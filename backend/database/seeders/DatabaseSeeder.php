@@ -16,33 +16,56 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create users with specific roles
-        $admin = User::factory()->admin()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
+        // Create users with specific roles (idempotent)
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'role' => 'admin',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
-        $producer = User::factory()->producer()->create([
-            'name' => 'Producer User', 
-            'email' => 'producer@example.com',
-        ]);
+        $producer = User::firstOrCreate(
+            ['email' => 'producer@example.com'],
+            [
+                'name' => 'Producer User',
+                'email' => 'producer@example.com', 
+                'role' => 'producer',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
-        $consumer = User::factory()->consumer()->create([
-            'name' => 'Consumer User',
-            'email' => 'consumer@example.com',
-        ]);
+        $consumer = User::firstOrCreate(
+            ['email' => 'consumer@example.com'],
+            [
+                'name' => 'Consumer User',
+                'email' => 'consumer@example.com',
+                'role' => 'consumer',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         $this->call([
             ProducerSeeder::class,
             ProductSeeder::class,
         ]);
 
-        // Create demo orders after products exist
+        // Create demo orders after products exist (idempotent)
         $this->createDemoOrders($consumer);
     }
 
     private function createDemoOrders(User $consumer): void
     {
+        // Only create demo orders if none exist for this consumer (idempotent)
+        if (Order::where('user_id', $consumer->id)->exists()) {
+            return;
+        }
+
         $products = Product::take(3)->get();
         
         if ($products->count() > 0) {

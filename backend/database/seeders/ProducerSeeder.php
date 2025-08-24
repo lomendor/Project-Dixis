@@ -23,8 +23,11 @@ class ProducerSeeder extends Seeder
             return;
         }
         
-        $producers = [
-            [
+        // Create producer idempotently
+        $existingProducer = DB::table('producers')->where('user_id', $producerUser->id)->first();
+        
+        if (!$existingProducer) {
+            $producerData = [
                 'user_id' => $producerUser->id,
                 'name' => 'Green Farm Co.',
                 'slug' => $this->generateUniqueSlug('green-farm-co'),
@@ -37,10 +40,10 @@ class ProducerSeeder extends Seeder
                 'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
-        ];
+            ];
 
-        DB::table('producers')->insert($producers);
+            DB::table('producers')->insert($producerData);
+        }
     }
     
     /**

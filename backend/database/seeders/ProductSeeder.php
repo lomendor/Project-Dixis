@@ -23,7 +23,8 @@ class ProductSeeder extends Seeder
             return;
         }
         
-        $products = [
+        // Create products idempotently (by slug)
+        $productsData = [
             [
                 'producer_id' => $producer->id,
                 'name' => 'Organic Tomatoes',
@@ -77,6 +78,11 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        DB::table('products')->insert($products);
+        foreach ($productsData as $productData) {
+            // Only insert if product with this slug doesn't exist
+            if (!DB::table('products')->where('slug', $productData['slug'])->exists()) {
+                DB::table('products')->insert($productData);
+            }
+        }
     }
 }
