@@ -14,18 +14,8 @@ return new class extends Migration
     {
         // Add FK to orders table
         Schema::table('orders', function (Blueprint $table) {
-            // Database-agnostic FK constraint guard
-            if (DB::getDriverName() === 'pgsql') {
-                // Postgres: use IF EXISTS
-                DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_foreign');
-            } else {
-                // SQLite/MySQL: use try-catch
-                try {
-                    $table->dropForeign(['user_id']);
-                } catch (\Exception $e) {
-                    // Constraint doesn't exist, continue
-                }
-            }
+            // Drop constraint if exists (idempotent)
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_foreign');
             
             // Add FK constraint
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -33,24 +23,9 @@ return new class extends Migration
 
         // Add FKs to order_items table  
         Schema::table('order_items', function (Blueprint $table) {
-            // Database-agnostic FK constraint guards
-            if (DB::getDriverName() === 'pgsql') {
-                // Postgres: use IF EXISTS
-                DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_order_id_foreign');
-                DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_product_id_foreign');
-            } else {
-                // SQLite/MySQL: use try-catch
-                try {
-                    $table->dropForeign(['order_id']);
-                } catch (\Exception $e) {
-                    // Constraint doesn't exist, continue
-                }
-                try {
-                    $table->dropForeign(['product_id']);
-                } catch (\Exception $e) {
-                    // Constraint doesn't exist, continue
-                }
-            }
+            // Drop constraints if exist (idempotent)
+            DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_order_id_foreign');
+            DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_product_id_foreign');
             
             // Add FK constraints
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
@@ -63,13 +38,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropForeign(['order_id']);
-            $table->dropForeign(['product_id']);
-        });
+        // Drop FK constraints from order_items table
+        DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_order_id_foreign');
+        DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_product_id_foreign');
         
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-        });
+        // Drop FK constraint from orders table
+        DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_foreign');
     }
 };
