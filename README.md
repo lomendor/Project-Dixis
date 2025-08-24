@@ -48,4 +48,4 @@ GitHub Actions automatically runs tests on:
 - Pull requests to main branch
 - Manual workflow dispatch
 
-Status: ![CI](https://github.com/lomendor/Project-Dixis/workflows/Backend%20CI/badge.svg)
+[![backend-ci](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml)
