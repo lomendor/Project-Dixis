@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Producer>
@@ -16,8 +18,12 @@ class ProducerFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->company();
+        
         return [
-            'name' => fake()->company(),
+            'user_id' => User::factory(),
+            'name' => $name,
+            'slug' => $this->generateUniqueSlug(Str::slug($name)),
             'business_name' => fake()->company() . ' LLC',
             'description' => fake()->paragraph(),
             'location' => fake()->city() . ', ' . fake()->country(),
@@ -26,5 +32,22 @@ class ProducerFactory extends Factory
             'website' => fake()->url(),
             'status' => 'active',
         ];
+    }
+    
+    /**
+     * Generate collision-safe unique slug
+     */
+    private function generateUniqueSlug(string $baseSlug): string
+    {
+        $slug = $baseSlug;
+        $counter = 1;
+        
+        // Simple unique slug generation - during testing this is usually unique anyway
+        while (\App\Models\Producer::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
     }
 }
