@@ -25,6 +25,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Public API v1 routes
+Route::prefix('v1')->group(function () {
+    // Products (public)
+    Route::get('products', [App\Http\Controllers\Api\ProductController::class, 'index']);
+    Route::get('products/{product}', [App\Http\Controllers\Api\ProductController::class, 'show']);
+    
+    // Orders (authenticated)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index']);
+        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store']);
+        Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show']);
+    });
+});
+
 // Producer API routes
 Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     // Product management

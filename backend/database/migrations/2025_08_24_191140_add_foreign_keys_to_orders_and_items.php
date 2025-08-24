@@ -14,8 +14,12 @@ return new class extends Migration
     {
         // Add FK to orders table
         Schema::table('orders', function (Blueprint $table) {
-            // Drop constraint if exists (Postgres-safe)
-            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_foreign');
+            // Drop constraint if exists (database-agnostic way)
+            try {
+                $table->dropForeign(['user_id']);
+            } catch (\Exception $e) {
+                // Constraint doesn't exist, continue
+            }
             
             // Add FK constraint
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -23,9 +27,18 @@ return new class extends Migration
 
         // Add FKs to order_items table  
         Schema::table('order_items', function (Blueprint $table) {
-            // Drop constraints if exist (Postgres-safe)
-            DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_order_id_foreign');
-            DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_product_id_foreign');
+            // Drop constraints if exist (database-agnostic way)
+            try {
+                $table->dropForeign(['order_id']);
+            } catch (\Exception $e) {
+                // Constraint doesn't exist, continue
+            }
+            
+            try {
+                $table->dropForeign(['product_id']);
+            } catch (\Exception $e) {
+                // Constraint doesn't exist, continue
+            }
             
             // Add FK constraints
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
