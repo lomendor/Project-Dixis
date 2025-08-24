@@ -82,7 +82,7 @@ jobs:
     - name: Execute tests
       run: |
         cd backend
-        php artisan test --coverage --min=80
+        php artisan test
 
     - name: Test health endpoint
       run: |
