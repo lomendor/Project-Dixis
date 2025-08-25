@@ -12,11 +12,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Update existing 'processing' status to 'paid' in existing records
-        DB::statement("UPDATE orders SET status = 'paid' WHERE status = 'processing'");
+        // Database-agnostic enum modification
+        $driver = DB::connection()->getDriverName();
         
-        // Update the enum definition
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','paid','shipped','completed','cancelled') DEFAULT 'pending'");
+        if ($driver === 'pgsql') {
+            // PostgreSQL: use temporary column approach to preserve data
+            Schema::table('orders', function (Blueprint $table) {
+                $table->enum('status_new', ['pending','paid','shipped','completed','cancelled'])->default('pending')->after('status');
+            });
+            
+            // Copy data, converting 'processing' to 'paid'
+            DB::statement("UPDATE orders SET status_new = CASE WHEN status = 'processing' THEN 'paid' ELSE status END");
+            
+            // Drop old column and rename new one
+            Schema::table('orders', function (Blueprint $table) {
+                $table->dropColumn('status');
+            });
+            Schema::table('orders', function (Blueprint $table) {
+                $table->renameColumn('status_new', 'status');
+            });
+        } else {
+            // Update existing 'processing' status to 'paid' in existing records
+            DB::statement("UPDATE orders SET status = 'paid' WHERE status = 'processing'");
+            
+            // MySQL/SQLite: use MODIFY COLUMN
+            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','paid','shipped','completed','cancelled') DEFAULT 'pending'");
+        }
     }
 
     /**
@@ -24,10 +45,31 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert 'paid' status to 'processing' in existing records  
-        DB::statement("UPDATE orders SET status = 'processing' WHERE status = 'paid'");
+        // Database-agnostic enum reversion
+        $driver = DB::connection()->getDriverName();
         
-        // Revert the enum definition
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','processing','shipped','completed','cancelled') DEFAULT 'pending'");
+        if ($driver === 'pgsql') {
+            // PostgreSQL: use temporary column approach to preserve data
+            Schema::table('orders', function (Blueprint $table) {
+                $table->enum('status_old', ['pending','processing','shipped','completed','cancelled'])->default('pending')->after('status');
+            });
+            
+            // Copy data, converting 'paid' to 'processing'
+            DB::statement("UPDATE orders SET status_old = CASE WHEN status = 'paid' THEN 'processing' ELSE status END");
+            
+            // Drop old column and rename new one
+            Schema::table('orders', function (Blueprint $table) {
+                $table->dropColumn('status');
+            });
+            Schema::table('orders', function (Blueprint $table) {
+                $table->renameColumn('status_old', 'status');
+            });
+        } else {
+            // Revert 'paid' status to 'processing' in existing records  
+            DB::statement("UPDATE orders SET status = 'processing' WHERE status = 'paid'");
+            
+            // MySQL/SQLite: use MODIFY COLUMN
+            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','processing','shipped','completed','cancelled') DEFAULT 'pending'");
+        }
     }
 };
