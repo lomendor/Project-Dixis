@@ -54,7 +54,11 @@ class DatabaseSeeder extends Seeder
         if (app()->environment(['local', 'testing'])) {
             $token = $consumer->createToken('Demo API Token');
             \Log::info("Demo API Token for consumer@example.com: {$token->plainTextToken}");
-            echo "\n🔑 Demo API Token for consumer@example.com: {$token->plainTextToken}\n";
+            echo "\n🔑 FRONTEND SMOKE TESTING CREDENTIALS:\n";
+            echo "   Consumer: consumer@example.com / password\n";
+            echo "   Producer: producer@example.com / password\n";
+            echo "   Admin: admin@example.com / password\n";
+            echo "   Demo Token: {$token->plainTextToken}\n\n";
         }
 
         $this->call([

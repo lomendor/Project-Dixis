@@ -25,6 +25,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Authentication routes
+Route::prefix('v1/auth')->group(function () {
+    Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
+    Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+    
+    // Protected routes
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
+        Route::post('logout-all', [App\Http\Controllers\Api\AuthController::class, 'logoutAll']);
+        Route::get('profile', [App\Http\Controllers\Api\AuthController::class, 'profile']);
+    });
+});
+
 // Public API v1 routes
 Route::prefix('v1')->group(function () {
     // Products (public)
