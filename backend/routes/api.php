@@ -34,7 +34,8 @@ Route::prefix('v1')->group(function () {
     // Orders (authenticated)
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index']);
-        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store']);
+        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store'])
+            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
         Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show']);
     });
 });

@@ -50,6 +50,13 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create demo API token for testing (local/testing environments only)
+        if (app()->environment(['local', 'testing'])) {
+            $token = $consumer->createToken('Demo API Token');
+            \Log::info("Demo API Token for consumer@example.com: {$token->plainTextToken}");
+            echo "\n🔑 Demo API Token for consumer@example.com: {$token->plainTextToken}\n";
+        }
+
         $this->call([
             ProducerSeeder::class,
             ProductSeeder::class,
