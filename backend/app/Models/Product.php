@@ -39,4 +39,28 @@ class Product extends Model
     {
         return $this->belongsTo(Producer::class);
     }
+
+    /**
+     * Get the categories for the product.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    /**
+     * Get the images for the product.
+     */
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the primary image for the product.
+     */
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
 }

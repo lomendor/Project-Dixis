@@ -40,18 +40,23 @@ class CoreDomainSmokeTest extends TestCase
         
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => [
-                    'id',
-                    'name',
-                    'slug',
-                    'price',
-                    'unit',
-                    'status',
-                    'producer' => [
+                'data' => [
+                    '*' => [
                         'id',
                         'name',
+                        'slug',
+                        'price',
+                        'unit',
+                        'status',
+                        'producer' => [
+                            'id',
+                            'name',
+                        ]
                     ]
-                ]
+                ],
+                'current_page',
+                'per_page',
+                'total'
             ]);
     }
     
