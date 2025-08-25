@@ -51,18 +51,33 @@ class ProducerController extends Controller
         
         $producer = $user->producer;
         
-        // Get KPI data
-        $productsCount = $producer->products()->count();
+        // Get real KPI data from database
+        $totalProducts = $producer->products()->count();
+        $activeProducts = $producer->products()->where('is_active', true)->count();
         
-        // For MVP, return sample data for orders, revenue, payouts
-        // In a real app, these would come from orders/sales tables
-        $kpiData = [
-            'orders' => 5,  // Sample data
-            'revenue' => 1250.50,  // Sample data
-            'products' => $productsCount,
-            'payouts' => 875.25  // Sample data
-        ];
+        // Calculate orders and revenue from order_items via products
+        $totalOrders = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('products.producer_id', $producer->id)
+            ->distinct('order_items.order_id')
+            ->count('order_items.order_id');
+            
+        $revenue = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('products.producer_id', $producer->id)
+            ->sum('order_items.total_price') ?? 0;
         
-        return response()->json($kpiData);
+        // Get unread messages count
+        $unreadMessages = \App\Models\Message::where('producer_id', $producer->id)
+            ->where('is_read', false)
+            ->count();
+        
+        return response()->json([
+            'total_products' => $totalProducts,
+            'active_products' => $activeProducts,
+            'total_orders' => $totalOrders,
+            'revenue' => (float) $revenue,
+            'unread_messages' => $unreadMessages,
+        ]);
     }
 }

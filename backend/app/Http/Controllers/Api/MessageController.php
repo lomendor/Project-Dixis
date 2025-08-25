@@ -12,7 +12,7 @@ class MessageController extends Controller
     /**
      * Mark a message as read
      */
-    public function markAsRead(Request $request, Message $message): JsonResponse
+    public function markAsRead(Request $request, Message $message): \Illuminate\Http\Response
     {
         $user = $request->user();
         
@@ -30,11 +30,7 @@ class MessageController extends Controller
         $message->is_read = true;
         $message->save();
         
-        return response()->json([
-            'id' => $message->id,
-            'is_read' => $message->is_read,
-            'message' => 'Message marked as read'
-        ]);
+        return response()->noContent();
     }
     
     /**
@@ -43,7 +39,7 @@ class MessageController extends Controller
     public function storeReply(Request $request, Message $message): JsonResponse
     {
         $request->validate([
-            'body' => 'required|string|max:2000',
+            'content' => 'required|string|max:5000',
         ]);
         
         $user = $request->user();
@@ -60,19 +56,13 @@ class MessageController extends Controller
         
         // Create the reply
         $reply = Message::create([
-            'body' => $request->body,
+            'content' => $request->content,
             'user_id' => $user->id,
             'producer_id' => $user->producer->id,
             'parent_id' => $message->id,
             'is_read' => false,
         ]);
         
-        return response()->json([
-            'id' => $reply->id,
-            'body' => $reply->body,
-            'parent_id' => $reply->parent_id,
-            'is_read' => $reply->is_read,
-            'created_at' => $reply->created_at,
-        ], 201);
+        return response()->json($reply, 201);
     }
 }

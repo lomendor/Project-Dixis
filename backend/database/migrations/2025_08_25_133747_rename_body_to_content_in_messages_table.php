@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        if (Schema::hasColumn('messages', 'body') && !Schema::hasColumn('messages', 'content')) {
+            Schema::table('messages', function (Blueprint $table) {
+                $table->renameColumn('body', 'content');
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        if (Schema::hasColumn('messages', 'content') && !Schema::hasColumn('messages', 'body')) {
+            Schema::table('messages', function (Blueprint $table) {
+                $table->renameColumn('content', 'body');
+            });
+        }
+    }
+};
