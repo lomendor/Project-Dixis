@@ -18,6 +18,7 @@ class MessageFactory extends Factory
     {
         return [
             'content' => fake()->paragraph(),
+            'user_id' => \App\Models\User::factory(),
             'is_read' => false,
         ];
     }

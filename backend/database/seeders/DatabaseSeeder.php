@@ -69,6 +69,7 @@ class DatabaseSeeder extends Seeder
 
         // Create demo orders after products exist (idempotent)
         $this->createDemoOrders($consumer);
+        $this->createEnhancedDemoOrders();
     }
 
     private function createDemoOrders(User $consumer): void
@@ -130,6 +131,155 @@ class DatabaseSeeder extends Seeder
                     'total_price' => $product->price ?? 25.00,
                     'product_name' => $product->name,
                     'product_unit' => $product->unit ?? 'kg',
+                ]);
+            }
+        }
+    }
+
+    private function createEnhancedDemoOrders(): void
+    {
+        // Skip if we already have many orders (idempotent)
+        if (Order::count() > 10) {
+            return;
+        }
+
+        $products = Product::with('producer')->get();
+        if ($products->isEmpty()) {
+            return;
+        }
+
+        // Create additional demo customers
+        $customers = collect();
+        for ($i = 1; $i <= 5; $i++) {
+            $customer = User::firstOrCreate(
+                ['email' => "customer{$i}@demo.com"],
+                [
+                    'name' => "Demo Customer {$i}",
+                    'email' => "customer{$i}@demo.com",
+                    'role' => 'consumer',
+                    'password' => bcrypt('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
+            $customers->push($customer);
+        }
+
+        // Create orders for different time periods (last 3 months)
+        $orderData = [
+            // Recent orders (this month)
+            ['days_ago' => 5, 'orders' => 3],
+            ['days_ago' => 10, 'orders' => 2],
+            ['days_ago' => 15, 'orders' => 4],
+            
+            // Last month
+            ['days_ago' => 35, 'orders' => 5],
+            ['days_ago' => 45, 'orders' => 3],
+            ['days_ago' => 50, 'orders' => 2],
+            
+            // Two months ago
+            ['days_ago' => 65, 'orders' => 4],
+            ['days_ago' => 75, 'orders' => 3],
+            
+            // Three months ago
+            ['days_ago' => 90, 'orders' => 2],
+        ];
+
+        foreach ($orderData as $period) {
+            for ($i = 0; $i < $period['orders']; $i++) {
+                $customer = $customers->random();
+                $orderDate = now()->subDays($period['days_ago'])->addHours(rand(-12, 12));
+                
+                // Create order with realistic data
+                $subtotal = 0;
+                $selectedProducts = $products->random(rand(1, 4));
+                
+                $order = Order::create([
+                    'user_id' => $customer->id,
+                    'subtotal' => 0, // Will calculate below
+                    'tax_amount' => 0,
+                    'shipping_amount' => collect(['HOME', 'PICKUP', 'COURIER'])->random() === 'PICKUP' ? 0 : 5.00,
+                    'total_amount' => 0,
+                    'payment_status' => collect(['paid', 'paid', 'paid', 'pending', 'failed'])->random(), // 60% paid
+                    'status' => collect(['completed', 'completed', 'shipped', 'paid', 'pending'])->random(),
+                    'shipping_method' => collect(['HOME', 'PICKUP', 'COURIER'])->random(),
+                    'notes' => rand(0, 1) ? "Demo order notes #{$i}" : null,
+                    'created_at' => $orderDate,
+                    'updated_at' => $orderDate->copy()->addHours(rand(1, 48)),
+                ]);
+
+                // Create order items
+                foreach ($selectedProducts as $product) {
+                    $quantity = rand(1, 5);
+                    $unitPrice = $product->price;
+                    $totalPrice = $quantity * $unitPrice;
+                    $subtotal += $totalPrice;
+
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'product_name' => $product->name,
+                        'product_unit' => $product->unit ?? 'unit',
+                        'created_at' => $orderDate,
+                        'updated_at' => $orderDate,
+                    ]);
+                }
+
+                // Update order totals
+                $taxAmount = $subtotal * 0.10; // 10% tax
+                $totalAmount = $subtotal + $taxAmount + $order->shipping_amount;
+                
+                $order->update([
+                    'subtotal' => $subtotal,
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                ]);
+            }
+        }
+
+        // Create some messages for producers to test unread_messages KPI
+        $this->createDemoMessages();
+    }
+
+    private function createDemoMessages(): void
+    {
+        $producers = \App\Models\Producer::all();
+        $customers = User::where('role', 'consumer')->get();
+        
+        // If no customers exist, create some
+        if ($customers->isEmpty()) {
+            for ($i = 1; $i <= 3; $i++) {
+                $customer = User::firstOrCreate(
+                    ['email' => "message-customer{$i}@demo.com"],
+                    [
+                        'name' => "Message Customer {$i}",
+                        'email' => "message-customer{$i}@demo.com",
+                        'role' => 'consumer',
+                        'password' => bcrypt('password'),
+                        'email_verified_at' => now(),
+                    ]
+                );
+                $customers->push($customer);
+            }
+        }
+        
+        foreach ($producers as $producer) {
+            // Skip if producer already has messages (idempotent)
+            if (\App\Models\Message::where('producer_id', $producer->id)->exists()) {
+                continue;
+            }
+
+            // Create some messages with mix of read/unread
+            for ($i = 0; $i < rand(2, 5); $i++) {
+                $customer = $customers->random();
+                \App\Models\Message::create([
+                    'user_id' => $customer->id,
+                    'producer_id' => $producer->id,
+                    'content' => "This is a demo message for testing KPI functionality. Message #" . ($i + 1) . " from customer.",
+                    'is_read' => rand(0, 1) == 1, // 50% chance of being read
+                    'created_at' => now()->subDays(rand(1, 30)),
                 ]);
             }
         }

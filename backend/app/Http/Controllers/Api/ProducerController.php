@@ -80,4 +80,99 @@ class ProducerController extends Controller
             'unread_messages' => $unreadMessages,
         ]);
     }
+    
+    /**
+     * Get top-selling products for producer dashboard
+     */
+    public function topProducts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+        
+        $producer = $user->producer;
+        
+        // Validate limit parameter
+        $limit = $request->query('limit', 10);
+        $limit = max(1, min(50, (int) $limit)); // Between 1 and 50
+        
+        // Get top-selling products by quantity sold
+        $topProducts = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('products.producer_id', $producer->id)
+            ->where('orders.status', '!=', 'cancelled') // Exclude cancelled orders
+            ->select(
+                'products.id',
+                'products.name',
+                'products.unit',
+                'products.price as current_price',
+                'products.stock',
+                'products.is_active',
+                \DB::raw('SUM(order_items.quantity) as total_quantity_sold'),
+                \DB::raw('SUM(order_items.total_price) as total_revenue'),
+                \DB::raw('COUNT(DISTINCT order_items.order_id) as total_orders'),
+                \DB::raw('AVG(order_items.unit_price) as average_unit_price')
+            )
+            ->groupBy(
+                'products.id', 
+                'products.name', 
+                'products.unit', 
+                'products.price',
+                'products.stock',
+                'products.is_active'
+            )
+            ->orderBy('total_quantity_sold', 'desc')
+            ->limit($limit)
+            ->get();
+        
+        // Also get products with no sales (for completeness if limit allows)
+        if ($topProducts->count() < $limit) {
+            $productIdsWithSales = $topProducts->pluck('id')->toArray();
+            
+            $productsWithoutSales = $producer->products()
+                ->whereNotIn('id', $productIdsWithSales)
+                ->select('id', 'name', 'unit', 'price as current_price', 'stock', 'is_active')
+                ->limit($limit - $topProducts->count())
+                ->get()
+                ->map(function ($product) {
+                    return (object) [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'unit' => $product->unit,
+                        'current_price' => $product->current_price,
+                        'stock' => $product->stock,
+                        'is_active' => $product->is_active,
+                        'total_quantity_sold' => 0,
+                        'total_revenue' => 0.0,
+                        'total_orders' => 0,
+                        'average_unit_price' => (float) $product->current_price,
+                    ];
+                });
+            
+            $topProducts = $topProducts->concat($productsWithoutSales);
+        }
+        
+        return response()->json([
+            'top_products' => $topProducts->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'unit' => $product->unit,
+                    'current_price' => number_format((float) $product->current_price, 2),
+                    'stock' => $product->stock,
+                    'is_active' => (bool) $product->is_active,
+                    'total_quantity_sold' => (int) $product->total_quantity_sold,
+                    'total_revenue' => number_format((float) $product->total_revenue, 2),
+                    'total_orders' => (int) $product->total_orders,
+                    'average_unit_price' => number_format((float) $product->average_unit_price, 2),
+                ];
+            })->values(),
+            'limit' => $limit,
+            'total_products_shown' => $topProducts->count(),
+        ]);
+    }
 }
