@@ -32,11 +32,15 @@ return new class extends Migration
                 $table->renameColumn('status_new', 'status');
             });
         } else {
+            // For SQLite, we just update the data - SQLite doesn't enforce ENUM constraints
             // Update existing 'processing' status to 'paid' in existing records
             DB::statement("UPDATE orders SET status = 'paid' WHERE status = 'processing'");
             
-            // MySQL/SQLite: use MODIFY COLUMN
-            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','paid','shipped','completed','cancelled') DEFAULT 'pending'");
+            // For MySQL: use MODIFY COLUMN
+            if ($driver === 'mysql') {
+                DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','paid','shipped','completed','cancelled') DEFAULT 'pending'");
+            }
+            // SQLite: no action needed as it doesn't enforce ENUM constraints
         }
     }
 
@@ -65,11 +69,15 @@ return new class extends Migration
                 $table->renameColumn('status_old', 'status');
             });
         } else {
+            // For SQLite, we just update the data - SQLite doesn't enforce ENUM constraints
             // Revert 'paid' status to 'processing' in existing records  
             DB::statement("UPDATE orders SET status = 'processing' WHERE status = 'paid'");
             
-            // MySQL/SQLite: use MODIFY COLUMN
-            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','processing','shipped','completed','cancelled') DEFAULT 'pending'");
+            // For MySQL: use MODIFY COLUMN
+            if ($driver === 'mysql') {
+                DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','processing','shipped','completed','cancelled') DEFAULT 'pending'");
+            }
+            // SQLite: no action needed as it doesn't enforce ENUM constraints
         }
     }
 };
