@@ -26,18 +26,32 @@ class ProductsTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => [
-                    'id',
-                    'name',
-                    'slug',
-                    'price',
-                    'unit',
-                    'status',
-                    'producer' => [
+                'current_page',
+                'data' => [
+                    '*' => [
                         'id',
                         'name',
+                        'slug',
+                        'price',
+                        'unit',
+                        'status',
+                        'producer' => [
+                            'id',
+                            'name',
+                        ]
                     ]
-                ]
+                ],
+                'first_page_url',
+                'from',
+                'last_page',
+                'last_page_url',
+                'links',
+                'next_page_url',
+                'path',
+                'per_page',
+                'prev_page_url',
+                'to',
+                'total',
             ]);
     }
 
