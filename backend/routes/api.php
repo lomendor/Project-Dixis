@@ -48,6 +48,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('public')->group(function () {
         Route::get('products', [App\Http\Controllers\Public\ProductController::class, 'index']);
         Route::get('products/{id}', [App\Http\Controllers\Public\ProductController::class, 'show']);
+        
+        // Public Producers API
+        Route::get('producers', [App\Http\Controllers\Public\ProducerController::class, 'index']);
+        Route::get('producers/{id}', [App\Http\Controllers\Public\ProducerController::class, 'show']);
     });
     
     // Cart (authenticated)

@@ -82,6 +82,26 @@ class ProductController extends Controller
         $perPage = min($request->get('per_page', 15), 100);
         $products = $query->paginate($perPage);
 
+        // Transform the data to ensure consistent producer information
+        $products->getCollection()->transform(function ($product) {
+            $data = $product->toArray();
+            
+            // Ensure producer information is properly formatted
+            if ($product->producer) {
+                $data['producer'] = [
+                    'id' => $product->producer->id,
+                    'name' => $product->producer->name,
+                    'slug' => $product->producer->slug,
+                    'location' => $product->producer->location,
+                ];
+            }
+            
+            // Format price consistently
+            $data['price'] = number_format($product->price, 2);
+            
+            return $data;
+        });
+
         return response()->json($products);
     }
 
@@ -96,6 +116,22 @@ class ProductController extends Controller
             ->where('is_active', true)
             ->findOrFail($id);
 
-        return response()->json($product);
+        $data = $product->toArray();
+        
+        // Ensure producer information is properly formatted
+        if ($product->producer) {
+            $data['producer'] = [
+                'id' => $product->producer->id,
+                'name' => $product->producer->name,
+                'slug' => $product->producer->slug,
+                'location' => $product->producer->location,
+                'description' => $product->producer->description,
+            ];
+        }
+        
+        // Format price consistently
+        $data['price'] = number_format($product->price, 2);
+
+        return response()->json($data);
     }
 }
