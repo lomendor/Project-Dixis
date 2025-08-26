@@ -11,13 +11,17 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'status',
+        'payment_status',
+        'payment_method',
+        'shipping_method',
         'subtotal',
+        'shipping_cost',
+        'total',
+        // Legacy fields - keep for backward compatibility
         'tax_amount',
         'shipping_amount',
         'total_amount',
-        'payment_status',
-        'status',
-        'shipping_method',
         'shipping_address',
         'billing_address',
         'notes',
@@ -25,6 +29,9 @@ class Order extends Model
 
     protected $casts = [
         'subtotal' => 'decimal:2',
+        'shipping_cost' => 'decimal:2',
+        'total' => 'decimal:2',
+        // Legacy fields - keep for backward compatibility
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',

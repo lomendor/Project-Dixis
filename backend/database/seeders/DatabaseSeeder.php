@@ -68,6 +68,7 @@ class DatabaseSeeder extends Seeder
             ProducerSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
+            OrderSeeder::class, // New structured order seeder
         ]);
 
         // Create demo orders after products exist (idempotent)

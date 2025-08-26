@@ -18,13 +18,14 @@ class OrderItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = fake()->numberBetween(1, 5);
-        $unitPrice = fake()->randomFloat(2, 2, 50);
+        $quantity = fake()->numberBetween(1, 3);
+        $unitPrice = fake()->randomFloat(2, 5, 25);
         $totalPrice = $unitPrice * $quantity;
 
         return [
             'order_id' => Order::factory(),
-            'product_id' => Product::factory(),
+            'product_id' => 1, // Will be overridden by seeder with existing products
+            'producer_id' => null, // Will be set by seeder from product's producer
             'quantity' => $quantity,
             'unit_price' => $unitPrice,
             'total_price' => $totalPrice,
