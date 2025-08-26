@@ -70,7 +70,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_authenticated_user_can_create_product(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         
         $productData = [
@@ -151,7 +151,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_product_creation_requires_valid_data(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
 
         $response = $this->actingAs($user)->postJson('/api/v1/products', []);
 
@@ -162,7 +162,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_product_creation_validates_discount_price_less_than_price(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         
         $productData = [
@@ -181,7 +181,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_authenticated_user_can_update_product(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $product = Product::factory()->create(['producer_id' => $producer->id]);
         
@@ -209,7 +209,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_product_update_auto_generates_slug_when_name_changes(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $product = Product::factory()->create([
             'producer_id' => $producer->id,
@@ -242,7 +242,7 @@ class ProductsTest extends TestCase
     #[Group('mvp')]
     public function test_authenticated_user_can_delete_product(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $product = Product::factory()->create(['producer_id' => $producer->id]);
 

@@ -8,22 +8,56 @@ use App\Models\User;
 class OrderPolicy
 {
     /**
-     * Determine whether the user can view the model.
-     * Currently allows all access for read-only API.
-     * TODO: Tighten later with proper authorization.
+     * Determine whether the user can view the order.
+     * Users can view their own orders, admins can view all.
      */
     public function view(?User $user, Order $order): bool
     {
-        return true;
+        if (!$user) {
+            return false; // Anonymous users cannot view orders
+        }
+
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        // Users can view their own orders
+        return $order->user_id === $user->id;
     }
 
     /**
-     * Determine whether the user can view any models.
-     * Currently allows all access for read-only API.
-     * TODO: Tighten later with proper authorization.
+     * Determine whether the user can view any orders.
+     * Allow listing for demo purposes but will be filtered in controller.
      */
     public function viewAny(?User $user): bool
     {
-        return true;
+        return true; // Public demo access - actual filtering happens in controller
+    }
+
+    /**
+     * Determine whether the user can create orders.
+     * Consumers and admins can create orders.
+     */
+    public function create(User $user): bool
+    {
+        return $user->role === 'consumer' || $user->role === 'admin';
+    }
+
+    /**
+     * Determine whether the user can update the order.
+     * Only admins can update orders (status changes, etc.).
+     */
+    public function update(User $user, Order $order): bool
+    {
+        return $user->role === 'admin';
+    }
+
+    /**
+     * Determine whether the user can delete the order.
+     * Only admins can delete orders.
+     */
+    public function delete(User $user, Order $order): bool
+    {
+        return $user->role === 'admin';
     }
 }

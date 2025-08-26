@@ -80,6 +80,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): OrderResource
     {
+        $this->authorize('create', Order::class);
         return DB::transaction(function () use ($request) {
             $validated = $request->validated();
             $orderTotal = 0;
