@@ -6,7 +6,9 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Producer;
 use App\Models\Product;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('api')]
 class ProducersApiTest extends TestCase
 {
     use RefreshDatabase;
