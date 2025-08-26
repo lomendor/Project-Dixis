@@ -40,6 +40,33 @@ class ProductController extends Controller
             });
         }
 
+        // Producer filter (by slug or id)
+        if ($producer = $request->get('producer')) {
+            $query->whereHas('producer', function ($q) use ($producer) {
+                if (is_numeric($producer)) {
+                    $q->where('producers.id', $producer);
+                } else {
+                    $q->where('producers.slug', $producer);
+                }
+            });
+        }
+
+        // Price range filters
+        if ($minPrice = $request->get('min_price')) {
+            $query->where('price', '>=', $minPrice);
+        }
+        if ($maxPrice = $request->get('max_price')) {
+            $query->where('price', '<=', $maxPrice);
+        }
+
+        // Organic filter
+        if ($request->has('organic')) {
+            $organic = filter_var($request->get('organic'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($organic !== null) {
+                $query->where('is_organic', $organic);
+            }
+        }
+
         // Sorting
         $sortField = $request->get('sort', 'created_at');
         $sortDir = $request->get('dir', 'desc');
