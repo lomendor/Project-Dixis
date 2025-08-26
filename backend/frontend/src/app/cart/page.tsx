@@ -188,7 +188,7 @@ export default function Cart() {
                   
                   <div className="space-y-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                      <div key={item.id} data-testid="cart-item" className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                         {/* Product Image */}
                         <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
                           {item.product.images.length > 0 ? (
@@ -280,6 +280,7 @@ export default function Cart() {
                 </div>
 
                 <button
+                  data-testid="checkout-btn"
                   onClick={handleCheckout}
                   disabled={checkingOut || cartItems.length === 0}
                   className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium"

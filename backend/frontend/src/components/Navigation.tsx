@@ -58,11 +58,12 @@ export default function Navigation() {
           {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <div data-testid="user-menu" className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700">
                   Hello, {user?.name}
                 </span>
                 <button
+                  data-testid="logout-btn"
                   onClick={handleLogout}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
                 >

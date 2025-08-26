@@ -247,7 +247,7 @@ export default function OrderDetails() {
 
             {/* Success Message for New Orders */}
             {order.status === 'pending' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div data-testid="order-success" className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

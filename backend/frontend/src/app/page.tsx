@@ -71,7 +71,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 data-testid="page-title" className="text-3xl font-bold text-gray-900 mb-4">
             Fresh Products from Local Producers
           </h1>
           
@@ -121,11 +121,12 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={product.id} data-testid="product-card" className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Product Image Placeholder */}
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                   {product.images.length > 0 ? (
                     <img
+                      data-testid="product-image"
                       src={product.images[0].image_path}
                       alt={product.images[0].alt_text || product.name}
                       className="h-full w-full object-cover"
@@ -136,7 +137,7 @@ export default function Home() {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 data-testid="product-name" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                     {product.name}
                   </h3>
                   
@@ -145,7 +146,7 @@ export default function Home() {
                   </p>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-xl font-bold text-green-600">
+                    <span data-testid="product-price" className="text-xl font-bold text-green-600">
                       €{product.price} / {product.unit}
                     </span>
                     {product.stock !== null && (
@@ -184,6 +185,7 @@ export default function Home() {
                       View Details
                     </Link>
                     <button
+                      data-testid="add-to-cart-btn"
                       onClick={() => handleAddToCart(product.id)}
                       disabled={product.stock === 0}
                       className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium"
