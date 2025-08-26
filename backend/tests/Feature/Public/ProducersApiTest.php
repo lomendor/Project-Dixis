@@ -2,49 +2,173 @@
 
 namespace Tests\Feature\Public;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Producer;
-use App\Models\Product;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('api')]
 class ProducersApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         parent::setUp();
-        // Αν υπάρχει DatabaseSeeder, τρέξε τον για demo data
-        $this->artisan('migrate');
-        $this->seed();
+        
+        // Create test producers
+        Producer::factory()->create([
+            'name' => 'Green Valley Farm',
+            'is_active' => true,
+        ]);
+        
+        Producer::factory()->create([
+            'name' => 'Mountain Harvest',
+            'is_active' => true,
+        ]);
+        
+        Producer::factory()->create([
+            'name' => 'Inactive Farm',
+            'is_active' => false,
+        ]);
     }
 
-    public function test_list_active_producers_returns_paginated_results(): void
+    public function test_producers_index_returns_paginated_json(): void
     {
-        $resp = $this->getJson('/api/v1/public/producers?per_page=5');
-        $resp->assertStatus(200)
-             ->assertJsonStructure(['data', 'links', 'current_page', 'per_page', 'total']);
+        $response = $this->getJson('/api/v1/producers');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'slug',
+                        'business_name',
+                        'description',
+                        'location',
+                        'website',
+                        'is_active',
+                        'created_at'
+                    ]
+                ],
+                'links',
+                'meta'
+            ])
+            ->assertJsonCount(2, 'data'); // Only active producers
     }
 
-    public function test_show_producer_returns_details_with_products(): void
+    public function test_producers_index_excludes_pii(): void
     {
-        $producer = Producer::query()->first();
-        $resp = $this->getJson('/api/v1/public/producers/'.$producer->id);
-        $resp->assertStatus(200)
-             ->assertJsonStructure(['id','name','slug','products']);
+        $response = $this->getJson('/api/v1/producers');
+
+        $response->assertStatus(200);
+        
+        $producerData = $response->json('data.0');
+        
+        // Verify PII fields are not present
+        $this->assertArrayNotHasKey('phone', $producerData);
+        $this->assertArrayNotHasKey('email', $producerData);
+        $this->assertArrayNotHasKey('user_id', $producerData);
     }
 
-    public function test_products_list_includes_producer_info(): void
+    public function test_producers_index_filters_by_name_search(): void
     {
-        $resp = $this->getJson('/api/v1/public/products?per_page=5');
-        $resp->assertStatus(200)
-             ->assertJsonStructure(['data','links','current_page','per_page','total']);
-        $first = $resp->json('data')[0] ?? null;
-        $this->assertIsArray($first);
-        $this->assertArrayHasKey('producer', $first);
-        $this->assertIsArray($first['producer']);
-        $this->assertArrayHasKey('id', $first['producer']);
-        $this->assertArrayHasKey('name', $first['producer']);
+        $response = $this->getJson('/api/v1/producers?q=Green');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Green Valley Farm');
+    }
+
+    public function test_producers_index_filters_by_slug_search(): void
+    {
+        $producer = Producer::where('name', 'Mountain Harvest')->first();
+        $slug = $producer->slug;
+
+        $response = $this->getJson("/api/v1/producers?q={$slug}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', $slug);
+    }
+
+    public function test_producers_show_returns_expected_fields(): void
+    {
+        $producer = Producer::where('is_active', true)->first();
+
+        $response = $this->getJson("/api/v1/producers/{$producer->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'slug',
+                    'business_name',
+                    'description',
+                    'location',
+                    'website',
+                    'is_active',
+                    'created_at'
+                ]
+            ])
+            ->assertJsonPath('data.id', $producer->id)
+            ->assertJsonPath('data.name', $producer->name)
+            ->assertJsonPath('data.slug', $producer->slug);
+    }
+
+    public function test_producers_show_excludes_pii(): void
+    {
+        $producer = Producer::where('is_active', true)->first();
+
+        $response = $this->getJson("/api/v1/producers/{$producer->id}");
+
+        $response->assertStatus(200);
+        
+        $producerData = $response->json('data');
+        
+        // Verify PII fields are not present
+        $this->assertArrayNotHasKey('phone', $producerData);
+        $this->assertArrayNotHasKey('email', $producerData);
+        $this->assertArrayNotHasKey('user_id', $producerData);
+    }
+
+    public function test_producers_show_returns_404_for_nonexistent_producer(): void
+    {
+        $response = $this->getJson('/api/v1/producers/99999');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_producers_show_returns_404_for_inactive_producer(): void
+    {
+        $inactiveProducer = Producer::where('is_active', false)->first();
+
+        $response = $this->getJson("/api/v1/producers/{$inactiveProducer->id}");
+
+        $response->assertStatus(404);
+    }
+
+    public function test_producers_index_supports_pagination(): void
+    {
+        $response = $this->getJson('/api/v1/producers?per_page=1');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonStructure([
+                'data',
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next'
+                ],
+                'meta' => [
+                    'current_page',
+                    'per_page',
+                    'total'
+                ]
+            ]);
     }
 }

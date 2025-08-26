@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductResource extends JsonResource
+class ProducerResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,17 +19,12 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'price' => number_format((float)$this->price, 2),
-            'stock' => $this->stock,
+            'business_name' => $this->business_name,
+            'description' => $this->description,
+            'location' => $this->location,
+            'website' => $this->website,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
-            'producer' => $this->when($this->relationLoaded('producer') && $this->producer, [
-                'id' => $this->producer?->id,
-                'name' => $this->producer?->name,
-                'slug' => $this->producer?->slug,
-                'business_name' => $this->producer?->business_name,
-                'location' => $this->producer?->location,
-            ]),
         ];
     }
 }

@@ -49,6 +49,10 @@ Route::prefix('v1')->group(function () {
     Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.orders.show');
     Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.orders.store');
     
+    // Producers (public, read-only)
+    Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index');
+    Route::get('producers/{producer}', [App\Http\Controllers\Api\V1\ProducerController::class, 'show'])->name('api.v1.producers.show');
+    
     // Enhanced Public Products API
     Route::prefix('public')->group(function () {
         Route::get('products', [App\Http\Controllers\Public\ProductController::class, 'index']);

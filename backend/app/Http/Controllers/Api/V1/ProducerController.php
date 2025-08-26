@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Http\Resources\ProductResource;
+use App\Models\Producer;
+use App\Http\Resources\ProducerResource;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-class ProductController extends Controller
+class ProducerController extends Controller
 {
     /**
-     * Display a listing of products with optional search and pagination.
+     * Display a listing of producers with optional search and pagination.
      *
      * @param Request $request
      * @return AnonymousResourceCollection
@@ -25,8 +24,7 @@ class ProductController extends Controller
             'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
-        $query = Product::query()
-            ->with('producer')
+        $query = Producer::query()
             ->where('is_active', true)
             ->orderBy('created_at', 'desc');
 
@@ -39,25 +37,22 @@ class ProductController extends Controller
         }
 
         $perPage = $request->get('per_page', 15);
-        $products = $query->paginate($perPage);
+        $producers = $query->paginate($perPage);
 
-        return ProductResource::collection($products);
+        return ProducerResource::collection($producers);
     }
 
     /**
-     * Display the specified product.
+     * Display the specified producer.
      *
-     * @param Product $product
-     * @return ProductResource
+     * @param Producer $producer
+     * @return ProducerResource
      */
-    public function show(Product $product): ProductResource
+    public function show(Producer $producer): ProducerResource
     {
-        // Only show active products
-        abort_if(!$product->is_active, 404);
+        // Only show active producers
+        abort_if(!$producer->is_active, 404);
 
-        // Eager load producer
-        $product->load('producer');
-
-        return new ProductResource($product);
+        return new ProducerResource($producer);
     }
 }
