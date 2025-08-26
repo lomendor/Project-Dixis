@@ -18,22 +18,22 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         $subtotal = fake()->randomFloat(2, 10, 200);
-        $taxAmount = $subtotal * 0.10;
-        $shippingAmount = fake()->randomFloat(2, 3, 10);
-        $totalAmount = $subtotal + $taxAmount + $shippingAmount;
+        $shippingCost = fake()->randomFloat(2, 0, 5);
+        $total = $subtotal + $shippingCost;
 
         return [
-            'user_id' => User::factory(),
+            'user_id' => null, // nullable as per requirements
+            'status' => fake()->randomElement(['pending', 'paid', 'shipped', 'completed', 'cancelled']),
+            'payment_status' => fake()->randomElement(['pending', 'paid', 'failed']),
+            'payment_method' => fake()->randomElement(['credit_card', 'paypal', 'bank_transfer']),
+            'shipping_method' => 'HOME',
             'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
-            'shipping_amount' => $shippingAmount,
-            'total_amount' => $totalAmount,
-            'payment_status' => fake()->randomElement(['pending', 'paid', 'failed', 'cancelled']),
-            'status' => fake()->randomElement(['pending', 'processing', 'completed', 'cancelled']),
-            'shipping_method' => fake()->randomElement(['HOME', 'PICKUP']),
-            'shipping_address' => null,
-            'billing_address' => null,
-            'notes' => fake()->optional()->sentence(),
+            'shipping_cost' => $shippingCost,
+            'total' => $total,
+            // Legacy fields for backward compatibility
+            'tax_amount' => 0,
+            'shipping_amount' => $shippingCost,
+            'total_amount' => $total,
         ];
     }
 

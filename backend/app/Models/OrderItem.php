@@ -12,6 +12,7 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'producer_id',
         'quantity',
         'unit_price',
         'total_price',
@@ -38,5 +39,13 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the producer associated with the order item.
+     */
+    public function producer()
+    {
+        return $this->belongsTo(Producer::class);
     }
 }
