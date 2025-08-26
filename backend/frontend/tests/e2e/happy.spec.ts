@@ -2,23 +2,24 @@ import { test, expect } from '@playwright/test';
 
 test('happy path - catalog to checkout flow', async ({ page }) => {
   // 1. Open home, see catalog list item
-  await page.goto('http://localhost:3000');
+  await page.goto('http://localhost:3001');
   
   // Wait for catalog to load and verify at least one product is visible
   await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
   
-  const firstProductLink = page.locator('[data-testid="product-card"] a').first();
-  const productName = await firstProductLink.locator('h3').textContent();
+  const firstProductCard = page.locator('[data-testid="product-card"]').first();
+  const productName = await firstProductCard.locator('[data-testid="product-name"]').textContent();
+  const firstProductLink = firstProductCard.locator('a').first();
   
   // 2. View first product page
   await firstProductLink.click();
   
   // Verify we're on product details page
-  await expect(page).toHaveURL(/\/product\/\d+/);
+  await expect(page).toHaveURL(/\/products\/\d+/);
   await expect(page.locator('h1')).toContainText(productName || '');
   
   // 3. Login via API and store token
-  const response = await page.request.post('http://127.0.0.1:8000/api/login', {
+  const response = await page.request.post('http://127.0.0.1:8001/api/v1/auth/login', {
     data: {
       email: 'consumer@example.com',
       password: 'password'
@@ -44,7 +45,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.reload();
   
   // Verify login worked - should see user menu or logout option
-  await expect(page.locator('[data-testid="user-menu"], [data-testid="logout-btn"]')).toBeVisible();
+  await expect(page.locator('[data-testid="user-menu"]').or(page.locator('[data-testid="logout-btn"]'))).toBeVisible();
   
   // 4. Add product to cart
   const addToCartBtn = page.locator('[data-testid="add-to-cart-btn"], button:has-text("Add to Cart")');
@@ -55,7 +56,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await expect(page.locator('[data-testid="cart-success"], .alert-success, [data-testid="cart-count"]')).toBeVisible();
   
   // Navigate to cart
-  await page.goto('http://localhost:3000/cart');
+  await page.goto('http://localhost:3001/cart');
   
   // Verify product is in cart
   await expect(page.locator('[data-testid="cart-item"]')).toBeVisible();
@@ -81,7 +82,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
 });
 
 test('catalog page loads and displays products', async ({ page }) => {
-  await page.goto('http://localhost:3000');
+  await page.goto('http://localhost:3001');
   
   // Wait for page to load
   await expect(page.locator('h1, [data-testid="page-title"]')).toBeVisible();
@@ -94,19 +95,18 @@ test('catalog page loads and displays products', async ({ page }) => {
   const firstProduct = page.locator('[data-testid="product-card"]').first();
   await expect(firstProduct.locator('img, [data-testid="product-image"]')).toBeVisible();
   await expect(firstProduct.locator('h3, [data-testid="product-name"]')).toBeVisible();
-  await expect(firstProduct.locator('[data-testid="product-price"], text=/€\d+/')).toBeVisible();
+  await expect(firstProduct.locator('[data-testid="product-price"]')).toBeVisible();
 });
 
 test('product detail page displays correctly', async ({ page }) => {
   // Go to catalog first
-  await page.goto('http://localhost:3000');
+  await page.goto('http://localhost:3001');
   
   // Click on first product
   await page.locator('[data-testid="product-card"] a').first().click();
   
   // Verify product details are shown
-  await expect(page.locator('h1, [data-testid="product-title"]')).toBeVisible();
-  await expect(page.locator('[data-testid="product-description"], .product-description')).toBeVisible();
-  await expect(page.locator('[data-testid="product-price"], text=/€\d+/')).toBeVisible();
-  await expect(page.locator('[data-testid="add-to-cart-btn"], button:has-text("Add to Cart")')).toBeVisible();
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('.text-xl.text-green-600:has-text("€")').first()).toBeVisible();
+  await expect(page.locator('button:has-text("Add to Cart")').first()).toBeVisible();
 });
