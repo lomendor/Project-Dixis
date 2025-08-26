@@ -20,12 +20,13 @@ Project-Dixis is a production-ready Laravel 11 backend API that facilitates conn
 
 ### ✨ Features
 
-- **Products API**: Browse and search agricultural products
+- **Products API**: Browse and search agricultural products with filters ([PR #6](https://github.com/lomendor/Project-Dixis/pull/6))
+- **Producer System**: KPIs, product toggle, messaging integration ([PR #7](https://github.com/lomendor/Project-Dixis/pull/7))
 - **Orders API**: Place and manage orders with authentication
-- **Producer Management**: Manage producer profiles and inventory
+- **Producer Management**: Dashboard KPIs, top products analytics
 - **Health Check**: System status monitoring
 - **Database Migrations**: PostgreSQL/SQLite compatible
-- **Comprehensive Testing**: Feature tests with @group mvp tagging
+- **Comprehensive Testing**: 51 tests / 359 assertions GREEN
 
 ## 🚀 Quick Start
 
@@ -128,9 +129,10 @@ Use Laravel Sanctum for API authentication. After seeding, check logs for demo u
 
 ## 📚 Documentation
 
-- **OpenAPI Spec**: [`backend/docs/openapi.yml`](backend/docs/openapi.yml)
+- **API v1 Endpoints**: [`backend/docs/API.md`](backend/docs/API.md)
+- **OpenAPI Spec**: [`backend/docs/openapi.yml`](backend/docs/openapi.yml) 
 - **Postman Collection**: [`backend/docs/collections/`](backend/docs/collections/)
-- **Changelog**: [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
+- **Release v0.2.0**: [Producer System Integration](https://github.com/lomendor/Project-Dixis/releases/tag/v0.2.0)
 
 ## 🔧 Development
 
