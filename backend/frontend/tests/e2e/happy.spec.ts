@@ -87,7 +87,8 @@ test('catalog page loads and displays products', async ({ page }) => {
   await expect(page.locator('h1, [data-testid="page-title"]')).toBeVisible();
   
   // Check that products are displayed
-  await expect(page.locator('[data-testid="product-card"]')).toHaveCount({ min: 1 });
+  const productCards = page.locator('[data-testid="product-card"]');
+  await expect(productCards).not.toHaveCount(0);
   
   // Verify each product card has required elements
   const firstProduct = page.locator('[data-testid="product-card"]').first();
