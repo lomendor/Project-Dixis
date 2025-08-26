@@ -11,6 +11,7 @@ class Producer extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'business_name', 
         'description',
         'location',
@@ -19,6 +20,7 @@ class Producer extends Model
         'website',
         'status',
         'user_id',
+        'is_active',
     ];
 
     protected $casts = [

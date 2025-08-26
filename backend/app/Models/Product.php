@@ -28,6 +28,7 @@ class Product extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_organic' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
