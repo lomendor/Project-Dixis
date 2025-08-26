@@ -14,11 +14,13 @@ class Product extends Model
         'slug',
         'description',
         'price',
+        'discount_price',
         'weight_per_unit',
         'unit',
         'stock',
         'category',
         'is_organic',
+        'is_seasonal',
         'image_url',
         'status',
         'is_active',
@@ -27,8 +29,10 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
         'is_active' => 'boolean',
         'is_organic' => 'boolean',
+        'is_seasonal' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
