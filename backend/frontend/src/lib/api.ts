@@ -27,7 +27,8 @@ export interface Category {
 
 export interface ProductImage {
   id: number;
-  image_path: string;
+  url: string;
+  image_path?: string; // fallback for compatibility
   alt_text?: string;
   is_primary: boolean;
 }
@@ -130,7 +131,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000';
+    this.baseURL = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8001';
     
     // Load token from localStorage if available
     if (typeof window !== 'undefined') {
@@ -305,7 +306,7 @@ class ApiClient {
     shipping_address?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('/api/v1/orders/checkout', {
+    const response = await this.request<{ order: Order }>('/api/v1/my/orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -313,11 +314,24 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('/api/v1/orders');
+    return this.request<{ orders: Order[] }>('/api/v1/my/orders');
   }
 
   async getOrder(id: number): Promise<Order> {
-    return this.request<Order>(`/api/v1/orders/${id}`);
+    return this.request<Order>(`/api/v1/my/orders/${id}`);
+  }
+
+  // Direct order creation (new V1 API)
+  async createOrder(data: {
+    items: { product_id: number; quantity: number }[];
+    currency: 'EUR' | 'USD';
+    shipping_method: 'HOME' | 'PICKUP';
+    notes?: string;
+  }): Promise<Order> {
+    return this.request<Order>('/api/v1/orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // Producer methods

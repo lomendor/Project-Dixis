@@ -150,7 +150,7 @@ export default function Home() {
                   {product.images.length > 0 ? (
                     <img
                       data-testid="product-image"
-                      src={product.images[0].image_path}
+                      src={product.images[0].url || product.images[0].image_path}
                       alt={product.images[0].alt_text || product.name}
                       className="h-full w-full object-cover"
                     />

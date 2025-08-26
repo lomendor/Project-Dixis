@@ -186,7 +186,7 @@ export default function Cart() {
                         <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
                           {item.product.images.length > 0 ? (
                             <img
-                              src={item.product.images[0].image_path}
+                              src={item.product.images[0].url || item.product.images[0].image_path}
                               alt={item.product.images[0].alt_text || item.product.name}
                               className="w-full h-full object-cover rounded-lg"
                             />

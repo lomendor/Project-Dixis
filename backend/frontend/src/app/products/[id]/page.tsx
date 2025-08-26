@@ -91,7 +91,7 @@ export default function ProductDetail() {
               <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
                 {product.images.length > 0 ? (
                   <img
-                    src={product.images.find(img => img.is_primary)?.image_path || product.images[0].image_path}
+                    src={product.images.find(img => img.is_primary)?.url || product.images.find(img => img.is_primary)?.image_path || product.images[0].url || product.images[0].image_path}
                     alt={product.images.find(img => img.is_primary)?.alt_text || product.name}
                     className="w-full h-full object-cover rounded-lg"
                   />
@@ -106,7 +106,7 @@ export default function ProductDetail() {
                   {product.images.slice(0, 4).map((image, index) => (
                     <div key={image.id} className="aspect-square bg-gray-200 rounded flex items-center justify-center">
                       <img
-                        src={image.image_path}
+                        src={image.url || image.image_path}
                         alt={image.alt_text || `${product.name} ${index + 1}`}
                         className="w-full h-full object-cover rounded"
                       />
