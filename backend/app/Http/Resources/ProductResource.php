@@ -23,6 +23,13 @@ class ProductResource extends JsonResource
             'stock' => $this->stock,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
+            'producer' => $this->when($this->relationLoaded('producer') && $this->producer, [
+                'id' => $this->producer?->id,
+                'name' => $this->producer?->name,
+                'slug' => $this->producer?->slug,
+                'business_name' => $this->producer?->business_name,
+                'location' => $this->producer?->location,
+            ]),
         ];
     }
 }

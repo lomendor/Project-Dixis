@@ -26,6 +26,7 @@ class ProductController extends Controller
         ]);
 
         $query = Product::query()
+            ->with('producer')
             ->where('is_active', true)
             ->orderBy('created_at', 'desc');
 
@@ -53,6 +54,9 @@ class ProductController extends Controller
     {
         // Only show active products
         abort_if(!$product->is_active, 404);
+
+        // Eager load producer
+        $product->load('producer');
 
         return new ProductResource($product);
     }

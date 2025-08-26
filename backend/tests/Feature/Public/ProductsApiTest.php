@@ -48,7 +48,14 @@ class ProductsApiTest extends TestCase
                         'price',
                         'stock',
                         'is_active',
-                        'created_at'
+                        'created_at',
+                        'producer' => [
+                            'id',
+                            'name',
+                            'slug',
+                            'business_name',
+                            'location'
+                        ]
                     ]
                 ],
                 'links',
@@ -93,7 +100,14 @@ class ProductsApiTest extends TestCase
                     'price',
                     'stock',
                     'is_active',
-                    'created_at'
+                    'created_at',
+                    'producer' => [
+                        'id',
+                        'name',
+                        'slug',
+                        'business_name',
+                        'location'
+                    ]
                 ]
             ])
             ->assertJsonPath('data.id', $product->id)
@@ -115,5 +129,35 @@ class ProductsApiTest extends TestCase
         $response = $this->getJson("/api/v1/products/{$inactiveProduct->id}");
 
         $response->assertStatus(404);
+    }
+
+    public function test_products_index_excludes_producer_pii(): void
+    {
+        $response = $this->getJson('/api/v1/products');
+
+        $response->assertStatus(200);
+        
+        $productData = $response->json('data.0');
+        
+        // Verify producer PII fields are not present
+        $this->assertArrayNotHasKey('phone', $productData['producer'] ?? []);
+        $this->assertArrayNotHasKey('email', $productData['producer'] ?? []);
+        $this->assertArrayNotHasKey('user_id', $productData['producer'] ?? []);
+    }
+
+    public function test_products_show_excludes_producer_pii(): void
+    {
+        $product = Product::where('is_active', true)->first();
+
+        $response = $this->getJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(200);
+        
+        $productData = $response->json('data');
+        
+        // Verify producer PII fields are not present
+        $this->assertArrayNotHasKey('phone', $productData['producer'] ?? []);
+        $this->assertArrayNotHasKey('email', $productData['producer'] ?? []);
+        $this->assertArrayNotHasKey('user_id', $productData['producer'] ?? []);
     }
 }
