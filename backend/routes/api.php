@@ -40,9 +40,13 @@ Route::prefix('v1/auth')->group(function () {
 
 // Public API v1 routes
 Route::prefix('v1')->group(function () {
-    // Products (public)
-    Route::get('products', [App\Http\Controllers\Api\ProductController::class, 'index']);
-    Route::get('products/{product}', [App\Http\Controllers\Api\ProductController::class, 'show']);
+    // Products (public, read-only)
+    Route::get('products', [App\Http\Controllers\Api\V1\ProductController::class, 'index'])->name('api.v1.products.index');
+    Route::get('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'show'])->name('api.v1.products.show');
+    
+    // Orders (public, read-only for demo purposes)
+    Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.orders.index');
+    Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.orders.show');
     
     // Enhanced Public Products API
     Route::prefix('public')->group(function () {
@@ -63,8 +67,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
     });
     
-    // Orders (authenticated)
-    Route::middleware('auth:sanctum')->group(function () {
+    // Orders (authenticated) - prefix with 'my' to avoid conflicts with public read-only API
+    Route::middleware('auth:sanctum')->prefix('my')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index']);
         Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store'])
             ->middleware('throttle:10,1'); // 10 requests per minute for order creation
