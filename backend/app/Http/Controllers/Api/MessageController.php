@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class MessageController extends Controller
 {
     /**
      * Mark a message as read
      */
-    public function markAsRead(Request $request, Message $message): \Illuminate\Http\Response
+    public function markAsRead(Request $request, Message $message): Response|JsonResponse
     {
         $user = $request->user();
         
