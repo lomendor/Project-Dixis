@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -65,5 +70,85 @@ class OrderController extends Controller
         $order->load('orderItems')->loadCount('orderItems');
 
         return new OrderResource($order);
+    }
+
+    /**
+     * Create a new order with atomic transactions and stock validation.
+     *
+     * @param StoreOrderRequest $request
+     * @return OrderResource
+     */
+    public function store(StoreOrderRequest $request): OrderResource
+    {
+        return DB::transaction(function () use ($request) {
+            $validated = $request->validated();
+            $orderTotal = 0;
+            $productData = [];
+
+            // Validate products and check stock
+            foreach ($validated['items'] as $itemData) {
+                $product = Product::where('id', $itemData['product_id'])
+                    ->where('is_active', true)
+                    ->lockForUpdate() // Prevent race conditions on stock
+                    ->first();
+
+                if (!$product) {
+                    abort(400, "Product with ID {$itemData['product_id']} not found or inactive.");
+                }
+
+                // Check stock if available
+                if ($product->stock !== null && $product->stock < $itemData['quantity']) {
+                    abort(409, "Insufficient stock for product '{$product->name}'. Available: {$product->stock}, requested: {$itemData['quantity']}.");
+                }
+
+                $unitPrice = $product->price;
+                $totalPrice = $unitPrice * $itemData['quantity'];
+                $orderTotal += $totalPrice;
+
+                $productData[] = [
+                    'product' => $product,
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $unitPrice,
+                    'total_price' => $totalPrice,
+                ];
+
+                // Update stock if it exists
+                if ($product->stock !== null) {
+                    $product->decrement('stock', $itemData['quantity']);
+                }
+            }
+
+            // Create the order
+            $order = Order::create([
+                'user_id' => $validated['user_id'] ?? null,
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'shipping_method' => $validated['shipping_method'],
+                'currency' => $validated['currency'],
+                'subtotal' => $orderTotal,
+                'shipping_cost' => 0, // No shipping cost for now
+                'total' => $orderTotal,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            // Create order items
+            foreach ($productData as $data) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $data['product']->id,
+                    'producer_id' => $data['product']->producer_id,
+                    'quantity' => $data['quantity'],
+                    'unit_price' => $data['unit_price'],
+                    'total_price' => $data['total_price'],
+                    'product_name' => $data['product']->name,
+                    'product_unit' => $data['product']->unit,
+                ]);
+            }
+
+            // Load relationships for response
+            $order->load('orderItems')->loadCount('orderItems');
+
+            return new OrderResource($order);
+        });
     }
 }
