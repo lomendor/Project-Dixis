@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\V1;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
@@ -14,10 +16,7 @@ class OrdersTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test order creation
-     * @group mvp
-     */
+    #[Group('mvp')]
     public function test_create_order_returns_201_with_structure(): void
     {
         // Create test data
@@ -79,10 +78,7 @@ class OrdersTest extends TestCase
         ]);
     }
 
-    /**
-     * Test order show endpoint
-     * @group mvp
-     */
+    #[Group('mvp')]
     public function test_show_order_returns_order_details(): void
     {
         // Create test data
@@ -126,10 +122,7 @@ class OrdersTest extends TestCase
             ]);
     }
 
-    /**
-     * Test order creation requires authentication
-     * @group mvp
-     */
+    #[Group('mvp')]
     public function test_create_order_requires_authentication(): void
     {
         $producer = Producer::factory()->create();
