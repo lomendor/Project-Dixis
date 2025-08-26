@@ -25,32 +25,19 @@ class ProductsTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'current_page',
                 'data' => [
                     '*' => [
                         'id',
                         'name',
                         'slug',
                         'price',
-                        'unit',
-                        'status',
-                        'producer' => [
-                            'id',
-                            'name',
-                        ]
+                        'stock',
+                        'is_active',
+                        'created_at'
                     ]
                 ],
-                'first_page_url',
-                'from',
-                'last_page',
-                'last_page_url',
                 'links',
-                'next_page_url',
-                'path',
-                'per_page',
-                'prev_page_url',
-                'to',
-                'total',
+                'meta'
             ]);
     }
 
@@ -65,20 +52,17 @@ class ProductsTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'name',
-                'slug',
-                'price',
-                'unit',
-                'status',
-                'producer' => [
+                'data' => [
                     'id',
                     'name',
+                    'slug',
+                    'price',
+                    'stock',
+                    'is_active',
+                    'created_at'
                 ]
             ])
-            ->assertJson([
-                'id' => $product->id,
-                'name' => $product->name,
-            ]);
+            ->assertJsonPath('data.id', $product->id)
+            ->assertJsonPath('data.name', $product->name);
     }
 }
