@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\V1;
 
+use PHPUnit\Framework\Attributes\Group;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Producer;
@@ -11,10 +13,7 @@ class ProductsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test products index endpoint
-     * @group mvp
-     */
+    #[Group('mvp')]
     public function test_products_index_returns_json_array(): void
     {
         // Create test data
@@ -55,10 +54,7 @@ class ProductsTest extends TestCase
             ]);
     }
 
-    /**
-     * Test products show endpoint
-     * @group mvp
-     */
+    #[Group('mvp')]
     public function test_products_show_returns_product_details(): void
     {
         // Create test data
