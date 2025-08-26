@@ -16,6 +16,11 @@ class ProducerController extends Controller
     {
         $user = $request->user();
         
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
         // Ensure user has a producer profile
         if (!$user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
@@ -43,6 +48,11 @@ class ProducerController extends Controller
     public function kpi(Request $request): JsonResponse
     {
         $user = $request->user();
+        
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
         
         // Ensure user has a producer profile
         if (!$user->producer) {
@@ -87,6 +97,11 @@ class ProducerController extends Controller
     public function topProducts(Request $request): JsonResponse
     {
         $user = $request->user();
+        
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
         
         // Ensure user has a producer profile
         if (!$user->producer) {
