@@ -7,22 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2025-08-26
+
 ### Added
-- Comprehensive E2E testing with Playwright
-- Enhanced UI polish with proper loading, error, and empty states  
-- Better user feedback with toast notifications for cart actions
-- Test data attributes for reliable E2E testing
-- Dedicated loading, error, and empty state components
+- **Comprehensive E2E testing with Playwright** covering complete user journeys
+- **Enhanced UI polish** with dedicated loading, error, and empty state components
+- **Better user feedback** with toast notifications replacing basic alerts
+- **Test data attributes** throughout frontend for reliable E2E testing
+- **CHANGELOG.md** with complete project history and semantic versioning
+- **DEPLOYMENT.md** with comprehensive deployment guide for all environments
 
 ### Changed
-- Improved cart success/error feedback from basic alerts to toast notifications
-- Enhanced empty states with contextual messaging and clear actions
-- Better loading states with descriptive text
+- Improved cart success/error feedback from alerts to elegant toast notifications
+- Enhanced empty states with contextual messaging and clear user actions
+- Better loading states with descriptive text and consistent styling
+- Upgraded error handling with retry functionality and professional styling
 
 ### Technical
-- Playwright configuration with multi-browser support
-- CI pipeline includes E2E tests with dual server setup
-- Test coverage for complete user journey: catalog → product → login → cart → checkout
+- **Playwright configuration** with multi-browser support (Chromium, Firefox, WebKit)
+- **CI pipeline enhancement** with E2E tests running on dual server setup
+- **Test coverage** for complete user journey: catalog → product → login → cart → checkout → success
+- **GitHub Actions** artifact collection for test results and reports
+- **Release hygiene** with proper semantic versioning and comprehensive documentation
 
 ## [0.1.2] - 2025-08-26
 
