@@ -44,9 +44,10 @@ Route::prefix('v1')->group(function () {
     Route::get('products', [App\Http\Controllers\Api\V1\ProductController::class, 'index'])->name('api.v1.products.index');
     Route::get('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'show'])->name('api.v1.products.show');
     
-    // Orders (public, read-only for demo purposes)
+    // Orders (public, read-only + create)
     Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.orders.index');
     Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.orders.show');
+    Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.orders.store');
     
     // Enhanced Public Products API
     Route::prefix('public')->group(function () {
