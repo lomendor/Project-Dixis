@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Producer extends Model
 {
@@ -44,6 +45,24 @@ class Producer extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     */
+    protected $appends = [
+        'is_verified',
+    ];
+
+    /**
+     * Accessor/mutator for is_verified (maps to verified column).
+     */
+    protected function isVerified(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (bool) $this->verified,
+            set: fn ($value) => ['verified' => (bool) $value],
+        );
+    }
 
     /**
      * Get the user that owns the producer.
