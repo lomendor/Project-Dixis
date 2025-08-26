@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import ErrorState from '@/components/ErrorState';
+import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
@@ -57,10 +60,36 @@ export default function Home() {
 
     try {
       await apiClient.addToCart(productId, 1);
-      alert('Product added to cart!');
+      // Show a better success message
+      const successDiv = document.createElement('div');
+      successDiv.innerHTML = `
+        <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2" data-testid="cart-success">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span>Added to cart!</span>
+        </div>
+      `;
+      document.body.appendChild(successDiv);
+      setTimeout(() => {
+        document.body.removeChild(successDiv);
+      }, 3000);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      alert('Failed to add product to cart');
+      // Show a better error message
+      const errorDiv = document.createElement('div');
+      errorDiv.innerHTML = `
+        <div class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>Failed to add to cart</span>
+        </div>
+      `;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => {
+        document.body.removeChild(errorDiv);
+      }, 3000);
     }
   };
 
@@ -105,19 +134,13 @@ export default function Home() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
+          <LoadingSpinner text="Loading fresh products..." />
         ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={loadProducts}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState
+            title="Unable to load products"
+            message={error}
+            onRetry={loadProducts}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
@@ -200,9 +223,23 @@ export default function Home() {
         )}
 
         {products.length === 0 && !loading && !error && (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No products found.</p>
-          </div>
+          <EmptyState
+            icon={
+              <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            }
+            title="No products found"
+            description={search || selectedCategory ? 
+              "We couldn't find any products matching your search criteria. Try adjusting your filters or search terms." :
+              "No products are currently available. Check back soon for fresh local produce!"
+            }
+            actionLabel="Clear Filters"
+            onAction={() => {
+              setSearch('');
+              setSelectedCategory('');
+            }}
+          />
         )}
       </main>
     </div>
