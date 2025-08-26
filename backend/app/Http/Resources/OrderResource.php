@@ -17,13 +17,15 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'order_number' => 'ORD-' . str_pad($this->id, 6, '0', STR_PAD_LEFT),
             'status' => $this->status,
-            'payment_status' => $this->payment_status,
-            'subtotal' => number_format((float)$this->subtotal, 2),
-            'shipping_cost' => number_format((float)$this->shipping_cost, 2),
-            'total' => number_format((float)$this->total, 2),
+            'total' => number_format((float)($this->total ?? $this->total_amount ?? 0), 2),
+            'currency' => 'EUR', // Default currency - could be made configurable
             'created_at' => $this->created_at?->toISOString(),
-            'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
+            'items_count' => $this->order_items_count ?? $this->orderItems?->count() ?? 0,
+            $this->mergeWhen($this->relationLoaded('orderItems'), [
+                'items' => OrderItemResource::collection($this->orderItems ?? []),
+            ]),
         ];
     }
 }

@@ -22,30 +22,50 @@ class OrdersApiTest extends TestCase
         $product1 = Product::factory()->create(['price' => 10.50, 'name' => 'Test Oranges']);
         $product2 = Product::factory()->create(['price' => 5.25, 'name' => 'Test Apples']);
         
-        // Create test order with items
-        $order = Order::factory()->create([
+        // Create test orders with items
+        $order1 = Order::factory()->create([
             'subtotal' => 26.25,
             'shipping_cost' => 3.50,
             'total' => 29.75,
-            'status' => 'paid',
+            'status' => 'completed',
             'payment_status' => 'paid'
         ]);
         
-        // Create order items
+        $order2 = Order::factory()->create([
+            'subtotal' => 15.00,
+            'shipping_cost' => 2.00,
+            'total' => 17.00,
+            'status' => 'pending',
+            'payment_status' => 'pending'
+        ]);
+        
+        // Create order items for first order
         OrderItem::factory()->create([
-            'order_id' => $order->id,
+            'order_id' => $order1->id,
             'product_id' => $product1->id,
+            'product_name' => $product1->name,
             'quantity' => 2,
             'unit_price' => 10.50,
             'total_price' => 21.00
         ]);
         
         OrderItem::factory()->create([
-            'order_id' => $order->id,
+            'order_id' => $order1->id,
             'product_id' => $product2->id,
+            'product_name' => $product2->name,
             'quantity' => 1,
             'unit_price' => 5.25,
             'total_price' => 5.25
+        ]);
+        
+        // Create order item for second order
+        OrderItem::factory()->create([
+            'order_id' => $order2->id,
+            'product_id' => $product1->id,
+            'product_name' => $product1->name,
+            'quantity' => 1,
+            'unit_price' => 10.50,
+            'total_price' => 10.50
         ]);
     }
 
@@ -58,25 +78,35 @@ class OrdersApiTest extends TestCase
                 'data' => [
                     '*' => [
                         'id',
+                        'order_number',
                         'status',
-                        'payment_status',
-                        'subtotal',
-                        'shipping_cost',
                         'total',
+                        'currency',
                         'created_at',
-                        'items'
+                        'items_count'
                     ]
                 ],
                 'links',
                 'meta'
-            ]);
+            ])
+            ->assertJsonCount(2, 'data'); // Should have 2 orders
         
         // Verify no PII fields are present
         $orderData = $response->json('data.0');
         $this->assertArrayNotHasKey('email', $orderData);
-        $this->assertArrayNotHasKey('address', $orderData);
-        $this->assertArrayNotHasKey('phone', $orderData);
+        $this->assertArrayNotHasKey('shipping_address', $orderData);
+        $this->assertArrayNotHasKey('billing_address', $orderData);
         $this->assertArrayNotHasKey('user_id', $orderData);
+        $this->assertArrayNotHasKey('payment_status', $orderData);
+        
+        // Verify order_number format
+        $this->assertMatchesRegularExpression('/^ORD-\d{6}$/', $orderData['order_number']);
+        
+        // Verify currency
+        $this->assertEquals('EUR', $orderData['currency']);
+        
+        // Verify items are NOT included in index (only in show)
+        $this->assertArrayNotHasKey('items', $orderData);
     }
 
     public function test_orders_show_returns_items_and_correct_total(): void
@@ -89,15 +119,16 @@ class OrdersApiTest extends TestCase
             ->assertJsonStructure([
                 'data' => [
                     'id',
+                    'order_number',
                     'status',
-                    'payment_status',
-                    'subtotal',
-                    'shipping_cost',
                     'total',
+                    'currency',
                     'created_at',
+                    'items_count',
                     'items' => [
                         '*' => [
                             'product_id',
+                            'product_name',
                             'quantity',
                             'unit_price',
                             'total_price'
@@ -108,21 +139,18 @@ class OrdersApiTest extends TestCase
 
         $orderData = $response->json('data');
         
-        // Verify items array is present
+        // Verify items array is present and has expected count
         $this->assertIsArray($orderData['items']);
         $this->assertCount(2, $orderData['items']);
+        $this->assertEquals(2, $orderData['items_count']);
         
-        // Verify total calculation: subtotal + shipping_cost = total
-        $subtotal = (float) str_replace(',', '', $orderData['subtotal']);
-        $shippingCost = (float) str_replace(',', '', $orderData['shipping_cost']);
-        $total = (float) str_replace(',', '', $orderData['total']);
-        
-        $this->assertEquals($subtotal + $shippingCost, $total, 'Total should equal subtotal + shipping_cost');
-        
-        // Verify specific values
-        $this->assertEquals('26.25', $orderData['subtotal']);
-        $this->assertEquals('3.50', $orderData['shipping_cost']);
+        // Verify total value
         $this->assertEquals('29.75', $orderData['total']);
+        
+        // Verify item structure includes product_name
+        $item = $orderData['items'][0];
+        $this->assertArrayHasKey('product_name', $item);
+        $this->assertNotEmpty($item['product_name']);
     }
 
     public function test_orders_show_returns_404_for_nonexistent_order(): void
@@ -132,26 +160,72 @@ class OrdersApiTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_orders_index_includes_items_with_eager_loading(): void
+    public function test_orders_index_filters_by_status(): void
     {
-        $response = $this->getJson('/api/v1/orders');
+        // Test filtering by 'completed' status
+        $response = $this->getJson('/api/v1/orders?status=completed');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data');
         
         $orderData = $response->json('data.0');
-        $this->assertArrayHasKey('items', $orderData);
-        $this->assertIsArray($orderData['items']);
+        $this->assertEquals('completed', $orderData['status']);
         
-        // Verify item structure
-        if (count($orderData['items']) > 0) {
-            $item = $orderData['items'][0];
-            $this->assertArrayHasKey('product_id', $item);
-            $this->assertArrayHasKey('quantity', $item);
-            $this->assertArrayHasKey('unit_price', $item);
-            $this->assertArrayHasKey('total_price', $item);
-        }
+        // Test filtering by 'pending' status
+        $response = $this->getJson('/api/v1/orders?status=pending');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+        
+        $orderData = $response->json('data.0');
+        $this->assertEquals('pending', $orderData['status']);
+        
+        // Test invalid status returns validation error
+        $response = $this->getJson('/api/v1/orders?status=invalid');
+        $response->assertStatus(422);
     }
 
+    public function test_orders_search_by_id(): void
+    {
+        $order = Order::first();
+        
+        // Test search by order ID
+        $response = $this->getJson("/api/v1/orders?q={$order->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+        
+        $orderData = $response->json('data.0');
+        $this->assertEquals($order->id, $orderData['id']);
+        
+        // Test search with non-numeric value returns no results
+        $response = $this->getJson('/api/v1/orders?q=abc');
+        $response->assertStatus(200)
+            ->assertJsonCount(0, 'data');
+    }
+    
+    public function test_orders_pagination_works(): void
+    {
+        $response = $this->getJson('/api/v1/orders?per_page=1');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonStructure([
+                'data',
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next'
+                ],
+                'meta' => [
+                    'current_page',
+                    'per_page',
+                    'total'
+                ]
+            ]);
+    }
+    
     public function test_orders_data_formats_are_correct(): void
     {
         $response = $this->getJson('/api/v1/orders');
@@ -161,11 +235,15 @@ class OrdersApiTest extends TestCase
         $orderData = $response->json('data.0');
         
         // Verify numeric fields are formatted as strings with 2 decimal places
-        $this->assertMatchesRegularExpression('/^\d+\.\d{2}$/', $orderData['subtotal']);
-        $this->assertMatchesRegularExpression('/^\d+\.\d{2}$/', $orderData['shipping_cost']);
         $this->assertMatchesRegularExpression('/^\d+\.\d{2}$/', $orderData['total']);
         
         // Verify created_at is ISO format
         $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/', $orderData['created_at']);
+        
+        // Verify order_number format
+        $this->assertMatchesRegularExpression('/^ORD-\d{6}$/', $orderData['order_number']);
+        
+        // Verify items_count is integer
+        $this->assertIsInt($orderData['items_count']);
     }
 }
