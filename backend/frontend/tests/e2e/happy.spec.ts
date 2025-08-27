@@ -44,8 +44,8 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   // Refresh to apply auth state
   await page.reload();
   
-  // Verify login worked - should see user menu or logout option
-  await expect(page.locator('[data-testid="user-menu"]').or(page.locator('[data-testid="logout-btn"]'))).toBeVisible();
+  // Verify login worked - should see user menu (primary auth indicator)
+  await expect(page.locator('[data-testid="user-menu"]').first()).toBeVisible();
   
   // 4. Add product to cart
   const addToCartBtn = page.locator('[data-testid="add-to-cart-btn"], button:has-text("Add to Cart")');
