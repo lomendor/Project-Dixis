@@ -24,6 +24,11 @@ export default async function globalSetup() {
       cwd: backendCwd, stdio: 'inherit'
     });
     
+    // Run E2E-specific seeds for deterministic test data
+    execSync('php artisan db:seed --class=E2ESeeder --env=testing', {
+      cwd: backendCwd, stdio: 'inherit'
+    });
+    
   } catch (e) {
     console.error('❌ Global setup failed:', e.message);
     throw e;
