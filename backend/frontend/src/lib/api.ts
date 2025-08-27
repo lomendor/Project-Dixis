@@ -131,9 +131,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api/v1';
-    // Ensure baseURL ends with a slash for proper concatenation
-    this.baseURL = baseURL.endsWith('/') ? baseURL : `${baseURL}/`;
+    this.baseURL = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001/api/v1';
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -182,7 +180,7 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     // Handle absolute URLs directly
-    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}/${endpoint}`;
     
     const response = await fetch(url, {
       ...options,
