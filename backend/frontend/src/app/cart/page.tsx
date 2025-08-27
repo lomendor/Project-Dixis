@@ -16,16 +16,21 @@ export default function Cart() {
   const [error, setError] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // Don't redirect during auth loading to prevent race conditions
+    if (authLoading) {
+      return;
+    }
+    
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
     }
     loadCart();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const loadCart = async () => {
     try {
@@ -118,8 +123,8 @@ export default function Cart() {
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+  if (authLoading || !isAuthenticated) {
+    return null; // Show nothing during auth loading or redirect
   }
 
   return (
