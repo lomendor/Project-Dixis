@@ -50,9 +50,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('🔑 AuthContext: Calling API login...');
       const response = await apiClient.login(email, password);
+      console.log('🔑 AuthContext: API login response:', response);
+      console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
+      console.log('🔑 AuthContext: Login completed successfully');
     } catch (error) {
+      console.error('🔑 AuthContext: Login error:', error);
       throw error;
     }
   };

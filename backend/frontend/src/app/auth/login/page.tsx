@@ -25,11 +25,14 @@ export default function Login() {
       setLoading(true);
       setError(null);
       
+      console.log('🔐 Starting login process...', { email });
       await login(email, password);
+      console.log('✅ Login successful, redirecting to home...');
       
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {
+      console.error('❌ Login failed:', err);
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);

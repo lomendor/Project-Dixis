@@ -261,7 +261,7 @@ class ApiClient {
     password_confirmation: string;
     role: 'consumer' | 'producer';
   }): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('/api/v1/auth/register', {
+    const response = await this.request<AuthResponse>('http://127.0.0.1:8001/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -274,7 +274,7 @@ class ApiClient {
   }
 
   async logout(): Promise<void> {
-    await this.request('/api/v1/auth/logout', {
+    await this.request('http://127.0.0.1:8001/api/v1/auth/logout', {
       method: 'POST',
     });
     this.setToken(null);
@@ -330,7 +330,7 @@ class ApiClient {
     shipping_address?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('/api/v1/my/orders/checkout', {
+    const response = await this.request<{ order: Order }>('http://127.0.0.1:8001/api/v1/my/orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -338,7 +338,7 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('/api/v1/my/orders');
+    return this.request<{ orders: Order[] }>('http://127.0.0.1:8001/api/v1/my/orders');
   }
 
   async getOrder(id: number): Promise<Order> {
@@ -352,7 +352,7 @@ class ApiClient {
     shipping_method: 'HOME' | 'PICKUP';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('/api/v1/orders', {
+    return this.request<Order>('http://127.0.0.1:8001/api/v1/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -360,11 +360,11 @@ class ApiClient {
 
   // Producer methods
   async getProducerKpi(): Promise<ProducerKpi> {
-    return this.request<ProducerKpi>('/api/v1/producer/dashboard/kpi');
+    return this.request<ProducerKpi>('http://127.0.0.1:8001/api/v1/producer/dashboard/kpi');
   }
 
   async getProducerStats(): Promise<ProducerStats> {
-    return this.request<ProducerStats>('/api/v1/producer/dashboard/stats');
+    return this.request<ProducerStats>('http://127.0.0.1:8001/api/v1/producer/dashboard/stats');
   }
 
   async getProducerTopProducts(limit?: number): Promise<{ data: Product[] }> {

@@ -85,23 +85,16 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await expect(page.locator('[data-testid="cart-item"]')).toBeVisible({ timeout: 10000 });
   await expect(page.locator('text=' + productName)).toBeVisible({ timeout: 5000 });
   
-  // 5. Proceed to checkout
+  // 5. Proceed to checkout (direct checkout - no form)
   const checkoutBtn = page.locator('[data-testid="checkout-btn"], button:has-text("Checkout"), button:has-text("Proceed")');
   await expect(checkoutBtn).toBeVisible();
   await checkoutBtn.click();
   
-  // Fill checkout form
-  await page.fill('[name="shipping_address"], [data-testid="shipping-address"]', '123 Test Street, Athens, Greece');
+  // Wait for checkout to complete and redirect to order page
+  await page.waitForURL(/\/orders\/\d+/, { timeout: 10000 });
   
-  // Submit checkout
-  const submitBtn = page.locator('[data-testid="place-order-btn"], button[type="submit"], button:has-text("Place Order")');
-  await submitBtn.click();
-  
-  // Expect success message or redirect to orders page
-  await expect(page.locator('[data-testid="order-success"], .alert-success, text=success').or(page.locator('[data-testid="orders-page"]'))).toBeVisible({ timeout: 10000 });
-  
-  // Verify we're either on success page or orders page
-  await expect(page).toHaveURL(/\/(checkout\/success|orders)/);
+  // Verify we're on the order details page
+  await expect(page).toHaveURL(/\/orders\/\d+/);
 });
 
 test('catalog page loads and displays products', async ({ page }) => {
