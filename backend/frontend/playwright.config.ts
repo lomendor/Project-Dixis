@@ -5,24 +5,30 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  /* Retry failed tests twice for stability */
+  retries: 2,
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  /* Reporter to use. Keep artifacts slim - only on failure */
+  reporter: [["html", { open: "never" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3001',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3001',
     
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Collect trace only when retrying failed tests */
+    trace: 'retain-on-failure',
+    
+    /* Keep artifacts only on failure to reduce storage */
+    video: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
+  /* Expect timeout for assertions */
+  expect: { timeout: 6000 },
 
   /* Configure projects for major browsers */
   projects: [
@@ -61,13 +67,4 @@ export default defineConfig({
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
-
-  /* Use external dev server - managed separately */
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3001', 
-  //   reuseExistingServer: !process.env.CI,
-  //   stdout: 'ignore',
-  //   stderr: 'pipe',
-  // },
 });

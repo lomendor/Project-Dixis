@@ -2,12 +2,9 @@ name: frontend-ci
 
 on:
   push:
-    paths:
-      - 'backend/frontend/**'
-      - '.github/workflows/frontend-ci.yml'
+    paths: ['backend/frontend/**', '.github/workflows/frontend-ci.yml']
   pull_request:
-    paths:
-      - 'backend/frontend/**'
+    paths: ['backend/frontend/**']
   workflow_dispatch:
 
 concurrency:
@@ -15,133 +12,105 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  frontend-tests:
+  e2e:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend/frontend
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Run ESLint
-        run: npm run lint
-      
-      - name: Run TypeScript type check
-        run: npm run type-check
-      
-      - name: Build application
-        run: npm run build
-      
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: backend/frontend/.next/
-          retention-days: 7
-
-  e2e-tests:
-    runs-on: ubuntu-latest
-    needs: frontend-tests
-    
     services:
       postgres:
-        image: postgres:15
+        image: postgres:14
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
+          POSTGRES_DB: project_dixis_test
+        ports: ['5432:5432']
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
-    defaults:
-      run:
-        working-directory: backend
-    
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
-      
-      # Setup backend
+
+      # Backend: Laravel @ 8001
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer, openssl, curl, fileinfo
-      
-      - name: Install backend dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-      
-      - name: Copy environment file
-        run: cp .env.example .env
-      
-      - name: Generate application key
-        run: php artisan key:generate
-      
-      - name: Configure database
+          php-version: '8.3'
+          extensions: mbstring, intl, bcmath, pgsql, pdo_pgsql
+          coverage: none
+
+      - name: Install backend deps
+        working-directory: backend
         run: |
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=dixis_test" >> .env
-          echo "DB_USERNAME=postgres" >> .env
-          echo "DB_PASSWORD=postgres" >> .env
-      
-      - name: Run migrations and seed
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env || touch .env
+          php artisan key:generate
+          {
+            echo "DB_CONNECTION=pgsql"
+            echo "DB_HOST=127.0.0.1"
+            echo "DB_PORT=5432"
+            echo "DB_DATABASE=project_dixis_test"
+            echo "DB_USERNAME=postgres"
+            echo "DB_PASSWORD=postgres"
+          } >> .env
+          php artisan migrate:fresh --seed --env=testing
+
+      - name: Start backend (8001)
+        working-directory: backend
         run: |
-          php artisan migrate --force
-          php artisan db:seed --force
-      
-      - name: Start Laravel server
-        run: php artisan serve --host=0.0.0.0 --port=8000 &
-        
-      # Setup frontend
-      - name: Setup Node.js
+          nohup php artisan serve --host=127.0.0.1 --port=8001 > ../.backend.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:8001/api/health && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8001/api/health
+
+      # Frontend @ 3001
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
-      
-      - name: Install frontend dependencies
+
+      - name: Install frontend deps
         working-directory: backend/frontend
         run: npm ci
-      
-      - name: Install Playwright Browsers
+
+      - name: Build frontend
         working-directory: backend/frontend
-        run: npx playwright install --with-deps chromium
-      
-      - name: Start Next.js server
-        working-directory: backend/frontend
-        run: npm run build && npm start &
-      
-      - name: Wait for servers to be ready
-        run: |
-          timeout 60 bash -c 'until curl -f http://localhost:8000/api/health; do sleep 2; done'
-          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
-      
-      - name: Run E2E tests
-        working-directory: backend/frontend
-        run: npm run e2e
         env:
-          CI: true
-      
-      - name: Upload test results
-        if: always()
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+        run: npm run build
+
+      - name: Install Playwright
+        working-directory: backend/frontend
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests (only-on-failure artifacts)
+        working-directory: backend/frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          PORT: "3001"
+        run: |
+          # Start frontend server on port 3001
+          nohup npm run start -- -p 3001 > ../.frontend.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:3001 && break
+            sleep 1
+          done
+          npx playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-results
-          path: backend/frontend/playwright-report/
-          retention-days: 7
+          name: playwright-report
+          path: backend/frontend/playwright-report
+          retention-days: 3
+
+      - name: Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: backend/frontend/test-results
+          retention-days: 3

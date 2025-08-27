@@ -38,6 +38,12 @@ jobs:
           php-version: '8.3'
           extensions: mbstring, intl, bcmath, pgsql, pdo_pgsql
           coverage: none
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
       - name: Install deps
         run: composer install --no-interaction --prefer-dist
       - name: Copy .env
@@ -54,11 +60,12 @@ jobs:
           echo "DB_PASSWORD=postgres" >> .env
       - name: Migrate & Seed (fresh)
         run: php artisan migrate:fresh --seed --env=testing
-      - name: Run feature tests (fallback all)
+      - name: Run tests
         run: |
-          if php artisan test --testsuite=Feature --group mvp --env=testing --testdox; then
-            exit 0
+          if php artisan test --testsuite=Feature --group mvp --env=testing --testdox 2>/dev/null; then
+            echo "✅ MVP feature tests passed"
           else
+            echo "⚠️ No MVP tests found, running all tests"
             php artisan test --env=testing --testdox
           fi
       - name: Upload OpenAPI specification
