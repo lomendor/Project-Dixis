@@ -21,7 +21,7 @@
   uses: shivammathur/setup-php@v2
   with:
     php-version: '8.2'
-    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, pdo_pgsql
+    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, bcmath, soap, intl, gd, exif, iconv, imagick, pdo_pgsql
     coverage: none  # 🔑 CRITICAL: Prevents coverage driver errors
 ```
 
