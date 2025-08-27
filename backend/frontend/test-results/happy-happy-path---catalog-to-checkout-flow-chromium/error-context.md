@@ -28,5 +28,5 @@
         - button "Try Again" [ref=e29]
   - button "Open Next.js Dev Tools" [ref=e35] [cursor=pointer]:
     - img [ref=e36] [cursor=pointer]
-  - alert [ref=e39]: Fresh Products from Local Producers
+  - alert [ref=e39]
 ```

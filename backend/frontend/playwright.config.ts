@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
+  globalSetup: require.resolve('./global-setup'),
   testDir: './tests/e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -18,7 +19,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://127.0.0.1:3001',
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "retain-on-failure",
@@ -66,12 +67,20 @@ export default defineConfig({
     // },
   ],
 
-  /* Use external dev server - managed separately */
-  // webServer: {
-  //   command: 'npm run dev',
-  //   url: 'http://localhost:3001', 
-  //   reuseExistingServer: !process.env.CI,
-  //   stdout: 'ignore',
-  //   stderr: 'pipe',
-  // },
+  /* Auto-start servers for testing */
+  webServer: [
+    {
+      command: 'php artisan serve --host 127.0.0.1 --port 8001',
+      port: 8001,
+      reuseExistingServer: true,
+      timeout: 120000,
+      cwd: '../'
+    },
+    {
+      command: 'npm run dev -- -p 3001',
+      port: 3001,
+      reuseExistingServer: true,
+      timeout: 180000
+    }
+  ],
 });
