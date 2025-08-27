@@ -27,6 +27,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Refresh token from localStorage to handle race conditions
+      apiClient.refreshToken();
       const token = apiClient.getToken();
       
       if (token) {

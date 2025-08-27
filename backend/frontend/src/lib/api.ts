@@ -134,9 +134,17 @@ class ApiClient {
     this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001';
     
     // Load token from localStorage if available
+    this.loadTokenFromStorage();
+  }
+
+  private loadTokenFromStorage(): void {
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token');
     }
+  }
+
+  refreshToken(): void {
+    this.loadTokenFromStorage();
   }
 
   private getHeaders(): HeadersInit {

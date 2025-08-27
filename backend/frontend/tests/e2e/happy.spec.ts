@@ -18,49 +18,68 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await expect(page).toHaveURL(/\/products\/\d+/);
   await expect(page.locator('h1')).toContainText(productName || '');
   
-  // 3. Login via API and store token
-  const response = await page.request.post('http://127.0.0.1:8001/api/v1/auth/login', {
-    data: {
-      email: 'consumer@example.com',
-      password: 'password'
-    }
-  });
+  // 3. Login via frontend login flow
+  await page.goto('http://localhost:3001/auth/login');
+  await page.waitForLoadState('networkidle');
   
-  expect(response.ok()).toBeTruthy();
-  const loginData = await response.json();
-  const token = loginData.token;
+  // Fill login form
+  await page.fill('[name="email"]', 'consumer@example.com');
+  await page.fill('[name="password"]', 'password');
   
-  // Set auth token in browser storage
-  await page.evaluate((token) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify({
-      id: 1,
-      name: 'Test Consumer',
-      email: 'consumer@example.com',
-      role: 'consumer'
-    }));
-  }, token);
+  // Submit login form
+  await page.click('button[type="submit"]');
+  await page.waitForLoadState('networkidle');
   
-  // Refresh to apply auth state
-  await page.reload();
+  // Should be redirected to home page after successful login
+  await expect(page).toHaveURL('http://localhost:3001/');
   
   // Verify login worked - should see user menu (primary auth indicator)
   await expect(page.locator('[data-testid="user-menu"]').first()).toBeVisible();
   
+  // Navigate back to the product page to add to cart
+  await firstProductLink.click();
+  await expect(page).toHaveURL(/\/products\/\d+/);
+  await page.waitForLoadState('networkidle');
+  
   // 4. Add product to cart
   const addToCartBtn = page.locator('[data-testid="add-to-cart-btn"], button:has-text("Add to Cart")');
   await expect(addToCartBtn).toBeVisible();
+  
+  // Wait for successful add to cart (look for success message)
+  const addToCartPromise = page.waitForSelector('[data-testid="cart-success"]', { timeout: 10000 });
   await addToCartBtn.click();
   
-  // Wait a moment for the API call to complete
-  await page.waitForTimeout(2000);
+  try {
+    await addToCartPromise;
+    console.log('✅ Add to cart success message appeared');
+  } catch (error) {
+    console.log('⚠️ No success message, but continuing with test...');
+  }
+  
+  // Wait a moment for the API call to fully complete
+  await page.waitForTimeout(1000);
   
   // Navigate to cart
   await page.goto('http://localhost:3001/cart');
+  await page.waitForLoadState('networkidle');
+  
+  // Check if we're still on cart page (not redirected to login)
+  const currentUrl = page.url();
+  console.log('🔗 Current URL after cart navigation:', currentUrl);
+  
+  if (currentUrl.includes('/auth/login')) {
+    console.log('❌ Still redirected to login - authentication not working');
+    throw new Error('Cart page redirected to login - authentication failed');
+  }
+  
+  console.log('✅ Authentication worked - staying on cart page');
+  
+  // Wait for cart to load - should see either cart items or loading state first
+  await page.waitForSelector('[data-testid="cart-item"], [data-testid="loading-spinner"], .text-center:has-text("empty")', { timeout: 10000 });
   
   // Verify product is in cart
-  await expect(page.locator('[data-testid="cart-item"]')).toBeVisible();
-  await expect(page.locator('text=' + productName)).toBeVisible();
+  await expect(page.locator('[data-testid="cart-item"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('text=' + productName)).toBeVisible({ timeout: 5000 });
   
   // 5. Proceed to checkout
   const checkoutBtn = page.locator('[data-testid="checkout-btn"], button:has-text("Checkout"), button:has-text("Proceed")');
