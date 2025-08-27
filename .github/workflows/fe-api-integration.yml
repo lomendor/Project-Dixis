@@ -120,8 +120,9 @@ jobs:
         working-directory: backend/frontend
         run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
       
-      - name: Install Playwright (browsers + deps)
-        uses: microsoft/playwright-github-action@v1
+      - name: Install Playwright browsers with dependencies
+        working-directory: backend/frontend
+        run: npx playwright install --with-deps
       
       - name: Build frontend
         working-directory: backend/frontend
