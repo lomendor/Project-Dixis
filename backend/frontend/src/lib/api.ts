@@ -127,11 +127,17 @@ export interface TopProduct {
 }
 
 // Helper functions for safe URL joining
+const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
+const trimBoth = (s: string) => s.replace(/\/+$/,'').replace(/^\/+/,'');
+const BASE = trimBoth(RAW_BASE);
+export const apiUrl = (path: string) => `${BASE}/${trimBoth(path)}`;
+
+// Legacy functions for compatibility
 function trimSlashes(s: string): string {
   return s.replace(/\/+$/,'').replace(/^\/+/,'');
 }
 
-function apiUrl(baseURL: string, path: string): string {
+function legacyApiUrl(baseURL: string, path: string): string {
   const base = trimSlashes(baseURL);
   const p = trimSlashes(path);
   return `${base}/${p}`;
@@ -191,8 +197,8 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle absolute URLs directly
-    const url = endpoint.startsWith('http') ? endpoint : apiUrl(this.baseURL, endpoint);
+    // Handle absolute URLs directly - use new safe URL joining
+    const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
     
     const response = await fetch(url, {
       ...options,
@@ -391,3 +397,10 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+
+// Helper function for public products
+export async function getPublicProducts() {
+  const res = await fetch(apiUrl('public/products'), { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
+  return res.json();
+}
