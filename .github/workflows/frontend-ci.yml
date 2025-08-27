@@ -127,6 +127,8 @@ jobs:
       
       - name: Start Next.js server (production build for E2E)
         working-directory: backend/frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
         run: npm run build && PORT=3001 npm start &
       
       - name: Wait for servers to be ready
