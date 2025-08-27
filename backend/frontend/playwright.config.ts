@@ -85,24 +85,22 @@ export default defineConfig({
     // },
   ],
 
-  /* Auto-start servers for testing - optimized timeouts */
-  webServer: [
+  /* Auto-start servers for testing - only for local development */
+  webServer: process.env.CI ? undefined : [
     {
       command: 'php artisan serve --host 127.0.0.1 --port 8001 --env=testing',
       port: 8001,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 60000,
       cwd: '../',
-      /* Health check for backend */
       url: 'http://127.0.0.1:8001/api/health',
       ignoreHTTPSErrors: true,
     },
     {
-      command: process.env.CI ? 'npm run build && npm start -- -p 3001' : 'npm run dev -- -p 3001',
+      command: 'npm run dev -- -p 3001',
       port: 3001,
-      reuseExistingServer: !process.env.CI,
-      timeout: process.env.CI ? 120000 : 180000,
-      /* Health check for frontend */
+      reuseExistingServer: true,
+      timeout: 180000,
       url: 'http://localhost:3001',
       ignoreHTTPSErrors: true,
     }
