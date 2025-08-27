@@ -267,7 +267,12 @@ class ApiClient {
 
   // Cart methods
   async getCart(): Promise<CartResponse> {
-    return this.request<CartResponse>('/api/v1/cart/items');
+    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('/api/v1/cart/items');
+    return {
+      items: response.cart_items || [],
+      total_items: response.total_items,
+      total_amount: response.total_amount
+    };
   }
 
   async addToCart(productId: number, quantity: number): Promise<{ cart_item: CartItem }> {
