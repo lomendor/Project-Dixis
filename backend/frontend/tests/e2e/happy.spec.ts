@@ -5,10 +5,8 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.goto('http://localhost:3001');
   
   // Wait for catalog to load and verify at least one product is visible
-  await Promise.all([
-    page.waitForResponse(r => /\/api\/v1\/public\/products/.test(r.url()) && r.ok()),
-    page.waitForSelector('[data-testid="product-card"]')
-  ]);
+  // Use a more WebKit-compatible approach without relying on waitForResponse
+  await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
   await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
   
   const firstProductCard = page.locator('[data-testid="product-card"]').first();
