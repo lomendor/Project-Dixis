@@ -13,7 +13,10 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   const firstProductLink = card.locator('a').first();
   
   // 2. View first product page
-  await firstProductLink.click();
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/, { timeout: 10000 }),
+    firstProductLink.click()
+  ]);
   
   // Verify we're on product details page
   await expect(page).toHaveURL(/\/products\/\d+/);
@@ -31,8 +34,10 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.fill('[name="password"]', 'password');
   
   // Submit login form
-  await page.click('button[type="submit"]');
-  await page.waitForLoadState('networkidle');
+  await Promise.all([
+    page.waitForURL('/', { timeout: 10000 }),
+    page.click('button[type="submit"]')
+  ]);
   
   // Should be redirected to home page after successful login
   await expect(page).toHaveURL('/');
@@ -41,7 +46,10 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await expect(page.locator('[data-testid="user-menu"]').first()).toBeVisible();
   
   // Navigate back to the product page to add to cart
-  await firstProductLink.click();
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/, { timeout: 10000 }),
+    firstProductLink.click()
+  ]);
   await expect(page).toHaveURL(/\/products\/\d+/);
   await page.waitForLoadState('networkidle');
   
@@ -64,8 +72,10 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.waitForTimeout(1000);
   
   // Navigate to cart
-  await page.goto('/cart');
-  await page.waitForLoadState('networkidle');
+  await Promise.all([
+    page.waitForURL(/\/cart/, { timeout: 10000 }),
+    page.goto('/cart')
+  ]);
   
   // Check if we're still on cart page (not redirected to login)
   const currentUrl = page.url();
@@ -116,7 +126,10 @@ test('product detail page displays correctly', async ({ page }) => {
   await page.goto('/');
   
   // Click on first product
-  await page.locator('[data-testid="product-card"] a').first().click();
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/, { timeout: 10000 }),
+    page.locator('[data-testid="product-card"] a').first().click()
+  ]);
   
   // Verify product details are shown
   await expect(page.locator('h1')).toBeVisible();

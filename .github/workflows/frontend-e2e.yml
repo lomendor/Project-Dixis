@@ -14,6 +14,8 @@ on:
       - 'backend/app/**'
       - 'backend/database/**'
       - 'backend/routes/**'
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3:00 UTC
   workflow_dispatch:
 
 concurrency:
@@ -75,11 +77,13 @@ jobs:
           coverage: none
       
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: backend/vendor
           key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          restore-keys: |
+            composer-${{ runner.os }}-
+            composer-
       
       - name: Install backend dependencies
         working-directory: backend

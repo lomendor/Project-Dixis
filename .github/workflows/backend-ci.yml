@@ -7,6 +7,8 @@ on:
   pull_request:
     paths:
       - 'backend/**'
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3:00 UTC
   workflow_dispatch:
 concurrency:
   group: backend-ci-${{ github.ref }}
@@ -39,11 +41,13 @@ jobs:
           extensions: mbstring, intl, bcmath, pgsql, pdo_pgsql
           coverage: none
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+            composer-
       - name: Install deps
         run: composer install --no-interaction --prefer-dist
       - name: Copy .env
