@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test('happy path - catalog to checkout flow', async ({ page }) => {
   // 1. Open home, see catalog list item
-  await page.goto('http://localhost:3001');
+  await page.goto('/');
 
-  // Wait for products API to respond OK
-  await page.waitForResponse(res =>
-    res.url().includes('/public/products') && res.ok()
+  // Wait for products API to respond OK - check for correct API endpoint
+  await page.waitForResponse(res => 
+    res.url().endsWith('/api/v1/public/products') && res.status() === 200
   );
 
   // Then assert product card is visible
@@ -23,9 +23,12 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await expect(page).toHaveURL(/\/products\/\d+/);
   await expect(page.locator('h1')).toContainText(productName || '');
   
-  // 3. Login via frontend login flow
-  await page.goto('http://localhost:3001/auth/login');
+  // 3. Login via frontend login flow - use safer navigation 
   await page.waitForLoadState('networkidle');
+  await Promise.all([
+    page.waitForURL('**/auth/login', { timeout: 10000 }),
+    page.goto('/auth/login', { waitUntil: 'load' }),
+  ]);
   
   // Fill login form
   await page.fill('[name="email"]', 'consumer@example.com');
@@ -36,7 +39,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   
   // Should be redirected to home page after successful login
-  await expect(page).toHaveURL('http://localhost:3001/');
+  await expect(page).toHaveURL('/');
   
   // Verify login worked - should see user menu (primary auth indicator)
   await expect(page.locator('[data-testid="user-menu"]').first()).toBeVisible();
@@ -65,7 +68,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.waitForTimeout(1000);
   
   // Navigate to cart
-  await page.goto('http://localhost:3001/cart');
+  await page.goto('/cart');
   await page.waitForLoadState('networkidle');
   
   // Check if we're still on cart page (not redirected to login)
@@ -96,7 +99,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
 });
 
 test('catalog page loads and displays products', async ({ page }) => {
-  await page.goto('http://localhost:3001');
+  await page.goto('/');
   
   // Wait for page to load
   await expect(page.locator('h1, [data-testid="page-title"]')).toBeVisible();
@@ -114,7 +117,7 @@ test('catalog page loads and displays products', async ({ page }) => {
 
 test('product detail page displays correctly', async ({ page }) => {
   // Go to catalog first
-  await page.goto('http://localhost:3001');
+  await page.goto('/');
   
   // Click on first product
   await page.locator('[data-testid="product-card"] a').first().click();
