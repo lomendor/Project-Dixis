@@ -41,6 +41,8 @@ jobs:
       
       - name: Build application
         run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

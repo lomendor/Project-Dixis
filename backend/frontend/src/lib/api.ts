@@ -126,12 +126,24 @@ export interface TopProduct {
   average_unit_price: string;
 }
 
+// Helper functions for safe URL joining
+function trimSlashes(s: string): string {
+  return s.replace(/\/+$/,'').replace(/^\/+/,'');
+}
+
+function apiUrl(baseURL: string, path: string): string {
+  const base = trimSlashes(baseURL);
+  const p = trimSlashes(path);
+  return `${base}/${p}`;
+}
+
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
+    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
+    this.baseURL = trimSlashes(rawBase);
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -180,7 +192,7 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     // Handle absolute URLs directly
-    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}/${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : apiUrl(this.baseURL, endpoint);
     
     const response = await fetch(url, {
       ...options,
