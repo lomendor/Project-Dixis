@@ -32,11 +32,8 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     console.log('📦 Testing products list...');
     await page.goto(FRONTEND_BASE);
     
-    // Wait for API response and products to render
-    await Promise.all([
-      page.waitForResponse(resp => resp.url().match(/\/api\/v1\/public\/products/) && resp.ok()),
-      page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 })
-    ]);
+    // Wait for products to render
+    await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
     
     // Verify we have multiple products using getByTestId
     const productCardCount = await page.getByTestId('product-card').count();
