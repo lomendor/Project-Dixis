@@ -42,12 +42,13 @@ jobs:
       - name: Build application
         run: npm run build
       
-      - name: Upload build artifacts
+      - name: Upload build artifacts (on failure only)
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
+          name: frontend-build-failure
           path: backend/frontend/.next/
-          retention-days: 7
+          retention-days: 3
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -124,7 +125,7 @@ jobs:
         working-directory: backend/frontend
         run: npx playwright install --with-deps chromium
       
-      - name: Start Next.js server
+      - name: Start Next.js server (production build for E2E)
         working-directory: backend/frontend
         run: npm run build && PORT=3001 npm start &
       
@@ -135,14 +136,23 @@ jobs:
       
       - name: Run E2E tests
         working-directory: backend/frontend
-        run: npm run e2e
+        run: npx playwright test --project=chromium
         env:
           CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
       
-      - name: Upload test results
-        if: always()
+      - name: Upload E2E test results (on failure only)
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-results
+          name: e2e-test-results-failure
           path: backend/frontend/playwright-report/
-          retention-days: 7
+          retention-days: 3
+      
+      - name: Upload E2E traces (on failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-traces-failure
+          path: backend/frontend/test-results/
+          retention-days: 3

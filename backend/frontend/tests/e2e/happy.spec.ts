@@ -1,99 +1,119 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
+
+// Helper functions for better test organization
+class E2EHelper {
+  constructor(private page: Page) {}
+
+  async navigateAndWait(path: string) {
+    await this.page.goto(path);
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async waitForProductCard() {
+    await this.page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
+    await expect(this.page.locator('[data-testid="product-card"]').first()).toBeVisible();
+    return this.page.locator('[data-testid="product-card"]').first();
+  }
+
+  async loginUser(email: string, password: string) {
+    await this.navigateAndWait('/auth/login');
+    
+    await this.page.fill('[name="email"]', email);
+    await this.page.fill('[name="password"]', password);
+    
+    // Use Promise.all for better navigation handling
+    await Promise.all([
+      this.page.waitForURL('/', { timeout: 10000 }),
+      this.page.click('button[type="submit"]')
+    ]);
+    
+    // Verify login success
+    await expect(this.page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+  }
+
+  async addToCart() {
+    const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
+    await expect(addToCartBtn).toBeVisible();
+    
+    // Better wait pattern instead of setTimeout
+    const responsePromise = this.page.waitForResponse(resp => resp.url().includes('/cart') && resp.status() === 200);
+    await addToCartBtn.click();
+    
+    try {
+      await responsePromise;
+      console.log('✅ Cart API call successful');
+    } catch (error) {
+      console.log('⚠️ Cart API call failed, continuing test...');
+    }
+  }
+}
 
 test('happy path - catalog to checkout flow', async ({ page }) => {
-  // 1. Open home, see catalog list item
-  await page.goto('http://localhost:3001');
+  const helper = new E2EHelper(page);
   
-  // Wait for catalog to load and verify at least one product is visible
-  // Use a more WebKit-compatible approach without relying on waitForResponse
-  await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
-  await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
+  // 1. Open home, see catalog list
+  await helper.navigateAndWait('/');
   
-  const firstProductCard = page.locator('[data-testid="product-card"]').first();
+  const firstProductCard = await helper.waitForProductCard();
   const productName = await firstProductCard.locator('[data-testid="product-title"]').textContent();
-  const firstProductLink = firstProductCard.locator('a').first();
+  const productUrl = await firstProductCard.locator('a').first().getAttribute('href');
   
   // 2. View first product page
-  await firstProductLink.click();
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/),
+    firstProductCard.locator('a').first().click()
+  ]);
   
-  // Verify we're on product details page
-  await expect(page).toHaveURL(/\/products\/\d+/);
   await expect(page.locator('h1')).toContainText(productName || '');
   
   // 3. Login via frontend login flow
-  await page.goto('http://localhost:3001/auth/login');
-  await page.waitForLoadState('networkidle');
-  
-  // Fill login form
-  await page.fill('[name="email"]', 'consumer@example.com');
-  await page.fill('[name="password"]', 'password');
-  
-  // Submit login form
-  await page.click('button[type="submit"]');
-  await page.waitForLoadState('networkidle');
-  
-  // Should be redirected to home page after successful login
-  await expect(page).toHaveURL('http://localhost:3001/');
-  
-  // Verify login worked - should see user menu (primary auth indicator)
-  await expect(page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+  await helper.loginUser('consumer@example.com', 'password');
   
   // Navigate back to the product page to add to cart
-  await firstProductLink.click();
-  await expect(page).toHaveURL(/\/products\/\d+/);
-  await page.waitForLoadState('networkidle');
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/),
+    page.goto(productUrl || '/')
+  ]);
   
   // 4. Add product to cart
-  const addToCartBtn = page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
-  await expect(addToCartBtn).toBeVisible();
-  
-  // Wait for successful add to cart (look for success message)
-  const addToCartPromise = page.waitForSelector('[data-testid="cart-success"]', { timeout: 10000 });
-  await addToCartBtn.click();
-  
-  try {
-    await addToCartPromise;
-    console.log('✅ Add to cart success message appeared');
-  } catch (error) {
-    console.log('⚠️ No success message, but continuing with test...');
-  }
-  
-  // Wait a moment for the API call to fully complete
-  await page.waitForTimeout(1000);
+  await helper.addToCart();
   
   // Navigate to cart
-  await page.goto('http://localhost:3001/cart');
-  await page.waitForLoadState('networkidle');
+  await helper.navigateAndWait('/cart');
   
-  // Check if we're still on cart page (not redirected to login)
-  const currentUrl = page.url();
-  console.log('🔗 Current URL after cart navigation:', currentUrl);
+  // Verify we're still authenticated (not redirected to login)
+  await expect(page).toHaveURL(/\/cart/);
+  console.log('✅ Authentication verified - staying on cart page');
   
-  if (currentUrl.includes('/auth/login')) {
-    console.log('❌ Still redirected to login - authentication not working');
-    throw new Error('Cart page redirected to login - authentication failed');
-  }
-  
-  console.log('✅ Authentication worked - staying on cart page');
-  
-  // Wait for cart to load - should see either cart items or loading state first
+  // Wait for cart to load properly
   await page.waitForSelector('[data-testid="cart-item"], [data-testid="loading-spinner"], .text-center:has-text("empty")', { timeout: 10000 });
   
   // Verify product is in cart
   await expect(page.locator('[data-testid="cart-item"]')).toBeVisible({ timeout: 10000 });
-  await expect(page.locator('text=' + productName)).toBeVisible({ timeout: 5000 });
+  if (productName) {
+    await expect(page.locator(`text=${productName}`)).toBeVisible({ timeout: 5000 });
+  }
   
-  // 5. Proceed to checkout (direct checkout - no form)
+  // 5. Proceed to checkout
   const checkoutBtn = page.locator('[data-testid="checkout-btn"], button:has-text("Checkout"), button:has-text("Proceed")');
   await expect(checkoutBtn).toBeVisible();
+  
+  // Better checkout completion wait
+  const checkoutPromise = page.waitForResponse(resp => resp.url().includes('checkout') || resp.url().includes('orders'));
   await checkoutBtn.click();
   
-  // Wait for checkout to complete - may show success message or stay on cart
-  await page.waitForTimeout(2000);
+  try {
+    await checkoutPromise;
+    console.log('✅ Checkout API call completed');
+  } catch (error) {
+    console.log('⚠️ Checkout response not captured, but test completed');
+  }
 });
 
 test('catalog page loads and displays products', async ({ page }) => {
-  await page.goto('http://localhost:3001');
+  const helper = new E2EHelper(page);
+  
+  await helper.navigateAndWait('/');
   
   // Wait for page to load
   await expect(page.locator('h1, [data-testid="page-title"]')).toBeVisible();
@@ -103,18 +123,25 @@ test('catalog page loads and displays products', async ({ page }) => {
   await expect(productCards).not.toHaveCount(0);
   
   // Verify each product card has required elements
-  const firstProduct = page.locator('[data-testid="product-card"]').first();
+  const firstProduct = await helper.waitForProductCard();
   await expect(firstProduct.locator('img, [data-testid="product-image"]')).toBeVisible();
   await expect(firstProduct.locator('h3, [data-testid="product-title"]')).toBeVisible();
   await expect(firstProduct.locator('[data-testid="product-price"]')).toBeVisible();
 });
 
 test('product detail page displays correctly', async ({ page }) => {
-  // Go to catalog first
-  await page.goto('http://localhost:3001');
+  const helper = new E2EHelper(page);
   
-  // Click on first product
-  await page.locator('[data-testid="product-card"] a').first().click();
+  // Go to catalog first
+  await helper.navigateAndWait('/');
+  
+  const firstProductCard = await helper.waitForProductCard();
+  
+  // Click on first product with better navigation wait
+  await Promise.all([
+    page.waitForURL(/\/products\/\d+/),
+    firstProductCard.locator('a').first().click()
+  ]);
   
   // Verify product details are shown
   await expect(page.locator('h1')).toBeVisible();

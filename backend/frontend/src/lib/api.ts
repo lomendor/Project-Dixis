@@ -1,5 +1,11 @@
 // API client utility with Bearer token support
 
+// Safe API URL construction to prevent double prefixes
+const RAW = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
+const trim = (s: string) => s.replace(/^\/+|\/+$/g, '');
+const BASE = trim(RAW);
+export const apiUrl = (p: string) => `${BASE}/${trim(p)}`;
+
 export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
@@ -131,7 +137,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001/api/v1';
+    this.baseURL = BASE;
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -179,8 +185,8 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle absolute URLs directly
-    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}/${endpoint}`;
+    // Handle absolute URLs directly, otherwise use safe URL joining
+    const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
     
     const response = await fetch(url, {
       ...options,
