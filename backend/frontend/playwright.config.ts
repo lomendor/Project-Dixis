@@ -19,7 +19,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://127.0.0.1:3001',
+    baseURL: 'http://localhost:3001',
     
     /* Expect timeout per guards */
     expect: { timeout: 5000 },
@@ -27,8 +27,8 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "retain-on-failure",
     
-    /* Keep video and screenshots only on failure to reduce artifacts */
-    video: "retain-on-failure",
+    /* Keep screenshots only on failure to reduce artifacts */
+    video: "off",
     screenshot: "only-on-failure",
   },
 

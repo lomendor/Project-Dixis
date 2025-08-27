@@ -131,7 +131,9 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001';
+    const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api/v1';
+    // Ensure baseURL ends with a slash for proper concatenation
+    this.baseURL = baseURL.endsWith('/') ? baseURL : `${baseURL}/`;
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -217,7 +219,7 @@ class ApiClient {
     }
     
     const queryString = searchParams.toString();
-    const endpoint = `http://127.0.0.1:8001/api/v1/public/products${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `public/products${queryString ? `?${queryString}` : ''}`;
     
     return this.request<{
       current_page: number;
@@ -237,12 +239,12 @@ class ApiClient {
   }
 
   async getProduct(id: number): Promise<Product> {
-    return this.request<Product>(`http://127.0.0.1:8001/api/v1/public/products/${id}`);
+    return this.request<Product>(`public/products/${id}`);
   }
 
   // Auth methods
   async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('http://127.0.0.1:8001/api/v1/auth/login', {
+    const response = await this.request<AuthResponse>('auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -261,7 +263,7 @@ class ApiClient {
     password_confirmation: string;
     role: 'consumer' | 'producer';
   }): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('http://127.0.0.1:8001/api/v1/auth/register', {
+    const response = await this.request<AuthResponse>('auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -274,19 +276,19 @@ class ApiClient {
   }
 
   async logout(): Promise<void> {
-    await this.request('http://127.0.0.1:8001/api/v1/auth/logout', {
+    await this.request('auth/logout', {
       method: 'POST',
     });
     this.setToken(null);
   }
 
   async getProfile(): Promise<User> {
-    return this.request<User>('http://127.0.0.1:8001/api/v1/auth/profile');
+    return this.request<User>('auth/profile');
   }
 
   // Cart methods
   async getCart(): Promise<CartResponse> {
-    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('http://127.0.0.1:8001/api/v1/cart/items');
+    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('cart/items');
     return {
       items: response.cart_items || [],
       total_items: response.total_items,
@@ -295,7 +297,7 @@ class ApiClient {
   }
 
   async addToCart(productId: number, quantity: number): Promise<{ cart_item: CartItem }> {
-    return this.request<{ cart_item: CartItem }>('http://127.0.0.1:8001/api/v1/cart/items', {
+    return this.request<{ cart_item: CartItem }>('cart/items', {
       method: 'POST',
       body: JSON.stringify({
         product_id: productId,
@@ -305,20 +307,20 @@ class ApiClient {
   }
 
   async updateCartItem(cartItemId: number, quantity: number): Promise<{ cart_item: CartItem }> {
-    return this.request<{ cart_item: CartItem }>(`http://127.0.0.1:8001/api/v1/cart/items/${cartItemId}`, {
+    return this.request<{ cart_item: CartItem }>(`cart/items/${cartItemId}`, {
       method: 'PATCH',
       body: JSON.stringify({ quantity }),
     });
   }
 
   async removeFromCart(cartItemId: number): Promise<void> {
-    return this.request(`http://127.0.0.1:8001/api/v1/cart/items/${cartItemId}`, {
+    return this.request(`cart/items/${cartItemId}`, {
       method: 'DELETE',
     });
   }
 
   async clearCart(): Promise<void> {
-    return this.request('http://127.0.0.1:8001/api/v1/cart/clear', {
+    return this.request('cart/clear', {
       method: 'DELETE',
     });
   }
@@ -330,7 +332,7 @@ class ApiClient {
     shipping_address?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('http://127.0.0.1:8001/api/v1/my/orders/checkout', {
+    const response = await this.request<{ order: Order }>('my/orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -338,11 +340,11 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('http://127.0.0.1:8001/api/v1/my/orders');
+    return this.request<{ orders: Order[] }>('my/orders');
   }
 
   async getOrder(id: number): Promise<Order> {
-    return this.request<Order>(`/api/v1/my/orders/${id}`);
+    return this.request<Order>(`my/orders/${id}`);
   }
 
   // Direct order creation (new V1 API)
@@ -352,7 +354,7 @@ class ApiClient {
     shipping_method: 'HOME' | 'PICKUP';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('http://127.0.0.1:8001/api/v1/orders', {
+    return this.request<Order>('orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -360,20 +362,20 @@ class ApiClient {
 
   // Producer methods
   async getProducerKpi(): Promise<ProducerKpi> {
-    return this.request<ProducerKpi>('http://127.0.0.1:8001/api/v1/producer/dashboard/kpi');
+    return this.request<ProducerKpi>('producer/dashboard/kpi');
   }
 
   async getProducerStats(): Promise<ProducerStats> {
-    return this.request<ProducerStats>('http://127.0.0.1:8001/api/v1/producer/dashboard/stats');
+    return this.request<ProducerStats>('producer/dashboard/stats');
   }
 
   async getProducerTopProducts(limit?: number): Promise<{ data: Product[] }> {
-    const endpoint = `/api/v1/producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
+    const endpoint = `producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
     return this.request<{ data: Product[] }>(endpoint);
   }
 
   async getTopProducts(limit?: number): Promise<{ top_products: TopProduct[] }> {
-    const endpoint = `/api/v1/producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
+    const endpoint = `producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
     return this.request<{ top_products: TopProduct[] }>(endpoint);
   }
 }

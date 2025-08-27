@@ -58,7 +58,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
+          POSTGRES_DB: project_dixis_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -95,14 +95,15 @@ jobs:
           echo "DB_CONNECTION=pgsql" >> .env
           echo "DB_HOST=localhost" >> .env
           echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=dixis_test" >> .env
+          echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
       
       - name: Run migrations and seed
         run: |
-          php artisan migrate --force
-          php artisan db:seed --force
+          php artisan migrate --force --env=testing
+          php artisan db:seed --force --env=testing
+          php artisan db:seed --class=E2ESeeder --force --env=testing
       
       - name: Start Laravel server
         run: php artisan serve --host=0.0.0.0 --port=8000 &
@@ -125,12 +126,12 @@ jobs:
       
       - name: Start Next.js server
         working-directory: backend/frontend
-        run: npm run build && npm start &
+        run: npm run build && PORT=3001 npm start &
       
       - name: Wait for servers to be ready
         run: |
           timeout 60 bash -c 'until curl -f http://localhost:8000/api/health; do sleep 2; done'
-          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3001; do sleep 2; done'
       
       - name: Run E2E tests
         working-directory: backend/frontend
