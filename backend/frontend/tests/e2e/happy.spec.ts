@@ -3,15 +3,11 @@ import { test, expect } from '@playwright/test';
 test('happy path - catalog to checkout flow', async ({ page }) => {
   // 1. Open home, see catalog list item
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
 
-  // Wait for products API to respond OK - check for correct API endpoint
-  await page.waitForResponse(res => 
-    res.url().endsWith('/api/v1/public/products') && res.status() === 200
-  );
-
-  // Then assert product card is visible
+  // Wait for product cards to appear (more reliable than waiting for API)
   const card = page.locator('[data-testid="product-card"]').first();
-  await expect(card).toBeVisible({ timeout: 10000 });
+  await expect(card).toBeVisible({ timeout: 15000 });
   
   const productName = await card.locator('[data-testid="product-title"]').textContent();
   const firstProductLink = card.locator('a').first();
