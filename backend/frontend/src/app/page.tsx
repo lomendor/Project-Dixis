@@ -160,7 +160,7 @@ export default function Home() {
                 </div>
 
                 <div className="p-4">
-                  <h3 data-testid="product-name" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 data-testid="product-title" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                     {product.name}
                   </h3>
                   
@@ -208,7 +208,7 @@ export default function Home() {
                       View Details
                     </Link>
                     <button
-                      data-testid="add-to-cart-btn"
+                      data-testid="add-to-cart"
                       onClick={() => handleAddToCart(product.id)}
                       disabled={product.stock === 0}
                       className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium"

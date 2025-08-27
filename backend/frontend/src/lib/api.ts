@@ -179,7 +179,8 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
+    // Handle absolute URLs directly
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
     
     const response = await fetch(url, {
       ...options,
@@ -216,22 +217,32 @@ class ApiClient {
     }
     
     const queryString = searchParams.toString();
-    const endpoint = `/api/v1/public/products${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `http://127.0.0.1:8001/api/v1/public/products${queryString ? `?${queryString}` : ''}`;
     
     return this.request<{
+      current_page: number;
       data: Product[];
-      links: Record<string, unknown>;
-      meta: Record<string, unknown>;
+      first_page_url: string;
+      from: number;
+      last_page: number;
+      last_page_url: string;
+      links: Array<{url: string | null; label: string; active: boolean}>;
+      next_page_url: string | null;
+      path: string;
+      per_page: number;
+      prev_page_url: string | null;
+      to: number;
+      total: number;
     }>(endpoint);
   }
 
   async getProduct(id: number): Promise<Product> {
-    return this.request<Product>(`/api/v1/public/products/${id}`);
+    return this.request<Product>(`http://127.0.0.1:8001/api/v1/public/products/${id}`);
   }
 
   // Auth methods
   async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await this.request<AuthResponse>('/api/v1/auth/login', {
+    const response = await this.request<AuthResponse>('http://127.0.0.1:8001/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -270,12 +281,12 @@ class ApiClient {
   }
 
   async getProfile(): Promise<User> {
-    return this.request<User>('/api/v1/auth/profile');
+    return this.request<User>('http://127.0.0.1:8001/api/v1/auth/profile');
   }
 
   // Cart methods
   async getCart(): Promise<CartResponse> {
-    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('/api/v1/cart/items');
+    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('http://127.0.0.1:8001/api/v1/cart/items');
     return {
       items: response.cart_items || [],
       total_items: response.total_items,
@@ -284,7 +295,7 @@ class ApiClient {
   }
 
   async addToCart(productId: number, quantity: number): Promise<{ cart_item: CartItem }> {
-    return this.request<{ cart_item: CartItem }>('/api/v1/cart/items', {
+    return this.request<{ cart_item: CartItem }>('http://127.0.0.1:8001/api/v1/cart/items', {
       method: 'POST',
       body: JSON.stringify({
         product_id: productId,
@@ -294,20 +305,20 @@ class ApiClient {
   }
 
   async updateCartItem(cartItemId: number, quantity: number): Promise<{ cart_item: CartItem }> {
-    return this.request<{ cart_item: CartItem }>(`/api/v1/cart/items/${cartItemId}`, {
+    return this.request<{ cart_item: CartItem }>(`http://127.0.0.1:8001/api/v1/cart/items/${cartItemId}`, {
       method: 'PATCH',
       body: JSON.stringify({ quantity }),
     });
   }
 
   async removeFromCart(cartItemId: number): Promise<void> {
-    return this.request(`/api/v1/cart/items/${cartItemId}`, {
+    return this.request(`http://127.0.0.1:8001/api/v1/cart/items/${cartItemId}`, {
       method: 'DELETE',
     });
   }
 
   async clearCart(): Promise<void> {
-    return this.request('/api/v1/cart/clear', {
+    return this.request('http://127.0.0.1:8001/api/v1/cart/clear', {
       method: 'DELETE',
     });
   }

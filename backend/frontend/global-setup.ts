@@ -6,7 +6,7 @@ export default async function globalSetup() {
   
   try {
     // Verify PostgreSQL is being used
-    const dbDriver = execSync("php -r \"echo config('database.default');\"", {
+    const dbDriver = execSync("php artisan tinker --execute=\"echo config('database.default');\" --env=testing", {
       cwd: backendCwd,
       env: { ...process.env, APP_ENV: 'testing' }
     }).toString().trim();

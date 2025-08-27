@@ -7,7 +7,7 @@ export default defineConfig({
   globalSetup: require.resolve('./global-setup'),
   testDir: './tests/e2e',
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -20,6 +20,9 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://127.0.0.1:3001',
+    
+    /* Expect timeout per guards */
+    expect: { timeout: 5000 },
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "retain-on-failure",
@@ -70,7 +73,7 @@ export default defineConfig({
   /* Auto-start servers for testing */
   webServer: [
     {
-      command: 'php artisan serve --host 127.0.0.1 --port 8001',
+      command: 'php artisan serve --host 127.0.0.1 --port 8001 --env=testing',
       port: 8001,
       reuseExistingServer: true,
       timeout: 120000,

@@ -5,10 +5,14 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.goto('http://localhost:3001');
   
   // Wait for catalog to load and verify at least one product is visible
+  await Promise.all([
+    page.waitForResponse(r => /\/api\/v1\/public\/products/.test(r.url()) && r.ok()),
+    page.waitForSelector('[data-testid="product-card"]')
+  ]);
   await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
   
   const firstProductCard = page.locator('[data-testid="product-card"]').first();
-  const productName = await firstProductCard.locator('[data-testid="product-name"]').textContent();
+  const productName = await firstProductCard.locator('[data-testid="product-title"]').textContent();
   const firstProductLink = firstProductCard.locator('a').first();
   
   // 2. View first product page
@@ -42,7 +46,7 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   
   // 4. Add product to cart
-  const addToCartBtn = page.locator('[data-testid="add-to-cart-btn"], button:has-text("Add to Cart")');
+  const addToCartBtn = page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
   await expect(addToCartBtn).toBeVisible();
   
   // Wait for successful add to cart (look for success message)
@@ -113,7 +117,7 @@ test('catalog page loads and displays products', async ({ page }) => {
   // Verify each product card has required elements
   const firstProduct = page.locator('[data-testid="product-card"]').first();
   await expect(firstProduct.locator('img, [data-testid="product-image"]')).toBeVisible();
-  await expect(firstProduct.locator('h3, [data-testid="product-name"]')).toBeVisible();
+  await expect(firstProduct.locator('h3, [data-testid="product-title"]')).toBeVisible();
   await expect(firstProduct.locator('[data-testid="product-price"]')).toBeVisible();
 });
 

@@ -32,25 +32,27 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     console.log('📦 Testing products list...');
     await page.goto(FRONTEND_BASE);
     
-    // Wait for products to load
-    await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 10000 });
+    // Wait for API response and products to render
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().match(/\/api\/v1\/public\/products/) && resp.ok()),
+      page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 })
+    ]);
     
-    // Verify we have multiple products
-    const productCards = page.locator('[data-testid="product-card"]');
-    const productCount = await productCards.count();
-    expect(productCount).toBeGreaterThan(0);
-    console.log(`✅ Products loaded: ${productCount} products found`);
+    // Verify we have multiple products using getByTestId
+    const productCardCount = await page.getByTestId('product-card').count();
+    expect(productCardCount).toBeGreaterThan(0);
+    console.log(`✅ Products loaded: ${productCardCount} products found`);
 
-    // Verify product card structure
-    const firstProduct = productCards.first();
-    await expect(firstProduct.locator('[data-testid="product-name"]')).toBeVisible();
-    await expect(firstProduct.locator('[data-testid="product-price"]')).toBeVisible();
-    await expect(firstProduct.locator('img')).toBeVisible();
+    // Verify product card structure using getByTestId
+    const firstProduct = page.getByTestId('product-card').first();
+    await expect(firstProduct.getByTestId('product-title')).toBeVisible();
+    await expect(firstProduct.getByTestId('product-price')).toBeVisible();
+    await expect(firstProduct.getByTestId('product-image')).toBeVisible();
     console.log('✅ Product cards structure validated');
 
     // 3. PRODUCT DETAIL - Click on first product and verify details
     console.log('📋 Testing product detail page...');
-    const productName = await firstProduct.locator('[data-testid="product-name"]').textContent();
+    const productName = await firstProduct.locator('[data-testid="product-title"]').textContent();
     const productLink = firstProduct.locator('a').first();
     
     await productLink.click();
