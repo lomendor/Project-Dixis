@@ -3,15 +3,18 @@ import { test, expect } from '@playwright/test';
 test('happy path - catalog to checkout flow', async ({ page }) => {
   // 1. Open home, see catalog list item
   await page.goto('http://localhost:3001');
+
+  // Wait for products API to respond OK
+  await page.waitForResponse(res =>
+    res.url().includes('/public/products') && res.ok()
+  );
+
+  // Then assert product card is visible
+  const card = page.locator('[data-testid="product-card"]').first();
+  await expect(card).toBeVisible({ timeout: 10000 });
   
-  // Wait for catalog to load and verify at least one product is visible
-  // Use a more WebKit-compatible approach without relying on waitForResponse
-  await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
-  await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
-  
-  const firstProductCard = page.locator('[data-testid="product-card"]').first();
-  const productName = await firstProductCard.locator('[data-testid="product-title"]').textContent();
-  const firstProductLink = firstProductCard.locator('a').first();
+  const productName = await card.locator('[data-testid="product-title"]').textContent();
+  const firstProductLink = card.locator('a').first();
   
   // 2. View first product page
   await firstProductLink.click();

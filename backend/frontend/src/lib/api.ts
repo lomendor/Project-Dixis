@@ -131,7 +131,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001/api/v1';
+    this.baseURL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
