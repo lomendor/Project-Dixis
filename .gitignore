@@ -144,3 +144,12 @@ backend/yarn-error.log
 
 # macOS
 .DS_Store
+
+# Playwright artifacts
+playwright-report/
+e2e-artifacts/
+test-results/
+*.trace.zip
+*.webm
+*.mp4
+*.png
