@@ -10,10 +10,7 @@ class E2EHelper {
   }
 
   async waitForProductCard() {
-    // Wait for API response before asserting on elements
-    await this.page.waitForResponse(resp =>
-      resp.url().includes('/api/v1/public/products') && resp.ok()
-    );
+    // Wait for product cards to be visible directly
     await this.page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
     await expect(this.page.locator('[data-testid="product-card"]').first()).toBeVisible();
     return this.page.locator('[data-testid="product-card"]').first();
