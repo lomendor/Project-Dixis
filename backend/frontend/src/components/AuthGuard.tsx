@@ -27,7 +27,7 @@ export default function AuthGuard({
     // If auth is required but user is not authenticated
     if (requireAuth && !isAuthenticated) {
       console.log('🛡️ AuthGuard: User not authenticated, redirecting to login');
-      setIntendedDestination(pathname);
+      setIntendedDestination?.(pathname);
       router.push(redirectTo);
       return;
     }
