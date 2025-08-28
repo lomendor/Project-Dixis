@@ -84,7 +84,7 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
       notes: 'Test order from e2e smoke test'
     };
 
-    const orderResponse = await page.request.post(`${API_BASE}/api/v1/my/orders`, {
+    const orderResponse = await page.request.post(`${API_BASE}/api/v1/orders`, {
       headers: {
         'Authorization': `Bearer ${authData.token}`,
         'Content-Type': 'application/json'
@@ -163,7 +163,7 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     console.log('🔒 Testing authentication states...');
     
     // Test protected route without auth
-    const protectedResponse = await page.request.get(`${API_BASE}/api/v1/my/orders`);
+    const protectedResponse = await page.request.get(`${API_BASE}/api/v1/orders`);
     expect([401, 500].includes(protectedResponse.status())).toBeTruthy();
     console.log(`✅ Protected routes require authentication (status: ${protectedResponse.status()})`);
 
@@ -177,7 +177,7 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     
     const authData = await loginResponse.json();
     
-    const authedResponse = await page.request.get(`${API_BASE}/api/v1/my/orders`, {
+    const authedResponse = await page.request.get(`${API_BASE}/api/v1/orders`, {
       headers: {
         'Authorization': `Bearer ${authData.token}`
       }

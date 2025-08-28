@@ -329,14 +329,14 @@ class ApiClient {
     });
   }
 
-  // Order methods
+  // Order methods (authenticated)
   async checkout(data: {
     payment_method?: string;
     shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
     shipping_address?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('my/orders/checkout', {
+    const response = await this.request<{ order: Order }>('orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -344,21 +344,32 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('my/orders');
+    return this.request<{ orders: Order[] }>('orders');
   }
 
   async getOrder(id: number): Promise<Order> {
-    return this.request<Order>(`my/orders/${id}`);
+    return this.request<Order>(`orders/${id}`);
   }
 
-  // Direct order creation (new V1 API)
   async createOrder(data: {
+    items: { product_id: number; quantity: number }[];
+    shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
+    notes?: string;
+  }): Promise<Order> {
+    return this.request<Order>('orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Public order creation (guest checkout)
+  async createPublicOrder(data: {
     items: { product_id: number; quantity: number }[];
     currency: 'EUR' | 'USD';
     shipping_method: 'HOME' | 'PICKUP';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('orders', {
+    return this.request<Order>('public/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
