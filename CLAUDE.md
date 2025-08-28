@@ -4,14 +4,14 @@
 
 ## ⚡ Guardrails & Standards
 - **CI/CD**: NO changes to `.github/workflows/**`
-- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED  
+- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED
 - **Next.js**: 15.5.0 - LOCKED
 - **PR Size**: ≤300 LOC per PR
 - **Artifacts**: playwright-report/**, test-results/** required
 
-## 🔧 Workspace Anchors  
+## 🔧 Workspace Anchors
 - **Repo (root)**: Project-Dixis (where frontend/ & backend/ exist)
-- **FE**: ./frontend  
+- **FE**: ./frontend
 - **BE**: ./backend
 - **Context Scope**: Limited to frontend/ directory (use `npm run agent:limit-scan`)
 
@@ -24,7 +24,6 @@
 ---
 
 # PROJECT-DIXIS - LOCAL PRODUCER MARKETPLACE
-
 **Full-Stack Laravel + Next.js Application** | **E2E Test Suite** | **Status**: ✅ PRODUCTION READY
 
 ---
@@ -286,6 +285,7 @@ const apiClient = {
 **Status**: ✅ **PRODUCTION READY** | **Phase**: Feature Development  
 **Architecture**: Full-Stack Marketplace με Modern CI/CD
 
+<<<<<<< HEAD
 **🇬🇷 Dixis: Connecting Greek Producers με Consumers Through Technology!**
 
 ## 🎯 NOW (2025-09-08) - Parent/Subagents Architecture Setup
@@ -293,3 +293,6 @@ const apiClient = {
 - **Current Goal**: Setting up parent/subagents architecture for controlled checkout feature implementation
 - **Active Pattern**: Research-only subagents (UI/Review experts) with strict scope limitations and ≤300 LOC PRs
 - **Next PRs**: PR-Infra-MCP (≤80 LOC), PR-Checkout-API (2A), PR-UI-small (2B) with proper context anchoring
+=======
+**🇬🇷 Dixis: Connecting Greek Producers με Consumers Through Technology!**
+>>>>>>> e6fca9e (docs: Complete CLAUDE.md refresh - reflect production-ready status)
