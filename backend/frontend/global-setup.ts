@@ -30,7 +30,8 @@ export default async function globalSetup() {
     });
     
   } catch (e) {
-    console.error('❌ Global setup failed:', e instanceof Error ? e.message : String(e));
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error('❌ Global setup failed:', errorMessage);
     throw e;
   }
 }

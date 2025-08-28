@@ -149,7 +149,14 @@ backend/yarn-error.log
 playwright-report/
 e2e-artifacts/
 test-results/
+/backend/frontend/test-results/
+/backend/frontend/playwright-report/
+traces/
 *.trace.zip
 *.webm
 *.mp4
 *.png
+*.zip
+
+# Keep test files accessible
+!/backend/frontend/tests/**

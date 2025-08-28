@@ -1,11 +1,5 @@
 // API client utility with Bearer token support
 
-// Safe API URL construction to prevent double prefixes
-const RAW = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
-const trim = (s: string) => s.replace(/^\/+|\/+$/g, '');
-const BASE = trim(RAW);
-export const apiUrl = (p: string) => `${BASE}/${trim(p)}`;
-
 export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
@@ -132,12 +126,30 @@ export interface TopProduct {
   average_unit_price: string;
 }
 
+// Helper functions for safe URL joining
+const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
+const trimBoth = (s: string) => s.replace(/\/+$/,'').replace(/^\/+/,'');
+const BASE = trimBoth(RAW_BASE);
+export const apiUrl = (path: string) => `${BASE}/${trimBoth(path)}`;
+
+// Legacy functions for compatibility
+function trimSlashes(s: string): string {
+  return s.replace(/\/+$/,'').replace(/^\/+/,'');
+}
+
+function legacyApiUrl(baseURL: string, path: string): string {
+  const base = trimSlashes(baseURL);
+  const p = trimSlashes(path);
+  return `${base}/${p}`;
+}
+
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
 
   constructor() {
-    this.baseURL = BASE;
+    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
+    this.baseURL = trimSlashes(rawBase);
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -185,7 +197,7 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle absolute URLs directly, otherwise use safe URL joining
+    // Handle absolute URLs directly - use new safe URL joining
     const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
     
     const response = await fetch(url, {
@@ -329,14 +341,14 @@ class ApiClient {
     });
   }
 
-  // Order methods (authenticated)
+  // Order methods
   async checkout(data: {
     payment_method?: string;
     shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
     shipping_address?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('orders/checkout', {
+    const response = await this.request<{ order: Order }>('my/orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -344,32 +356,21 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('orders');
+    return this.request<{ orders: Order[] }>('my/orders');
   }
 
   async getOrder(id: number): Promise<Order> {
-    return this.request<Order>(`orders/${id}`);
+    return this.request<Order>(`my/orders/${id}`);
   }
 
+  // Direct order creation (new V1 API)
   async createOrder(data: {
-    items: { product_id: number; quantity: number }[];
-    shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
-    notes?: string;
-  }): Promise<Order> {
-    return this.request<Order>('orders', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  // Public order creation (guest checkout)
-  async createPublicOrder(data: {
     items: { product_id: number; quantity: number }[];
     currency: 'EUR' | 'USD';
     shipping_method: 'HOME' | 'PICKUP';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('public/orders', {
+    return this.request<Order>('orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -396,3 +397,10 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
+
+// Helper function for public products
+export async function getPublicProducts() {
+  const res = await fetch(apiUrl('public/products'), { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
+  return res.json();
+}
