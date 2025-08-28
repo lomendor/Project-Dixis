@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -17,6 +18,7 @@ export default function Cart() {
   const [checkingOut, setCheckingOut] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
   const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function Cart() {
       await loadCart(); // Reload to get updated totals
     } catch (err) {
       console.error('Failed to update quantity:', err);
-      alert('Failed to update quantity');
+      showToast('error', 'Failed to update quantity');
     } finally {
       setUpdatingItems(prev => {
         const newSet = new Set(prev);
@@ -74,7 +76,7 @@ export default function Cart() {
       await loadCart();
     } catch (err) {
       console.error('Failed to remove item:', err);
-      alert('Failed to remove item from cart');
+      showToast('error', 'Failed to remove item from cart');
     } finally {
       setUpdatingItems(prev => {
         const newSet = new Set(prev);
@@ -92,9 +94,10 @@ export default function Cart() {
     try {
       await apiClient.clearCart();
       await loadCart();
+      showToast('success', 'Cart cleared successfully');
     } catch (err) {
       console.error('Failed to clear cart:', err);
-      alert('Failed to clear cart');
+      showToast('error', 'Failed to clear cart');
     }
   };
 
@@ -111,7 +114,7 @@ export default function Cart() {
       router.push(`/orders/${order.id}`);
     } catch (err) {
       console.error('Checkout failed:', err);
-      alert('Checkout failed. Please try again.');
+      showToast('error', 'Checkout failed. Please try again.');
     } finally {
       setCheckingOut(false);
     }
@@ -178,6 +181,7 @@ export default function Cart() {
                       <button
                         onClick={clearCart}
                         className="text-sm text-red-600 hover:text-red-700"
+                        data-testid="clear-cart-button"
                       >
                         Clear Cart
                       </button>
@@ -221,16 +225,18 @@ export default function Cart() {
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             disabled={updatingItems.has(item.id)}
                             className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                            data-testid="decrease-quantity"
                           >
                             -
                           </button>
-                          <span className="w-12 text-center text-sm font-medium">
+                          <span className="w-12 text-center text-sm font-medium" data-testid="quantity-display">
                             {updatingItems.has(item.id) ? '...' : item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             disabled={updatingItems.has(item.id)}
                             className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                            data-testid="increase-quantity"
                           >
                             +
                           </button>
@@ -241,6 +247,7 @@ export default function Cart() {
                           onClick={() => removeItem(item.id)}
                           disabled={updatingItems.has(item.id)}
                           className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                          data-testid="remove-item"
                         >
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
