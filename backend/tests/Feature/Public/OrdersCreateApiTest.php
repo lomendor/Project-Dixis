@@ -81,7 +81,7 @@ class OrdersCreateApiTest extends TestCase
             'notes' => 'Test order notes',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -170,7 +170,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors('items.0.product_id');
@@ -189,7 +189,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(400)
             ->assertJson([
@@ -210,7 +210,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors('items.0.quantity');
@@ -229,7 +229,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(409)
             ->assertJson([
@@ -263,7 +263,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(409); // Should fail due to insufficient stock
         
@@ -293,7 +293,7 @@ class OrdersCreateApiTest extends TestCase
             'notes' => null,
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201);
         
@@ -329,7 +329,7 @@ class OrdersCreateApiTest extends TestCase
     public function test_it_validates_required_fields(): void
     {
         // Test missing items
-        $response = $this->postJson('/api/v1/orders', [
+        $response = $this->postJson('/api/v1/public/orders', [
             'currency' => 'EUR',
             'shipping_method' => 'HOME',
         ]);
@@ -337,7 +337,7 @@ class OrdersCreateApiTest extends TestCase
             ->assertJsonValidationErrors('items');
 
         // Test invalid currency
-        $response = $this->postJson('/api/v1/orders', [
+        $response = $this->postJson('/api/v1/public/orders', [
             'items' => [['product_id' => $this->product1->id, 'quantity' => 1]],
             'currency' => 'GBP', // Invalid currency
             'shipping_method' => 'HOME',
@@ -346,7 +346,7 @@ class OrdersCreateApiTest extends TestCase
             ->assertJsonValidationErrors('currency');
 
         // Test invalid shipping method
-        $response = $this->postJson('/api/v1/orders', [
+        $response = $this->postJson('/api/v1/public/orders', [
             'items' => [['product_id' => $this->product1->id, 'quantity' => 1]],
             'currency' => 'EUR',
             'shipping_method' => 'DELIVERY', // Invalid shipping method
@@ -355,7 +355,7 @@ class OrdersCreateApiTest extends TestCase
             ->assertJsonValidationErrors('shipping_method');
 
         // Test empty items array
-        $response = $this->postJson('/api/v1/orders', [
+        $response = $this->postJson('/api/v1/public/orders', [
             'items' => [], // Empty array
             'currency' => 'EUR',
             'shipping_method' => 'HOME',
@@ -378,7 +378,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'PICKUP',
         ];
 
-        $response = $this->postJson('/api/v1/orders', $orderData);
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201);
         

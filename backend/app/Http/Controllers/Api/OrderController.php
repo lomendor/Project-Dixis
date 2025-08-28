@@ -238,6 +238,8 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $this->authorize('create', Order::class);
+        
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',

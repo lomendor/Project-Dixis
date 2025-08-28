@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -13,10 +14,27 @@ export default function Register() {
     password_confirmation: '',
     role: 'consumer' as 'consumer' | 'producer',
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { register } = useAuth();
+  const { register, registerLoading, isAuthenticated, user, getIntendedDestination, clearIntendedDestination } = useAuth();
+  const { showSuccess, showError } = useToast();
   const router = useRouter();
+
+  // Redirect authenticated users away from register page
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const intendedDestination = getIntendedDestination?.();
+      clearIntendedDestination?.();
+      
+      // Role-based redirect logic
+      const destination = intendedDestination && intendedDestination !== '/' 
+        ? intendedDestination 
+        : user.role === 'producer' 
+          ? '/producer/dashboard' 
+          : '/';
+      
+      router.push(destination);
+    }
+  }, [isAuthenticated, user, router, getIntendedDestination, clearIntendedDestination]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -30,31 +48,37 @@ export default function Register() {
     
     if (!formData.name || !formData.email || !formData.password) {
       setError('Please fill in all required fields');
+      showError('Please fill in all required fields');
       return;
     }
 
     if (formData.password !== formData.password_confirmation) {
       setError('Passwords do not match');
+      showError('Passwords do not match');
       return;
     }
 
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
+      showError('Password must be at least 8 characters long');
       return;
     }
 
     try {
-      setLoading(true);
       setError(null);
       
+      console.log('📝 Starting registration process...', { email: formData.email, role: formData.role });
       await register(formData);
+      console.log('✅ Registration successful!');
       
-      // Redirect to home page after successful registration
-      router.push('/');
+      // Success message will be shown, redirect is handled in useEffect
+      const accountType = formData.role === 'producer' ? 'Producer' : 'Consumer';
+      showSuccess(`Welcome to Project Dixis! Your ${accountType} account has been created successfully.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-    } finally {
-      setLoading(false);
+      console.error('❌ Registration failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
+      showError(errorMessage);
     }
   };
 
@@ -192,10 +216,10 @@ export default function Register() {
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={registerLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {registerLoading ? 'Creating Account...' : 'Create Account'}
               </button>
             </div>
           </form>

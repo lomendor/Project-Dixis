@@ -36,10 +36,17 @@ class OrderPolicy
 
     /**
      * Determine whether the user can create orders.
-     * Consumers and admins can create orders.
+     * Consumers, admins, and guests can create orders.
+     * Producers cannot create orders (they sell, don't buy).
      */
-    public function create(User $user): bool
+    public function create(?User $user): bool
     {
+        // Allow guest orders (user = null)
+        if (!$user) {
+            return true;
+        }
+        
+        // Allow authenticated consumers and admins, but NOT producers
         return $user->role === 'consumer' || $user->role === 'admin';
     }
 

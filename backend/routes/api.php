@@ -51,10 +51,15 @@ Route::prefix('v1')->group(function () {
         Route::delete('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'destroy'])->name('api.v1.products.destroy');
     });
     
-    // Orders (public, read-only + create)
-    Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.orders.index');
-    Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.orders.show');
-    Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.orders.store');
+    // Authenticated user orders 
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index'])->name('api.v1.orders.index');
+        Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show'])->name('api.v1.orders.show');
+        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store'])->name('api.v1.orders.store')
+            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
+        Route::post('orders/checkout', [App\Http\Controllers\Api\OrderController::class, 'checkout'])->name('api.v1.orders.checkout')
+            ->middleware('throttle:5,1'); // 5 checkouts per minute
+    });
     
     // Producers (public, read-only)
     Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index');
@@ -68,6 +73,12 @@ Route::prefix('v1')->group(function () {
         // Public Producers API
         Route::get('producers', [App\Http\Controllers\Public\ProducerController::class, 'index']);
         Route::get('producers/{id}', [App\Http\Controllers\Public\ProducerController::class, 'show']);
+        
+        // Public Orders API (demo access - no PII exposed)
+        Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.public.orders.index');
+        Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.public.orders.show');
+        Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
+            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
     });
     
     // Cart (authenticated)
@@ -79,15 +90,6 @@ Route::prefix('v1')->group(function () {
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
     });
     
-    // Orders (authenticated) - prefix with 'my' to avoid conflicts with public read-only API
-    Route::middleware('auth:sanctum')->prefix('my')->group(function () {
-        Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index']);
-        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store'])
-            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
-        Route::post('orders/checkout', [App\Http\Controllers\Api\OrderController::class, 'checkout'])
-            ->middleware('throttle:5,1'); // 5 checkouts per minute
-        Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show']);
-    });
 });
 
 // OpenAPI Documentation

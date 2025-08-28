@@ -71,7 +71,7 @@ class OrdersApiTest extends TestCase
 
     public function test_orders_index_returns_paginated_json_with_required_fields(): void
     {
-        $response = $this->getJson('/api/v1/orders');
+        $response = $this->getJson('/api/v1/public/orders');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -113,7 +113,7 @@ class OrdersApiTest extends TestCase
     {
         $order = Order::first();
 
-        $response = $this->getJson("/api/v1/orders/{$order->id}");
+        $response = $this->getJson("/api/v1/public/orders/{$order->id}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -155,7 +155,7 @@ class OrdersApiTest extends TestCase
 
     public function test_orders_show_returns_404_for_nonexistent_order(): void
     {
-        $response = $this->getJson('/api/v1/orders/99999');
+        $response = $this->getJson('/api/v1/public/orders/99999');
 
         $response->assertStatus(404);
     }
@@ -163,7 +163,7 @@ class OrdersApiTest extends TestCase
     public function test_orders_index_filters_by_status(): void
     {
         // Test filtering by 'completed' status
-        $response = $this->getJson('/api/v1/orders?status=completed');
+        $response = $this->getJson('/api/v1/public/orders?status=completed');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data');
@@ -172,7 +172,7 @@ class OrdersApiTest extends TestCase
         $this->assertEquals('completed', $orderData['status']);
         
         // Test filtering by 'pending' status
-        $response = $this->getJson('/api/v1/orders?status=pending');
+        $response = $this->getJson('/api/v1/public/orders?status=pending');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data');
@@ -181,7 +181,7 @@ class OrdersApiTest extends TestCase
         $this->assertEquals('pending', $orderData['status']);
         
         // Test invalid status returns validation error
-        $response = $this->getJson('/api/v1/orders?status=invalid');
+        $response = $this->getJson('/api/v1/public/orders?status=invalid');
         $response->assertStatus(422);
     }
 
@@ -190,7 +190,7 @@ class OrdersApiTest extends TestCase
         $order = Order::first();
         
         // Test search by order ID
-        $response = $this->getJson("/api/v1/orders?q={$order->id}");
+        $response = $this->getJson("/api/v1/public/orders?q={$order->id}");
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data');
@@ -199,14 +199,14 @@ class OrdersApiTest extends TestCase
         $this->assertEquals($order->id, $orderData['id']);
         
         // Test search with non-numeric value returns no results
-        $response = $this->getJson('/api/v1/orders?q=abc');
+        $response = $this->getJson('/api/v1/public/orders?q=abc');
         $response->assertStatus(200)
             ->assertJsonCount(0, 'data');
     }
     
     public function test_orders_pagination_works(): void
     {
-        $response = $this->getJson('/api/v1/orders?per_page=1');
+        $response = $this->getJson('/api/v1/public/orders?per_page=1');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
@@ -228,7 +228,7 @@ class OrdersApiTest extends TestCase
     
     public function test_orders_data_formats_are_correct(): void
     {
-        $response = $this->getJson('/api/v1/orders');
+        $response = $this->getJson('/api/v1/public/orders');
 
         $response->assertStatus(200);
         

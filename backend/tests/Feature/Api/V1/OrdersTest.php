@@ -41,7 +41,7 @@ class OrdersTest extends TestCase
         ];
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/my/orders', $orderData);
+            ->postJson('/api/v1/orders', $orderData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -93,7 +93,7 @@ class OrdersTest extends TestCase
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->get("/api/v1/my/orders/{$order->id}");
+            ->get("/api/v1/orders/{$order->id}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -137,7 +137,7 @@ class OrdersTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson('/api/v1/my/orders', $orderData);
+        $response = $this->postJson('/api/v1/orders', $orderData);
 
         $response->assertStatus(401);
     }
