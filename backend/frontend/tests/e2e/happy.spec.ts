@@ -39,16 +39,12 @@ class E2EHelper {
     const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
     await expect(addToCartBtn).toBeVisible();
     
-    // Better wait pattern instead of setTimeout
-    const responsePromise = this.page.waitForResponse(resp => resp.url().includes('/cart') && resp.status() === 200);
+    // Click add to cart and wait for any UI feedback
     await addToCartBtn.click();
     
-    try {
-      await responsePromise;
-      console.log('✅ Cart API call successful');
-    } catch (error) {
-      console.log('⚠️ Cart API call failed, continuing test...');
-    }
+    // Give a brief moment for the action to process
+    await this.page.waitForTimeout(1000);
+    console.log('✅ Add to cart clicked');
   }
 }
 
