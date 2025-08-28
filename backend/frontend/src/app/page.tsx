@@ -46,7 +46,7 @@ export default function Home() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: Record<string, string | number | boolean> = {
         per_page: 20,
       };
       
@@ -89,7 +89,7 @@ export default function Home() {
     }
   };
 
-  const updateFilter = (key: keyof Filters, value: any) => {
+  const updateFilter = (key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
