@@ -167,12 +167,6 @@ function trimSlashes(s: string): string {
   return s.replace(/\/+$/,'').replace(/^\/+/,'');
 }
 
-function legacyApiUrl(baseURL: string, path: string): string {
-  const base = trimSlashes(baseURL);
-  const p = trimSlashes(path);
-  return `${base}/${p}`;
-}
-
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
