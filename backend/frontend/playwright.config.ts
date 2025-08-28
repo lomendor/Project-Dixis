@@ -23,7 +23,7 @@ export default defineConfig({
     { name: 'webkit',   use: devices['Desktop Safari'] },
   ],
 
-  webServer: {
+  webServer: isCI ? undefined : {
     command: 'npm run start',
     url: 'http://127.0.0.1:3001',
     reuseExistingServer: true,
