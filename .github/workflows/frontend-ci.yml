@@ -158,10 +158,21 @@ jobs:
           path: backend/frontend/playwright-report/
           retention-days: 3
       
+      - name: Upload E2E videos and screenshots (on failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-videos-screenshots-failure
+          path: |
+            backend/frontend/test-results/**/*.webm
+            backend/frontend/test-results/**/*.png
+            backend/frontend/playwright-report/**/*.png
+          retention-days: 5
+      
       - name: Upload E2E traces (on failure only)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-traces-failure
-          path: backend/frontend/test-results/
+          path: backend/frontend/test-results/**/*.zip
           retention-days: 3

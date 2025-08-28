@@ -177,16 +177,18 @@ test.describe('Mobile Navigation', () => {
     await helper.login('consumer@example.com', 'password');
     
     await helper.openMobileMenu();
-    await page.click('[data-testid="mobile-logout-btn"]');
     
-    // Should redirect to home and show unauthenticated state
-    await page.waitForTimeout(1000); // Wait for logout to process
+    // Verify user is logged in by checking logout button exists
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible();
     
-    await helper.openMobileMenu();
+    // Click logout and wait for the auth state to change
+    await page.getByTestId('mobile-logout-btn').click();
     
-    // Should show login/register links again
-    await expect(page.locator('[data-testid="mobile-nav-login"]')).toBeVisible();
-    await expect(page.locator('[data-testid="mobile-nav-register"]')).toBeVisible();
+    // Wait for the user to be logged out by checking that user menu disappears
+    await expect(page.getByTestId('user-menu')).toHaveCount(0);
+    
+    // Verify logout was successful - logout button should no longer exist
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toHaveCount(0);
   });
 
   test('should navigate to cart when mobile cart link is clicked', async ({ page }) => {

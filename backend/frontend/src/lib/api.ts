@@ -128,9 +128,39 @@ export interface TopProduct {
 
 // Helper functions for safe URL joining
 const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
-const trimBoth = (s: string) => s.replace(/\/+$/,'').replace(/^\/+/,'');
+
+// Enhanced URL trimming that handles multiple slashes and edge cases
+const trimBoth = (s: string) => {
+  if (!s || typeof s !== 'string') return '';
+  
+  // Handle protocol URLs specially (preserve :// in protocols)
+  if (s.includes('://')) {
+    const [protocol, rest] = s.split('://');
+    const cleanRest = rest.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
+    return `${protocol}://${cleanRest}`;
+  }
+  
+  // For non-protocol strings, remove leading and trailing slashes, collapse multiple slashes
+  return s.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
+};
+
 const BASE = trimBoth(RAW_BASE);
-export const apiUrl = (path: string) => `${BASE}/${trimBoth(path)}`;
+
+// Safe URL joining with validation and normalization
+export const apiUrl = (path: string) => {
+  if (!path || typeof path !== 'string') return BASE;
+  
+  const cleanPath = trimBoth(path);
+  if (!cleanPath) return BASE;
+  
+  // Handle absolute URLs passed as path
+  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+    return cleanPath;
+  }
+  
+  // Safe join with single slash
+  return `${BASE}/${cleanPath}`;
+};
 
 // Legacy functions for compatibility
 function trimSlashes(s: string): string {
@@ -149,7 +179,7 @@ class ApiClient {
 
   constructor() {
     const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
-    this.baseURL = trimSlashes(rawBase);
+    this.baseURL = trimBoth(rawBase);
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
