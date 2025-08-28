@@ -9,39 +9,77 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface Filters {
+  search: string;
+  category: string;
+  producer: string;
+  minPrice: string;
+  maxPrice: string;
+  organic: boolean | null;
+  sort: string;
+  dir: string;
+}
+
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [producers, setProducers] = useState<{id: number, name: string}[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<Filters>({
+    search: '',
+    category: '',
+    producer: '',
+    minPrice: '',
+    maxPrice: '',
+    organic: null,
+    sort: 'created_at',
+    dir: 'desc'
+  });
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     loadProducts();
-  }, [search, selectedCategory]);
+  }, [filters]);
 
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.getProducts({
-        search: search || undefined,
-        category: selectedCategory || undefined,
+      const params: any = {
         per_page: 20,
-      });
+      };
       
+      // Only add parameters if they have values
+      if (filters.search) params.search = filters.search;
+      if (filters.category) params.category = filters.category;
+      if (filters.producer) params.producer = filters.producer;
+      if (filters.minPrice) params.min_price = parseFloat(filters.minPrice);
+      if (filters.maxPrice) params.max_price = parseFloat(filters.maxPrice);
+      if (filters.organic !== null) params.organic = filters.organic;
+      if (filters.sort) params.sort = filters.sort;
+      if (filters.dir) params.dir = filters.dir;
+      
+      const response = await apiClient.getProducts(params);
       setProducts(response.data);
       
-      // Extract unique categories
+      // Extract unique categories and producers for filter dropdowns
       const uniqueCategories = Array.from(
-        new Set(
-          response.data.flatMap(product => 
-            product.categories.map(cat => cat.name)
-          )
-        )
+        new Set(response.data.flatMap(product => 
+          product.categories.map(cat => cat.name)
+        ))
       );
       setCategories(uniqueCategories);
+      
+      const uniqueProducers = Array.from(
+        new Set(response.data.map(product => ({
+          id: product.producer.id,
+          name: product.producer.name
+        })).filter((producer, index, self) => 
+          index === self.findIndex(p => p.id === producer.id)
+        ))
+      );
+      setProducers(uniqueProducers);
       
       setError(null);
     } catch (err) {
@@ -50,6 +88,26 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const updateFilter = (key: keyof Filters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
+      category: '',
+      producer: '',
+      minPrice: '',
+      maxPrice: '',
+      organic: null,
+      sort: 'created_at',
+      dir: 'desc'
+    });
+  };
+
+  const hasActiveFilters = filters.search || filters.category || filters.producer || 
+                          filters.minPrice || filters.maxPrice || filters.organic !== null;
 
   const handleAddToCart = async (productId: number) => {
     if (!isAuthenticated) {
@@ -104,31 +162,148 @@ export default function Home() {
             Fresh Products from Local Producers
           </h1>
           
-          {/* Search and Filter */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+          {/* Enhanced Search and Filters */}
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={filters.search}
+                  onChange={(e) => updateFilter('search', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
+                  {hasActiveFilters && (
+                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                      {Object.values(filters).filter(v => v && v !== 'created_at' && v !== 'desc').length}
+                    </span>
+                  )}
+                </button>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="md:w-64">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
+
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+              <div className="bg-white p-6 rounded-lg shadow-md border">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Category Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select
+                      value={filters.category}
+                      onChange={(e) => updateFilter('category', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Producer Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Producer</label>
+                    <select
+                      value={filters.producer}
+                      onChange={(e) => updateFilter('producer', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">All Producers</option>
+                      {producers.map((producer) => (
+                        <option key={producer.id} value={producer.id}>
+                          {producer.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Price Range */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Price Range (€)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={filters.minPrice}
+                        onChange={(e) => updateFilter('minPrice', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <span className="self-center text-gray-500">-</span>
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={filters.maxPrice}
+                        onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sort and Organic */}
+                  <div className="space-y-4">
+                    {/* Sort Options */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                      <div className="flex gap-2">
+                        <select
+                          value={filters.sort}
+                          onChange={(e) => updateFilter('sort', e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                          <option value="created_at">Newest</option>
+                          <option value="name">Name</option>
+                          <option value="price">Price</option>
+                        </select>
+                        <select
+                          value={filters.dir}
+                          onChange={(e) => updateFilter('dir', e.target.value)}
+                          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                          <option value="asc">↑</option>
+                          <option value="desc">↓</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Organic Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Organic</label>
+                      <select
+                        value={filters.organic === null ? '' : filters.organic.toString()}
+                        onChange={(e) => updateFilter('organic', e.target.value === '' ? null : e.target.value === 'true')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      >
+                        <option value="">All Products</option>
+                        <option value="true">Organic Only</option>
+                        <option value="false">Non-Organic</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -230,15 +405,12 @@ export default function Home() {
               </svg>
             }
             title="No products found"
-            description={search || selectedCategory ? 
+            description={hasActiveFilters ? 
               "We couldn't find any products matching your search criteria. Try adjusting your filters or search terms." :
               "No products are currently available. Check back soon for fresh local produce!"
             }
-            actionLabel="Clear Filters"
-            onAction={() => {
-              setSearch('');
-              setSelectedCategory('');
-            }}
+            actionLabel={hasActiveFilters ? "Clear Filters" : undefined}
+            onAction={hasActiveFilters ? clearAllFilters : undefined}
           />
         )}
       </main>
