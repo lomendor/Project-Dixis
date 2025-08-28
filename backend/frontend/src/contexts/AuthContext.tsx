@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, apiClient } from '@/lib/api';
+import { useToast } from './ToastContext';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -59,9 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔑 AuthContext: API login response:', response);
       console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
+      showToast(`Welcome back, ${response.user.name}!`, 'success');
       console.log('🔑 AuthContext: Login completed successfully');
     } catch (error) {
       console.error('🔑 AuthContext: Login error:', error);
+      const message = error instanceof Error ? error.message : 'Login failed. Please check your credentials.';
+      showToast(message, 'error');
       throw error;
     }
   };
@@ -76,7 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiClient.register(data);
       setUser(response.user);
+      showToast(`Welcome to Project Dixis, ${response.user.name}!`, 'success');
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      showToast(message, 'error');
       throw error;
     }
   };
@@ -84,9 +92,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await apiClient.logout();
+      showToast('You have been logged out successfully', 'info');
     } catch (error) {
       // Ignore logout errors and proceed with clearing local state
       console.error('Logout error:', error);
+      showToast('You have been logged out', 'info');
     }
     
     setUser(null);
