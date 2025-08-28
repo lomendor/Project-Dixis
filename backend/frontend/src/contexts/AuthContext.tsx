@@ -6,6 +6,7 @@ import { User, apiClient } from '@/lib/api';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  registerLoading?: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     name: string;
@@ -17,6 +18,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isProducer: boolean;
+  setIntendedDestination?: (destination: string) => void;
+  getIntendedDestination?: () => string | null;
+  clearIntendedDestination?: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
