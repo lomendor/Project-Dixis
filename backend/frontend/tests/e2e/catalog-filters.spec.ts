@@ -58,7 +58,10 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(1000);
     
     // Verify products are shown again
-    await expect(page.locator('[data-testid="product-card"]')).toBeVisible();
+    // wait for API to respond OK first
+    await page.waitForResponse(r => r.url().includes('/api/v1/public/products') && r.ok(), { timeout: 15000 });
+    // then expect at least one card
+    await expect(page.getByTestId('product-card').first()).toBeVisible({ timeout: 15000 });
     
     console.log('✅ Enhanced catalog filters test completed successfully');
   });
