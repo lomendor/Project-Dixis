@@ -178,7 +178,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
+    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
     this.baseURL = trimBoth(rawBase);
     
     // Load token from localStorage if available
