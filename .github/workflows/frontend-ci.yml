@@ -106,8 +106,14 @@ jobs:
           php artisan db:seed --force --env=testing
           php artisan db:seed --class=E2ESeeder --force --env=testing
       
+      - name: Kill leftover ports
+        run: |
+          lsof -ti :3000 | xargs -r kill -9 || true
+          lsof -ti :3001 | xargs -r kill -9 || true
+          lsof -ti :8001 | xargs -r kill -9 || true
+      
       - name: Start Laravel server
-        run: php artisan serve --host=0.0.0.0 --port=8000 &
+        run: php artisan serve --host=0.0.0.0 --port=8001 &
         
       # Setup frontend
       - name: Setup Node.js
@@ -128,12 +134,12 @@ jobs:
       - name: Start Next.js server (production build for E2E)
         working-directory: backend/frontend
         env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
         run: npm run build && PORT=3001 npm start &
       
       - name: Wait for servers to be ready
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:8000/api/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:8001/api/health; do sleep 2; done'
           timeout 60 bash -c 'until curl -f http://localhost:3001; do sleep 2; done'
       
       - name: Run E2E tests
@@ -142,7 +148,7 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3001
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       
       - name: Upload E2E test results (on failure only)
         if: failure()

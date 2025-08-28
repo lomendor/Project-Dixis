@@ -10,13 +10,20 @@ class E2EHelper {
   }
 
   async waitForProductCard() {
+    // Wait for API response before asserting on elements
+    await this.page.waitForResponse(resp =>
+      resp.url().includes('/api/v1/public/products') && resp.ok()
+    );
     await this.page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
     await expect(this.page.locator('[data-testid="product-card"]').first()).toBeVisible();
     return this.page.locator('[data-testid="product-card"]').first();
   }
 
   async loginUser(email: string, password: string) {
-    await this.navigateAndWait('/auth/login');
+    // Navigate to Login via top-nav link instead of raw page.goto
+    await this.page.getByRole('link', { name: /login/i }).click();
+    await expect(this.page).toHaveURL(/\/auth\/login/);
+    await this.page.waitForLoadState('networkidle');
     
     await this.page.fill('[name="email"]', email);
     await this.page.fill('[name="password"]', password);
@@ -59,21 +66,22 @@ test('happy path - catalog to checkout flow', async ({ page }) => {
   const productUrl = await firstProductCard.locator('a').first().getAttribute('href');
   
   // 2. View first product page
-  await Promise.all([
-    page.waitForURL(/\/products\/\d+/),
-    firstProductCard.locator('a').first().click()
-  ]);
+  const firstProductLink = firstProductCard.locator('a').first();
+  await firstProductLink.click();
+  await expect(page).toHaveURL(/\/products\/\d+/, { timeout: 15000 });
+  await page.waitForLoadState('networkidle');
   
   await expect(page.locator('h1')).toContainText(productName || '');
   
   // 3. Login via frontend login flow
   await helper.loginUser('consumer@example.com', 'password');
   
-  // Navigate back to the product page to add to cart
-  await Promise.all([
-    page.waitForURL(/\/products\/\d+/),
-    page.goto(productUrl || '/')
-  ]);
+  // Navigate back to the product page to add to cart (avoid raw goto after SPA navigation)
+  if (productUrl) {
+    await page.goto(productUrl);
+    await expect(page).toHaveURL(/\/products\/\d+/, { timeout: 15000 });
+    await page.waitForLoadState('networkidle');
+  }
   
   // 4. Add product to cart
   await helper.addToCart();
@@ -138,10 +146,10 @@ test('product detail page displays correctly', async ({ page }) => {
   const firstProductCard = await helper.waitForProductCard();
   
   // Click on first product with better navigation wait
-  await Promise.all([
-    page.waitForURL(/\/products\/\d+/),
-    firstProductCard.locator('a').first().click()
-  ]);
+  const firstProductLink = firstProductCard.locator('a').first();
+  await firstProductLink.click();
+  await expect(page).toHaveURL(/\/products\/\d+/, { timeout: 15000 });
+  await page.waitForLoadState('networkidle');
   
   // Verify product details are shown
   await expect(page.locator('h1')).toBeVisible();
