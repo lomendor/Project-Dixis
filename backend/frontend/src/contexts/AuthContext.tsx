@@ -29,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [registerLoading, setRegisterLoading] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: 'consumer' | 'producer';
   }) => {
     try {
+      setRegisterLoading(true);
       const response = await apiClient.register(data);
       setUser(response.user);
       showToast('success', `Welcome to Project Dixis, ${response.user.name}!`);
@@ -86,6 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
       showToast('error', message);
       throw error;
+    } finally {
+      setRegisterLoading(false);
     }
   };
 
@@ -105,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     loading,
+    registerLoading,
     login,
     register,
     logout,
