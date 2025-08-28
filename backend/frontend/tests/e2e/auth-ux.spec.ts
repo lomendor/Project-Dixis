@@ -9,11 +9,12 @@ class AuthE2EHelper {
   }
 
   async waitForToast(type: 'success' | 'error' | 'info' | 'warning') {
-    // Wait for toast container first
-    await this.page.waitForSelector('.fixed.top-4.right-4', { timeout: 10000 });
+    // Wait for toast container to be present (existence check)
+    await this.page.waitForSelector('[data-testid="toast-container"]', { state: 'attached', timeout: 10000 });
     
-    const toastSelector = `.bg-${type === 'success' ? 'green' : type === 'error' ? 'red' : type === 'warning' ? 'yellow' : 'blue'}-500`;
-    await this.page.waitForSelector(toastSelector, { timeout: 10000 });
+    // Wait for specific toast type to be attached to DOM
+    const toastSelector = `[data-testid="toast-${type}"]`;
+    await this.page.waitForSelector(toastSelector, { state: 'attached', timeout: 10000 });
     return this.page.locator(toastSelector).first();
   }
 
