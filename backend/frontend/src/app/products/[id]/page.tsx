@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function ProductDetail() {
   const params = useParams();
@@ -14,7 +16,9 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { showToast } = useToast();
 
   const productId = parseInt(params.id as string);
 
@@ -44,12 +48,16 @@ export default function ProductDetail() {
     }
 
     try {
+      setAddingToCart(true);
       await apiClient.addToCart(productId, quantity);
-      alert(`${quantity} item(s) added to cart!`);
+      showToast('success', `${quantity} item(s) added to cart!`);
       setQuantity(1);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      alert('Failed to add product to cart');
+      const message = error instanceof Error ? error.message : 'Failed to add product to cart';
+      showToast('error', message);
+    } finally {
+      setAddingToCart(false);
     }
   };
 
@@ -71,9 +79,7 @@ export default function ProductDetail() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
+          <LoadingSpinner text="Loading product..." />
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-600 mb-4">{error}</p>
@@ -218,10 +224,12 @@ export default function ProductDetail() {
 
                   <button
                     onClick={handleAddToCart}
-                    disabled={product.stock === 0}
+                    disabled={product.stock === 0 || addingToCart}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium"
+                    data-testid="add-to-cart-button"
                   >
-                    {product.stock === 0 ? 'Out of Stock' : 
+                    {addingToCart ? 'Adding to Cart...' : 
+                     product.stock === 0 ? 'Out of Stock' : 
                      !isAuthenticated ? 'Login to Add to Cart' : 'Add to Cart'}
                   </button>
 
