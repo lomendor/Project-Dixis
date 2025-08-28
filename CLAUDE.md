@@ -1,264 +1,127 @@
-# PROJECT-DIXIS - LOCAL PRODUCER MARKETPLACE
+# CLAUDE.md — Project Dixis (concise guide for Claude Code)
 
-**Full-Stack Laravel + Next.js Application** | **E2E Test Suite** | **Status**: ✅ PRODUCTION READY
+## Objectives
+- Keep backend (Laravel, Postgres) + frontend (Next.js) consistent.
+- Make CI green and keep it green.
+- Prefer minimal diffs, idempotent DB patches, and stable E2E tests.
 
----
+## Invariants (treat as source of truth)
+- API base URL (local & CI): `http://127.0.0.1:8001/api/v1`
+- Frontend dev port: `3001`
+- Database: **PostgreSQL** only (no SQLite fallbacks)
+- Playwright artifacts: **save screenshots/videos only on failure**, retain 3 days
+- One server rule: πριν σηκώσεις οτιδήποτε, κλείσε πόρτες 3001/8001
 
-## 🎯 PURPOSE
+## Folder layout (monorepo)
+- `backend/` → Laravel API
+- `backend/frontend/` → Next.js app
+- `.github/workflows/` → CI (backend-ci.yml, frontend-ci.yml)
+- `backend/frontend/tests/e2e/` → Playwright specs
 
-**Project-Dixis** is a **complete local producer marketplace** connecting Greek producers with consumers. Features full Laravel 11 backend API, Next.js 15 frontend, and comprehensive E2E test coverage.
-
-## 🏆 RECENT MAJOR MILESTONE - E2E STABILIZATION COMPLETE
-
-### ✅ **PR #35 MERGED** - `feat/e2e-hardening` 
-**Achievement**: Complete E2E test stabilization from infrastructure chaos to 100% GREEN  
-**Result**: 23 files changed (+1,174/-323), bulletproof CI/CD pipeline  
-**Impact**: Production-ready deployment confidence
-
-## ✅ VERIFIED PRODUCTION SETUP
-
-### 🚀 Tech Stack
-- **Backend**: Laravel 11.45.2 + PostgreSQL 15
-- **Frontend**: Next.js 15.5.0 + React 19 + TypeScript 5
-- **Testing**: Playwright E2E + PHPUnit backend tests
-- **CI/CD**: GitHub Actions with comprehensive test coverage
-- **Infrastructure**: Docker-ready, PostgreSQL service containers
-
-### 🔧 Core Features
-- ✅ **Producer Marketplace**: Full CRUD for producers and products  
-- ✅ **User Authentication**: Consumer/Producer roles with AuthGuard
-- ✅ **Order System**: Complete order flow with API integration
-- ✅ **Product Catalog**: Search, filtering, categories  
-- ✅ **Cart System**: Add to cart, checkout flow
-- ✅ **Toast Notifications**: User feedback system
-- ✅ **Responsive Design**: Mobile-first approach
-
-## 📊 PRODUCTION-READY CI/CD PIPELINE
-
-### GitHub Actions Workflows (All ✅ GREEN)
-```yaml
-# Backend CI - Laravel + PHPUnit
-✅ PostgreSQL 15 service container
-✅ PHP 8.2 + all required extensions  
-✅ Composer caching + dependency install
-✅ Database migrations + seeding
-✅ PHPUnit test execution (30+ tests)
-✅ API health endpoint verification
-
-# Frontend CI - Next.js Build + TypeScript  
-✅ Node.js 18 + npm caching
-✅ TypeScript compilation (strict mode)
-✅ Next.js build process
-✅ Lint + type checking
-
-# E2E Test Suite - Playwright
-✅ Full-stack integration testing
-✅ 26 comprehensive test scenarios  
-✅ Authentication flows (Consumer/Producer)
-✅ Product catalog + search functionality
-✅ Order creation + API integration
-✅ Error handling + edge cases
+## Backend rules (Laravel + Postgres)
+- Use `.env` (local) and GH Actions job env (CI) με:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=project_dixis_local # CI: project_dixis_test
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
-### Health Check Endpoints
-```php
-// Backend API Health
-GET /api/health
-{
-  "status": "ok",
-  "database": "connected",
-  "timestamp": "2025-08-28T13:16:41.001Z",
-  "version": "11.45.2"
+- **Migrations**:
+  - `create_*` migrations: **χωρίς** FKs.
+  - Foreign keys μπαίνουν **σε later migration** και πάντα **idempotent**:
+    - `ALTER TABLE … DROP CONSTRAINT IF EXISTS …;` μετά `ADD CONSTRAINT …`.
+  - Patch columns με `Schema::hasColumn` guards (π.χ. money `decimal(10,2)`).
+- **Seeders**:
+  - Μην αλλάζεις enums/constraints για να "χωρέσουν" seed values. Διόρθωσε τους seeders.
+  - Αν χρειάζεται slug/unique, φτιάξε το στη δημιουργία (ή model booted()).
+
+## Frontend rules (Next.js)
+- **API URL join**: χρησιμοποίησε helper που καθαρίζει slashes, ώστε:
+  - `apiUrl('public/products')` → `http://127.0.0.1:8001/api/v1/public/products`
+- **Do not** σκληροκωδικοποιείς `api/v1/api/v1`. Πάντα relative paths στον helper.
+- Αν πρέπει να τρέξει σε single port dev, κλείσε πρώτα ό,τι τρέχει σε 3000/3001.
+
+## E2E (Playwright) rules
+- Περιμένουμε **κατάστασεις UI** (data-testid) — όχι αυθαίρετα timeouts.
+- Αν αποτυγχάνει για 404/empty data:
+  - Έλεγξε ότι τρέχει backend στο 8001 **και** ότι `NEXT_PUBLIC_API_BASE_URL` δείχνει σωστά.
+- Artifacts:
+```ts
+use: {
+  video: 'retain-on-failure',
+  screenshot: 'only-on-failure',
+  trace: 'retain-on-failure'
 }
-
-// Frontend Health (via E2E)
-- Page load times: <2s
-- Interactive elements: Fully responsive
-- API integration: 100% working
 ```
 
-## 🛠️ DEVELOPMENT SETUP
+## Runbooks
 
-### Prerequisites
-- PHP 8.2+ με PostgreSQL extension
-- Node.js 18+ με npm
-- PostgreSQL 15+
-- Composer 2.x
-
-### Quick Start
+### Pre-flight (local, once per session)
+1. Κλείσε πόρτες:
 ```bash
-# Clone repository
-git clone https://github.com/lomendor/Project-Dixis.git
-cd Project-Dixis
+lsof -ti :3001 | xargs kill -9 || true
+lsof -ti :8001 | xargs kill -9 || true
+```
 
-# Backend setup  
+2. Backend:
+```bash
 cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve --port=8000
-
-# Frontend setup (separate terminal)
-cd ../frontend  
-npm install
-npm run build
-npm run dev  # Runs on http://localhost:3000
-
-# Run E2E tests (optional)
-cd frontend
-npx playwright test
+cp -n .env.example .env || true
+php artisan key:generate || true
+createdb -h 127.0.0.1 -U postgres project_dixis_local 2>/dev/null || true
+php artisan migrate:fresh --seed
+php artisan serve --host=127.0.0.1 --port=8001
 ```
 
-### Verification Commands
+3. Frontend:
 ```bash
-# Backend tests
-cd backend && php artisan test
-
-# Frontend build
-cd frontend && npm run build  
-
-# E2E test suite
-cd frontend && npx playwright test --reporter=line
-
-# API health check
-curl http://localhost:8000/api/health
+cd backend/frontend
+npm install
+NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
 ```
 
-## 🧠 PRODUCTION ARCHITECTURE PATTERNS
-
-### 1. Full-Stack API Integration
-```typescript
-// Frontend API client
-const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  endpoints: {
-    products: '/api/v1/public/products',
-    orders: '/api/v1/orders',
-    auth: '/api/v1/auth'
-  }
-}
+### E2E locally
+```bash
+cd backend/frontend
+NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npx playwright test
 ```
 
-### 2. E2E Test Stabilization Strategy
-```typescript
-// Instead of API waits (flaky)
-await page.waitForResponse('/api/products') 
+## CI expectations
+- `backend-ci.yml`: στήνει Postgres service, γράφει testing .env, τρέχει migrate:fresh --seed, tests.
+- `frontend-ci.yml`:
+  - Σηκώνει API (Laravel) σε 8001 (artisan serve & migrate fresh)
+  - Τρέχει Next build ή dev server (προτιμότερο next build && next start για σταθερά timings)
+  - NEXT_PUBLIC_API_BASE_URL περασμένο στο job env
+  - Playwright με artifacts only-on-failure
 
-// Use user-facing element waits (stable)  
-await page.waitForSelector('[data-testid="product-card"]')
-await expect(page.getByTestId('product-card')).toBeVisible()
+## When something fails
+- **404 on products**: πιθανό διπλό prefix ή λάθος base. Δες helper + env.
+- **42703 column missing**: πρόσθεσε 1 idempotent patch migration, μόνο αυτό.
+- **42710 duplicate FK/index**: DROP IF EXISTS πριν το ADD.
+- **Not null violation σε seeders**: φτιάξε τον seeder, όχι το constraint.
+
+## Quick commands
+```bash
+# Kill and restart everything
+lsof -ti :3001,:8001 | xargs kill -9; cd backend && php artisan serve --port=8001 &
+cd backend/frontend && npm run build && npm start -- -p 3001
+
+# Run specific test suite  
+npx playwright test mobile-navigation.spec.ts --project=chromium
+
+# Check API health
+curl http://localhost:8001/api/health
+
+# Fresh database
+php artisan migrate:fresh --seed
 ```
 
-### 3. TypeScript + Laravel API Integration
-```php
-// Laravel API Resource
-class ProductResource extends JsonResource {
-    public function toArray($request): array {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'price' => number_format($this->price, 2),
-            'categories' => CategoryResource::collection($this->categories)
-        ];
-    }
-}
-```
-
-### 4. Authentication Flow (Frontend ↔ Backend)
-```typescript
-// Next.js AuthGuard with role-based protection
-<AuthGuard requireAuth={true} requireRole="producer">
-  <ProducerDashboard />
-</AuthGuard>
-
-// Laravel API with Sanctum tokens
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('orders', OrderController::class);
-});
-```
-
-## 📈 SUCCESS METRICS ACHIEVED
-
-- **Backend Tests**: ✅ 30+ tests passing (100% core functionality)
-- **Frontend Build**: ✅ TypeScript strict mode, zero errors  
-- **E2E Coverage**: ✅ 26 test scenarios, complete user journeys
-- **CI Duration**: ~3-5 minutes end-to-end (optimized for speed)
-- **Performance**: <2s page loads, responsive on all devices
-- **Database**: PostgreSQL with comprehensive migrations + seeding
-
-## 🚀 DEPLOYMENT STATUS
-
-- **Infrastructure**: ✅ Production-ready
-- **Security**: ✅ Authentication + authorization implemented  
-- **Performance**: ✅ Optimized builds + database queries
-- **Testing**: ✅ Comprehensive coverage (backend + frontend + E2E)
-- **Documentation**: ✅ Complete setup + architecture guides
-
-## 📋 NEXT PHASE OBJECTIVES
-
-### 🎨 **Immediate Tasks** (Week 1-2)
-- Frontend UX polish (toast improvements, loading states)
-- Mobile responsiveness refinement  
-- Accessibility audit + improvements
-
-### 🚀 **Feature Milestones** (Week 3-4)
-- Payment integration (Viva Wallet)
-- Multi-language support (Greek + English)
-- Advanced producer dashboard
-
-### 📊 **Growth Features** (Week 5-6+)
-- Analytics dashboard  
-- Advanced inventory management
-- Producer profile enhancements
-
-## 🎖️ BATTLE-TESTED SOLUTIONS
-
-### E2E Test Flakiness Resolution
-**Problem**: Playwright `waitForResponse` timeouts causing CI failures  
-**Solution**: Element-based waits instead of API timing dependency
-```typescript
-// ❌ Flaky approach
-await page.waitForResponse('/api/products', { timeout: 60000 })
-
-// ✅ Stable approach  
-await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 })
-```
-
-### TypeScript Optional Chaining for Context APIs
-**Problem**: Cannot invoke possibly undefined functions  
-**Solution**: Optional chaining operators for context methods
-```typescript
-// ❌ Runtime error potential
-setIntendedDestination(pathname)
-
-// ✅ Safe invocation
-setIntendedDestination?.(pathname)
-```
-
-### Frontend-Backend Integration
-**Problem**: CORS, authentication, API versioning complexity  
-**Solution**: Centralized API client with environment-based configuration
-```typescript
-const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
-  withAuth: (token: string) => ({ Authorization: `Bearer ${token}` })
-}
-```
-
----
-
-## 📚 COMPREHENSIVE DOCUMENTATION
-
-- **📋 Next Phase Roadmap**: `NEXT-PHASE-ROADMAP.md`
-- **⚡ Immediate Tasks**: `IMMEDIATE-TASKS.md`  
-- **🔧 API Documentation**: `backend/docs/API.md`
-- **🧪 E2E Test Guide**: `frontend/tests/e2e/README.md`
-
----
-
-**Repository**: https://github.com/lomendor/Project-Dixis  
-**Status**: ✅ **PRODUCTION READY** | **Phase**: Feature Development  
-**Architecture**: Full-Stack Marketplace με Modern CI/CD
-
-**🇬🇷 Dixis: Connecting Greek Producers με Consumers Through Technology!**
+## Key files
+- `backend/.env` - Database config
+- `backend/frontend/src/lib/api.ts` - API client με apiUrl helper
+- `backend/frontend/playwright.config.ts` - E2E test config
+- `.github/workflows/` - CI/CD workflows
+- `backend/database/seeders/` - Test data setup
