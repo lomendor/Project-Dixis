@@ -22,11 +22,11 @@ export default function Register() {
   // Redirect authenticated users away from register page
   useEffect(() => {
     if (isAuthenticated && user) {
-      const intendedDestination = getIntendedDestination();
-      clearIntendedDestination();
+      const intendedDestination = getIntendedDestination?.();
+      clearIntendedDestination?.();
       
       // Role-based redirect logic
-      const destination = intendedDestination !== '/' 
+      const destination = intendedDestination && intendedDestination !== '/' 
         ? intendedDestination 
         : user.role === 'producer' 
           ? '/producer/dashboard' 
