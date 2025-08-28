@@ -18,7 +18,7 @@ class E2EHelper {
 
   async loginUser(email: string, password: string) {
     // Navigate to Login via top-nav link instead of raw page.goto
-    await this.page.getByRole('link', { name: /login/i }).click();
+    await this.page.getByRole('link', { name: /login/i }).first().click();
     await expect(this.page).toHaveURL(/\/auth\/login/);
     await this.page.waitForLoadState('networkidle');
     
