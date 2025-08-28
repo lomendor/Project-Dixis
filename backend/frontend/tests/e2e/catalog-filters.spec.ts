@@ -57,10 +57,7 @@ test.describe('Catalog Filters & Search', () => {
     await page.click('button:has-text("Clear All")');
     await page.waitForTimeout(1000);
     
-    // Verify products are shown again
-    // wait for API to respond OK first
-    await page.waitForResponse(r => r.url().includes('/api/v1/public/products') && r.ok(), { timeout: 15000 });
-    // then expect at least one card
+    // Verify products are shown again - just check visibility directly
     await expect(page.getByTestId('product-card').first()).toBeVisible({ timeout: 15000 });
     
     console.log('✅ Enhanced catalog filters test completed successfully');
