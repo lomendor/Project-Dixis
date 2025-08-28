@@ -160,3 +160,4 @@ traces/
 
 # Keep test files accessible
 !/backend/frontend/tests/**
+backend/.env.testing.bak
