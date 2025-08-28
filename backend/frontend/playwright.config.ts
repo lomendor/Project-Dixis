@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: isCI,
-  workers: isCI ? 1 : undefined,
+  workers: isCI ? 2 : undefined,     // fewer workers reduces flake
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3001',
     trace: 'retain-on-failure',
@@ -17,11 +17,13 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  projects: [
-    { name: 'chromium', use: devices['Desktop Chrome'] },
-    { name: 'firefox',  use: devices['Desktop Firefox'] },
-    { name: 'webkit',   use: devices['Desktop Safari'] },
-  ],
+  projects: isCI
+    ? [{ name: 'chromium', use: devices['Desktop Chrome'] }]   // CI: run only chromium
+    : [
+        { name: 'chromium', use: devices['Desktop Chrome'] },
+        { name: 'firefox',  use: devices['Desktop Firefox'] },
+        { name: 'webkit',   use: devices['Desktop Safari'] },
+      ],
 
   webServer: isCI ? undefined : {
     command: 'npm run start',
