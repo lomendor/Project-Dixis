@@ -66,6 +66,9 @@ jobs:
         run: php artisan migrate:fresh --seed --env=testing
       - name: Run tests
         run: |
+          echo "🧪 Running shipping integration tests..."
+          php artisan test tests/Feature/Api/ShippingIntegrationTest.php --env=testing --testdox
+          
           if php artisan test --testsuite=Feature --group mvp --env=testing --testdox 2>/dev/null; then
             echo "✅ MVP feature tests passed"
           else

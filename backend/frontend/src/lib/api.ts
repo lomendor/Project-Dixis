@@ -418,11 +418,11 @@ class ApiClient {
   }
 
   async getOrders(): Promise<{ orders: Order[] }> {
-    return this.request<{ orders: Order[] }>('my/orders');
+    return this.request<{ orders: Order[] }>('orders');
   }
 
   async getOrder(id: number): Promise<Order> {
-    return this.request<Order>(`my/orders/${id}`);
+    return this.request<Order>(`orders/${id}`);
   }
 
   // Direct order creation (new V1 API)
