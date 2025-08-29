@@ -410,7 +410,7 @@ class ApiClient {
     city?: string;
     notes?: string;
   }): Promise<Order> {
-    const response = await this.request<{ order: Order }>('my/orders/checkout', {
+    const response = await this.request<{ order: Order }>('orders/checkout', {
       method: 'POST',
       body: JSON.stringify(data),
     });
