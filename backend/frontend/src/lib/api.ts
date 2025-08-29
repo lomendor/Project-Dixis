@@ -69,6 +69,11 @@ export interface Order {
   status: string;
   shipping_method: string;
   shipping_address?: string;
+  shipping_cost?: number;
+  shipping_carrier?: string;
+  shipping_eta_days?: number;
+  postal_code?: string;
+  city?: string;
   notes?: string;
   created_at: string;
   items: OrderItem[];
@@ -398,6 +403,11 @@ class ApiClient {
     payment_method?: string;
     shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
     shipping_address?: string;
+    shipping_cost?: number;
+    shipping_carrier?: string;
+    shipping_eta_days?: number;
+    postal_code?: string;
+    city?: string;
     notes?: string;
   }): Promise<Order> {
     const response = await this.request<{ order: Order }>('my/orders/checkout', {

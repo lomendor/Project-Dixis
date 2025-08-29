@@ -106,19 +106,48 @@ export default function Cart() {
   };
 
   const handleCheckout = async () => {
+    // Validate shipping information
+    if (!postalCode || postalCode.length < 5) {
+      showToast('error', 'Please enter a valid postal code (ΤΚ)');
+      return;
+    }
+
+    if (!city || city.trim().length < 2) {
+      showToast('error', 'Please enter a valid city name');
+      return;
+    }
+
+    if (!shippingQuote) {
+      showToast('error', 'Please wait for shipping calculation to complete');
+      return;
+    }
+
     try {
       setCheckingOut(true);
+      
+      // Create full shipping address
+      const shippingAddress = `${city}, ${postalCode}${user?.address ? `, ${user.address}` : ''}`;
+      
       const order = await apiClient.checkout({
         payment_method: 'cash_on_delivery',
-        shipping_address: user?.address || '',
-        notes: '',
+        shipping_method: 'COURIER',
+        shipping_address: shippingAddress,
+        shipping_cost: shippingQuote.cost,
+        shipping_carrier: shippingQuote.carrier,
+        shipping_eta_days: shippingQuote.etaDays,
+        postal_code: postalCode,
+        city: city,
+        notes: `Shipping Zone: ${shippingQuote.zone}`,
       });
+      
+      showToast('success', `Order created! ID: ${order.id}`);
       
       // Redirect to order confirmation page
       router.push(`/orders/${order.id}`);
     } catch (err) {
       console.error('Checkout failed:', err);
-      showToast('error', 'Checkout failed. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
+      showToast('error', errorMessage);
     } finally {
       setCheckingOut(false);
     }
@@ -407,10 +436,23 @@ export default function Cart() {
                 <button
                   data-testid="checkout-btn"
                   onClick={handleCheckout}
-                  disabled={checkingOut || cartItems.length === 0}
+                  disabled={
+                    checkingOut || 
+                    cartItems.length === 0 || 
+                    !postalCode || 
+                    postalCode.length < 5 || 
+                    !city || 
+                    city.trim().length < 2 ||
+                    !shippingQuote ||
+                    loadingShipping
+                  }
                   className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium"
                 >
-                  {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
+                  {checkingOut ? 'Processing...' : 
+                   loadingShipping ? 'Calculating shipping...' :
+                   !postalCode || !city ? 'Enter shipping info to continue' :
+                   !shippingQuote ? 'Enter valid ΤΚ and city' :
+                   'Proceed to Checkout'}
                 </button>
 
                 <p className="text-xs text-gray-500 mt-4 text-center">

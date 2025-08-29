@@ -184,11 +184,21 @@ export default function OrderDetails() {
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">€{parseFloat(order.total_amount).toFixed(2)}</span>
+                      <span className="font-medium">€{parseFloat(order.subtotal || order.total_amount).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping</span>
-                      <span className="font-medium">Free</span>
+                      <div className="text-right">
+                        <span className="font-medium">
+                          {order.shipping_cost ? `€${order.shipping_cost.toFixed(2)}` : 'Free'}
+                        </span>
+                        {order.shipping_carrier && (
+                          <div className="text-xs text-gray-500">{order.shipping_carrier}</div>
+                        )}
+                        {order.shipping_eta_days && (
+                          <div className="text-xs text-gray-500">{order.shipping_eta_days} day(s)</div>
+                        )}
+                      </div>
                     </div>
                     <div className="border-t border-gray-200 pt-3">
                       <div className="flex justify-between text-base font-semibold">
@@ -213,9 +223,23 @@ export default function OrderDetails() {
                       </p>
                     </div>
                     
+                    {(order.postal_code || order.city) && (
+                      <div>
+                        <span className="text-gray-600">Delivery Location:</span>
+                        <p className="font-medium">
+                          {order.city}{order.postal_code && `, ${order.postal_code}`}
+                        </p>
+                        {order.shipping_carrier && order.shipping_eta_days && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Via {order.shipping_carrier} • Estimated {order.shipping_eta_days} day(s)
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
                     {order.shipping_address && (
                       <div>
-                        <span className="text-gray-600">Shipping Address:</span>
+                        <span className="text-gray-600">Full Address:</span>
                         <p className="font-medium">
                           {order.shipping_address}
                         </p>
