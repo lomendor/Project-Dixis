@@ -34,6 +34,9 @@
 - **POST** `/api/v1/orders/checkout` - Checkout cart
 - **GET** `/api/v1/orders/{id}` - Get order details
 
+## Shipping (Rate Limited: 60/min)
+- **POST** `/api/v1/shipping/quote` - Calculate shipping cost and ETA
+
 ## Examples (curl)
 
 ### Health Check
@@ -72,9 +75,44 @@ curl http://127.0.0.1:8000/api/v1/public/products
 curl "http://127.0.0.1:8000/api/v1/public/products?search=ντομάτες&organic=true&min_price=2&max_price=5&producer=farm-koukoutsis"
 ```
 
+### Shipping Quote Calculation
+```bash
+# Athens Metro Zone (11xxx-12xxx postal codes)
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"zip":"11527","city":"Athens","weight":2.5,"volume":0.01}' \
+     http://127.0.0.1:8000/api/v1/shipping/quote
+
+# Response: {"carrier":"Athens Express","cost":4.20,"etaDays":1,"zone":"athens_metro"}
+
+# Thessaloniki Zone (54xxx-56xxx postal codes)  
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"zip":"54623","city":"Thessaloniki","weight":2.0,"volume":0.008}' \
+     http://127.0.0.1:8000/api/v1/shipping/quote
+
+# Response: {"carrier":"Northern Courier","cost":4.80,"etaDays":2,"zone":"thessaloniki"}
+
+# Greek Islands (80xxx-85xxx postal codes)
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"zip":"84600","city":"Mykonos","weight":1.5,"volume":0.005}' \
+     http://127.0.0.1:8000/api/v1/shipping/quote
+
+# Response: {"carrier":"Island Logistics","cost":10.56,"etaDays":4,"zone":"islands"}
+
+# Major Cities (20xxx-28xxx, 30xxx-38xxx postal codes)
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"zip":"26500","city":"Patras","weight":3.0,"volume":0.015}' \
+     http://127.0.0.1:8000/api/v1/shipping/quote
+
+# Response: {"carrier":"Greek Post","cost":6.30,"etaDays":3,"zone":"major_cities"}
+```
+
 ## Greek Market Features
 - Product filtering by Greek producers
 - Greek language support in messages
 - Local produce categories
 - Organic certification flags
 - Greek market-specific validation
+- **Greek shipping zones**: Athens Metro, Thessaloniki, Islands, Major Cities, Remote areas
+- **ΤΚ (Postal Code) validation** for accurate shipping calculations
+- **Weight/volume-based pricing** with Greek carrier partnerships
+- **Real-time shipping quotes** with ETA calculations
