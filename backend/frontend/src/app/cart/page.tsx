@@ -206,9 +206,22 @@ export default function Cart() {
       });
       
       setShippingQuote(quote);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to get shipping quote:', err);
-      showToast('error', 'Could not calculate shipping cost');
+      
+      // Handle specific error cases
+      const errorMessage = err.message || 'Could not calculate shipping cost';
+      
+      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        showToast('error', 'Too many requests. Please wait a moment and try again.');
+      } else if (errorMessage.includes('500') || errorMessage.includes('502') || errorMessage.includes('503')) {
+        showToast('error', 'Shipping service temporarily unavailable. Please try again.');
+      } else if (errorMessage.includes('400') || errorMessage.includes('422')) {
+        showToast('error', 'Invalid postal code or city. Please check your input.');
+      } else {
+        showToast('error', 'Could not calculate shipping cost. Please try again.');
+      }
+      
       setShippingQuote(null);
     } finally {
       setLoadingShipping(false);
