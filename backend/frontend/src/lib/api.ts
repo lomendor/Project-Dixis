@@ -101,6 +101,26 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface ShippingQuote {
+  carrier: string;
+  cost: number;
+  etaDays: number;
+  zone: string;
+  details?: {
+    zip: string;
+    city: string;
+    weight: number;
+    volume: number;
+  };
+}
+
+export interface ShippingQuoteRequest {
+  zip: string;
+  city: string;
+  weight: number;
+  volume: number;
+}
+
 export interface ProducerKpi {
   total_products: number;
   active_products: number;
@@ -362,6 +382,14 @@ class ApiClient {
   async clearCart(): Promise<void> {
     return this.request('cart/clear', {
       method: 'DELETE',
+    });
+  }
+
+  // Shipping methods
+  async getShippingQuote(data: ShippingQuoteRequest): Promise<ShippingQuote> {
+    return this.request<ShippingQuote>('shipping/quote', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 

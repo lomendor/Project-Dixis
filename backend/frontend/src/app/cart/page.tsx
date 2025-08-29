@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { apiClient, CartItem } from '@/lib/api';
+import { apiClient, CartItem, ShippingQuote } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorState from '@/components/ErrorState';
@@ -17,6 +17,10 @@ export default function Cart() {
   const [error, setError] = useState<string | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+  const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null);
+  const [loadingShipping, setLoadingShipping] = useState(false);
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
@@ -125,6 +129,71 @@ export default function Cart() {
   }, 0);
 
   const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Calculate weight and volume (MVP: simple estimates based on product type)
+  const calculateShippingMetrics = () => {
+    let weight = 0;
+    let volume = 0;
+    
+    cartItems.forEach(item => {
+      // MVP weight estimation: 0.3kg per kg for produce, 0.1kg for other items
+      const itemWeight = item.product.unit === 'kg' 
+        ? item.quantity * 0.3 // Assume 0.3kg per "kg" unit of produce
+        : item.quantity * 0.1; // Assume 0.1kg per item for other units
+      
+      // MVP volume estimation: 0.002 m³ per item (small package)
+      const itemVolume = item.quantity * 0.002;
+      
+      weight += itemWeight;
+      volume += itemVolume;
+    });
+    
+    return { 
+      weight: Math.max(0.1, weight), // Min 0.1kg
+      volume: Math.max(0.001, volume) // Min 0.001 m³
+    };
+  };
+
+  // Get shipping quote when postal code and city are provided
+  const getShippingQuote = async () => {
+    if (!postalCode || !city || cartItems.length === 0) {
+      setShippingQuote(null);
+      return;
+    }
+
+    if (postalCode.length < 5) {
+      return; // Wait for valid postal code
+    }
+
+    try {
+      setLoadingShipping(true);
+      const { weight, volume } = calculateShippingMetrics();
+      
+      const quote = await apiClient.getShippingQuote({
+        zip: postalCode,
+        city: city,
+        weight,
+        volume
+      });
+      
+      setShippingQuote(quote);
+    } catch (err) {
+      console.error('Failed to get shipping quote:', err);
+      showToast('error', 'Could not calculate shipping cost');
+      setShippingQuote(null);
+    } finally {
+      setLoadingShipping(false);
+    }
+  };
+
+  // Effect to get shipping quote when postal code or city changes
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      getShippingQuote();
+    }, 500); // Debounce API calls
+
+    return () => clearTimeout(debounceTimer);
+  }, [postalCode, city, cartItems]);
 
   if (authLoading || !isAuthenticated) {
     return null; // Show nothing during auth loading or redirect
@@ -267,6 +336,43 @@ export default function Cart() {
                   Order Summary
                 </h2>
                 
+                {/* Shipping Information */}
+                <div className="mb-6 space-y-4">
+                  <h3 className="text-sm font-medium text-gray-900">Shipping Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label htmlFor="postal-code" className="block text-xs font-medium text-gray-700 mb-1">
+                        Ταχυδρομικός Κώδικας (ΤΚ)
+                      </label>
+                      <input
+                        type="text"
+                        id="postal-code"
+                        value={postalCode}
+                        onChange={(e) => setPostalCode(e.target.value)}
+                        placeholder="11527"
+                        maxLength={5}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                        data-testid="postal-code-input"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="city" className="block text-xs font-medium text-gray-700 mb-1">
+                        Πόλη
+                      </label>
+                      <input
+                        type="text"
+                        id="city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="Athens"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                        data-testid="city-input"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Order Totals */}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Items ({totalItems})</span>
@@ -274,12 +380,26 @@ export default function Cart() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">Free</span>
+                    {loadingShipping ? (
+                      <span className="text-sm text-gray-500">Calculating...</span>
+                    ) : shippingQuote ? (
+                      <div className="text-right">
+                        <span className="font-medium">€{shippingQuote.cost.toFixed(2)}</span>
+                        <div className="text-xs text-gray-500">{shippingQuote.carrier}</div>
+                        <div className="text-xs text-gray-500">{shippingQuote.etaDays} day(s)</div>
+                      </div>
+                    ) : postalCode && city ? (
+                      <span className="text-sm text-gray-500">Enter valid ΤΚ</span>
+                    ) : (
+                      <span className="text-sm text-gray-500">Enter ΤΚ & city</span>
+                    )}
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-base font-semibold">
                       <span>Total</span>
-                      <span className="text-green-600">€{totalAmount.toFixed(2)}</span>
+                      <span className="text-green-600">
+                        €{(totalAmount + (shippingQuote?.cost || 0)).toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -294,7 +414,7 @@ export default function Cart() {
                 </button>
 
                 <p className="text-xs text-gray-500 mt-4 text-center">
-                  Payment on delivery. Free shipping on all orders.
+                  Payment on delivery. Shipping calculated based on location.
                 </p>
               </div>
             </div>
