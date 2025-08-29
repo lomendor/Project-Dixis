@@ -69,6 +69,11 @@ export interface Order {
   status: string;
   shipping_method: string;
   shipping_address?: string;
+  shipping_cost?: number;
+  shipping_carrier?: string;
+  shipping_eta_days?: number;
+  postal_code?: string;
+  city?: string;
   notes?: string;
   created_at: string;
   items: OrderItem[];
@@ -101,6 +106,26 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface ShippingQuote {
+  carrier: string;
+  cost: number;
+  etaDays: number;
+  zone: string;
+  details?: {
+    zip: string;
+    city: string;
+    weight: number;
+    volume: number;
+  };
+}
+
+export interface ShippingQuoteRequest {
+  zip: string;
+  city: string;
+  weight: number;
+  volume: number;
+}
+
 export interface ProducerKpi {
   total_products: number;
   active_products: number;
@@ -128,19 +153,43 @@ export interface TopProduct {
 
 // Helper functions for safe URL joining
 const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
-const trimBoth = (s: string) => s.replace(/\/+$/,'').replace(/^\/+/,'');
+
+// Enhanced URL trimming that handles multiple slashes and edge cases
+const trimBoth = (s: string) => {
+  if (!s || typeof s !== 'string') return '';
+  
+  // Handle protocol URLs specially (preserve :// in protocols)
+  if (s.includes('://')) {
+    const [protocol, rest] = s.split('://');
+    const cleanRest = rest.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
+    return `${protocol}://${cleanRest}`;
+  }
+  
+  // For non-protocol strings, remove leading and trailing slashes, collapse multiple slashes
+  return s.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
+};
+
 const BASE = trimBoth(RAW_BASE);
-export const apiUrl = (path: string) => `${BASE}/${trimBoth(path)}`;
+
+// Safe URL joining with validation and normalization
+export const apiUrl = (path: string) => {
+  if (!path || typeof path !== 'string') return BASE;
+  
+  const cleanPath = trimBoth(path);
+  if (!cleanPath) return BASE;
+  
+  // Handle absolute URLs passed as path
+  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+    return cleanPath;
+  }
+  
+  // Safe join with single slash
+  return `${BASE}/${cleanPath}`;
+};
 
 // Legacy functions for compatibility
 function trimSlashes(s: string): string {
   return s.replace(/\/+$/,'').replace(/^\/+/,'');
-}
-
-function legacyApiUrl(baseURL: string, path: string): string {
-  const base = trimSlashes(baseURL);
-  const p = trimSlashes(path);
-  return `${base}/${p}`;
 }
 
 class ApiClient {
@@ -148,8 +197,8 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8001/api/v1';
-    this.baseURL = trimSlashes(rawBase);
+    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
+    this.baseURL = trimBoth(rawBase);
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -341,11 +390,24 @@ class ApiClient {
     });
   }
 
+  // Shipping methods
+  async getShippingQuote(data: ShippingQuoteRequest): Promise<ShippingQuote> {
+    return this.request<ShippingQuote>('shipping/quote', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // Order methods
   async checkout(data: {
     payment_method?: string;
     shipping_method?: 'HOME' | 'PICKUP' | 'COURIER';
     shipping_address?: string;
+    shipping_cost?: number;
+    shipping_carrier?: string;
+    shipping_eta_days?: number;
+    postal_code?: string;
+    city?: string;
     notes?: string;
   }): Promise<Order> {
     const response = await this.request<{ order: Order }>('my/orders/checkout', {

@@ -1,191 +1,127 @@
-# PROJECT-DIXIS - CLEAN LARAVEL BOOTSTRAP
+# CLAUDE.md — Project Dixis (concise guide for Claude Code)
 
-**Clean Laravel 11 template** | **GitHub Actions CI/CD** | **Status**: ✅ GREEN
+## Objectives
+- Keep backend (Laravel, Postgres) + frontend (Next.js) consistent.
+- Make CI green and keep it green.
+- Prefer minimal diffs, idempotent DB patches, and stable E2E tests.
 
----
+## Invariants (treat as source of truth)
+- API base URL (local & CI): `http://127.0.0.1:8001/api/v1`
+- Frontend dev port: `3001`
+- Database: **PostgreSQL** only (no SQLite fallbacks)
+- Playwright artifacts: **save screenshots/videos only on failure**, retain 3 days
+- One server rule: πριν σηκώσεις οτιδήποτε, κλείσε πόρτες 3001/8001
 
-## 🎯 PURPOSE
+## Folder layout (monorepo)
+- `backend/` → Laravel API
+- `backend/frontend/` → Next.js app
+- `.github/workflows/` → CI (backend-ci.yml, frontend-ci.yml)
+- `backend/frontend/tests/e2e/` → Playwright specs
 
-**Project-Dixis** is a **production-ready Laravel 11 template** with working GitHub Actions CI/CD pipeline. Created as a **clean bootstrap reference** for new Laravel projects.
-
-## ✅ VERIFIED WORKING SETUP
-
-### 🚀 Tech Stack
-- **Laravel**: 11.45.2 (latest stable)
-- **PHP**: 8.2 with full extension support
-- **Database**: PostgreSQL 15 (production + CI)
-- **Testing**: PHPUnit with comprehensive health checks
-- **CI/CD**: GitHub Actions with PostgreSQL service containers
-
-### 🔧 Key Features
-- ✅ **Health Check API**: `/api/health` with database verification
-- ✅ **PostgreSQL Integration**: Service containers in CI
-- ✅ **Composer Caching**: Optimized dependency management
-- ✅ **Laravel 11 Routing**: Properly configured API routes
-- ✅ **Test Coverage**: 3 tests, 8 assertions passing
-- ✅ **Automated Deployment**: Push-to-deploy workflow
-
-## 📊 WORKING CONFIGURATION
-
-### GitHub Actions CI Pipeline
-```yaml
-# .github/workflows/backend-ci.yml
-✅ PostgreSQL 15 service container
-✅ PHP 8.2 + required extensions (pdo_pgsql, etc.)
-✅ Composer install with caching
-✅ Database migrations
-✅ PHPUnit test execution
-✅ Health endpoint verification
+## Backend rules (Laravel + Postgres)
+- Use `.env` (local) and GH Actions job env (CI) με:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=project_dixis_local # CI: project_dixis_test
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
-### Health Check Endpoint
-```php
-// /api/health response
-{
-  "status": "ok",
-  "database": "connected", 
-  "timestamp": "2025-08-24T09:05:04.016172Z",
-  "version": "11.45.2"
+- **Migrations**:
+  - `create_*` migrations: **χωρίς** FKs.
+  - Foreign keys μπαίνουν **σε later migration** και πάντα **idempotent**:
+    - `ALTER TABLE … DROP CONSTRAINT IF EXISTS …;` μετά `ADD CONSTRAINT …`.
+  - Patch columns με `Schema::hasColumn` guards (π.χ. money `decimal(10,2)`).
+- **Seeders**:
+  - Μην αλλάζεις enums/constraints για να "χωρέσουν" seed values. Διόρθωσε τους seeders.
+  - Αν χρειάζεται slug/unique, φτιάξε το στη δημιουργία (ή model booted()).
+
+## Frontend rules (Next.js)
+- **API URL join**: χρησιμοποίησε helper που καθαρίζει slashes, ώστε:
+  - `apiUrl('public/products')` → `http://127.0.0.1:8001/api/v1/public/products`
+- **Do not** σκληροκωδικοποιείς `api/v1/api/v1`. Πάντα relative paths στον helper.
+- Αν πρέπει να τρέξει σε single port dev, κλείσε πρώτα ό,τι τρέχει σε 3000/3001.
+
+## E2E (Playwright) rules
+- Περιμένουμε **κατάστασεις UI** (data-testid) — όχι αυθαίρετα timeouts.
+- Αν αποτυγχάνει για 404/empty data:
+  - Έλεγξε ότι τρέχει backend στο 8001 **και** ότι `NEXT_PUBLIC_API_BASE_URL` δείχνει σωστά.
+- Artifacts:
+```ts
+use: {
+  video: 'retain-on-failure',
+  screenshot: 'only-on-failure',
+  trace: 'retain-on-failure'
 }
 ```
 
-## 🛠️ QUICK START
+## Runbooks
 
-### Prerequisites
-- PHP 8.2+
-- PostgreSQL 15+
-- Composer
-
-### Setup Commands
+### Pre-flight (local, once per session)
+1. Κλείσε πόρτες:
 ```bash
-# Clone and setup
-git clone https://github.com/lomendor/Project-Dixis.git
-cd Project-Dixis/backend
-
-# Install dependencies
-composer install
-
-# Environment setup
-cp .env.example .env
-php artisan key:generate
-
-# Database
-php artisan migrate
-
-# Start server
-php artisan serve
+lsof -ti :3001 | xargs kill -9 || true
+lsof -ti :8001 | xargs kill -9 || true
 ```
 
-### Test Everything Works
+2. Backend:
 ```bash
-# Run tests
-php artisan test
-
-# Check health endpoint
-curl http://localhost:8000/api/health
+cd backend
+cp -n .env.example .env || true
+php artisan key:generate || true
+createdb -h 127.0.0.1 -U postgres project_dixis_local 2>/dev/null || true
+php artisan migrate:fresh --seed
+php artisan serve --host=127.0.0.1 --port=8001
 ```
 
-## 🧠 KEY KNOWLEDGE PATTERNS
-
-### 1. Laravel 11 API Routes Registration
-```php
-// bootstrap/app.php
-->withRouting(
-    web: __DIR__.'/../routes/web.php',
-    api: __DIR__.'/../routes/api.php',  // Required for API routes
-    commands: __DIR__.'/../routes/console.php',
-    health: '/up',
-)
+3. Frontend:
+```bash
+cd backend/frontend
+npm install
+NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
 ```
 
-### 2. CI Without Code Coverage (Critical Fix)
-```yaml
-# ❌ This fails in CI (no Xdebug/PCOV)
-php artisan test --coverage --min=80
-
-# ✅ This works in GitHub Actions
-php artisan test
+### E2E locally
+```bash
+cd backend/frontend
+NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npx playwright test
 ```
 
-### 3. PostgreSQL Service in GitHub Actions
-```yaml
-services:
-  postgres:
-    image: postgres:15
-    env:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    options: >-
-      --health-cmd pg_isready
-      --health-interval 10s
-      --health-timeout 5s
-      --health-retries 5
-    ports:
-      - 5432:5432
+## CI expectations
+- `backend-ci.yml`: στήνει Postgres service, γράφει testing .env, τρέχει migrate:fresh --seed, tests.
+- `frontend-ci.yml`:
+  - Σηκώνει API (Laravel) σε 8001 (artisan serve & migrate fresh)
+  - Τρέχει Next build ή dev server (προτιμότερο next build && next start για σταθερά timings)
+  - NEXT_PUBLIC_API_BASE_URL περασμένο στο job env
+  - Playwright με artifacts only-on-failure
+
+## When something fails
+- **404 on products**: πιθανό διπλό prefix ή λάθος base. Δες helper + env.
+- **42703 column missing**: πρόσθεσε 1 idempotent patch migration, μόνο αυτό.
+- **42710 duplicate FK/index**: DROP IF EXISTS πριν το ADD.
+- **Not null violation σε seeders**: φτιάξε τον seeder, όχι το constraint.
+
+## Quick commands
+```bash
+# Kill and restart everything
+lsof -ti :3001,:8001 | xargs kill -9; cd backend && php artisan serve --port=8001 &
+cd backend/frontend && npm run build && npm start -- -p 3001
+
+# Run specific test suite  
+npx playwright test mobile-navigation.spec.ts --project=chromium
+
+# Check API health
+curl http://localhost:8001/api/health
+
+# Fresh database
+php artisan migrate:fresh --seed
 ```
 
-### 4. Health Check Pattern
-```php
-Route::get('/health', function () {
-    try {
-        DB::connection()->getPdo();
-        $dbStatus = 'connected';
-    } catch (\Exception $e) {
-        $dbStatus = 'failed: ' . $e->getMessage();
-    }
-
-    return response()->json([
-        'status' => 'ok',
-        'database' => $dbStatus,
-        'timestamp' => now()->toISOString(),
-        'version' => app()->version(),
-    ]);
-});
-```
-
-## 📈 SUCCESS METRICS
-
-- **GitHub Actions**: ✅ GREEN (3 tests passed)
-- **Health Endpoint**: ✅ Responding with database connection
-- **Laravel Version**: 11.45.2 (latest)
-- **Database**: PostgreSQL connected
-- **CI Duration**: ~48 seconds end-to-end
-
-## 🔄 WORKFLOW TRIGGERS
-
-- **Push to main**: Automatic testing
-- **Pull Requests**: Pre-merge validation  
-- **Manual Dispatch**: On-demand testing
-- **Path Filtering**: Only triggers on `backend/**` changes
-
-## 📚 DOCUMENTATION
-
-- **CI/CD Patterns**: `docs/CI-CD-PATTERNS.md`
-- **Workflow Notes**: `.github/WORKFLOW-NOTES.md`
-- **Main Project**: `../Dixis Project 2/CLAUDE.md`
-
-## 🎖️ BATTLE-TESTED SOLUTIONS
-
-### Issue: "Code coverage driver not available"
-**Solution**: Remove `--coverage` flags from CI tests
-```yaml
-- name: Execute tests
-  run: php artisan test  # Not: php artisan test --coverage
-```
-
-### Issue: Laravel 11 API routes not working
-**Solution**: Register API routes in `bootstrap/app.php`
-```php
-api: __DIR__.'/../routes/api.php',
-```
-
-### Issue: PostgreSQL connection in CI
-**Solution**: Use service container with proper health checks
-
----
-
-**Repository**: https://github.com/lomendor/Project-Dixis  
-**Status**: ✅ Production Ready | **Created**: 2025-08-24  
-**Purpose**: Clean Laravel 11 bootstrap template with CI/CD
-
-**🏆 Use this as a template for new Laravel projects with confidence!**
+## Key files
+- `backend/.env` - Database config
+- `backend/frontend/src/lib/api.ts` - API client με apiUrl helper
+- `backend/frontend/playwright.config.ts` - E2E test config
+- `.github/workflows/` - CI/CD workflows
+- `backend/database/seeders/` - Test data setup
