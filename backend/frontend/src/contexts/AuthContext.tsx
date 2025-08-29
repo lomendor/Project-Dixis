@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, apiClient } from '@/lib/api';
+import { useToast } from './ToastContext';
 
 interface AuthContextType {
   user: User | null;
@@ -28,6 +29,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [registerLoading, setRegisterLoading] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -59,9 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔑 AuthContext: API login response:', response);
       console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
+      showToast('success', `Welcome back, ${response.user.name}!`);
       console.log('🔑 AuthContext: Login completed successfully');
     } catch (error) {
       console.error('🔑 AuthContext: Login error:', error);
+      const message = error instanceof Error ? error.message : 'Login failed. Please check your credentials.';
+      showToast('error', message);
       throw error;
     }
   };
@@ -74,19 +80,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: 'consumer' | 'producer';
   }) => {
     try {
+      setRegisterLoading(true);
       const response = await apiClient.register(data);
       setUser(response.user);
+      showToast('success', `Welcome to Project Dixis, ${response.user.name}!`);
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      showToast('error', message);
       throw error;
+    } finally {
+      setRegisterLoading(false);
     }
   };
 
   const logout = async () => {
     try {
       await apiClient.logout();
+      showToast('info', 'You have been logged out successfully');
     } catch (error) {
       // Ignore logout errors and proceed with clearing local state
       console.error('Logout error:', error);
+      showToast('info', 'You have been logged out');
     }
     
     setUser(null);
@@ -95,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     loading,
+    registerLoading,
     login,
     register,
     logout,

@@ -37,8 +37,8 @@ test('filters and search - apply search filter', async ({ page }) => {
       const firstTitle = await productTitles.first().textContent();
       expect(firstTitle?.toLowerCase()).toContain('πορτοκάλια');
     } else {
-      // Check for "no results" message
-      const noResultsMessage = page.locator('[data-testid="no-results"], .no-results, :has-text("no products found")');
+      // Check for "no results" message (use first specific match)
+      const noResultsMessage = page.locator('h3:has-text("No products found")').first();
       await expect(noResultsMessage).toBeVisible({ timeout: 5000 });
     }
     

@@ -20,9 +20,12 @@ export default function LoadingSpinner({
     : 'flex flex-col items-center justify-center py-12';
 
   return (
-    <div className={containerClass}>
-      <div className={`animate-spin rounded-full ${spinnerSizes[size]} border-b-2 border-green-600 mb-4`}></div>
-      <p className="text-gray-600 text-sm font-medium">{text}</p>
+    <div className={containerClass} data-testid="loading-spinner">
+      <div 
+        className={`animate-spin rounded-full ${spinnerSizes[size]} border-b-2 border-green-600 mb-4`}
+        data-testid="loading-spinner-icon"
+      ></div>
+      <p className="text-gray-600 text-sm font-medium" data-testid="loading-spinner-text">{text}</p>
     </div>
   );
 }
