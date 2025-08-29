@@ -69,7 +69,7 @@ frontend/
 4. **Configure environment variables**:
    ```env
    # .env.local
-   NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000
+   NEXT_PUBLIC_API_BASE=http://127.0.0.1:8001
    ```
 
 5. **Start development server**:
@@ -148,7 +148,7 @@ The frontend includes GitHub Actions CI pipeline (`.github/workflows/frontend-ci
 
 ## 🔗 Integration with Backend
 
-The frontend expects the Laravel backend to be running on `http://127.0.0.1:8000` (configurable via `NEXT_PUBLIC_API_BASE`).
+The frontend expects the Laravel backend to be running on `http://127.0.0.1:8001` (configurable via `NEXT_PUBLIC_API_BASE`).
 
 **Required Backend Endpoints**:
 - `POST /api/auth/register` - User registration

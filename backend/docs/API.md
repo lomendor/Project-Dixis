@@ -41,38 +41,38 @@
 
 ### Health Check
 ```bash
-curl -i http://127.0.0.1:8000/api/v1/health
+curl -i http://127.0.0.1:8001/api/v1/health
 ```
 
 ### Producer KPIs (requires auth)
 ```bash
-curl -H "Authorization: Bearer <token>" http://127.0.0.1:8000/api/v1/producer/dashboard/kpi
+curl -H "Authorization: Bearer <token>" http://127.0.0.1:8001/api/v1/producer/dashboard/kpi
 ```
 
 ### Toggle Product Status
 ```bash
-curl -X PATCH -H "Authorization: Bearer <token>" http://127.0.0.1:8000/api/v1/producer/products/123/toggle
+curl -X PATCH -H "Authorization: Bearer <token>" http://127.0.0.1:8001/api/v1/producer/products/123/toggle
 ```
 
 ### Mark Message as Read
 ```bash
-curl -X PATCH -H "Authorization: Bearer <token>" http://127.0.0.1:8000/api/v1/producer/messages/10/read
+curl -X PATCH -H "Authorization: Bearer <token>" http://127.0.0.1:8001/api/v1/producer/messages/10/read
 ```
 
 ### Reply to Message
 ```bash
 curl -X POST -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
      -d '{"content":"Καλημέρα!"}' \
-     http://127.0.0.1:8000/api/v1/producer/messages/10/replies
+     http://127.0.0.1:8001/api/v1/producer/messages/10/replies
 ```
 
 ### Product Catalog with Filters
 ```bash
 # Basic product list
-curl http://127.0.0.1:8000/api/v1/public/products
+curl http://127.0.0.1:8001/api/v1/public/products
 
 # With filters
-curl "http://127.0.0.1:8000/api/v1/public/products?search=ντομάτες&organic=true&min_price=2&max_price=5&producer=farm-koukoutsis"
+curl "http://127.0.0.1:8001/api/v1/public/products?search=ντομάτες&organic=true&min_price=2&max_price=5&producer=farm-koukoutsis"
 ```
 
 ### Shipping Quote Calculation
@@ -80,28 +80,28 @@ curl "http://127.0.0.1:8000/api/v1/public/products?search=ντομάτες&organ
 # Athens Metro Zone (11xxx-12xxx postal codes)
 curl -X POST -H "Content-Type: application/json" \
      -d '{"zip":"11527","city":"Athens","weight":2.5,"volume":0.01}' \
-     http://127.0.0.1:8000/api/v1/shipping/quote
+     http://127.0.0.1:8001/api/v1/shipping/quote
 
 # Response: {"carrier":"Athens Express","cost":4.20,"etaDays":1,"zone":"athens_metro"}
 
 # Thessaloniki Zone (54xxx-56xxx postal codes)  
 curl -X POST -H "Content-Type: application/json" \
      -d '{"zip":"54623","city":"Thessaloniki","weight":2.0,"volume":0.008}' \
-     http://127.0.0.1:8000/api/v1/shipping/quote
+     http://127.0.0.1:8001/api/v1/shipping/quote
 
 # Response: {"carrier":"Northern Courier","cost":4.80,"etaDays":2,"zone":"thessaloniki"}
 
 # Greek Islands (80xxx-85xxx postal codes)
 curl -X POST -H "Content-Type: application/json" \
      -d '{"zip":"84600","city":"Mykonos","weight":1.5,"volume":0.005}' \
-     http://127.0.0.1:8000/api/v1/shipping/quote
+     http://127.0.0.1:8001/api/v1/shipping/quote
 
 # Response: {"carrier":"Island Logistics","cost":10.56,"etaDays":4,"zone":"islands"}
 
 # Major Cities (20xxx-28xxx, 30xxx-38xxx postal codes)
 curl -X POST -H "Content-Type: application/json" \
      -d '{"zip":"26500","city":"Patras","weight":3.0,"volume":0.015}' \
-     http://127.0.0.1:8000/api/v1/shipping/quote
+     http://127.0.0.1:8001/api/v1/shipping/quote
 
 # Response: {"carrier":"Greek Post","cost":6.30,"etaDays":3,"zone":"major_cities"}
 ```
