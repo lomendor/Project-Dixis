@@ -44,7 +44,7 @@ jobs:
       PW_TEST_TIMEOUT: 30000
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       # Backend setup
       - name: Setup PHP
