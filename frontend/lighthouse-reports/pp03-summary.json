@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-08-31T16:56:53.777Z",
+  "overallScore": 82,
+  "results": {
+    "home": {
+      "performance": 68,
+      "accessibility": 93,
+      "bestPractices": 96,
+      "seo": 91
+    },
+    "product-detail": {
+      "performance": 52,
+      "accessibility": 95,
+      "bestPractices": 96,
+      "seo": 91
+    },
+    "cart": {
+      "performance": 52,
+      "accessibility": 95,
+      "bestPractices": 100,
+      "seo": 66
+    },
+    "analytics-dashboard": {
+      "performance": 53,
+      "accessibility": 95,
+      "bestPractices": 100,
+      "seo": 66
+    }
+  }
+}
