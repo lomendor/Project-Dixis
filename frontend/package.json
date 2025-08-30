@@ -2,6 +2,10 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -38,7 +42,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^7.2.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

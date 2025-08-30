@@ -1,0 +1,147 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Don't block the build
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dixis_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install backend dependencies
+        run: cd backend && composer install --no-progress --prefer-dist --optimize-autoloader
+        
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+        
+      - name: Setup backend environment
+        run: |
+          cd backend
+          cp .env.example .env
+          php artisan key:generate
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_DATABASE=dixis_test" >> .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+        
+      - name: Setup database
+        run: cd backend && php artisan migrate:fresh --seed
+        
+      - name: Start backend server
+        run: cd backend && php artisan serve --host=127.0.0.1 --port=8001 &
+        
+      - name: Build and start frontend
+        run: |
+          cd frontend
+          npm run build
+          npm run start &
+        
+      - name: Wait for services
+        run: |
+          npx wait-on http://127.0.0.1:8001/api/health --timeout 60000
+          npx wait-on http://127.0.0.1:3001 --timeout 60000
+        
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+        
+      - name: Run Lighthouse CI
+        run: |
+          cd frontend
+          lhci autorun --upload.target=temporary-public-storage --collect.url=http://127.0.0.1:3001
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: |
+            frontend/.lighthouseci/
+          retention-days: 7
+          
+      - name: Comment Lighthouse results on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            try {
+              const reportPath = path.join('frontend', '.lighthouseci');
+              if (fs.existsSync(reportPath)) {
+                // Read the latest lighthouse report
+                const files = fs.readdirSync(reportPath).filter(f => f.endsWith('.json'));
+                if (files.length > 0) {
+                  const reportFile = path.join(reportPath, files[files.length - 1]);
+                  const report = JSON.parse(fs.readFileSync(reportFile));
+                  
+                  const scores = {
+                    performance: Math.round(report.categories.performance.score * 100),
+                    accessibility: Math.round(report.categories.accessibility.score * 100),
+                    'best-practices': Math.round(report.categories['best-practices'].score * 100),
+                    seo: Math.round(report.categories.seo.score * 100)
+                  };
+                  
+                  const body = `## 🏍️ Lighthouse Report
+                  
+| Category | Score | Status |
+|----------|-------|---------|
+| 🚀 Performance | ${scores.performance}% | ${scores.performance >= 70 ? '✅' : '⚠️'} |
+| 🎯 Accessibility | ${scores.accessibility}% | ${scores.accessibility >= 90 ? '✅' : '⚠️'} |
+| 🛡️ Best Practices | ${scores['best-practices']}% | ${scores['best-practices'] >= 80 ? '✅' : '⚠️'} |
+| 🔍 SEO | ${scores.seo}% | ${scores.seo >= 90 ? '✅' : '⚠️'} |
+
+*Targets: Performance ≥ 70, Accessibility ≥ 90 (currently warnings only)*
+
+[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+                  
+                  github.rest.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body
+                  });
+                } else {
+                  console.log('No Lighthouse report files found');
+                }
+              } else {
+                console.log('Lighthouse report directory not found');
+              }
+            } catch (error) {
+              console.error('Error processing Lighthouse report:', error);
+            }
