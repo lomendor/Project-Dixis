@@ -15,7 +15,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
+          POSTGRES_DB: project_dixis_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -48,7 +48,7 @@ jobs:
           echo "DB_CONNECTION=pgsql" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=dixis_test" >> .env
+          echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
         
@@ -102,7 +102,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
+          POSTGRES_DB: project_dixis_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -144,7 +144,7 @@ jobs:
           echo "DB_CONNECTION=pgsql" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=dixis_test" >> .env
+          echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
         
