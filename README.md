@@ -106,7 +106,16 @@ When E2E tests fail in CI, comprehensive artifacts are automatically uploaded:
    npx playwright show-trace test-results/[test-name]/trace.zip
    ```
 
-3. **Trace Viewer Features**:
+3. **Open HTML Report** (Overview of all tests):
+   ```bash
+   # Download playwright-report-[run-id]-[branch] artifact
+   unzip playwright-report-[run-id]-[branch].zip
+   
+   # Open interactive HTML report
+   npx playwright show-report playwright-report/
+   ```
+
+4. **Trace Viewer Features**:
    - **Timeline**: Visual step-by-step execution
    - **Screenshots**: Before/after each action
    - **Network**: API calls and responses  
@@ -126,9 +135,10 @@ When E2E tests fail in CI, comprehensive artifacts are automatically uploaded:
    ```
 
 **Artifact Retention**:
-- ✅ **Success runs**: 2-3 days (traces + reports)
+- ✅ **Success runs**: 3 days (traces + HTML reports)
 - ❌ **Failed runs**: 7 days (full artifacts + media)
-- 🎥 **Videos/Screenshots**: Only on failures
+- 🎥 **Videos/Screenshots**: Only on failures (7 days)
+- 📊 **HTML Reports**: Always available (3-7 days)
 
 ## 📡 API Documentation
 

@@ -190,24 +190,28 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:3001
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       
-      # ENHANCED: Comprehensive artifact uploads with proper naming
-      - name: Upload Playwright Report (always)
+      # ENHANCED: Comprehensive artifact uploads with dual retention policies
+      - name: Upload Complete Playwright Report (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-${{ github.run_id }}-${{ github.ref_name }}
-          path: backend/frontend/playwright-report/
-          retention-days: ${{ failure() && 7 || 2 }}
+          path: |
+            backend/frontend/playwright-report/
+            backend/frontend/playwright-report/**
+          retention-days: ${{ failure() && 7 || 3 }}
       
-      - name: Upload E2E Test Results (always) 
+      - name: Upload E2E Test Results with Traces (always) 
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-results-${{ github.run_id }}-${{ github.ref_name }}
-          path: backend/frontend/test-results/
-          retention-days: ${{ failure() && 7 || 2 }}
+          path: |
+            backend/frontend/test-results/
+            backend/frontend/test-results/**/trace.zip
+          retention-days: ${{ failure() && 7 || 3 }}
       
-      - name: Upload E2E Videos and Screenshots (on failure)
+      - name: Upload E2E Media (failure only)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -218,10 +222,12 @@ jobs:
             backend/frontend/playwright-report/**/*.png
           retention-days: 7
       
-      - name: Upload E2E Traces (always, essential for debugging)
+      - name: Upload E2E Traces (always - essential debugging)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-traces-${{ github.run_id }}-${{ github.ref_name }}
-          path: backend/frontend/test-results/**/*.zip
+          path: |
+            backend/frontend/test-results/**/*.zip
+            backend/frontend/test-results/**/trace.zip
           retention-days: ${{ failure() && 7 || 3 }}

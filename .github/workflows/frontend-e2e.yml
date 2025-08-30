@@ -143,26 +143,29 @@ jobs:
       - name: Run E2E
         run: npx playwright test
       
-      # ENHANCED: Comprehensive artifact uploads for better debugging
-      - name: Upload Playwright Report (always)
+      # ENHANCED: Complete artifact collection with dual retention policies
+      - name: Upload Complete Playwright Report (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-playwright-report-${{ github.run_id }}-${{ github.ref_name }}
-          path: backend/frontend/playwright-report/
-          retention-days: ${{ failure() && 7 || 2 }}
+          path: |
+            backend/frontend/playwright-report/
+            backend/frontend/playwright-report/**
+          retention-days: ${{ failure() && 7 || 3 }}
 
-      - name: Upload Test Results and Traces (always)
+      - name: Upload Test Results with All Traces (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-artifacts-${{ github.run_id }}-${{ github.ref_name }}
           path: |
             backend/frontend/test-results/
+            backend/frontend/test-results/**/trace.zip
             backend/frontend/playwright-report/**/*.zip
           retention-days: ${{ failure() && 7 || 3 }}
       
-      - name: Upload Videos and Screenshots (on failure)
+      - name: Upload E2E Media (failure only)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
