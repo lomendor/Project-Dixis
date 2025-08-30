@@ -70,25 +70,30 @@ test.describe('Analytics & Observability', () => {
     await page.goto('/test-error');
     await page.waitForLoadState('networkidle');
 
-    // Click to show events
-    const showEventsButton = page.getByRole('button', { name: /show events/i });
-    await showEventsButton.click();
+    // Should show events count button (may be Show or Hide depending on initial state)
+    const eventsButton = page.getByTestId('events-count');
+    await expect(eventsButton).toBeVisible();
+
+    // Click to show events if not already visible
+    await eventsButton.click();
+    await page.waitForTimeout(500); // Small delay for UI update
 
     // Should show events container (use the h3 heading)
     const eventsContainer = page.getByRole('heading', { name: 'Analytics Events:' });
     await expect(eventsContainer).toBeVisible();
-
-    // Take screenshot showing events
+    
+    // Take screenshot showing events interface
     await page.screenshot({ path: 'test-results/analytics-events-display.png' });
 
-    // Test clear events
-    await page.getByRole('button', { name: /clear events/i }).click();
+    // Test clear events functionality - click the Clear Events button
+    const clearButton = page.getByRole('button', { name: /clear events/i });
+    await clearButton.click();
     
-    // Show events again to verify they were cleared
-    await page.getByRole('button', { name: /show events/i }).click();
+    // Give a moment for the clear operation to complete and UI to update
+    await page.waitForTimeout(1000);
     
-    // Events should be cleared - verify the button shows 0 events
-    await expect(page.getByRole('button', { name: /show events \(0\)/i })).toBeVisible();
+    // The events count should update to show 0
+    await expect(eventsButton).toContainText('(0)');
     
     await page.screenshot({ path: 'test-results/analytics-events-cleared.png' });
   });

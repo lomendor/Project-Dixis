@@ -73,6 +73,11 @@ class AnalyticsService {
     this.sessionId = this.generateSessionId();
     this.loadStoredEvents();
     
+    // Expose to global for testing
+    if (typeof window !== 'undefined') {
+      (window as any).__ANALYTICS = this.events;
+    }
+    
     // In development, log to console by default
     if (process.env.NODE_ENV === 'development') {
       this.enableConsoleLogging();
@@ -141,6 +146,11 @@ class AnalyticsService {
 
     this.events.push(enrichedEvent);
     this.persistEvents();
+    
+    // Expose to global for testing
+    if (typeof window !== 'undefined') {
+      (window as any).__ANALYTICS = this.events;
+    }
 
     // Forward to external analytics if configured
     this.forwardToExternalServices(enrichedEvent);
@@ -252,6 +262,8 @@ class AnalyticsService {
     this.events = [];
     if (typeof window !== 'undefined') {
       localStorage.removeItem('dixis_analytics_events');
+      // Expose to global for testing
+      (window as any).__ANALYTICS = this.events;
     }
   }
 
@@ -287,5 +299,6 @@ export function useAnalytics() {
     getEvents: analytics.getEvents.bind(analytics),
     getSessionId: analytics.getSessionId.bind(analytics),
     clearEvents: analytics.clearEvents.bind(analytics),
+    exportEvents: analytics.exportEvents.bind(analytics),
   };
 }

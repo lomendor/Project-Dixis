@@ -38,7 +38,8 @@ export default function TestErrorPage() {
   const handleClearEvents = () => {
     clearEvents();
     setEvents([]);
-    setShowEvents(false);
+    // Keep events panel open to show empty state
+    setShowEvents(true);
   };
 
   const handleDownloadEvents = () => {
@@ -126,6 +127,7 @@ export default function TestErrorPage() {
             <button
               onClick={handleShowEvents}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              data-testid="events-count"
             >
               {showEvents ? 'Hide Events' : 'Show Events'} ({getEvents().length})
             </button>
