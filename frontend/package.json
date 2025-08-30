@@ -43,7 +43,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --max-warnings=0",
-      "tsc --noEmit"
+      "tsc -p tsconfig.json --noEmit"
     ]
   }
 }
