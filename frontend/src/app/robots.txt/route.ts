@@ -1,5 +1,3 @@
-import { MetadataRoute } from 'next';
-
 export function GET(): Response {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
   
@@ -36,40 +34,4 @@ Sitemap: ${siteUrl}/sitemap.xml`;
       'Content-Type': 'text/plain',
     },
   });
-}
-
-export async function robots(): Promise<MetadataRoute.Robots> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
-  
-  return {
-    rules: [
-      {
-        userAgent: '*',
-        allow: [
-          '/',
-          '/products',
-          '/producers', 
-          '/auth/login',
-          '/auth/register',
-        ],
-        disallow: [
-          '/admin',
-          '/api',
-          '/producer/dashboard',
-          '/b2b',
-          '/test-error',
-          '/_next',
-          '/checkout',
-          '/cart',
-        ],
-        crawlDelay: 1,
-      },
-      {
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/admin', '/api'],
-      },
-    ],
-    sitemap: `${siteUrl}/sitemap.xml`,
-  };
 }

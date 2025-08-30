@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatCurrency } from '@/env';
 
 interface StatsCard {
   title: string;
@@ -61,10 +60,13 @@ export default function ProducerDashboard() {
     return null; // Will redirect in useEffect
   }
 
+  const formatCurrency = (amount: string | number) => {
+    return `€${parseFloat(amount.toString()).toFixed(2)}`;
+  };
 
   const statsCards: StatsCard[] = stats ? [
     {
-      title: 'Σύνολο Παραγγελιών',
+      title: 'Total Orders',
       value: stats.total_orders.toString(),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,8 +75,8 @@ export default function ProducerDashboard() {
       ),
     },
     {
-      title: 'Συνολικά Έσοδα',
-      value: formatCurrency(parseFloat(stats.total_revenue)),
+      title: 'Total Revenue',
+      value: formatCurrency(stats.total_revenue),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -82,7 +84,7 @@ export default function ProducerDashboard() {
       ),
     },
     {
-      title: 'Ενεργά Προϊόντα',
+      title: 'Active Products',
       value: stats.active_products.toString(),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,8 +93,8 @@ export default function ProducerDashboard() {
       ),
     },
     {
-      title: 'Μέση Αξία Παραγγελίας',
-      value: formatCurrency(parseFloat(stats.average_order_value)),
+      title: 'Average Order Value',
+      value: formatCurrency(stats.average_order_value),
       icon: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -109,10 +111,10 @@ export default function ProducerDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Ταμπλό Παραγωγού
+            Producer Dashboard
           </h1>
           <p className="text-gray-600">
-            Καλώς ήρθατε, {user?.name}! Εδώ είναι η επισκόπηση της επιχείρησής σας.
+            Welcome back, {user?.name}! Here&rsquo;s an overview of your business.
           </p>
         </div>
 
@@ -127,7 +129,7 @@ export default function ProducerDashboard() {
               onClick={loadDashboardData}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
             >
-              Δοκιμάστε Ξανά
+              Try Again
             </button>
           </div>
         ) : (
@@ -158,13 +160,13 @@ export default function ProducerDashboard() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Κορυφαία Προϊόντα
+                    Top Performing Products
                   </h2>
                   <Link
                     href="/producer/products"
                     className="text-sm text-green-600 hover:text-green-700 font-medium"
                   >
-                    Προβολή Όλων των Προϊόντων →
+                    View All Products →
                   </Link>
                 </div>
 
@@ -176,13 +178,13 @@ export default function ProducerDashboard() {
                       </svg>
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Δεν υπάρχουν ακόμη προϊόντα
+                      No products yet
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      Ξεκινήστε προσθέτοντας το πρώτο σας προϊόν για να ξεκινήσετε την πώληση.
+                      Start by adding your first product to begin selling.
                     </p>
                     <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
-                      Προσθήκη Προϊόντος
+                      Add Product
                     </button>
                   </div>
                 ) : (
@@ -191,16 +193,16 @@ export default function ProducerDashboard() {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Προϊόν
+                            Product
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Τιμή
+                            Price
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Απόθεμα
+                            Stock
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Κατάσταση
+                            Status
                           </th>
                         </tr>
                       </thead>
@@ -218,7 +220,7 @@ export default function ProducerDashboard() {
                                     />
                                   ) : (
                                     <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">
-                                      <span className="text-xs text-gray-400">Χωρίς Εικόνα</span>
+                                      <span className="text-xs text-gray-400">No Image</span>
                                     </div>
                                   )}
                                 </div>
@@ -236,7 +238,7 @@ export default function ProducerDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-gray-900">
-                                {formatCurrency(parseFloat(product.price))} / {product.unit}
+                                {formatCurrency(product.price)} / {product.unit}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -244,13 +246,13 @@ export default function ProducerDashboard() {
                                 {product.stock !== null ? (
                                   `${product.stock} ${product.unit}(s)`
                                 ) : (
-                                  'Σε Απόθεμα'
+                                  'In Stock'
                                 )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                Ενεργό
+                                Active
                               </span>
                             </td>
                           </tr>
@@ -265,21 +267,21 @@ export default function ProducerDashboard() {
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Γρήγορες Ενέργειες
+                Quick Actions
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                   <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">Προσθήκη Προϊόντος</span>
+                  <span className="text-sm font-medium text-gray-900">Add Product</span>
                 </button>
                 
                 <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                   <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">Προβολή Παραγγελιών</span>
+                  <span className="text-sm font-medium text-gray-900">View Orders</span>
                 </button>
                 
                 <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
@@ -287,7 +289,7 @@ export default function ProducerDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">Ρυθμίσεις</span>
+                  <span className="text-sm font-medium text-gray-900">Settings</span>
                 </button>
               </div>
             </div>
