@@ -3,8 +3,17 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import ToastContainer from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import SkipLink from "@/components/SkipLink";
+import EnvironmentError from "@/components/EnvironmentError";
+import { 
+  SITE_URL, 
+  DEFAULT_LOCALE,
+  GOOGLE_SITE_VERIFICATION,
+  FACEBOOK_DOMAIN_VERIFICATION 
+} from "@/env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,10 +25,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Project Dixis - Local Producer Marketplace",
     template: "%s | Project Dixis"
@@ -37,7 +44,7 @@ export const metadata: Metadata = {
     "sustainable agriculture",
     "direct from farm"
   ],
-  authors: [{ name: "Project Dixis Team", url: siteUrl }],
+  authors: [{ name: "Project Dixis Team", url: SITE_URL }],
   creator: "Project Dixis",
   publisher: "Project Dixis",
   category: "Food & Agriculture",
@@ -55,20 +62,20 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'el_GR',
-    url: siteUrl,
+    locale: DEFAULT_LOCALE,
+    url: SITE_URL,
     siteName: 'Project Dixis',
     title: 'Project Dixis - Local Producer Marketplace',
     description: 'Connect with local producers and discover fresh, quality products in your area. Support local farmers and enjoy premium organic produce.',
     images: [
       {
-        url: `${siteUrl}/og-image.jpg`,
+        url: `${SITE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: 'Project Dixis - Fresh Local Products',
       },
       {
-        url: `${siteUrl}/og-image-square.jpg`,
+        url: `${SITE_URL}/og-image-square.jpg`,
         width: 1200,
         height: 1200,
         alt: 'Project Dixis Logo',
@@ -81,19 +88,19 @@ export const metadata: Metadata = {
     creator: '@projectdixis',
     title: 'Project Dixis - Local Producer Marketplace',
     description: 'Connect with local producers and discover fresh, quality products in your area.',
-    images: [`${siteUrl}/twitter-image.jpg`],
+    images: [`${SITE_URL}/twitter-image.jpg`],
   },
   alternates: {
-    canonical: siteUrl,
+    canonical: SITE_URL,
     languages: {
-      'el-GR': `${siteUrl}/el`,
-      'en-US': `${siteUrl}/en`,
+      'el-GR': `${SITE_URL}/el`,
+      'en-US': `${SITE_URL}/en`,
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    google: GOOGLE_SITE_VERIFICATION,
     other: {
-      'facebook-domain-verification': process.env.NEXT_PUBLIC_FACEBOOK_DOMAIN_VERIFICATION || '',
+      'facebook-domain-verification': FACEBOOK_DOMAIN_VERIFICATION,
     },
   },
 };
@@ -109,7 +116,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="el-GR">
+    <html lang={DEFAULT_LOCALE}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -122,22 +129,22 @@ export default function RootLayout({
               '@type': 'WebSite',
               name: 'Project Dixis',
               description: 'Local Producer Marketplace connecting farmers with consumers',
-              url: siteUrl,
+              url: SITE_URL,
               potentialAction: {
                 '@type': 'SearchAction',
                 target: {
                   '@type': 'EntryPoint',
-                  urlTemplate: `${siteUrl}/?search={search_term_string}`,
+                  urlTemplate: `${SITE_URL}/?search={search_term_string}`,
                 },
                 'query-input': 'required name=search_term_string',
               },
               publisher: {
                 '@type': 'Organization',
                 name: 'Project Dixis',
-                url: siteUrl,
+                url: SITE_URL,
                 logo: {
                   '@type': 'ImageObject',
-                  url: `${siteUrl}/logo.png`,
+                  url: `${SITE_URL}/logo.png`,
                   width: 400,
                   height: 400,
                 },
@@ -154,8 +161,8 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Project Dixis',
-              url: siteUrl,
-              logo: `${siteUrl}/logo.png`,
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.png`,
               description: 'Local Producer Marketplace supporting sustainable agriculture',
               address: {
                 '@type': 'PostalAddress',
@@ -171,27 +178,17 @@ export default function RootLayout({
         />
 
         {/* Skip to main content link for screen readers */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-green-600 text-white px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-green-500"
-          onClick={(e) => {
-            e.preventDefault();
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-              mainContent.setAttribute('tabindex', '-1');
-              mainContent.focus();
-            }
-          }}
-        >
-          Skip to main content
-        </a>
+        <SkipLink />
+        <EnvironmentError />
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-          <ToastProvider>
-            <AuthProvider>
-              {children}
-              <ToastContainer />
-            </AuthProvider>
-          </ToastProvider>
+          <LocaleProvider>
+            <ToastProvider>
+              <AuthProvider>
+                {children}
+                <ToastContainer />
+              </AuthProvider>
+            </ToastProvider>
+          </LocaleProvider>
         </ErrorBoundary>
       </body>
     </html>

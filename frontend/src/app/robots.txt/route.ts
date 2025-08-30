@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/env';
 
 export function GET(): Response {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
   
   const robotsTxt = `User-agent: *
 Allow: /
@@ -29,7 +29,7 @@ Allow: /*.webp$
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: ${siteUrl}/sitemap.xml`;
+Sitemap: ${SITE_URL}/sitemap.xml`;
 
   return new Response(robotsTxt, {
     headers: {
@@ -39,7 +39,6 @@ Sitemap: ${siteUrl}/sitemap.xml`;
 }
 
 export async function robots(): Promise<MetadataRoute.Robots> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
   
   return {
     rules: [
@@ -70,6 +69,6 @@ export async function robots(): Promise<MetadataRoute.Robots> {
         disallow: ['/admin', '/api'],
       },
     ],
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

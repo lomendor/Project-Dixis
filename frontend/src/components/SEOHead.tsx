@@ -1,1 +1,160 @@
-'use client';\n\nimport Head from 'next/head';\nimport { useEffect } from 'react';\n\ninterface SEOHeadProps {\n  title?: string;\n  description?: string;\n  keywords?: string[];\n  ogImage?: string;\n  ogType?: string;\n  canonicalUrl?: string;\n  jsonLd?: Record<string, any>;\n  noIndex?: boolean;\n}\n\nexport default function SEOHead({\n  title,\n  description,\n  keywords = [],\n  ogImage,\n  ogType = 'website',\n  canonicalUrl,\n  jsonLd,\n  noIndex = false,\n}: SEOHeadProps) {\n  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';\n  \n  useEffect(() => {\n    // Update document title\n    if (title) {\n      document.title = `${title} | Project Dixis`;\n    }\n    \n    // Update meta description\n    if (description) {\n      let metaDescription = document.querySelector('meta[name=\"description\"]');\n      if (!metaDescription) {\n        metaDescription = document.createElement('meta');\n        metaDescription.setAttribute('name', 'description');\n        document.head.appendChild(metaDescription);\n      }\n      metaDescription.setAttribute('content', description);\n    }\n    \n    // Update keywords\n    if (keywords.length > 0) {\n      let metaKeywords = document.querySelector('meta[name=\"keywords\"]');\n      if (!metaKeywords) {\n        metaKeywords = document.createElement('meta');\n        metaKeywords.setAttribute('name', 'keywords');\n        document.head.appendChild(metaKeywords);\n      }\n      metaKeywords.setAttribute('content', keywords.join(', '));\n    }\n    \n    // Update canonical URL\n    if (canonicalUrl) {\n      let canonicalLink = document.querySelector('link[rel=\"canonical\"]') as HTMLLinkElement;\n      if (!canonicalLink) {\n        canonicalLink = document.createElement('link');\n        canonicalLink.setAttribute('rel', 'canonical');\n        document.head.appendChild(canonicalLink);\n      }\n      canonicalLink.setAttribute('href', canonicalUrl);\n    }\n    \n    // Add robots meta if noIndex\n    if (noIndex) {\n      let robotsMeta = document.querySelector('meta[name=\"robots\"]');\n      if (!robotsMeta) {\n        robotsMeta = document.createElement('meta');\n        robotsMeta.setAttribute('name', 'robots');\n        document.head.appendChild(robotsMeta);\n      }\n      robotsMeta.setAttribute('content', 'noindex, nofollow');\n    }\n    \n    // OpenGraph tags\n    if (title) {\n      let ogTitle = document.querySelector('meta[property=\"og:title\"]');\n      if (!ogTitle) {\n        ogTitle = document.createElement('meta');\n        ogTitle.setAttribute('property', 'og:title');\n        document.head.appendChild(ogTitle);\n      }\n      ogTitle.setAttribute('content', title);\n    }\n    \n    if (description) {\n      let ogDescription = document.querySelector('meta[property=\"og:description\"]');\n      if (!ogDescription) {\n        ogDescription = document.createElement('meta');\n        ogDescription.setAttribute('property', 'og:description');\n        document.head.appendChild(ogDescription);\n      }\n      ogDescription.setAttribute('content', description);\n    }\n    \n    if (ogImage) {\n      let ogImageMeta = document.querySelector('meta[property=\"og:image\"]');\n      if (!ogImageMeta) {\n        ogImageMeta = document.createElement('meta');\n        ogImageMeta.setAttribute('property', 'og:image');\n        document.head.appendChild(ogImageMeta);\n      }\n      ogImageMeta.setAttribute('content', ogImage);\n    }\n    \n    // Add JSON-LD structured data\n    if (jsonLd) {\n      let existingScript = document.querySelector('script[data-seo-jsonld]');\n      if (existingScript) {\n        existingScript.remove();\n      }\n      \n      const script = document.createElement('script');\n      script.setAttribute('type', 'application/ld+json');\n      script.setAttribute('data-seo-jsonld', 'true');\n      script.textContent = JSON.stringify(jsonLd);\n      document.head.appendChild(script);\n    }\n  }, [title, description, keywords, ogImage, ogType, canonicalUrl, jsonLd, noIndex]);\n  \n  return null; // This component doesn't render anything\n}\n\n// Utility functions for common SEO patterns\nexport const generateProductJsonLd = (product: any, siteUrl: string) => ({\n  '@context': 'https://schema.org',\n  '@type': 'Product',\n  name: product.name,\n  description: product.description || `Fresh ${product.name} from ${product.producer?.name}`,\n  image: product.images?.[0]?.url || product.images?.[0]?.image_path,\n  offers: {\n    '@type': 'Offer',\n    price: product.price,\n    priceCurrency: 'EUR',\n    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',\n    seller: {\n      '@type': 'Organization',\n      name: product.producer?.name || 'Local Producer',\n    },\n  },\n  brand: {\n    '@type': 'Brand',\n    name: product.producer?.name || 'Local Producer',\n  },\n  category: product.categories?.[0]?.name || 'Fresh Produce',\n  url: `${siteUrl}/products/${product.id}`,\n});\n\nexport const generateBreadcrumbJsonLd = (items: Array<{name: string, url?: string}>, siteUrl: string) => ({\n  '@context': 'https://schema.org',\n  '@type': 'BreadcrumbList',\n  itemListElement: items.map((item, index) => ({\n    '@type': 'ListItem',\n    position: index + 1,\n    name: item.name,\n    item: item.url ? `${siteUrl}${item.url}` : undefined,\n  })),\n});
+'use client';
+
+import { useEffect } from 'react';
+import { SITE_URL, DEFAULT_CURRENCY } from '@/env';
+
+interface SEOHeadProps {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+  jsonLd?: Record<string, any>;
+  noIndex?: boolean;
+}
+
+export default function SEOHead({
+  title,
+  description,
+  keywords = [],
+  ogImage,
+  ogType = 'website',
+  canonicalUrl,
+  jsonLd,
+  noIndex = false,
+}: SEOHeadProps) {
+  useEffect(() => {
+    // Update document title
+    if (title) {
+      document.title = `${title} | Project Dixis`;
+    }
+    
+    // Update meta description
+    if (description) {
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute('content', description);
+    }
+    
+    // Update keywords
+    if (keywords.length > 0) {
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.setAttribute('content', keywords.join(', '));
+    }
+    
+    // Update canonical URL
+    if (canonicalUrl) {
+      let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonicalLink) {
+        canonicalLink = document.createElement('link');
+        canonicalLink.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalLink);
+      }
+      canonicalLink.setAttribute('href', canonicalUrl);
+    }
+    
+    // Add robots meta if noIndex
+    if (noIndex) {
+      let robotsMeta = document.querySelector('meta[name="robots"]');
+      if (!robotsMeta) {
+        robotsMeta = document.createElement('meta');
+        robotsMeta.setAttribute('name', 'robots');
+        document.head.appendChild(robotsMeta);
+      }
+      robotsMeta.setAttribute('content', 'noindex, nofollow');
+    }
+    
+    // OpenGraph tags
+    if (title) {
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.setAttribute('content', title);
+    }
+    
+    if (description) {
+      let ogDescription = document.querySelector('meta[property="og:description"]');
+      if (!ogDescription) {
+        ogDescription = document.createElement('meta');
+        ogDescription.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDescription);
+      }
+      ogDescription.setAttribute('content', description);
+    }
+    
+    if (ogImage) {
+      let ogImageMeta = document.querySelector('meta[property="og:image"]');
+      if (!ogImageMeta) {
+        ogImageMeta = document.createElement('meta');
+        ogImageMeta.setAttribute('property', 'og:image');
+        document.head.appendChild(ogImageMeta);
+      }
+      ogImageMeta.setAttribute('content', ogImage);
+    }
+    
+    // Add JSON-LD structured data
+    if (jsonLd) {
+      let existingScript = document.querySelector('script[data-seo-jsonld]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      const script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
+      script.setAttribute('data-seo-jsonld', 'true');
+      script.textContent = JSON.stringify(jsonLd);
+      document.head.appendChild(script);
+    }
+  }, [title, description, keywords, ogImage, ogType, canonicalUrl, jsonLd, noIndex]);
+  
+  return null; // This component doesn't render anything
+}
+
+// Utility functions for common SEO patterns
+export const generateProductJsonLd = (product: any, siteUrl: string = SITE_URL) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.description || `Fresh ${product.name} from ${product.producer?.name}`,
+  image: product.images?.[0]?.url || product.images?.[0]?.image_path,
+  offers: {
+    '@type': 'Offer',
+    price: product.price,
+    priceCurrency: DEFAULT_CURRENCY,
+    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    seller: {
+      '@type': 'Organization',
+      name: product.producer?.name || 'Local Producer',
+    },
+  },
+  brand: {
+    '@type': 'Brand',
+    name: product.producer?.name || 'Local Producer',
+  },
+  category: product.categories?.[0]?.name || 'Fresh Produce',
+  url: `${siteUrl}/products/${product.id}`,
+});
+
+export const generateBreadcrumbJsonLd = (items: Array<{name: string, url?: string}>, siteUrl: string = SITE_URL) => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url ? `${siteUrl}${item.url}` : undefined,
+  })),
+});

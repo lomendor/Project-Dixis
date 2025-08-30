@@ -1,4 +1,5 @@
 // API client utility with Bearer token support
+import { API_BASE_URL, apiUrl as envApiUrl } from '@/env';
 
 export interface ApiResponse<T = unknown> {
   data?: T;
@@ -151,43 +152,10 @@ export interface TopProduct {
   average_unit_price: string;
 }
 
-// Helper functions for safe URL joining
-const RAW_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
+// Re-export apiUrl from env for backward compatibility
+export const apiUrl = envApiUrl;
 
-// Enhanced URL trimming that handles multiple slashes and edge cases
-const trimBoth = (s: string) => {
-  if (!s || typeof s !== 'string') return '';
-  
-  // Handle protocol URLs specially (preserve :// in protocols)
-  if (s.includes('://')) {
-    const [protocol, rest] = s.split('://');
-    const cleanRest = rest.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
-    return `${protocol}://${cleanRest}`;
-  }
-  
-  // For non-protocol strings, remove leading and trailing slashes, collapse multiple slashes
-  return s.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
-};
-
-const BASE = trimBoth(RAW_BASE);
-
-// Safe URL joining with validation and normalization
-export const apiUrl = (path: string) => {
-  if (!path || typeof path !== 'string') return BASE;
-  
-  const cleanPath = trimBoth(path);
-  if (!cleanPath) return BASE;
-  
-  // Handle absolute URLs passed as path
-  if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
-    return cleanPath;
-  }
-  
-  // Safe join with single slash
-  return `${BASE}/${cleanPath}`;
-};
-
-// Legacy functions for compatibility
+// Legacy function for compatibility
 function trimSlashes(s: string): string {
   return s.replace(/\/+$/,'').replace(/^\/+/,'');
 }
@@ -197,8 +165,7 @@ class ApiClient {
   private token: string | null = null;
 
   constructor() {
-    const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
-    this.baseURL = trimBoth(rawBase);
+    this.baseURL = API_BASE_URL;
     
     // Load token from localStorage if available
     this.loadTokenFromStorage();
@@ -246,8 +213,8 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle absolute URLs directly - use new safe URL joining
-    const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
+    // Handle absolute URLs directly - use centralized URL joining
+    const url = endpoint.startsWith('http') ? endpoint : envApiUrl(endpoint);
     
     const response = await fetch(url, {
       ...options,
@@ -462,7 +429,7 @@ export const apiClient = new ApiClient();
 
 // Helper function for public products
 export async function getPublicProducts() {
-  const res = await fetch(apiUrl('public/products'), { cache: 'no-store' });
+  const res = await fetch(envApiUrl('public/products'), { cache: 'no-store' });
   if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
   return res.json();
 }

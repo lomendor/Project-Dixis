@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatCurrency, formatDate as formatGreekDate } from '@/env';
 
 export default function OrderDetails() {
   const params = useParams();
@@ -85,7 +86,7 @@ export default function OrderDetails() {
             href="/cart"
             className="text-green-600 hover:text-green-700 flex items-center text-sm font-medium"
           >
-            ← Back to Cart
+            ← Επιστροφή στο Καλάθι
           </Link>
         </div>
 
@@ -130,7 +131,7 @@ export default function OrderDetails() {
                 <div className="bg-white rounded-lg shadow-md">
                   <div className="p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                      Order Items
+                      Προϊόντα Παραγγελίας
                     </h2>
                     
                     <div className="space-y-4">
@@ -159,10 +160,10 @@ export default function OrderDetails() {
                             </p>
                             <div className="flex items-center justify-between mt-2">
                               <span className="text-sm text-gray-600">
-                                Quantity: {item.quantity} {item.product.unit}(s)
+                                Ποσότητα: {item.quantity} {item.product.unit}(s)
                               </span>
                               <span className="text-sm font-medium text-green-600">
-                                €{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                {formatCurrency(parseFloat(item.price) * item.quantity)}
                               </span>
                             </div>
                           </div>
@@ -178,19 +179,19 @@ export default function OrderDetails() {
                 {/* Order Summary Card */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Order Summary
+                    Σύνοψη Παραγγελίας
                   </h2>
                   
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">€{parseFloat(order.subtotal || order.total_amount).toFixed(2)}</span>
+                      <span className="text-gray-600">Υποσύνολο</span>
+                      <span className="font-medium">{formatCurrency(parseFloat(order.subtotal || order.total_amount))}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Shipping</span>
+                      <span className="text-gray-600">Μεταφορικά</span>
                       <div className="text-right">
                         <span className="font-medium">
-                          {order.shipping_cost ? `€${order.shipping_cost.toFixed(2)}` : 'Free'}
+                          {order.shipping_cost ? formatCurrency(order.shipping_cost) : 'Δωρεάν'}
                         </span>
                         {order.shipping_carrier && (
                           <div className="text-xs text-gray-500">{order.shipping_carrier}</div>
@@ -202,8 +203,8 @@ export default function OrderDetails() {
                     </div>
                     <div className="border-t border-gray-200 pt-3">
                       <div className="flex justify-between text-base font-semibold">
-                        <span>Total</span>
-                        <span className="text-green-600">€{parseFloat(order.total_amount).toFixed(2)}</span>
+                        <span>Σύνολο</span>
+                        <span className="text-green-600">{formatCurrency(parseFloat(order.total_amount))}</span>
                       </div>
                     </div>
                   </div>
@@ -212,7 +213,7 @@ export default function OrderDetails() {
                 {/* Shipping Information */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Delivery Information
+                    Πληροφορίες Παράδοσης
                   </h2>
                   
                   <div className="space-y-3 text-sm">
@@ -263,7 +264,7 @@ export default function OrderDetails() {
                     href="/"
                     className="inline-flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium"
                   >
-                    Continue Shopping
+                    Συνέχεια Αγορών
                   </Link>
                 </div>
               </div>

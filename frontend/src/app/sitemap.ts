@@ -1,25 +1,25 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/env';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
   const currentDate = new Date().toISOString();
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: siteUrl,
+      url: SITE_URL,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: `${siteUrl}/auth/login`,
+      url: `${SITE_URL}/auth/login`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
-      url: `${siteUrl}/auth/register`,
+      url: `${SITE_URL}/auth/register`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.6,
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // This would typically fetch from your API:
   // const products = await apiClient.getProducts({ per_page: 1000 });
   // const productPages = products.data.map(product => ({
-  //   url: `${siteUrl}/products/${product.id}`,
+  //   url: `${SITE_URL}/products/${product.id}`,
   //   lastModified: product.updated_at || currentDate,
   //   changeFrequency: 'weekly' as const,
   //   priority: 0.8,
@@ -39,25 +39,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Placeholder for future dynamic pages
   const futurePlaceholders: MetadataRoute.Sitemap = [
     {
-      url: `${siteUrl}/products`,
+      url: `${SITE_URL}/products`,
       lastModified: currentDate,
       changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
-      url: `${siteUrl}/producers`,
+      url: `${SITE_URL}/producers`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.8,
     },
     {
-      url: `${siteUrl}/about`,
+      url: `${SITE_URL}/about`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${siteUrl}/contact`,
+      url: `${SITE_URL}/contact`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.5,

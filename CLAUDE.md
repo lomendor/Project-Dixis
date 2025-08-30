@@ -14,9 +14,9 @@
 
 ## Folder layout (monorepo)
 - `backend/` → Laravel API
-- `backend/frontend/` → Next.js app
+- `frontend/` → Next.js app
 - `.github/workflows/` → CI (backend-ci.yml, frontend-ci.yml)
-- `backend/frontend/tests/e2e/` → Playwright specs
+- `frontend/tests/e2e/` → Playwright specs
 
 ## Backend rules (Laravel + Postgres)
 - Use `.env` (local) and GH Actions job env (CI) με:
@@ -78,14 +78,14 @@ php artisan serve --host=127.0.0.1 --port=8001
 
 3. Frontend:
 ```bash
-cd backend/frontend
+cd frontend
 npm install
 NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
 ```
 
 ### E2E locally
 ```bash
-cd backend/frontend
+cd frontend
 NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npx playwright test
 ```
 
@@ -107,7 +107,7 @@ NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npx playwright test
 ```bash
 # Kill and restart everything
 lsof -ti :3001,:8001 | xargs kill -9; cd backend && php artisan serve --port=8001 &
-cd backend/frontend && npm run build && npm start -- -p 3001
+cd frontend && npm run build && npm start -- -p 3001
 
 # Run specific test suite  
 npx playwright test mobile-navigation.spec.ts --project=chromium
@@ -121,7 +121,7 @@ php artisan migrate:fresh --seed
 
 ## Key files
 - `backend/.env` - Database config
-- `backend/frontend/src/lib/api.ts` - API client με apiUrl helper
-- `backend/frontend/playwright.config.ts` - E2E test config
+- `frontend/src/lib/api.ts` - API client με apiUrl helper
+- `frontend/playwright.config.ts` - E2E test config
 - `.github/workflows/` - CI/CD workflows
 - `backend/database/seeders/` - Test data setup

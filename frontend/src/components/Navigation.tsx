@@ -2,10 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navigation() {
   const { user, logout, isAuthenticated, isProducer } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -45,6 +48,11 @@ export default function Navigation() {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [mobileMenuOpen]);
+
+  // Close mobile menu when pathname changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Handle click outside to close mobile menu
   useEffect(() => {
@@ -184,7 +192,6 @@ export default function Navigation() {
                 href="/"
                 className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                 data-testid="mobile-nav-products"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 Products
               </Link>
@@ -194,7 +201,6 @@ export default function Navigation() {
                   href="/cart"
                   className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-cart"
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Cart
                 </Link>
@@ -205,7 +211,6 @@ export default function Navigation() {
                   href="/producer/dashboard"
                   className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
@@ -245,7 +250,6 @@ export default function Navigation() {
                     href="/auth/login"
                     className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-login"
-                    onClick={() => setMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
@@ -253,7 +257,6 @@ export default function Navigation() {
                     href="/auth/register"
                     className="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-register"
-                    onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign Up
                   </Link>

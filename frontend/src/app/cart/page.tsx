@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { formatCurrency } from '@/env';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -254,7 +255,7 @@ export default function Cart() {
             href="/"
             className="text-green-600 hover:text-green-700 flex items-center text-sm font-medium"
           >
-            ← Continue Shopping
+            ← Συνέχεια Αγορών
           </Link>
         </div>
 
@@ -325,7 +326,7 @@ export default function Cart() {
                           </p>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-sm font-medium text-green-600">
-                              €{item.product.price} / {item.product.unit}
+                              {formatCurrency(parseFloat(item.product.price))} / {item.product.unit}
                             </span>
                           </div>
                         </div>
@@ -417,16 +418,16 @@ export default function Cart() {
                 {/* Order Totals */}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Items ({totalItems})</span>
-                    <span className="font-medium">€{totalAmount.toFixed(2)}</span>
+                    <span className="text-gray-600">Προϊόντα ({totalItems})</span>
+                    <span className="font-medium">{formatCurrency(totalAmount)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-gray-600">Μεταφορικά</span>
                     {loadingShipping ? (
                       <span className="text-sm text-gray-500">Calculating...</span>
                     ) : shippingQuote ? (
                       <div className="text-right">
-                        <span className="font-medium">€{shippingQuote.cost.toFixed(2)}</span>
+                        <span className="font-medium">{formatCurrency(shippingQuote.cost)}</span>
                         <div className="text-xs text-gray-500">{shippingQuote.carrier}</div>
                         <div className="text-xs text-gray-500">{shippingQuote.etaDays} day(s)</div>
                       </div>
@@ -438,9 +439,9 @@ export default function Cart() {
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-base font-semibold">
-                      <span>Total</span>
+                      <span>Σύνολο</span>
                       <span className="text-green-600">
-                        €{(totalAmount + (shippingQuote?.cost || 0)).toFixed(2)}
+                        {formatCurrency(totalAmount + (shippingQuote?.cost || 0))}
                       </span>
                     </div>
                   </div>
@@ -465,7 +466,7 @@ export default function Cart() {
                    loadingShipping ? 'Calculating shipping...' :
                    !postalCode || !city ? 'Enter shipping info to continue' :
                    !shippingQuote ? 'Enter valid ΤΚ and city' :
-                   'Proceed to Checkout'}
+                   'Προχώρηση στην Πληρωμή'}
                 </button>
 
                 <p className="text-xs text-gray-500 mt-4 text-center">
