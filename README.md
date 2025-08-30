@@ -34,7 +34,27 @@ Project-Dixis is a production-ready Laravel 11 backend API that facilitates conn
 
 - PHP 8.2 or higher
 - Composer
+- Node.js 18+ (see `.nvmrc`)
 - PostgreSQL 15+ (production) or SQLite (development)
+
+### Repository Setup
+
+This is the **main Project-Dixis repository**. Always work from this directory:
+
+```bash
+# Clone the main repository (NOT worktrees)
+git clone https://github.com/lomendor/Project-Dixis.git
+cd Project-Dixis
+
+# Verify you're in the correct repo
+pwd  # Should be: .../Project-Dixis
+git remote -v  # Should show origin pointing to Project-Dixis
+
+# Use correct Node version
+nvm use  # Reads from frontend/.nvmrc
+```
+
+⚠️ **Important**: Do NOT work in worktree directories like `GitHub-Dixis-Project-1/`. Always use the main `Project-Dixis/` directory.
 
 ### Installation
 
@@ -68,6 +88,63 @@ php artisan test --testsuite=Feature --group mvp
 
 # Run with coverage (requires Xdebug/PCOV)
 php artisan test --coverage
+```
+
+## 🔄 CI/CD Local Testing
+
+To run the same checks that GitHub Actions performs:
+
+### Full CI Pipeline Locally
+
+```bash
+# 1. Backend testing
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan test
+php artisan serve --host=127.0.0.1 --port=8001 &
+
+# 2. Frontend testing (separate terminal)
+cd frontend
+npm ci
+npm run type-check
+npm run build
+npm run start &
+
+# 3. E2E testing (separate terminal)
+cd frontend
+npx wait-on http://127.0.0.1:8001/api/health http://127.0.0.1:3001 --timeout 60000
+npm run e2e
+
+# 4. Lighthouse testing (optional)
+npm install -g @lhci/cli
+lhci autorun --collect.url=http://127.0.0.1:3001
+```
+
+### Port Configuration
+
+**⚠️ CRITICAL**: Always use these ports to match CI environment:
+
+- Backend API: `127.0.0.1:8001`
+- Frontend: `127.0.0.1:3001`
+- DO NOT use `:3000` or `:8000` (legacy ports)
+
+### Environment Variables
+
+```bash
+# Frontend .env.local
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1
+NEXT_PUBLIC_APP_URL=http://127.0.0.1:3001
+
+# Backend .env (PostgreSQL)
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=dixis_test
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
 ```
 
 ## 📡 API Documentation
