@@ -1,0 +1,12 @@
+{
+  "name": "project-dixis",
+  "version": "1.0.0",
+  "description": "Project-Dixis: Modern Laravel + Next.js Agricultural Marketplace",
+  "scripts": {
+    "danger": "danger ci"
+  },
+  "devDependencies": {
+    "danger": "^11.3.1"
+  },
+  "type": "module"
+}
