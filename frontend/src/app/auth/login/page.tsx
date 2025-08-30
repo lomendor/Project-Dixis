@@ -17,7 +17,7 @@ export default function Login() {
     e.preventDefault();
     
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError('Παρακαλώ συμπληρώστε όλα τα πεδία');
       return;
     }
 
@@ -47,15 +47,15 @@ export default function Login() {
             Project Dixis
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Sign in to your account
+            Σύνδεση στον Λογαριασμό σας
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
+            Ή{' '}
             <Link
               href="/auth/register"
               className="font-medium text-green-600 hover:text-green-500"
             >
-              create a new account
+              δημιουργήστε νέο λογαριασμό
             </Link>
           </p>
         </div>
@@ -72,7 +72,7 @@ export default function Login() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                Διεύθυνση Email
               </label>
               <div className="mt-1">
                 <input
@@ -84,14 +84,14 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Enter your email"
+                  placeholder="Εισάγετε το email σας"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Κωδικός Πρόσβασης
               </label>
               <div className="mt-1">
                 <input
@@ -103,7 +103,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Enter your password"
+                  placeholder="Εισάγετε τον κωδικό σας"
                 />
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function Login() {
                 disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? 'Σύνδεση...' : 'Σύνδεση'}
               </button>
             </div>
           </form>
@@ -125,7 +125,7 @@ export default function Login() {
                 href="/"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                ← Back to Products
+                ← Πίσω στα Προϊόντα
               </Link>
             </div>
           </div>

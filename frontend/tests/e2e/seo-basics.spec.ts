@@ -88,4 +88,215 @@ test.describe('SEO Basics Implementation', () => {
 
   test.describe('Structured Data (JSON-LD)', () => {
     test('has website structured data', async ({ page }) => {
-      // Check for JSON-LD script tags\n      const jsonLdScripts = page.locator('script[type=\"application/ld+json\"]');\n      const scriptCount = await jsonLdScripts.count();\n      expect(scriptCount).toBeGreaterThan(0);\n      \n      // Check website schema\n      const websiteSchema = await page.locator('script[type=\"application/ld+json\"]').first().textContent();\n      expect(websiteSchema).toBeTruthy();\n      \n      const websiteData = JSON.parse(websiteSchema!);\n      expect(websiteData['@type']).toBe('WebSite');\n      expect(websiteData.name).toBe('Project Dixis');\n      expect(websiteData.url).toBeTruthy();\n      expect(websiteData.potentialAction).toBeTruthy();\n    });\n\n    test('has organization structured data', async ({ page }) => {\n      // Get all JSON-LD scripts\n      const jsonLdScripts = await page.locator('script[type=\"application/ld+json\"]').all();\n      \n      // Look for organization schema\n      let foundOrganization = false;\n      for (const script of jsonLdScripts) {\n        const content = await script.textContent();\n        if (content) {\n          const data = JSON.parse(content);\n          if (data['@type'] === 'Organization') {\n            foundOrganization = true;\n            expect(data.name).toBe('Project Dixis');\n            expect(data.url).toBeTruthy();\n            expect(data.logo).toBeTruthy();\n            expect(data.sameAs).toBeInstanceOf(Array);\n            break;\n          }\n        }\n      }\n      expect(foundOrganization).toBe(true);\n    });\n\n    test('has products structured data when products load', async ({ page }) => {\n      // Wait for products to load\n      await page.waitForSelector('[data-testid=\"product-card\"]', { timeout: 10000 });\n      \n      // Check if products JSON-LD was added\n      const jsonLdScripts = await page.locator('script[type=\"application/ld+json\"]').all();\n      \n      let foundProducts = false;\n      for (const script of jsonLdScripts) {\n        const content = await script.textContent();\n        if (content) {\n          const data = JSON.parse(content);\n          if (data['@type'] === 'ItemList') {\n            foundProducts = true;\n            expect(data.name).toBe('Fresh Local Products');\n            expect(data.itemListElement).toBeInstanceOf(Array);\n            expect(data.numberOfItems).toBeGreaterThan(0);\n            \n            // Check first product item\n            if (data.itemListElement.length > 0) {\n              const firstProduct = data.itemListElement[0];\n              expect(firstProduct['@type']).toBe('Product');\n              expect(firstProduct.name).toBeTruthy();\n              expect(firstProduct.offers).toBeTruthy();\n            }\n            break;\n          }\n        }\n      }\n      expect(foundProducts).toBe(true);\n    });\n  });\n\n  test.describe('Technical SEO', () => {\n    test('robots.txt is accessible', async ({ page }) => {\n      const response = await page.goto('/robots.txt');\n      expect(response?.status()).toBe(200);\n      \n      const content = await page.textContent('body');\n      expect(content).toContain('User-agent: *');\n      expect(content).toContain('Allow: /');\n      expect(content).toContain('Disallow: /admin');\n      expect(content).toContain('Sitemap:');\n    });\n\n    test('sitemap.xml is accessible', async ({ page }) => {\n      const response = await page.goto('/sitemap.xml');\n      expect(response?.status()).toBe(200);\n      \n      // Check if it's valid XML\n      const content = await page.content();\n      expect(content).toContain('<urlset');\n      expect(content).toContain('<url>');\n      expect(content).toContain('<loc>');\n      expect(content).toContain('<lastmod>');\n      expect(content).toContain('<changefreq>');\n      expect(content).toContain('<priority>');\n    });\n\n    test('manifest.json is accessible', async ({ page }) => {\n      const response = await page.goto('/manifest.json');\n      expect(response?.status()).toBe(200);\n      \n      const content = await page.textContent('body');\n      const manifest = JSON.parse(content!);\n      \n      expect(manifest.name).toBe('Project Dixis - Local Producer Marketplace');\n      expect(manifest.short_name).toBe('Dixis');\n      expect(manifest.display).toBe('standalone');\n      expect(manifest.theme_color).toBe('#16a34a');\n      expect(manifest.icons).toBeInstanceOf(Array);\n      expect(manifest.icons.length).toBeGreaterThan(0);\n    });\n\n    test('has proper heading hierarchy', async ({ page }) => {\n      // Check for h1\n      const h1 = page.locator('h1');\n      await expect(h1).toBeVisible();\n      const h1Count = await h1.count();\n      expect(h1Count).toBe(1); // Should have exactly one h1\n      \n      // Check h1 content\n      const h1Text = await h1.textContent();\n      expect(h1Text).toContain('Fresh Products from Local Producers');\n    });\n\n    test('images have alt attributes', async ({ page }) => {\n      await page.waitForSelector('[data-testid=\"product-image\"]', { timeout: 10000 });\n      \n      const images = page.locator('[data-testid=\"product-image\"]');\n      const imageCount = await images.count();\n      \n      if (imageCount > 0) {\n        // Check first few images\n        for (let i = 0; i < Math.min(imageCount, 3); i++) {\n          const image = images.nth(i);\n          const alt = await image.getAttribute('alt');\n          expect(alt).toBeTruthy();\n          expect(alt!.length).toBeGreaterThan(0);\n        }\n      }\n    });\n  });\n\n  test.describe('Performance and Core Web Vitals', () => {\n    test('page loads within reasonable time', async ({ page }) => {\n      const startTime = Date.now();\n      await page.goto('/');\n      await page.waitForSelector('[data-testid=\"page-title\"]');\n      const loadTime = Date.now() - startTime;\n      \n      expect(loadTime).toBeLessThan(5000); // 5 seconds max\n    });\n\n    test('has proper meta tags for mobile', async ({ page }) => {\n      // Check viewport meta tag\n      const viewport = page.locator('meta[name=\"viewport\"]');\n      await expect(viewport).toBeAttached();\n      \n      const viewportContent = await viewport.getAttribute('content');\n      expect(viewportContent).toContain('width=device-width');\n      expect(viewportContent).toContain('initial-scale=1');\n    });\n\n    test('responds properly to different viewport sizes', async ({ page }) => {\n      // Test desktop\n      await page.setViewportSize({ width: 1200, height: 800 });\n      await page.goto('/');\n      await expect(page.getByTestId('page-title')).toBeVisible();\n      \n      // Test mobile\n      await page.setViewportSize({ width: 375, height: 667 });\n      await expect(page.getByTestId('page-title')).toBeVisible();\n      \n      // Test tablet\n      await page.setViewportSize({ width: 768, height: 1024 });\n      await expect(page.getByTestId('page-title')).toBeVisible();\n    });\n  });\n\n  test.describe('Content Quality', () => {\n    test('has descriptive page content', async ({ page }) => {\n      // Check main heading\n      const heading = page.getByTestId('page-title');\n      await expect(heading).toBeVisible();\n      \n      // Check for descriptive paragraph\n      const description = page.locator('p:has-text(\"Discover premium organic vegetables\")');\n      await expect(description).toBeVisible();\n      \n      const descriptionText = await description.textContent();\n      expect(descriptionText!.length).toBeGreaterThan(100); // Substantial content\n    });\n\n    test('search functionality has proper structure', async ({ page }) => {\n      const searchInput = page.getByPlaceholder('Search products...');\n      await expect(searchInput).toBeVisible();\n      \n      // Test search functionality\n      await searchInput.fill('organic');\n      // Could add more search tests here\n    });\n\n    test('navigation has proper structure', async ({ page }) => {\n      const nav = page.locator('nav[role=\"navigation\"]');\n      await expect(nav).toBeVisible();\n      \n      // Check for proper ARIA labels\n      const ariaLabel = await nav.getAttribute('aria-label');\n      expect(ariaLabel).toBe('Main navigation');\n    });\n  });\n});"}
+      // Check for JSON-LD script tags
+      const jsonLdScripts = page.locator('script[type="application/ld+json"]');
+      const scriptCount = await jsonLdScripts.count();
+      expect(scriptCount).toBeGreaterThan(0);
+      
+      // Check website schema
+      const websiteSchema = await page.locator('script[type="application/ld+json"]').first().textContent();
+      expect(websiteSchema).toBeTruthy();
+      
+      const websiteData = JSON.parse(websiteSchema!);
+      expect(websiteData['@type']).toBe('WebSite');
+      expect(websiteData.name).toBe('Project Dixis');
+      expect(websiteData.url).toBeTruthy();
+      expect(websiteData.potentialAction).toBeTruthy();
+    });
+
+    test('has organization structured data', async ({ page }) => {
+      // Get all JSON-LD scripts
+      const jsonLdScripts = await page.locator('script[type="application/ld+json"]').all();
+      
+      // Look for organization schema
+      let foundOrganization = false;
+      for (const script of jsonLdScripts) {
+        const content = await script.textContent();
+        if (content) {
+          const data = JSON.parse(content);
+          if (data['@type'] === 'Organization') {
+            foundOrganization = true;
+            expect(data.name).toBe('Project Dixis');
+            expect(data.url).toBeTruthy();
+            expect(data.logo).toBeTruthy();
+            expect(data.sameAs).toBeInstanceOf(Array);
+            break;
+          }
+        }
+      }
+      expect(foundOrganization).toBe(true);
+    });
+
+    test('has products structured data when products load', async ({ page }) => {
+      // Wait for products to load
+      await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
+      
+      // Check if products JSON-LD was added
+      const jsonLdScripts = await page.locator('script[type="application/ld+json"]').all();
+      
+      let foundProducts = false;
+      for (const script of jsonLdScripts) {
+        const content = await script.textContent();
+        if (content) {
+          const data = JSON.parse(content);
+          if (data['@type'] === 'ItemList') {
+            foundProducts = true;
+            expect(data.name).toBe('Fresh Local Products');
+            expect(data.itemListElement).toBeInstanceOf(Array);
+            expect(data.numberOfItems).toBeGreaterThan(0);
+            
+            // Check first product item
+            if (data.itemListElement.length > 0) {
+              const firstProduct = data.itemListElement[0];
+              expect(firstProduct['@type']).toBe('Product');
+              expect(firstProduct.name).toBeTruthy();
+              expect(firstProduct.offers).toBeTruthy();
+            }
+            break;
+          }
+        }
+      }
+      expect(foundProducts).toBe(true);
+    });
+  });
+
+  test.describe('Technical SEO', () => {
+    test('robots.txt is accessible', async ({ page }) => {
+      const response = await page.goto('/robots.txt');
+      expect(response?.status()).toBe(200);
+      
+      const content = await page.textContent('body');
+      expect(content).toContain('User-agent: *');
+      expect(content).toContain('Allow: /');
+      expect(content).toContain('Disallow: /admin');
+      expect(content).toContain('Sitemap:');
+    });
+
+    test('sitemap.xml is accessible', async ({ page }) => {
+      const response = await page.goto('/sitemap.xml');
+      expect(response?.status()).toBe(200);
+      
+      // Check if it's valid XML
+      const content = await page.content();
+      expect(content).toContain('<urlset');
+      expect(content).toContain('<url>');
+      expect(content).toContain('<loc>');
+      expect(content).toContain('<lastmod>');
+      expect(content).toContain('<changefreq>');
+      expect(content).toContain('<priority>');
+    });
+
+    test('manifest.json is accessible', async ({ page }) => {
+      const response = await page.goto('/manifest.json');
+      expect(response?.status()).toBe(200);
+      
+      const content = await page.textContent('body');
+      const manifest = JSON.parse(content!);
+      
+      expect(manifest.name).toBe('Project Dixis - Local Producer Marketplace');
+      expect(manifest.short_name).toBe('Dixis');
+      expect(manifest.display).toBe('standalone');
+      expect(manifest.theme_color).toBe('#16a34a');
+      expect(manifest.icons).toBeInstanceOf(Array);
+      expect(manifest.icons.length).toBeGreaterThan(0);
+    });
+
+    test('has proper heading hierarchy', async ({ page }) => {
+      // Check for h1
+      const h1 = page.locator('h1');
+      await expect(h1).toBeVisible();
+      const h1Count = await h1.count();
+      expect(h1Count).toBe(1); // Should have exactly one h1
+      
+      // Check h1 content
+      const h1Text = await h1.textContent();
+      expect(h1Text).toContain('Fresh Products from Local Producers');
+    });
+
+    test('images have alt attributes', async ({ page }) => {
+      await page.waitForSelector('[data-testid="product-image"]', { timeout: 10000 });
+      
+      const images = page.locator('[data-testid="product-image"]');
+      const imageCount = await images.count();
+      
+      if (imageCount > 0) {
+        // Check first few images
+        for (let i = 0; i < Math.min(imageCount, 3); i++) {
+          const image = images.nth(i);
+          const alt = await image.getAttribute('alt');
+          expect(alt).toBeTruthy();
+          expect(alt!.length).toBeGreaterThan(0);
+        }
+      }
+    });
+  });
+
+  test.describe('Performance and Core Web Vitals', () => {
+    test('page loads within reasonable time', async ({ page }) => {
+      const startTime = Date.now();
+      await page.goto('/');
+      await page.waitForSelector('[data-testid="page-title"]');
+      const loadTime = Date.now() - startTime;
+      
+      expect(loadTime).toBeLessThan(5000); // 5 seconds max
+    });
+
+    test('has proper meta tags for mobile', async ({ page }) => {
+      // Check viewport meta tag
+      const viewport = page.locator('meta[name="viewport"]');
+      await expect(viewport).toBeAttached();
+      
+      const viewportContent = await viewport.getAttribute('content');
+      expect(viewportContent).toContain('width=device-width');
+      expect(viewportContent).toContain('initial-scale=1');
+    });
+
+    test('responds properly to different viewport sizes', async ({ page }) => {
+      // Test desktop
+      await page.setViewportSize({ width: 1200, height: 800 });
+      await page.goto('/');
+      await expect(page.getByTestId('page-title')).toBeVisible();
+      
+      // Test mobile
+      await page.setViewportSize({ width: 375, height: 667 });
+      await expect(page.getByTestId('page-title')).toBeVisible();
+      
+      // Test tablet
+      await page.setViewportSize({ width: 768, height: 1024 });
+      await expect(page.getByTestId('page-title')).toBeVisible();
+    });
+  });
+
+  test.describe('Content Quality', () => {
+    test('has descriptive page content', async ({ page }) => {
+      // Check main heading
+      const heading = page.getByTestId('page-title');
+      await expect(heading).toBeVisible();
+      
+      // Check for descriptive paragraph
+      const description = page.locator('p:has-text("Discover premium organic vegetables")');
+      await expect(description).toBeVisible();
+      
+      const descriptionText = await description.textContent();
+      expect(descriptionText!.length).toBeGreaterThan(100); // Substantial content
+    });
+
+    test('search functionality has proper structure', async ({ page }) => {
+      const searchInput = page.getByPlaceholder('Search products...');
+      await expect(searchInput).toBeVisible();
+      
+      // Test search functionality
+      await searchInput.fill('organic');
+      // Could add more search tests here
+    });
+
+    test('navigation has proper structure', async ({ page }) => {
+      const nav = page.locator('nav[role="navigation"]');
+      await expect(nav).toBeVisible();
+      
+      // Check for proper ARIA labels
+      const ariaLabel = await nav.getAttribute('aria-label');
+      expect(ariaLabel).toBe('Main navigation');
+    });
+  });
+});
