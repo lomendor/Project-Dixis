@@ -70,6 +70,66 @@ php artisan test --testsuite=Feature --group mvp
 php artisan test --coverage
 ```
 
+### E2E Testing & Debugging 🎭
+
+**Run Playwright E2E Tests**
+```bash
+cd backend/frontend
+
+# Install Playwright browsers
+npx playwright install
+
+# Run all E2E tests
+npx playwright test
+
+# Run specific test file
+npx playwright test shipping-integration.spec.ts
+
+# Run with UI mode (local development)
+npx playwright test --ui
+```
+
+**πώς ανοίγω trace (Debugging Failed Tests)**
+
+When E2E tests fail in CI, comprehensive artifacts are automatically uploaded:
+
+1. **Download Artifacts from GitHub**:
+   - Go to the failed Actions run → "Summary" tab
+   - Download `e2e-traces-[run-id]-[branch]` artifact
+
+2. **Open Trace Viewer**:
+   ```bash
+   # Extract the downloaded zip
+   unzip e2e-traces-[run-id]-[branch].zip
+   
+   # Open specific test trace
+   npx playwright show-trace test-results/[test-name]/trace.zip
+   ```
+
+3. **Trace Viewer Features**:
+   - **Timeline**: Visual step-by-step execution
+   - **Screenshots**: Before/after each action
+   - **Network**: API calls and responses  
+   - **Console**: Browser logs and errors
+   - **DOM**: Page state at each step
+
+4. **Local Debugging**:
+   ```bash
+   # Run with trace debugging enabled
+   npx playwright test --trace on
+   
+   # Debug mode (opens browser)
+   npx playwright test --debug
+   
+   # Open last trace
+   npx playwright show-trace test-results/[latest]/trace.zip
+   ```
+
+**Artifact Retention**:
+- ✅ **Success runs**: 2-3 days (traces + reports)
+- ❌ **Failed runs**: 7 days (full artifacts + media)
+- 🎥 **Videos/Screenshots**: Only on failures
+
 ## 📡 API Documentation
 
 ### Base URL

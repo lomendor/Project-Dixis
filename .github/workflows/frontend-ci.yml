@@ -190,29 +190,38 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:3001
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       
-      - name: Upload E2E test results (on failure only)
-        if: failure()
+      # ENHANCED: Comprehensive artifact uploads with proper naming
+      - name: Upload Playwright Report (always)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-results-failure
+          name: playwright-report-${{ github.run_id }}-${{ github.ref_name }}
           path: backend/frontend/playwright-report/
-          retention-days: 3
+          retention-days: ${{ failure() && 7 || 2 }}
       
-      - name: Upload E2E videos and screenshots (on failure only)
+      - name: Upload E2E Test Results (always) 
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-${{ github.run_id }}-${{ github.ref_name }}
+          path: backend/frontend/test-results/
+          retention-days: ${{ failure() && 7 || 2 }}
+      
+      - name: Upload E2E Videos and Screenshots (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-videos-screenshots-failure
+          name: e2e-media-failure-${{ github.run_id }}-${{ github.ref_name }}
           path: |
             backend/frontend/test-results/**/*.webm
-            backend/frontend/test-results/**/*.png
+            backend/frontend/test-results/**/*.png  
             backend/frontend/playwright-report/**/*.png
-          retention-days: 5
+          retention-days: 7
       
-      - name: Upload E2E traces (on failure only)
-        if: failure()
+      - name: Upload E2E Traces (always, essential for debugging)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-traces-failure
+          name: e2e-traces-${{ github.run_id }}-${{ github.ref_name }}
           path: backend/frontend/test-results/**/*.zip
-          retention-days: 3
+          retention-days: ${{ failure() && 7 || 3 }}

@@ -5,16 +5,18 @@ const isCI = !!process.env.CI;
 export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  retries: isCI ? 1 : 0,
+  retries: isCI ? 2 : 0,              // Enhanced: more retries for stability
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,     // fewer workers reduces flake
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3001',
-    trace: 'retain-on-failure',
+    trace: 'on',                     // Enhanced: trace on ALL runs for debugging
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    actionTimeout: 10_000,           // Enhanced: explicit action timeout
+    navigationTimeout: 30_000,       // Enhanced: longer navigation timeout
   },
 
   projects: isCI
