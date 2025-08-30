@@ -673,6 +673,8 @@ Route::get('v1/openapi.json', function () {
 Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     // Product management
     Route::patch('products/{product}/toggle', [App\Http\Controllers\Api\ProducerController::class, 'toggleProduct']);
+    Route::patch('products/{product}/price', [App\Http\Controllers\Api\ProducerController::class, 'updatePrice']);
+    Route::patch('products/{product}/stock', [App\Http\Controllers\Api\ProducerController::class, 'updateStock']);
     
     // Dashboard
     Route::get('dashboard/kpi', [App\Http\Controllers\Api\ProducerController::class, 'kpi']);

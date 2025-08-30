@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface StatsCard {
   title: string;
@@ -20,7 +21,13 @@ export default function ProducerDashboard() {
   const [topProducts, setTopProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingPrice, setEditingPrice] = useState<number | null>(null);
+  const [editingStock, setEditingStock] = useState<number | null>(null);
+  const [tempPrice, setTempPrice] = useState('');
+  const [tempStock, setTempStock] = useState('');
+  const [actionLoading, setActionLoading] = useState<{ [key: number]: string }>({});
   const { isAuthenticated, isProducer, user } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -62,6 +69,127 @@ export default function ProducerDashboard() {
 
   const formatCurrency = (amount: string | number) => {
     return `€${parseFloat(amount.toString()).toFixed(2)}`;
+  };
+
+  // Admin action handlers
+  const handleToggleActive = async (productId: number) => {
+    setActionLoading(prev => ({ ...prev, [productId]: 'toggle' }));
+    
+    try {
+      const result = await apiClient.toggleProductActive(productId);
+      
+      // Update the product in the list
+      setTopProducts(prev => prev.map(product => 
+        product.id === productId 
+          ? { ...product, is_active: result.is_active }
+          : product
+      ));
+      
+      showToast('success', result.message);
+      
+      // Refresh stats since active product count may have changed
+      await loadDashboardData();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to toggle product status';
+      showToast('error', message);
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
+    }
+  };
+
+  const startEditPrice = (productId: number, currentPrice: string) => {
+    setEditingPrice(productId);
+    setTempPrice(currentPrice);
+  };
+
+  const cancelEditPrice = () => {
+    setEditingPrice(null);
+    setTempPrice('');
+  };
+
+  const handleUpdatePrice = async (productId: number) => {
+    if (!tempPrice || isNaN(parseFloat(tempPrice))) {
+      showToast('error', 'Please enter a valid price');
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [productId]: 'price' }));
+    
+    try {
+      const result = await apiClient.updateProductPrice(productId, parseFloat(tempPrice));
+      
+      // Update the product in the list
+      setTopProducts(prev => prev.map(product => 
+        product.id === productId 
+          ? { ...product, price: result.new_price }
+          : product
+      ));
+      
+      showToast('success', `Price updated from ${result.old_price} to ${result.new_price}`);
+      
+      setEditingPrice(null);
+      setTempPrice('');
+      
+      // Refresh stats
+      await loadDashboardData();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update price';
+      showToast('error', message);
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
+    }
+  };
+
+  const startEditStock = (productId: number, currentStock: number | null) => {
+    setEditingStock(productId);
+    setTempStock(currentStock?.toString() || '0');
+  };
+
+  const cancelEditStock = () => {
+    setEditingStock(null);
+    setTempStock('');
+  };
+
+  const handleUpdateStock = async (productId: number) => {
+    if (!tempStock || isNaN(parseInt(tempStock))) {
+      showToast('error', 'Please enter a valid stock number');
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [productId]: 'stock' }));
+    
+    try {
+      const result = await apiClient.updateProductStock(productId, parseInt(tempStock));
+      
+      // Update the product in the list
+      setTopProducts(prev => prev.map(product => 
+        product.id === productId 
+          ? { ...product, stock: result.new_stock }
+          : product
+      ));
+      
+      showToast('success', `Stock updated from ${result.old_stock} to ${result.new_stock} ${result.unit}(s)`);
+      
+      setEditingStock(null);
+      setTempStock('');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update stock';
+      showToast('error', message);
+    } finally {
+      setActionLoading(prev => {
+        const newState = { ...prev };
+        delete newState[productId];
+        return newState;
+      });
+    }
   };
 
   const statsCards: StatsCard[] = stats ? [
@@ -204,6 +332,9 @@ export default function ProducerDashboard() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -237,23 +368,137 @@ export default function ProducerDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {formatCurrency(product.price)} / {product.unit}
-                              </div>
+                              {editingPrice === product.id ? (
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={tempPrice}
+                                    onChange={(e) => setTempPrice(e.target.value)}
+                                    className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter') handleUpdatePrice(product.id);
+                                      if (e.key === 'Escape') cancelEditPrice();
+                                    }}
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => handleUpdatePrice(product.id)}
+                                    disabled={actionLoading[product.id] === 'price'}
+                                    className="text-green-600 hover:text-green-800"
+                                  >
+                                    ✓
+                                  </button>
+                                  <button
+                                    onClick={cancelEditPrice}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="text-sm font-medium text-gray-900">
+                                  {formatCurrency(product.price)} / {product.unit}
+                                </div>
+                              )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {product.stock !== null ? (
-                                  `${product.stock} ${product.unit}(s)`
-                                ) : (
-                                  'In Stock'
-                                )}
-                              </div>
+                              {editingStock === product.id ? (
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={tempStock}
+                                    onChange={(e) => setTempStock(e.target.value)}
+                                    className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter') handleUpdateStock(product.id);
+                                      if (e.key === 'Escape') cancelEditStock();
+                                    }}
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => handleUpdateStock(product.id)}
+                                    disabled={actionLoading[product.id] === 'stock'}
+                                    className="text-green-600 hover:text-green-800"
+                                  >
+                                    ✓
+                                  </button>
+                                  <button
+                                    onClick={cancelEditStock}
+                                    className="text-red-600 hover:text-red-800"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="text-sm text-gray-900">
+                                  {product.stock !== null ? (
+                                    `${product.stock} ${product.unit}(s)`
+                                  ) : (
+                                    'In Stock'
+                                  )}
+                                </div>
+                              )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                Active
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                product.is_active 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {product.is_active ? 'Active' : 'Inactive'}
                               </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex items-center space-x-2">
+                                {/* Toggle Active Status */}
+                                <button
+                                  onClick={() => handleToggleActive(product.id)}
+                                  disabled={actionLoading[product.id] === 'toggle'}
+                                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded transition-colors ${
+                                    product.is_active
+                                      ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  } disabled:opacity-50`}
+                                  title={product.is_active ? 'Deactivate product' : 'Activate product'}
+                                >
+                                  {actionLoading[product.id] === 'toggle' ? (
+                                    <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                  ) : product.is_active ? (
+                                    '🔴'
+                                  ) : (
+                                    '🟢'
+                                  )}
+                                  <span className="ml-1">
+                                    {product.is_active ? 'Deactivate' : 'Activate'}
+                                  </span>
+                                </button>
+                                
+                                {/* Edit Price */}
+                                <button
+                                  onClick={() => startEditPrice(product.id, product.price)}
+                                  disabled={editingPrice === product.id || actionLoading[product.id] === 'price'}
+                                  className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors disabled:opacity-50"
+                                  title="Edit price"
+                                >
+                                  💰 Price
+                                </button>
+                                
+                                {/* Edit Stock */}
+                                <button
+                                  onClick={() => startEditStock(product.id, product.stock)}
+                                  disabled={editingStock === product.id || actionLoading[product.id] === 'stock'}
+                                  className="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-50"
+                                  title="Edit stock"
+                                >
+                                  📦 Stock
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}

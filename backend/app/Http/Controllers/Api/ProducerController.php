@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class ProducerController extends Controller
 {
@@ -39,6 +40,89 @@ class ProducerController extends Controller
             'id' => $product->id,
             'is_active' => $product->is_active,
             'message' => 'Product status updated successfully'
+        ]);
+    }
+    
+    /**
+     * Update product price for the authenticated producer
+     */
+    public function updatePrice(Request $request, Product $product): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+        
+        // Ensure product belongs to this producer
+        if ($product->producer_id !== $user->producer->id) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+        
+        // Validate price
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0.01|max:999999.99'
+        ]);
+        
+        $oldPrice = $product->price;
+        $product->price = $validated['price'];
+        $product->save();
+        
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'old_price' => number_format((float) $oldPrice, 2),
+            'new_price' => number_format((float) $product->price, 2),
+            'unit' => $product->unit,
+            'message' => 'Product price updated successfully'
+        ]);
+    }
+    
+    /**
+     * Update product stock for the authenticated producer
+     */
+    public function updateStock(Request $request, Product $product): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+        
+        // Ensure product belongs to this producer
+        if ($product->producer_id !== $user->producer->id) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+        
+        // Validate stock
+        $validated = $request->validate([
+            'stock' => 'required|integer|min:0|max:999999'
+        ]);
+        
+        $oldStock = $product->stock;
+        $product->stock = $validated['stock'];
+        $product->save();
+        
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'old_stock' => (int) $oldStock,
+            'new_stock' => (int) $product->stock,
+            'unit' => $product->unit,
+            'is_in_stock' => $product->stock > 0,
+            'message' => 'Product stock updated successfully'
         ]);
     }
     

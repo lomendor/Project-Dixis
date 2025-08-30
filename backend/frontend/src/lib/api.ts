@@ -456,6 +456,65 @@ class ApiClient {
     const endpoint = `producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
     return this.request<{ top_products: TopProduct[] }>(endpoint);
   }
+
+  // Admin/Producer product management methods
+  async toggleProductActive(productId: number): Promise<{ 
+    id: number; 
+    is_active: boolean; 
+    message: string; 
+  }> {
+    return this.request<{
+      id: number;
+      is_active: boolean;
+      message: string;
+    }>(`producer/products/${productId}/toggle`, {
+      method: 'PATCH',
+    });
+  }
+
+  async updateProductPrice(productId: number, price: number): Promise<{
+    id: number;
+    name: string;
+    old_price: string;
+    new_price: string;
+    unit: string;
+    message: string;
+  }> {
+    return this.request<{
+      id: number;
+      name: string;
+      old_price: string;
+      new_price: string;
+      unit: string;
+      message: string;
+    }>(`producer/products/${productId}/price`, {
+      method: 'PATCH',
+      body: JSON.stringify({ price }),
+    });
+  }
+
+  async updateProductStock(productId: number, stock: number): Promise<{
+    id: number;
+    name: string;
+    old_stock: number;
+    new_stock: number;
+    unit: string;
+    is_in_stock: boolean;
+    message: string;
+  }> {
+    return this.request<{
+      id: number;
+      name: string;
+      old_stock: number;
+      new_stock: number;
+      unit: string;
+      is_in_stock: boolean;
+      message: string;
+    }>(`producer/products/${productId}/stock`, {
+      method: 'PATCH',
+      body: JSON.stringify({ stock }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
