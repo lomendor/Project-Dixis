@@ -58,7 +58,7 @@ class E2ESeeder extends Seeder
             );
         }
 
-        // Create 6 deterministic products
+        // Create 8 deterministic products (mix of English and Greek for E2E testing)
         $productsData = [
             [
                 'name' => 'E2E Test Tomatoes',
@@ -91,6 +91,16 @@ class E2ESeeder extends Seeder
                 'image_url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
             ],
             [
+                'name' => 'Πορτοκάλια E2E Test',
+                'slug' => 'portokalia-e2e-test',
+                'description' => 'Φρέσκα πορτοκάλια για E2E δοκιμές',
+                'price' => 3.75,
+                'unit' => 'kg',
+                'stock' => 60,
+                'category' => 'e2e-fruits',
+                'image_url' => 'https://images.unsplash.com/photo-1547514701-42782101795e',
+            ],
+            [
                 'name' => 'E2E Test Oranges',
                 'slug' => 'e2e-test-oranges',
                 'description' => 'Juicy test oranges for E2E testing',
@@ -114,6 +124,16 @@ class E2ESeeder extends Seeder
                 'name' => 'E2E Test Basil',
                 'slug' => 'e2e-test-basil',
                 'description' => 'Fresh test basil for E2E testing',
+                'price' => 4.50,
+                'unit' => 'packet',
+                'stock' => 30,
+                'category' => 'e2e-herbs',
+                'image_url' => 'https://images.unsplash.com/photo-1618164436241-4473940d1f5c',
+            ],
+            [
+                'name' => 'Ελληνικό Βασιλικό',
+                'slug' => 'elliniko-vasiliko',
+                'description' => 'Αρωματικό βασιλικό για E2E δοκιμές',
                 'price' => 4.50,
                 'unit' => 'packet',
                 'stock' => 30,
@@ -157,6 +177,6 @@ class E2ESeeder extends Seeder
             ]);
         }
 
-        echo "✅ E2E Seeder: Created 1 user, 3 categories, 6 products\n";
+        echo "✅ E2E Seeder: Created 1 user, 3 categories, 8 products (including Greek products)\n";
     }
 }
