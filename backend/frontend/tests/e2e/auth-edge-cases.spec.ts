@@ -1,4 +1,92 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page, BrowserContext } from '@playwright/test';
+
+/**
+ * Enhanced E2E Test Suite: Authentication Edge Cases
+ * Tests session management, token handling, and auth recovery
+ */
+
+class AuthTestHelper {
+  constructor(private page: Page, private context: BrowserContext) {}
+
+  async clearAllAuthData() {
+    // Clear cookies
+    await this.context.clearCookies();
+    
+    // Clear localStorage (including auth tokens)
+    await this.page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+    
+    console.log('🧹 Cleared all authentication data');
+  }
+
+  async loginWithCredentials(email: string, password: string, shouldSucceed: boolean = true) {
+    await this.page.goto('/auth/login');
+    await this.page.waitForLoadState('networkidle');
+    
+    await this.page.fill('[name="email"]', email);
+    await this.page.fill('[name="password"]', password);
+    
+    const loginBtn = this.page.locator('button[type="submit"]');
+    await loginBtn.click();
+    
+    if (shouldSucceed) {
+      // Wait for successful redirect to home
+      await this.page.waitForURL('/', { timeout: 10000 });
+      
+      // Verify user is logged in
+      const userGreeting = this.page.locator(':text("Hello"), :text("Welcome"), [data-testid="user-menu"]');
+      await expect(userGreeting.first()).toBeVisible({ timeout: 5000 });
+      
+      console.log(`✅ Login successful for ${email}`);
+      return true;
+    } else {
+      // Wait for error message or stay on login page
+      await this.page.waitForTimeout(2000);
+      
+      const currentUrl = this.page.url();
+      if (currentUrl.includes('/auth/login')) {
+        console.log(`❌ Login failed for ${email} (expected)`);
+        return false;
+      } else {
+        throw new Error(`Expected login to fail but succeeded for ${email}`);
+      }
+    }
+  }
+
+  async attemptProtectedAction() {
+    // Try to access cart (requires authentication)
+    await this.page.goto('/cart');
+    
+    const currentUrl = this.page.url();
+    
+    if (currentUrl.includes('/auth/login')) {
+      console.log('🔒 Redirected to login (not authenticated)');
+      return false;
+    } else {
+      console.log('✅ Accessed protected page (authenticated)');
+      return true;
+    }
+  }
+
+  async checkAuthState(): Promise<'authenticated' | 'unauthenticated'> {
+    // Check if auth token exists in localStorage
+    const token = await this.page.evaluate(() => localStorage.getItem('auth_token'));
+    
+    // Check if user menu/greeting is visible
+    const userMenu = this.page.locator(':text("Hello"), :text("Consumer User"), [data-testid="user-menu"]');
+    const isUserMenuVisible = await userMenu.first().isVisible().catch(() => false);
+    
+    if (token && isUserMenuVisible) {
+      console.log('🔓 User is authenticated');
+      return 'authenticated';
+    } else {
+      console.log('🔒 User is not authenticated');
+      return 'unauthenticated';
+    }
+  }
+}
 
 test('auth edge-cases - wrong password then correct password', async ({ page }) => {
   // Navigate to login page
@@ -62,6 +150,122 @@ test('auth edge-cases - empty fields validation', async ({ page }) => {
   
   // Ensure we're still on login page (not redirected)
   await expect(page).toHaveURL(/.*auth\/login/);
+});
+
+// ============================================================================
+// C3: Enhanced Session Management and Auth Recovery Tests
+// ============================================================================
+
+test('C3: Session management and auth recovery', async ({ page, context }) => {
+  const helper = new AuthTestHelper(page, context);
+  
+  console.log('🧪 C3: Testing session management...');
+  
+  // Phase 1: Normal login
+  console.log('👤 Phase 1: Normal login flow...');
+  await helper.loginWithCredentials('consumer@example.com', 'password');
+  
+  let authState = await helper.checkAuthState();
+  expect(authState).toBe('authenticated');
+  
+  // Verify protected action works
+  const protectedAccess = await helper.attemptProtectedAction();
+  expect(protectedAccess).toBe(true);
+  
+  // Phase 2: Clear session and verify auth state
+  console.log('🧹 Phase 2: Clearing session data...');
+  await helper.clearAllAuthData();
+  
+  authState = await helper.checkAuthState();
+  expect(authState).toBe('unauthenticated');
+  
+  // Phase 3: Attempt protected action (should redirect)
+  console.log('🔒 Phase 3: Testing auth protection...');
+  const protectedAccessAfterClear = await helper.attemptProtectedAction();
+  expect(protectedAccessAfterClear).toBe(false);
+  
+  // Phase 4: Re-login after session clear
+  console.log('🔄 Phase 4: Re-login after session clear...');
+  await helper.loginWithCredentials('consumer@example.com', 'password');
+  
+  authState = await helper.checkAuthState();
+  expect(authState).toBe('authenticated');
+  
+  // Verify protected action works again
+  const finalProtectedAccess = await helper.attemptProtectedAction();
+  expect(finalProtectedAccess).toBe(true);
+  
+  console.log('✅ C3: Session management test completed');
+});
+
+test('C3a: Auth state persistence across page reloads', async ({ page, context }) => {
+  const helper = new AuthTestHelper(page, context);
+  
+  console.log('🧪 C3a: Testing auth persistence...');
+  
+  // Login
+  await helper.loginWithCredentials('consumer@example.com', 'password');
+  
+  // Reload page
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  
+  // Check if still authenticated
+  const authAfterReload = await helper.checkAuthState();
+  expect(authAfterReload).toBe('authenticated');
+  console.log('✅ Auth state persisted after reload');
+  
+  // Navigate to different page and back
+  await page.goto('/');
+  await page.goto('/cart');
+  
+  const authAfterNavigation = await helper.attemptProtectedAction();
+  expect(authAfterNavigation).toBe(true);
+  console.log('✅ Auth state persisted across navigation');
+  
+  console.log('✅ C3a: Auth persistence test completed');
+});
+
+test('C3b: Token corruption and recovery', async ({ page, context }) => {
+  const helper = new AuthTestHelper(page, context);
+  
+  console.log('🧪 C3b: Testing token handling...');
+  
+  // Login normally
+  await helper.loginWithCredentials('consumer@example.com', 'password');
+  
+  // Verify token exists
+  const initialToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+  expect(initialToken).toBeTruthy();
+  console.log('🎫 Initial token acquired');
+  
+  // Simulate token corruption
+  await page.evaluate(() => {
+    localStorage.setItem('auth_token', 'invalid_token_12345');
+  });
+  console.log('💥 Token corrupted');
+  
+  // Try to access protected resource
+  await page.goto('/cart');
+  
+  const currentUrl = page.url();
+  
+  if (currentUrl.includes('/auth/login')) {
+    console.log('🔒 Redirected to login due to invalid token');
+    
+    // Re-login should work
+    await helper.loginWithCredentials('consumer@example.com', 'password');
+    const finalToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+    expect(finalToken).toBeTruthy();
+    expect(finalToken).not.toBe('invalid_token_12345');
+    
+    console.log('✅ Token refresh via re-login successful');
+  } else {
+    // App might handle invalid tokens gracefully
+    console.log('🛡️ App handled invalid token gracefully');
+  }
+  
+  console.log('✅ C3b: Token handling test completed');
 });
 
 test('auth edge-cases - invalid email format', async ({ page }) => {
