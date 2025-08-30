@@ -74,25 +74,25 @@ php artisan test --coverage
 
 ### Base URL
 ```
-http://localhost:8000/api/v1
+http://localhost:8001/api/v1
 ```
 
 ### Health Check
 ```bash
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```
 
 ### Products
 
 **List Products**
 ```bash
-curl -X GET "http://localhost:8000/api/v1/products" \
+curl -X GET "http://localhost:8001/api/v1/products" \
      -H "Accept: application/json"
 ```
 
 **Get Product**
 ```bash
-curl -X GET "http://localhost:8000/api/v1/products/{id}" \
+curl -X GET "http://localhost:8001/api/v1/products/{id}" \
      -H "Accept: application/json"
 ```
 
@@ -100,7 +100,7 @@ curl -X GET "http://localhost:8000/api/v1/products/{id}" \
 
 **Create Order**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/orders" \
+curl -X POST "http://localhost:8001/api/v1/orders" \
      -H "Accept: application/json" \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer YOUR_TOKEN_HERE" \
@@ -118,7 +118,7 @@ curl -X POST "http://localhost:8000/api/v1/orders" \
 
 **Get Order**
 ```bash
-curl -X GET "http://localhost:8000/api/v1/orders/{id}" \
+curl -X GET "http://localhost:8001/api/v1/orders/{id}" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```

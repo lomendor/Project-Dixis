@@ -90,6 +90,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
     });
     
+    // Shipping (public - no auth required for quotes)
+    Route::prefix('shipping')->group(function () {
+        Route::post('quote', [App\Http\Controllers\Api\ShippingController::class, 'quote'])
+            ->middleware('throttle:60,1'); // 60 quote requests per minute
+    });
+    
 });
 
 // OpenAPI Documentation

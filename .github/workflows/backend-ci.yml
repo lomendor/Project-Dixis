@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -37,8 +37,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: mbstring, intl, bcmath, pgsql, pdo_pgsql
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer, openssl, curl, fileinfo
           coverage: none
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -66,16 +66,28 @@ jobs:
         run: php artisan migrate:fresh --seed --env=testing
       - name: Run tests
         run: |
+          echo "🧪 Running shipping integration tests..."
+          php artisan test tests/Feature/Api/ShippingIntegrationTest.php --env=testing --testdox
+          
           if php artisan test --testsuite=Feature --group mvp --env=testing --testdox 2>/dev/null; then
             echo "✅ MVP feature tests passed"
           else
             echo "⚠️ No MVP tests found, running all tests"
             php artisan test --env=testing --testdox
           fi
-      - name: Upload OpenAPI specification (on failure only)
-        if: failure() 
+      - name: Verify API health endpoint
+        run: |
+          php artisan serve --host=0.0.0.0 --port=8001 --env=testing &
+          sleep 5
+          curl -f http://localhost:8001/api/health || exit 1
+          echo "✅ API health endpoint verified"
+      - name: Upload test logs and artifacts (on failure only)
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: openapi-spec-failure
-          path: backend/docs/openapi.yml
+          name: backend-test-failure-artifacts
+          path: |
+            backend/storage/logs/laravel.log
+            backend/docs/openapi.yml
+            backend/.env
           retention-days: 3
