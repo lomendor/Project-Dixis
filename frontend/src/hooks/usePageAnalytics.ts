@@ -1,18 +1,11 @@
-'use client';
-
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { useAnalytics } from '@/lib/analytics';
 
-export function usePageAnalytics(title?: string) {
-  const pathname = usePathname();
-  const { trackPageView, setUserId } = useAnalytics();
-
+export function usePageAnalytics(title: string) {
   useEffect(() => {
-    // Track page view
-    const pageTitle = title || document?.title || pathname;
-    trackPageView(pathname, pageTitle);
-  }, [pathname, title, trackPageView]);
-
-  return { setUserId };
+    // Track page view (placeholder for analytics)
+    if (typeof window !== 'undefined') {
+      document.title = title;
+      console.log(`Page Analytics: ${title}`);
+    }
+  }, [title]);
 }

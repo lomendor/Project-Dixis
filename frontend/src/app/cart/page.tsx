@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { formatCurrency } from '@/env';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -248,13 +249,13 @@ export default function Cart() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Your Cart
+            Το Καλάθι Σας
           </h1>
           <Link
             href="/"
             className="text-green-600 hover:text-green-700 flex items-center text-sm font-medium"
           >
-            ← Continue Shopping
+            ← Συνέχεια Αγορών
           </Link>
         </div>
 
@@ -325,7 +326,7 @@ export default function Cart() {
                           </p>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-sm font-medium text-green-600">
-                              €{item.product.price} / {item.product.unit}
+                              {formatCurrency(parseFloat(item.product.price))} / {item.product.unit}
                             </span>
                           </div>
                         </div>
@@ -375,7 +376,7 @@ export default function Cart() {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Order Summary
+                  Σύνοψη Παραγγελίας
                 </h2>
                 
                 {/* Shipping Information */}
@@ -417,30 +418,30 @@ export default function Cart() {
                 {/* Order Totals */}
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Items ({totalItems})</span>
-                    <span className="font-medium">€{totalAmount.toFixed(2)}</span>
+                    <span className="text-gray-600">Προϊόντα ({totalItems})</span>
+                    <span className="font-medium">{formatCurrency(totalAmount)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-gray-600">Μεταφορικά</span>
                     {loadingShipping ? (
-                      <span className="text-sm text-gray-500">Calculating...</span>
+                      <span className="text-sm text-gray-500">Υπολογισμός...</span>
                     ) : shippingQuote ? (
                       <div className="text-right">
-                        <span className="font-medium">€{shippingQuote.cost.toFixed(2)}</span>
+                        <span className="font-medium">{formatCurrency(shippingQuote.cost)}</span>
                         <div className="text-xs text-gray-500">{shippingQuote.carrier}</div>
-                        <div className="text-xs text-gray-500">{shippingQuote.etaDays} day(s)</div>
+                        <div className="text-xs text-gray-500">{shippingQuote.etaDays} ημέρες</div>
                       </div>
                     ) : postalCode && city ? (
-                      <span className="text-sm text-gray-500">Enter valid ΤΚ</span>
+                      <span className="text-sm text-gray-500">Εισάγετε έγκυρο ΤΚ</span>
                     ) : (
-                      <span className="text-sm text-gray-500">Enter ΤΚ & city</span>
+                      <span className="text-sm text-gray-500">Εισάγετε ΤΚ & πόλη</span>
                     )}
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-base font-semibold">
-                      <span>Total</span>
+                      <span>Σύνολο</span>
                       <span className="text-green-600">
-                        €{(totalAmount + (shippingQuote?.cost || 0)).toFixed(2)}
+                        {formatCurrency(totalAmount + (shippingQuote?.cost || 0))}
                       </span>
                     </div>
                   </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navigation() {
@@ -9,6 +10,7 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
@@ -64,6 +66,11 @@ export default function Navigation() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [mobileMenuOpen]);
+
+  // Close mobile menu on route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <nav className="bg-white shadow-sm border-b" role="navigation" aria-label="Main navigation">
@@ -184,7 +191,6 @@ export default function Navigation() {
                 href="/"
                 className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                 data-testid="mobile-nav-products"
-                onClick={() => setMobileMenuOpen(false)}
               >
                 Products
               </Link>
@@ -194,8 +200,7 @@ export default function Navigation() {
                   href="/cart"
                   className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-cart"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                  >
                   Cart
                 </Link>
               )}
@@ -205,8 +210,7 @@ export default function Navigation() {
                   href="/producer/dashboard"
                   className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                  >
                   Dashboard
                 </Link>
               )}
@@ -245,16 +249,14 @@ export default function Navigation() {
                     href="/auth/login"
                     className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-login"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
+                      >
                     Login
                   </Link>
                   <Link
                     href="/auth/register"
                     className="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-register"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
+                      >
                     Sign Up
                   </Link>
                 </div>
