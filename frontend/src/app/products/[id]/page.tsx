@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { usePageAnalytics } from '@/hooks/usePageAnalytics';
 import { useAnalytics } from '@/lib/analytics';
+import { formatCurrency } from '@/env';
 
 export default function ProductDetail() {
   const params = useParams();
@@ -54,7 +55,7 @@ export default function ProductDetail() {
     }
 
     if (!product) {
-      showToast('error', 'Product information not available');
+      showToast('error', 'Οι πληροφορίες προϊόντος δεν είναι διαθέσιμες');
       return;
     }
 
@@ -71,11 +72,11 @@ export default function ProductDetail() {
         product.categories.length > 0 ? product.categories[0].name : undefined
       );
       
-      showToast('success', `${quantity} item(s) added to cart!`);
+      showToast('success', `${quantity} προϊόν(τα) προστέθηκαν στο καλάθι!`);
       setQuantity(1);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      const message = error instanceof Error ? error.message : 'Failed to add product to cart';
+      const message = error instanceof Error ? error.message : 'Αποτυχία προσθήκης προϊόντος στο καλάθι';
       showToast('error', message);
     } finally {
       setAddingToCart(false);
@@ -95,12 +96,12 @@ export default function ProductDetail() {
             href="/"
             className="text-green-600 hover:text-green-700 flex items-center text-sm font-medium"
           >
-            ← Back to Products
+            ← Πίσω στα Προϊόντα
           </Link>
         </div>
 
         {loading ? (
-          <LoadingSpinner text="Loading product..." />
+          <LoadingSpinner text="Φόρτωση προϊόντος..." />
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-600 mb-4">{error}</p>
@@ -108,7 +109,7 @@ export default function ProductDetail() {
               onClick={loadProduct}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
             >
-              Try Again
+              Δοκιμάστε Ξανά
             </button>
           </div>
         ) : product ? (
@@ -123,7 +124,7 @@ export default function ProductDetail() {
                     className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <span className="text-gray-400">No Image Available</span>
+                  <span className="text-gray-400">Δεν Υπάρχει Εικόνα</span>
                 )}
               </div>
               
@@ -151,7 +152,7 @@ export default function ProductDetail() {
                 </h1>
                 
                 <div className="text-xl text-green-600 font-bold mb-4">
-                  €{product.price} / {product.unit}
+                  {formatCurrency(product.price)} / {product.unit}
                 </div>
 
                 {product.description && (
@@ -164,7 +165,7 @@ export default function ProductDetail() {
               {/* Producer Info */}
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Producer Information
+                  Πληροφορίες Παραγωγού
                 </h3>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium text-gray-900">
@@ -192,7 +193,7 @@ export default function ProductDetail() {
               {product.categories.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-2">
-                    Categories
+                    Κατηγορίες
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {product.categories.map((category) => (
@@ -212,13 +213,13 @@ export default function ProductDetail() {
                 {product.stock !== null ? (
                   <div className="mb-4">
                     <span className="text-sm text-gray-600">
-                      Available Stock: {product.stock} {product.unit}(s)
+                      Διαθέσιμο Απόθεμα: {product.stock} {product.unit}
                     </span>
                   </div>
                 ) : (
                   <div className="mb-4">
                     <span className="text-sm text-green-600">
-                      ✓ In Stock
+                      ✓ Σε Απόθεμα
                     </span>
                   </div>
                 )}
@@ -227,7 +228,7 @@ export default function ProductDetail() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <label htmlFor="quantity" className="text-sm font-medium text-gray-900">
-                      Quantity:
+                      Ποσότητα:
                     </label>
                     <select
                       id="quantity"
@@ -249,21 +250,21 @@ export default function ProductDetail() {
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium"
                     data-testid="add-to-cart-button"
                   >
-                    {addingToCart ? 'Adding to Cart...' : 
-                     product.stock === 0 ? 'Out of Stock' : 
-                     !isAuthenticated ? 'Login to Add to Cart' : 'Add to Cart'}
+                    {addingToCart ? 'Προσθήκη στο Καλάθι...' : 
+                     product.stock === 0 ? 'Εξαντλημένο' : 
+                     !isAuthenticated ? 'Σύνδεση για Προσθήκη στο Καλάθι' : 'Προσθήκη στο Καλάθι'}
                   </button>
 
                   {!isAuthenticated && (
                     <p className="text-sm text-gray-600 text-center">
                       <Link href="/auth/login" className="text-green-600 hover:text-green-700">
-                        Login
+                        Σύνδεση
                       </Link>
-                      {' '}or{' '}
+                      {' '}ή{' '}
                       <Link href="/auth/register" className="text-green-600 hover:text-green-700">
-                        create an account
+                        δημιουργήστε λογαριασμό
                       </Link>
-                      {' '}to add items to cart
+                      {' '}για να προσθέσετε προϊόντα στο καλάθι
                     </p>
                   )}
                 </div>
@@ -272,7 +273,7 @@ export default function ProductDetail() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600">Product not found.</p>
+            <p className="text-gray-600">Το προϊόν δεν βρέθηκε.</p>
           </div>
         )}
       </main>
