@@ -118,9 +118,10 @@ cd frontend
 npx wait-on http://127.0.0.1:8001/api/health http://127.0.0.1:3001 --timeout 60000
 npm run e2e
 
-# 4. Lighthouse testing (optional)
+# 4. Lighthouse performance testing (optional)
+cd frontend
 npm install -g @lhci/cli
-lhci autorun --collect.url=http://127.0.0.1:3001
+lhci autorun --config=.lighthouserc.js
 ```
 
 ### Port Configuration
