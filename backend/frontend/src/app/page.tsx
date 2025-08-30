@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Metadata } from 'next';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -10,6 +11,42 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+
+// SEO metadata for homepage
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
+
+export const metadata: Metadata = {
+  title: "Fresh Local Products from Greek Producers",
+  description: "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers. Support sustainable agriculture and taste the difference of farm-fresh quality.",
+  keywords: [
+    "fresh vegetables Greece",
+    "organic fruits",
+    "local Greek producers", 
+    "farm fresh products",
+    "sustainable agriculture",
+    "artisanal food",
+    "direct from farm",
+    "premium organic produce"
+  ],
+  openGraph: {
+    title: "Fresh Local Products from Greek Producers",
+    description: "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers.",
+    url: siteUrl,
+    images: [
+      {
+        url: `${siteUrl}/og-products.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'Fresh local products from Greek producers',
+      },
+    ],
+  },
+  twitter: {
+    title: "Fresh Local Products from Greek Producers",
+    description: "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers.",
+    images: [`${siteUrl}/twitter-products.jpg`],
+  },
+};
 
 interface Filters {
   search: string;
@@ -144,8 +181,54 @@ export default function Home() {
     }
   }, [isAuthenticated, addingToCart, showSuccess, showError]);
 
+  // Generate JSON-LD for products
+  const generateProductsJsonLd = () => {
+    if (products.length === 0) return null;
+    
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Fresh Local Products',
+      description: 'Premium organic products from local Greek producers',
+      url: siteUrl,
+      numberOfItems: products.length,
+      itemListElement: products.slice(0, 10).map((product, index) => ({
+        '@type': 'Product',
+        position: index + 1,
+        name: product.name,
+        description: product.description || `Fresh ${product.name} from ${product.producer.name}`,
+        image: product.images[0]?.url || product.images[0]?.image_path,
+        offers: {
+          '@type': 'Offer',
+          price: product.price,
+          priceCurrency: 'EUR',
+          availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          seller: {
+            '@type': 'Organization',
+            name: product.producer.name,
+          },
+        },
+        brand: {
+          '@type': 'Brand',
+          name: product.producer.name,
+        },
+        category: product.categories[0]?.name || 'Fresh Produce',
+      })),
+    };
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Products JSON-LD */}
+      {products.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateProductsJsonLd()),
+          }}
+        />
+      )}
+      
       <Navigation />
       
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -154,6 +237,10 @@ export default function Home() {
           <h1 data-testid="page-title" className="text-3xl font-bold text-gray-900 mb-4">
             Fresh Products from Local Producers
           </h1>
+          <p className="text-lg text-gray-600 mb-6">
+            Discover premium organic vegetables, artisanal products, and fresh fruits directly from passionate Greek producers. 
+            Support sustainable agriculture while enjoying the finest quality produce delivered fresh to your door.
+          </p>
           
           {/* Enhanced Search and Filters */}
           <div className="space-y-4">
