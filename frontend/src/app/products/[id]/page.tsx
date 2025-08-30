@@ -152,7 +152,7 @@ export default function ProductDetail() {
                 </h1>
                 
                 <div className="text-xl text-green-600 font-bold mb-4">
-                  {formatCurrency(product.price)} / {product.unit}
+                  {formatCurrency(parseFloat(product.price))} / {product.unit}
                 </div>
 
                 {product.description && (
