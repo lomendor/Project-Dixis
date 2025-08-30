@@ -8,6 +8,8 @@ import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { usePageAnalytics } from '@/hooks/usePageAnalytics';
+import { useAnalytics } from '@/lib/analytics';
 
 export default function ProductDetail() {
   const params = useParams();
@@ -19,8 +21,12 @@ export default function ProductDetail() {
   const [addingToCart, setAddingToCart] = useState(false);
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
+  const { trackAddToCart } = useAnalytics();
 
   const productId = parseInt(params.id as string);
+  
+  // Track page view with product name when available
+  usePageAnalytics(product ? `${product.name} - Product Detail` : 'Product Detail');
 
   useEffect(() => {
     if (productId) {
@@ -47,9 +53,24 @@ export default function ProductDetail() {
       return;
     }
 
+    if (!product) {
+      showToast('error', 'Product information not available');
+      return;
+    }
+
     try {
       setAddingToCart(true);
       await apiClient.addToCart(productId, quantity);
+      
+      // Track successful add to cart event
+      trackAddToCart(
+        product.id,
+        product.name,
+        quantity,
+        product.price,
+        product.categories.length > 0 ? product.categories[0].name : undefined
+      );
+      
       showToast('success', `${quantity} item(s) added to cart!`);
       setQuantity(1);
     } catch (error) {
