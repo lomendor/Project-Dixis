@@ -299,4 +299,4 @@ test.describe('SEO Basics Implementation', () => {
       expect(ariaLabel).toBe('Main navigation');
     });
   });
-});"}
+});
