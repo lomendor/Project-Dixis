@@ -16,6 +16,11 @@ class ProducerController extends Controller
     {
         $user = $request->user();
         
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
         // Ensure user has a producer profile
         if (!$user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
@@ -44,6 +49,11 @@ class ProducerController extends Controller
     {
         $user = $request->user();
         
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
         // Ensure user has a producer profile
         if (!$user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
@@ -51,18 +61,133 @@ class ProducerController extends Controller
         
         $producer = $user->producer;
         
-        // Get KPI data
-        $productsCount = $producer->products()->count();
+        // Get real KPI data from database
+        $totalProducts = $producer->products()->count();
+        $activeProducts = $producer->products()->where('is_active', true)->count();
         
-        // For MVP, return sample data for orders, revenue, payouts
-        // In a real app, these would come from orders/sales tables
-        $kpiData = [
-            'orders' => 5,  // Sample data
-            'revenue' => 1250.50,  // Sample data
-            'products' => $productsCount,
-            'payouts' => 875.25  // Sample data
-        ];
+        // Calculate orders and revenue from order_items via products
+        $totalOrders = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('products.producer_id', $producer->id)
+            ->distinct('order_items.order_id')
+            ->count('order_items.order_id');
+            
+        $revenue = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('products.producer_id', $producer->id)
+            ->sum('order_items.total_price') ?? 0;
         
-        return response()->json($kpiData);
+        // Get unread messages count
+        $unreadMessages = \App\Models\Message::where('producer_id', $producer->id)
+            ->where('is_read', false)
+            ->count();
+        
+        return response()->json([
+            'total_products' => $totalProducts,
+            'active_products' => $activeProducts,
+            'total_orders' => $totalOrders,
+            'revenue' => (float) $revenue,
+            'unread_messages' => $unreadMessages,
+        ]);
+    }
+    
+    /**
+     * Get top-selling products for producer dashboard
+     */
+    public function topProducts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+        
+        $producer = $user->producer;
+        
+        // Validate limit parameter
+        $limit = $request->query('limit', 10);
+        $limit = max(1, min(50, (int) $limit)); // Between 1 and 50
+        
+        // Get top-selling products by quantity sold
+        $topProducts = \DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('products.producer_id', $producer->id)
+            ->where('orders.status', '!=', 'cancelled') // Exclude cancelled orders
+            ->select(
+                'products.id',
+                'products.name',
+                'products.unit',
+                'products.price as current_price',
+                'products.stock',
+                'products.is_active',
+                \DB::raw('SUM(order_items.quantity) as total_quantity_sold'),
+                \DB::raw('SUM(order_items.total_price) as total_revenue'),
+                \DB::raw('COUNT(DISTINCT order_items.order_id) as total_orders'),
+                \DB::raw('AVG(order_items.unit_price) as average_unit_price')
+            )
+            ->groupBy(
+                'products.id', 
+                'products.name', 
+                'products.unit', 
+                'products.price',
+                'products.stock',
+                'products.is_active'
+            )
+            ->orderBy('total_quantity_sold', 'desc')
+            ->limit($limit)
+            ->get();
+        
+        // Also get products with no sales (for completeness if limit allows)
+        if ($topProducts->count() < $limit) {
+            $productIdsWithSales = $topProducts->pluck('id')->toArray();
+            
+            $productsWithoutSales = $producer->products()
+                ->whereNotIn('id', $productIdsWithSales)
+                ->select('id', 'name', 'unit', 'price as current_price', 'stock', 'is_active')
+                ->limit($limit - $topProducts->count())
+                ->get()
+                ->map(function ($product) {
+                    return (object) [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'unit' => $product->unit,
+                        'current_price' => $product->current_price,
+                        'stock' => $product->stock,
+                        'is_active' => $product->is_active,
+                        'total_quantity_sold' => 0,
+                        'total_revenue' => 0.0,
+                        'total_orders' => 0,
+                        'average_unit_price' => (float) $product->current_price,
+                    ];
+                });
+            
+            $topProducts = $topProducts->concat($productsWithoutSales);
+        }
+        
+        return response()->json([
+            'top_products' => $topProducts->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'unit' => $product->unit,
+                    'current_price' => number_format((float) $product->current_price, 2),
+                    'stock' => $product->stock,
+                    'is_active' => (bool) $product->is_active,
+                    'total_quantity_sold' => (int) $product->total_quantity_sold,
+                    'total_revenue' => number_format((float) $product->total_revenue, 2),
+                    'total_orders' => (int) $product->total_orders,
+                    'average_unit_price' => number_format((float) $product->average_unit_price, 2),
+                ];
+            })->values(),
+            'limit' => $limit,
+            'total_products_shown' => $topProducts->count(),
+        ]);
     }
 }

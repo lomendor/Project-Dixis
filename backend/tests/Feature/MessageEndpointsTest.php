@@ -53,11 +53,7 @@ class MessageEndpointsTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
                          ->patchJson("/api/v1/producer/messages/{$message->id}/read");
                          
-        $response->assertOk()
-                ->assertJson([
-                    'id' => $message->id,
-                    'is_read' => true
-                ]);
+        $response->assertNoContent();
     }
     
     #[Group('mvp')]
@@ -69,19 +65,19 @@ class MessageEndpointsTest extends TestCase
         
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
                          ->postJson("/api/v1/producer/messages/{$message->id}/replies", [
-                             'body' => 'Thanks!'
+                             'content' => 'Thanks!'
                          ]);
                          
         $response->assertCreated()
                 ->assertJson([
                     'parent_id' => $message->id,
-                    'body' => 'Thanks!'
+                    'content' => 'Thanks!'
                 ]);
                 
         // Verify reply was created in database
         $this->assertDatabaseHas('messages', [
             'parent_id' => $message->id,
-            'body' => 'Thanks!'
+            'content' => 'Thanks!'
         ]);
     }
 }

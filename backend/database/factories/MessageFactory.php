@@ -17,7 +17,8 @@ class MessageFactory extends Factory
     public function definition(): array
     {
         return [
-            'body' => fake()->paragraph(),
+            'content' => fake()->paragraph(),
+            'user_id' => \App\Models\User::factory(),
             'is_read' => false,
         ];
     }
