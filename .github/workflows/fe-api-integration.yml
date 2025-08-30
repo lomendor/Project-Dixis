@@ -1,0 +1,161 @@
+name: FE-API Integration
+
+on:
+  push:
+    paths:
+      - 'backend/frontend/**'
+      - 'backend/app/**'
+      - 'backend/routes/**'
+      - '.github/workflows/fe-api-integration.yml'
+  pull_request:
+    paths:
+      - 'backend/frontend/**'
+      - 'backend/app/**'
+      - 'backend/routes/**'
+  workflow_dispatch:
+
+concurrency:
+  group: fe-api-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: project_dixis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    
+    env:
+      NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+      PLAYWRIGHT_JOBS: 1
+      PW_TEST_RETRIES: 2
+      PW_TEST_TIMEOUT: 30000
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Backend setup
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, bcmath, pgsql, pdo_pgsql
+          coverage: none
+      
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      
+      - name: Install backend dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+      
+      - name: Copy backend .env
+        working-directory: backend
+        run: cp .env.example .env || touch .env
+      
+      - name: Generate application key
+        working-directory: backend
+        run: php artisan key:generate
+      
+      - name: Configure backend DB env (testing)
+        working-directory: backend
+        run: |
+          {
+            echo "DB_CONNECTION=pgsql"
+            echo "DB_HOST=127.0.0.1"
+            echo "DB_PORT=5432"
+            echo "DB_DATABASE=project_dixis_test"
+            echo "DB_USERNAME=postgres"
+            echo "DB_PASSWORD=postgres"
+          } >> .env
+      
+      - name: Run backend migrations and seed
+        working-directory: backend
+        run: php artisan migrate:fresh --seed --env=testing
+      
+      - name: Start Laravel backend (8001)
+        working-directory: backend
+        run: php artisan serve --host=127.0.0.1 --port=8001 --env=testing &
+      
+      - name: Wait for backend API health
+        run: |
+          timeout 60 bash -c 'until curl -f http://127.0.0.1:8001/api/health; do sleep 2; done'
+      
+      # Frontend setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/frontend/package-lock.json
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('backend/frontend/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-playwright-
+      
+      - name: Install frontend dependencies
+        working-directory: backend/frontend
+        run: npm ci
+      
+      - name: Set frontend API base URL
+        working-directory: backend/frontend
+        run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
+      
+      - name: Install Playwright browsers with dependencies
+        working-directory: backend/frontend
+        run: npx playwright install --with-deps
+      
+      - name: Build frontend
+        working-directory: backend/frontend
+        run: npm run build
+      
+      - name: Start frontend server (3001)
+        working-directory: backend/frontend
+        run: nohup npm run start -- -p 3001 > ../frontend.log 2>&1 &
+      
+      - name: Wait for frontend server
+        run: |
+          timeout 60 bash -c 'until curl -f http://127.0.0.1:3001; do sleep 2; done'
+      
+      # Run Integration E2E tests
+      - name: Run integration tests
+        working-directory: backend/frontend
+        run: npx playwright test --grep="integration"
+      
+      # Artifacts ΜΟΝΟ σε αποτυχία
+      - name: Upload Playwright report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-playwright-report
+          path: backend/frontend/playwright-report
+          retention-days: 3
+      
+      - name: Upload test artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-artifacts
+          path: |
+            backend/frontend/test-results
+            backend/frontend/playwright/.cache
+          retention-days: 3

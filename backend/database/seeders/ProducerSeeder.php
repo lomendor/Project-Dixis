@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 class ProducerSeeder extends Seeder
 {
@@ -13,9 +15,22 @@ class ProducerSeeder extends Seeder
      */
     public function run(): void
     {
-        $producers = [
-            [
+        // Get the producer user created in DatabaseSeeder
+        $producerUser = User::where('email', 'producer@example.com')->first();
+        
+        if (!$producerUser) {
+            $this->command->warn('Producer user not found. Skipping producer seeding.');
+            return;
+        }
+        
+        // Create producer idempotently
+        $existingProducer = DB::table('producers')->where('user_id', $producerUser->id)->first();
+        
+        if (!$existingProducer) {
+            $producerData = [
+                'user_id' => $producerUser->id,
                 'name' => 'Green Farm Co.',
+                'slug' => $this->generateUniqueSlug('green-farm-co'),
                 'business_name' => 'Green Farm Company Ltd',
                 'description' => 'Organic vegetables and fruits from local farms',
                 'location' => 'Athens, Greece',
@@ -25,33 +40,25 @@ class ProducerSeeder extends Seeder
                 'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-            [
-                'name' => 'Mediterranean Harvest',
-                'business_name' => 'Mediterranean Harvest SA',
-                'description' => 'Traditional Greek products and olive oil',
-                'location' => 'Crete, Greece',
-                'phone' => '+30 28210 98765',
-                'email' => 'contact@medharvest.gr',
-                'website' => 'https://medharvest.gr',
-                'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Fresh Valley',
-                'business_name' => null,
-                'description' => 'Seasonal fruits and vegetables',
-                'location' => 'Thessaloniki, Greece',
-                'phone' => '+30 2310 555444',
-                'email' => 'orders@freshvalley.gr',
-                'website' => null,
-                'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ];
+            ];
 
-        DB::table('producers')->insert($producers);
+            DB::table('producers')->insert($producerData);
+        }
+    }
+    
+    /**
+     * Generate collision-safe unique slug
+     */
+    private function generateUniqueSlug(string $baseSlug): string
+    {
+        $slug = $baseSlug;
+        $counter = 1;
+        
+        while (DB::table('producers')->where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
     }
 }

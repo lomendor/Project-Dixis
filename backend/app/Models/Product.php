@@ -11,17 +11,28 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'price',
+        'discount_price',
+        'weight_per_unit',
         'unit',
+        'stock',
         'category',
+        'is_organic',
+        'is_seasonal',
+        'image_url',
+        'status',
         'is_active',
         'producer_id',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_organic' => 'boolean',
+        'is_seasonal' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -32,5 +43,29 @@ class Product extends Model
     public function producer()
     {
         return $this->belongsTo(Producer::class);
+    }
+
+    /**
+     * Get the categories for the product.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
+
+    /**
+     * Get the images for the product.
+     */
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Get the primary image for the product.
+     */
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
 }

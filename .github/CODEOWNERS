@@ -1,0 +1,15 @@
+# Default owner for all files
+* @lomendor
+
+# Backend Laravel code
+backend/ @lomendor
+
+# Frontend Next.js code  
+backend/frontend/ @lomendor
+
+# CI/CD workflows
+.github/workflows/ @lomendor
+
+# Documentation
+docs/ @lomendor
+*.md @lomendor
