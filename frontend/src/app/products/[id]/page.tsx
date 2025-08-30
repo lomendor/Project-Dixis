@@ -6,20 +6,25 @@ import Link from 'next/link';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ProductDetailSkeleton from '@/components/ProductDetailSkeleton';
+import ErrorFallback from '@/components/ErrorFallback';
+import ProductImageFallback from '@/components/ProductImageFallback';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { usePageAnalytics } from '@/hooks/usePageAnalytics';
 import { useAnalytics } from '@/lib/analytics';
 import { formatCurrency } from '@/env';
+import { validateProductData, classifyApiError } from '@/utils/productValidation';
 
 export default function ProductDetail() {
   const params = useParams();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<'not-found' | 'server-error' | 'network-error' | 'unknown' | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const { isAuthenticated } = useAuth();
   const { showToast } = useToast();
   const { trackAddToCart } = useAnalytics();
@@ -38,11 +43,31 @@ export default function ProductDetail() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const productData = await apiClient.getProduct(productId);
-      setProduct(productData);
       setError(null);
+      
+      const productData = await apiClient.getProduct(productId);
+      
+      // Validate and sanitize product data
+      const validation = validateProductData(productData);
+      
+      if (!validation.isValid) {
+        console.error('Product validation failed:', validation.errors);
+        setError('unknown');
+        return;
+      }
+      
+      // Log warnings for debugging
+      if (validation.warnings.length > 0) {
+        console.warn('Product validation warnings:', validation.warnings);
+      }
+      
+      setProduct(validation.product);
+      setImageErrors(new Set()); // Reset image errors on successful load
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load product');
+      console.error('Failed to load product:', err);
+      const errorType = err instanceof Error ? classifyApiError(err) : 'unknown';
+      setError(errorType);
     } finally {
       setLoading(false);
     }
@@ -84,6 +109,19 @@ export default function ProductDetail() {
   };
 
   const maxQuantity = product?.stock || 10; // Fallback to 10 if no stock limit
+  
+  const handleImageError = (imageId: number) => {
+    setImageErrors(prev => new Set([...prev, imageId]));
+  };
+  
+  const getImageSrc = (image: any) => {
+    return image.url || image.image_path || '';
+  };
+  
+  const getPrimaryImage = () => {
+    if (!product?.images || product.images.length === 0) return null;
+    return product.images.find(img => img.is_primary) || product.images[0];
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,45 +139,55 @@ export default function ProductDetail() {
         </div>
 
         {loading ? (
-          <LoadingSpinner text="Φόρτωση προϊόντος..." />
+          <ProductDetailSkeleton />
         ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={loadProduct}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-            >
-              Δοκιμάστε Ξανά
-            </button>
-          </div>
+          <ErrorFallback
+            error={error}
+            productId={productId}
+            onRetry={loadProduct}
+          />
         ) : product ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
-                {product.images.length > 0 ? (
-                  <img
-                    src={product.images.find(img => img.is_primary)?.url || product.images.find(img => img.is_primary)?.image_path || product.images[0].url || product.images[0].image_path}
-                    alt={product.images.find(img => img.is_primary)?.alt_text || product.name}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                ) : (
-                  <span className="text-gray-400">Δεν Υπάρχει Εικόνα</span>
-                )}
+              <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                {(() => {
+                  const primaryImage = getPrimaryImage();
+                  const imageSrc = primaryImage ? getImageSrc(primaryImage) : null;
+                  const isImageBroken = primaryImage && imageErrors.has(primaryImage.id);
+                  
+                  return (
+                    <ProductImageFallback
+                      src={!isImageBroken ? imageSrc : undefined}
+                      alt={primaryImage?.alt_text || product.name}
+                      productName={product.name}
+                      className="w-full h-full object-cover rounded-lg"
+                      priority={true}
+                      onError={() => primaryImage && handleImageError(primaryImage.id)}
+                    />
+                  );
+                })()}
               </div>
               
               {/* Additional Images */}
               {product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
-                  {product.images.slice(0, 4).map((image, index) => (
-                    <div key={image.id} className="aspect-square bg-gray-200 rounded flex items-center justify-center">
-                      <img
-                        src={image.url || image.image_path}
-                        alt={image.alt_text || `${product.name} ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  ))}
+                  {product.images.slice(0, 4).map((image, index) => {
+                    const isImageBroken = imageErrors.has(image.id);
+                    const imageSrc = !isImageBroken ? getImageSrc(image) : undefined;
+                    
+                    return (
+                      <div key={image.id} className="aspect-square bg-gray-200 rounded overflow-hidden">
+                        <ProductImageFallback
+                          src={imageSrc}
+                          alt={image.alt_text || `${product.name} ${index + 1}`}
+                          productName={product.name}
+                          className="w-full h-full object-cover rounded"
+                          onError={() => handleImageError(image.id)}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -169,19 +217,19 @@ export default function ProductDetail() {
                 </h3>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium text-gray-900">
-                    {product.producer.name}
+                    {product.producer?.name || 'Άγνωστος Παραγωγός'}
                   </h4>
-                  {product.producer.business_name && (
+                  {product.producer?.business_name && (
                     <p className="text-sm text-gray-600">
                       {product.producer.business_name}
                     </p>
                   )}
-                  {product.producer.location && (
+                  {product.producer?.location && (
                     <p className="text-sm text-gray-600 mt-1">
                       📍 {product.producer.location}
                     </p>
                   )}
-                  {product.producer.description && (
+                  {product.producer?.description && (
                     <p className="text-sm text-gray-600 mt-2">
                       {product.producer.description}
                     </p>
@@ -190,7 +238,7 @@ export default function ProductDetail() {
               </div>
 
               {/* Categories */}
-              {product.categories.length > 0 && (
+              {product.categories && product.categories.length > 0 && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-2">
                     Κατηγορίες
@@ -201,7 +249,7 @@ export default function ProductDetail() {
                         key={category.id}
                         className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full"
                       >
-                        {category.name}
+                        {category.name || 'Άγνωστη Κατηγορία'}
                       </span>
                     ))}
                   </div>
@@ -247,8 +295,9 @@ export default function ProductDetail() {
                   <button
                     onClick={handleAddToCart}
                     disabled={product.stock === 0 || addingToCart}
-                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium"
+                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
                     data-testid="add-to-cart-button"
+                    aria-label={`Add ${product.name} to cart`}
                   >
                     {addingToCart ? 'Προσθήκη στο Καλάθι...' : 
                      product.stock === 0 ? 'Εξαντλημένο' : 
