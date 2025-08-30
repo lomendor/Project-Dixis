@@ -14,6 +14,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:analytics": "PLAYWRIGHT_BASE_URL=http://localhost:3001 playwright test tests/e2e/analytics-observability.spec.ts",
+    "test:e2e:performance-a11y": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/performance-accessibility-core.spec.ts --reporter=line",
     "dev:e2e": "next dev -p 3001 || vite --port 3001",
     "dev:api": "php -S 127.0.0.1:8001 -t ../public",
     "api:e2e": "php ../artisan serve --host 127.0.0.1 --port 8001"

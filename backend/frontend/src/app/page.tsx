@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Filters {
   search: string;
@@ -27,6 +29,7 @@ export default function Home() {
   const [categories, setCategories] = useState<string[]>([]);
   const [producers, setProducers] = useState<{id: number, name: string}[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [addingToCart, setAddingToCart] = useState<Set<number>>(new Set());
   const [filters, setFilters] = useState<Filters>({
     search: '',
     category: '',
@@ -38,12 +41,13 @@ export default function Home() {
     dir: 'desc'
   });
   const { isAuthenticated } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     loadProducts();
   }, [filters]);
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const params: Record<string, string | number | boolean> = {
@@ -87,13 +91,13 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const updateFilter = (key: keyof Filters, value: Filters[keyof Filters]) => {
+  const updateFilter = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setFilters({
       search: '',
       category: '',
@@ -104,58 +108,47 @@ export default function Home() {
       sort: 'created_at',
       dir: 'desc'
     });
-  };
+  }, []);
 
-  const hasActiveFilters = filters.search || filters.category || filters.producer || 
-                          filters.minPrice || filters.maxPrice || filters.organic !== null;
+  const hasActiveFilters = useMemo(() => 
+    filters.search || filters.category || filters.producer || 
+    filters.minPrice || filters.maxPrice || filters.organic !== null,
+    [filters]
+  );
 
-  const handleAddToCart = async (productId: number) => {
+  const handleAddToCart = useCallback(async (productId: number) => {
     if (!isAuthenticated) {
       // Redirect to login if not authenticated
       window.location.href = '/auth/login';
       return;
     }
 
+    if (addingToCart.has(productId)) {
+      return; // Prevent double-clicking
+    }
+
+    setAddingToCart(prev => new Set(prev).add(productId));
+
     try {
       await apiClient.addToCart(productId, 1);
-      // Show a better success message
-      const successDiv = document.createElement('div');
-      successDiv.innerHTML = `
-        <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2" data-testid="cart-success">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-          <span>Added to cart!</span>
-        </div>
-      `;
-      document.body.appendChild(successDiv);
-      setTimeout(() => {
-        document.body.removeChild(successDiv);
-      }, 3000);
+      showSuccess('Added to cart!');
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      // Show a better error message
-      const errorDiv = document.createElement('div');
-      errorDiv.innerHTML = `
-        <div class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-          <span>Failed to add to cart</span>
-        </div>
-      `;
-      document.body.appendChild(errorDiv);
-      setTimeout(() => {
-        document.body.removeChild(errorDiv);
-      }, 3000);
+      showError('Failed to add to cart');
+    } finally {
+      setAddingToCart(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
     }
-  };
+  }, [isAuthenticated, addingToCart, showSuccess, showError]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 data-testid="page-title" className="text-3xl font-bold text-gray-900 mb-4">
@@ -323,14 +316,19 @@ export default function Home() {
                 {/* Product Image Placeholder */}
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
                   {product.images.length > 0 ? (
-                    <img
+                    <Image
                       data-testid="product-image"
                       src={product.images[0].url || product.images[0].image_path}
                       alt={product.images[0].alt_text || product.name}
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      priority={products.indexOf(product) < 4}
                     />
                   ) : (
-                    <span className="text-gray-400 text-sm">No Image</span>
+                    <div className="flex items-center justify-center text-gray-400 text-sm" role="img" aria-label="No image available">
+                      No Image
+                    </div>
                   )}
                 </div>
 
@@ -385,10 +383,16 @@ export default function Home() {
                     <button
                       data-testid="add-to-cart"
                       onClick={() => handleAddToCart(product.id)}
-                      disabled={product.stock === 0}
-                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium"
+                      disabled={product.stock === 0 || addingToCart.has(product.id)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      aria-label={`Add ${product.name} to cart`}
                     >
-                      {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                      {product.stock === 0 
+                        ? 'Out of Stock' 
+                        : addingToCart.has(product.id) 
+                          ? 'Adding...' 
+                          : 'Add to Cart'
+                      }
                     </button>
                   </div>
                 </div>

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navigation() {
   const { user, logout, isAuthenticated, isProducer } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -16,8 +18,55 @@ export default function Navigation() {
     }
   };
 
+  // Handle mobile menu toggle with accessibility
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(prev => !prev);
+  };
+
+  // Handle escape key to close mobile menu
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Focus the first focusable element in mobile menu
+      const firstFocusable = mobileMenuRef.current?.querySelector(
+        'a, button, [tabindex]:not([tabindex="-1"])'
+      ) as HTMLElement;
+      firstFocusable?.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [mobileMenuOpen]);
+
+  // Handle click outside to close mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !mobileMenuButtonRef.current?.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white shadow-sm border-b" role="navigation" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -98,11 +147,15 @@ export default function Navigation() {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
+              ref={mobileMenuButtonRef}
               data-testid="mobile-menu-button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="bg-gray-50 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+              onClick={toggleMobileMenu}
+              className="bg-gray-50 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 transition-colors"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileMenuOpen ? 'Close main menu' : 'Open main menu'}
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">{mobileMenuOpen ? 'Close' : 'Open'} main menu</span>
               {mobileMenuOpen ? (
                 <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -118,7 +171,14 @@ export default function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden" data-testid="mobile-menu">
+          <div 
+            ref={mobileMenuRef}
+            className="md:hidden" 
+            data-testid="mobile-menu"
+            id="mobile-menu"
+            role="menu"
+            aria-labelledby="mobile-menu-button"
+          >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 href="/"

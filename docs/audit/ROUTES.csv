@@ -1,29 +1,29 @@
 Route/Page,OLD Path,CURRENT Path,Status,Priority,Notes
 "CORE CONSUMER JOURNEY",,,,, 
 /,app/page.tsx,app/page.tsx,Migrated,P0,Basic homepage lacks features
-/products,app/products/page.tsx,Missing,Missing,P0,Full products listing missing
+/products,app/products/page.tsx,Missing,Missing,P0,"Need: Product listing page + filters + search + pagination"
 /products/[slug],app/products/[slug]/page.tsx,app/products/[id]/page.tsx,Partial,P0,Changed slug→id missing features
 /cart,app/cart/page.tsx,app/cart/page.tsx,Refactored,P0,Basic cart missing advanced features
-/checkout,app/checkout/page.tsx,Missing,Missing,P0,Complete checkout flow missing
-/checkout/confirmation,app/checkout/confirmation/page.tsx,Missing,Missing,P0,Order confirmation missing
-/search,app/search/page.tsx,Missing,Missing,P1,Dedicated search page
+/checkout,app/checkout/page.tsx,Missing,Missing,P0,"Need: Multi-step checkout + payment + shipping selection"
+/checkout/confirmation,app/checkout/confirmation/page.tsx,Missing,Missing,P0,"Need: Order confirmation page + email receipt integration"
+/search,app/search/page.tsx,Missing,Missing,P1,"Need: Search page + filters + suggestions + results"
 "AUTHENTICATION",,,,, 
 /auth/login,app/auth/login/page.tsx,app/auth/login/page.tsx,Migrated,P0,Basic functionality preserved
 /auth/register,app/auth/register/page.tsx,app/auth/register/page.tsx,Migrated,P0,Basic functionality preserved
-/auth/forgot-password,app/auth/forgot-password/page.tsx,Missing,Missing,P1,Password recovery missing
+/auth/forgot-password,app/auth/forgot-password/page.tsx,Missing,Missing,P1,"Need: Password reset form + email flow + verification"
 "ORDER MANAGEMENT",,,,, 
-/orders,app/orders/page.tsx,Missing,Missing,P1,Order history missing
+/orders,app/orders/page.tsx,Missing,Missing,P1,"Need: Order history list + status tracking + reorder"
 /orders/[id],app/orders/[id]/page.tsx,app/orders/[id]/page.tsx,Partial,P1,Order details needs features
 /order-success,app/order-success/page.tsx,Missing,Missing,P1,Success confirmation
 "ACCOUNT MANAGEMENT",,,,, 
-/account,app/account/page.tsx,Missing,Missing,P1,Account dashboard
+/account,app/account/page.tsx,Missing,Missing,P1,"Need: User dashboard + profile + settings + order summary"
 /account/settings,app/account/settings/page.tsx,Missing,Missing,P1,User settings
 /account/addresses,app/account/addresses/page.tsx,Missing,Missing,P1,Address management
 /account/orders,app/account/orders/page.tsx,Missing,Missing,P1,Order history in account
 /account/wishlist,app/account/wishlist/page.tsx,Missing,Missing,P2,Wishlist functionality
 "PRODUCER SYSTEM",,,,, 
 /producer,app/producer/page.tsx,Missing,Missing,P1,Producer landing
-/producer/register,app/producer/register/page.tsx,Missing,Missing,P1,Producer registration
+/producer/register,app/producer/register/page.tsx,Missing,Missing,P1,"Need: Multi-step registration + verification + onboarding"
 /producer/dashboard,app/producer/dashboard/page.tsx,app/producer/dashboard/page.tsx,Basic,P1,Minimal implementation
 /producer/products,app/producer/products/page.tsx,Missing,Missing,P1,Producer product management
 /producer/orders,app/producer/orders/page.tsx,Missing,Missing,P1,Producer order management
