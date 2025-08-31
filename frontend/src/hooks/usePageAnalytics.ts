@@ -1,11 +1,19 @@
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { useAuth } from '@/contexts/AuthContext';
 
-export function usePageAnalytics(title: string) {
+export function usePageAnalytics(pageTitle?: string) {
+  const pathname = usePathname();
+  const { trackPageView } = useAnalytics();
+  const { user } = useAuth();
+
   useEffect(() => {
-    // Track page view (placeholder for analytics)
-    if (typeof window !== 'undefined') {
-      document.title = title;
-      console.log(`Page Analytics: ${title}`);
-    }
-  }, [title]);
+    // Track page view on mount and pathname changes
+    trackPageView(
+      pathname,
+      pageTitle || document.title,
+      user?.id?.toString()
+    );
+  }, [pathname, pageTitle, user?.id, trackPageView]);
 }
