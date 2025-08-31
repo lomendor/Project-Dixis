@@ -9,9 +9,13 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: isCI,
-  workers: isCI ? 2 : undefined,     // fewer workers reduces flake
-  outputDir: 'frontend/test-results',
+  workers: isCI ? 2 : undefined,
   
+  // Global setup for storageState creation
+  globalSetup: require.resolve('./tests/global-setup'),
+  
+  // Artifacts configuration
+  outputDir: 'frontend/test-results',
   reporter: [['html', { outputFolder: 'frontend/playwright-report' }]],
   
   use: {
@@ -21,13 +25,38 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  projects: isCI
-    ? [{ name: 'chromium', use: devices['Desktop Chrome'] }]   // CI: run only chromium
-    : [
-        { name: 'chromium', use: devices['Desktop Chrome'] },
-        { name: 'firefox',  use: devices['Desktop Firefox'] },
-        { name: 'webkit',   use: devices['Desktop Safari'] },
-      ],
+  projects: isCI ? [
+    // CI: Single project with no auth for basic smoke tests
+    { 
+      name: 'smoke',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
+    }
+  ] : [
+    // Local: Multiple auth states and browsers
+    { 
+      name: 'consumer',
+      use: { 
+        ...devices['Desktop Chrome'],
+        storageState: 'frontend/.auth/consumer.json'
+      },
+      testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
+    },
+    { 
+      name: 'producer',
+      use: { 
+        ...devices['Desktop Chrome'],
+        storageState: 'frontend/.auth/producer.json'
+      },
+      testMatch: ['**/auth-*.spec.ts', '**/admin-*.spec.ts']
+    },
+    // Unauthenticated tests (smoke, registration, etc.)
+    { 
+      name: 'guest',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: ['**/smoke.spec.ts', '**/register.spec.ts', '**/e3-docs-smoke.spec.ts']
+    }
+  ],
 
   webServer: isCI ? undefined : {
     command: 'npm run start',
