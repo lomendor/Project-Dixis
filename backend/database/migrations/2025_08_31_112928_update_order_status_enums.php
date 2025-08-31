@@ -25,27 +25,40 @@ return new class extends Migration
     }
 
     /**
-     * Fix existing data that violates the new constraints
-     * Aggressive approach: clean invalid data completely for CI stability
+     * Deterministic PostgreSQL fix: Hard-drop all CHECK constraints then normalize data
+     * This approach ensures clean slate for constraint rebuilding
      */
     private function fixOrdersConstraints(): void
     {
-        // Drop all existing constraints first to avoid conflicts
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
+        // Step 1: Hard-drop ALL existing CHECK constraints on orders table using PostgreSQL DO block
+        DB::statement("
+            DO $$
+            DECLARE r RECORD;
+            BEGIN
+                FOR r IN SELECT conname FROM pg_constraint 
+                WHERE conrelid = 'orders'::regclass AND contype = 'c' AND conname LIKE 'orders_%_check'
+                LOOP
+                    EXECUTE 'ALTER TABLE orders DROP CONSTRAINT ' || quote_ident(r.conname) || ' CASCADE';
+                END LOOP;
+            END$$;
+        ");
         
-        // Clean ALL invalid data that would violate new constraints
+        // Step 2: Normalize existing data to valid enum values
         $validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled'];
         $validPaymentStatuses = ['pending', 'paid', 'completed', 'failed', 'refunded'];
         
-        // Delete orders with invalid status (aggressive cleanup for CI)
-        $deletedOrders = DB::table('orders')
+        // Update invalid status values to 'pending' (most conservative)
+        $updatedStatus = DB::table('orders')
             ->whereNotIn('status', $validStatuses)
-            ->orWhereNotIn('payment_status', $validPaymentStatuses)
-            ->delete();
+            ->update(['status' => 'pending']);
             
-        if ($deletedOrders > 0) {
-            echo "🧹 Cleaned {$deletedOrders} orders with invalid status/payment_status values\n";
+        // Update invalid payment_status values to 'pending' (most conservative)
+        $updatedPaymentStatus = DB::table('orders')
+            ->whereNotIn('payment_status', $validPaymentStatuses)
+            ->update(['payment_status' => 'pending']);
+            
+        if ($updatedStatus > 0 || $updatedPaymentStatus > 0) {
+            echo "🔧 Normalized {$updatedStatus} status + {$updatedPaymentStatus} payment_status values\n";
         }
     }
 
