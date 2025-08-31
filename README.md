@@ -245,11 +245,36 @@ php artisan test tests/Feature/Api/V1/OrdersTest.php
 
 ## 🚦 CI/CD
 
+### Automated Workflows
 GitHub Actions automatically:
-- Runs tests on PostgreSQL
-- Validates code quality
-- Generates OpenAPI artifacts
-- Maintains green build status
+- **Backend Testing**: PHPUnit on PostgreSQL 15
+- **Frontend Testing**: TypeScript compilation + builds  
+- **E2E Testing**: Playwright with comprehensive artifacts (traces, videos, screenshots)
+- **Performance Monitoring**: Lighthouse CI on key pages (soft warnings)
+- **Code Quality**: DangerJS gatekeeper with soft warnings
+- **OpenAPI**: Documentation generation and validation
+
+### Quality Gates (Soft Mode)
+Our CI/CD includes gentle guidance without blocking:
+
+#### 🎭 **Playwright Artifacts** (TOOLS-01)
+- Complete debugging artifacts on failures
+- Trace files, videos, and screenshots
+- Retention: 7 days (failure) / 3 days (success)
+
+#### 🔍 **Lighthouse CI** (TOOLS-02)  
+- Performance monitoring on 4 key pages
+- Thresholds: Performance ≥75%, Accessibility ≥90%
+- Desktop preset with comprehensive reports
+
+#### 🎯 **DangerJS Gatekeeper** (TOOLS-03)
+- PR size warnings (>300 LOC)
+- Port compliance monitoring (8001/3001 enforcement)
+- Version pinning validation (Next.js 15.5.0)
+- Missing test coverage reminders
+- Configuration change alerts
+
+All quality gates operate in **soft mode** - providing warnings and guidance without blocking merges.
 
 ## 🤝 Contributing
 
