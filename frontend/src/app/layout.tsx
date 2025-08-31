@@ -5,7 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import ToastContainer from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import SkipLink from "@/components/SkipLink";
+import SkipLinks from "@/components/accessibility/SkipLinks";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -171,8 +171,8 @@ export default function RootLayout({
           }}
         />
 
-        {/* Skip to main content link for screen readers */}
-        <SkipLink />
+        {/* Enhanced skip links for screen readers */}
+        <SkipLinks />
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
           <ToastProvider>
             <AuthProvider>

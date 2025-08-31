@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/components/performance/OptimizedImage';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -11,6 +11,7 @@ import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { greekNormalize, greekTextContains } from '@/lib/utils/greekNormalize';
+import { usePerformance } from '@/hooks/usePerformance';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
 
@@ -60,10 +61,18 @@ export default function HomeClient() {
   });
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { metrics, reportMetrics } = usePerformance();
 
   useEffect(() => {
     loadProducts();
   }, [filters]);
+
+  // Report performance metrics when component unmounts
+  useEffect(() => {
+    return () => {
+      reportMetrics();
+    };
+  }, [reportMetrics]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -258,12 +267,17 @@ export default function HomeClient() {
             <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="flex-1">
                 <div className="relative">
+                  <label htmlFor="search-products" className="sr-only">
+                    Αναζήτηση προϊόντων
+                  </label>
                   <input
+                    id="search-products"
                     type="text"
                     placeholder="Αναζήτηση προϊόντων (π.χ. πορτοκάλια, portokalia, Πορτοκάλια)..."
                     value={filters.search}
                     onChange={(e) => updateFilter('search', e.target.value)}
                     className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    aria-describedby="search-hint"
                   />
                   {/* Search type indicator */}
                   {filters.search && (
@@ -281,12 +295,16 @@ export default function HomeClient() {
                   )}
                 </div>
                 {/* Search hints for Greek normalization */}
-                {filters.search && searchState.variants.length > 1 && (
-                  <div className="mt-2 text-xs text-gray-600">
-                    <span className="font-medium">Searching for:</span> {searchState.variants.slice(0, 3).join(', ')}
-                    {searchState.variants.length > 3 && ` +${searchState.variants.length - 3} more variants`}
-                  </div>
-                )}
+                <div id="search-hint" className="mt-2 text-xs text-gray-600">
+                  {filters.search && searchState.variants.length > 1 ? (
+                    <>
+                      <span className="font-medium">Searching for:</span> {searchState.variants.slice(0, 3).join(', ')}
+                      {searchState.variants.length > 3 && ` +${searchState.variants.length - 3} more variants`}
+                    </>
+                  ) : (
+                    <span>Search supports both Greek and Latin characters with automatic normalization</span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2">
                 <button
@@ -433,23 +451,19 @@ export default function HomeClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
               <div key={product.id} data-testid="product-card" className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                {/* Product Image Placeholder */}
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  {product.images.length > 0 ? (
-                    <Image
-                      data-testid="product-image"
-                      src={product.images[0].url || product.images[0].image_path || '/placeholder.jpg'}
-                      alt={product.images[0].alt_text || product.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      priority={products.indexOf(product) < 4}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center text-gray-400 text-sm" role="img" aria-label="No image available">
-                      No Image
-                    </div>
-                  )}
+                {/* Product Image with Optimized Loading */}
+                <div className="h-48 relative">
+                  <OptimizedImage
+                    src={product.images.length > 0 ? (product.images[0].url || product.images[0].image_path || '/placeholder.jpg') : '/placeholder.jpg'}
+                    alt={product.images.length > 0 ? (product.images[0].alt_text || product.name) : `${product.name} - no image available`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    priority={products.indexOf(product) < 4}
+                    aspectRatio="1 / 1"
+                    fallbackSrc="/placeholder.jpg"
+                    data-testid="product-image"
+                  />
                 </div>
 
                 <div className="p-4">
