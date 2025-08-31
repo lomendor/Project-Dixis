@@ -172,7 +172,7 @@ export const validateCheckoutPayload = (payload: any): {
     const validation = checkoutValidationSchema.safeParse(payload);
     
     if (!validation.success) {
-      validation.error.errors.forEach(err => {
+      validation.error.issues.forEach(err => {
         errors.push({
           field: err.path.join('.'),
           message: err.message,

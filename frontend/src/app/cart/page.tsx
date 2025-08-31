@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { usePerformance } from '@/hooks/usePerformance';
 import { formatCurrency } from '@/env';
 // Enhanced checkout validation and retry logic
 import { 
@@ -39,6 +40,7 @@ export default function Cart() {
   const [useFallbackShipping, setUseFallbackShipping] = useState(false);
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
+  const { reportMetrics } = usePerformance();
   const router = useRouter();
 
   useEffect(() => {
@@ -59,6 +61,13 @@ export default function Cart() {
     const unsubscribe = shippingRetryManager.onStateChange(setRetryState);
     return unsubscribe;
   }, []);
+
+  // Report performance metrics when component unmounts
+  useEffect(() => {
+    return () => {
+      reportMetrics();
+    };
+  }, [reportMetrics]);
 
   const loadCart = async () => {
     try {
@@ -474,16 +483,21 @@ export default function Cart() {
                   <div className="space-y-3">
                     <div>
                       <label htmlFor="postal-code" className="block text-xs font-medium text-gray-700 mb-1">
-                        Ταχυδρομικός Κώδικας (ΤΚ) <span className="text-red-500">*</span>
+                        Ταχυδρομικός Κώδικας (ΤΚ) <span className="text-red-500" aria-label="required">*</span>
                       </label>
                       <input
                         type="text"
                         id="postal-code"
+                        name="postalCode"
                         value={postalCode}
                         onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
                         placeholder="11527"
                         maxLength={5}
-                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 ${
+                        required
+                        aria-required="true"
+                        aria-invalid={validationErrors.find(e => e.field === 'postalCode') ? 'true' : 'false'}
+                        aria-describedby={validationErrors.find(e => e.field === 'postalCode') ? "postal-code-error" : undefined}
+                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
                           validationErrors.find(e => e.field === 'postalCode')
                             ? 'border-red-300 bg-red-50'
                             : postalCode && !validatePostalCodeCity(postalCode, city) && postalCode.length === 5 && city
@@ -493,22 +507,27 @@ export default function Cart() {
                         data-testid="postal-code-input"
                       />
                       {validationErrors.find(e => e.field === 'postalCode') && (
-                        <p className="mt-1 text-xs text-red-600">
+                        <p id="postal-code-error" className="mt-1 text-xs text-red-600" role="alert">
                           {validationErrors.find(e => e.field === 'postalCode')?.message}
                         </p>
                       )}
                     </div>
                     <div>
                       <label htmlFor="city" className="block text-xs font-medium text-gray-700 mb-1">
-                        Πόλη <span className="text-red-500">*</span>
+                        Πόλη <span className="text-red-500" aria-label="required">*</span>
                       </label>
                       <input
                         type="text"
                         id="city"
+                        name="city"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         placeholder="Αθήνα / Athens"
-                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 ${
+                        required
+                        aria-required="true"
+                        aria-invalid={validationErrors.find(e => e.field === 'city') ? 'true' : 'false'}
+                        aria-describedby={validationErrors.find(e => e.field === 'city') ? "city-error" : undefined}
+                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
                           validationErrors.find(e => e.field === 'city')
                             ? 'border-red-300 bg-red-50'
                             : city && postalCode && !validatePostalCodeCity(postalCode, city) && postalCode.length === 5
@@ -518,7 +537,7 @@ export default function Cart() {
                         data-testid="city-input"
                       />
                       {validationErrors.find(e => e.field === 'city') && (
-                        <p className="mt-1 text-xs text-red-600">
+                        <p id="city-error" className="mt-1 text-xs text-red-600" role="alert">
                           {validationErrors.find(e => e.field === 'city')?.message}
                         </p>
                       )}

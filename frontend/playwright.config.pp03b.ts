@@ -43,7 +43,7 @@ export default defineConfig({
     actionTimeout: 10000,
     
     /* Maximum time each assertion such as `expect(locator).toBeVisible()` can take. */
-    expect: { timeout: 15000 },
+    // expect: { timeout: 15000 }, // Moved to global config
     
     /* Configure browser context */
     viewport: { width: 1280, height: 720 },
