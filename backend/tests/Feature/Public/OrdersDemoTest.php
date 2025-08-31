@@ -54,8 +54,8 @@ class OrdersDemoTest extends TestCase
 
     public function test_order_statuses_are_valid(): void
     {
-        $validStatuses = ['pending', 'paid', 'shipped', 'completed', 'cancelled']; // Current valid enum values
-        $validPaymentStatuses = ['pending', 'paid', 'failed'];
+        $validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled']; // Updated enum values
+        $validPaymentStatuses = ['pending', 'paid', 'completed', 'failed', 'refunded'];
         
         $orders = Order::all();
         $this->assertNotEmpty($orders, 'Expected orders to exist for testing');
