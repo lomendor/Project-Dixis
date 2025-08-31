@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Producer;
 use App\Http\Resources\ProducerResource;
+use App\Http\Resources\PublicProducerResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -39,20 +40,20 @@ class ProducerController extends Controller
         $perPage = $request->get('per_page', 15);
         $producers = $query->paginate($perPage);
 
-        return ProducerResource::collection($producers);
+        return PublicProducerResource::collection($producers);
     }
 
     /**
      * Display the specified producer.
      *
      * @param Producer $producer
-     * @return ProducerResource
+     * @return PublicProducerResource
      */
-    public function show(Producer $producer): ProducerResource
+    public function show(Producer $producer): PublicProducerResource
     {
         // Only show active producers
         abort_if(!$producer->is_active, 404);
 
-        return new ProducerResource($producer);
+        return new PublicProducerResource($producer);
     }
 }
