@@ -12,7 +12,7 @@ export default defineConfig({
   workers: isCI ? 2 : undefined,
   
   // Global setup for storageState creation
-  globalSetup: require.resolve('./tests/global-setup'),
+  globalSetup: './tests/global-setup.ts',
   
   // Artifacts configuration
   outputDir: 'frontend/test-results',

@@ -71,6 +71,13 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class, // New structured order seeder
         ]);
 
+        // E2E deterministic data for testing environment
+        if (app()->environment('testing')) {
+            $this->call([
+                E2ESeeder::class,
+            ]);
+        }
+
         // Create demo orders after products exist (idempotent)
         $this->createDemoOrders($consumer);
         $this->createEnhancedDemoOrders();
