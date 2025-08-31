@@ -26,7 +26,7 @@ return new class extends Migration
 
     /**
      * Fix existing data that violates the new constraints
-     * Aggressive approach: clean invalid data completely
+     * Aggressive approach: clean invalid data completely for CI stability
      */
     private function fixOrdersConstraints(): void
     {
@@ -38,7 +38,7 @@ return new class extends Migration
         $validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled'];
         $validPaymentStatuses = ['pending', 'paid', 'completed', 'failed', 'refunded'];
         
-        // Delete orders with invalid status (aggressive cleanup)
+        // Delete orders with invalid status (aggressive cleanup for CI)
         $deletedOrders = DB::table('orders')
             ->whereNotIn('status', $validStatuses)
             ->orWhereNotIn('payment_status', $validPaymentStatuses)
