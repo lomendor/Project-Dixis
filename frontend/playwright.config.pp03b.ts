@@ -18,9 +18,6 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   
-  /* Maximum time each assertion such as `expect(locator).toBeVisible()` can take. */
-  expect: { timeout: 15000 },
-  
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report-pp03b', open: 'never' }],
@@ -125,5 +122,10 @@ export default defineConfig({
   outputDir: 'test-results-pp03b/',
   
   /* Test timeout */
-  timeout: 60 * 1000
+  timeout: 60 * 1000,
+  
+  /* Expect timeout */
+  expect: {
+    timeout: 15 * 1000
+  }
 });
