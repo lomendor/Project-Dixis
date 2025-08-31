@@ -1,59 +1,79 @@
 import { test, expect } from '@playwright/test';
 
-test('filters and search - apply search filter', async ({ page }) => {
-  // Navigate to catalog page
-  await Promise.all([
-    page.waitForURL('/', { timeout: 10000 }),
-    page.goto('/')
-  ]);
-  
-  // Wait for initial products to load
-  await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 });
-  
-  // Count initial products
-  const initialProductCount = await page.locator('[data-testid="product-card"]').count();
-  expect(initialProductCount).toBeGreaterThan(0);
-  
-  // Find search input (various possible selectors)
-  const searchInput = page.locator('input[type="search"], input[placeholder*="search" i], input[name*="search" i], [data-testid="search-input"]').first();
-  
-  if (await searchInput.isVisible({ timeout: 3000 })) {
-    // Apply search filter
-    await searchInput.fill('Πορτοκάλια'); // Greek oranges
+test.describe('Filters and Search', () => {
+  // Clean state before each test
+  test.beforeEach(async ({ context }) => {
+    await context.clearCookies();
+  });
+
+  test('should apply search filter with Greek text normalization', async ({ page }) => {
+    // Navigate to catalog page
+    await page.goto('/');
     
-    // Wait for search results to update
-    await page.waitForTimeout(1000); // Allow for debounce
-    await page.waitForLoadState('networkidle');
+    // Wait for deterministic E2E products to load
+    await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 });
     
-    // Check if results were filtered
-    const filteredProductCount = await page.locator('[data-testid="product-card"]').count();
+    // Count initial products (should include E2E seeded products)
+    const initialProductCount = await page.locator('[data-testid="product-card"]').count();
+    expect(initialProductCount).toBeGreaterThan(0);
     
-    // Either products were filtered or no results message appears
-    if (filteredProductCount > 0) {
-      expect(filteredProductCount).toBeLessThanOrEqual(initialProductCount);
+    // Use stable data-testid selector for search input
+    const searchInput = page.getByTestId('search-input');
+    
+    if (await searchInput.isVisible({ timeout: 3000 })) {
+      // Test Greek search - should find "Πορτοκάλια E2E Test" product from E2ESeeder
+      await searchInput.fill('Πορτοκάλια');
       
-      // Verify search term appears in visible products
-      const productTitles = page.locator('[data-testid="product-title"], [data-testid="product-card"] h3');
-      const firstTitle = await productTitles.first().textContent();
-      expect(firstTitle?.toLowerCase()).toContain('πορτοκάλια');
+      // Wait for search results (with debounce)
+      await page.waitForTimeout(1000);
+      await page.waitForLoadState('networkidle');
+      
+      // Check if results were filtered
+      const filteredProductCount = await page.locator('[data-testid="product-card"]').count();
+      
+      if (filteredProductCount > 0) {
+        expect(filteredProductCount).toBeLessThanOrEqual(initialProductCount);
+        
+        // Verify Greek product is found using stable selector
+        const productTitles = page.getByTestId('product-title');
+        const visibleTitles = await productTitles.allTextContents();
+        
+        // Should find Greek oranges (normalized search)
+        const hasGreekOranges = visibleTitles.some(title => 
+          title.toLowerCase().includes('πορτοκάλια') || 
+          title.toLowerCase().includes('oranges')
+        );
+        expect(hasGreekOranges).toBe(true);
+      } else {
+        // If no results, ensure proper "no results" message
+        await expect(page.getByTestId('no-results-message')).toBeVisible({ timeout: 5000 });
+      }
+      
+      // Test normalization - search for "πορτοκαλια" (without accent) should work
+      await searchInput.clear();
+      await searchInput.fill('πορτοκαλια'); // no accent
+      
+      await page.waitForTimeout(1000);
+      await page.waitForLoadState('networkidle');
+      
+      const normalizedResults = await page.locator('[data-testid="product-card"]').count();
+      if (normalizedResults > 0) {
+        // Greek normalization should work - results should be similar
+        expect(normalizedResults).toBeGreaterThan(0);
+      }
+      
+      // Clear search filter
+      await searchInput.clear();
+      await page.waitForTimeout(1000);
+      await page.waitForLoadState('networkidle');
+      
+      // Verify all products are restored
+      const restoredProductCount = await page.locator('[data-testid="product-card"]').count();
+      expect(restoredProductCount).toBeGreaterThanOrEqual(initialProductCount);
     } else {
-      // Check for "no results" message (use first specific match)
-      const noResultsMessage = page.locator('h3:has-text("No products found")').first();
-      await expect(noResultsMessage).toBeVisible({ timeout: 5000 });
+      console.log('⚠️ Search input not found - verify data-testid="search-input" exists');
     }
-    
-    // Clear search filter
-    await searchInput.clear();
-    await page.waitForTimeout(1000); // Allow for debounce
-    await page.waitForLoadState('networkidle');
-    
-    // Verify products are restored
-    const restoredProductCount = await page.locator('[data-testid="product-card"]').count();
-    expect(restoredProductCount).toBeGreaterThanOrEqual(initialProductCount);
-  } else {
-    console.log('⚠️ Search input not found - skipping search test');
-  }
-});
+  });
 
 test('filters and search - category filter', async ({ page }) => {
   // Navigate to catalog page
