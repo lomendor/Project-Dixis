@@ -44,7 +44,10 @@ export default defineConfig({
     
     /* Maximum time each assertion such as `expect(locator).toBeVisible()` can take. */
     expect: { timeout: 15000 },
+<<<<<<< HEAD
     
+=======
+>>>>>>> 62c35c4 (fix(deps): Add zod dependency and resolve type-check errors)
     /* Configure browser context */
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
