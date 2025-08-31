@@ -91,7 +91,14 @@ class ProductController extends Controller
         $perPage = $request->get('per_page', 15);
         $products = $query->paginate($perPage);
 
-        return ProductResource::collection($products);
+        return ProductResource::collection($products)->additional([
+            'current_page' => $products->currentPage(),
+            'per_page' => $products->perPage(), 
+            'total' => $products->total(),
+            'last_page' => $products->lastPage(),
+            'from' => $products->firstItem(),
+            'to' => $products->lastItem(),
+        ]);
     }
 
     /**
