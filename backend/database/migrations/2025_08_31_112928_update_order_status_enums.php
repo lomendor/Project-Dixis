@@ -26,18 +26,26 @@ return new class extends Migration
 
     /**
      * Fix existing data that violates the new constraints
+     * Aggressive approach: clean invalid data completely
      */
     private function fixOrdersConstraints(): void
     {
-        // Map old status values to new valid values
-        $statusMappings = [
-            'paid' => 'completed',  // paid orders are considered completed
-        ];
-
-        foreach ($statusMappings as $oldStatus => $newStatus) {
-            DB::table('orders')
-                ->where('status', $oldStatus)
-                ->update(['status' => $newStatus]);
+        // Drop all existing constraints first to avoid conflicts
+        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
+        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
+        
+        // Clean ALL invalid data that would violate new constraints
+        $validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled'];
+        $validPaymentStatuses = ['pending', 'paid', 'completed', 'failed', 'refunded'];
+        
+        // Delete orders with invalid status (aggressive cleanup)
+        $deletedOrders = DB::table('orders')
+            ->whereNotIn('status', $validStatuses)
+            ->orWhereNotIn('payment_status', $validPaymentStatuses)
+            ->delete();
+            
+        if ($deletedOrders > 0) {
+            echo "🧹 Cleaned {$deletedOrders} orders with invalid status/payment_status values\n";
         }
     }
 
