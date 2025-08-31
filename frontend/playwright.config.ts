@@ -10,10 +10,14 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,     // fewer workers reduces flake
+  outputDir: 'frontend/test-results',
+  
+  reporter: [['html', { outputFolder: 'frontend/playwright-report' }]],
+  
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3001',
     trace: 'on',
-    video: 'retain-on-failure',
+    video: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
 
