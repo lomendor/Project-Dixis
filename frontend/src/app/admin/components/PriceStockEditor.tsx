@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ProductWithProducer } from '@/lib/admin/adminApi';
-import { ProductUpdateData, validateProductUpdate, formatPrice } from '@/lib/validation/productValidation';
+import { ProductWithProducer, ProductUpdateData } from '@/lib/admin/pricingApi';
+import { formatPrice } from '@/lib/validation/productValidation';
 import { useToast } from '@/contexts/ToastContext';
 
 interface PriceStockEditorProps {
@@ -34,10 +34,14 @@ export default function PriceStockEditor({ products, loading, onUpdateProduct }:
     if (!editingId) return;
 
     try {
-      const validatedData = validateProductUpdate(editForm);
+      // Basic validation - ensure positive values
+      if (editForm.price <= 0 || editForm.stock < 0) {
+        throw new Error('Τιμή και απόθεμα πρέπει να είναι έγκυρες τιμές');
+      }
+      
       setUpdatingIds(prev => new Set([...prev, editingId]));
       
-      await onUpdateProduct(editingId, validatedData);
+      await onUpdateProduct(editingId, editForm);
       
       showToast('success', 'Το προϊόν ενημερώθηκε επιτυχώς');
       setEditingId(null);

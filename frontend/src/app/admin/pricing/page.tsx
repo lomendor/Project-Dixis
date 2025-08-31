@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import PriceStockEditor from '../components/PriceStockEditor';
-import { pricingApi, ProductWithProducer } from '@/lib/admin/pricingApi';
-import { ProductUpdateData } from '@/lib/validation/productValidation';
+import { pricingApi, ProductWithProducer, ProductUpdateData } from '@/lib/admin/pricingApi';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function AdminPricingPage() {
