@@ -160,6 +160,14 @@ traces/
 *.png
 *.zip
 
+# Lighthouse reports
+lighthouse-reports/
+lighthouse-report/
+/frontend/lighthouse-reports/
+/frontend/lighthouse-report/
+*.lighthouse.json
+*.lighthouse.html
+
 # Keep test files accessible
 !/frontend/tests/**
 backend/.env.testing.bak
