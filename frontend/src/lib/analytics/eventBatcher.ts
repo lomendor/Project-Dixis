@@ -146,7 +146,7 @@ class EventBatcher {
     const groups = new Map<string, AnalyticsEvent[]>();
 
     events.forEach(event => {
-      let key = event.type;
+      let key: string = event.type;
       
       // Create more specific keys for grouping
       if (event.type === 'click') {
