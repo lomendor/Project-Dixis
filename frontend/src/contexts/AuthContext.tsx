@@ -14,11 +14,12 @@ interface AuthContextType {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isProducer: boolean;
+  isAdmin: boolean;
   setIntendedDestination?: (destination: string) => void;
   getIntendedDestination?: () => string | null;
   clearIntendedDestination?: () => void;
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => {
     try {
       setRegisterLoading(true);
@@ -115,6 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     isAuthenticated: !!user,
     isProducer: user?.role === 'producer',
+    isAdmin: user?.role === 'admin',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

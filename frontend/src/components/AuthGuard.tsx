@@ -37,7 +37,8 @@ export default function AuthGuard({
       console.log(`🛡️ AuthGuard: User role ${user.role} doesn't match required role ${requireRole}`);
       
       // Redirect based on user's actual role
-      const destination = user.role === 'producer' ? '/producer/dashboard' : '/';
+      const destination = user.role === 'producer' ? '/producer/dashboard' : 
+                         user.role === 'admin' ? '/admin' : '/';
       router.push(destination);
       return;
     }

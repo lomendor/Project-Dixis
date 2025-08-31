@@ -36,7 +36,7 @@ export interface ProductImage {
 export interface Producer {
   id: number;
   name: string;
-  business_name: string;
+  business_name?: string;
   description?: string;
   location?: string;
   phone?: string;
@@ -96,7 +96,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'consumer' | 'producer';
+  role: 'consumer' | 'producer' | 'admin';
   address?: string;
   created_at: string;
 }
@@ -326,7 +326,7 @@ class ApiClient {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }): Promise<AuthResponse> {
     const response = await this.request<AuthResponse>('auth/register', {
       method: 'POST',
