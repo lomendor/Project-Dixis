@@ -11,6 +11,18 @@ import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { formatCurrency } from '@/env';
+// Enhanced checkout validation and retry logic
+import { 
+  validateCheckoutPayload, 
+  validatePostalCodeCity, 
+  CheckoutValidationError,
+  CheckoutHttpError,
+  getErrorMessage
+} from '@/lib/checkout/checkoutValidation';
+import { 
+  shippingRetryManager, 
+  ShippingRetryState 
+} from '@/lib/checkout/shippingRetry';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -22,6 +34,9 @@ export default function Cart() {
   const [city, setCity] = useState('');
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null);
   const [loadingShipping, setLoadingShipping] = useState(false);
+  const [retryState, setRetryState] = useState<ShippingRetryState>(shippingRetryManager.getState());
+  const [validationErrors, setValidationErrors] = useState<CheckoutValidationError[]>([]);
+  const [useFallbackShipping, setUseFallbackShipping] = useState(false);
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
@@ -38,6 +53,12 @@ export default function Cart() {
     }
     loadCart();
   }, [isAuthenticated, authLoading, router]);
+  
+  // Subscribe to shipping retry state changes
+  useEffect(() => {
+    const unsubscribe = shippingRetryManager.onStateChange(setRetryState);
+    return unsubscribe;
+  }, []);
 
   const loadCart = async () => {
     try {
@@ -107,19 +128,38 @@ export default function Cart() {
   };
 
   const handleCheckout = async () => {
-    // Validate shipping information
-    if (!postalCode || postalCode.length < 5) {
-      showToast('error', 'Please enter a valid postal code (ΤΚ)');
+    // Enhanced validation with Greek postal codes
+    const checkoutData = {
+      firstName: user?.name?.split(' ')[0] || '',
+      lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+      email: user?.email || '',
+      phone: user?.address || '', // Use address field as phone for now
+      address: user?.address || '',
+      city,
+      postalCode
+    };
+    
+    // Comprehensive validation
+    const validation = validateCheckoutPayload(checkoutData);
+    console.log('🔍 Checkout validation proof:', validation.proof);
+    
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      showToast('error', 'Παρακαλώ διορθώστε τα σφάλματα στη φόρμα');
+      return;
+    }
+    
+    // Clear previous validation errors
+    setValidationErrors([]);
+    
+    // Validate postal code and city combination
+    if (!validatePostalCodeCity(postalCode, city)) {
+      showToast('error', 'Η πόλη δεν αντιστοιχεί στον ταχυδρομικό κώδικα');
       return;
     }
 
-    if (!city || city.trim().length < 2) {
-      showToast('error', 'Please enter a valid city name');
-      return;
-    }
-
-    if (!shippingQuote) {
-      showToast('error', 'Please wait for shipping calculation to complete');
+    if (!shippingQuote && !useFallbackShipping) {
+      showToast('error', 'Παρακαλώ περιμένετε τον υπολογισμό μεταφορικών ή χρησιμοποιήστε εκτιμώμενο κόστος');
       return;
     }
 
@@ -129,25 +169,50 @@ export default function Cart() {
       // Create full shipping address
       const shippingAddress = `${city}, ${postalCode}${user?.address ? `, ${user.address}` : ''}`;
       
+      // Use actual quote or fallback
+      const finalQuote = shippingQuote || shippingRetryManager.getFallbackShippingQuote({
+        zip: postalCode,
+        city,
+        weight: calculateShippingMetrics().weight,
+        volume: calculateShippingMetrics().volume
+      });
+      
+      console.log('🛒 Creating order with quote:', finalQuote);
+      
       const order = await apiClient.checkout({
         payment_method: 'cash_on_delivery',
         shipping_method: 'COURIER',
         shipping_address: shippingAddress,
-        shipping_cost: shippingQuote.cost,
-        shipping_carrier: shippingQuote.carrier,
-        shipping_eta_days: shippingQuote.etaDays,
+        shipping_cost: finalQuote.cost,
+        shipping_carrier: finalQuote.carrier,
+        shipping_eta_days: finalQuote.etaDays,
         postal_code: postalCode,
         city: city,
-        notes: `Shipping Zone: ${shippingQuote.zone}`,
+        notes: `Shipping Zone: ${finalQuote.zone || 'Standard'}${useFallbackShipping ? ' (Εκτιμώμενα μεταφορικά)' : ''}`,
       });
       
-      showToast('success', `Order created! ID: ${order.id}`);
+      showToast('success', `Η παραγγελία δημιουργήθηκε! Κωδικός: ${order.id}`);
       
       // Redirect to order confirmation page
       router.push(`/orders/${order.id}`);
     } catch (err) {
       console.error('Checkout failed:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Checkout failed. Please try again.';
+      
+      // Enhanced error handling with Greek messages
+      let errorMessage = 'Η ολοκλήρωση της παραγγελίας απέτυχε. Παρακαλώ δοκιμάστε ξανά.';
+      
+      if (err instanceof Error) {
+        if (err.message.includes('422')) {
+          errorMessage = 'Τα στοιχεία παραγγελίας δεν είναι έγκυρα. Παρακαλώ ελέγξτε τα στοιχεία σας.';
+        } else if (err.message.includes('429')) {
+          errorMessage = 'Πολλές αιτήσεις. Παρακαλώ περιμένετε και δοκιμάστε ξανά.';
+        } else if (err.message.includes('500') || err.message.includes('502') || err.message.includes('503')) {
+          errorMessage = 'Προσωρινό πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
+        } else if (err.name === 'TypeError' || err.message.includes('fetch')) {
+          errorMessage = 'Πρόβλημα σύνδεσης. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
+        }
+      }
+      
       showToast('error', errorMessage);
     } finally {
       setCheckingOut(false);
@@ -184,46 +249,70 @@ export default function Cart() {
     };
   };
 
-  // Get shipping quote when postal code and city are provided
+  // Enhanced shipping quote with retry logic and fallback
   const getShippingQuote = async () => {
     if (!postalCode || !city || cartItems.length === 0) {
       setShippingQuote(null);
+      setUseFallbackShipping(false);
       return;
     }
 
     if (postalCode.length < 5) {
       return; // Wait for valid postal code
     }
+    
+    // Validate postal code and city combination first
+    if (!validatePostalCodeCity(postalCode, city)) {
+      showToast('error', 'Η πόλη δεν αντιστοιχεί στον ταχυδρομικό κώδικα');
+      return;
+    }
 
     try {
       setLoadingShipping(true);
+      setUseFallbackShipping(false);
       const { weight, volume } = calculateShippingMetrics();
       
-      const quote = await apiClient.getShippingQuote({
+      const request = {
         zip: postalCode,
         city: city,
         weight,
         volume
+      };
+      
+      // Use retry manager for shipping quote
+      const quote = await shippingRetryManager.getShippingQuoteWithRetry(
+        (data) => apiClient.getShippingQuote(data),
+        request
+      );
+      
+      if (quote) {
+        setShippingQuote(quote);
+        setUseFallbackShipping(false);
+        console.log('✅ Shipping quote successful:', quote);
+      } else {
+        // Use fallback shipping quote
+        const fallbackQuote = shippingRetryManager.getFallbackShippingQuote(request);
+        setShippingQuote(fallbackQuote);
+        setUseFallbackShipping(true);
+        console.log('🔄 Using fallback shipping quote:', fallbackQuote);
+        
+        showToast('warning', 'Χρησιμοποιείται εκτιμώμενο κόστος μεταφορικών. Το ακριβές κόστος θα υπολογιστεί κατά την επιβεβαίωση.');
+      }
+    } catch (err: any) {
+      console.error('Shipping quote completely failed:', err);
+      
+      // Final fallback
+      const { weight, volume } = calculateShippingMetrics();
+      const fallbackQuote = shippingRetryManager.getFallbackShippingQuote({
+        zip: postalCode,
+        city,
+        weight,
+        volume
       });
       
-      setShippingQuote(quote);
-    } catch (err: any) {
-      console.error('Failed to get shipping quote:', err);
-      
-      // Handle specific error cases
-      const errorMessage = err.message || 'Could not calculate shipping cost';
-      
-      if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
-        showToast('error', 'Too many requests. Please wait a moment and try again.');
-      } else if (errorMessage.includes('500') || errorMessage.includes('502') || errorMessage.includes('503')) {
-        showToast('error', 'Shipping service temporarily unavailable. Please try again.');
-      } else if (errorMessage.includes('400') || errorMessage.includes('422')) {
-        showToast('error', 'Invalid postal code or city. Please check your input.');
-      } else {
-        showToast('error', 'Could not calculate shipping cost. Please try again.');
-      }
-      
-      setShippingQuote(null);
+      setShippingQuote(fallbackQuote);
+      setUseFallbackShipping(true);
+      showToast('error', 'Δεν ήταν δυνατός ο υπολογισμός μεταφορικών. Χρησιμοποιείται εκτιμώμενο κόστος.');
     } finally {
       setLoadingShipping(false);
     }
@@ -379,40 +468,92 @@ export default function Cart() {
                   Σύνοψη Παραγγελίας
                 </h2>
                 
-                {/* Shipping Information */}
+                {/* Enhanced Shipping Information with Validation */}
                 <div className="mb-6 space-y-4">
                   <h3 className="text-sm font-medium text-gray-900">Shipping Information</h3>
                   <div className="space-y-3">
                     <div>
                       <label htmlFor="postal-code" className="block text-xs font-medium text-gray-700 mb-1">
-                        Ταχυδρομικός Κώδικας (ΤΚ)
+                        Ταχυδρομικός Κώδικας (ΤΚ) <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="postal-code"
                         value={postalCode}
-                        onChange={(e) => setPostalCode(e.target.value)}
+                        onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
                         placeholder="11527"
                         maxLength={5}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 ${
+                          validationErrors.find(e => e.field === 'postalCode')
+                            ? 'border-red-300 bg-red-50'
+                            : postalCode && !validatePostalCodeCity(postalCode, city) && postalCode.length === 5 && city
+                            ? 'border-yellow-300 bg-yellow-50'
+                            : 'border-gray-300'
+                        }`}
                         data-testid="postal-code-input"
                       />
+                      {validationErrors.find(e => e.field === 'postalCode') && (
+                        <p className="mt-1 text-xs text-red-600">
+                          {validationErrors.find(e => e.field === 'postalCode')?.message}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label htmlFor="city" className="block text-xs font-medium text-gray-700 mb-1">
-                        Πόλη
+                        Πόλη <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="city"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder="Athens"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                        placeholder="Αθήνα / Athens"
+                        className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 ${
+                          validationErrors.find(e => e.field === 'city')
+                            ? 'border-red-300 bg-red-50'
+                            : city && postalCode && !validatePostalCodeCity(postalCode, city) && postalCode.length === 5
+                            ? 'border-yellow-300 bg-yellow-50'
+                            : 'border-gray-300'
+                        }`}
                         data-testid="city-input"
                       />
+                      {validationErrors.find(e => e.field === 'city') && (
+                        <p className="mt-1 text-xs text-red-600">
+                          {validationErrors.find(e => e.field === 'city')?.message}
+                        </p>
+                      )}
+                      {city && postalCode && !validatePostalCodeCity(postalCode, city) && postalCode.length === 5 && (
+                        <p className="mt-1 text-xs text-yellow-600">
+                          Η πόλη δεν αντιστοιχεί στον ταχυδρομικό κώδικα
+                        </p>
+                      )}
                     </div>
                   </div>
+                  
+                  {/* Validation Error Summary */}
+                  {validationErrors.length > 0 && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            Διορθώστε τα παρακάτω σφάλματα:
+                          </h3>
+                          <div className="mt-2 text-sm text-red-700">
+                            <ul className="list-disc pl-5 space-y-1">
+                              {validationErrors.map((error, index) => (
+                                <li key={index}>{error.message}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Order Totals */}
@@ -423,13 +564,51 @@ export default function Cart() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Μεταφορικά</span>
-                    {loadingShipping ? (
-                      <span className="text-sm text-gray-500">Υπολογισμός...</span>
+                    {retryState.isLoading ? (
+                      <div className="text-right">
+                        <div className="flex items-center text-sm text-blue-600">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                          Υπολογισμός...
+                        </div>
+                        {retryState.currentAttempt > 1 && (
+                          <div className="text-xs text-gray-500">
+                            Προσπάθεια {retryState.currentAttempt}/{retryState.maxAttempts}
+                          </div>
+                        )}
+                        {retryState.nextRetryIn > 0 && (
+                          <div className="text-xs text-gray-500">
+                            Επανάληψη σε {Math.ceil(retryState.nextRetryIn / 1000)}s
+                          </div>
+                        )}
+                      </div>
                     ) : shippingQuote ? (
                       <div className="text-right">
-                        <span className="font-medium">{formatCurrency(shippingQuote.cost)}</span>
+                        <span className={`font-medium ${
+                          useFallbackShipping ? 'text-yellow-600' : 'text-gray-900'
+                        }`}>
+                          {formatCurrency(shippingQuote.cost)}
+                          {useFallbackShipping && (
+                            <span className="text-xs text-yellow-600 ml-1">(εκτ.)</span>
+                          )}
+                        </span>
                         <div className="text-xs text-gray-500">{shippingQuote.carrier}</div>
                         <div className="text-xs text-gray-500">{shippingQuote.etaDays} ημέρες</div>
+                        {useFallbackShipping && (
+                          <div className="text-xs text-yellow-600">Εκτιμώμενο κόστος</div>
+                        )}
+                      </div>
+                    ) : retryState.error && !retryState.isLoading ? (
+                      <div className="text-right">
+                        <span className="text-sm text-red-500">Σφάλμα υπολογισμού</span>
+                        <button
+                          onClick={() => {
+                            shippingRetryManager.reset();
+                            getShippingQuote();
+                          }}
+                          className="block text-xs text-blue-600 hover:text-blue-700 underline mt-1"
+                        >
+                          Δοκιμή ξανά
+                        </button>
                       </div>
                     ) : postalCode && city ? (
                       <span className="text-sm text-gray-500">Εισάγετε έγκυρο ΤΚ</span>
@@ -437,6 +616,24 @@ export default function Cart() {
                       <span className="text-sm text-gray-500">Εισάγετε ΤΚ & πόλη</span>
                     )}
                   </div>
+                  
+                  {/* Shipping Status Messages */}
+                  {retryState.error && retryState.currentAttempt === retryState.maxAttempts && !retryState.isLoading && (
+                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <svg className="h-4 w-4 text-yellow-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.19-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-2">
+                          <p className="text-sm text-yellow-700">
+                            Χρησιμοποιείται εκτιμώμενο κόστος μεταφορικών. Το ακριβές κόστος θα υπολογιστεί κατά την επιβεβαίωση.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-base font-semibold">
                       <span>Σύνολο</span>
@@ -457,21 +654,70 @@ export default function Cart() {
                     postalCode.length < 5 || 
                     !city || 
                     city.trim().length < 2 ||
-                    !shippingQuote ||
-                    loadingShipping
+                    (!shippingQuote && !useFallbackShipping) ||
+                    retryState.isLoading ||
+                    validationErrors.length > 0 ||
+                    (postalCode && city && !validatePostalCodeCity(postalCode, city))
                   }
-                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium"
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+                    checkingOut || 
+                    cartItems.length === 0 || 
+                    !postalCode || 
+                    postalCode.length < 5 || 
+                    !city || 
+                    city.trim().length < 2 ||
+                    (!shippingQuote && !useFallbackShipping) ||
+                    retryState.isLoading ||
+                    validationErrors.length > 0 ||
+                    (postalCode && city && !validatePostalCodeCity(postalCode, city))
+                      ? 'bg-gray-400 cursor-not-allowed text-white'
+                      : useFallbackShipping
+                      ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
                 >
-                  {checkingOut ? 'Processing...' : 
-                   loadingShipping ? 'Calculating shipping...' :
-                   !postalCode || !city ? 'Enter shipping info to continue' :
-                   !shippingQuote ? 'Enter valid ΤΚ and city' :
-                   'Proceed to Checkout'}
+                  {checkingOut ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Επεξεργασία...
+                    </div>
+                  ) : retryState.isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Υπολογισμός μεταφορικών...
+                    </div>
+                  ) : validationErrors.length > 0 ? (
+                    'Διορθώστε τα σφάλματα'
+                  ) : !postalCode || !city ? (
+                    'Εισάγετε στοιχεία αποστολής'
+                  ) : postalCode.length < 5 ? (
+                    'Εισάγετε έγκυρο ΤΚ (5 ψηφία)'
+                  ) : !validatePostalCodeCity(postalCode, city) ? (
+                    'Ελέγξτε ΤΚ και πόλη'
+                  ) : !shippingQuote && !useFallbackShipping ? (
+                    'Αναμονή υπολογισμού μεταφορικών'
+                  ) : useFallbackShipping ? (
+                    'Συνέχεια με εκτιμώμενα μεταφορικά'
+                  ) : (
+                    'Ολοκλήρωση Παραγγελίας'
+                  )}
                 </button>
 
-                <p className="text-xs text-gray-500 mt-4 text-center">
-                  Payment on delivery. Shipping calculated based on location.
-                </p>
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">
+                    Πληρωμή με αντικαταβολή. Μεταφορικά υπολογίζονται βάση της τοποθεσίας.
+                  </p>
+                  {useFallbackShipping && (
+                    <p className="text-xs text-yellow-600 mt-1">
+                      ⚠️ Χρήση εκτιμώμενων μεταφορικών - το ακριβές κόστος θα επιβεβαιωθεί
+                    </p>
+                  )}
+                  {postalCode && city && validatePostalCodeCity(postalCode, city) && shippingQuote && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✅ Έγκυρος ταχυδρομικός κώδικας για {city}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
