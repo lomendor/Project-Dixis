@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navigation() {
-  const { user, logout, isAuthenticated, isProducer } = useAuth();
+  const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -113,6 +113,16 @@ export default function Navigation() {
                   Dashboard
                 </Link>
               )}
+              
+              {isAuthenticated && isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                  data-testid="nav-admin"
+                >
+                  Διαχείριση
+                </Link>
+              )}
             </div>
           </div>
 
@@ -212,6 +222,16 @@ export default function Navigation() {
                   data-testid="mobile-nav-dashboard"
                   >
                   Dashboard
+                </Link>
+              )}
+              
+              {isAuthenticated && isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                  data-testid="mobile-nav-admin"
+                  >
+                  Διαχείριση
                 </Link>
               )}
             </div>
