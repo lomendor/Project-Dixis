@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { greekNormalize, greekTextContains } from '@/lib/utils/greekNormalize';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
 
@@ -22,6 +23,14 @@ interface Filters {
   organic: boolean | null;
   sort: string;
   dir: string;
+}
+
+interface SearchState {
+  query: string;
+  normalizedQuery: string;
+  variants: string[];
+  isGreek: boolean;
+  isLatin: boolean;
 }
 
 export default function HomeClient() {
@@ -42,6 +51,13 @@ export default function HomeClient() {
     sort: 'created_at',
     dir: 'desc'
   });
+  const [searchState, setSearchState] = useState<SearchState>({
+    query: '',
+    normalizedQuery: '',
+    variants: [],
+    isGreek: false,
+    isLatin: false
+  });
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
 
@@ -52,22 +68,39 @@ export default function HomeClient() {
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
-      const params: Record<string, string | number | boolean> = {
+      const params: {
+        per_page?: number;
+        search?: string;
+        category?: string;
+        sort?: string;
+        page?: number;
+      } = {
         per_page: 20,
       };
       
-      // Only add parameters if they have values
-      if (filters.search) params.search = filters.search;
+      // Don't pass search to API - do all filtering client-side for Greek normalization
       if (filters.category) params.category = filters.category;
-      if (filters.producer) params.producer = filters.producer;
-      if (filters.minPrice) params.min_price = parseFloat(filters.minPrice);
-      if (filters.maxPrice) params.max_price = parseFloat(filters.maxPrice);
-      if (filters.organic !== null) params.organic = filters.organic;
       if (filters.sort) params.sort = filters.sort;
-      if (filters.dir) params.dir = filters.dir;
       
       const response = await apiClient.getProducts(params);
-      setProducts(response.data);
+      let products = response.data;
+      
+      // Apply client-side Greek-aware filtering if search query exists
+      if (filters.search) {
+        products = products.filter(product => {
+          // Search in product name, description, categories, and producer name
+          const searchableText = [
+            product.name,
+            product.description || '',
+            ...product.categories.map(cat => cat.name),
+            product.producer.name || product.producer.business_name
+          ].join(' ');
+          
+          return greekTextContains(searchableText, filters.search);
+        });
+      }
+      
+      setProducts(products);
       
       // Extract unique categories and producers for filter dropdowns
       const uniqueCategories = Array.from(
@@ -97,6 +130,18 @@ export default function HomeClient() {
 
   const updateFilter = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+    
+    // Update search state when search filter changes
+    if (key === 'search' && typeof value === 'string') {
+      const normalized = greekNormalize(value);
+      setSearchState({
+        query: value,
+        normalizedQuery: normalized.normalized,
+        variants: normalized.variants,
+        isGreek: /[\u0370-\u03FF\u1F00-\u1FFF]/.test(value),
+        isLatin: /[a-zA-Z]/.test(value) && !/[\u0370-\u03FF\u1F00-\u1FFF]/.test(value)
+      });
+    }
   }, []);
 
   const clearAllFilters = useCallback(() => {
@@ -212,13 +257,36 @@ export default function HomeClient() {
             {/* Search Bar */}
             <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={filters.search}
-                  onChange={(e) => updateFilter('search', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Αναζήτηση προϊόντων (π.χ. πορτοκάλια, portokalia, Πορτοκάλια)..."
+                    value={filters.search}
+                    onChange={(e) => updateFilter('search', e.target.value)}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  {/* Search type indicator */}
+                  {filters.search && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                      {searchState.isGreek && (
+                        <span className="text-xs text-green-600 font-medium" title="Greek text detected">ΕΛ</span>
+                      )}
+                      {searchState.isLatin && (
+                        <span className="text-xs text-blue-600 font-medium" title="Latin text detected (will be transliterated)">EN</span>
+                      )}
+                      {searchState.variants.length > 1 && (
+                        <span className="text-xs text-purple-600 font-medium" title={`${searchState.variants.length} search variants`}>+{searchState.variants.length - 1}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {/* Search hints for Greek normalization */}
+                {filters.search && searchState.variants.length > 1 && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    <span className="font-medium">Searching for:</span> {searchState.variants.slice(0, 3).join(', ')}
+                    {searchState.variants.length > 3 && ` +${searchState.variants.length - 3} more variants`}
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <button
