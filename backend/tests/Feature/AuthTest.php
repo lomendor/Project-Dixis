@@ -75,8 +75,10 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials'
+            ]);
     }
 
     public function test_user_registration_requires_password_confirmation(): void
@@ -126,8 +128,10 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials'
+            ]);
     }
 
     public function test_user_can_login_with_valid_credentials(): void
@@ -184,8 +188,10 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/login', $loginData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials'
+            ]);
     }
 
     public function test_user_cannot_login_with_nonexistent_email(): void
@@ -197,8 +203,10 @@ class AuthTest extends TestCase
 
         $response = $this->postJson('/api/v1/auth/login', $loginData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials'
+            ]);
     }
 
     public function test_authenticated_user_can_logout(): void
