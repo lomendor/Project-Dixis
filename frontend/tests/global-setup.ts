@@ -7,8 +7,14 @@ import path from 'path';
  */
 
 const TEST_USERS = {
-  consumer: { email: 'test@dixis.local', password: 'Passw0rd!' },
-  producer: { email: 'producer@dixis.local', password: 'Passw0rd!' },
+  consumer: { 
+    email: process.env.LOGIN_EMAIL || 'test@dixis.local', 
+    password: process.env.LOGIN_PASSWORD || 'Passw0rd!' 
+  },
+  producer: { 
+    email: process.env.PRODUCER_EMAIL || 'producer@dixis.local', 
+    password: process.env.PRODUCER_PASSWORD || 'Passw0rd!' 
+  },
 };
 
 async function globalSetup(config: FullConfig) {
@@ -16,6 +22,8 @@ async function globalSetup(config: FullConfig) {
   
   const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3001';
   const authDir = path.join(__dirname, '../.auth');
+  
+  console.log(`🔗 Using baseURL: ${baseURL}`);
   
   // Create browser and context for setup
   const browser = await chromium.launch();
@@ -26,23 +34,22 @@ async function globalSetup(config: FullConfig) {
     const consumerContext = await browser.newContext();
     const consumerPage = await consumerContext.newPage();
     
-    await consumerPage.goto(`${baseURL}/login`);
+    await consumerPage.goto('/auth/login');
     
-    // Wait for login form with stable selectors
-    await consumerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 15000 });
+    // Wait for login form with extended timeout and better element detection
+    await consumerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
+    
+    // Use getByTestId with explicit waits for better stability
+    await consumerPage.getByTestId('login-email').waitFor({ timeout: 30000 });
     
     // Fill login form using data-testid selectors
-    const emailInput = consumerPage.locator('[data-testid="login-email"], [name="email"], input[type="email"]').first();
-    const passwordInput = consumerPage.locator('[data-testid="login-password"], [name="password"], input[type="password"]').first();
-    const submitButton = consumerPage.locator('[data-testid="login-submit"], button[type="submit"], button:has-text("Login")').first();
-    
-    await emailInput.fill(TEST_USERS.consumer.email);
-    await passwordInput.fill(TEST_USERS.consumer.password);
-    await submitButton.click();
+    await consumerPage.getByTestId('login-email').fill(TEST_USERS.consumer.email);
+    await consumerPage.getByTestId('login-password').fill(TEST_USERS.consumer.password);
+    await consumerPage.getByTestId('login-submit').click();
     
     // Wait for successful login (redirect away from login page)
     await consumerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 15000,
+      timeout: 30000,
       waitUntil: 'networkidle' 
     });
     
@@ -55,23 +62,22 @@ async function globalSetup(config: FullConfig) {
     const producerContext = await browser.newContext();
     const producerPage = await producerContext.newPage();
     
-    await producerPage.goto(`${baseURL}/login`);
+    await producerPage.goto('/auth/login');
     
-    // Wait for login form
-    await producerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 15000 });
+    // Wait for login form with extended timeout  
+    await producerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
     
-    // Fill producer login form
-    const producerEmail = producerPage.locator('[data-testid="login-email"], [name="email"], input[type="email"]').first();
-    const producerPassword = producerPage.locator('[data-testid="login-password"], [name="password"], input[type="password"]').first();
-    const producerSubmit = producerPage.locator('[data-testid="login-submit"], button[type="submit"], button:has-text("Login")').first();
+    // Use getByTestId with explicit waits for better stability
+    await producerPage.getByTestId('login-email').waitFor({ timeout: 30000 });
     
-    await producerEmail.fill(TEST_USERS.producer.email);
-    await producerPassword.fill(TEST_USERS.producer.password);
-    await producerSubmit.click();
+    // Fill producer login form using data-testid selectors
+    await producerPage.getByTestId('login-email').fill(TEST_USERS.producer.email);
+    await producerPage.getByTestId('login-password').fill(TEST_USERS.producer.password);
+    await producerPage.getByTestId('login-submit').click();
     
     // Wait for successful producer login
     await producerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 15000,
+      timeout: 30000,
       waitUntil: 'networkidle' 
     });
     

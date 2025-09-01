@@ -11,15 +11,22 @@ export default defineConfig({
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,
   
-  // Global setup for storageState creation
+  // Global setup for storageState creation  
   globalSetup: './tests/global-setup.ts',
   
-  // Artifacts configuration
-  outputDir: 'frontend/test-results',
-  reporter: [['html', { outputFolder: 'frontend/playwright-report' }]],
+  // Artifacts configuration - align with CI expectations
+  outputDir: 'test-results',
+  reporter: isCI ? [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list']
+  ] : [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list'],
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
   
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3001',
+    baseURL: 'http://127.0.0.1:3001',
     trace: 'on',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -38,7 +45,7 @@ export default defineConfig({
       name: 'consumer',
       use: { 
         ...devices['Desktop Chrome'],
-        storageState: 'frontend/.auth/consumer.json'
+        storageState: '.auth/consumer.json'
       },
       testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
     },
@@ -46,7 +53,7 @@ export default defineConfig({
       name: 'producer',
       use: { 
         ...devices['Desktop Chrome'],
-        storageState: 'frontend/.auth/producer.json'
+        storageState: '.auth/producer.json'
       },
       testMatch: ['**/auth-*.spec.ts', '**/admin-*.spec.ts']
     },

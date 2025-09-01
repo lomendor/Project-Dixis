@@ -95,8 +95,8 @@ test('auth edge-cases - wrong password then correct password', async ({ page }) 
     page.goto('/auth/login')
   ]);
   
-  // Fill login form with wrong password
-  await page.fill('[name="email"]', 'consumer@example.com');
+  // Fill login form with wrong password (using correct test user email)
+  await page.fill('[name="email"]', 'test@dixis.local');
   await page.fill('[name="password"]', 'wrong-password');
   
   // Submit login form with wrong password
@@ -111,7 +111,7 @@ test('auth edge-cases - wrong password then correct password', async ({ page }) 
   
   // Clear the password field and enter correct password
   await page.fill('[name="password"]', '');
-  await page.fill('[name="password"]', 'password');
+  await page.fill('[name="password"]', 'Passw0rd!');
   
   // Submit login form with correct password
   await Promise.all([
@@ -163,7 +163,7 @@ test('C3: Session management and auth recovery', async ({ page, context }) => {
   
   // Phase 1: Normal login
   console.log('👤 Phase 1: Normal login flow...');
-  await helper.loginWithCredentials('consumer@example.com', 'password');
+  await helper.loginWithCredentials('test@dixis.local', 'Passw0rd!');
   
   let authState = await helper.checkAuthState();
   expect(authState).toBe('authenticated');
@@ -186,7 +186,7 @@ test('C3: Session management and auth recovery', async ({ page, context }) => {
   
   // Phase 4: Re-login after session clear
   console.log('🔄 Phase 4: Re-login after session clear...');
-  await helper.loginWithCredentials('consumer@example.com', 'password');
+  await helper.loginWithCredentials('test@dixis.local', 'Passw0rd!');
   
   authState = await helper.checkAuthState();
   expect(authState).toBe('authenticated');
@@ -204,7 +204,7 @@ test('C3a: Auth state persistence across page reloads', async ({ page, context }
   console.log('🧪 C3a: Testing auth persistence...');
   
   // Login
-  await helper.loginWithCredentials('consumer@example.com', 'password');
+  await helper.loginWithCredentials('test@dixis.local', 'Passw0rd!');
   
   // Reload page
   await page.reload();
@@ -232,7 +232,7 @@ test('C3b: Token corruption and recovery', async ({ page, context }) => {
   console.log('🧪 C3b: Testing token handling...');
   
   // Login normally
-  await helper.loginWithCredentials('consumer@example.com', 'password');
+  await helper.loginWithCredentials('test@dixis.local', 'Passw0rd!');
   
   // Verify token exists
   const initialToken = await page.evaluate(() => localStorage.getItem('auth_token'));
@@ -254,7 +254,7 @@ test('C3b: Token corruption and recovery', async ({ page, context }) => {
     console.log('🔒 Redirected to login due to invalid token');
     
     // Re-login should work
-    await helper.loginWithCredentials('consumer@example.com', 'password');
+    await helper.loginWithCredentials('test@dixis.local', 'Passw0rd!');
     const finalToken = await page.evaluate(() => localStorage.getItem('auth_token'));
     expect(finalToken).toBeTruthy();
     expect(finalToken).not.toBe('invalid_token_12345');
@@ -277,7 +277,7 @@ test('auth edge-cases - invalid email format', async ({ page }) => {
   
   // Fill login form with invalid email format
   await page.fill('[name="email"]', 'invalid-email-format');
-  await page.fill('[name="password"]', 'password');
+  await page.fill('[name="password"]', 'Passw0rd!');
   
   // Submit login form
   await page.click('button[type="submit"]');

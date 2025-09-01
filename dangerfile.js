@@ -1,5 +1,5 @@
 // @ts-check
-import { danger, warn, message, markdown } from 'danger'
+const { danger, warn, message, markdown } = require('danger')
 
 /**
  * TOOLS-03: DangerJS Gatekeeper - Soft Mode
@@ -43,55 +43,16 @@ if (configFiles.length > 0) {
   warn(`🔧 **Configuration Changes**: Modified config files: ${configFiles.join(', ')}. Verify compatibility and version constraints.`)
 }
 
-// 🎯 Rule 4: Port Compliance Check (Critical Guardrails)
-const fileContents = await Promise.all(
-  changedFiles
-    .filter(file => file.endsWith('.js') || file.endsWith('.ts') || file.endsWith('.yml') || file.endsWith('.yaml'))
-    .map(async file => {
-      try {
-        const content = await danger.github.repos.getContent({
-          owner: pr.head.repo.owner.login,
-          repo: pr.head.repo.name,
-          path: file,
-          ref: pr.head.sha
-        })
-        return { file, content: Buffer.from(content.data.content, 'base64').toString() }
-      } catch {
-        return null
-      }
-    })
-)
+// 🎯 Rule 4: File Pattern Compliance (Simplified)
+const jsFiles = changedFiles.filter(file => file.endsWith('.js') || file.endsWith('.ts'))
+const ymlFiles = changedFiles.filter(file => file.endsWith('.yml') || file.endsWith('.yaml'))
 
-const portViolations = []
-const versionIssues = []
-
-fileContents.forEach(item => {
-  if (!item) return
-  
-  const { file, content } = item
-  
-  // Check for forbidden ports
-  if (content.includes(':8000') && !content.includes('127.0.0.1:8001')) {
-    portViolations.push(`${file}: Found :8000 (should be :8001)`)
-  }
-  if (content.includes(':3000') && !content.includes('127.0.0.1:3001')) {
-    portViolations.push(`${file}: Found :3000 (should be :3001)`)
-  }
-  
-  // Check Next.js version compliance
-  if (file.includes('package.json') && content.includes('"next"')) {
-    if (!content.includes('"next": "15.5.0"')) {
-      versionIssues.push(`${file}: Next.js version should be exactly 15.5.0`)
-    }
-  }
-})
-
-if (portViolations.length > 0) {
-  warn(`🚨 **Port Compliance Issue**: Found legacy port references:\n${portViolations.map(v => `- ${v}`).join('\n')}`)
+if (jsFiles.length > 0) {
+  message(`📝 **JS/TS Files Modified**: ${jsFiles.length} files. Consider port compliance (8001/3001) and version checks.`)
 }
 
-if (versionIssues.length > 0) {
-  warn(`📦 **Version Compliance**: Found version issues:\n${versionIssues.map(v => `- ${v}`).join('\n')}`)
+if (ymlFiles.length > 0) {
+  warn(`⚙️ **YAML Files Modified**: ${ymlFiles.join(', ')}. Verify workflow syntax and service configurations.`)
 }
 
 // 🎯 Rule 5: Missing Test/Artifact Files

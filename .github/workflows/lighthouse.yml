@@ -35,7 +35,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
           
@@ -67,12 +67,15 @@ jobs:
         run: |
           cd frontend
           npm run build
-          npm run start &
+          npm run start -- --port 3001 &
+        
+      - name: Install wait-on utility
+        run: npm install -g wait-on
         
       - name: Wait for services
         run: |
-          npx wait-on http://127.0.0.1:8001/api/health --timeout 60000
-          npx wait-on http://127.0.0.1:3001 --timeout 60000
+          wait-on http://127.0.0.1:8001/api/health --timeout 60000
+          wait-on http://127.0.0.1:3001 --timeout 60000
         
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
@@ -117,18 +120,20 @@ jobs:
                     seo: Math.round(report.categories.seo.score * 100)
                   };
                   
-                  const body = `## 🏍️ Lighthouse Report
-                  
-| Category | Score | Status |
-|----------|-------|---------|
-| 🚀 Performance | ${scores.performance}% | ${scores.performance >= 70 ? '✅' : '⚠️'} |
-| 🎯 Accessibility | ${scores.accessibility}% | ${scores.accessibility >= 90 ? '✅' : '⚠️'} |
-| 🛡️ Best Practices | ${scores['best-practices']}% | ${scores['best-practices'] >= 80 ? '✅' : '⚠️'} |
-| 🔍 SEO | ${scores.seo}% | ${scores.seo >= 90 ? '✅' : '⚠️'} |
-
-*Targets: Performance ≥ 70, Accessibility ≥ 90 (currently warnings only)*
-
-[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+                  const body = [
+                    '## 🏍️ Lighthouse Report',
+                    '',
+                    '| Category | Score | Status |',
+                    '|----------|-------|---------|',
+                    `| 🚀 Performance | ${scores.performance}% | ${scores.performance >= 70 ? '✅' : '⚠️'} |`,
+                    `| 🎯 Accessibility | ${scores.accessibility}% | ${scores.accessibility >= 90 ? '✅' : '⚠️'} |`,
+                    `| 🛡️ Best Practices | ${scores['best-practices']}% | ${scores['best-practices'] >= 80 ? '✅' : '⚠️'} |`,
+                    `| 🔍 SEO | ${scores.seo}% | ${scores.seo >= 90 ? '✅' : '⚠️'} |`,
+                    '',
+                    '*Targets: Performance ≥ 70, Accessibility ≥ 90 (currently warnings only)*',
+                    '',
+                    `[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+                  ].join('\n');
                   
                   github.rest.issues.createComment({
                     issue_number: context.issue.number,
