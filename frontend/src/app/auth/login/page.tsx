@@ -12,7 +12,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
   const router = useRouter();
 
   // Redirect authenticated users away from login page
@@ -36,8 +36,15 @@ export default function Login() {
       
       console.log('🔐 Starting login process...', { email });
       await login(email, password);
-      console.log('✅ Login successful, redirecting to home...');
+      console.log('✅ Login successful, showing success toast...');
       
+      // Show success toast for E2E test verification
+      showSuccess('Welcome back');
+      
+      // Small delay to ensure toast renders before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      console.log('✅ Redirecting to home...');
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {
