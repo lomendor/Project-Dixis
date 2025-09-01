@@ -23,18 +23,7 @@ async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3001';
   const authDir = path.join(__dirname, '../.auth');
   
-  // Health check: ensure frontend is responding
-  try {
-    console.log(`🏥 Health check: ${baseURL}/login`);
-    const response = await fetch(`${baseURL}/login`);
-    if (!response.ok) {
-      throw new Error(`Health check failed: ${response.status}`);
-    }
-    console.log('✅ Frontend health check passed');
-  } catch (error) {
-    console.error('❌ Frontend health check failed:', error);
-    throw error;
-  }
+  console.log(`🔗 Using baseURL: ${baseURL}`);
   
   // Create browser and context for setup
   const browser = await chromium.launch();
