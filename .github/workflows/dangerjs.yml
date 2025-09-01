@@ -30,13 +30,11 @@ jobs:
           node-version: '20'
       
       - name: Install DangerJS
-        working-directory: frontend
         run: |
           npm install --no-save danger@11.x
           npm list danger || echo "DangerJS installed globally"
       
       - name: Run DangerJS
-        working-directory: frontend
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
