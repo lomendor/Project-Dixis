@@ -1,17 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiClient } from '@/lib/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Guard: Redirect authenticated users away from login page
+  useEffect(() => {
+    if (!authLoading && user) {
+      // Check for intended destination first
+      const intended = typeof window !== 'undefined'
+        ? sessionStorage.getItem('intended_destination')
+        : null;
+      
+      if (intended) {
+        sessionStorage.removeItem('intended_destination');
+        router.push(intended);
+        return;
+      }
+      
+      // Role-based redirect
+      router.push(user.role === 'producer' ? '/producer/dashboard' : '/');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,13 +47,33 @@ export default function Login() {
       
       console.log('🔐 Starting login process...', { email });
       await login(email, password);
-      console.log('✅ Login successful, redirecting to home...');
+      console.log('✅ Login successful, checking redirect...');
       
       // Small delay to ensure toast renders before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Redirect to home page after successful login
-      router.push('/');
+      // 1) Smart redirect - check for intended destination
+      const intended = typeof window !== 'undefined'
+        ? sessionStorage.getItem('intended_destination')
+        : null;
+      
+      if (intended) {
+        console.log('🔄 Redirecting to intended destination:', intended);
+        sessionStorage.removeItem('intended_destination');
+        router.push(intended);
+        return;
+      }
+      
+      // 2) Role-based redirect - get fresh user profile
+      const userProfile = await apiClient.getProfile().catch(() => null);
+      
+      if (userProfile?.role === 'producer') {
+        console.log('🏪 Redirecting producer to dashboard');
+        router.push('/producer/dashboard');
+      } else {
+        console.log('🏠 Redirecting consumer to home');
+        router.push('/');
+      }
     } catch (err) {
       console.error('❌ Login failed:', err);
       setError(err instanceof Error ? err.message : 'Login failed');
