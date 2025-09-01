@@ -23,8 +23,8 @@ class OrderFactory extends Factory
 
         return [
             'user_id' => null, // nullable as per requirements
-            'status' => fake()->randomElement(['pending', 'paid', 'shipped', 'completed', 'cancelled']),
-            'payment_status' => fake()->randomElement(['pending', 'paid', 'failed']),
+            'status' => fake()->randomElement(['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled']),
+            'payment_status' => fake()->randomElement(['pending', 'paid', 'completed', 'failed', 'refunded']),
             'payment_method' => fake()->randomElement(['credit_card', 'paypal', 'bank_transfer']),
             'shipping_method' => 'HOME',
             'subtotal' => $subtotal,

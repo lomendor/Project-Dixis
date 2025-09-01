@@ -9,12 +9,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "next lint",
     "type-check": "tsc --noEmit --skipLibCheck",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:debug": "playwright test --debug",
+    "e2e:ci": "npm run e2e:ci:setup && playwright test",
+    "e2e:ci:setup": "rm -rf frontend/.next && NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1 npm run build && npm start -- --port 3001 & npx wait-on tcp:127.0.0.1:3001 && sleep 2",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:analytics": "PLAYWRIGHT_BASE_URL=http://localhost:3001 playwright test tests/e2e/analytics-observability.spec.ts",
@@ -28,7 +30,8 @@
   "dependencies": {
     "next": "15.5.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

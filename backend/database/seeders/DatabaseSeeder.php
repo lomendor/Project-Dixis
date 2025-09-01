@@ -71,6 +71,13 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class, // New structured order seeder
         ]);
 
+        // E2E deterministic data for testing environment
+        if (app()->environment('testing')) {
+            $this->call([
+                E2ESeeder::class,
+            ]);
+        }
+
         // Create demo orders after products exist (idempotent)
         $this->createDemoOrders($consumer);
         $this->createEnhancedDemoOrders();
@@ -203,8 +210,8 @@ class DatabaseSeeder extends Seeder
                     'tax_amount' => 0,
                     'shipping_amount' => collect(['HOME', 'PICKUP', 'COURIER'])->random() === 'PICKUP' ? 0 : 5.00,
                     'total_amount' => 0,
-                    'payment_status' => collect(['paid', 'paid', 'paid', 'pending', 'failed'])->random(), // 60% paid
-                    'status' => collect(['completed', 'completed', 'shipped', 'paid', 'pending'])->random(),
+                    'payment_status' => collect(['paid', 'paid', 'completed', 'pending', 'failed'])->random(), // Updated for new constraints
+                    'status' => collect(['completed', 'completed', 'shipped', 'confirmed', 'pending'])->random(),
                     'shipping_method' => collect(['HOME', 'PICKUP', 'COURIER'])->random(),
                     'notes' => rand(0, 1) ? "Demo order notes #{$i}" : null,
                     'created_at' => $orderDate,

@@ -10,6 +10,19 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,     // fewer workers reduces flake
+  
+  // Essential for artifact generation in CI
+  globalSetup: './global-setup.ts',
+  outputDir: 'test-results',
+  
+  reporter: isCI ? [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list']
+  ] : [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['list'],
+    ['json', { outputFile: 'test-results/results.json' }]
+  ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3001',
     trace: 'retain-on-failure',

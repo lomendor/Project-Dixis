@@ -49,8 +49,8 @@ class OrderSeeder extends Seeder
         
         $order = Order::create([
             'user_id' => null, // nullable as specified
-            'status' => fake()->randomElement(['pending', 'paid', 'shipped', 'completed', 'cancelled']), // Use current valid enum values
-            'payment_status' => fake()->randomElement(['pending', 'paid', 'failed']),
+            'status' => fake()->randomElement(['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled']), // Updated to match new constraints
+            'payment_status' => fake()->randomElement(['pending', 'paid', 'completed', 'failed', 'refunded']),
             'payment_method' => fake()->randomElement(['credit_card', 'paypal', 'bank_transfer']),
             'shipping_method' => 'HOME',
             'subtotal' => 0, // Will be calculated after items
