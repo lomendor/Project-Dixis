@@ -7,15 +7,15 @@ test('auth edge-cases - wrong password then correct password', async ({ page }) 
     page.goto('/auth/login')
   ]);
   
-  // Fill login form with wrong password
-  await page.fill('[name="email"]', 'consumer@example.com');
+  // Fill login form with wrong password (using correct test user email)
+  await page.fill('[name="email"]', 'test@dixis.local');
   await page.fill('[name="password"]', 'wrong-password');
   
   // Submit login form with wrong password
   await page.click('button[type="submit"]');
   
-  // Wait for error message to appear
-  const errorMessage = page.locator('[data-testid="error-toast"], .error, [role="alert"]');
+  // Wait for error message to appear (use specific selector to avoid Next.js route announcer)
+  const errorMessage = page.getByTestId('error-toast');
   await expect(errorMessage).toBeVisible({ timeout: 10000 });
   
   // Verify error message content
@@ -23,7 +23,7 @@ test('auth edge-cases - wrong password then correct password', async ({ page }) 
   
   // Clear the password field and enter correct password
   await page.fill('[name="password"]', '');
-  await page.fill('[name="password"]', 'password');
+  await page.fill('[name="password"]', 'Passw0rd!');
   
   // Submit login form with correct password
   await Promise.all([
@@ -73,13 +73,13 @@ test('auth edge-cases - invalid email format', async ({ page }) => {
   
   // Fill login form with invalid email format
   await page.fill('[name="email"]', 'invalid-email-format');
-  await page.fill('[name="password"]', 'password');
+  await page.fill('[name="password"]', 'Passw0rd!');
   
   // Submit login form
   await page.click('button[type="submit"]');
   
-  // Check for validation error or server error
-  const errorIndicator = page.locator('[data-testid="error-toast"], .error, [role="alert"], input[name="email"]:invalid');
+  // Check for validation error or server error (more specific selector)
+  const errorIndicator = page.locator('[data-testid="error-toast"], input[name="email"]:invalid');
   
   try {
     await expect(errorIndicator).toBeVisible({ timeout: 5000 });
