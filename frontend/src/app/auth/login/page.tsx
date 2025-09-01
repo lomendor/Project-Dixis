@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/contexts/ToastContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +11,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
-  const { showError, showSuccess } = useToast();
   const router = useRouter();
 
   // Redirect authenticated users away from login page
@@ -36,31 +34,20 @@ export default function Login() {
       
       console.log('🔐 Starting login process...', { email });
       await login(email, password);
-      console.log('✅ Login successful, showing success toast...');
-      
-      // Show success toast for E2E test verification
-      showSuccess('Welcome back');
+      console.log('✅ Login successful, redirecting to home...');
       
       // Small delay to ensure toast renders before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      console.log('✅ Redirecting to home...');
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {
       console.error('❌ Login failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       
-      // Ensure error message contains expected patterns for E2E tests
-      const normalizedError = errorMessage.toLowerCase().includes('invalid') ||
-                             errorMessage.toLowerCase().includes('incorrect') ||
-                             errorMessage.toLowerCase().includes('wrong') ||
-                             errorMessage.toLowerCase().includes('failed')
-        ? errorMessage
-        : `Invalid credentials. ${errorMessage}`;
-      
-      setError(normalizedError);
-      showError(normalizedError);
+      // Set inline error display for form
+      setError(errorMessage);
+      // Note: Toast error is already handled by AuthContext
     } finally {
       setLoading(false);
     }

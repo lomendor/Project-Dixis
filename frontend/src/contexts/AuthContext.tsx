@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔑 AuthContext: API login response:', response);
       console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
-      showToast('success', `Welcome back, ${response.user.name}!`);
+      showToast('success', 'Welcome back');
       console.log('🔑 AuthContext: Login completed successfully');
     } catch (error) {
       console.error('🔑 AuthContext: Login error:', error);
