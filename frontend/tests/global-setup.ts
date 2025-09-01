@@ -34,7 +34,7 @@ async function globalSetup(config: FullConfig) {
     const consumerContext = await browser.newContext();
     const consumerPage = await consumerContext.newPage();
     
-    await consumerPage.goto('/login');
+    await consumerPage.goto('/auth/login');
     
     // Wait for login form with extended timeout and better element detection
     await consumerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
@@ -62,7 +62,7 @@ async function globalSetup(config: FullConfig) {
     const producerContext = await browser.newContext();
     const producerPage = await producerContext.newPage();
     
-    await producerPage.goto('/login');
+    await producerPage.goto('/auth/login');
     
     // Wait for login form with extended timeout  
     await producerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
