@@ -17,8 +17,8 @@ class E2ESeeder extends Seeder
      */
     public function run(): void
     {
-        // Create deterministic test users for E2E (ONLY in testing environment)
-        if (app()->environment('testing')) {
+        // Create deterministic test users for E2E (in testing and local environments)
+        if (app()->environment(['testing', 'local'])) {
             
             // Test consumer user
             $testUser = User::firstOrCreate(
@@ -43,6 +43,10 @@ class E2ESeeder extends Seeder
                     'email_verified_at' => now(),
                 ]
             );
+
+            echo "🔐 E2E Test Users Created:\n";
+            echo "   Consumer: test@dixis.local / Passw0rd!\n";
+            echo "   Producer: producer@dixis.local / Passw0rd!\n";
         }
 
         // Create legacy test user for backwards compatibility

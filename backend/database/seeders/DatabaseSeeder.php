@@ -71,8 +71,8 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class, // New structured order seeder
         ]);
 
-        // E2E deterministic data for testing environment
-        if (app()->environment('testing')) {
+        // E2E deterministic data for testing and local environments
+        if (app()->environment(['testing', 'local'])) {
             $this->call([
                 E2ESeeder::class,
             ]);
