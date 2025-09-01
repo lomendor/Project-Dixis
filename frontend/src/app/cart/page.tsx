@@ -10,6 +10,7 @@ import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { formatCurrency } from '@/env';
 // Enhanced checkout validation and retry logic
 import { 
@@ -39,6 +40,7 @@ export default function Cart() {
   const [useFallbackShipping, setUseFallbackShipping] = useState(false);
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
+  const { trackCheckoutStart, trackOrderComplete } = useAnalytics();
   const router = useRouter();
 
   useEffect(() => {
@@ -166,6 +168,13 @@ export default function Cart() {
     try {
       setCheckingOut(true);
       
+      // Track checkout start event
+      trackCheckoutStart(
+        totalAmount + (shippingQuote?.cost || 0),
+        totalItems,
+        user?.id?.toString()
+      );
+      
       // Create full shipping address
       const shippingAddress = `${city}, ${postalCode}${user?.address ? `, ${user.address}` : ''}`;
       
@@ -190,6 +199,15 @@ export default function Cart() {
         city: city,
         notes: `Shipping Zone: ${finalQuote.zone || 'Standard'}${useFallbackShipping ? ' (Εκτιμώμενα μεταφορικά)' : ''}`,
       });
+      
+      // Track successful order completion
+      trackOrderComplete(
+        order.id.toString(),
+        totalAmount + finalQuote.cost,
+        totalItems,
+        'cash_on_delivery',
+        user?.id?.toString()
+      );
       
       showToast('success', `Η παραγγελία δημιουργήθηκε! Κωδικός: ${order.id}`);
       
