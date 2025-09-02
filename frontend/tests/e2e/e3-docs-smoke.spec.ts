@@ -36,11 +36,22 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
   test('Cart page accessibility', async ({ page }) => {
     await page.goto('/cart');
     
-    // Should either show cart content or redirect to login
-    const isLoginPage = await page.locator('form').isVisible();
-    const isCartPage = await page.locator('main').isVisible();
+    // Wait for any auth redirect to complete
+    await page.waitForLoadState('networkidle');
     
-    expect(isLoginPage || isCartPage).toBe(true);
+    // Should either show cart content or redirect to login
+    const currentUrl = page.url();
+    
+    if (currentUrl.includes('/auth/login')) {
+      // Redirected to login - check for login form
+      const hasForm = await page.locator('form').isVisible();
+      expect(hasForm).toBe(true);
+    } else {
+      // Check for page content
+      const hasMain = await page.locator('main').isVisible().catch(() => false);
+      const hasPageRoot = await page.getByTestId('page-root').isVisible().catch(() => false);
+      expect(hasMain || hasPageRoot).toBe(true);
+    }
   });
 
   test('Navigation elements present', async ({ page }) => {
