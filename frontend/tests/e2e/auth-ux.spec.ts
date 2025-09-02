@@ -68,13 +68,13 @@ test.describe('Auth UX Improvements', () => {
     await auth.loginAsConsumer();
     
     // Try to access login page again
-    await page.goto('/login');
+    await page.goto('/auth/login');
     
     // Should be redirected away or see authenticated state
     await page.waitForTimeout(2000);
     const currentUrl = page.url();
     
-    if (!currentUrl.includes('/login')) {
+    if (!currentUrl.includes('/auth/login')) {
       // Good - redirected away from login
       expect(currentUrl).not.toMatch(/\/login/);
     }
