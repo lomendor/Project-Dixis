@@ -18,7 +18,7 @@ test.describe('Auth UX Improvements', () => {
     await auth.clearAuthState();
     
     // Navigate to login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await expect(page.getByTestId('login-form')).toBeVisible();
     
     // Fill in deterministic credentials
@@ -48,7 +48,7 @@ test.describe('Auth UX Improvements', () => {
     await auth.clearAuthState();
     
     // Navigate to login page
-    await page.goto('/login');
+    await page.goto('/auth/login');
     await expect(page.getByTestId('login-form')).toBeVisible();
     
     // Use invalid credentials
