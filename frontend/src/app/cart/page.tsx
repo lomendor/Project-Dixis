@@ -412,7 +412,7 @@ export default function Cart() {
                       <div key={item.id} data-testid="cart-item" className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                         {/* Product Image */}
                         <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                          {item.product.images.length > 0 ? (
+                          {item.product.images.length > 0 && item.product.images[0] ? (
                             <img
                               src={item.product.images[0].url || item.product.images[0].image_path}
                               alt={item.product.images[0].alt_text || item.product.name}
@@ -675,7 +675,7 @@ export default function Cart() {
                     (!shippingQuote && !useFallbackShipping) ||
                     retryState.isLoading ||
                     validationErrors.length > 0 ||
-                    (postalCode && city && !validatePostalCodeCity(postalCode, city))
+                    Boolean(postalCode && city && !validatePostalCodeCity(postalCode, city))
                   }
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
                     checkingOut || 
