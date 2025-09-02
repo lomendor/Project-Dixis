@@ -89,8 +89,23 @@ export class AuthHelper {
     // Clear all cookies, localStorage, sessionStorage
     await this.page.context().clearCookies();
     await this.page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.clear();
+        }
+      } catch (e) {
+        // SecurityError when localStorage is not accessible (e.g., about:blank)
+        console.log('localStorage not accessible:', e.message);
+      }
+      
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.clear();
+        }
+      } catch (e) {
+        // SecurityError when sessionStorage is not accessible
+        console.log('sessionStorage not accessible:', e.message);
+      }
     });
   }
 
