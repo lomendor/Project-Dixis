@@ -20,7 +20,7 @@
     "e2e:ci": "playwright test --reporter=html,list"
   },
   "dependencies": {
-    "next": "15.5.0",
+    "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
