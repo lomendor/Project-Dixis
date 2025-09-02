@@ -31,7 +31,10 @@ async function globalSetup(config: FullConfig) {
   try {
     // Setup Consumer Auth
     console.log('🔐 Creating consumer storageState...');
-    const consumerContext = await browser.newContext();
+    const consumerContext = await browser.newContext({
+      baseURL: baseURL,
+      storageState: undefined,
+    });
     const consumerPage = await consumerContext.newPage();
     
     await consumerPage.goto('/auth/login');
@@ -59,7 +62,10 @@ async function globalSetup(config: FullConfig) {
     
     // Setup Producer Auth
     console.log('🔐 Creating producer storageState...');
-    const producerContext = await browser.newContext();
+    const producerContext = await browser.newContext({
+      baseURL: baseURL,
+      storageState: undefined,
+    });
     const producerPage = await producerContext.newPage();
     
     await producerPage.goto('/auth/login');
