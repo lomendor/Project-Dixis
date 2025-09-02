@@ -16,7 +16,6 @@ export default defineConfig({
       '@tests': path.resolve(__dirname, './tests'),
     },
   },
-  css: false, // Disable CSS processing completely
   define: {
     'process.env.NODE_ENV': '"test"',
   },
