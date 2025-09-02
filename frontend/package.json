@@ -22,6 +22,8 @@
     "test:e2e:analytics": "PLAYWRIGHT_BASE_URL=http://localhost:3001 playwright test tests/e2e/analytics-observability.spec.ts",
     "test:e2e:performance-a11y": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/performance-accessibility-core.spec.ts --reporter=line",
     "test:e2e:seo": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/seo-basics.spec.ts --reporter=line",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev:e2e": "next dev -p 3001 || vite --port 3001",
     "dev:api": "php -S 127.0.0.1:8001 -t ../public",
     "api:e2e": "php ../artisan serve --host 127.0.0.1 --port 8001",
@@ -46,6 +48,7 @@
     "lint-staged": "^16.1.5",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^2.1.0",
     "wait-on": "^7.2.0"
   },
   "lint-staged": {
