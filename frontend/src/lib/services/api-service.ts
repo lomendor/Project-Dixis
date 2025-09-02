@@ -106,7 +106,7 @@ class ValidatedApiClient {
         try {
           const apiError = validatePayload(apiErrorSchema, responseData, 'API error');
           throw new ApiValidationError(apiError.message, response.status, apiError);
-        } catch (validationError) {
+        } catch (_validationError) {
           // If error response doesn't match schema, throw generic error
           throw new ApiValidationError(
             `HTTP ${response.status}: ${response.statusText}`,

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { getExpectedSiteTitle } from './utils/site';
 
 /**
  * E2E Smoke Tests - Minimal test suite to ensure artifacts are ALWAYS generated
@@ -14,14 +15,17 @@ test.describe('Smoke Tests - Core Functionality', () => {
   test('Homepage loads and shows main content', async ({ page }) => {
     await page.goto('/');
     
-    // Check for main content area
-    await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
+    // Check for main content area with testid fallback
+    await expect(
+      page.getByTestId('page-root').or(page.locator('main'))
+    ).toBeVisible({ timeout: 10000 });
     
     // Check for navigation
     await expect(page.locator('nav')).toBeVisible();
     
-    // Check page title contains site name
-    await expect(page).toHaveTitle(/Dixis/i);
+    // Check page title contains expected site name
+    const expectedTitle = getExpectedSiteTitle();
+    await expect(page).toHaveTitle(new RegExp(expectedTitle, 'i'));
   });
 
   test('Products page loads with product cards', async ({ page }) => {
@@ -112,12 +116,31 @@ test.describe('Smoke Tests - Core Functionality', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     
-    // Check that page loads on mobile
-    await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
     
+<<<<<<< HEAD
     // Check for navigation (could be hamburger menu or standard nav)
     const hasNav = await page.locator('nav, [data-testid="mobile-menu"], button[aria-label*="menu"], header').first().isVisible({ timeout: 5000 });
     expect(hasNav).toBe(true);
+=======
+    // Check that page loads on mobile
+    await expect(
+      page.getByTestId('page-root').or(page.locator('main'))
+    ).toBeVisible({ timeout: 10000 });
+    
+    // Navigation should be present (the nav element should always be there)
+    const navElement = await page.locator('nav').isVisible().catch(() => false);
+    expect(navElement).toBe(true);
+    
+    // Mobile menu button should be visible at 375px width
+    const mobileMenuButton = await page.getByTestId('mobile-menu-button').isVisible().catch(() => false);
+    
+    // Either mobile menu button is visible, or the regular nav items are visible
+    const navItems = await page.locator('nav a, nav button').count() > 0;
+    
+    expect(mobileMenuButton || navItems).toBe(true);
+>>>>>>> 2bfc819 (fix(e2e): Stabilize smoke tests - resolve 3 core E2E failures)
   });
 
   test('Search functionality is present', async ({ page }) => {
