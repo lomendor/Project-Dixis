@@ -18,7 +18,7 @@ export class AuthHelper {
    */
   async login({ email, password }: LoginCredentials): Promise<void> {
     // Navigate to login page
-    await this.page.goto('/login');
+    await this.page.goto('/auth/login');
     
     // Wait for login form to be ready
     await expect(this.page.getByTestId('login-form')).toBeVisible();
@@ -38,7 +38,7 @@ export class AuthHelper {
     
     // Verify login success (should NOT be on login page)
     const currentUrl = this.page.url();
-    expect(currentUrl).not.toMatch(/\/login/);
+    expect(currentUrl).not.toMatch(/\/auth\/login/);
   }
 
   /**
@@ -75,7 +75,7 @@ export class AuthHelper {
     }
     
     // Wait for redirect to home/login
-    await this.page.waitForURL(/\/(login|$)/, { 
+    await this.page.waitForURL(/\/(auth\/login|$)/, { 
       timeout: 5000,
       waitUntil: 'networkidle'
     });
@@ -86,11 +86,23 @@ export class AuthHelper {
    * Should be called in test.beforeEach for clean state
    */
   async clearAuthState(): Promise<void> {
-    // Clear all cookies, localStorage, sessionStorage
+    // First ensure we're on a valid origin (not about:blank)
+    const currentUrl = this.page.url();
+    if (currentUrl === 'about:blank' || !currentUrl.startsWith('http')) {
+      // Navigate to a safe page within our origin
+      const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3001';
+      await this.page.goto(`${baseUrl}/auth/login`, { 
+        waitUntil: 'domcontentloaded' 
+      });
+    }
+    
+    // Clear all cookies from context (safe for any origin state)
     await this.page.context().clearCookies();
+    
+    // Now safe to clear storage since we're on valid origin
     await this.page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
+      try { localStorage.clear(); } catch (e) { /* ignore */ }
+      try { sessionStorage.clear(); } catch (e) { /* ignore */ }
     });
   }
 

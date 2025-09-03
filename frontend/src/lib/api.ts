@@ -161,6 +161,9 @@ const trimBoth = (s: string) => {
   // Handle protocol URLs specially (preserve :// in protocols)
   if (s.includes('://')) {
     const [protocol, rest] = s.split('://');
+    if (!protocol || !rest) {
+      throw new Error(`Invalid URL format: ${s}`);
+    }
     const cleanRest = rest.replace(/\/+$/,'').replace(/^\/+/,'').replace(/\/+/g, '/');
     return `${protocol}://${cleanRest}`;
   }
