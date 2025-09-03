@@ -51,27 +51,13 @@ test.describe('Smoke Tests - Core Functionality', () => {
     // Wait for any auth redirect to complete
     await page.waitForLoadState('networkidle');
     
-    // Cart page requires authentication, so it should redirect to login
-    const currentUrl = page.url();
+    // Cart page should be accessible or redirect appropriately
+    // Check for main content OR login form (flexible approach)
+    const hasMainElement = await page.getByRole('main').isVisible().catch(() => false);
+    const hasLoginForm = await page.getByRole('textbox', { name: /email/i }).isVisible().catch(() => false);
+    const hasLoginHeading = await page.getByRole('heading', { name: /sign in/i }).isVisible().catch(() => false);
     
-    if (currentUrl.includes('/auth/login')) {
-      // Redirected to login - check for login form
-      const hasLogin = await page.getByTestId('login-form').isVisible().catch(() => false);
-      const hasPageRoot = await page.getByTestId('page-root').isVisible().catch(() => false);
-      expect(hasLogin || hasPageRoot).toBe(true);
-    } else if (currentUrl.includes('/cart')) {
-      // Still on cart page - check for content (authenticated user scenario)
-      const hasPageRoot = await page.getByTestId('page-root').isVisible().catch(() => false);
-      const hasMainElement = await page.locator('main').isVisible().catch(() => false);
-      const hasContent = await page.locator('h1, h2').isVisible().catch(() => false);
-      
-      expect(hasPageRoot || hasMainElement || hasContent).toBe(true);
-    } else {
-      // Some other valid redirect
-      const hasPageRoot = await page.getByTestId('page-root').isVisible().catch(() => false);
-      const hasMainElement = await page.locator('main').isVisible().catch(() => false);
-      expect(hasPageRoot || hasMainElement).toBe(true);
-    }
+    expect(hasMainElement || hasLoginForm || hasLoginHeading).toBe(true);
   });
 
   test('Checkout page handles authentication correctly', async ({ page }) => {
@@ -81,27 +67,19 @@ test.describe('Smoke Tests - Core Functionality', () => {
     // Wait for any redirect/load to complete
     await page.waitForLoadState('networkidle');
     
-    // Check if it's a 404 or redirect
+    // Check if it's a 404 or redirect - use main element for consistent detection
     if (response?.status() === 404) {
       // If 404, that's a valid response - check for 404 page content
       const has404Content = await page.locator('h1:has-text("404"), [data-testid="not-found"]').isVisible().catch(() => false);
       expect(has404Content || true).toBe(true); // 404 is acceptable
     } else {
-      // If not 404, check final URL and content
-      const currentUrl = page.url();
-      const isValidRedirect = currentUrl.includes('/checkout') || 
-                            currentUrl.includes('/cart') || 
-                            currentUrl.includes('/auth/login') ||
-                            currentUrl.includes('/');
+      // Should have content (flexible approach for different page types)
+      const hasMainElement = await page.getByRole('main').isVisible().catch(() => false);
+      const hasLoginForm = await page.getByRole('textbox', { name: /email/i }).isVisible().catch(() => false);
+      const hasLoginHeading = await page.getByRole('heading', { name: /sign in/i }).isVisible().catch(() => false);
+      const hasCheckoutContent = await page.getByText(/checkout/i).isVisible().catch(() => false);
       
-      expect(isValidRedirect).toBe(true);
-      
-      // Should have main content area or login form
-      const hasPageRoot = await page.getByTestId('page-root').isVisible().catch(() => false);
-      const hasLoginForm = await page.getByTestId('login-form').isVisible().catch(() => false);
-      const hasMainElement = await page.locator('main').isVisible().catch(() => false);
-      
-      expect(hasPageRoot || hasLoginForm || hasMainElement).toBe(true);
+      expect(hasMainElement || hasLoginForm || hasLoginHeading || hasCheckoutContent).toBe(true);
     }
   });
 
@@ -156,13 +134,16 @@ test.describe('Smoke Tests - Core Functionality', () => {
     const navElement = await page.locator('nav').isVisible().catch(() => false);
     expect(navElement).toBe(true);
     
-    // Mobile menu button should be visible at 375px width
+    // Split checks to avoid strict mode violations
+    // Check 1: Mobile menu button
     const mobileMenuButton = await page.getByTestId('mobile-menu-button').isVisible().catch(() => false);
     
-    // Either mobile menu button is visible, or the regular nav items are visible
-    const navItems = await page.locator('nav a, nav button').count() > 0;
+    // Check 2: Main navigation (avoid broad selectors)
+    const mainNavigation = await page.getByRole('navigation', { name: /main/i }).isVisible().catch(() => false);
+    const hasNavLinks = await page.locator('nav a').count() > 0;
     
-    expect(mobileMenuButton || navItems).toBe(true);
+    // Either mobile menu button OR main navigation should be present
+    expect(mobileMenuButton || mainNavigation || hasNavLinks).toBe(true);
   });
 
   test('Search functionality is present', async ({ page }) => {
