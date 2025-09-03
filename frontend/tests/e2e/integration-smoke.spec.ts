@@ -50,8 +50,10 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     // 3. PRODUCT DETAIL - Click on first product and verify details
     console.log('📋 Testing product detail page...');
     const productName = await firstProduct.locator('[data-testid="product-title"]').textContent();
-    const productLink = firstProduct.locator('a').first();
+    const productLink = firstProduct.getByTestId('product-view-details');
     
+    // Ensure the link is visible and stable before clicking
+    await expect(productLink).toBeVisible({ timeout: 10000 });
     await productLink.click();
     await expect(page).toHaveURL(/\/products\/\d+/);
     
