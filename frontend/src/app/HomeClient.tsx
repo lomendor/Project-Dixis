@@ -432,16 +432,16 @@ export default function HomeClient() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div key={product.id} data-testid="product-card" className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <div key={product.id} data-testid="product-card" className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {/* Product Image Placeholder */}
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
+                <div className="h-48 bg-gray-200 flex items-center justify-center relative">
                   {product.images.length > 0 ? (
                     <Image
                       data-testid="product-image"
                       src={product.images[0].url || product.images[0].image_path || '/placeholder.jpg'}
                       alt={product.images[0].alt_text || product.name}
                       fill
-                      className="object-cover"
+                      className="object-cover pointer-events-none"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       priority={products.indexOf(product) < 4}
                     />
@@ -496,7 +496,8 @@ export default function HomeClient() {
                   <div className="flex gap-2">
                     <Link
                       href={`/products/${product.id}`}
-                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-center text-sm font-medium"
+                      data-testid="product-view-details"
+                      className="relative z-10 flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-center text-sm font-medium"
                     >
                       View Details
                     </Link>
