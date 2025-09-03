@@ -81,10 +81,10 @@ async function globalSetup(config: FullConfig) {
     await producerPage.getByTestId('login-password').fill(TEST_USERS.producer.password);
     await producerPage.getByTestId('login-submit').click();
     
-    // Wait for successful producer login
-    await producerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 30000,
-      waitUntil: 'networkidle' 
+    // Wait for successful producer login (redirect to home page)
+    await producerPage.waitForURL(/^[^?]*\/(dashboard|$)/, { 
+      timeout: 15000,
+      waitUntil: 'domcontentloaded' 
     });
     
     // Save producer storageState
