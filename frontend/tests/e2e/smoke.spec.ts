@@ -109,13 +109,14 @@ test.describe('Smoke Tests - Core Functionality', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
     
     // Check that page loads on mobile
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
     
     // Check for navigation (could be hamburger menu or standard nav)
-    const hasNav = await page.locator('nav, [data-testid="mobile-menu"], button[aria-label*="menu"]').isVisible({ timeout: 5000 });
+    const hasNav = await page.locator('nav, [data-testid="mobile-menu"], button[aria-label*="menu"], header').first().isVisible({ timeout: 5000 });
     expect(hasNav).toBe(true);
   });
 

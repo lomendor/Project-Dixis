@@ -5,7 +5,7 @@ import HomeClient from './HomeClient';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
 
 export const metadata: Metadata = {
-  title: "Fresh Local Products from Greek Producers",
+  title: "Fresh Local Products from Greek Producers | Dixis",
   description: "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers. Support sustainable agriculture and taste the difference of farm-fresh quality.",
   keywords: [
     "fresh vegetables Greece",
