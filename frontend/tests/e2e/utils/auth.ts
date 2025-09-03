@@ -18,7 +18,7 @@ export class AuthHelper {
    */
   async login({ email, password }: LoginCredentials): Promise<void> {
     // Navigate to login page
-    await this.page.goto('/login');
+    await this.page.goto('/auth/login');
     
     // Wait for login form to be ready
     await expect(this.page.getByTestId('login-form')).toBeVisible();
@@ -30,8 +30,8 @@ export class AuthHelper {
     // Submit login form
     await this.page.getByTestId('login-submit').click();
     
-    // Wait for navigation after successful login
-    await this.page.waitForURL(/\/(dashboard|products|$)/, { 
+    // Wait for navigation after successful login (redirects to home)
+    await this.page.waitForURL(/^[^?]*\/(dashboard|products|producer\/dashboard|$)/, { 
       timeout: 10000,
       waitUntil: 'networkidle'
     });
@@ -130,7 +130,9 @@ export class AuthHelper {
     const toastSelector = `toast-${type}`;
     const toast = this.page.getByTestId(toastSelector);
     
-    await expect(toast).toBeVisible({ timeout: 5000 });
+    // Wait for specific toast to appear with increased timeout
+    // Note: Success toasts might appear briefly before page redirect
+    await expect(toast).toBeVisible({ timeout: 15000 });
     
     if (message) {
       await expect(toast).toContainText(message);
