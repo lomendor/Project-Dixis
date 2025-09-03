@@ -44,31 +44,29 @@ test.describe('Smoke Tests - Core Functionality', () => {
   test('Cart page is accessible', async ({ page }) => {
     await page.goto('/cart');
     
-    // Cart should either show content or redirect to login
-    try {
-      // Check if cart page loads
-      await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
-      
-      // Could be empty cart or login form - both are valid
-      const isCartContent = await page.locator('[data-testid="cart-content"], h1:has-text("Cart")').isVisible({ timeout: 3000 });
-      const isLoginForm = await page.locator('[data-testid="login-form"], form').isVisible({ timeout: 3000 });
-      
-      expect(isCartContent || isLoginForm).toBe(true);
-    } catch (error) {
-      // Even if cart redirects, main should be visible
-      await expect(page.locator('main')).toBeVisible();
-    }
+    // Wait for page to stabilize after any redirects
+    await page.waitForLoadState('networkidle');
+    
+    // Main element should be present on all pages (login, cart, etc.)
+    await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
+    
+    // Could be cart content, login form, or error page - all valid responses
+    const hasValidContent = await page.locator('[data-testid="cart-content"], [data-testid="login-form"], form, h1, h2').first().isVisible({ timeout: 5000 });
+    expect(hasValidContent).toBe(true);
   });
 
   test('Checkout page handles authentication correctly', async ({ page }) => {
     await page.goto('/checkout');
     
-    // Checkout should either show form or redirect to login
+    // Wait for page to stabilize after any redirects
+    await page.waitForLoadState('networkidle');
+    
+    // Main element should be present on all pages
     await expect(page.locator('main')).toBeVisible({ timeout: 10000 });
     
     // Could be checkout form, login form, or cart redirect - all valid
-    const hasContent = await page.locator('form, h1, h2').first().isVisible({ timeout: 5000 });
-    expect(hasContent).toBe(true);
+    const hasValidContent = await page.locator('[data-testid="checkout-form"], [data-testid="login-form"], form, h1, h2').first().isVisible({ timeout: 5000 });
+    expect(hasValidContent).toBe(true);
   });
 
   test('Navigation elements are present and functional', async ({ page }) => {
