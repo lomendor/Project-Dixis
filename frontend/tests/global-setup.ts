@@ -31,7 +31,10 @@ async function globalSetup(config: FullConfig) {
   try {
     // Setup Consumer Auth
     console.log('🔐 Creating consumer storageState...');
-    const consumerContext = await browser.newContext();
+    const consumerContext = await browser.newContext({
+      baseURL: baseURL,
+      storageState: undefined,
+    });
     const consumerPage = await consumerContext.newPage();
     
     await consumerPage.goto('/auth/login');
@@ -59,7 +62,10 @@ async function globalSetup(config: FullConfig) {
     
     // Setup Producer Auth
     console.log('🔐 Creating producer storageState...');
-    const producerContext = await browser.newContext();
+    const producerContext = await browser.newContext({
+      baseURL: baseURL,
+      storageState: undefined,
+    });
     const producerPage = await producerContext.newPage();
     
     await producerPage.goto('/auth/login');
@@ -75,10 +81,10 @@ async function globalSetup(config: FullConfig) {
     await producerPage.getByTestId('login-password').fill(TEST_USERS.producer.password);
     await producerPage.getByTestId('login-submit').click();
     
-    // Wait for successful producer login
-    await producerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 30000,
-      waitUntil: 'networkidle' 
+    // Wait for successful producer login (redirect to home page)
+    await producerPage.waitForURL(/^[^?]*\/(dashboard|$)/, { 
+      timeout: 15000,
+      waitUntil: 'domcontentloaded' 
     });
     
     // Save producer storageState

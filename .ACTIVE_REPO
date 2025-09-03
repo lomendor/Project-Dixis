@@ -1,0 +1,13 @@
+PROJECT_DIXIS_ACTIVE_REPO=true
+REPO_NAME=Project-Dixis
+ACTIVE_SINCE=2025-01-02
+LAST_VERIFIED=2025-09-02
+STATUS=production-ready
+BRANCH=main
+VERSION=v0.4.1-auth-ux
+
+# This marker file indicates that this Project-Dixis directory
+# is the currently active development repository.
+# 
+# If you see this file in multiple locations, there may be 
+# duplicate repos that need cleanup.

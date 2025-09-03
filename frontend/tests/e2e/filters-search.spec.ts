@@ -201,3 +201,5 @@ test('filters and search - sort functionality', async ({ page }) => {
     console.log('⚠️ Sort dropdown not found - skipping sort test');
   }
 });
+
+});

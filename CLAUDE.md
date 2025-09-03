@@ -24,6 +24,28 @@
 - **CI/CD**: GitHub Actions with comprehensive test coverage
 - **Infrastructure**: Docker-ready, PostgreSQL service containers
 
+### 🔒 **SANITY LOCK SYSTEM** - Active Repo Verification
+**Purpose**: Prevents confusion when working across multiple Project-Dixis repo copies
+
+#### Quick Commands
+```bash
+# Verify this is the active repo
+./scripts/sanity.sh
+
+# Quick sanity check
+ls -la .ACTIVE_REPO  # Should exist in active repo only
+```
+
+#### System Components
+- **`.ACTIVE_REPO`**: Marker file identifying the currently active repo
+- **`scripts/sanity.sh`**: Comprehensive sanity check script
+- **Auto-verification**: Timestamp updates and duplicate detection
+
+#### Usage Scenarios
+- **Before major work**: Run `./scripts/sanity.sh` to verify repo state
+- **Multiple repos**: System detects and warns about duplicate active markers
+- **Context switching**: Ensures you're always working in the correct Project-Dixis copy
+
 ### 🔧 Core Features
 - ✅ **Producer Marketplace**: Full CRUD for producers and products  
 - ✅ **User Authentication**: Consumer/Producer roles with AuthGuard
