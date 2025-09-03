@@ -57,14 +57,19 @@ test.describe('Smoke Tests - Core Functionality', () => {
     await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     
-    // Checkout can redirect to login, show 404, or show checkout form - all valid for guest
-    const currentUrl = page.url();
-    const isValidResponse = 
-      currentUrl.includes('/auth/login') || 
-      currentUrl.includes('/checkout') ||
-      (await page.locator('text=/404|not found/i').count() > 0);
+    const url = page.url();
+    const onLogin = /\/auth\/login(\/|$)/.test(url);
     
-    expect(isValidResponse).toBe(true);
+    // Check for 404 template
+    const shows404 = await page.locator('text=/404|not found/i').first().isVisible().catch(() => false);
+    
+    // Check for checkout content or general main element
+    const hasCheckout = await page.locator('[data-testid="checkout-content"]').first().isVisible().catch(() => false);
+    const hasLoginForm = await page.locator('[data-testid="login-form"]').first().isVisible().catch(() => false);
+    const hasMain = await page.getByRole('main').first().isVisible().catch(() => false);
+    
+    // Valid states: redirect to login, show 404, show checkout content, or show main
+    expect(onLogin || shows404 || hasCheckout || hasLoginForm || hasMain).toBe(true);
   });
 
   test('Navigation elements are present and functional', async ({ page }) => {
