@@ -176,9 +176,7 @@ export default function RootLayout({
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
           <ToastProvider>
             <AuthProvider>
-              <main>
-                {children}
-              </main>
+              {children}
               <ToastContainer />
             </AuthProvider>
           </ToastProvider>
