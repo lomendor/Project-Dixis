@@ -16,7 +16,7 @@ export default defineConfig({
       '@tests': path.resolve(__dirname, './tests'),
     },
   },
-  css: { modules: { classNameStrategy: 'non-scoped' } }, // CSS processing for tests
+  // css: false is deprecated, omitting css config uses default behavior
   define: {
     'process.env.NODE_ENV': '"test"',
   },
