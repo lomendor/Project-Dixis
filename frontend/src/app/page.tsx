@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import { Metadata } from 'next';
 import HomeClient from './HomeClient';
 
 // SEO metadata for homepage

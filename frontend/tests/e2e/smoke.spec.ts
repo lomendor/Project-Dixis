@@ -128,13 +128,16 @@ test.describe('Smoke Tests - Core Functionality', () => {
     const navElement = await page.locator('nav').isVisible().catch(() => false);
     expect(navElement).toBe(true);
     
-    // Mobile menu button should be visible at 375px width
+    // Split checks to avoid strict mode violations
+    // Check 1: Mobile menu button
     const mobileMenuButton = await page.getByTestId('mobile-menu-button').isVisible().catch(() => false);
     
-    // Either mobile menu button is visible, or the regular nav items are visible
-    const navItems = await page.locator('nav a, nav button').count() > 0;
+    // Check 2: Main navigation (avoid broad selectors)
+    const mainNavigation = await page.getByRole('navigation', { name: /main/i }).isVisible().catch(() => false);
+    const hasNavLinks = await page.locator('nav a').count() > 0;
     
-    expect(mobileMenuButton || navItems).toBe(true);
+    // Either mobile menu button OR main navigation should be present
+    expect(mobileMenuButton || mainNavigation || hasNavLinks).toBe(true);
   });
 
   test('Search functionality is present', async ({ page }) => {
