@@ -101,8 +101,23 @@ export class AuthHelper {
     
     // Now safe to clear storage since we're on valid origin
     await this.page.evaluate(() => {
-      try { localStorage.clear(); } catch (e) { /* ignore */ }
-      try { sessionStorage.clear(); } catch (e) { /* ignore */ }
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.clear();
+        }
+      } catch (e) {
+        // SecurityError when localStorage is not accessible (e.g., about:blank)
+        console.log('localStorage not accessible:', e.message);
+      }
+      
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.clear();
+        }
+      } catch (e) {
+        // SecurityError when sessionStorage is not accessible
+        console.log('sessionStorage not accessible:', e.message);
+      }
     });
   }
 

@@ -202,7 +202,6 @@ class ErrorService {
     context?: ErrorContext
   ): ProcessedError {
     const fieldErrors = error.errors.map((err) => {
-      const field = err.path.length > 0 ? err.path.join('.') : 'field';
       return this.translateMessage(err.message);
     });
 
@@ -279,7 +278,7 @@ class ErrorService {
   /**
    * Get suggested user action based on error type
    */
-  private getUserAction(error: ApiValidationError, context?: ErrorContext): string {
+  private getUserAction(error: ApiValidationError, _context?: ErrorContext): string {
     if (error.isAuthError()) {
       return this.locale === 'el' 
         ? 'Παρακαλώ συνδεθείτε ξανά.'
