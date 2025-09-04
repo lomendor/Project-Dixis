@@ -1,3 +1,4 @@
+NOTE: Active workspace. Use Project-Dixis (not legacy).
 # PROJECT-DIXIS - LOCAL PRODUCER MARKETPLACE
 
 **Full-Stack Laravel + Next.js Application** | **E2E Test Suite** | **Status**: ✅ PRODUCTION READY
