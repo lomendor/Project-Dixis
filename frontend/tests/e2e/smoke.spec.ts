@@ -119,11 +119,6 @@ test.describe('Smoke Tests - Core Functionality', () => {
     // Wait for page to load
     await page.waitForLoadState('networkidle');
     
-<<<<<<< HEAD
-    // Check for navigation (could be hamburger menu or standard nav)
-    const hasNav = await page.locator('nav, [data-testid="mobile-menu"], button[aria-label*="menu"], header').first().isVisible({ timeout: 5000 });
-    expect(hasNav).toBe(true);
-=======
     // Check that page loads on mobile
     await expect(
       page.getByTestId('page-root').or(page.locator('main'))
@@ -140,7 +135,6 @@ test.describe('Smoke Tests - Core Functionality', () => {
     const navItems = await page.locator('nav a, nav button').count() > 0;
     
     expect(mobileMenuButton || navItems).toBe(true);
->>>>>>> 2bfc819 (fix(e2e): Stabilize smoke tests - resolve 3 core E2E failures)
   });
 
   test('Search functionality is present', async ({ page }) => {
