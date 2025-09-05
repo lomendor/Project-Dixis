@@ -77,7 +77,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
             'notes' => 'Test order notes',
         ];
 
@@ -186,7 +193,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ];
 
         $response = $this->postJson('/api/v1/public/orders', $orderData);
@@ -207,7 +221,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ];
 
         $response = $this->postJson('/api/v1/public/orders', $orderData);
@@ -226,7 +247,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ];
 
         $response = $this->postJson('/api/v1/public/orders', $orderData);
@@ -260,7 +288,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ];
 
         $response = $this->postJson('/api/v1/public/orders', $orderData);
@@ -289,7 +324,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'USD',
+            'payment_method' => 'card',
             'shipping_method' => 'PICKUP',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 0.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 0,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
             'notes' => null,
         ];
 
@@ -331,7 +373,14 @@ class OrdersCreateApiTest extends TestCase
         // Test missing items
         $response = $this->postJson('/api/v1/public/orders', [
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors('items');
@@ -340,7 +389,14 @@ class OrdersCreateApiTest extends TestCase
         $response = $this->postJson('/api/v1/public/orders', [
             'items' => [['product_id' => $this->product1->id, 'quantity' => 1]],
             'currency' => 'GBP', // Invalid currency
+            'payment_method' => 'card',
             'shipping_method' => 'HOME',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors('currency');
@@ -349,7 +405,14 @@ class OrdersCreateApiTest extends TestCase
         $response = $this->postJson('/api/v1/public/orders', [
             'items' => [['product_id' => $this->product1->id, 'quantity' => 1]],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'DELIVERY', // Invalid shipping method
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 5.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 3,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors('shipping_method');
@@ -375,7 +438,14 @@ class OrdersCreateApiTest extends TestCase
                 ],
             ],
             'currency' => 'EUR',
+            'payment_method' => 'card',
             'shipping_method' => 'PICKUP',
+            'shipping_address' => 'Test Address 123',
+            'shipping_cost' => 0.00,
+            'shipping_carrier' => 'Test Courier',
+            'shipping_eta_days' => 0,
+            'postal_code' => '10563',
+            'city' => 'Αθήνα',
         ];
 
         $response = $this->postJson('/api/v1/public/orders', $orderData);
