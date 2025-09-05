@@ -178,6 +178,150 @@ export const validateCheckoutForm = (data: unknown): CheckoutForm => {
   return CheckoutFormSchema.parse(data);
 };
 
+// Safe validation functions that return success/error objects
+interface ValidationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    errors: Array<{
+      path: string[];
+      message: string;
+      code: string;
+    }>;
+  };
+}
+
+export const safeValidateCartLine = (data: unknown): ValidationResult<CartLine> => {
+  try {
+    const result = CartLineSchema.parse(data);
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: {
+          errors: error.errors.map(err => ({
+            path: err.path.map(p => String(p)),
+            message: err.message,
+            code: err.code
+          }))
+        }
+      };
+    }
+    return {
+      success: false,
+      error: {
+        errors: [{
+          path: ['general'],
+          message: 'Σφάλμα επικύρωσης',
+          code: 'unknown'
+        }]
+      }
+    };
+  }
+};
+
+export const safeValidateOrderSummary = (data: unknown): ValidationResult<OrderSummary> => {
+  try {
+    const result = OrderSummarySchema.parse(data);
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: {
+          errors: error.errors.map(err => ({
+            path: err.path.map(p => String(p)),
+            message: err.message,
+            code: err.code
+          }))
+        }
+      };
+    }
+    return {
+      success: false,
+      error: {
+        errors: [{
+          path: ['general'],
+          message: 'Σφάλμα επικύρωσης παραγγελίας',
+          code: 'unknown'
+        }]
+      }
+    };
+  }
+};
+
+export const safeValidateCheckoutForm = (data: unknown): ValidationResult<CheckoutForm> => {
+  try {
+    const result = CheckoutFormSchema.parse(data);
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: {
+          errors: error.errors.map(err => ({
+            path: err.path.map(p => String(p)),
+            message: err.message,
+            code: err.code
+          }))
+        }
+      };
+    }
+    return {
+      success: false,
+      error: {
+        errors: [{
+          path: ['general'],
+          message: 'Σφάλμα επικύρωσης φόρμας checkout',
+          code: 'unknown'
+        }]
+      }
+    };
+  }
+};
+
+// Order totals validation
+interface TotalsValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+export const validateOrderTotals = (orderSummary: OrderSummary): TotalsValidationResult => {
+  const errors: string[] = [];
+  
+  // Calculate expected subtotal from items
+  const calculatedSubtotal = orderSummary.items.reduce(
+    (sum, item) => sum + (item.price * item.quantity), 
+    0
+  );
+  
+  // Validate subtotal matches item calculations
+  if (Math.abs(calculatedSubtotal - orderSummary.subtotal) > 0.01) {
+    errors.push('Το υποσύνολο δεν ταιριάζει με τα προϊόντα');
+  }
+  
+  // Validate total calculation
+  const expectedTotal = orderSummary.subtotal + 
+                       orderSummary.shipping_cost + 
+                       orderSummary.payment_fees + 
+                       orderSummary.tax_amount;
+  
+  if (Math.abs(expectedTotal - orderSummary.total_amount) > 0.01) {
+    errors.push('Το συνολικό ποσό δεν υπολογίζεται σωστά');
+  }
+  
+  // Validate reasonable tax amount (0-25% of subtotal)
+  if (orderSummary.tax_amount > orderSummary.subtotal * 0.25) {
+    errors.push('Το ποσό φόρου είναι υπερβολικά υψηλό');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
 // Greek currency formatting utility
 export const formatEuroPrice = (price: number): string => {
   return new Intl.NumberFormat('el-GR', {

@@ -3,18 +3,35 @@
  * Essential API methods for checkout flow with Zod validation
  */
 
-import { apiClient } from '../api';
+import { apiClient, apiUrl } from '../api';
 import type { CartItem, Order } from '../api';
 import {
   safeValidateOrderSummary,
   safeValidateCartLine,
   safeValidateCheckoutForm,
   validateOrderTotals,
+  ShippingMethodSchema,
   type CheckoutForm,
   type CartLine,
   type OrderSummary,
+  type ShippingMethod,
 } from '../validation/checkout';
 import { validatePostalCodeCity } from '../checkout/checkoutValidation';
+import { z } from 'zod';
+
+// Shipping quote request schema
+const ShippingQuoteRequestSchema = z.object({
+  items: z.array(z.object({
+    product_id: z.number().int().min(1, 'Invalid product ID'),
+    quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  })).min(1, 'At least one item is required'),
+  destination: z.object({
+    postal_code: z.string().regex(/^\d{5}$/, 'Greek postal code must be 5 digits'),
+    city: z.string().min(2, 'City name is required'),
+  }),
+});
+
+export type ShippingQuoteRequest = z.infer<typeof ShippingQuoteRequestSchema>;
 
 // API Response types with validation
 interface ValidatedApiResponse<T = unknown> {
@@ -85,6 +102,82 @@ export class CheckoutApiClient {
 
     } catch (error) {
       return this.handleApiError('getValidatedCart', error);
+    }
+  }
+
+  // Get shipping quote for items and destination
+  async getShippingQuote(quoteRequest: unknown): Promise<ValidatedApiResponse<ShippingMethod[]>> {
+    try {
+      // Step 1: Validate the shipping quote request
+      const validation = ShippingQuoteRequestSchema.safeParse(quoteRequest);
+      
+      if (!validation.success) {
+        const errors = validation.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: 'VALIDATION_ERROR'
+        }));
+
+        return {
+          success: false,
+          errors,
+          validationProof: `Quote request validation failed`
+        };
+      }
+
+      const validatedRequest = validation.data;
+
+      // Step 2: Call shipping quote API
+      const response = await fetch(apiUrl('shipping/quote'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          items: validatedRequest.items,
+          destination: validatedRequest.destination,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to get shipping quote`);
+      }
+
+      const quoteData = await response.json();
+
+      // Step 3: Validate response data
+      if (!quoteData.data || !Array.isArray(quoteData.data)) {
+        throw new Error('Invalid shipping quote response format');
+      }
+
+      const validatedMethods: ShippingMethod[] = [];
+      const errors: Array<{ field: string; message: string; code: string }> = [];
+
+      quoteData.data.forEach((method: unknown, index: number) => {
+        const methodValidation = ShippingMethodSchema.safeParse(method);
+        if (methodValidation.success) {
+          validatedMethods.push(methodValidation.data);
+        } else {
+          methodValidation.error.errors.forEach(err => {
+            errors.push({
+              field: `methods.${index}.${err.path.join('.')}`,
+              message: err.message,
+              code: 'VALIDATION_ERROR'
+            });
+          });
+        }
+      });
+
+      return {
+        success: errors.length === 0,
+        data: validatedMethods,
+        errors,
+        validationProof: `Shipping quote validated: ${validatedMethods.length} methods`
+      };
+
+    } catch (error) {
+      return this.handleApiError('getShippingQuote', error);
     }
   }
 
