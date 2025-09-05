@@ -26,5 +26,17 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "tests/**/*", "**/*.spec.ts", "**/*.test.ts", "**/global-setup*.ts"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "coverage",
+    "tests/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "vitest.config*.ts",
+    // ρητά legacy directories  
+    "../GitHub-Dixis-Project-1/**",
+    "../Dixis-Project-1/**"
+  ]
 }
