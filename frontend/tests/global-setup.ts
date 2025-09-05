@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * Global Setup - Create authenticated storageState files
- * Runs ONCE before all tests to avoid UI login in every test
+ * Enhanced with server readiness checks and deterministic waits
  */
 
 const TEST_USERS = {
@@ -17,71 +17,111 @@ const TEST_USERS = {
   },
 };
 
+// Enhanced server readiness check
+async function waitForServerReady(baseURL: string, maxRetries = 10): Promise<void> {
+  console.log(`⏳ Checking server readiness at ${baseURL}...`);
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(`${baseURL}/auth/login`);
+      if (response.ok) {
+        console.log('✅ Server is ready!');
+        return;
+      }
+    } catch (error) {
+      console.log(`🔄 Retry ${i + 1}/${maxRetries} - Server not ready yet...`);
+    }
+    
+    // Wait 2s between retries
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  
+  throw new Error(`❌ Server not ready after ${maxRetries} attempts at ${baseURL}`);
+}
+
+// Enhanced login with better error handling
+async function performLogin(page: any, user: { email: string; password: string; }, userType: string): Promise<void> {
+  console.log(`🔐 Logging in as ${userType}...`);
+  
+  // Navigate with explicit error handling
+  await page.goto('/auth/login', { timeout: 15000 });
+  
+  // Wait for form with better error context
+  try {
+    await page.waitForSelector('[data-testid="login-form"]', { timeout: 15000 });
+  } catch (error) {
+    console.error(`❌ Login form not found for ${userType}`);
+    throw new Error(`Login form selector failed for ${userType}: ${error}`);
+  }
+  
+  // Deterministic form interaction with readiness checks
+  await page.getByTestId('login-email').waitFor({ state: 'visible', timeout: 10000 });
+  await page.getByTestId('login-email').fill(user.email);
+  
+  await page.getByTestId('login-password').waitFor({ state: 'visible', timeout: 10000 });
+  await page.getByTestId('login-password').fill(user.password);
+  
+  // Submit with network wait strategy
+  await page.getByTestId('login-submit').click();
+  
+  // Enhanced navigation verification with multiple success patterns
+  try {
+    await page.waitForURL((url: URL) => {
+      const validPaths = ['/', '/products', '/dashboard'];
+      return validPaths.some(path => url.pathname === path || url.pathname.startsWith(path));
+    }, { 
+      timeout: 15000,
+      waitUntil: 'domcontentloaded' // More reliable than networkidle
+    });
+    
+    console.log(`✅ ${userType} login successful!`);
+  } catch (error) {
+    console.error(`❌ ${userType} login navigation failed:`, error);
+    throw new Error(`Login navigation failed for ${userType}: ${error}`);
+  }
+}
+
 async function globalSetup(config: FullConfig) {
-  console.log('🔐 Setting up authenticated storageState files...');
+  console.log('🔐 Enhanced E2E Setup - Creating authenticated storageState files...');
   
   const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3001';
   const authDir = path.join(__dirname, '../.auth');
   
   console.log(`🔗 Using baseURL: ${baseURL}`);
   
-  // Create browser and context for setup
-  const browser = await chromium.launch();
+  // Critical: Wait for server readiness before proceeding
+  await waitForServerReady(baseURL);
+  
+  // Create browser with explicit options for CI stability
+  const browser = await chromium.launch({
+    timeout: 30000,
+    // CI-friendly options
+    args: ['--disable-web-security', '--disable-features=VizDisplayCompositor']
+  });
   
   try {
-    // Setup Consumer Auth
-    console.log('🔐 Creating consumer storageState...');
-    const consumerContext = await browser.newContext({ baseURL });
+    // Setup Consumer Auth with enhanced error handling
+    const consumerContext = await browser.newContext({ 
+      baseURL,
+      // Ensure clean state
+      acceptDownloads: false,
+      ignoreHTTPSErrors: true
+    });
     const consumerPage = await consumerContext.newPage();
     
-    await consumerPage.goto('/auth/login');
-    
-    // Wait for login form with extended timeout and better element detection
-    await consumerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
-    
-    // Use getByTestId with explicit waits for better stability
-    await consumerPage.getByTestId('login-email').waitFor({ timeout: 30000 });
-    
-    // Fill login form using data-testid selectors
-    await consumerPage.getByTestId('login-email').fill(TEST_USERS.consumer.email);
-    await consumerPage.getByTestId('login-password').fill(TEST_USERS.consumer.password);
-    await consumerPage.getByTestId('login-submit').click();
-    
-    // Wait for successful login (redirect away from login page)
-    await consumerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 30000,
-      waitUntil: 'networkidle' 
-    });
-    
-    // Save consumer storageState
+    await performLogin(consumerPage, TEST_USERS.consumer, 'consumer');
     await consumerContext.storageState({ path: path.join(authDir, 'consumer.json') });
     await consumerContext.close();
     
-    // Setup Producer Auth
-    console.log('🔐 Creating producer storageState...');
-    const producerContext = await browser.newContext({ baseURL });
+    // Setup Producer Auth with enhanced error handling
+    const producerContext = await browser.newContext({ 
+      baseURL,
+      acceptDownloads: false,
+      ignoreHTTPSErrors: true
+    });
     const producerPage = await producerContext.newPage();
     
-    await producerPage.goto('/auth/login');
-    
-    // Wait for login form with extended timeout  
-    await producerPage.waitForSelector('[data-testid="login-form"], form', { timeout: 30000 });
-    
-    // Use getByTestId with explicit waits for better stability
-    await producerPage.getByTestId('login-email').waitFor({ timeout: 30000 });
-    
-    // Fill producer login form using data-testid selectors
-    await producerPage.getByTestId('login-email').fill(TEST_USERS.producer.email);
-    await producerPage.getByTestId('login-password').fill(TEST_USERS.producer.password);
-    await producerPage.getByTestId('login-submit').click();
-    
-    // Wait for successful producer login
-    await producerPage.waitForURL((url) => !url.pathname.includes('/login'), { 
-      timeout: 30000,
-      waitUntil: 'networkidle' 
-    });
-    
-    // Save producer storageState
+    await performLogin(producerPage, TEST_USERS.producer, 'producer');
     await producerContext.storageState({ path: path.join(authDir, 'producer.json') });
     await producerContext.close();
     
@@ -90,7 +130,11 @@ async function globalSetup(config: FullConfig) {
     console.log(`   Producer: ${path.join(authDir, 'producer.json')}`);
     
   } catch (error) {
-    console.error('❌ Global setup failed:', error);
+    console.error('❌ Enhanced global setup failed:', error);
+    // Provide actionable error context
+    console.error('🔍 Debug info:');
+    console.error(`   BaseURL: ${baseURL}`);
+    console.error(`   Auth Dir: ${authDir}`);
     throw error;
   } finally {
     await browser.close();

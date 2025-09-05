@@ -1,5 +1,14 @@
 # Testing Guide - Project Dixis
 
+## 🎯 **E2E Stability Enhancements** (PR-88c-2A)
+**Enhanced global-setup.ts** with deterministic login flow:
+- Server readiness checks before test execution  
+- Robust error handling with actionable context
+- CI-friendly browser options for headless environments
+- Trace generation: `npx playwright show-trace test-results/[test-name]/trace.zip`
+
+---
+
 ## E2E Testing with Playwright
 
 ### Prerequisites
