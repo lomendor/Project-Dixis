@@ -15,9 +15,12 @@ describe('CheckoutApiClient Core', () => {
   it('validates cart items successfully', async () => {
     const mockCart = {
       items: [{
+        id: 1,
         product: { id: 1, name: 'Test', price: '10.00', producer: { name: 'Producer' } },
         quantity: 1, subtotal: '10.00'
-      }]
+      }],
+      total_items: 1,
+      total_amount: '10.00'
     };
     vi.mocked(apiClient.getCart).mockResolvedValue(mockCart);
 
@@ -44,7 +47,7 @@ describe('CheckoutApiClient Core', () => {
     expect(checkoutApi.validateOrderSummary(order).success).toBe(true);
 
     // Test checkout processing  
-    vi.mocked(apiClient.checkout).mockResolvedValue({ id: 'order_1', total: 13 });
+    vi.mocked(apiClient.checkout).mockResolvedValue({ id: 'order_1', total: 13, status: 'pending' as const, created_at: new Date().toISOString() });
     const checkout = {
       customer: { firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' },
       shipping: { address: 'Test St', city: 'Athens', postalCode: '10671' },
