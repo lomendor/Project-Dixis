@@ -1,6 +1,6 @@
 /**
  * Checkout Flow Validation Schemas for Greek Marketplace
- * Comprehensive Zod validation for all checkout-related data structures
+ * Core Zod validation schemas for checkout-related data structures
  */
 
 import { z } from 'zod';
@@ -98,7 +98,7 @@ export const OrderSummarySchema = z.object({
 
 // Complete checkout form combining personal info + order details
 export const CheckoutFormSchema = z.object({
-  // Personal & shipping information (reuses existing checkoutValidationSchema patterns)
+  // Personal & shipping information
   customer: z.object({
     firstName: z.string()
       .min(2, 'Το όνομα πρέπει να έχει τουλάχιστον 2 χαρακτήρες')
@@ -157,7 +157,7 @@ export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 export type OrderSummary = z.infer<typeof OrderSummarySchema>;
 export type CheckoutForm = z.infer<typeof CheckoutFormSchema>;
 
-// Validation helper functions with comprehensive error handling
+// Basic validation functions
 export const validateCartLine = (data: unknown): CartLine => {
   return CartLineSchema.parse(data);
 };
@@ -178,39 +178,6 @@ export const validateCheckoutForm = (data: unknown): CheckoutForm => {
   return CheckoutFormSchema.parse(data);
 };
 
-// Safe validation functions that return results with error handling
-export const safeValidateCartLine = (data: unknown) => {
-  return CartLineSchema.safeParse(data);
-};
-
-export const safeValidateShippingMethod = (data: unknown) => {
-  return ShippingMethodSchema.safeParse(data);
-};
-
-export const safeValidatePaymentMethod = (data: unknown) => {
-  return PaymentMethodSchema.safeParse(data);
-};
-
-export const safeValidateOrderSummary = (data: unknown) => {
-  return OrderSummarySchema.safeParse(data);
-};
-
-export const safeValidateCheckoutForm = (data: unknown) => {
-  return CheckoutFormSchema.safeParse(data);
-};
-
-// Calculation helpers for order totals
-export const calculateCartSubtotal = (items: CartLine[]): number => {
-  return items.reduce((sum, item) => sum + item.subtotal, 0);
-};
-
-export const calculateOrderTotal = (orderSummary: OrderSummary): number => {
-  return orderSummary.subtotal + 
-         orderSummary.shipping_cost + 
-         orderSummary.payment_fees + 
-         orderSummary.tax_amount;
-};
-
 // Greek currency formatting utility
 export const formatEuroPrice = (price: number): string => {
   return new Intl.NumberFormat('el-GR', {
@@ -218,41 +185,4 @@ export const formatEuroPrice = (price: number): string => {
     currency: 'EUR',
     minimumFractionDigits: 2,
   }).format(price);
-};
-
-// Order summary validation with calculated totals verification
-export const validateOrderTotals = (orderSummary: OrderSummary): {
-  isValid: boolean;
-  errors: string[];
-} => {
-  const errors: string[] = [];
-  
-  // Verify cart subtotal calculation
-  const calculatedSubtotal = calculateCartSubtotal(orderSummary.items);
-  if (Math.abs(calculatedSubtotal - orderSummary.subtotal) > 0.01) {
-    errors.push('Το υποσύνολο του καλαθιού δεν αντιστοιχεί στα προϊόντα');
-  }
-  
-  // Verify total calculation
-  const calculatedTotal = calculateOrderTotal(orderSummary);
-  if (Math.abs(calculatedTotal - orderSummary.total_amount) > 0.01) {
-    errors.push('Το συνολικό ποσό δεν αντιστοιχεί στα επιμέρους κόστη');
-  }
-  
-  // Verify payment fees calculation if applicable
-  const paymentMethod = orderSummary.payment_method;
-  if (paymentMethod.fee_percentage || paymentMethod.fixed_fee) {
-    let expectedFees = paymentMethod.fixed_fee || 0;
-    if (paymentMethod.fee_percentage) {
-      expectedFees += (orderSummary.subtotal + orderSummary.shipping_cost) * (paymentMethod.fee_percentage / 100);
-    }
-    if (Math.abs(expectedFees - orderSummary.payment_fees) > 0.01) {
-      errors.push('Οι χρεώσεις πληρωμής δεν αντιστοιχούν στη μέθοδο πληρωμής');
-    }
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
 };

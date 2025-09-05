@@ -1,4 +1,18 @@
-**NOTE: Active workspace = Project-Dixis (όχι Dixis-Project-1).**
+# 🎯 PROJECT-DIXIS - CANONICAL WORKSPACE
+
+**NOTE: Active workspace — use Project-Dixis (not legacy repos).**
+
+## ⚡ Guardrails & Standards
+- **CI/CD**: NO changes to `.github/workflows/**`
+- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED  
+- **Next.js**: 15.5.0 - LOCKED
+- **PR Size**: ≤300 LOC per PR
+- **Artifacts**: playwright-report/**, test-results/** required
+
+## 🔧 Workspace Anchors  
+**Reference**: `frontend/.run-anchors` (canonical paths)
+
+---
 
 # PROJECT-DIXIS - LOCAL PRODUCER MARKETPLACE
 
