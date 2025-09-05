@@ -8,12 +8,12 @@ import path from 'path';
 
 const TEST_USERS = {
   consumer: { 
-    email: process.env.LOGIN_EMAIL || 'test@dixis.local', 
-    password: process.env.LOGIN_PASSWORD || 'Passw0rd!' 
+    email: process.env.LOGIN_EMAIL || 'consumer@example.com', 
+    password: process.env.LOGIN_PASSWORD || 'password' 
   },
   producer: { 
-    email: process.env.PRODUCER_EMAIL || 'producer@dixis.local', 
-    password: process.env.PRODUCER_PASSWORD || 'Passw0rd!' 
+    email: process.env.PRODUCER_EMAIL || 'producer@example.com', 
+    password: process.env.PRODUCER_PASSWORD || 'password' 
   },
 };
 
