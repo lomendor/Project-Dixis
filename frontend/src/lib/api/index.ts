@@ -26,11 +26,10 @@ export {
   type TopProduct,
 } from '../api';
 
-// Checkout API client with validation
+// Core checkout API client with validation
 export {
   CheckoutApiClient,
   checkoutApi,
-  useCheckoutValidation,
   type ValidatedApiResponse,
   type CheckoutApiError,
 } from './checkout';
