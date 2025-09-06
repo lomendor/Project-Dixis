@@ -1,22 +1,25 @@
 import { test, expect, Page } from '@playwright/test';
+import { createAuthHelper } from './helpers/auth';
 
 /**
  * E2E Test Suite: Checkout Happy Path
  * Tests the complete checkout flow from cart to order confirmation
  * 
- * STATUS: QUARANTINED - Requires backend fixtures + deterministic data
- * TODO: Fix in separate PR with real backend integration
+ * STATUS: FIXED - Using deterministic login fixtures
  */
 
 class CheckoutFlowHelper {
+  private auth = createAuthHelper(this.page);
+  
   constructor(private page: Page) {}
 
   async loginAsConsumer() {
-    await this.page.goto('/auth/login');
-    await this.page.fill('[name="email"]', 'consumer@example.com');
-    await this.page.fill('[name="password"]', 'password'); 
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL('/', { timeout: 10000 });
+    // Use fast deterministic login instead of UI-based flaky login
+    await this.auth.fastLogin('consumer');
+    await this.page.goto('/', { waitUntil: 'networkidle' });
+    
+    // Verify we're authenticated
+    await this.auth.verifyAuthState('consumer');
   }
 
   async addProductToCart() {
