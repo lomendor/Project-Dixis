@@ -35,22 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       // MSW Bridge: Short-circuit authentication in MSW mode for smoke tests
-      if (process.env.NEXT_PUBLIC_MSW === '1') {
+      if (typeof window !== 'undefined' && localStorage.getItem('auth_token') === 'mock_token') {
         try {
-          const token = localStorage.getItem('auth_token');
-          const role = localStorage.getItem('user_role') || 'consumer';
-          if (token) {
-            // Set authenticated state directly for MSW mode
-            setUser({ 
-              id: 1, 
-              name: 'Test User', 
-              email: 'test@dixis.local', 
-              role: role as 'consumer' | 'producer',
-              created_at: new Date().toISOString()
-            });
-            setLoading(false);
-            return; // Skip real /auth/me API call
-          }
+          const role = (localStorage.getItem('user_role') || 'consumer') as 'consumer' | 'producer';
+          setUser({ 
+            id: 1, 
+            name: 'Test User', 
+            email: 'test@dixis.local', 
+            role,
+            created_at: new Date().toISOString()
+          });
+          setLoading(false);
+          return; // Skip real /auth/me API call
         } catch (error) {
           console.error('MSW auth bridge error:', error);
         }
