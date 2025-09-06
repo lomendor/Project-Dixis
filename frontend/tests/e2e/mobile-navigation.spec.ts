@@ -1,6 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
+import { createAuthHelper } from './helpers/auth';
 
 class MobileNavHelper {
+  private auth = createAuthHelper(this.page);
+  
   constructor(private page: Page) {}
 
   async openMobileMenu() {
@@ -21,12 +24,11 @@ class MobileNavHelper {
     return await this.page.isVisible('[data-testid="mobile-menu-button"]');
   }
 
-  async login(email: string, password: string) {
-    await this.page.goto('/auth/login');
-    await this.page.fill('[name="email"]', email);
-    await this.page.fill('[name="password"]', password);
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL('/', { timeout: 10000 });
+  async fastLogin(role: 'consumer' | 'producer') {
+    // Use deterministic fast login instead of flaky UI login
+    await this.auth.fastLogin(role);
+    await this.page.goto('/', { waitUntil: 'networkidle' });
+    await this.auth.verifyAuthState(role);
   }
 }
 
@@ -116,7 +118,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as consumer
-    await helper.login('consumer@example.com', 'password');
+    await helper.fastLogin('consumer');
     
     await helper.openMobileMenu();
     
@@ -135,7 +137,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as producer
-    await helper.login('producer@example.com', 'password');
+    await helper.fastLogin('producer');
     
     await helper.openMobileMenu();
     
@@ -154,7 +156,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as consumer
-    await helper.login('consumer@example.com', 'password');
+    await helper.fastLogin('consumer');
     
     await helper.openMobileMenu();
     
@@ -174,7 +176,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as consumer
-    await helper.login('consumer@example.com', 'password');
+    await helper.fastLogin('consumer');
     
     await helper.openMobileMenu();
     
@@ -195,7 +197,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as consumer
-    await helper.login('consumer@example.com', 'password');
+    await helper.fastLogin('consumer');
     
     await helper.openMobileMenu();
     await page.click('[data-testid="mobile-nav-cart"]');
@@ -209,7 +211,7 @@ test.describe('Mobile Navigation', () => {
     const helper = new MobileNavHelper(page);
     
     // Login as producer
-    await helper.login('producer@example.com', 'password');
+    await helper.fastLogin('producer');
     
     await helper.openMobileMenu();
     await page.click('[data-testid="mobile-nav-dashboard"]');
