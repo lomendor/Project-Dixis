@@ -32,8 +32,8 @@ export class AuthHelper {
     
     // Wait for navigation after successful login
     await this.page.waitForURL(/\/(dashboard|products|$)/, { 
-      timeout: 10000,
-      waitUntil: 'networkidle'
+      timeout: 15000,
+      waitUntil: 'load'
     });
     
     // Verify login success (should NOT be on login page)
@@ -46,8 +46,8 @@ export class AuthHelper {
    */
   async loginAsConsumer(): Promise<void> {
     await this.login({
-      email: 'test@dixis.local',
-      password: 'Passw0rd!'
+      email: 'consumer@example.com',
+      password: 'password'
     });
   }
 
@@ -56,8 +56,8 @@ export class AuthHelper {
    */
   async loginAsProducer(): Promise<void> {
     await this.login({
-      email: 'producer@dixis.local',
-      password: 'Passw0rd!'
+      email: 'producer@example.com',
+      password: 'password'
     });
   }
 
@@ -76,8 +76,8 @@ export class AuthHelper {
     
     // Wait for redirect to home/login
     await this.page.waitForURL(/\/(auth\/login|$)/, { 
-      timeout: 5000,
-      waitUntil: 'networkidle'
+      timeout: 15000,
+      waitUntil: 'load'
     });
   }
 

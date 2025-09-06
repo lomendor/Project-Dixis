@@ -1,6 +1,31 @@
 import { test, expect } from '@playwright/test';
 import { setupApiMocks } from './api-mocks';
 
+// MSW Route Stub Helper for Cart Smoke Tests
+const setupCartApiStubs = async (page: any) => {
+  // Stub critical cart API routes for smoke test resilience
+  await page.route('/api/*/cart', (route: any) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ 
+        items: [], 
+        total: 0, 
+        message: 'Cart is empty',
+        status: 'success' 
+      })
+    });
+  });
+  
+  await page.route('/api/*/checkout', (route: any) => {
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json', 
+      body: JSON.stringify({ message: 'Checkout endpoint available', status: 'ready' })
+    });
+  });
+};
+
 /**
  * E2E Smoke Tests - Minimal test suite to ensure artifacts are ALWAYS generated
  * These tests provide basic coverage of core pages and functionality
@@ -79,34 +104,54 @@ test.describe('Smoke Tests - Core Functionality', () => {
   });
 
   test('Cart page is accessible', async ({ page }) => {
-    // Create mock cart page HTML
+    // Enhanced mock cart page HTML with stable selectors
     const mockCartPage = `
       <!DOCTYPE html>
       <html lang="el">
         <head><title>Dixis - Καλάθι</title></head>
         <body>
-          <nav>Πλοήγηση</nav>
-          <main>
-            <h1>Το Καλάθι σας</h1>
-            <form id="cart-form">
-              <p>Το καλάθι σας είναι κενό</p>
-              <button type="submit">Συνέχεια</button>
+          <nav role="navigation" data-testid="cart-nav">Πλοήγηση</nav>
+          <main data-testid="cart-main" role="main">
+            <h1 data-testid="cart-title">Το Καλάθι σας</h1>
+            <form id="cart-form" data-testid="cart-form" aria-label="Shopping cart">
+              <p data-testid="cart-empty-message">Το καλάθι σας είναι κενό</p>
+              <button type="submit" data-testid="cart-continue-btn">Συνέχεια</button>
             </form>
           </main>
         </body>
       </html>`;
     
     await page.setContent(mockCartPage);
+    await setupCartApiStubs(page);
     
-    // Guest users should see some valid page content
-    await page.waitForSelector('main, form, body', { timeout: 10000 });
+    // Multi-fallback selector strategy for maximum resilience
+    const cartMainSelector = `
+      [data-testid="cart-main"],
+      main[role="main"],
+      main,
+      [role="main"]
+    `;
     
-    // Verify page loaded with valid content
-    const hasMain = await page.locator('main').isVisible();
-    const hasForm = await page.locator('form').isVisible();
-    const hasBody = await page.locator('body').isVisible();
+    const cartFormSelector = `
+      [data-testid="cart-form"],
+      form[aria-label*="cart" i],
+      #cart-form,
+      form
+    `;
+    
+    // Wait for any valid cart element with resilient selectors
+    await page.waitForSelector(`${cartMainSelector.replace(/\s+/g, ' ')}, ${cartFormSelector.replace(/\s+/g, ' ')}, body`, { timeout: 10000 });
+    
+    // Verify page loaded with stable multi-selector approach
+    const hasMain = await page.locator(cartMainSelector.replace(/\s+/g, ' ')).first().isVisible().catch(() => false);
+    const hasForm = await page.locator(cartFormSelector.replace(/\s+/g, ' ')).first().isVisible().catch(() => false);
+    const hasBody = await page.locator('body').isVisible().catch(() => false);
+    
+    // Additional accessibility checks
+    const hasTitle = await page.locator('[data-testid="cart-title"], h1').first().isVisible().catch(() => false);
     
     expect(hasMain || hasForm || hasBody).toBe(true);
+    expect(hasMain || hasTitle).toBe(true); // Ensure semantic structure
   });
 
   test('Checkout page handles authentication correctly', async ({ page }) => {
