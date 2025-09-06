@@ -3,6 +3,9 @@ import { test, expect, Page } from '@playwright/test';
 /**
  * E2E Test Suite: Checkout Happy Path
  * Tests the complete checkout flow from cart to order confirmation
+ * 
+ * STATUS: QUARANTINED - Requires backend fixtures + deterministic data
+ * TODO: Fix in separate PR with real backend integration
  */
 
 class CheckoutFlowHelper {
