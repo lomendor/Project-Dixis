@@ -96,4 +96,104 @@ describe('useCheckout Hook', () => {
     expect(result.current.form.customer?.firstName).toBe('');
     expect(result.current.cart).toBeNull();
   });
+
+  it('validates Greek phone numbers comprehensively', () => {
+    const { result } = renderHook(() => useCheckout());
+    
+    const testCases = [
+      { phone: '2101234567', valid: true },
+      { phone: '+302101234567', valid: true },
+      { phone: '00302101234567', valid: true },
+      { phone: '302101234567', valid: true },
+      { phone: '6944123456', valid: true },
+      { phone: '123456', valid: false },
+      { phone: '1234567890', valid: false },
+      { phone: '+1234567890', valid: false }
+    ];
+
+    testCases.forEach(({ phone, valid }) => {
+      act(() => {
+        result.current.updateCustomerInfo({ firstName: 'Test', email: 'test@test.com', phone });
+        result.current.updateShippingInfo({ city: 'Athens', postalCode: '10671' });
+        result.current.setTermsAccepted(true);
+      });
+      
+      const isValid = result.current.validateForm();
+      if (valid) {
+        expect(isValid).toBe(true);
+        expect(result.current.formErrors['customer.phone']).toBeUndefined();
+      } else {
+        expect(isValid).toBe(false);
+        expect(result.current.formErrors['customer.phone']).toBe('Μη έγκυρος αριθμός τηλεφώνου');
+      }
+    });
+  });
+
+  it('handles loading states during API calls', async () => {
+    server.use(http.get(apiUrl('cart/items'), async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return HttpResponse.json(mockCart);
+    }));
+    
+    const { result } = renderHook(() => useCheckout());
+    
+    expect(result.current.isLoading).toBe(false);
+    
+    const loadPromise = act(async () => {
+      await result.current.loadCart();
+    });
+    
+    // Should be loading immediately after call
+    expect(result.current.isLoading).toBe(true);
+    
+    await loadPromise;
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('handles empty cart scenarios', async () => {
+    const { result } = renderHook(() => useCheckout());
+    
+    await act(async () => {
+      await result.current.getShippingQuote({ postal_code: '10671', city: 'Athens' });
+    });
+    
+    expect(result.current.error).toBe('Το καλάθι είναι κενό');
+  });
+
+  it('clears errors correctly', () => {
+    const { result } = renderHook(() => useCheckout());
+    
+    act(() => {
+      result.current.updateCustomerInfo({ firstName: '', email: 'invalid' });
+      result.current.validateForm();
+    });
+    
+    expect(Object.keys(result.current.formErrors).length).toBeGreaterThan(0);
+    
+    act(() => {
+      result.current.clearErrors();
+    });
+    
+    expect(result.current.error).toBeNull();
+    expect(Object.keys(result.current.formErrors).length).toBe(0);
+  });
+
+  it('handles API validation errors gracefully', async () => {
+    server.use(
+      http.get(apiUrl('cart/items'), () => HttpResponse.json({ success: false, message: 'Cart not found' })),
+      http.post(apiUrl('shipping/quote'), () => HttpResponse.json({ success: false, message: 'Invalid destination' }))
+    );
+    
+    const { result } = renderHook(() => useCheckout());
+    
+    await act(async () => {
+      await result.current.loadCart();
+    });
+    expect(result.current.error).toBe('Αποτυχία φόρτωσης καλαθιού');
+    
+    await act(async () => {
+      await result.current.getShippingQuote({ postal_code: '10671', city: 'Athens' });
+    });
+    expect(result.current.error).toBe('Το καλάθι είναι κενό'); // Due to empty cart
+  });
 });
