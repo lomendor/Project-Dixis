@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   // Fix "inferred workspace root" warning
   outputFileTracingRoot: __dirname,
   
+  // Instrumentation is enabled by default in Next.js 15
+  
   // Temporarily disable ESLint during build for hotfix
   eslint: {
     ignoreDuringBuilds: true,
