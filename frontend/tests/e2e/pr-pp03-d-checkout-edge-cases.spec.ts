@@ -385,8 +385,12 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
   test('4. Edge Cases: Empty Cart and Invalid States', async ({ page }) => {
     console.log('🚫 Starting edge cases testing...');
     
-    await page.goto('http://127.0.0.1:3001');
-    await authenticateUser(page);
+    // Direct login using correct test credentials
+    await page.goto('http://127.0.0.1:3001/auth/login');
+    await page.fill('[name="email"]', 'test@dixis.local');
+    await page.fill('[name="password"]', 'Passw0rd!');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('http://127.0.0.1:3001/', { timeout: 10000 });
     
     console.log('🛒 Testing empty cart scenario...');
     
@@ -400,7 +404,7 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     });
     
     // Verify empty cart message is displayed
-    await expect(page.locator('text=Your cart is empty')).toBeVisible();
+    await expect(page.getByTestId('empty-cart-message')).toBeVisible();
     
     // Add items then clear cart
     await addItemsToCart(page);

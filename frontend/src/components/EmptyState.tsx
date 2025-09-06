@@ -28,7 +28,7 @@ export default function EmptyState({
       <div className="mb-4">
         {icon || defaultIcon}
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-2" data-testid="empty-cart-message">{title}</h3>
       <p className="text-gray-600 mb-6 max-w-md mx-auto">{description}</p>
       
       {(actionLabel && (actionHref || onAction)) && (
