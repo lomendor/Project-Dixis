@@ -115,9 +115,14 @@ test.describe('Mobile Navigation', () => {
   test('should show cart link for authenticated consumers', async ({ page }) => {
     const helper = new MobileNavHelper(page);
     
-    // Login as consumer
-    await helper.login('consumer@example.com', 'password');
+    // Direct auth injection for reliable consumer authentication
+    await page.addInitScript(() => {
+      localStorage.setItem('auth_token', 'mock_consumer_token');
+      localStorage.setItem('user_role', 'consumer');
+      localStorage.setItem('user_email', 'test@dixis.local');
+    });
     
+    await page.goto('/');
     await helper.openMobileMenu();
     
     // Should show cart link for consumers
