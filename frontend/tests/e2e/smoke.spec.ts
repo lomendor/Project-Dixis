@@ -74,11 +74,10 @@ test.describe('Smoke Tests - MSW Authentication', () => {
       // Verify we reached checkout/confirmation flow
       await expect(page.locator('main')).toBeVisible();
     } else {
-      // For empty cart, verify page loaded (more robust selector)
-      await expect(page.locator('body')).toBeVisible();
-      // Optionally check for empty state if available
-      const hasEmptyMessage = await page.locator('[data-testid="empty-cart-message"]').isVisible({ timeout: 2000 });
-      expect(hasEmptyMessage || true).toBe(true); // Pass regardless
+      // For empty cart, verify empty cart message appears
+      await page.waitForSelector('[data-testid="empty-cart-message"], main', { timeout: 10000 });
+      const emptyCart = await page.locator('[data-testid="empty-cart-message"]').isVisible().catch(() => false);
+      expect(emptyCart).toBe(true);
     }
   });
 
@@ -94,7 +93,7 @@ test.describe('Smoke Tests - MSW Authentication', () => {
     
     // Check if authenticated state is recognized (look for user menu or cart)
     const hasUserMenu = await page.locator('[data-testid="user-menu"], [data-testid="nav-cart"]').isVisible({ timeout: 5000 });
-    // MSW auth integration - test passes regardless of UI integration status
-    expect(hasUserMenu || !hasUserMenu).toBe(true);
+    // Verify MSW auth integration shows user UI elements
+    expect(hasUserMenu).toBe(true);
   });
 });

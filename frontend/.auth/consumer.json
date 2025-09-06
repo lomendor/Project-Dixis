@@ -1,12 +1,23 @@
 {
-  "cookies": [],
+  "cookies": [
+    {
+      "name": "mock_session",
+      "value": "consumer_authenticated",
+      "domain": "127.0.0.1",
+      "path": "/",
+      "expires": 1757262260621,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
   "origins": [
     {
       "origin": "http://127.0.0.1:3001",
       "localStorage": [
         {
           "name": "auth_token",
-          "value": "27|H6k32pJYedP1Hl8BZtBdBYPTcV8nmrSNcIBDtVvHc75ced93"
+          "value": "mock_consumer_token"
         }
       ]
     }
