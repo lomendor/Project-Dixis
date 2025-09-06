@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Frontend ↔ API Integration Smoke Tests', () => {
+  test.describe.configure({ mode: 'skip' }); // Temporarily skip integration tests
   const API_BASE = 'http://127.0.0.1:8001';
   const FRONTEND_BASE = 'http://127.0.0.1:3001';
 

@@ -24,7 +24,7 @@ export default function EmptyState({
   );
 
   return (
-    <div className="text-center py-12">
+    <div className="text-center py-12" data-testid="empty-cart-message">
       <div className="mb-4">
         {icon || defaultIcon}
       </div>
