@@ -7,7 +7,7 @@
  * ~95 LOC with comprehensive order summary
  */
 
-import { formatCurrency } from '@/env';
+import { formatCurrency } from '../../env';
 import type { CartSummaryProps } from './types';
 
 export function CartSummary({
