@@ -7,7 +7,7 @@
  * ~80 LOC with comprehensive UI logic
  */
 
-import { formatCurrency } from '@/env';
+import { formatCurrency } from '../../env';
 import type { CartItemProps } from './types';
 
 export function CartItem({ 
