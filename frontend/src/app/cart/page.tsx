@@ -12,6 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { formatCurrency } from '@/env';
+import CartItemSkeleton, { OrderSummarySkeleton } from '@/components/cart/CartItemSkeleton';
+import '@/styles/cart-animations.css';
 // Enhanced checkout validation and retry logic
 import { 
   validateCheckoutPayload, 
@@ -115,17 +117,20 @@ export default function Cart() {
   };
 
   const clearCart = async () => {
-    if (!confirm('Are you sure you want to clear your cart?')) {
+    // Enhanced Greek confirmation dialog
+    const confirmMessage = `Είστε βέβαιοι ότι θέλετε να αδειάσετε το καλάθι σας?\n\nΘα αφαιρεθούν ${totalItems} προϊόντα συνολικής αξίας ${formatCurrency(totalAmount)}.`;
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
 
     try {
       await apiClient.clearCart();
       await loadCart();
-      showToast('success', 'Cart cleared successfully');
+      showToast('success', '✅ Το καλάθι αδειάστηκε επιτυχώς!');
     } catch (err) {
       console.error('Failed to clear cart:', err);
-      showToast('error', 'Failed to clear cart');
+      showToast('error', '❌ Σφάλμα κατά την εκκαθάριση του καλαθιού. Δοκιμάστε ξανά.');
     }
   };
 
@@ -367,7 +372,24 @@ export default function Cart() {
         </div>
 
         {loading ? (
-          <LoadingSpinner text="Loading your cart..." />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Cart Items Skeleton */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="h-6 bg-gray-200 rounded animate-pulse w-32" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16" />
+                  </div>
+                  <CartItemSkeleton count={3} />
+                </div>
+              </div>
+            </div>
+            {/* Order Summary Skeleton */}
+            <div className="lg:col-span-1">
+              <OrderSummarySkeleton />
+            </div>
+          </div>
         ) : error ? (
           <ErrorState
             title="Unable to load cart"
@@ -409,66 +431,108 @@ export default function Cart() {
                   
                   <div className="space-y-4">
                     {cartItems.map((item) => (
-                      <div key={item.id} data-testid="cart-item" className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                      <div 
+                        key={item.id} 
+                        data-testid="cart-item" 
+                        className={`cart-item-enter flex items-center space-x-4 p-4 border border-gray-200 rounded-lg transition-all duration-300 ${
+                          updatingItems.has(item.id) ? 'bg-gray-50 border-gray-300' : 'hover:shadow-sm'
+                        }`}
+                      >
                         {/* Product Image */}
-                        <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                           {item.product.images.length > 0 && item.product.images[0] ? (
                             <img
                               src={item.product.images[0].url || item.product.images[0].image_path}
                               alt={item.product.images[0].alt_text || item.product.name}
-                              className="w-full h-full object-cover rounded-lg"
+                              className="w-full h-full object-cover rounded-lg transition-transform duration-200 hover:scale-105"
+                              loading="lazy"
                             />
                           ) : (
-                            <span className="text-gray-400 text-xs">No Image</span>
+                            <span className="text-gray-400 text-xs">Χωρίς εικόνα</span>
                           )}
                         </div>
 
                         {/* Product Details */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-medium text-gray-900 truncate">
+                          <h3 className="text-sm font-medium text-gray-900 truncate" aria-label={`Προϊόν: ${item.product.name}`}>
                             {item.product.name}
                           </h3>
-                          <p className="text-sm text-gray-600">
-                            By {item.product.producer.name}
+                          <p className="text-sm text-gray-600" aria-label={`Παραγωγός: ${item.product.producer.name}`}>
+                            Από {item.product.producer.name}
                           </p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-sm font-medium text-green-600">
+                            <span className={`text-sm font-medium text-green-600 transition-colors duration-200 ${
+                              updatingItems.has(item.id) ? 'price-change' : ''
+                            }`}>
                               {formatCurrency(parseFloat(item.product.price))} / {item.product.unit}
                             </span>
                           </div>
                         </div>
 
-                        {/* Quantity Controls */}
-                        <div className="flex items-center space-x-2">
+                        {/* Enhanced Quantity Controls */}
+                        <div className="flex items-center space-x-2" role="group" aria-label="Έλεγχος ποσότητας">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
                             disabled={updatingItems.has(item.id)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                            className={`mobile-tap-target w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 focus-enhanced ${
+                              updatingItems.has(item.id) 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : 'hover:bg-red-50 hover:border-red-300 hover:text-red-600 active:scale-95'
+                            }`}
                             data-testid="decrease-quantity"
+                            aria-label={`Μείωση ποσότητας ${item.product.name}`}
                           >
-                            -
+                            <span className="text-lg font-medium">−</span>
                           </button>
-                          <span className="w-12 text-center text-sm font-medium" data-testid="quantity-display">
-                            {updatingItems.has(item.id) ? '...' : item.quantity}
-                          </span>
+                          <div className={`quantity-transition w-16 text-center ${
+                            updatingItems.has(item.id) ? 'quantity-updating' : ''
+                          }`}>
+                            <span 
+                              className={`text-sm font-medium px-3 py-1 rounded-md ${
+                                updatingItems.has(item.id) 
+                                  ? 'bg-blue-100 text-blue-700' 
+                                  : 'bg-gray-100 text-gray-900'
+                              }`}
+                              data-testid="quantity-display"
+                              aria-label={`Ποσότητα: ${updatingItems.has(item.id) ? 'ενημέρωση' : item.quantity}`}
+                            >
+                              {updatingItems.has(item.id) ? (
+                                <div className="flex items-center justify-center">
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                                </div>
+                              ) : (
+                                item.quantity
+                              )}
+                            </span>
+                          </div>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             disabled={updatingItems.has(item.id)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50"
+                            className={`mobile-tap-target w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 focus-enhanced ${
+                              updatingItems.has(item.id)
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-green-50 hover:border-green-300 hover:text-green-600 active:scale-95'
+                            }`}
                             data-testid="increase-quantity"
+                            aria-label={`Αύξηση ποσότητας ${item.product.name}`}
                           >
-                            +
+                            <span className="text-lg font-medium">+</span>
                           </button>
                         </div>
 
-                        {/* Remove Button */}
+                        {/* Enhanced Remove Button */}
                         <button
                           onClick={() => removeItem(item.id)}
                           disabled={updatingItems.has(item.id)}
-                          className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                          className={`mobile-tap-target p-2 text-red-600 rounded-full transition-all duration-200 focus-enhanced ${
+                            updatingItems.has(item.id)
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'hover:bg-red-50 hover:text-red-700 active:scale-95'
+                          }`}
                           data-testid="remove-item"
+                          aria-label={`Αφαίρεση ${item.product.name} από το καλάθι`}
                         >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -479,9 +543,9 @@ export default function Cart() {
               </div>
             </div>
 
-            {/* Order Summary */}
+            {/* Enhanced Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+              <div className="bg-white rounded-lg shadow-md p-6 sticky top-8 sticky-cart-summary">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
                   Σύνοψη Παραγγελίας
                 </h2>

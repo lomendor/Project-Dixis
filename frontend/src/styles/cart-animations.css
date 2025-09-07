@@ -1,0 +1,167 @@
+/**
+ * Cart Animation Styles
+ * PR-88c-4: Cart UI Polish
+ * 
+ * Smooth animations for cart interactions
+ * Greek-optimized mobile experience
+ */
+
+/* Smooth quantity transitions */
+.quantity-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.quantity-updating {
+  transform: scale(1.05);
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.quantity-bounce {
+  animation: quantityBounce 0.4s ease-out;
+}
+
+@keyframes quantityBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Cart item animations */
+.cart-item-enter {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.cart-item-exit {
+  animation: slideOutToRight 0.3s ease-in forwards;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+  100% {
+    transform: translateX(20px);
+    opacity: 0;
+    height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Enhanced mobile tap targets */
+.mobile-tap-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Sticky summary on mobile */
+@media (max-width: 1023px) {
+  .sticky-cart-summary {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+  }
+}
+
+/* Greek text optimized animations */
+.greek-text-fade {
+  animation: greekTextFade 0.5s ease-out;
+}
+
+@keyframes greekTextFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading shimmer effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e0e0e0 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.focus-enhanced:focus {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Price change animation */
+.price-change {
+  animation: priceHighlight 0.6s ease-out;
+}
+
+@keyframes priceHighlight {
+  0% {
+    background-color: #fef3c7;
+    transform: scale(1);
+  }
+  50% {
+    background-color: #fde68a;
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+/* Toast animations for Greek messages */
+.toast-slide-up {
+  animation: toastSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes toastSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
