@@ -1,0 +1,10 @@
+/**
+ * Cart Animations - Basic placeholder file to prevent module not found errors
+ * This file provides minimal CSS to prevent build/runtime errors
+ */
+
+/* Empty placeholder to prevent missing CSS import errors */
+.cart-placeholder {
+  /* This ensures the CSS file loads without errors */
+  display: block;
+}
