@@ -13,7 +13,6 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { formatCurrency } from '@/env';
 import CartItemSkeleton, { OrderSummarySkeleton } from '@/components/cart/CartItemSkeleton';
-import '@/styles/cart-animations.css';
 // Enhanced checkout validation and retry logic
 import { 
   validateCheckoutPayload, 
