@@ -22,7 +22,9 @@ interface CartState {
 interface UseCartReturn extends CartState {
   loadCart: () => Promise<void>;
   updateQuantity: (itemId: number, quantity: number) => Promise<void>;
-  removeItem: (itemId: number) => Promise<void>;
+  removeItem: (itemId: number, skipConfirmation?: boolean) => Promise<void>;
+  clearCart: () => Promise<void>;
+  validateQuantity: (quantity: number, itemName?: string) => { isValid: boolean; error?: string };
   clearError: () => void;
 }
 
@@ -95,9 +97,32 @@ export function useCart(): UseCartReturn {
     }
   }, [calculateTotals]);
 
-  // Update item quantity
+  // Enhanced quantity validation
+  const validateQuantity = useCallback((quantity: number, itemName?: string): { isValid: boolean; error?: string } => {
+    if (!Number.isInteger(quantity)) {
+      return { isValid: false, error: 'Η ποσότητα πρέπει να είναι ακέραιος αριθμός' };
+    }
+    if (quantity < 1) {
+      return { isValid: false, error: 'Η ελάχιστη ποσότητα είναι 1' };
+    }
+    if (quantity > 99) {
+      return { isValid: false, error: 'Η μέγιστη ποσότητα είναι 99' };
+    }
+    return { isValid: true };
+  }, []);
+
+  // Update item quantity with enhanced validation
   const updateQuantity = useCallback(async (itemId: number, quantity: number) => {
-    if (quantity < 1 || quantity > 99) return;
+    const item = state.items.find(item => item.id === itemId);
+    const validation = validateQuantity(quantity, item?.name);
+    
+    if (!validation.isValid) {
+      setState(prev => ({
+        ...prev,
+        error: validation.error || 'Μη έγκυρη ποσότητα',
+      }));
+      return;
+    }
     
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
@@ -113,7 +138,7 @@ export function useCart(): UseCartReturn {
         throw new Error('Failed to update quantity');
       }
       
-      // Update local state optimistically
+      // Update local state optimistically with real-time totals
       setState(prev => {
         const updatedItems = prev.items.map(item => {
           if (item.id === itemId) {
@@ -139,10 +164,19 @@ export function useCart(): UseCartReturn {
         isLoading: false,
       }));
     }
-  }, [calculateTotals]);
+  }, [calculateTotals, validateQuantity, state.items]);
 
-  // Remove item from cart
-  const removeItem = useCallback(async (itemId: number) => {
+  // Remove item from cart with optional confirmation
+  const removeItem = useCallback(async (itemId: number, skipConfirmation = false) => {
+    const item = state.items.find(item => item.id === itemId);
+    
+    if (!skipConfirmation && item) {
+      const confirmed = window.confirm(
+        `Είστε σίγουροι ότι θέλετε να αφαιρέσετε το "${item.name}" από το καλάθι σας;`
+      );
+      if (!confirmed) return;
+    }
+    
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
@@ -155,7 +189,7 @@ export function useCart(): UseCartReturn {
         throw new Error('Failed to remove item');
       }
       
-      // Update local state
+      // Update local state with real-time totals
       setState(prev => {
         const updatedItems = prev.items.filter(item => item.id !== itemId);
         const totals = calculateTotals(updatedItems);
@@ -174,7 +208,49 @@ export function useCart(): UseCartReturn {
         isLoading: false,
       }));
     }
-  }, [calculateTotals]);
+  }, [calculateTotals, state.items]);
+
+  // Clear entire cart
+  const clearCart = useCallback(async () => {
+    const hasItems = state.items.length > 0;
+    
+    if (hasItems) {
+      const confirmed = window.confirm(
+        'Είστε σίγουροι ότι θέλετε να αδειάσετε όλο το καλάθι σας;'
+      );
+      if (!confirmed) return;
+    }
+    
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      // Mock API call
+      const response = await fetch('/api/cart/clear', {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to clear cart');
+      }
+      
+      // Update local state - empty cart
+      setState(prev => ({
+        ...prev,
+        items: [],
+        subtotal: 0,
+        shippingCost: 0,
+        taxAmount: 0,
+        totalAmount: 0,
+        isLoading: false,
+      }));
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error.message : 'Σφάλμα καθαρισμού καλαθιού',
+        isLoading: false,
+      }));
+    }
+  }, [state.items]);
 
   // Clear error message
   const clearError = useCallback(() => {
@@ -191,6 +267,8 @@ export function useCart(): UseCartReturn {
     loadCart,
     updateQuantity,
     removeItem,
+    clearCart,
+    validateQuantity,
     clearError,
   };
 }
