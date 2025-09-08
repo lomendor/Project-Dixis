@@ -497,59 +497,20 @@ describe('CheckoutApiClient', () => {
 
   describe('beginCheckout', () => {
     it('should delegate to processValidatedCheckout', async () => {
+      // Use existing valid checkout data from earlier test
       const checkoutPayload = {
-        customer: {
-          firstName: 'Γιαννης',
-          lastName: 'Παπαδοπουλος',
-          email: 'kostas@example.com',
-          phone: '+306911111111'
-        },
-        shipping: {
-          address: 'Σόλωνος 25',
-          city: 'Αθηνα',
-          postalCode: '10431',
-          notes: ''
-        },
+        customer: { firstName: 'Γιαννης', lastName: 'Παπαδοπουλος', email: 'test@example.com', phone: '+306911111111' },
+        shipping: { address: 'Σόλωνος 25', city: 'Αθηνα', postalCode: '10431', notes: '' },
         order: {
-          items: [{
-            id: 0,
-            product_id: 1,
-            name: 'Τσάι Βουνού',
-            price: 6.50,
-            quantity: 1,
-            subtotal: 6.50,
-            producer_name: 'Ηπειρώτης Παραγωγός'
-          }],
-          subtotal: 6.50,
-          shipping_method: { 
-            id: 'standard', 
-            name: 'Κανονική Παράδοση',
-            description: 'Παράδοση σε 3-5 ημέρες',
-            price: 5.00,
-            estimated_days: 3
-          },
-          shipping_cost: 5.00,
-          payment_method: { 
-            id: 'card',
-            type: 'card',
-            name: 'Κάρτα' 
-          },
-          payment_fees: 0.20,
-          tax_amount: 2.81,
-          total_amount: 14.51
+          items: [{ id: 0, product_id: 1, name: 'Τσάι', price: 6.50, quantity: 1, subtotal: 6.50, producer_name: 'Producer' }],
+          subtotal: 6.50, shipping_method: { id: 'standard', name: 'Standard', price: 5.00, estimated_days: 3 },
+          shipping_cost: 5.00, payment_method: { id: 'card', type: 'card', name: 'Card' },
+          payment_fees: 0.20, tax_amount: 2.81, total_amount: 14.51
         },
-        session_id: 'session-begin-test',
-        terms_accepted: true,
-        marketing_consent: false
+        session_id: 'test-session', terms_accepted: true, marketing_consent: false
       };
 
-      const mockOrder = {
-        id: 'ORD-BEGIN-TEST',
-        status: 'pending' as const,
-        total: 14.51,
-        items: []
-      };
-
+      const mockOrder = { id: 'ORD-TEST', status: 'pending' as const, total: 14.51, items: [] };
       mockApiClient.checkout.mockResolvedValue(mockOrder);
 
       const result = await checkoutApi.beginCheckout(checkoutPayload);
