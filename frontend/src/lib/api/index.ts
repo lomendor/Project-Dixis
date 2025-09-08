@@ -30,6 +30,11 @@ export {
 export {
   CheckoutApiClient,
   checkoutApi,
+  getCart,
+  addToCart,
+  updateQty,
+  removeFromCart,
+  beginCheckout,
   type ValidatedApiResponse,
   type CheckoutApiError,
 } from './checkout';

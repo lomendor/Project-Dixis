@@ -5,6 +5,9 @@ import { CheckoutApiClient, type ValidatedApiResponse } from '../../src/lib/api/
 const mockApiClient = vi.hoisted(() => ({
   getCart: vi.fn(),
   checkout: vi.fn(),
+  addToCart: vi.fn(),
+  updateCartItem: vi.fn(),
+  removeFromCart: vi.fn(),
 }));
 
 // Mock the dependencies
@@ -389,6 +392,171 @@ describe('CheckoutApiClient', () => {
       expect(result.success).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
       expect(result.errors.some(err => err.field.includes('postal_code'))).toBe(true);
+    });
+  });
+
+  describe('addToCart', () => {
+    it('should add product to cart successfully', async () => {
+      const mockCartItem = {
+        id: 1,
+        quantity: 2,
+        product: {
+          id: 1,
+          name: 'Ελαιόλαδο Κρήτης',
+          price: '15.50',
+          producer: { name: 'Κρητικός Παραγωγός' }
+        },
+        subtotal: '31.00'
+      };
+
+      mockApiClient.addToCart.mockResolvedValue({ cart_item: mockCartItem });
+
+      const result = await checkoutApi.addToCart({ product_id: 1, quantity: 2 });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject(mockCartItem);
+      expect(result.errors).toHaveLength(0);
+      expect(mockApiClient.addToCart).toHaveBeenCalledWith(1, 2);
+    });
+
+    it('should reject invalid add to cart request', async () => {
+      const result = await checkoutApi.addToCart({ product_id: -1, quantity: 0 });
+
+      expect(result.success).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors.some(err => err.message.includes('θετικός'))).toBe(true);
+      expect(mockApiClient.addToCart).not.toHaveBeenCalled();
+    });
+
+    it('should handle API errors', async () => {
+      mockApiClient.addToCart.mockRejectedValue(new Error('HTTP 404: Product not found'));
+
+      const result = await checkoutApi.addToCart({ product_id: 999, quantity: 1 });
+
+      expect(result.success).toBe(false);
+      expect(result.errors[0].message).toContain('έγκυρα δεδομένα');
+      expect(result.errors[0].code).toBe('PERMANENT_ERROR');
+    });
+  });
+
+  describe('updateQty', () => {
+    it('should update cart item quantity successfully', async () => {
+      const mockUpdatedItem = {
+        id: 1,
+        quantity: 5,
+        product: {
+          id: 1,
+          name: 'Μέλι Θυμαρίσιο',
+          price: '12.00',
+          producer: { name: 'Θεσσαλός Παραγωγός' }
+        },
+        subtotal: '60.00'
+      };
+
+      mockApiClient.updateCartItem.mockResolvedValue({ cart_item: mockUpdatedItem });
+
+      const result = await checkoutApi.updateQty({ cart_item_id: 1, quantity: 5 });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject(mockUpdatedItem);
+      expect(result.errors).toHaveLength(0);
+      expect(mockApiClient.updateCartItem).toHaveBeenCalledWith(1, 5);
+    });
+
+    it('should reject invalid quantity update', async () => {
+      const result = await checkoutApi.updateQty({ cart_item_id: 1, quantity: 1000 });
+
+      expect(result.success).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors.some(err => err.message.includes('υψηλή'))).toBe(true);
+      expect(mockApiClient.updateCartItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeFromCart', () => {
+    it('should remove cart item successfully', async () => {
+      mockApiClient.removeFromCart.mockResolvedValue(undefined);
+
+      const result = await checkoutApi.removeFromCart({ cart_item_id: 1 });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toBeUndefined();
+      expect(result.errors).toHaveLength(0);
+      expect(mockApiClient.removeFromCart).toHaveBeenCalledWith(1);
+    });
+
+    it('should reject invalid cart item id', async () => {
+      const result = await checkoutApi.removeFromCart({ cart_item_id: -1 });
+
+      expect(result.success).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors.some(err => err.message.includes('θετικός'))).toBe(true);
+      expect(mockApiClient.removeFromCart).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('beginCheckout', () => {
+    it('should delegate to processValidatedCheckout', async () => {
+      const checkoutPayload = {
+        customer: {
+          firstName: 'Γιαννης',
+          lastName: 'Παπαδοπουλος',
+          email: 'kostas@example.com',
+          phone: '+306911111111'
+        },
+        shipping: {
+          address: 'Σόλωνος 25',
+          city: 'Αθηνα',
+          postalCode: '10431',
+          notes: ''
+        },
+        order: {
+          items: [{
+            id: 0,
+            product_id: 1,
+            name: 'Τσάι Βουνού',
+            price: 6.50,
+            quantity: 1,
+            subtotal: 6.50,
+            producer_name: 'Ηπειρώτης Παραγωγός'
+          }],
+          subtotal: 6.50,
+          shipping_method: { 
+            id: 'standard', 
+            name: 'Κανονική Παράδοση',
+            description: 'Παράδοση σε 3-5 ημέρες',
+            price: 5.00,
+            estimated_days: 3
+          },
+          shipping_cost: 5.00,
+          payment_method: { 
+            id: 'card',
+            type: 'card',
+            name: 'Κάρτα' 
+          },
+          payment_fees: 0.20,
+          tax_amount: 2.81,
+          total_amount: 14.51
+        },
+        session_id: 'session-begin-test',
+        terms_accepted: true,
+        marketing_consent: false
+      };
+
+      const mockOrder = {
+        id: 'ORD-BEGIN-TEST',
+        status: 'pending' as const,
+        total: 14.51,
+        items: []
+      };
+
+      mockApiClient.checkout.mockResolvedValue(mockOrder);
+
+      const result = await checkoutApi.beginCheckout(checkoutPayload);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject(mockOrder);
+      expect(mockApiClient.checkout).toHaveBeenCalled();
     });
   });
 

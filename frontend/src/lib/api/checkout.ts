@@ -18,6 +18,21 @@ import {
 import { z } from 'zod';
 import { validatePostalCodeCity } from '../checkout/checkoutValidation';
 
+// Local schemas for cart operations
+const AddToCartRequestSchema = z.object({
+  product_id: z.number().int().positive('Το ID του προϊόντος πρέπει να είναι θετικός ακέραιος'),
+  quantity: z.number().int().min(1, 'Η ποσότητα πρέπει να είναι τουλάχιστον 1').max(999, 'Η ποσότητα είναι πολύ υψηλή')
+});
+
+const UpdateQuantityRequestSchema = z.object({
+  cart_item_id: z.number().int().positive('Το ID του προϊόντου στο καλάθι πρέπει να είναι θετικός ακέραιος'),
+  quantity: z.number().int().min(1, 'Η ποσότητα πρέπει να είναι τουλάχιστον 1').max(999, 'Η ποσότητα είναι πολύ υψηλή')
+});
+
+const RemoveFromCartRequestSchema = z.object({
+  cart_item_id: z.number().int().positive('Το ID του προϊόντου στο καλάθι πρέπει να είναι θετικός ακέραιος')
+});
+
 // Local schema for shipping quote (minimal)
 const ShippingQuoteRequestSchema = z.object({
   items: z.array(z.object({
@@ -192,6 +207,112 @@ export class CheckoutApiClient {
     }
   }
 
+  // Add product to cart with validation
+  async addToCart(request: unknown): Promise<ValidatedApiResponse<CartItem>> {
+    try {
+      const validation = AddToCartRequestSchema.safeParse(request);
+      if (!validation.success) {
+        const errors = validation.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: 'VALIDATION_ERROR'
+        }));
+        return {
+          success: false,
+          errors,
+          validationProof: `Add to cart validation failed`
+        };
+      }
+
+      const { product_id, quantity } = validation.data;
+      const result = await this.baseClient.addToCart(product_id, quantity);
+      
+      return {
+        success: true,
+        data: result.cart_item,
+        errors: [],
+        validationProof: `Product ${product_id} (qty: ${quantity}) added to cart`
+      };
+
+    } catch (error) {
+      return this.handleApiError('addToCart', error);
+    }
+  }
+
+  // Update cart item quantity with validation
+  async updateQty(request: unknown): Promise<ValidatedApiResponse<CartItem>> {
+    try {
+      const validation = UpdateQuantityRequestSchema.safeParse(request);
+      if (!validation.success) {
+        const errors = validation.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: 'VALIDATION_ERROR'
+        }));
+        return {
+          success: false,
+          errors,
+          validationProof: `Update quantity validation failed`
+        };
+      }
+
+      const { cart_item_id, quantity } = validation.data;
+      const result = await this.baseClient.updateCartItem(cart_item_id, quantity);
+      
+      return {
+        success: true,
+        data: result.cart_item,
+        errors: [],
+        validationProof: `Cart item ${cart_item_id} updated to quantity ${quantity}`
+      };
+
+    } catch (error) {
+      return this.handleApiError('updateQty', error);
+    }
+  }
+
+  // Remove item from cart with validation
+  async removeFromCart(request: unknown): Promise<ValidatedApiResponse<void>> {
+    try {
+      const validation = RemoveFromCartRequestSchema.safeParse(request);
+      if (!validation.success) {
+        const errors = validation.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: 'VALIDATION_ERROR'
+        }));
+        return {
+          success: false,
+          errors,
+          validationProof: `Remove from cart validation failed`
+        };
+      }
+
+      const { cart_item_id } = validation.data;
+      await this.baseClient.removeFromCart(cart_item_id);
+      
+      return {
+        success: true,
+        data: undefined,
+        errors: [],
+        validationProof: `Cart item ${cart_item_id} removed`
+      };
+
+    } catch (error) {
+      return this.handleApiError('removeFromCart', error);
+    }
+  }
+
+  // Begin checkout (simpler version of processValidatedCheckout)
+  async beginCheckout(payload: unknown): Promise<ValidatedApiResponse<Order>> {
+    try {
+      // For now, delegate to processValidatedCheckout for full validation
+      return await this.processValidatedCheckout(payload);
+    } catch (error) {
+      return this.handleApiError('beginCheckout', error);
+    }
+  }
+
   // Get shipping quote with Greek postal code validation
   async getShippingQuote(quoteRequest: unknown): Promise<ValidatedApiResponse<ShippingMethod[]>> {
     try {
@@ -293,5 +414,18 @@ export class CheckoutApiClient {
   }
 }
 
+// Export instance and convenience functions
 export const checkoutApi = new CheckoutApiClient();
+
+// Convenience functions for common operations
+export const getCart = () => checkoutApi.getValidatedCart();
+export const addToCart = (productId: number, quantity: number) => 
+  checkoutApi.addToCart({ product_id: productId, quantity });
+export const updateQty = (cartItemId: number, quantity: number) => 
+  checkoutApi.updateQty({ cart_item_id: cartItemId, quantity });
+export const removeFromCart = (cartItemId: number) => 
+  checkoutApi.removeFromCart({ cart_item_id: cartItemId });
+export const beginCheckout = (payload: unknown) => 
+  checkoutApi.beginCheckout(payload);
+
 export type { ValidatedApiResponse, CheckoutApiErrorType as CheckoutApiError };
