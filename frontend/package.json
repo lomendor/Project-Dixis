@@ -35,7 +35,10 @@
     "dev:e2e": "next dev -p 3001 || vite --port 3001",
     "dev:api": "php -S 127.0.0.1:8001 -t ../public",
     "api:e2e": "php ../artisan serve --host 127.0.0.1 --port 8001",
-    "prepare": "husky"
+    "prepare": "husky",
+    "agent:limit-scan": "node scripts/limit-scan.js",
+    "qa:smoke": "npm run type-check && npm run build && npm run e2e:smoke",
+    "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v"
   },
   "dependencies": {
     "next": "15.5.0",
@@ -64,7 +67,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.4",
-    "wait-on": "^7.2.0"
+    "wait-on": "^7.2.0",
+    "cross-env": "^7.0.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
