@@ -1,6 +1,5 @@
 /**
- * useCheckout React Hook - Minimal Implementation
- * Essential checkout flow management with Greek validation
+ * useCheckout React Hook - Essential checkout flow with Greek validation
  */
 
 import { useState, useCallback } from 'react';
@@ -32,7 +31,6 @@ export interface UseCheckoutReturn {
   clearErrors: () => void;
 }
 
-// Main hook with simplified useState
 export const useCheckout = (): UseCheckoutReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [cart, setCart] = useState<CartLine[] | null>(null);
@@ -145,26 +143,10 @@ export const useCheckout = (): UseCheckoutReturn => {
   const clearErrors = useCallback(() => { setError(null); setFormErrors({}); }, []);
 
   return {
-    isLoading,
-    cart,
-    shippingMethods,
-    selectedShippingMethod,
-    selectedPaymentMethod,
-    form,
-    formErrors,
-    completedOrder,
-    error,
-    loadCart,
-    getShippingQuote,
-    selectShippingMethod: setSelectedShippingMethod,
-    selectPaymentMethod: setSelectedPaymentMethod,
-    updateCustomerInfo,
-    updateShippingInfo,
-    setTermsAccepted,
-    validateForm,
-    calculateOrderSummary,
-    processCheckout,
-    reset,
-    clearErrors
+    isLoading, cart, shippingMethods, selectedShippingMethod, selectedPaymentMethod,
+    form, formErrors, completedOrder, error, loadCart, getShippingQuote,
+    selectShippingMethod: setSelectedShippingMethod, selectPaymentMethod: setSelectedPaymentMethod,
+    updateCustomerInfo, updateShippingInfo, setTermsAccepted, validateForm,
+    calculateOrderSummary, processCheckout, reset, clearErrors
   };
 };
