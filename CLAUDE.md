@@ -10,7 +10,16 @@
 - **Artifacts**: playwright-report/**, test-results/** required
 
 ## 🔧 Workspace Anchors  
-**Reference**: `frontend/.run-anchors` (canonical paths)
+- **Repo (root)**: Project-Dixis (where frontend/ & backend/ exist)
+- **FE**: ./frontend  
+- **BE**: ./backend
+- **Context Scope**: Limited to frontend/ directory (use `npm run agent:limit-scan`)
+
+## 🤖 Parent/Subagents Working Style
+- **Parent Mode**: Maintains context, performs all code implementations/commits
+- **Subagents**: Research-only (produce docs in `doc/research/`), no code edits
+- **ULTRATHINK Protocol**: Always execute before any work (read docs, verify .claude/ignore, limit scope)
+- **PR Structure**: ≤300 LOC with AC, Evidence links, "Generated-by" footer
 
 ---
 
@@ -278,3 +287,9 @@ const apiClient = {
 **Architecture**: Full-Stack Marketplace με Modern CI/CD
 
 **🇬🇷 Dixis: Connecting Greek Producers με Consumers Through Technology!**
+
+## 🎯 NOW (2025-09-08) - Parent/Subagents Architecture Setup
+
+- **Current Goal**: Setting up parent/subagents architecture for controlled checkout feature implementation
+- **Active Pattern**: Research-only subagents (UI/Review experts) with strict scope limitations and ≤300 LOC PRs
+- **Next PRs**: PR-Infra-MCP (≤80 LOC), PR-Checkout-API (2A), PR-UI-small (2B) with proper context anchoring
