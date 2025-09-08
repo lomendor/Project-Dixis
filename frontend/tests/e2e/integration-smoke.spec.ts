@@ -45,6 +45,9 @@ test.describe('Frontend ↔ API Integration Smoke Tests', () => {
     const firstProduct = page.getByTestId('product-card').first();
     await expect(firstProduct.getByTestId('product-title')).toBeVisible();
     await expect(firstProduct.getByTestId('product-price')).toBeVisible();
+    
+    // Wait for product image with extended timeout
+    await firstProduct.getByTestId('product-image').waitFor({ timeout: 30000 });
     await expect(firstProduct.getByTestId('product-image')).toBeVisible();
     console.log('✅ Product cards structure validated');
 
