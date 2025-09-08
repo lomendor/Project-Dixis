@@ -37,7 +37,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await page.setContent(mockHomepage);
     
     // Check that main content area exists
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Check for navigation
     await expect(page.getByRole('navigation')).toBeVisible();
@@ -67,7 +67,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await page.setContent(mockProductsPage);
     
     // Navigate to products (should be the same as homepage for this app)
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Check for product-related content
     const hasProducts = await page.locator('[data-testid*="product"]').count();
@@ -97,7 +97,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     // Guest users should see valid page content
     await page.waitForSelector('main, form, body', { timeout: 10000 });
     
-    const hasMain = await page.locator('main').isVisible().catch(() => false);
+    const hasMain = await page.getByTestId('page-root').isVisible().catch(() => false);
     const hasForm = await page.locator('form').isVisible().catch(() => false);
     const hasBody = await page.locator('body').isVisible().catch(() => false);
     
@@ -131,7 +131,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await expect(page.getByRole('navigation')).toBeVisible();
     
     // Check for main content area
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Verify no console errors for basic navigation
     const errors: string[] = [];
