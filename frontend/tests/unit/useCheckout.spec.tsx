@@ -5,10 +5,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
 import { useCheckout } from '../../src/hooks/useCheckout';
 import { apiUrl } from '../../src/lib/api';
 
-// MSW server
 const server = setupServer();
 beforeEach(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => { server.resetHandlers(); server.close(); });
