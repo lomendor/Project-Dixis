@@ -17,7 +17,6 @@ test.describe('Auth-Cart Flow Tests', () => {
     await cartLoginPrompt.click();
     await expect(page).toHaveURL(/\/auth\/login/);
   });
-
   test('Consumer users see active cart with item count', async ({ page, context }) => {
     await setupAuthState(page, context, 'consumer');
     await setupPage(page);
@@ -29,7 +28,6 @@ test.describe('Auth-Cart Flow Tests', () => {
     await activeCartIcon.click();
     await expect(page).toHaveURL(/\/cart/);
   });
-
   test('Producer users see limited cart access message', async ({ page, context }) => {
     await setupAuthState(page, context, 'producer');
     await setupPage(page);
@@ -39,7 +37,6 @@ test.describe('Auth-Cart Flow Tests', () => {
     await expect(producerMessage).toBeVisible();
     await expect(producerMessage).toHaveText('Producer Cart View');
   });
-
   test('Mobile navigation shows correct cart behavior for all roles', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await setupPage(page);
@@ -50,7 +47,6 @@ test.describe('Auth-Cart Flow Tests', () => {
     await expect(mobileCartPrompt).toBeVisible();
     await expect(mobileCartPrompt).toHaveText('Login to Add to Cart');
   });
-
   test('Role transition updates cart display correctly', async ({ page, context }) => {
     await setupPage(page);
     await expect(page.getByTestId('cart-login-prompt')).toBeVisible();
