@@ -1,11 +1,5 @@
 import { test, expect } from '@playwright/test';
 import './setup.mocks';
-
-/**
- * Auth-Cart Flow E2E Tests - Data-driven role testing
- */
-
-// Helper functions to reduce LOC duplication
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await Promise.race([page.getByTestId('page-root').waitFor().catch(() => {}), page.getByTestId('error-boundary').waitFor().catch(() => {})]);
@@ -18,7 +12,6 @@ const setupAuthState = async (page: any, context: any, role: 'consumer' | 'produ
 };
 
 test.describe('Auth-Cart Flow Tests', () => {
-  
   test('Guest users see login prompt for cart access', async ({ page }) => {
     await setupPage(page);
     const cartLoginPrompt = page.getByTestId('cart-login-prompt');
