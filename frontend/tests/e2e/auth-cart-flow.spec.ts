@@ -3,14 +3,11 @@ import './setup.mocks';
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await Promise.race([page.getByTestId('page-root').waitFor().catch(() => {}), page.getByTestId('error-boundary').waitFor().catch(() => {})]);
-  await page.waitForTimeout(1000);
 };
-
 const setupAuthState = async (page: any, context: any, role: 'consumer' | 'producer') => {
   await context.addCookies([{ name: 'auth_token', value: `${role}_token`, domain: '127.0.0.1', path: '/' }]);
   await page.addInitScript((r: string) => { localStorage.setItem('auth_token', `${r}_token`); localStorage.setItem('user_role', r); }, role);
 };
-
 test.describe('Auth-Cart Flow Tests', () => {
   test('Guest users see login prompt for cart access', async ({ page }) => {
     await setupPage(page);
