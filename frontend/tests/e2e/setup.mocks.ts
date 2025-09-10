@@ -40,23 +40,51 @@ test.beforeEach(async ({ page }) => {
       });
     }
 
-    // Cart endpoints
+    // Cart endpoints - role-based access control
     if (url.includes('/cart')) {
+      const authHeader = route.request().headers()['authorization'];
+      const authToken = authHeader?.replace('Bearer ', '') || '';
+      
+      // Guest users get 401
+      if (!authToken) {
+        return route.fulfill({
+          status: 401,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'Authentication required for cart access' })
+        });
+      }
+      
+      // Authenticated users (consumer/producer) get cart data
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ items: [], total_items: 0, total_amount: '0.00' })
+        body: JSON.stringify({ 
+          items: [
+            { id: 1, product_id: 1, quantity: 2, product: { name: 'Mock Product 1', price: '10.00' } },
+            { id: 2, product_id: 2, quantity: 1, product: { name: 'Mock Product 2', price: '15.00' } }
+          ], 
+          total_items: 3, 
+          total_amount: '35.00' 
+        })
       });
     }
 
-    // Auth endpoints - different behavior for guest vs authenticated tests
+    // Auth endpoints - role-based behavior for auth-cart flow tests
     if (url.includes('/auth/me') || url.includes('/auth/profile')) {
-      // Detect guest mode by checking for absence of auth header or test context
+      // Detect auth state from cookies, localStorage, or headers
       const authHeader = route.request().headers()['authorization'];
       const hasStorageState = route.request().headers()['x-storage-state'] === 'consumer';
       
-      // Return 401 for guest tests (no auth header and no storage state)
-      if (!authHeader && !hasStorageState) {
+      // Check for role-specific auth tokens
+      const authToken = authHeader?.replace('Bearer ', '') || '';
+      let userRole = 'guest';
+      
+      if (authToken.includes('consumer') || hasStorageState) {
+        userRole = 'consumer';
+      } else if (authToken.includes('producer')) {
+        userRole = 'producer';
+      } else if (!authToken && !hasStorageState) {
+        // Guest mode - return 401
         return route.fulfill({
           status: 401,
           contentType: 'application/json',
@@ -64,11 +92,17 @@ test.beforeEach(async ({ page }) => {
         });
       }
       
-      // Return authenticated user for consumer/producer tests
+      // Return authenticated user with appropriate role
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ id: 1, role: 'consumer', email: 'test@example.com', name: 'Test User' })
+        body: JSON.stringify({ 
+          id: 1, 
+          role: userRole, 
+          email: `test-${userRole}@example.com`, 
+          name: `Test ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}`,
+          created_at: new Date().toISOString()
+        })
       });
     }
 
