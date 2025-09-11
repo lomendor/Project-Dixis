@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { setupApiMocks } from './api-mocks';
+import './setup.mocks';
 
 /**
  * PP03-E3 Smoke Test - Documentation & Performance
