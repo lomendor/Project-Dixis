@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import ProductImage from '@/components/product/ProductImage';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -433,24 +433,12 @@ export default function HomeClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
               <div key={product.id} data-testid="product-card" className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                {/* Product Image Placeholder */}
-                <div className="h-48 bg-gray-200 flex items-center justify-center relative">
-                  {product.images.length > 0 ? (
-                    <Image
-                      data-testid="product-image"
-                      src={product.images[0].url || product.images[0].image_path || '/placeholder.jpg'}
-                      alt={product.images[0].alt_text || product.name}
-                      fill
-                      className="object-cover pointer-events-none"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      priority={products.indexOf(product) < 4}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center text-gray-400 text-sm" role="img" aria-label="No image available">
-                      No Image
-                    </div>
-                  )}
-                </div>
+                <ProductImage
+                  src={product.images[0]?.url || product.images[0]?.image_path || '/placeholder.jpg'}
+                  alt={product.images[0]?.alt_text || product.name}
+                  priority={products.indexOf(product) < 4}
+                  data-testid="product-image-timeout"
+                />
 
                 <div className="p-4">
                   <h3 data-testid="product-title" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">

@@ -1,15 +1,17 @@
 /**
- * Fallback E2E Stubs - Smoke Test Only
- * Ultra-minimal API mocking for smoke tests without backend dependency
+ * E2E Unified Mock Setup
+ * Comprehensive API mocking for smoke tests + role-based cart access
  */
 
 import { test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  // Fallback API route mocking for smoke tests
+  // Unified API route mocking for E2E tests
   await page.route('**/api/**', async (route) => {
     const url = route.request().url();
     const method = route.request().method();
+    const authHeader = route.request().headers()['authorization'];
+    const authToken = authHeader?.replace('Bearer ', '') || '';
 
     // Products endpoints
     if (url.includes('/products')) {
@@ -40,8 +42,11 @@ test.beforeEach(async ({ page }) => {
       });
     }
 
-    // Cart endpoints
+    // Cart endpoints - role-based access control
     if (url.includes('/cart')) {
+      if (!authToken) {
+        return route.fulfill({ status: 401, body: JSON.stringify({ message: 'Auth required' }) });
+      }
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -49,14 +54,12 @@ test.beforeEach(async ({ page }) => {
       });
     }
 
-    // Auth endpoints - different behavior for guest vs authenticated tests
+    // Auth endpoints - role detection and guest handling
     if (url.includes('/auth/me') || url.includes('/auth/profile')) {
-      // Detect guest mode by checking for absence of auth header or test context
-      const authHeader = route.request().headers()['authorization'];
       const hasStorageState = route.request().headers()['x-storage-state'] === 'consumer';
       
       // Return 401 for guest tests (no auth header and no storage state)
-      if (!authHeader && !hasStorageState) {
+      if (!authToken && !hasStorageState) {
         return route.fulfill({
           status: 401,
           contentType: 'application/json',
@@ -64,11 +67,18 @@ test.beforeEach(async ({ page }) => {
         });
       }
       
-      // Return authenticated user for consumer/producer tests
+      // Role detection for authenticated users
+      let userRole = 'guest';
+      if (authToken.includes('consumer')) userRole = 'consumer';
+      else if (authToken.includes('producer')) userRole = 'producer';
+      else if (!authToken) {
+        return route.fulfill({ status: 401, body: JSON.stringify({ message: 'Unauthenticated' }) });
+      }
+      
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ id: 1, role: 'consumer', email: 'test@example.com', name: 'Test User' })
+        body: JSON.stringify({ id: 1, role: userRole, email: 'test@example.com', name: 'Test User', profile: { role: userRole } })
       });
     }
 
@@ -93,7 +103,7 @@ test.beforeEach(async ({ page }) => {
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ success: true, message: 'Smoke test mock' })
+      body: JSON.stringify({ success: true, message: 'E2E test mock' })
     });
   });
 
