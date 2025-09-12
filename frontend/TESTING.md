@@ -1,5 +1,10 @@
 # Testing Guide - Project Dixis
 
+## Unit Testing with Vitest & MSW
+
+### API Testing Patterns
+Unit tests use **MSW (Mock Service Worker)** for API mocking with realistic response patterns. See `tests/unit/checkout-api-extended.spec.ts` for comprehensive examples including retry logic, Greek postal codes, and network resilience scenarios.
+
 ## E2E Testing with Playwright
 
 ### Prerequisites

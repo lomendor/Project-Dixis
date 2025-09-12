@@ -78,6 +78,25 @@ describe('Checkout API Resilience', () => {
       expect(result.data?.[0].price).toBe(3.5)
     })
 
+    it('handles Thessaloniki rates', async () => {
+      const result = await checkoutApi.getShippingQuote({
+        items: [{ product_id: 1, quantity: 1 }],
+        destination: { postal_code: '54628', city: 'Thessaloniki' }
+      })
+      expect(result.success).toBe(true)
+      expect(result.data?.[0].price).toBe(4.0)
+    })
+
+    it('handles Crete rates (remote islands)', async () => {
+      const result = await checkoutApi.getShippingQuote({
+        items: [{ product_id: 1, quantity: 1 }],
+        destination: { postal_code: '71201', city: 'Heraklion' }
+      })
+      expect(result.success).toBe(true)
+      expect(result.data?.[0].price).toBe(5.5) // "other" zone
+      expect(result.data?.[0].estimated_days).toBe(2)
+    })
+
     it('handles islands rates', async () => {
       const result = await checkoutApi.getShippingQuote({
         items: [{ product_id: 1, quantity: 1 }],
@@ -85,12 +104,31 @@ describe('Checkout API Resilience', () => {
       })
       expect(result.success).toBe(true)
       expect(result.data?.[0].price).toBe(8.0)
+      expect(result.data?.[0].estimated_days).toBe(4)
     })
 
-    it('validates postal format', async () => {
+    it('validates postal format - too short', async () => {
       const result = await checkoutApi.getShippingQuote({
         items: [{ product_id: 1, quantity: 1 }],
         destination: { postal_code: '123', city: 'Invalid' }
+      })
+      expect(result.success).toBe(false)
+      expect(result.errors[0].field).toBe('destination.postal_code')
+    })
+
+    it('validates postal format - too long', async () => {
+      const result = await checkoutApi.getShippingQuote({
+        items: [{ product_id: 1, quantity: 1 }],
+        destination: { postal_code: '123456', city: 'Invalid' }
+      })
+      expect(result.success).toBe(false)
+      expect(result.errors[0].field).toBe('destination.postal_code')
+    })
+
+    it('validates postal format - non-numeric', async () => {
+      const result = await checkoutApi.getShippingQuote({
+        items: [{ product_id: 1, quantity: 1 }],
+        destination: { postal_code: 'ABC12', city: 'Invalid' }
       })
       expect(result.success).toBe(false)
       expect(result.errors[0].field).toBe('destination.postal_code')
@@ -121,6 +159,51 @@ describe('Checkout API Resilience', () => {
       const result = await checkoutApi.processValidatedCheckout(checkoutForm)
       expect(result.success).toBe(false)
       expect(categorizeError(new Error('HTTP 500'))).toBe('server')
+    })
+
+    it('handles rate limiting (HTTP 429)', async () => {
+      server.use(
+        http.get(`${API_BASE}/cart/items`, () => 
+          HttpResponse.json({ error: 'Too many requests' }, { status: 429 })
+        )
+      )
+
+      const result = await checkoutApi.getValidatedCart()
+      expect(result.success).toBe(false)
+      expect(result.errors[0].message).toBe('Πολλές αιτήσεις. Δοκιμάστε ξανά.')
+      expect(categorizeError(new Error('HTTP 429'))).toBe('server')
+    })
+
+    it('handles network timeout', async () => {
+      server.use(
+        http.get(`${API_BASE}/cart/items`, async () => {
+          await delay(10000) // Simulate long delay
+          return HttpResponse.json({ cart_items: [] })
+        })
+      )
+
+      // Mock fetch to throw timeout error instead of waiting
+      const originalFetch = global.fetch
+      global.fetch = vi.fn().mockRejectedValue(new Error('Request timeout'))
+      
+      const result = await checkoutApi.getValidatedCart()
+      expect(result.success).toBe(false)
+      expect(categorizeError(new Error('Request timeout'))).toBe('timeout')
+      
+      global.fetch = originalFetch
+    })
+
+    it('handles network connection failure', async () => {
+      // Mock fetch to simulate network failure
+      const originalFetch = global.fetch
+      global.fetch = vi.fn().mockRejectedValue(new Error('Failed to fetch'))
+      
+      const result = await checkoutApi.getValidatedCart()
+      expect(result.success).toBe(false)
+      expect(result.errors[0].message).toBe('Πρόβλημα σύνδεσης')
+      expect(categorizeError(new Error('Failed to fetch'))).toBe('network')
+      
+      global.fetch = originalFetch
     })
 
     it('validates responses', async () => {
