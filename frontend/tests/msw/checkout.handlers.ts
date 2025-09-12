@@ -22,7 +22,7 @@ export const checkoutHandlers = [
   http.post(`${API_BASE}/orders/checkout`, () => {
     return HttpResponse.json({
       order: {
-        id: 'order_12345',
+        id: 'order_123',
         total: 34.50,
         status: 'pending' as const,
         created_at: new Date().toISOString()
