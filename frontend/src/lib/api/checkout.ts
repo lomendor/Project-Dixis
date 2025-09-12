@@ -42,6 +42,48 @@ interface ValidatedApiResponse<T = unknown> {
   validationProof?: string;
 }
 
+// Retry utility with exponential backoff
+export async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  options: {
+    retries?: number;
+    baseMs?: number;
+    jitter?: boolean;
+    abortSignal?: AbortSignal;
+  } = {}
+): Promise<T> {
+  const { retries = 2, baseMs = 250, jitter = true, abortSignal } = options;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (abortSignal?.aborted) {
+      throw new Error('Request aborted');
+    }
+    
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === retries) throw error;
+      
+      const delay = baseMs * Math.pow(2, attempt);
+      const finalDelay = jitter ? delay + Math.random() * delay * 0.1 : delay;
+      await new Promise(resolve => setTimeout(resolve, finalDelay));
+    }
+  }
+  throw new Error('Retry failed'); // This should never be reached
+}
+
+// Error categorization utility
+export function categorizeError(error: Error): 'network' | 'timeout' | 'validation' | 'server' | 'unknown' {
+  const message = error.message.toLowerCase();
+  
+  if (message.includes('network') || message.includes('fetch')) return 'network';
+  if (message.includes('timeout') || message.includes('timed out')) return 'timeout';
+  if (message.includes('http 4') || message.includes('bad request') || message.includes('validation')) return 'validation';
+  if (message.includes('http 5') || message.includes('server') || message.includes('internal')) return 'server';
+  
+  return 'unknown';
+}
+
 // Checkout API error types
 export interface CheckoutApiErrorType extends Error {
   status: number;
@@ -210,7 +252,7 @@ export class CheckoutApiClient {
 
       // Zone-based shipping calculation based on Greek postal codes
       const { postal_code } = validation.data.destination;
-      const zone = postal_code.match(/^1[12]/) ? 'athens_metro' : postal_code.match(/^5[456]/) ? 'thessaloniki' : postal_code.match(/^8[0-5]/) ? 'islands' : 'other';
+      const zone = postal_code.match(/^1[0-2]/) ? 'athens_metro' : postal_code.match(/^5[456]/) ? 'thessaloniki' : postal_code.match(/^8[0-5]/) ? 'islands' : 'other';
       const baseCost = zone === 'athens_metro' ? 3.5 : zone === 'thessaloniki' ? 4.0 : zone === 'islands' ? 8.0 : 5.5;
       const estimatedDays = zone === 'athens_metro' ? 1 : zone === 'islands' ? 4 : 2;
       const shippingMethods: ShippingMethod[] = [{ id: 'standard', name: 'Κανονική Παράδοση', description: `Παράδοση σε ${estimatedDays} εργάσιμες ημέρες`, price: baseCost, estimated_days: estimatedDays }];
@@ -267,7 +309,21 @@ export class CheckoutApiClient {
     const statusMatch = error instanceof Error ? error.message.match(/HTTP (\d+):/) : null;
     const status = statusMatch ? parseInt(statusMatch[1]) : 500;
     const retryable = status !== 429 && (status >= 500 || status === 0);
-    const errorMessage = status === 401 ? 'Μη εξουσιοδοτημένος' : status === 429 ? 'Πολλές αιτήσεις. Δοκιμάστε ξανά.' : status >= 400 && status < 500 ? 'Μη έγκυρα δεδομένα' : 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστε ξανά.';
+    
+    // Fix error messages to match test expectations
+    let errorMessage: string;
+    if (status === 401) {
+      errorMessage = 'Μη εξουσιοδοτημένος';
+    } else if (status === 429) {
+      errorMessage = 'Πολλές αιτήσεις. Δοκιμάστε ξανά.';
+    } else if (status >= 400 && status < 500) {
+      errorMessage = 'Μη έγκυρα δεδομένα';
+    } else if (error instanceof Error && (error.message.includes('Failed to fetch') || error.message.includes('Network'))) {
+      errorMessage = 'Πρόβλημα σύνδεσης';
+    } else {
+      errorMessage = 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστε ξανά.';
+    }
+    
     return { success: false, errors: [{ field: 'general', message: errorMessage, code: retryable ? 'RETRYABLE_ERROR' : 'PERMANENT_ERROR' }], validationProof: `${operation}: ${status}` };
   }
 }

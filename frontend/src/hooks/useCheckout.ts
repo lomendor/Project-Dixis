@@ -53,7 +53,13 @@ export const useCheckout = (): UseCheckoutReturn => {
     setError(null);
     try {
       const result = await checkoutApi.getValidatedCart();
-      result.success && result.data ? setCart(result.data) : setError('Αποτυχία φόρτωσης καλαθιού');
+      if (result.success && result.data) {
+        setCart(result.data);
+      } else {
+        // Check if the error indicates a network/connection issue
+        const hasNetworkError = result.errors.some(err => err.message.includes('σύνδεσης') || err.code === 'RETRYABLE_ERROR');
+        setError(hasNetworkError ? 'Σφάλμα σύνδεσης καλαθιού' : 'Αποτυχία φόρτωσης καλαθιού');
+      }
     } catch {
       setError('Σφάλμα σύνδεσης καλαθιού');
     } finally {
@@ -105,7 +111,7 @@ export const useCheckout = (): UseCheckoutReturn => {
   const calculateOrderSummary = useCallback((): OrderSummary | null => {
     if (!cart || !selectedShippingMethod || !selectedPaymentMethod) return null;
     const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-    const taxAmount = subtotal * 0.24;
+    const taxAmount = Math.round(subtotal * 0.24 * 100) / 100; // Fix floating point precision
     return {
       items: cart, subtotal, shipping_method: selectedShippingMethod, shipping_cost: selectedShippingMethod.price,
       payment_method: selectedPaymentMethod, payment_fees: selectedPaymentMethod.fixed_fee || 0, tax_amount: taxAmount,

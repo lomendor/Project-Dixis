@@ -72,7 +72,9 @@ describe('useCheckout Hook', () => {
 
     // Test validation
     act(() => result.current.updateCustomerInfo({ firstName: '', email: 'invalid' }));
-    expect(result.current.validateForm()).toBe(false);
+    let isValid;
+    act(() => { isValid = result.current.validateForm(); });
+    expect(isValid).toBe(false);
     expect(result.current.formErrors['customer.firstName']).toBe('Το όνομα είναι υποχρεωτικό');
 
     // Test checkout processing
