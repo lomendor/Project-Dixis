@@ -16,7 +16,23 @@ afterEach(() => { server.resetHandlers(); server.close(); });
 // Mock data
 const mockCart = { cart_items: [{ id: 1, product: { id: 1, name: 'Greek Oil', price: '15.50', producer: { name: 'Producer' } }, quantity: 2, subtotal: '31.00' }] };
 const mockShipping = { data: [{ id: 'home', name: 'Home Delivery', price: 5.50, estimated_days: 2 }] };
-const mockOrder = { order: { id: 'order_123', total_amount: '42.14', status: 'pending' } };
+const mockOrder = { 
+  order: { 
+    id: 123, 
+    user_id: 1,
+    subtotal: '31.00',
+    tax_amount: '7.44',
+    shipping_amount: '5.50',
+    total_amount: '43.94', 
+    payment_status: 'pending',
+    payment_method: 'cod',
+    status: 'pending',
+    shipping_method: 'home',
+    created_at: new Date().toISOString(),
+    items: [],
+    order_items: []
+  } 
+};
 
 describe('useCheckout Hook', () => {
   it('loads cart and handles errors', async () => {
@@ -59,7 +75,7 @@ describe('useCheckout Hook', () => {
     act(() => {
       result.current.selectShippingMethod({ id: 'home', name: 'Home', price: 5.50, estimated_days: 2 });
       result.current.selectPaymentMethod({ id: 'cod', type: 'cash_on_delivery', name: 'COD', fixed_fee: 2.00 });
-      result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com', phone: '2101234567' });
+      result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' });
       result.current.updateShippingInfo({ city: 'Athens', postalCode: '10671' });
       result.current.setTermsAccepted(true);
     });
@@ -77,14 +93,21 @@ describe('useCheckout Hook', () => {
     expect(isValid).toBe(false);
     expect(result.current.formErrors['customer.firstName']).toBe('Το όνομα είναι υποχρεωτικό');
 
-    // Test checkout processing
-    act(() => result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com' }));
+    // Test checkout processing - Reset all required fields for successful validation
+    act(() => {
+      result.current.clearErrors();
+      result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' });
+      result.current.updateShippingInfo({ city: 'Athens', postalCode: '10671', address: 'Test St' });
+      result.current.selectShippingMethod({ id: 'home', name: 'Home', price: 5.50, estimated_days: 2 });
+      result.current.selectPaymentMethod({ id: 'cod', type: 'cash_on_delivery', name: 'COD', fixed_fee: 2.00 });
+      result.current.setTermsAccepted(true);
+    });
     await act(async () => {
       const order = await result.current.processCheckout();
-      expect(order?.id).toBe('order_123');
+      expect(order?.id).toBe(123);
     });
 
-    expect(result.current.completedOrder?.id).toBe('order_123');
+    expect(result.current.completedOrder?.id).toBe(123);
   });
 
   it('resets state correctly', () => {
