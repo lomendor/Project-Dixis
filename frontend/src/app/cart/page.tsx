@@ -12,6 +12,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCheckout } from '@/hooks/useCheckout';
 import { formatCurrency } from '@/env';
+import CartSummary from '@/components/cart/CartSummary';
 
 export default function Cart() {
   const {
@@ -208,30 +209,7 @@ export default function Cart() {
             )}
 
             {/* Order Summary */}
-            {orderSummary && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-4">Σύνοψη Παραγγελίας</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Προϊόντα:</span>
-                    <span>{formatCurrency(orderSummary.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Μεταφορικά:</span>
-                    <span>{formatCurrency(orderSummary.shipping_cost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>ΦΠΑ (24%):</span>
-                    <span>{formatCurrency(orderSummary.tax_amount)}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Σύνολο:</span>
-                    <span>{formatCurrency(orderSummary.total_amount)}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {orderSummary && <CartSummary orderSummary={orderSummary} />}
 
             {/* Checkout Button */}
             <button
