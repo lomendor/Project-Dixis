@@ -5,6 +5,7 @@
 
 import { test, expect } from '@playwright/test';
 import { ApiMockHelper } from './helpers/api-mocks';
+import { CART_TESTIDS } from '@/lib/testids';
 
 test.describe('Cart UI Smoke Tests', () => {
   let apiMocks: ApiMockHelper;
@@ -39,9 +40,19 @@ test.describe('Cart UI Smoke Tests', () => {
     await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
-    // Cart page accessible or auth redirect - both valid
+    // Test can handle both cart content and auth redirects
     const url = page.url();
-    expect(url.includes('/cart') || url.includes('/auth/login')).toBe(true);
+    if (url.includes('/cart')) {
+      // When cart is accessible, validate testids
+      const hasSummary = await page.getByTestId(CART_TESTIDS.CART_SUMMARY).isVisible().catch(() => false);
+      const hasTotal = await page.getByTestId(CART_TESTIDS.CART_TOTAL_AMOUNT).isVisible().catch(() => false);
+      
+      // At least some cart elements should be present
+      expect(hasSummary || hasTotal).toBe(true);
+    } else {
+      // Auth redirect is valid behavior
+      expect(url.includes('/auth/login')).toBe(true);
+    }
   });
 
   test('Empty cart state with navigation link', async ({ page }) => {

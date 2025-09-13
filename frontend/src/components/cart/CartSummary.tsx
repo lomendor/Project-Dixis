@@ -4,6 +4,7 @@
  */
 
 import { formatCurrency } from '@/env';
+import { CART_TESTIDS } from '@/lib/testids';
 
 interface OrderSummary {
   subtotal?: number;
@@ -19,7 +20,7 @@ interface CartSummaryProps {
 
 export default function CartSummary({ orderSummary, className = '' }: CartSummaryProps) {
   return (
-    <div className={`border rounded-lg p-4 ${className}`} data-testid="cart-summary">
+    <div className={`border rounded-lg p-4 ${className}`} data-testid={CART_TESTIDS.CART_SUMMARY}>
       <h3 className="font-semibold mb-4">Σύνοψη Παραγγελίας</h3>
       <div className="space-y-2">
         <div className="flex justify-between">
@@ -37,7 +38,7 @@ export default function CartSummary({ orderSummary, className = '' }: CartSummar
         <hr />
         <div className="flex justify-between font-bold text-lg">
           <span>Σύνολο:</span>
-          <span data-testid="cart-total-amount">{formatCurrency(orderSummary.total_amount || 0)}</span>
+          <span data-testid={CART_TESTIDS.CART_TOTAL_AMOUNT}>{formatCurrency(orderSummary.total_amount || 0)}</span>
         </div>
       </div>
     </div>

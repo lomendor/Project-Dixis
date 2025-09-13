@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { formatCurrency } from '@/env';
+import { CART_TESTIDS } from '@/lib/testids';
 
 interface CartItem {
   id: number;
@@ -23,7 +24,7 @@ export default function CartMiniPanel({ items, totalAmount, className = '' }: Ca
 
   if (itemCount === 0) {
     return (
-      <div className={`bg-gray-50 border rounded-lg p-4 ${className}`} data-testid="cart-mini">
+      <div className={`bg-gray-50 border rounded-lg p-4 ${className}`} data-testid={CART_TESTIDS.CART_MINI_PANEL}>
         <div className="text-center">
           <p className="text-gray-600 text-sm">Το καλάθι είναι κενό</p>
           <Link 
@@ -39,12 +40,12 @@ export default function CartMiniPanel({ items, totalAmount, className = '' }: Ca
   }
 
   return (
-    <div className={`bg-white border rounded-lg p-4 shadow-sm ${className}`} data-testid="cart-mini">
+    <div className={`bg-white border rounded-lg p-4 shadow-sm ${className}`} data-testid={CART_TESTIDS.CART_MINI_PANEL}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-medium text-gray-900">Καλάθι</h3>
         <span 
           className="bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
-          data-testid="cart-items-count"
+          data-testid={CART_TESTIDS.CART_ITEMS_COUNT}
         >
           {itemCount} {itemCount === 1 ? 'προϊόν' : 'προϊόντα'}
         </span>
@@ -65,12 +66,12 @@ export default function CartMiniPanel({ items, totalAmount, className = '' }: Ca
       <div className="border-t pt-3">
         <div className="flex justify-between font-semibold">
           <span>Σύνολο:</span>
-          <span data-testid="cart-total-amount">{formatCurrency(totalAmount)}</span>
+          <span data-testid={CART_TESTIDS.CART_TOTAL_AMOUNT}>{formatCurrency(totalAmount)}</span>
         </div>
         <Link 
           href="/cart" 
           className="w-full mt-3 bg-green-600 text-white text-center py-2 px-4 rounded-md hover:bg-green-700 transition-colors block"
-          data-testid="cart-view-link"
+          data-testid={CART_TESTIDS.CART_VIEW_LINK}
         >
           Προβολή Καλαθιού
         </Link>
