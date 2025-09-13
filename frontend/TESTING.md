@@ -168,6 +168,38 @@ Zone-based shipping calculation with validation:
 - Validation error handling
 - Concurrent operation performance
 
+### Checkout API Performance Testing
+
+**Test File**: `tests/unit/checkout-api-performance.spec.ts`
+**Coverage**: Circuit breaker patterns, concurrency stress testing, timeout handling
+
+**Performance Test Scenarios:**
+1. **Concurrent Operations**: 10 parallel cart operations, 3 parallel checkouts with progressive delays
+2. **Timeout Handling**: Slow server responses (1.5s+), request timeouts (8s+)
+3. **Circuit Breaker**: Failure threshold testing, automatic reset after timeout, response time metrics
+4. **Resource Management**: Memory pressure testing (50+ operations), cleanup verification
+5. **Greek Postal Edge Cases**: Remote islands (19010, 83103), validation (00000 invalid, 10671 valid)
+
+**Circuit Breaker Usage:**
+```typescript
+import { checkoutCircuitBreaker } from '@/lib/api/checkout-monitor'
+
+// Wrap checkout operations
+const result = await checkoutCircuitBreaker.execute(() => 
+  checkoutApi.processValidatedCheckout(form)
+)
+
+// Monitor health
+const health = checkoutCircuitBreaker.getHealthStatus()
+// { state: 'CLOSED'|'OPEN'|'HALF_OPEN', failureRate: 0.2, avgResponseTime: 150, isHealthy: true }
+```
+
+**MSW Test Handlers:**
+- `rateLimitHandlers`: Rate limiting simulation (429 after 5 requests)
+- `networkPartitionHandlers`: Partial failures (cart OK, checkout fails)  
+- `greekPostalHandlers`: Islands shipping costs, postal code validation
+- `circuitBreakerTestHandlers`: 30% failure rate for breaker testing
+
 ### Continuous Integration
 
 Tests run automatically in CI/CD pipeline with:
