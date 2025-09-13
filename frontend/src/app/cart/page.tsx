@@ -98,7 +98,7 @@ export default function Cart() {
     return (
       <>
         <Navigation />
-        <div className="container mx-auto px-4 py-8" data-testid="page-root">
+        <div className="container mx-auto px-4 py-8" data-testid="cart-empty-container">
           <EmptyState 
             title="Το καλάθι σας είναι κενό"
             description="Προσθέστε προϊόντα για να συνεχίσετε με την αγορά."
@@ -117,7 +117,7 @@ export default function Cart() {
   return (
     <>
       <Navigation />
-      <div className="container mx-auto px-4 py-8" data-testid="page-root">
+      <div className="container mx-auto px-4 py-8" data-testid="cart-items-container">
         <h1 className="text-3xl font-bold mb-6">Καλάθι Αγορών</h1>
         
         {/* Cart Items */}
