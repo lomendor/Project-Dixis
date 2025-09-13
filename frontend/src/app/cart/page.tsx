@@ -209,17 +209,20 @@ export default function Cart() {
             )}
 
             {/* Order Summary */}
-            {orderSummary && <CartSummary orderSummary={orderSummary} />}
-
-            {/* Checkout Button */}
-            <button
-              onClick={handleCheckout}
-              disabled={!orderSummary || isLoading}
-              className="w-full px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              data-testid="checkout-btn"
-            >
-              {isLoading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
-            </button>
+            {orderSummary && (
+              <CartSummary
+                orderSummary={{
+                  subtotal: orderSummary.subtotal,
+                  shipping_cost: orderSummary.shipping_cost,
+                  tax_amount: orderSummary.tax_amount,
+                  payment_fees: orderSummary.payment_fees || 0,
+                  total_amount: orderSummary.total_amount
+                }}
+                onCheckout={handleCheckout}
+                isLoading={isLoading}
+                disabled={!orderSummary}
+              />
+            )}
 
             {Object.keys(formErrors).length > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">
