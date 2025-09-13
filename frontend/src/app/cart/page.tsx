@@ -12,6 +12,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCheckout } from '@/hooks/useCheckout';
 import { formatCurrency } from '@/env';
+import CartSummary from '@/components/cart/CartSummary';
 
 export default function Cart() {
   const {
@@ -209,39 +210,19 @@ export default function Cart() {
 
             {/* Order Summary */}
             {orderSummary && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-4">Σύνοψη Παραγγελίας</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Προϊόντα:</span>
-                    <span>{formatCurrency(orderSummary.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Μεταφορικά:</span>
-                    <span>{formatCurrency(orderSummary.shipping_cost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>ΦΠΑ (24%):</span>
-                    <span>{formatCurrency(orderSummary.tax_amount)}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Σύνολο:</span>
-                    <span>{formatCurrency(orderSummary.total_amount)}</span>
-                  </div>
-                </div>
-              </div>
+              <CartSummary
+                orderSummary={{
+                  subtotal: orderSummary.subtotal,
+                  shipping_cost: orderSummary.shipping_cost,
+                  tax_amount: orderSummary.tax_amount,
+                  payment_fees: orderSummary.payment_fees || 0,
+                  total_amount: orderSummary.total_amount
+                }}
+                onCheckout={handleCheckout}
+                isLoading={isLoading}
+                disabled={!orderSummary}
+              />
             )}
-
-            {/* Checkout Button */}
-            <button
-              onClick={handleCheckout}
-              disabled={!orderSummary || isLoading}
-              className="w-full px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              data-testid="checkout-btn"
-            >
-              {isLoading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
-            </button>
 
             {Object.keys(formErrors).length > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-md p-4">
