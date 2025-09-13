@@ -65,10 +65,12 @@ export default defineConfig({
     }
   ],
 
-  webServer: isCI ? undefined : {
-    command: 'npm run start',
+  webServer: {
+    command: 'npm run dev -- --port 3001',
     url: 'http://127.0.0.1:3001',
     reuseExistingServer: true,
-    timeout: 120_000,
+    timeout: 90_000,
+    stdout: 'ignore',
+    stderr: 'pipe',
   },
 });

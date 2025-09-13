@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import CartIcon from '@/components/cart/CartIcon';
 
 export default function Navigation() {
   const { user, logout, isAuthenticated, isProducer } = useAuth();
@@ -94,15 +95,7 @@ export default function Navigation() {
                 Products
               </Link>
               
-              {isAuthenticated && !isProducer && (
-                <Link
-                  href="/cart"
-                  className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
-                  data-testid="nav-cart"
-                >
-                  Cart
-                </Link>
-              )}
+              <CartIcon />
               
               {isAuthenticated && isProducer && (
                 <Link
@@ -195,15 +188,10 @@ export default function Navigation() {
                 Products
               </Link>
               
-              {isAuthenticated && !isProducer && (
-                <Link
-                  href="/cart"
-                  className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
-                  data-testid="mobile-nav-cart"
-                  >
-                  Cart
-                </Link>
-              )}
+              <CartIcon 
+                className="block text-base font-medium" 
+                isMobile={true}
+              />
               
               {isAuthenticated && isProducer && (
                 <Link
