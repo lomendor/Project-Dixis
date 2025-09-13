@@ -52,7 +52,7 @@ export async function retryWithBackoff<T>(
     abortSignal?: AbortSignal;
   } = {}
 ): Promise<T> {
-  const { retries = 2, baseMs = 250, jitter = true, abortSignal } = options;
+  const { retries = 2, baseMs = 300, jitter = true, abortSignal } = options;
   
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (abortSignal?.aborted) {
@@ -78,6 +78,8 @@ export function categorizeError(error: Error): 'network' | 'timeout' | 'validati
   
   if (message.includes('network') || message.includes('fetch')) return 'network';
   if (message.includes('timeout') || message.includes('timed out')) return 'timeout';
+  // Handle specific HTTP errors before general patterns
+  if (message.includes('http 429')) return 'server'; // Rate limiting
   if (message.includes('http 4') || message.includes('bad request') || message.includes('validation')) return 'validation';
   if (message.includes('http 5') || message.includes('server') || message.includes('internal')) return 'server';
   
