@@ -39,7 +39,7 @@ async function globalSetup(config: FullConfig) {
         value: 'consumer_authenticated', 
         domain: '127.0.0.1',
         path: '/',
-        expires: Date.now() + 86400000, // 24h
+        expires: -1, // Session cookie
         httpOnly: false,
         secure: false,
         sameSite: 'Lax'
@@ -60,7 +60,7 @@ async function globalSetup(config: FullConfig) {
         value: 'producer_authenticated', 
         domain: '127.0.0.1',
         path: '/',
-        expires: Date.now() + 86400000, // 24h
+        expires: -1, // Session cookie
         httpOnly: false,
         secure: false,
         sameSite: 'Lax'

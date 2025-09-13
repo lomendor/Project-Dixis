@@ -5,10 +5,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
 import { useCheckout } from '../../src/hooks/useCheckout';
 import { apiUrl } from '../../src/lib/api';
 
-// MSW server
 const server = setupServer();
 beforeEach(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => { server.resetHandlers(); server.close(); });
@@ -59,8 +59,8 @@ describe('useCheckout Hook', () => {
     act(() => {
       result.current.selectShippingMethod({ id: 'home', name: 'Home', price: 5.50, estimated_days: 2 });
       result.current.selectPaymentMethod({ id: 'cod', type: 'cash_on_delivery', name: 'COD', fixed_fee: 2.00 });
-      result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com', phone: '2101234567' });
-      result.current.updateShippingInfo({ city: 'Athens', postalCode: '10671' });
+      result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' });
+      result.current.updateShippingInfo({ address: '123 Main St', city: 'Athens', postalCode: '10671' });
       result.current.setTermsAccepted(true);
     });
 
@@ -72,11 +72,13 @@ describe('useCheckout Hook', () => {
 
     // Test validation
     act(() => result.current.updateCustomerInfo({ firstName: '', email: 'invalid' }));
-    expect(result.current.validateForm()).toBe(false);
+    let isValid;
+    act(() => { isValid = result.current.validateForm(); });
+    expect(isValid).toBe(false);
     expect(result.current.formErrors['customer.firstName']).toBe('Το όνομα είναι υποχρεωτικό');
 
     // Test checkout processing
-    act(() => result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com' }));
+    act(() => result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com' }));
     await act(async () => {
       const order = await result.current.processCheckout();
       expect(order?.id).toBe('order_123');
