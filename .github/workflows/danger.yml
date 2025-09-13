@@ -10,7 +10,7 @@ jobs:
     continue-on-error: true  # Soft warnings, don't block
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0  # Full history for proper diffs
       
