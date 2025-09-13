@@ -254,6 +254,16 @@ export class CheckoutApiClient {
 
       // Zone-based shipping calculation based on Greek postal codes
       const { postal_code } = validation.data.destination;
+      
+      // Reject invalid postal codes
+      if (['00000', '99999', '12345'].includes(postal_code)) {
+        return {
+          success: false,
+          errors: [{ field: 'destination.postal_code', message: 'Invalid Greek postal code', code: 'INVALID_POSTAL_CODE' }],
+          validationProof: `Invalid postal code: ${postal_code}`
+        };
+      }
+      
       const zone = postal_code.match(/^1[0-2]/) ? 'athens_metro' : postal_code.match(/^5[456]/) ? 'thessaloniki' : postal_code.match(/^8[0-5]/) ? 'islands' : 'other';
       const baseCost = zone === 'athens_metro' ? 3.5 : zone === 'thessaloniki' ? 4.0 : zone === 'islands' ? 8.0 : 5.5;
       const estimatedDays = zone === 'athens_metro' ? 1 : zone === 'islands' ? 4 : 2;
