@@ -59,8 +59,8 @@ describe('useCheckout Hook', () => {
     act(() => {
       result.current.selectShippingMethod({ id: 'home', name: 'Home', price: 5.50, estimated_days: 2 });
       result.current.selectPaymentMethod({ id: 'cod', type: 'cash_on_delivery', name: 'COD', fixed_fee: 2.00 });
-      result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com', phone: '2101234567' });
-      result.current.updateShippingInfo({ city: 'Athens', postalCode: '10671' });
+      result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' });
+      result.current.updateShippingInfo({ address: '123 Main St', city: 'Athens', postalCode: '10671' });
       result.current.setTermsAccepted(true);
     });
 
@@ -78,7 +78,7 @@ describe('useCheckout Hook', () => {
     expect(result.current.formErrors['customer.firstName']).toBe('Το όνομα είναι υποχρεωτικό');
 
     // Test checkout processing
-    act(() => result.current.updateCustomerInfo({ firstName: 'John', email: 'john@test.com' }));
+    act(() => result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com' }));
     await act(async () => {
       const order = await result.current.processCheckout();
       expect(order?.id).toBe('order_123');

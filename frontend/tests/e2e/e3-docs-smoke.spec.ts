@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupApiMocks } from './api-mocks';
+import { ApiMockHelper } from './helpers/api-mocks';
 import './setup.mocks';
 
 /**
@@ -12,7 +12,8 @@ import './setup.mocks';
 test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
   // Setup API mocks before each test  
   test.beforeEach(async ({ page }) => {
-    await setupApiMocks(page);
+    const apiMocks = new ApiMockHelper(page);
+    await apiMocks.setupCartMocks();
   });
   
   test('Homepage loads correctly', async ({ page }) => {
