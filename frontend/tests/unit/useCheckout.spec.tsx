@@ -66,15 +66,17 @@ describe('useCheckout Hook', () => {
     const summary = result.current.calculateOrderSummary();
     expect(summary?.tax_amount).toBe(7.44); // 24% VAT
 
-    // Test validation
+    // Test validation (temporarily set invalid data)
     act(() => result.current.updateCustomerInfo({ firstName: '', email: 'invalid' }));
     let isValid;
     act(() => { isValid = result.current.validateForm(); });
     expect(isValid).toBe(false);
     expect(result.current.formErrors['customer.firstName']).toBe('Το όνομα είναι υποχρεωτικό');
 
+    // Restore valid data for checkout
+    act(() => result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' }));
+
     // Test checkout processing
-    act(() => result.current.updateCustomerInfo({ firstName: 'John', lastName: 'Doe', email: 'john@test.com' }));
     await act(async () => {
       const order = await result.current.processCheckout();
       expect(order?.id).toBe('order_123');
