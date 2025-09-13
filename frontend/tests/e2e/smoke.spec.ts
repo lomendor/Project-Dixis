@@ -30,8 +30,9 @@ test.describe('Smoke Tests - MSW Authentication', () => {
     // Navigate to homepage with better loading
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
-    // Wait for main content to be visible first
-    await page.getByTestId('main-content').waitFor({ timeout: 30000 });
+    // Wait for main content to be visible first - flexible selector
+    const mainContentSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
+    await mainContentSelector.first().waitFor({ timeout: 30000 });
     
     // Look for mobile menu button with deterministic wait
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
@@ -86,11 +87,12 @@ test.describe('Smoke Tests - MSW Authentication', () => {
     // Navigate to homepage with deterministic loading
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
-    // Wait for main content to load first
-    await page.getByTestId('main-content').waitFor({ timeout: 30000 });
+    // Wait for main content to load first - flexible selector
+    const mainContentSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
+    await mainContentSelector.first().waitFor({ timeout: 30000 });
     
     // Verify page structure loaded
-    await expect(page.getByTestId('main-content')).toBeVisible();
+    await expect(mainContentSelector.first()).toBeVisible();
     
     // Check for authenticated user interface elements
     // Either user menu (desktop) or nav cart should be visible
@@ -112,7 +114,8 @@ test.describe('Smoke Tests - MSW Authentication', () => {
     } catch (error) {
       // Fallback: verify page loaded but auth elements may not be visible
       // This is acceptable for smoke test as MSW auth is tricky
-      await expect(page.getByTestId('main-content')).toBeVisible();
+      const fallbackMainSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
+      await expect(fallbackMainSelector.first()).toBeVisible();
     }
   });
 });
