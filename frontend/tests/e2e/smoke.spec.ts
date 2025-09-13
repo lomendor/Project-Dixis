@@ -56,11 +56,12 @@ test.describe('Smoke Tests - Guest Mode', () => {
     // Navigate to cart page and wait for hydration
     await page.goto('/cart', { waitUntil: 'domcontentloaded' });
     
-    // Wait for main content to load (hydration complete)
-    await page.getByTestId('page-root').waitFor({ timeout: 30000 });
+    // Wait for cart content to load (hydration complete) - either empty or with items
+    const cartContainer = page.locator('[data-testid="cart-empty-container"], [data-testid="cart-items-container"]');
+    await cartContainer.first().waitFor({ timeout: 30000 });
     
-    // Basic smoke test - verify page structure exists
-    await expect(page.getByTestId('page-root')).toBeVisible();
+    // Basic smoke test - verify cart page structure exists
+    await expect(cartContainer.first()).toBeVisible();
     
     // Wait for page stability
     await page.waitForTimeout(1000);
@@ -78,8 +79,9 @@ test.describe('Smoke Tests - Guest Mode', () => {
         const checkoutButton = page.getByTestId('checkout-btn');
         await expect(checkoutButton).toBeVisible();
       } catch (error) {
-        // Final fallback: just verify page loaded properly
-        await expect(page.getByTestId('page-root')).toBeVisible();
+        // Final fallback: just verify cart page loaded properly  
+        const fallbackContainer = page.locator('[data-testid="cart-empty-container"], [data-testid="cart-items-container"]');
+        await expect(fallbackContainer.first()).toBeVisible();
       }
     }
   });
