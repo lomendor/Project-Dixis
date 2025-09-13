@@ -21,7 +21,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       <Link
         href="/auth/login"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid="cart-login-prompt"
+        data-testid="nav-cart cart-login-prompt"
         aria-label="Login to access cart"
       >
         {getCartMessage('guest')}
@@ -35,7 +35,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       <Link
         href="/cart"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-        data-testid="cart-icon-active"
+        data-testid="nav-cart cart-icon-active"
         aria-label={`View cart with ${cartItemCount} items`}
       >
         <span className="flex items-center">
@@ -59,7 +59,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
     return (
       <div 
         className={`text-gray-500 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid="cart-producer-mode"
+        data-testid="nav-cart cart-producer-mode"
       >
         <span data-testid="cart-producer-message" title="Producers have limited cart access">
           {getCartMessage('producer')}
