@@ -40,15 +40,16 @@ class OrdersDemoTest extends TestCase
         $this->assertLessThanOrEqual(4, $itemCount, 'Order should have at most 4 items');
         
         // Assert total calculation is correct (subtotal + shipping_cost = total)
+        // Use delta due to floating point arithmetic; business rounding is handled at persistence
         $expectedTotal = $order->subtotal + $order->shipping_cost;
-        $this->assertEquals($expectedTotal, $order->total, 'Order total should equal subtotal + shipping_cost');
+        $this->assertEqualsWithDelta($expectedTotal, $order->total, 0.01, 'Order total should equal subtotal + shipping_cost');
         
         // Assert order items have valid data
         foreach ($order->orderItems as $item) {
             $this->assertNotNull($item->product_id, 'Order item should have a product_id');
             $this->assertGreaterThan(0, $item->quantity, 'Order item should have positive quantity');
             $this->assertGreaterThan(0, $item->unit_price, 'Order item should have positive unit_price');
-            $this->assertEquals($item->quantity * $item->unit_price, $item->total_price, 'Item total_price should equal quantity * unit_price');
+            $this->assertEqualsWithDelta($item->quantity * $item->unit_price, $item->total_price, 0.01, 'Item total_price should equal quantity * unit_price');
         }
     }
 

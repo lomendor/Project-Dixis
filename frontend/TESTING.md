@@ -1,5 +1,10 @@
 # Testing Guide - Project Dixis
 
+## Unit Testing with Vitest & MSW
+
+### API Testing Patterns
+Unit tests use **MSW (Mock Service Worker)** for API mocking with realistic response patterns. See `tests/unit/checkout-api-extended.spec.ts` for comprehensive examples including retry logic, Greek postal codes, and network resilience scenarios.
+
 ## E2E Testing with Playwright
 
 ### Prerequisites
@@ -106,6 +111,62 @@ The analytics system tracks:
 - Each test starts with clean analytics state
 - Events are cleared between test scenarios
 - Global `window.__ANALYTICS` exposure for verification
+
+## Unit Testing
+
+### Checkout API Extensions
+**Test File**: `tests/unit/checkout-api-extended.spec.ts`  
+**Coverage**: Comprehensive testing of retry utilities, error categorization, and Greek postal code handling
+
+**Run Unit Tests:**
+```bash
+npm run test:unit
+```
+
+#### Key Features Tested
+
+**1. Retry with Backoff (`retryWithBackoff`)**
+```typescript
+import { retryWithBackoff } from '@/lib/api/checkout';
+
+// Basic retry with exponential backoff
+await retryWithBackoff(apiCall, { 
+  retries: 3, 
+  baseMs: 250,
+  jitter: true 
+});
+
+// With abort signal for timeout control
+const controller = new AbortController();
+await retryWithBackoff(apiCall, { 
+  abortSignal: controller.signal 
+});
+```
+
+**2. Error Categorization (`categorizeError`)**  
+Automatically categorizes API errors into actionable types:
+- `network`: Connection failures, fetch errors
+- `timeout`: Request timeouts
+- `validation`: HTTP 4xx, validation errors  
+- `server`: HTTP 5xx, internal server errors
+- `unknown`: Unclassified errors
+
+**3. Greek Postal Code Zones**
+Zone-based shipping calculation with validation:
+- **Athens Metro** (10xxx-12xxx): €3.50, 1-day delivery
+- **Thessaloniki** (54xxx-56xxx): €4.00, 2-day delivery  
+- **Islands** (80xxx-85xxx): €8.00, 4-day delivery
+- **Other Greece**: €5.50, 2-day delivery
+
+#### Test Scenarios Covered
+- Success on first attempt
+- Retry logic with exponential backoff
+- Abort signal handling
+- Error categorization accuracy
+- Greek postal code edge cases
+- Network failure scenarios
+- Validation error handling
+- Concurrent operation performance
 
 ### Continuous Integration
 

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { setupApiMocks } from './api-mocks';
+import { ApiMockHelper } from './helpers/api-mocks';
+import './setup.mocks';
 
 /**
  * PP03-E3 Smoke Test - Documentation & Performance
@@ -11,7 +12,8 @@ import { setupApiMocks } from './api-mocks';
 test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
   // Setup API mocks before each test  
   test.beforeEach(async ({ page }) => {
-    await setupApiMocks(page);
+    const apiMocks = new ApiMockHelper(page);
+    await apiMocks.setupCartMocks();
   });
   
   test('Homepage loads correctly', async ({ page }) => {
@@ -25,7 +27,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
             <a href="/">Αρχική</a>
             <a href="/docs">Τεκμηρίωση</a>
           </nav>
-          <main>
+          <main data-testid="page-root">
             <h1>Καλώς ήρθατε στο Dixis</h1>
             <section>
               <p>Το περιεχόμενο της ιστοσελίδας</p>
@@ -37,7 +39,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await page.setContent(mockHomepage);
     
     // Check that main content area exists
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Check for navigation
     await expect(page.getByRole('navigation')).toBeVisible();
@@ -54,7 +56,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
         <head><title>Dixis - Προϊόντα</title></head>
         <body>
           <nav role="navigation">Πλοήγηση</nav>
-          <main>
+          <main data-testid="page-root">
             <h1>Αναζήτηση Προϊόντων</h1>
             <div data-testid="product-grid">
               <div data-testid="product-item">Κρητικό Ελαιόλαδο</div>
@@ -67,7 +69,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await page.setContent(mockProductsPage);
     
     // Navigate to products (should be the same as homepage for this app)
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Check for product-related content
     const hasProducts = await page.locator('[data-testid*="product"]').count();
@@ -82,7 +84,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
         <head><title>Dixis - Καλάθι Αγορών</title></head>
         <body>
           <nav role="navigation">Πλοήγηση</nav>
-          <main>
+          <main data-testid="page-root">
             <h1>Καλάθι Αγορών</h1>
             <form id="cart-form">
               <p>Το καλάθι σας είναι κενό</p>
@@ -97,7 +99,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     // Guest users should see valid page content
     await page.waitForSelector('main, form, body', { timeout: 10000 });
     
-    const hasMain = await page.locator('main').isVisible().catch(() => false);
+    const hasMain = await page.getByTestId('page-root').isVisible().catch(() => false);
     const hasForm = await page.locator('form').isVisible().catch(() => false);
     const hasBody = await page.locator('body').isVisible().catch(() => false);
     
@@ -118,7 +120,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
               <li><a href="/about">Σχετικά</a></li>
             </ul>
           </nav>
-          <main>
+          <main data-testid="page-root">
             <h1>Αυτή είναι η αρχική σελίδα</h1>
             <p>Περιεχόμενο ιστοσελίδας</p>
           </main>
@@ -131,7 +133,7 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
     await expect(page.getByRole('navigation')).toBeVisible();
     
     // Check for main content area
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
     // Verify no console errors for basic navigation
     const errors: string[] = [];
