@@ -248,6 +248,43 @@ npx playwright test auth-edge-cases.spec.ts:91
 - **Greek Text**: Ensure proper UTF-8 encoding
 - **Cart State**: Clear localStorage between test runs
 
+## E2E Helpers & Auth Fixtures
+
+### Test Helpers
+The E2E test suite includes dedicated helper functions for common operations:
+
+**waitForRoot Helper** (`tests/e2e/helpers/waitForRoot.ts`)
+```typescript
+// Resilient page load detection with fallback selectors
+await waitForRoot(page);
+// Waits for [data-testid="page-root"] or #__next with 15s timeout
+```
+
+**API Mocking** (`tests/e2e/helpers/api-mocks.ts`)
+```typescript
+// Lightweight route stubs for deterministic testing
+await setupCartApiMocks(page);
+await registerSmokeStubs(page);
+```
+
+### Auth Fixtures Management
+**⚠️ Important**: Auth fixture files should remain local-only for testing:
+
+```bash
+# Auth fixtures are auto-generated during test execution
+frontend/.auth/consumer.json  # Local consumer session
+frontend/.auth/producer.json  # Local producer session
+
+# These files should NOT be committed to version control
+# They contain temporary test authentication states only
+```
+
+**Best Practices**:
+- Auth files are regenerated automatically before each test run
+- Timestamps are dynamically updated to prevent expiration
+- Clean auth state ensures deterministic test behavior
+- Manual modification of auth fixtures is not recommended
+
 ## Continuous Improvement
 
 ### Test Quality Gates
