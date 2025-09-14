@@ -79,8 +79,8 @@ test.describe('Smoke Tests - Lightweight Stubs', () => {
         // Actual checkout would require form filling
       }
     } catch (error) {
-      // Fallback: just verify page loaded
-      await expect(page.getByTestId('page-root')).toBeVisible();
+      // Fallback: just verify page loaded with resilient selector
+      await waitForRoot(page);
     }
   });
 
