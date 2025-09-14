@@ -104,6 +104,40 @@ expect(orderPayload.payment_method || 'COD').toBeTruthy();
 5. **E2E Execution**: Playwright test suite
 6. **Artifact Collection**: HTML reports, videos, traces
 
+## Smoke Testing How-To
+
+### Quick Smoke Test Execution
+```bash
+# Run smoke tests (fastest validation)
+npm run e2e:smoke
+
+# Expected output: 7 passed (2-3s)
+# Coverage: homepage, navigation, cart, checkout flow
+```
+
+### Smoke Test Reports
+```bash
+# View latest HTML report
+npx playwright show-report
+
+# Direct report paths
+frontend/playwright-report/index.html    # HTML dashboard  
+frontend/test-results/smoke-*/           # Individual test evidence
+frontend/test-results/*/trace.zip        # Execution traces
+```
+
+### Smoke Test Architecture
+- **Lightweight Stubs**: Playwright route stubs (no MSW overhead)
+- **Mobile Viewport**: 360x800 for hamburger menu testing
+- **Resilient Selectors**: `waitForRoot(page)` helper with fallbacks
+- **Auth Mode**: Mock storage states for consumer/producer roles
+
+### Common Smoke Issues
+- **Page Root**: Use `waitForRoot(page)` instead of strict testid waits
+- **Mobile Nav**: Ensure hamburger menu is visible before clicking
+- **API Stubs**: Register `registerSmokeStubs(page)` before navigation
+- **Image 404s**: Handled by demo.jpg stub in api-mocks.ts
+
 ### Playwright Configuration
 ```typescript
 // playwright.config.ts highlights
