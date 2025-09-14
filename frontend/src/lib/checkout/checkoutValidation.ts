@@ -112,8 +112,8 @@ export const validatePostalCodeCity = (postalCode: string, city: string): boolea
   if (!validCities) return false;
   
   // Normalize city for comparison (remove accents, convert to lowercase)
-  const normalizedCity = city.trim().toLowerCase()
-    .replace(/[άα]/g, 'α')
+  const normalizeGreekText = (text: string) => text.trim().toLowerCase()
+    .replace(/[άά]/g, 'α')
     .replace(/[έε]/g, 'ε')
     .replace(/[ήη]/g, 'η')
     .replace(/[ίι]/g, 'ι')
@@ -121,9 +121,11 @@ export const validatePostalCodeCity = (postalCode: string, city: string): boolea
     .replace(/[ύυ]/g, 'υ')
     .replace(/[ώω]/g, 'ω');
   
+  const normalizedCity = normalizeGreekText(city);
+  
   // Check if any valid city matches (case-insensitive, partial match both ways)
   return validCities.some(validCity => {
-    const normalizedValidCity = validCity.toLowerCase();
+    const normalizedValidCity = normalizeGreekText(validCity);
     // Direct match, partial match, or contained match
     return normalizedValidCity === normalizedCity ||
            normalizedValidCity.includes(normalizedCity) || 

@@ -367,7 +367,7 @@ describe('CheckoutApiClient Resilience', () => {
 
       const result = await checkoutApi.processValidatedCheckout({
         customer: { firstName: 'John', lastName: 'Doe', email: 'john@test.com', phone: '2101234567' },
-        shipping: { address: 'Test', city: 'Athens', postalCode: '10671' },
+        shipping: { address: 'Test Street 123', city: 'Athens', postalCode: '10671' },
         order: {
           items: [{ id: 1, product_id: 1, name: 'Test', price: 10, quantity: 1, subtotal: 10, producer_name: 'Test' }],
           subtotal: 10,
