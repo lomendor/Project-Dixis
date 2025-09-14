@@ -5,7 +5,7 @@
 export const setupCartApiMocks = async (page: any) => {
   const routes = {
     '**/api/v1/cart/items': { cart_items: [{ id: 1, product: { id: 1, name: 'Κρητικό Ελαιόλαδο', price: '15.50' }, quantity: 2, subtotal: '31.00', producer_name: 'Μανωλάς Farms' }], total_items: 2, total_amount: '31.00' },
-    '**/api/v1/auth/me': { error: 'Unauthenticated', status: 401 }
+    '**/api/v1/auth/me': { id: 1, name: 'Test Consumer', email: 'test@dixis.local', role: 'consumer' }
   };
 
   for (const [pattern, response] of Object.entries(routes)) {
@@ -18,3 +18,6 @@ export const setupCartApiMocks = async (page: any) => {
     });
   }
 };
+
+// Alias for compatibility with smoke tests
+export const registerSmokeStubs = setupCartApiMocks;
