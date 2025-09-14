@@ -1,18 +1,22 @@
 import { test, expect } from '@playwright/test';
 import './support/msw-stubs';
+import { registerSmokeStubs } from './helpers/api-mocks';
 
 /**
- * E2E Smoke Tests - MSW Mock Authentication
- * Tests use MSW for stable API mocking without backend dependency
+ * E2E Smoke Tests - Playwright Route Stubs
+ * Tests use lightweight Playwright route stubs to avoid MSW homepage compatibility issues
  */
 
-test.describe('Smoke Tests - MSW Authentication', () => {
+// Configure mobile viewport for all smoke tests
+test.use({ viewport: { width: 360, height: 800 } });
+
+test.describe('Smoke Tests - Lightweight Stubs', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.clearCookies();
     
-    // Enable MSW for this test session
-    await page.addInitScript(() => {
-      process.env.NEXT_PUBLIC_MSW = '1';
+    // Capture page errors for debugging
+    page.on('pageerror', (error) => {
+      console.log('🚨 PAGE ERROR:', error.message);
     });
     
     // Mock authenticated consumer state
@@ -24,19 +28,18 @@ test.describe('Smoke Tests - MSW Authentication', () => {
   });
 
   test('Mobile navigation shows cart link for logged-in consumer', async ({ page }) => {
-    // Set mobile viewport  
-    await page.setViewportSize({ width: 375, height: 667 });
+    // Register API stubs for smoke test
+    await registerSmokeStubs(page);
     
     // Navigate to homepage with better loading
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
-    // Wait for main content to be visible first - flexible selector
-    const mainContentSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
-    await mainContentSelector.first().waitFor({ timeout: 30000 });
+    // Wait for page root to load
+    await expect(page.getByTestId('page-root')).toBeVisible({ timeout: 10000 });
     
-    // Look for mobile menu button with deterministic wait
+    // Look for mobile menu button and verify it's visible
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
-    await mobileMenuButton.waitFor({ timeout: 30000 });
+    await expect(mobileMenuButton).toBeVisible({ timeout: 10000 });
     
     // Open mobile menu
     await mobileMenuButton.click();
@@ -60,11 +63,8 @@ test.describe('Smoke Tests - MSW Authentication', () => {
     const emptyCartMessage = page.getByTestId('empty-cart-message');
     
     try {
-      // Wait for either empty cart message OR checkout button
-      await Promise.race([
-        emptyCartMessage.waitFor({ timeout: 15000 }),
-        page.getByTestId('checkout-btn').waitFor({ timeout: 15000 })
-      ]);
+      // Wait for either empty cart message OR checkout button (deterministic)
+      await emptyCartMessage.or(page.getByTestId('checkout-btn')).first().waitFor({ timeout: 15000 });
       
       if (await emptyCartMessage.isVisible()) {
         // Empty cart scenario - verify empty state
@@ -79,43 +79,26 @@ test.describe('Smoke Tests - MSW Authentication', () => {
       }
     } catch (error) {
       // Fallback: just verify page loaded
-      await expect(page.locator('main')).toBeVisible();
+      await expect(page.getByTestId('page-root')).toBeVisible();
     }
   });
 
-  test('Homepage loads with MSW authentication', async ({ page }) => {
+  test('Homepage loads with lightweight API stubs', async ({ page }) => {
+    // Register API stubs for smoke test
+    await registerSmokeStubs(page);
+    
     // Navigate to homepage with deterministic loading
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
-    // Wait for main content to load first - flexible selector
-    const mainContentSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
-    await mainContentSelector.first().waitFor({ timeout: 30000 });
+    // Wait for page root to load
+    await page.getByTestId('page-root').waitFor({ timeout: 10000 });
+    await expect(page.getByTestId('page-root')).toBeVisible();
     
-    // Verify page structure loaded
-    await expect(mainContentSelector.first()).toBeVisible();
+    // Verify main content is present
+    await expect(page.locator('main')).toBeVisible();
     
-    // Check for authenticated user interface elements
-    // Either user menu (desktop) or nav cart should be visible
-    const userMenu = page.getByTestId('user-menu');
-    const navCart = page.getByTestId('nav-cart');
-    
-    try {
-      // Wait for either authenticated element to appear
-      await Promise.race([
-        userMenu.waitFor({ timeout: 15000 }),
-        navCart.waitFor({ timeout: 15000 })
-      ]);
-      
-      // Verify at least one auth element is visible
-      const userMenuVisible = await userMenu.isVisible();
-      const navCartVisible = await navCart.isVisible();
-      
-      expect(userMenuVisible || navCartVisible).toBe(true);
-    } catch (error) {
-      // Fallback: verify page loaded but auth elements may not be visible
-      // This is acceptable for smoke test as MSW auth is tricky
-      const fallbackMainSelector = page.locator('[data-testid="main-content"], main, [role="main"]');
-      await expect(fallbackMainSelector.first()).toBeVisible();
-    }
+    // Verify essential homepage elements loaded
+    await expect(page.getByText('Fresh Products from Local Producers')).toBeVisible();
+    await expect(page.getByText('Demo Product')).toBeVisible();
   });
 });
