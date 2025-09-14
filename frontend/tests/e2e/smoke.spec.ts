@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import './support/msw-stubs';
 import { registerSmokeStubs } from './helpers/api-mocks';
+import { waitForRoot } from './helpers/waitForRoot';
 
 /**
  * E2E Smoke Tests - Playwright Route Stubs
@@ -35,8 +36,7 @@ test.describe('Smoke Tests - Lightweight Stubs', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
     // Wait for page root to load with resilient selector
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('[data-testid="page-root"], #__next', { timeout: 15000 });
+    await waitForRoot(page);
     
     // Look for mobile menu button and verify it's visible
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
@@ -92,8 +92,7 @@ test.describe('Smoke Tests - Lightweight Stubs', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
     // Wait for page root to load with resilient selector
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('[data-testid="page-root"], #__next', { timeout: 15000 });
+    await waitForRoot(page);
     
     // Verify main content is present
     await expect(page.locator('main')).toBeVisible();
