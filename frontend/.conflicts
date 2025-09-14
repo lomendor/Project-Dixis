@@ -1,0 +1,5 @@
+doc/tasks/context-session.md
+frontend/.auth/consumer.json
+frontend/.auth/producer.json
+frontend/src/app/cart/page.tsx
+frontend/src/lib/api/checkout.ts

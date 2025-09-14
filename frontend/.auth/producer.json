@@ -5,7 +5,7 @@
       "value": "producer_authenticated",
       "domain": "127.0.0.1",
       "path": "/",
-      "expires": -1,
+      "expires": 1757935974300,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"

@@ -36,7 +36,7 @@ export const GREEK_POSTAL_CODES: Record<string, string[]> = {
   '85': ['Ρόδος', 'Rhodes', 'Δωδεκάνησα', 'Dodecanese'],
 
   // Cyclades (Mykonos, Santorini, etc.) and Dodecanese
-  '84': ['Μύκονος', 'Mykonos', 'Σαντορίνη', 'Santorini', 'Θήρα', 'Thira', 'Κυκλάδες', 'Cyclades', 'Δωδεκάνησα', 'Dodecanese'],
+  '84': ['Μύκονος', 'Mykonos', 'Σαντορίνη', 'Santorini', 'Θήρα', 'Thira', 'Σύρος', 'Syros', 'Κυκλάδες', 'Cyclades', 'Δωδεκάνησα', 'Dodecanese'],
 
   // Common areas
   '20': ['Κόρινθος', 'Corinth'],
@@ -103,14 +103,17 @@ export const checkoutValidationSchema = z.object({
 export const validatePostalCodeCity = (postalCode: string, city: string): boolean => {
   if (!postalCode || !city) return false;
   
+  // First validate postal code format - must be exactly 5 digits
+  if (!/^\d{5}$/.test(postalCode)) return false;
+  
   const prefix = postalCode.substring(0, 2);
   const validCities = GREEK_POSTAL_CODES[prefix];
   
   if (!validCities) return false;
   
   // Normalize city for comparison (remove accents, convert to lowercase)
-  const normalizedCity = city.trim().toLowerCase()
-    .replace(/[άα]/g, 'α')
+  const normalizeGreekText = (text: string) => text.trim().toLowerCase()
+    .replace(/[άά]/g, 'α')
     .replace(/[έε]/g, 'ε')
     .replace(/[ήη]/g, 'η')
     .replace(/[ίι]/g, 'ι')
@@ -118,10 +121,16 @@ export const validatePostalCodeCity = (postalCode: string, city: string): boolea
     .replace(/[ύυ]/g, 'υ')
     .replace(/[ώω]/g, 'ω');
   
-  return validCities.some(validCity => 
-    validCity.toLowerCase().includes(normalizedCity) || 
-    normalizedCity.includes(validCity.toLowerCase())
-  );
+  const normalizedCity = normalizeGreekText(city);
+  
+  // Check if any valid city matches (case-insensitive, partial match both ways)
+  return validCities.some(validCity => {
+    const normalizedValidCity = normalizeGreekText(validCity);
+    // Direct match, partial match, or contained match
+    return normalizedValidCity === normalizedCity ||
+           normalizedValidCity.includes(normalizedCity) || 
+           normalizedCity.includes(normalizedValidCity);
+  });
 };
 
 // Validation error types with Greek messages
