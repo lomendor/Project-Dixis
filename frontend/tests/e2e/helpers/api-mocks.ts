@@ -18,3 +18,6 @@ export const setupCartApiMocks = async (page: any) => {
     });
   }
 };
+
+// Alias for compatibility with smoke tests
+export const registerSmokeStubs = setupCartApiMocks;
