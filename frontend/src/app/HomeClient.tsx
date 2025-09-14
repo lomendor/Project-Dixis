@@ -228,7 +228,7 @@ export default function HomeClient() {
   };
 
   return (
-    <div data-testid="page-root" className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Products JSON-LD */}
       {products.length > 0 && (
         <script
