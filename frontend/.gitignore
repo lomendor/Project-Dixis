@@ -45,3 +45,4 @@ playwright-report/
 test-results/
 traces/
 *.zip
+# Trigger CI Pipeline for latest CI-resilient fixes
