@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import AuthGuard from '@/components/AuthGuard';
 
@@ -35,6 +35,7 @@ export default function ProducerProductsPage() {
 function ProducerProductsContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [products, setProducts] = useState<ProducerProduct[]>([]);
   const [producerStatus, setProducerStatus] = useState<ProducerStatus>({
@@ -44,12 +45,35 @@ function ProducerProductsContent() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
   useEffect(() => {
     if (user?.id) {
       checkProducerStatus();
     }
   }, [user?.id]);
+
+  // Handle success messages from URL params
+  useEffect(() => {
+    const created = searchParams.get('created');
+    const updated = searchParams.get('updated');
+
+    if (created === 'success') {
+      setSuccess('Το προϊόν δημιουργήθηκε επιτυχώς!');
+      // Clean up URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('created');
+      router.replace(`/producer/products?${newParams.toString()}`);
+    } else if (updated === 'success') {
+      setSuccess('Το προϊόν ενημερώθηκε επιτυχώς!');
+      // Clean up URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('updated');
+      router.replace(`/producer/products?${newParams.toString()}`);
+    }
+  }, [searchParams, router]);
 
   const checkProducerStatus = async () => {
     try {
@@ -80,7 +104,11 @@ function ProducerProductsContent() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/producer/products');
+      const response = await fetch('/api/producer/products', {
+        headers: {
+          'Authorization': 'Bearer mock_token',
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -90,6 +118,43 @@ function ProducerProductsContent() {
     } catch (err) {
       setError('Σφάλμα φόρτωσης προϊόντων');
     }
+  };
+
+  const handleDeleteProduct = async (productId: number) => {
+    setDeletingProductId(productId);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/producer/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer mock_token',
+        },
+      });
+
+      if (response.ok) {
+        // Remove product from local state
+        setProducts(prev => prev.filter(p => p.id !== productId));
+        setSuccess('Το προϊόν διαγράφηκε επιτυχώς!');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Αποτυχία διαγραφής προϊόντος');
+      }
+    } catch (err) {
+      setError('Σφάλμα δικτύου κατά τη διαγραφή');
+    } finally {
+      setDeletingProductId(null);
+      setShowDeleteConfirm(null);
+    }
+  };
+
+  const getProductSlug = (product: ProducerProduct): string => {
+    // Generate slug from title or name
+    const text = product.title || product.name;
+    return text.toLowerCase()
+      .replace(/[^\u0370-\u03FF\u1F00-\u1FFFa-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
   };
 
   // Loading state
@@ -238,6 +303,18 @@ function ProducerProductsContent() {
             </div>
           )}
 
+          {success && (
+            <div className="mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg" data-testid="success-message">
+              {success}
+              <button
+                onClick={() => setSuccess('')}
+                className="ml-2 text-green-600 hover:text-green-500"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           <div className="p-6" data-testid="products-section">
             {products.length === 0 ? (
               <div className="text-center py-12" data-testid="no-products-state">
@@ -313,11 +390,19 @@ function ProducerProductsContent() {
                             Επεξεργασία
                           </button>
                           <button
-                            onClick={() => router.push(`/products/${product.id}`)}
+                            onClick={() => router.push(`/products/${getProductSlug(product)}`)}
                             className="text-green-600 hover:text-green-900"
                             data-testid={`view-product-${product.id}`}
                           >
                             Προβολή
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteConfirm(product.id)}
+                            disabled={deletingProductId === product.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                            data-testid={`delete-product-${product.id}`}
+                          >
+                            {deletingProductId === product.id ? 'Διαγραφή...' : 'Διαγραφή'}
                           </button>
                         </td>
                       </tr>
@@ -329,6 +414,38 @@ function ProducerProductsContent() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-confirmation">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Επιβεβαίωση Διαγραφής
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το προϊόν; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+            </p>
+            <div className="flex items-center justify-end space-x-4">
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                disabled={deletingProductId !== null}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                data-testid="cancel-delete-btn"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={() => handleDeleteProduct(showDeleteConfirm)}
+                disabled={deletingProductId !== null}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400"
+                data-testid="confirm-delete-btn"
+              >
+                {deletingProductId === showDeleteConfirm ? 'Διαγραφή...' : 'Διαγραφή'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

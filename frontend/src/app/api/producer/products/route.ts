@@ -117,3 +117,129 @@ async function getProducerProducts(producerId: number) {
   // Filter by producer (in mock, all products belong to producer 1)
   return producerId === 1 ? mockProducts : [];
 }
+
+/**
+ * POST /api/producer/products
+ * Creates a new product for the authenticated producer
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Mock authentication
+    const userToken = request.headers.get('authorization');
+    const userId = getCurrentUserId(userToken);
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is an approved producer
+    const producerProfile = await getProducerProfile(userId);
+
+    if (!producerProfile || producerProfile.status !== 'active') {
+      return NextResponse.json(
+        { error: 'Producer not approved or profile not found' },
+        { status: 403 }
+      );
+    }
+
+    // Validate required fields
+    if (!body.title?.trim()) {
+      return NextResponse.json(
+        { error: 'Ο τίτλος είναι υποχρεωτικός' },
+        { status: 400 }
+      );
+    }
+
+    if (!body.priceCents || body.priceCents <= 0) {
+      return NextResponse.json(
+        { error: 'Η τιμή πρέπει να είναι μεγαλύτερη από 0' },
+        { status: 400 }
+      );
+    }
+
+    if (body.stockQty < 0) {
+      return NextResponse.json(
+        { error: 'Το απόθεμα δεν μπορεί να είναι αρνητικό' },
+        { status: 400 }
+      );
+    }
+
+    // Create new product (mock implementation)
+    const newProduct = await createProduct(producerProfile.id, {
+      title: body.title.trim(),
+      description: body.description?.trim() || '',
+      priceCents: body.priceCents,
+      stockQty: body.stockQty,
+      weightGrams: body.weightGrams || 0,
+      lengthCm: body.lengthCm || 0,
+      widthCm: body.widthCm || 0,
+      heightCm: body.heightCm || 0,
+      isActive: body.isActive !== false, // Default to true
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Το προϊόν δημιουργήθηκε επιτυχώς',
+      product: newProduct,
+    });
+
+  } catch (error) {
+    console.error('Product creation error:', error);
+    return NextResponse.json(
+      { error: 'Παρουσιάστηκε σφάλμα κατά τη δημιουργία του προϊόντος' },
+      { status: 500 }
+    );
+  }
+}
+
+async function createProduct(producerId: number, data: {
+  title: string;
+  description: string;
+  priceCents: number;
+  stockQty: number;
+  weightGrams: number;
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
+  isActive: boolean;
+}) {
+  // Mock product creation
+  // In real app: INSERT into products table
+
+  const now = new Date().toISOString();
+  const slug = data.title.toLowerCase()
+    .replace(/[^\u0370-\u03FF\u1F00-\u1FFFa-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  const product = {
+    id: Math.floor(Math.random() * 10000), // Mock ID
+    producer_id: producerId,
+    name: slug,
+    title: data.title,
+    slug: slug,
+    description: data.description,
+    price: data.priceCents / 100, // Convert cents to euros
+    price_cents: data.priceCents,
+    currency: 'EUR',
+    unit: 'piece',
+    stock: data.stockQty,
+    weight_grams: data.weightGrams,
+    length_cm: data.lengthCm,
+    width_cm: data.widthCm,
+    height_cm: data.heightCm,
+    is_active: data.isActive,
+    is_organic: false,
+    status: 'available' as const,
+    created_at: now,
+    updated_at: now,
+  };
+
+  // Mock: store to in-memory cache
+  // In real app: INSERT into products table
+  console.log('Mock: Created product:', product);
+
+  return product;
+}
