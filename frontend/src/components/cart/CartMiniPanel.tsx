@@ -33,7 +33,7 @@ export default function CartMiniPanel({
 
   if (isLoading) {
     return (
-      <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="cart-mini-panel">
+      <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="mini-cart-root">
         <div className="animate-pulse" data-testid="mini-panel-loading">
           <div className="h-4 bg-gray-200 rounded mb-2"></div>
           <div className="h-6 bg-gray-200 rounded"></div>
@@ -44,7 +44,7 @@ export default function CartMiniPanel({
 
   if (isEmpty) {
     return (
-      <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="cart-mini-panel">
+      <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="mini-cart-root">
         <div className="flex items-center justify-center text-gray-500" data-testid="empty-cart-mini">
           <ShoppingCartIcon />
           <span className="ml-2">Κενό καλάθι</span>
@@ -55,7 +55,7 @@ export default function CartMiniPanel({
   }
 
   return (
-    <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="cart-mini-panel">
+    <div className={`bg-white border rounded-lg shadow-lg p-4 ${className}`} data-testid="mini-cart-root">
       <div className="flex items-center justify-between mb-3" data-testid="mini-panel-header">
         <div className="flex items-center">
           <ShoppingCartIcon />
@@ -68,7 +68,7 @@ export default function CartMiniPanel({
         </span>
       </div>
 
-      <div className="space-y-2 mb-4" data-testid="mini-items-list">
+      <div className="space-y-2 mb-4" data-testid="mini-cart-items">
         {items.slice(0, 3).map((item) => (
           <div key={item.id} className="flex justify-between text-sm" data-testid="mini-item">
             <div className="flex-1 truncate">
@@ -99,7 +99,7 @@ export default function CartMiniPanel({
 
       <div className="space-y-2">
         <Link href="/cart" onClick={onViewCart} className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors" data-testid="view-cart-btn">Προβολή καλαθιού</Link>
-        <Link href="/checkout" className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors" data-testid="checkout-cta-btn">Ολοκλήρωση παραγγελίας</Link>
+        <Link href="/checkout" className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors" data-testid="mini-cart-cta">Ολοκλήρωση παραγγελίας</Link>
       </div>
     </div>
   );

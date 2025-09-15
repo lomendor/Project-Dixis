@@ -16,22 +16,26 @@ export interface OrderSummaryData {
 
 export interface CartSummaryProps {
   orderSummary: OrderSummaryData;
+  itemsCount?: number;
   onCheckout: () => void;
   isLoading?: boolean;
   disabled?: boolean;
   checkoutButtonText?: string;
   className?: string;
   showTitle?: boolean;
+  showViewCartLink?: boolean;
 }
 
 export default function CartSummary({
   orderSummary,
+  itemsCount = 0,
   onCheckout,
   isLoading = false,
   disabled = false,
   checkoutButtonText = 'Ολοκλήρωση Παραγγελίας',
   className = '',
-  showTitle = true
+  showTitle = true,
+  showViewCartLink = false
 }: CartSummaryProps) {
   const {
     subtotal,
@@ -47,6 +51,12 @@ export default function CartSummary({
         <h3 className="font-semibold mb-4" data-testid="summary-title">
           Σύνοψη Παραγγελίας
         </h3>
+      )}
+      
+      {itemsCount > 0 && (
+        <div className="mb-3 text-sm text-gray-600" data-testid="cart-items-count">
+          {itemsCount} {itemsCount === 1 ? 'προϊόν' : 'προϊόντα'}
+        </div>
       )}
       
       <div className="space-y-2" data-testid="summary-details">
@@ -76,10 +86,20 @@ export default function CartSummary({
         
         <div className="flex justify-between font-bold text-lg" data-testid="total-row">
           <span>Σύνολο:</span>
-          <span data-testid="total-amount">{formatCurrency(total_amount)}</span>
+          <span data-testid="cart-total-amount">{formatCurrency(total_amount)}</span>
         </div>
       </div>
 
+      {showViewCartLink && (
+        <a
+          href="/cart"
+          className="block w-full mt-4 px-6 py-2 text-center border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          data-testid="cart-view-link"
+        >
+          Προβολή καλαθιού
+        </a>
+      )}
+      
       <button
         onClick={onCheckout}
         disabled={disabled || isLoading}
