@@ -77,9 +77,9 @@ export default function Cart() {
     return (
       <>
         <Navigation />
-        <div className="container mx-auto px-4 py-8">
+        <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
           <LoadingSpinner />
-        </div>
+        </main>
       </>
     );
   }
@@ -88,9 +88,9 @@ export default function Cart() {
     return (
       <>
         <Navigation />
-        <div className="container mx-auto px-4 py-8">
+        <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
           <ErrorState message={error} onRetry={loadCart} />
-        </div>
+        </main>
       </>
     );
   }
@@ -99,7 +99,7 @@ export default function Cart() {
     return (
       <>
         <Navigation />
-        <div className="container mx-auto px-4 py-8" data-testid="page-root">
+        <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
           <EmptyState 
             title="Το καλάθι σας είναι κενό"
             description="Προσθέστε προϊόντα για να συνεχίσετε με την αγορά."
@@ -110,7 +110,7 @@ export default function Cart() {
               Συνέχεια στην αγορά
             </Link>
           </div>
-        </div>
+        </main>
       </>
     );
   }
@@ -118,7 +118,7 @@ export default function Cart() {
   return (
     <>
       <Navigation />
-      <div className="container mx-auto px-4 py-8" data-testid="page-root">
+      <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Καλάθι Αγορών</h1>
         
         {/* Cart Items */}
@@ -242,7 +242,7 @@ export default function Cart() {
             )}
           </div>
         </div>
-      </div>
+      </main>
     </>
   );
 }
