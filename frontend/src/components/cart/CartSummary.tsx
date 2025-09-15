@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { formatCurrency } from '@/env';
 
 export interface OrderSummaryData {
@@ -17,21 +18,25 @@ export interface OrderSummaryData {
 export interface CartSummaryProps {
   orderSummary: OrderSummaryData;
   onCheckout: () => void;
+  itemsCount?: number;
   isLoading?: boolean;
   disabled?: boolean;
   checkoutButtonText?: string;
   className?: string;
   showTitle?: boolean;
+  showViewCartLink?: boolean;
 }
 
 export default function CartSummary({
   orderSummary,
   onCheckout,
+  itemsCount = 0,
   isLoading = false,
   disabled = false,
   checkoutButtonText = 'Ολοκλήρωση Παραγγελίας',
   className = '',
-  showTitle = true
+  showTitle = true,
+  showViewCartLink = false
 }: CartSummaryProps) {
   const {
     subtotal,
@@ -48,7 +53,13 @@ export default function CartSummary({
           Σύνοψη Παραγγελίας
         </h3>
       )}
-      
+
+      {itemsCount > 0 && (
+        <div className="mb-3 text-sm text-gray-600" data-testid="cart-items-count">
+          {itemsCount} {itemsCount === 1 ? 'προϊόν' : 'προϊόντα'}
+        </div>
+      )}
+
       <div className="space-y-2" data-testid="summary-details">
         <div className="flex justify-between" data-testid="subtotal-row">
           <span>Προϊόντα:</span>
@@ -76,7 +87,7 @@ export default function CartSummary({
         
         <div className="flex justify-between font-bold text-lg" data-testid="total-row">
           <span>Σύνολο:</span>
-          <span data-testid="total-amount">{formatCurrency(total_amount)}</span>
+          <span data-testid="cart-total-amount">{formatCurrency(total_amount)}</span>
         </div>
       </div>
 
@@ -88,6 +99,16 @@ export default function CartSummary({
       >
         {isLoading ? 'Επεξεργασία...' : checkoutButtonText}
       </button>
+
+      {showViewCartLink && (
+        <Link
+          href="/cart"
+          className="block text-center mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium"
+          data-testid="cart-view-link"
+        >
+          Προβολή καλαθιού
+        </Link>
+      )}
     </div>
   );
 }
