@@ -72,18 +72,74 @@ export async function retryWithBackoff<T>(
   throw new Error('Retry failed'); // This should never be reached
 }
 
-// Error categorization utility
+// Enhanced error categorization for checkout resilience
 export function categorizeError(error: Error): 'network' | 'timeout' | 'validation' | 'server' | 'unknown' {
   const message = error.message.toLowerCase();
   
-  if (message.includes('network') || message.includes('fetch')) return 'network';
-  if (message.includes('timeout') || message.includes('timed out')) return 'timeout';
-  // Handle specific HTTP errors before general patterns
-  if (message.includes('http 429')) return 'server'; // Rate limiting
-  if (message.includes('http 4') || message.includes('bad request') || message.includes('validation')) return 'validation';
-  if (message.includes('http 5') || message.includes('server') || message.includes('internal')) return 'server';
+  // Network errors (connection failures, DNS issues)
+  if (message.includes('network') || message.includes('fetch') || 
+      message.includes('connection') || message.includes('dns') ||
+      message.includes('cors') || message.includes('refused')) return 'network';
+  
+  // Timeout errors (request/response timeouts)
+  if (message.includes('timeout') || message.includes('timed out') ||
+      message.includes('aborted') || message.includes('signal')) return 'timeout';
+  
+  // Server errors (rate limiting first)
+  if (message.includes('http 429')) return 'server';
+  
+  // Validation errors (4xx client errors)
+  if (message.includes('http 4') || message.includes('bad request') || 
+      message.includes('validation') || message.includes('invalid') ||
+      message.includes('unauthorized') || message.includes('forbidden')) return 'validation';
+  
+  // Server errors (5xx)
+  if (message.includes('http 5') || message.includes('server') || 
+      message.includes('internal') || message.includes('unavailable') || 
+      message.includes('gateway')) return 'server';
   
   return 'unknown';
+}
+
+// Resilient checkout operation wrapper with Greek error messaging
+export async function withCheckoutResilience<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  options: { retries?: number; timeoutMs?: number } = {}
+): Promise<T> {
+  const { retries = 2, timeoutMs = 30000 } = options;
+  
+  return retryWithBackoff(
+    async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      
+      try {
+        return await operation();
+      } catch (error) {
+        const category = categorizeError(error as Error);
+        
+        // Enhanced Greek error messages based on category
+        const greekMessages = {
+          network: 'Πρόβλημα σύνδεσης δικτύου. Ελέγξτε τη σύνδεσή σας.',
+          timeout: 'Η αίτηση έληξε. Δοκιμάστε ξανά σε λίγο.',
+          validation: 'Μη έγκυρα δεδομένα. Ελέγξτε τα στοιχεία σας.',
+          server: 'Προσωρινό πρόβλημα διακομιστή. Δοκιμάστε ξανά.',
+          unknown: 'Απροσδόκητο σφάλμα. Επικοινωνήστε με την υποστήριξη.'
+        };
+        
+        const enhancedError = new Error(greekMessages[category]);
+        (enhancedError as any).category = category;
+        (enhancedError as any).originalError = error;
+        (enhancedError as any).operation = operationName;
+        
+        throw enhancedError;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    },
+    { retries, baseMs: 300, jitter: true, abortSignal: new AbortController().signal }
+  );
 }
 
 // Checkout API error types

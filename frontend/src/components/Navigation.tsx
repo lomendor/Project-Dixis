@@ -175,6 +175,7 @@ export default function Navigation() {
             ref={mobileMenuRef}
             className="md:hidden" 
             data-testid="mobile-menu"
+            data-state={mobileMenuOpen ? 'open' : 'closed'}
             id="mobile-menu"
             role="menu"
             aria-labelledby="mobile-menu-button"

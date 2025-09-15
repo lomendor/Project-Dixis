@@ -191,9 +191,10 @@ export default function HomeClient() {
     }
   }, [isAuthenticated, addingToCart, showSuccess, showError]);
 
-  // Generate JSON-LD for products
+  // Generate JSON-LD for products with safe-guards  
   const generateProductsJsonLd = () => {
-    if (products.length === 0) return null;
+    const list = Array.isArray(products) ? products : [];
+    if (list.length === 0) return null; // skip script when empty
     
     return {
       '@context': 'https://schema.org',
@@ -201,36 +202,39 @@ export default function HomeClient() {
       name: 'Fresh Local Products',
       description: 'Premium organic products from local Greek producers',
       url: siteUrl,
-      numberOfItems: products.length,
-      itemListElement: products.slice(0, 10).map((product, index) => ({
+      numberOfItems: list.length,
+      itemListElement: list.slice(0, 10).map((product, index) => ({
         '@type': 'Product',
         position: index + 1,
-        name: product.name,
-        description: product.description || `Fresh ${product.name} from ${product.producer.name}`,
-        image: product.images[0]?.url || product.images[0]?.image_path,
+        name: product?.name || 'Product',
+        description: product?.description || `Fresh product from local producer`,
+        image: product?.images?.[0]?.url || product?.images?.[0]?.image_path || undefined,
         offers: {
           '@type': 'Offer',
-          price: product.price,
-          priceCurrency: 'EUR',
-          availability: (product.stock ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          price: product?.price || 0,
+          priceCurrency: (product as any)?.currency || 'EUR',
+          availability: (product?.stock ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           seller: {
             '@type': 'Organization',
-            name: product.producer.name,
+            name: product?.producer?.name || 'Local Producer',
           },
         },
         brand: {
           '@type': 'Brand',
-          name: product.producer.name,
+          name: (product as any)?.brand || product?.producer?.name || 'Dixis',
         },
-        category: product.categories[0]?.name || 'Fresh Produce',
+        category: product?.categories?.[0]?.name || (product as any)?.category?.name || 'Fresh Produce',
       })),
     };
   };
 
+  // Defensive: ensure products is always an array
+  const safeProducts = Array.isArray(products) ? products : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Products JSON-LD */}
-      {products.length > 0 && (
+      {safeProducts.length > 0 && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -431,7 +435,7 @@ export default function HomeClient() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {safeProducts.map((product) => (
               <div key={product.id} data-testid="product-card" className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <ProductImage
                   src={product.images[0]?.url || product.images[0]?.image_path || '/placeholder.jpg'}
@@ -510,7 +514,7 @@ export default function HomeClient() {
           </div>
         )}
 
-        {products.length === 0 && !loading && !error && (
+        {safeProducts.length === 0 && !loading && !error && (
           <EmptyState
             icon={
               <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
