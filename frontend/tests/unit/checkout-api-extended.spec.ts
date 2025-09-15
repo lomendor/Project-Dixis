@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setupServer } from 'msw/node'
 import { http, HttpResponse, delay } from 'msw'
-import { checkoutApi, categorizeError, retryWithBackoff } from '../../src/lib/api/checkout'
+import { checkoutApi, categorizeError, retryWithBackoff, withCheckoutResilience } from '../../src/lib/api/checkout'
 import { checkoutHandlers } from '../msw/checkout.handlers'
 
 const API_BASE = 'http://127.0.0.1:8001/api/v1'
@@ -210,6 +210,44 @@ describe('Checkout API Resilience', () => {
       const result = await checkoutApi.getValidatedCart()
       expect(result.success).toBe(true)
       expect(result.validationProof).toBe('Cart validated')
+    })
+  })
+
+  describe('Checkout Resilience Wrapper', () => {
+    it('wraps operations with enhanced error handling', async () => {
+      const mockOperation = vi.fn().mockResolvedValue('success')
+      
+      const result = await withCheckoutResilience(
+        mockOperation,
+        'test-operation',
+        { retries: 1, timeoutMs: 5000 }
+      )
+      
+      expect(result).toBe('success')
+      expect(mockOperation).toHaveBeenCalledTimes(1)
+    })
+
+    it('provides Greek error messages based on category', async () => {
+      const mockOperation = vi.fn().mockRejectedValue(new Error('Network request failed'))
+      
+      await expect(
+        withCheckoutResilience(mockOperation, 'test-network-error', { retries: 0 })
+      ).rejects.toMatchObject({
+        message: 'Πρόβλημα σύνδεσης δικτύου. Ελέγξτε τη σύνδεσή σας.',
+        category: 'network',
+        operation: 'test-network-error'
+      })
+    })
+
+    it('handles timeout scenarios with Greek messaging', async () => {
+      const mockOperation = vi.fn().mockRejectedValue(new Error('Request timed out'))
+      
+      await expect(
+        withCheckoutResilience(mockOperation, 'test-timeout', { retries: 0 })
+      ).rejects.toMatchObject({
+        message: 'Η αίτηση έληξε. Δοκιμάστε ξανά σε λίγο.',
+        category: 'timeout'
+      })
     })
   })
 
