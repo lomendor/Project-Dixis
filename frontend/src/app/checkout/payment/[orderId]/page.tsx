@@ -31,24 +31,13 @@ export default function PaymentPage() {
   const { isAuthenticated, user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
 
-  const [order, setOrder] = useState<Order | null>(null);
+const [order, setOrder] = useState<Order | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
-
-initializePayment();
-  }, [orderId, isAuthenticated, authLoading, router, initializePayment]);
-
-const initializePayment = useCallback(async () => {
+  const initializePayment = useCallback(async () => {
     if (!orderId || Array.isArray(orderId)) return;
 
     setIsLoading(true);
@@ -84,6 +73,17 @@ const initializePayment = useCallback(async () => {
       setIsLoading(false);
     }
 }, [orderId, user?.email, user?.name, showToast]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+      return;
+    }
+
+    initializePayment();
+  }, [orderId, isAuthenticated, authLoading, router, initializePayment]);
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
     if (!order) return;
