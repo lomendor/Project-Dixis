@@ -6,7 +6,10 @@ import type {
   SalesAnalytics,
   OrdersAnalytics,
   TopProduct,
-  ProductsAnalytics,
+  ProductsAnalytics
+} from './analytics';
+
+import {
   formatCurrency,
   formatPercentage,
   getStatusColor
