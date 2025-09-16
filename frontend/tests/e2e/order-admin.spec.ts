@@ -112,7 +112,7 @@ test.describe('Order Management - Admin Workflow', () => {
     await statusDropdown.selectOption('shipped');
 
     // Verify status update completed
-    await expect(page.getByText('Σε αποστολή')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Αποστολή')).toBeVisible({ timeout: 5000 });
   });
 
   test('Admin sees validation error for invalid status transition', async ({ page }) => {
