@@ -95,7 +95,29 @@ Route::prefix('v1')->group(function () {
         Route::post('quote', [App\Http\Controllers\Api\ShippingController::class, 'quote'])
             ->middleware('throttle:60,1'); // 60 quote requests per minute
     });
-    
+
+    // Payment methods (public - no auth required)
+    Route::get('payment/methods', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentMethods']);
+
+    // Payments (authenticated)
+    Route::middleware('auth:sanctum')->prefix('payments')->group(function () {
+        Route::post('orders/{order}/init', [App\Http\Controllers\Api\PaymentController::class, 'initPayment'])
+            ->middleware('throttle:10,1'); // 10 payment inits per minute
+        Route::post('orders/{order}/confirm', [App\Http\Controllers\Api\PaymentController::class, 'confirmPayment'])
+            ->middleware('throttle:20,1'); // 20 confirmations per minute
+        Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\PaymentController::class, 'cancelPayment'])
+            ->middleware('throttle:10,1'); // 10 cancellations per minute
+        Route::get('orders/{order}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus'])
+            ->middleware('throttle:30,1'); // 30 status checks per minute
+    });
+
+});
+
+// Webhook routes (no authentication - verified by signature)
+Route::prefix('webhooks')->group(function () {
+    Route::post('stripe', [App\Http\Controllers\Api\WebhookController::class, 'stripe']);
+    Route::post('viva', [App\Http\Controllers\Api\WebhookController::class, 'viva']);
+    Route::post('payment', [App\Http\Controllers\Api\WebhookController::class, 'payment']);
 });
 
 // OpenAPI Documentation
