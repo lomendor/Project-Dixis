@@ -60,11 +60,6 @@ export async function POST(
       if (shipmentValidation.isValid) {
         updatedShipmentStatus = 'shipped';
       }
-    } else if (body.status === 'processing' && mockCurrentOrder.shipment.status === 'pending') {
-      const shipmentValidation = validateShipmentStatusUpdate('pending', 'processing');
-      if (shipmentValidation.isValid) {
-        updatedShipmentStatus = 'processing';
-      }
     } else if (body.status === 'delivered' && mockCurrentOrder.shipment.status === 'shipped') {
       const shipmentValidation = validateShipmentStatusUpdate('shipped', 'delivered');
       if (shipmentValidation.isValid) {

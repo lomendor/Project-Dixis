@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 import { validateOrderStatusUpdate, getValidOrderStatusTransitions, type OrderStatus } from '@/lib/order-status-validator';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Order {
   id: number;
@@ -33,7 +34,6 @@ const statusLabels: Record<OrderStatus, string> = {
   draft: 'Προσχέδιο',
   pending: 'Εκκρεμής',
   paid: 'Πληρωμένη',
-  processing: 'Επεξεργασία',
   shipped: 'Αποστολή',
   delivered: 'Παραδόθηκε',
   cancelled: 'Ακυρώθηκε'
@@ -43,7 +43,6 @@ const statusColors: Record<OrderStatus, string> = {
   draft: 'bg-gray-100 text-gray-800',
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-blue-100 text-blue-800',
-  processing: 'bg-purple-100 text-purple-800',
   shipped: 'bg-indigo-100 text-indigo-800',
   delivered: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800'
@@ -53,6 +52,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     loadOrders();
@@ -75,7 +75,7 @@ export default function AdminOrdersPage() {
 
     const validation = validateOrderStatusUpdate(order.status, newStatus);
     if (!validation.isValid) {
-      alert(validation.error);
+      showError(validation.error || 'Μη έγκυρη μετάβαση κατάστασης');
       return;
     }
 
@@ -94,9 +94,10 @@ export default function AdminOrdersPage() {
       setOrders(prev => prev.map(o =>
         o.id === orderId ? { ...o, status: newStatus } : o
       ));
+      showSuccess(`Η κατάσταση της παραγγελίας #${orderId} ενημερώθηκε σε "${statusLabels[newStatus]}"`);
     } catch (error) {
       console.error('Σφάλμα ενημέρωσης κατάστασης:', error);
-      alert('Σφάλμα ενημέρωσης κατάστασης παραγγελίας');
+      showError('Σφάλμα ενημέρωσης κατάστασης παραγγελίας');
     } finally {
       setUpdating(null);
     }

@@ -25,7 +25,7 @@ export async function POST(
 
     const mockCurrentOrder = {
       id: parseInt(orderId),
-      status: 'processing' as const,
+      status: 'paid' as const,
       shipment: {
         id: `ship_${orderId}`,
         status: 'pending' as const

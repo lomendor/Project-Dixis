@@ -1,19 +1,17 @@
-export type OrderStatus = 'draft' | 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-export type ShipmentStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
+export type OrderStatus = 'draft' | 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
+export type ShipmentStatus = 'pending' | 'shipped' | 'delivered';
 
 const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  draft: ['pending', 'cancelled'],
+  draft: ['pending'],
   pending: ['paid', 'cancelled'],
-  paid: ['processing', 'cancelled'],
-  processing: ['shipped', 'cancelled'],
+  paid: ['shipped', 'cancelled'],
   shipped: ['delivered'],
   delivered: [],
   cancelled: []
 };
 
 const SHIPMENT_STATUS_TRANSITIONS: Record<ShipmentStatus, ShipmentStatus[]> = {
-  pending: ['processing', 'shipped'],
-  processing: ['shipped'],
+  pending: ['shipped'],
   shipped: ['delivered'],
   delivered: []
 };

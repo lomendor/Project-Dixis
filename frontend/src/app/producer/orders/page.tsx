@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/api';
 import { validateOrderStatusUpdate, type OrderStatus } from '@/lib/order-status-validator';
+import { useToast } from '@/contexts/ToastContext';
 
 interface Order {
   id: number;
@@ -32,7 +33,6 @@ const statusLabels: Record<OrderStatus, string> = {
   draft: 'Προσχέδιο',
   pending: 'Εκκρεμής',
   paid: 'Πληρωμένη',
-  processing: 'Επεξεργασία',
   shipped: 'Σε αποστολή',
   delivered: 'Παραδόθηκε',
   cancelled: 'Ακυρώθηκε'
@@ -42,7 +42,6 @@ const statusColors: Record<OrderStatus, string> = {
   draft: 'bg-gray-100 text-gray-800',
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-blue-100 text-blue-800',
-  processing: 'bg-purple-100 text-purple-800',
   shipped: 'bg-indigo-100 text-indigo-800',
   delivered: 'bg-green-100 text-green-800',
   cancelled: 'bg-red-100 text-red-800'
@@ -52,6 +51,7 @@ export default function ProducerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [shipping, setShipping] = useState<number | null>(null);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     loadOrders();
@@ -74,7 +74,7 @@ export default function ProducerOrdersPage() {
 
     const validation = validateOrderStatusUpdate(order.status, 'shipped');
     if (!validation.isValid) {
-      alert(validation.error);
+      showError(validation.error || 'Δεν είναι δυνατή η αποστολή αυτής της παραγγελίας');
       return;
     }
 
@@ -92,16 +92,17 @@ export default function ProducerOrdersPage() {
       setOrders(prev => prev.map(o =>
         o.id === orderId ? { ...o, status: 'shipped' as OrderStatus } : o
       ));
+      showSuccess(`Η παραγγελία #${orderId} σημειώθηκε ως απεσταλμένη`);
     } catch (error) {
       console.error('Σφάλμα ενημέρωσης αποστολής:', error);
-      alert('Σφάλμα ενημέρωσης αποστολής παραγγελίας');
+      showError('Σφάλμα ενημέρωσης αποστολής παραγγελίας');
     } finally {
       setShipping(null);
     }
   };
 
   const canMarkAsShipped = (status: OrderStatus): boolean => {
-    return status === 'paid' || status === 'processing';
+    return status === 'paid';
   };
 
   const filteredOrders = orders.filter(order =>
