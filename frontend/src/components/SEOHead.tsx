@@ -23,7 +23,7 @@ export default function SEOHead({
   canonicalUrl,
   jsonLd,
   noIndex = false,
-}: SEOHeadProps) {
+}: SEOHeadProps): null {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
   
   useEffect(() => {
