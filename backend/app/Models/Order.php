@@ -14,6 +14,7 @@ class Order extends Model
         'status',
         'payment_status',
         'payment_method',
+        'payment_intent_id',
         'shipping_method',
         'currency',
         'subtotal',

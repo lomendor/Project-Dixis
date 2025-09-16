@@ -54,7 +54,9 @@
     "next": "15.5.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@stripe/stripe-js": "^4.8.0",
+    "@stripe/react-stripe-js": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

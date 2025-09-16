@@ -35,4 +35,32 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Providers Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'payment' => [
+        'provider' => env('PAYMENT_PROVIDER', 'fake'),
+        'currency' => env('PAYMENT_CURRENCY', 'EUR'),
+        'webhook_tolerance' => env('PAYMENT_WEBHOOK_TOLERANCE', 300), // 5 minutes
+    ],
+
+    'stripe' => [
+        'secret_key' => env('STRIPE_SECRET_KEY'),
+        'public_key' => env('STRIPE_PUBLIC_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'webhook_url' => env('APP_URL') . '/api/webhooks/stripe',
+    ],
+
+    'viva' => [
+        'merchant_id' => env('VIVA_MERCHANT_ID'),
+        'api_key' => env('VIVA_API_KEY'),
+        'client_id' => env('VIVA_CLIENT_ID'),
+        'client_secret' => env('VIVA_CLIENT_SECRET'),
+        'environment' => env('VIVA_ENVIRONMENT', 'demo'), // demo or live
+        'webhook_verification_key' => env('VIVA_WEBHOOK_VERIFICATION_KEY'),
+    ],
+
 ];
