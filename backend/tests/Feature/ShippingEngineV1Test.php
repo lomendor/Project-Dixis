@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
 use App\Models\Shipment;
+use App\Models\User;
 use App\Services\ShippingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,7 +18,9 @@ class ShippingEngineV1Test extends TestCase
     use RefreshDatabase;
 
     private ShippingService $shippingService;
+
     private User $testUser;
+
     private Product $testProduct;
 
     protected function setUp(): void
@@ -30,7 +32,7 @@ class ShippingEngineV1Test extends TestCase
         // Create test data
         $this->testUser = User::factory()->create([
             'email' => 'testuser@example.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         $producer = Producer::factory()->create(['name' => 'Test Producer']);
@@ -40,7 +42,7 @@ class ShippingEngineV1Test extends TestCase
             'name' => 'Test Product',
             'price' => 10.00,
             'producer_id' => $producer->id,
-            'weight_per_unit' => 1.0
+            'weight_per_unit' => 1.0,
         ]);
     }
 
@@ -100,7 +102,7 @@ class ShippingEngineV1Test extends TestCase
 
             // Mainland (fallback)
             ['26500', 'GR_MAINLAND'],
-            ['38221', 'GR_MAINLAND']
+            ['38221', 'GR_MAINLAND'],
         ];
 
         foreach ($testCases as [$postalCode, $expectedZone]) {
@@ -119,7 +121,7 @@ class ShippingEngineV1Test extends TestCase
             'GR_THESSALONIKI' => ['54622', 4.00],
             'GR_CRETE' => ['71202', 8.00],
             'GR_ISLANDS_LARGE' => ['84100', 12.00],
-            'GR_MAINLAND' => ['26500', 5.50]
+            'GR_MAINLAND' => ['26500', 5.50],
         ];
 
         foreach ($testZones as $zoneCode => [$postalCode, $expectedBaseCost]) {
@@ -141,7 +143,7 @@ class ShippingEngineV1Test extends TestCase
         $testWeights = [
             1.5 => 'tier_0_2kg',    // Light package
             3.5 => 'tier_2_5kg',    // Medium package
-            8.0 => 'tier_above_5kg' // Heavy package
+            8.0 => 'tier_above_5kg', // Heavy package
         ];
 
         foreach ($testWeights as $weight => $expectedTier) {
@@ -170,7 +172,7 @@ class ShippingEngineV1Test extends TestCase
             'flat_rate' => 5.00,
             'free_shipping' => 0.00, // Free shipping profile
             'premium_producer' => null, // Should use standard calculation
-            'local_producer' => null   // Should use local rates
+            'local_producer' => null,   // Should use local rates
         ];
 
         foreach ($profiles as $profile => $expectedCost) {
@@ -212,10 +214,10 @@ class ShippingEngineV1Test extends TestCase
             'items' => [
                 [
                     'product_id' => $this->testProduct->id,
-                    'quantity' => 2
-                ]
+                    'quantity' => 2,
+                ],
             ],
-            'postal_code' => '11527'
+            'postal_code' => '11527',
         ]);
 
         $response->assertStatus(200)
@@ -226,8 +228,8 @@ class ShippingEngineV1Test extends TestCase
                     'zone_code',
                     'carrier_code',
                     'estimated_delivery_days',
-                    'breakdown'
-                ]
+                    'breakdown',
+                ],
             ]);
 
         $data = $response->json()['data'];
@@ -247,9 +249,9 @@ class ShippingEngineV1Test extends TestCase
         // Invalid postal code
         $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [
-                ['product_id' => $this->testProduct->id, 'quantity' => 1]
+                ['product_id' => $this->testProduct->id, 'quantity' => 1],
             ],
-            'postal_code' => '123' // Too short
+            'postal_code' => '123', // Too short
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['postal_code']);
@@ -257,9 +259,9 @@ class ShippingEngineV1Test extends TestCase
         // Invalid product
         $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [
-                ['product_id' => 99999, 'quantity' => 1] // Non-existent product
+                ['product_id' => 99999, 'quantity' => 1], // Non-existent product
             ],
-            'postal_code' => '11527'
+            'postal_code' => '11527',
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['items.0.product_id']);
@@ -280,14 +282,14 @@ class ShippingEngineV1Test extends TestCase
                 'data' => [
                     'tracking_code',
                     'label_url',
-                    'carrier_code'
-                ]
+                    'carrier_code',
+                ],
             ]);
 
         // Verify shipment was created
         $this->assertDatabaseHas('shipments', [
             'order_id' => $order->id,
-            'status' => 'labeled'
+            'status' => 'labeled',
         ]);
     }
 
@@ -308,7 +310,7 @@ class ShippingEngineV1Test extends TestCase
         $shipment = Shipment::factory()->create([
             'order_id' => $order->id,
             'tracking_code' => 'TEST123456789',
-            'status' => 'in_transit'
+            'status' => 'in_transit',
         ]);
 
         $response = $this->getJson("/api/v1/shipping/tracking/{$shipment->tracking_code}");
@@ -319,8 +321,8 @@ class ShippingEngineV1Test extends TestCase
                 'data' => [
                     'tracking_code',
                     'status',
-                    'carrier_code'
-                ]
+                    'carrier_code',
+                ],
             ]);
 
         $data = $response->json()['data'];
@@ -352,7 +354,7 @@ class ShippingEngineV1Test extends TestCase
             'status' => 'pending',
             'payment_status' => 'pending',
             'subtotal' => 20.00,
-            'total' => 20.00
+            'total' => 20.00,
         ]);
 
         OrderItem::factory()->create([
@@ -362,7 +364,7 @@ class ShippingEngineV1Test extends TestCase
             'unit_price' => $this->testProduct->price,
             'total_price' => $this->testProduct->price * ceil($totalWeight),
             'product_name' => $this->testProduct->name,
-            'product_unit' => $this->testProduct->unit ?? 'piece'
+            'product_unit' => $this->testProduct->unit ?? 'piece',
         ]);
 
         return $order;
@@ -373,6 +375,7 @@ class ShippingEngineV1Test extends TestCase
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
         $method->setAccessible(true);
+
         return $method->invokeArgs($object, $parameters);
     }
 }

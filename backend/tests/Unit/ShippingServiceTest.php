@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Services\ShippingService;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ShippingServiceTest extends TestCase
 {
@@ -15,7 +15,7 @@ class ShippingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->shippingService = new ShippingService();
+        $this->shippingService = new ShippingService;
     }
 
     public function test_volumetric_weight_calculation_precision()
@@ -93,7 +93,7 @@ class ShippingServiceTest extends TestCase
             '00000',    // Invalid Greek postal code
             '99999',    // Invalid Greek postal code
             '',         // Empty
-            '12345ABCD' // Mixed format
+            '12345ABCD', // Mixed format
         ];
 
         foreach ($invalidCodes as $invalidCode) {
@@ -153,7 +153,7 @@ class ShippingServiceTest extends TestCase
                 $this->assertTrue(
                     str_contains($e->getMessage(), 'Shipping configuration files not found') ||
                     str_contains($e->getMessage(), 'No query results for model'),
-                    "Expected config or model error, got: " . $e->getMessage()
+                    'Expected config or model error, got: '.$e->getMessage()
                 );
             }
         }
@@ -215,7 +215,7 @@ class ShippingServiceTest extends TestCase
                 $this->assertTrue(
                     str_contains($e->getMessage(), 'Shipping configuration files not found') ||
                     str_contains($e->getMessage(), 'No query results for model'),
-                    "Expected config or model error, got: " . $e->getMessage()
+                    'Expected config or model error, got: '.$e->getMessage()
                 );
                 break;
             }
@@ -254,7 +254,7 @@ class ShippingServiceTest extends TestCase
             'base_rate',
             'extra_weight_kg',
             'extra_cost',
-            'billable_weight_kg'
+            'billable_weight_kg',
         ];
 
         foreach ($requiredKeys as $key) {
@@ -279,7 +279,7 @@ class ShippingServiceTest extends TestCase
             'total_volume_cm3' => $weight * 1000, // Approximate volume
             'item_count' => $type === 'single_item' ? 1 : 3,
             'subtotal_cents' => 2000, // €20.00
-            'user_id' => 1
+            'user_id' => 1,
         ];
     }
 
@@ -322,6 +322,7 @@ class ShippingServiceTest extends TestCase
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
         $method->setAccessible(true);
+
         return $method->invokeArgs($object, $parameters);
     }
 }

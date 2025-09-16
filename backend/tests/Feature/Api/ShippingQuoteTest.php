@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ShippingQuoteTest extends TestCase
 {
@@ -23,25 +23,25 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 2
-                ]
+                    'quantity' => 2,
+                ],
             ],
-            'postal_code' => '11527'
+            'postal_code' => '11527',
         ]);
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'cost_cents',
-                        'cost_eur',
-                        'zone_code',
-                        'zone_name',
-                        'carrier_code',
-                        'estimated_delivery_days',
-                        'breakdown'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'cost_cents',
+                    'cost_eur',
+                    'zone_code',
+                    'zone_name',
+                    'carrier_code',
+                    'estimated_delivery_days',
+                    'breakdown',
+                ],
+            ]);
 
         $this->assertTrue($response->json('success'));
         $this->assertIsNumeric($response->json('data.cost_cents'));
@@ -57,10 +57,10 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 1
-                ]
+                    'quantity' => 1,
+                ],
             ],
-            'postal_code' => '54623'
+            'postal_code' => '54623',
         ]);
 
         $response->assertStatus(200);
@@ -77,10 +77,10 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 1
-                ]
+                    'quantity' => 1,
+                ],
             ],
-            'postal_code' => '84600'
+            'postal_code' => '84600',
         ]);
 
         $response->assertStatus(200);
@@ -97,10 +97,10 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 5 // Higher quantity simulates heavy package
-                ]
+                    'quantity' => 5, // Higher quantity simulates heavy package
+                ],
             ],
-            'postal_code' => '11527'
+            'postal_code' => '11527',
         ]);
 
         $response->assertStatus(200);
@@ -114,15 +114,15 @@ class ShippingQuoteTest extends TestCase
         // Missing required fields
         $response = $this->postJson('/api/v1/shipping/quote', []);
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['items', 'postal_code']);
+            ->assertJsonValidationErrors(['items', 'postal_code']);
 
         // Invalid items (empty array)
         $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [],
-            'postal_code' => '11527'
+            'postal_code' => '11527',
         ]);
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['items']);
+            ->assertJsonValidationErrors(['items']);
 
         // Invalid postal code (too short)
         $product = \App\Models\Product::first();
@@ -130,13 +130,13 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 1
-                ]
+                    'quantity' => 1,
+                ],
             ],
-            'postal_code' => '123' // Too short
+            'postal_code' => '123', // Too short
         ]);
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['postal_code']);
+            ->assertJsonValidationErrors(['postal_code']);
     }
 
     public function test_shipping_quote_unknown_postal_code()
@@ -147,10 +147,10 @@ class ShippingQuoteTest extends TestCase
             'items' => [
                 [
                     'product_id' => $product->id,
-                    'quantity' => 1
-                ]
+                    'quantity' => 1,
+                ],
             ],
-            'postal_code' => '99999' // Unknown postal code
+            'postal_code' => '99999', // Unknown postal code
         ]);
 
         $response->assertStatus(200);
