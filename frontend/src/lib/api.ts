@@ -459,6 +459,62 @@ class ApiClient {
     const endpoint = `producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
     return this.request<{ top_products: TopProduct[] }>(endpoint);
   }
+
+  // Producer product management methods
+  async getProducerProducts(params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    status?: 'active' | 'inactive' | 'all';
+  }): Promise<{
+    data: Product[];
+    current_page: number;
+    per_page: number;
+    total: number;
+    last_page: number;
+    has_more: boolean;
+  }> {
+    const searchParams = new URLSearchParams();
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = `producer/products${queryString ? `?${queryString}` : ''}`;
+
+    return this.request<{
+      data: Product[];
+      current_page: number;
+      per_page: number;
+      total: number;
+      last_page: number;
+      has_more: boolean;
+    }>(endpoint);
+  }
+
+  async updateProductStock(productId: number, stock: number): Promise<{
+    id: number;
+    name: string;
+    old_stock: number | null;
+    new_stock: number;
+    message: string;
+  }> {
+    return this.request<{
+      id: number;
+      name: string;
+      old_stock: number | null;
+      new_stock: number;
+      message: string;
+    }>(`producer/products/${productId}/stock`, {
+      method: 'PATCH',
+      body: JSON.stringify({ stock }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

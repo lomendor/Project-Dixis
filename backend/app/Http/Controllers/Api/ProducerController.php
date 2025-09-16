@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -91,6 +92,106 @@ class ProducerController extends Controller
         ]);
     }
     
+    /**
+     * Update stock level for a producer's product
+     */
+    public function updateStock(Request $request, Product $product, InventoryService $inventoryService): JsonResponse
+    {
+        $user = $request->user();
+
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+
+        // Ensure product belongs to this producer
+        if ($product->producer_id !== $user->producer->id) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        // Validate request
+        $request->validate([
+            'stock' => 'required|integer|min:0|max:99999',
+        ]);
+
+        $oldStock = $product->stock;
+        $newStock = $request->input('stock');
+
+        // Update stock using inventory service (which handles low stock alerts)
+        $inventoryService->updateProductStock($product, $newStock);
+
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'old_stock' => $oldStock,
+            'new_stock' => $newStock,
+            'message' => 'Stock updated successfully'
+        ]);
+    }
+
+    /**
+     * Get all products for the authenticated producer
+     */
+    public function getProducts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Ensure user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Ensure user has a producer profile
+        if (!$user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+
+        $producer = $user->producer;
+
+        // Validate query parameters
+        $request->validate([
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|string|in:active,inactive,all',
+        ]);
+
+        $perPage = $request->query('per_page', 20);
+        $search = $request->query('search');
+        $status = $request->query('status', 'all');
+
+        // Build query
+        $query = $producer->products()->orderBy('name', 'asc');
+
+        // Apply search filter
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // Apply status filter
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        $products = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => $products->items(),
+            'current_page' => $products->currentPage(),
+            'per_page' => $products->perPage(),
+            'total' => $products->total(),
+            'last_page' => $products->lastPage(),
+            'has_more' => $products->hasMorePages(),
+        ]);
+    }
+
     /**
      * Get top-selling products for producer dashboard
      */
