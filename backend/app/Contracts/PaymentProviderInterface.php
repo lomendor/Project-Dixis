@@ -50,4 +50,14 @@ interface PaymentProviderInterface
      * @return array Processing result
      */
     public function handleWebhook(array $payload, string $signature = ''): array;
+
+    /**
+     * Process a refund for the given order.
+     *
+     * @param Order $order
+     * @param int $amountCents Amount to refund in cents (null for full refund)
+     * @param string $reason Refund reason
+     * @return array Refund result with refund_id
+     */
+    public function refund(Order $order, ?int $amountCents = null, string $reason = 'requested_by_customer'): array;
 }

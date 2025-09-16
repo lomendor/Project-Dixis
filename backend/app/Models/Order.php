@@ -15,6 +15,9 @@ class Order extends Model
         'payment_status',
         'payment_method',
         'payment_intent_id',
+        'refund_id',
+        'refunded_amount_cents',
+        'refunded_at',
         'shipping_method',
         'currency',
         'subtotal',
@@ -33,6 +36,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'total' => 'decimal:2',
+        'refunded_at' => 'datetime',
         // Legacy fields - keep for backward compatibility
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
