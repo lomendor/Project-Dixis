@@ -129,6 +129,64 @@ class FakePaymentProvider implements PaymentProviderInterface
     }
 
     /**
+     * Process a refund for the given order.
+     * For fake provider, simulate refund success.
+     */
+    public function refund(Order $order, ?int $amountCents = null, string $reason = 'requested_by_customer'): array
+    {
+        if (!$order->payment_intent_id) {
+            return [
+                'success' => false,
+                'error' => 'no_payment_intent',
+                'error_message' => 'Δεν βρέθηκε payment intent για αυτή την παραγγελία',
+            ];
+        }
+
+        if ($order->payment_status !== 'paid') {
+            return [
+                'success' => false,
+                'error' => 'order_not_paid',
+                'error_message' => 'Η παραγγελία δεν έχει πληρωθεί ακόμη',
+            ];
+        }
+
+        // Calculate refund amount (full refund if not specified)
+        $refundAmount = $amountCents ?? (int) round($order->total_amount * 100);
+
+        // Validate refund amount doesn't exceed paid amount
+        $maxRefundable = (int) round($order->total_amount * 100) - ($order->refunded_amount_cents ?? 0);
+        if ($refundAmount > $maxRefundable) {
+            return [
+                'success' => false,
+                'error' => 'amount_exceeds_refundable',
+                'error_message' => 'Το ποσό επιστροφής υπερβαίνει το διαθέσιμο ποσό',
+                'max_refundable_cents' => $maxRefundable,
+            ];
+        }
+
+        $fakeRefundId = 'fake_re_' . Str::random(12);
+
+        // Update order with fake refund info
+        $currentRefunded = $order->refunded_amount_cents ?? 0;
+        $order->update([
+            'refund_id' => $fakeRefundId,
+            'refunded_amount_cents' => $currentRefunded + $refundAmount,
+            'refunded_at' => now(),
+        ]);
+
+        return [
+            'success' => true,
+            'refund_id' => $fakeRefundId,
+            'amount_cents' => $refundAmount,
+            'amount_euros' => $refundAmount / 100,
+            'currency' => 'eur',
+            'status' => 'succeeded',
+            'reason' => $reason,
+            'created_at' => now()->toISOString(),
+        ];
+    }
+
+    /**
      * Handle webhook notifications from payment provider.
      * For fake provider, just return success.
      */

@@ -225,6 +225,95 @@ class StripePaymentProvider implements PaymentProviderInterface
     }
 
     /**
+     * Process a refund for the given order.
+     */
+    public function refund(Order $order, ?int $amountCents = null, string $reason = 'requested_by_customer'): array
+    {
+        try {
+            if (!$order->payment_intent_id) {
+                return [
+                    'success' => false,
+                    'error' => 'no_payment_intent',
+                    'error_message' => 'Δεν βρέθηκε payment intent για αυτή την παραγγελία',
+                ];
+            }
+
+            if ($order->payment_status !== 'paid') {
+                return [
+                    'success' => false,
+                    'error' => 'order_not_paid',
+                    'error_message' => 'Η παραγγελία δεν έχει πληρωθεί ακόμη',
+                ];
+            }
+
+            // Calculate refund amount (full refund if not specified)
+            $refundAmount = $amountCents ?? (int) round($order->total_amount * 100);
+
+            // Validate refund amount doesn't exceed paid amount
+            $maxRefundable = (int) round($order->total_amount * 100) - ($order->refunded_amount_cents ?? 0);
+            if ($refundAmount > $maxRefundable) {
+                return [
+                    'success' => false,
+                    'error' => 'amount_exceeds_refundable',
+                    'error_message' => 'Το ποσό επιστροφής υπερβαίνει το διαθέσιμο ποσό',
+                    'max_refundable_cents' => $maxRefundable,
+                ];
+            }
+
+            // Create refund in Stripe
+            $refund = $this->stripe->refunds->create([
+                'payment_intent' => $order->payment_intent_id,
+                'amount' => $refundAmount,
+                'reason' => $reason,
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'refund_reason' => $reason,
+                ],
+            ]);
+
+            // Update order with refund info
+            $currentRefunded = $order->refunded_amount_cents ?? 0;
+            $order->update([
+                'refund_id' => $refund->id,
+                'refunded_amount_cents' => $currentRefunded + $refundAmount,
+                'refunded_at' => now(),
+            ]);
+
+            Log::info('Refund created successfully', [
+                'order_id' => $order->id,
+                'refund_id' => $refund->id,
+                'amount_cents' => $refundAmount,
+                'reason' => $reason,
+            ]);
+
+            return [
+                'success' => true,
+                'refund_id' => $refund->id,
+                'amount_cents' => $refundAmount,
+                'amount_euros' => $refundAmount / 100,
+                'currency' => 'eur',
+                'status' => $refund->status,
+                'reason' => $reason,
+                'created_at' => date('c', $refund->created),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Stripe refund failed', [
+                'order_id' => $order->id,
+                'amount_cents' => $amountCents,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'refund_failed',
+                'error_message' => 'Η επιστροφή χρημάτων απέτυχε. Παρακαλώ δοκιμάστε ξανά.',
+                'details' => config('app.debug') ? $e->getMessage() : null,
+            ];
+        }
+    }
+
+    /**
      * Handle webhook notifications from Stripe.
      */
     public function handleWebhook(array $payload, string $signature = ''): array
@@ -252,6 +341,14 @@ class StripePaymentProvider implements PaymentProviderInterface
 
                 case 'payment_intent.canceled':
                     return $this->handlePaymentCanceled($event->data->object);
+
+                case 'charge.refund.updated':
+                case 'refund.created':
+                case 'refund.succeeded':
+                    return $this->handleRefundSucceeded($event->data->object);
+
+                case 'refund.failed':
+                    return $this->handleRefundFailed($event->data->object);
 
                 default:
                     Log::info('Unhandled Stripe webhook event', ['type' => $event->type]);
@@ -365,6 +462,68 @@ class StripePaymentProvider implements PaymentProviderInterface
             'event_type' => 'payment_intent.canceled',
             'processed' => true,
             'order_id' => $orderId,
+        ];
+    }
+
+    /**
+     * Handle successful refund webhook.
+     */
+    private function handleRefundSucceeded($refund): array
+    {
+        $orderId = $refund->metadata->order_id ?? null;
+
+        if ($orderId) {
+            $order = Order::find($orderId);
+            if ($order) {
+                // Update refund status - webhook confirms the refund is processed
+                $order->update([
+                    'refund_id' => $refund->id,
+                    'refunded_amount_cents' => $refund->amount,
+                    'refunded_at' => now(),
+                ]);
+
+                Log::info('Refund processed successfully via webhook', [
+                    'order_id' => $orderId,
+                    'refund_id' => $refund->id,
+                    'amount_cents' => $refund->amount,
+                ]);
+            }
+        }
+
+        return [
+            'success' => true,
+            'event_type' => 'refund.succeeded',
+            'processed' => true,
+            'order_id' => $orderId,
+            'refund_id' => $refund->id,
+        ];
+    }
+
+    /**
+     * Handle failed refund webhook.
+     */
+    private function handleRefundFailed($refund): array
+    {
+        $orderId = $refund->metadata->order_id ?? null;
+
+        if ($orderId) {
+            $order = Order::find($orderId);
+            if ($order) {
+                // Log the failure but don't change order status drastically
+                Log::error('Refund failed via webhook', [
+                    'order_id' => $orderId,
+                    'refund_id' => $refund->id,
+                    'failure_reason' => $refund->failure_reason,
+                ]);
+            }
+        }
+
+        return [
+            'success' => true,
+            'event_type' => 'refund.failed',
+            'processed' => true,
+            'order_id' => $orderId,
+            'refund_id' => $refund->id,
         ];
     }
 }

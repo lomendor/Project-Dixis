@@ -111,6 +111,16 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 status checks per minute
     });
 
+    // Refunds (admin only - simplified auth for now)
+    Route::middleware('auth:sanctum')->prefix('refunds')->group(function () {
+        Route::get('orders', [App\Http\Controllers\Api\RefundController::class, 'index'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::post('orders/{order}', [App\Http\Controllers\Api\RefundController::class, 'create'])
+            ->middleware('throttle:5,1'); // 5 refunds per minute
+        Route::get('orders/{order}', [App\Http\Controllers\Api\RefundController::class, 'show'])
+            ->middleware('throttle:30,1'); // 30 status checks per minute
+    });
+
 });
 
 // Webhook routes (no authentication - verified by signature)
