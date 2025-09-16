@@ -218,6 +218,7 @@ export default function Cart() {
                   payment_fees: orderSummary.payment_fees || 0,
                   total_amount: orderSummary.total_amount
                 }}
+                itemsCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 onCheckout={handleCheckout}
                 isLoading={isLoading}
                 disabled={!orderSummary}
