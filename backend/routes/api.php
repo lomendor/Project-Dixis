@@ -135,6 +135,20 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:10,1'); // 10 requests per minute
     });
 
+    // Admin Analytics (simplified auth for now - should be admin middleware in production)
+    Route::middleware('auth:sanctum')->prefix('admin/analytics')->group(function () {
+        Route::get('sales', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'sales'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('orders', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'orders'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('products', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'products'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('producers', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'producers'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('dashboard', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'dashboard'])
+            ->middleware('throttle:120,1'); // 120 requests per minute for dashboard
+    });
+
 });
 
 // Webhook routes (no authentication - verified by signature)
