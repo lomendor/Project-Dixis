@@ -60,4 +60,12 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    /**
+     * Get the shipment for the order.
+     */
+    public function shipment()
+    {
+        return $this->hasOne(Shipment::class);
+    }
 }
