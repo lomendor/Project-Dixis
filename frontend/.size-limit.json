@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Homepage JS Bundle",
+    "path": ".next/static/chunks/pages/index-*.js",
+    "limit": "180 KB",
+    "gzip": true
+  },
+  {
+    "name": "Product Page JS Bundle",
+    "path": ".next/static/chunks/pages/products-*.js",
+    "limit": "160 KB",
+    "gzip": true
+  },
+  {
+    "name": "Cart Page JS Bundle",
+    "path": ".next/static/chunks/pages/cart-*.js",
+    "limit": "140 KB",
+    "gzip": true
+  },
+  {
+    "name": "Vendor Bundle",
+    "path": ".next/static/chunks/framework-*.js",
+    "limit": "200 KB",
+    "gzip": true
+  },
+  {
+    "name": "Main CSS Bundle",
+    "path": ".next/static/css/*.css",
+    "limit": "50 KB",
+    "gzip": true
+  }
+]
