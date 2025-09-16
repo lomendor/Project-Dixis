@@ -1,57 +1,58 @@
 #!/usr/bin/env node
 
 /**
- * CodeMap Subagent - Lightweight codebase analysis
- * Generates structure, complexity, and risk assessment reports
+ * CodeMap Subagent - Git diff-based change analysis
+ * Analyzes git changes to identify risks and generate focused reports
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // Configuration
 const CONFIG = {
   maxFileSize: 300,
   maxComplexity: 10,
-  maxNesting: 4,
-  maxParams: 5,
-  srcPath: 'src',
-  outputDir: 'docs/research',
-  excludePaths: ['node_modules', '.next', 'test-results', '.git', 'dist', 'build']
+  outputDir: 'docs/reports',
+  baseBranch: 'main'
 };
 
 // Analysis state
 const analysis = {
-  files: [],
-  totalLOC: 0,
-  complexFunctions: [],
-  largeFiles: [],
-  apiEndpoints: [],
-  risks: { high: [], medium: [], low: [] }
+  changedFiles: [],
+  totalLOCDelta: { added: 0, deleted: 0 },
+  risks: { high: [], medium: [], low: [] },
+  integrationPoints: [],
+  newFiles: [],
+  modifiedFiles: [],
+  deletedFiles: []
 };
 
 /**
  * Main analysis entry point
  */
 async function runCodeMapAnalysis() {
-  console.log('🗺️  CodeMap Subagent - Starting analysis...\n');
+  console.log('🗺️  CodeMap Subagent - Git diff analysis...\n');
 
   try {
     // Ensure output directory exists
-    ensureOutputDir();
+    const dateDir = ensureOutputDir();
 
-    // Scan source directory
-    scanDirectory(CONFIG.srcPath);
+    // Get git diff information
+    await analyzeGitDiff();
 
-    // Perform analysis
-    analyzeFiles();
+    // Analyze changed files
+    await analyzeChangedFiles();
 
-    // Generate report
-    const reportPath = generateReport();
+    // Generate reports
+    const { codemapPath, risksPath } = await generateReports(dateDir);
 
     // Display summary
     displaySummary();
 
-    console.log(`\n✅ Analysis complete! Report saved to: ${reportPath}`);
+    console.log(`\n✅ Analysis complete!`);
+    console.log(`📊 CODEMAP: ${codemapPath}`);
+    console.log(`⚠️  RISKS: ${risksPath}`);
 
   } catch (error) {
     console.error('❌ CodeMap analysis failed:', error.message);
@@ -60,25 +61,61 @@ async function runCodeMapAnalysis() {
 }
 
 /**
- * Recursively scan directory for source files
+ * Analyze git diff to get changed files and stats
  */
-function scanDirectory(dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    console.warn(`⚠️  Source directory '${dirPath}' not found`);
-    return;
-  }
+async function analyzeGitDiff() {
+  try {
+    // Get list of changed files
+    const diffFiles = execSync(`git diff --name-status ${CONFIG.baseBranch}...HEAD`, { encoding: 'utf8' });
 
-  const entries = fs.readdirSync(dirPath);
+    for (const line of diffFiles.split('\n').filter(Boolean)) {
+      const [status, filePath] = line.split('\t');
 
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry);
-    const stat = fs.statSync(fullPath);
+      if (!filePath || !isSourceFile(filePath)) continue;
 
-    if (stat.isDirectory() && !CONFIG.excludePaths.includes(entry)) {
-      scanDirectory(fullPath);
-    } else if (stat.isFile() && isSourceFile(entry)) {
-      analyzeFile(fullPath);
+      const fileInfo = {
+        path: filePath,
+        status: status,
+        loc: 0,
+        locDelta: { added: 0, deleted: 0 }
+      };
+
+      // Get LOC statistics for this file
+      try {
+        const diffStat = execSync(`git diff --numstat ${CONFIG.baseBranch}...HEAD -- "${filePath}"`, { encoding: 'utf8' });
+        const [added, deleted] = diffStat.trim().split('\t').map(n => parseInt(n) || 0);
+
+        fileInfo.locDelta = { added, deleted };
+        analysis.totalLOCDelta.added += added;
+        analysis.totalLOCDelta.deleted += deleted;
+
+        // Get current file size if it exists
+        if (status !== 'D' && fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf8');
+          fileInfo.loc = content.split('\n').filter(line => line.trim().length > 0).length;
+        }
+      } catch (error) {
+        console.warn(`⚠️  Could not get stats for ${filePath}`);
+      }
+
+      // Categorize files
+      if (status === 'A') {
+        analysis.newFiles.push(fileInfo);
+      } else if (status === 'D') {
+        analysis.deletedFiles.push(fileInfo);
+      } else {
+        analysis.modifiedFiles.push(fileInfo);
+      }
+
+      analysis.changedFiles.push(fileInfo);
+
+      // Risk assessment
+      assessChangeRisk(fileInfo);
     }
+
+  } catch (error) {
+    console.warn(`⚠️  Git diff analysis failed: ${error.message}`);
+    console.warn('Note: Ensure you are on a feature branch with changes vs main');
   }
 }
 
@@ -86,120 +123,95 @@ function scanDirectory(dirPath) {
  * Check if file is a source file we should analyze
  */
 function isSourceFile(filename) {
-  const sourceExtensions = ['.ts', '.tsx', '.js', '.jsx'];
+  const sourceExtensions = ['.ts', '.tsx', '.js', '.jsx', '.json'];
   return sourceExtensions.some(ext => filename.endsWith(ext)) &&
-         !filename.endsWith('.test.ts') &&
-         !filename.endsWith('.spec.ts');
+         !filename.includes('node_modules') &&
+         !filename.includes('.next') &&
+         !filename.includes('test-results');
 }
 
 /**
- * Analyze individual file
+ * Analyze changed files for complexity and integration points
  */
-function analyzeFile(filePath) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    const lines = content.split('\n');
-    const loc = lines.filter(line => line.trim().length > 0).length;
+async function analyzeChangedFiles() {
+  for (const fileInfo of analysis.changedFiles) {
+    if (fileInfo.status === 'D' || !fs.existsSync(fileInfo.path)) continue;
 
-    const fileInfo = {
-      path: filePath,
-      loc: loc,
-      lines: lines.length,
-      functions: [],
-      apiCalls: [],
-      complexity: 0
-    };
+    try {
+      const content = fs.readFileSync(fileInfo.path, 'utf8');
 
-    // Analyze file content
-    analyzeFileContent(content, fileInfo);
+      // Check for API endpoints
+      const apiRegex = /(?:fetch|axios|api)\s*\(\s*['"`]([^'"`]+)['"`]/g;
+      let match;
+      while ((match = apiRegex.exec(content)) !== null) {
+        analysis.integrationPoints.push({
+          file: fileInfo.path,
+          type: 'API endpoint',
+          value: match[1]
+        });
+      }
 
-    analysis.files.push(fileInfo);
-    analysis.totalLOC += loc;
+      // Check for type definitions
+      if (fileInfo.path.includes('types') || content.includes('interface ') || content.includes('type ')) {
+        analysis.integrationPoints.push({
+          file: fileInfo.path,
+          type: 'Type definitions',
+          value: 'TypeScript interfaces/types'
+        });
+      }
 
-    // Risk assessment
-    assessFileRisk(fileInfo);
+      // Check for component exports
+      if (content.includes('export default') || content.includes('export const')) {
+        analysis.integrationPoints.push({
+          file: fileInfo.path,
+          type: 'Component export',
+          value: 'React component or utility'
+        });
+      }
 
-  } catch (error) {
-    console.warn(`⚠️  Could not analyze ${filePath}: ${error.message}`);
-  }
-}
-
-/**
- * Analyze file content for complexity and patterns
- */
-function analyzeFileContent(content, fileInfo) {
-  const lines = content.split('\n');
-
-  // Find functions and calculate complexity
-  const functionRegex = /(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|export\s+(?:async\s+)?function)/g;
-  const apiCallRegex = /(?:fetch|axios|api)\s*\(\s*['"`]([^'"`]+)['"`]/g;
-
-  let match;
-
-  // Find API endpoints
-  while ((match = apiCallRegex.exec(content)) !== null) {
-    analysis.apiEndpoints.push(match[1]);
-  }
-
-  // Simple complexity analysis
-  let complexity = 0;
-  let maxNesting = 0;
-  let currentNesting = 0;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    // Count control flow statements for complexity
-    if (trimmed.match(/\b(if|for|while|switch|catch|&&|\|\|)\b/)) {
-      complexity++;
+    } catch (error) {
+      console.warn(`⚠️  Could not analyze content of ${fileInfo.path}: ${error.message}`);
     }
-
-    // Track nesting depth
-    const openBraces = (trimmed.match(/{/g) || []).length;
-    const closeBraces = (trimmed.match(/}/g) || []).length;
-    currentNesting += openBraces - closeBraces;
-    maxNesting = Math.max(maxNesting, currentNesting);
-  }
-
-  fileInfo.complexity = complexity;
-  fileInfo.maxNesting = maxNesting;
-
-  if (complexity > CONFIG.maxComplexity) {
-    analysis.complexFunctions.push({
-      file: fileInfo.path,
-      complexity: complexity
-    });
   }
 }
 
 /**
- * Assess risk level for a file
+ * Assess risk level for a changed file
  */
-function assessFileRisk(fileInfo) {
+function assessChangeRisk(fileInfo) {
   let riskLevel = 'low';
   const reasons = [];
 
+  // Check file size risks
   if (fileInfo.loc > 250) {
     riskLevel = 'high';
     reasons.push(`Large file (${fileInfo.loc} LOC)`);
   } else if (fileInfo.loc > 150) {
-    riskLevel = 'medium';
-    reasons.push(`Medium file (${fileInfo.loc} LOC)`);
+    riskLevel = riskLevel === 'high' ? 'high' : 'medium';
+    reasons.push(`Medium-sized file (${fileInfo.loc} LOC)`);
   }
 
-  if (fileInfo.complexity > CONFIG.maxComplexity) {
+  // Check change size
+  const totalDelta = fileInfo.locDelta.added + fileInfo.locDelta.deleted;
+  if (totalDelta > 100) {
     riskLevel = 'high';
-    reasons.push(`High complexity (${fileInfo.complexity})`);
+    reasons.push(`Large change (+${fileInfo.locDelta.added}/-${fileInfo.locDelta.deleted} LOC)`);
+  } else if (totalDelta > 50) {
+    riskLevel = riskLevel === 'high' ? 'high' : 'medium';
+    reasons.push(`Medium change (+${fileInfo.locDelta.added}/-${fileInfo.locDelta.deleted} LOC)`);
   }
 
-  if (fileInfo.maxNesting > CONFIG.maxNesting) {
-    riskLevel = 'high';
-    reasons.push(`Deep nesting (${fileInfo.maxNesting} levels)`);
+  // Check critical paths
+  if (fileInfo.path.includes('api') || fileInfo.path.includes('types') || fileInfo.path.includes('lib/')) {
+    riskLevel = riskLevel === 'high' ? 'high' : 'medium';
+    reasons.push('Critical integration path');
   }
 
   const riskEntry = {
     file: fileInfo.path,
+    status: fileInfo.status,
     loc: fileInfo.loc,
+    locDelta: fileInfo.locDelta,
     reasons: reasons
   };
 
@@ -207,121 +219,193 @@ function assessFileRisk(fileInfo) {
 }
 
 /**
- * Perform final analysis calculations
+ * Generate CODEMAP and RISKS reports
  */
-function analyzeFiles() {
-  // Sort files by size
-  analysis.largeFiles = analysis.files
-    .filter(f => f.loc > 100)
-    .sort((a, b) => b.loc - a.loc)
-    .slice(0, 10);
+async function generateReports(dateDir) {
+  const date = new Date().toISOString().split('T')[0];
+  const codemapPath = path.join(dateDir, 'CODEMAP.md');
+  const risksPath = path.join(dateDir, 'RISKS-NEXT.md');
 
-  // Deduplicate API endpoints
-  analysis.apiEndpoints = [...new Set(analysis.apiEndpoints)];
-}
+  // Generate CODEMAP.md
+  const codemapReport = `# 🗺️ Git Diff CodeMap Analysis - ${date}
 
-/**
- * Generate markdown report
- */
-function generateReport() {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `CODEMAP-${timestamp}.md`;
-  const reportPath = path.join(CONFIG.outputDir, filename);
+## Changed Files Overview
+- **Modified Files**: ${analysis.modifiedFiles.length}
+- **Added Files**: ${analysis.newFiles.length}
+- **Deleted Files**: ${analysis.deletedFiles.length}
+- **Total LOC Delta**: +${analysis.totalLOCDelta.added}/-${analysis.totalLOCDelta.deleted}
 
-  const avgFileSize = analysis.files.length > 0 ?
-    Math.round(analysis.totalLOC / analysis.files.length) : 0;
+## File Change Analysis
 
-  const report = `# 🗺️ CodeMap Analysis - ${new Date().toISOString()}
+### Modified Files
+${analysis.modifiedFiles.map(f =>
+  `- ${f.path} (+${f.locDelta.added}/-${f.locDelta.deleted} LOC) [${f.loc} total LOC]`
+).join('\n') || '- No files modified'}
 
-## Codebase Structure
-- **Total Files**: ${analysis.files.length}
-- **Total LOC**: ${analysis.totalLOC.toLocaleString()}
-- **Average File Size**: ${avgFileSize} LOC
-- **Source Directory**: ${CONFIG.srcPath}/
+### New Files
+${analysis.newFiles.map(f =>
+  `- ${f.path} (+${f.locDelta.added} LOC)`
+).join('\n') || '- No files added'}
 
-### Largest Files
-${analysis.largeFiles.map(f =>
-  `- ${f.path.replace(CONFIG.srcPath + '/', '')} (${f.loc} LOC)`
-).join('\n') || '- No large files detected'}
+### Deleted Files
+${analysis.deletedFiles.map(f =>
+  `- ${f.path} (-${f.locDelta.deleted} LOC)`
+).join('\n') || '- No files deleted'}
 
-## Complexity Analysis
-- **High Complexity Functions**: ${analysis.complexFunctions.length}
-- **Complexity Threshold**: ${CONFIG.maxComplexity}
+## Complexity Impact
 
-${analysis.complexFunctions.length > 0 ? '### Complex Functions\n' +
-  analysis.complexFunctions.map(f =>
-    `- ${f.file.replace(CONFIG.srcPath + '/', '')} (complexity: ${f.complexity})`
-  ).join('\n') : ''}
+### Large Changes (>50 LOC delta)
+${analysis.changedFiles
+  .filter(f => (f.locDelta.added + f.locDelta.deleted) > 50)
+  .map(f => `- ${f.path} (+${f.locDelta.added}/-${f.locDelta.deleted} LOC)`)
+  .join('\n') || '- No large changes detected'}
 
-## Integration Points
-- **API Endpoints**: ${analysis.apiEndpoints.length}
-- **External Dependencies**: (requires package.json scan)
+### File Size Concerns (>200 LOC)
+${analysis.changedFiles
+  .filter(f => f.loc > 200)
+  .map(f => `- ${f.path} (${f.loc} LOC total)`)
+  .join('\n') || '- No large files in changes'}
 
-${analysis.apiEndpoints.length > 0 ? '### Discovered API Endpoints\n' +
-  analysis.apiEndpoints.map(ep => `- ${ep}`).join('\n') : ''}
+## Integration Points Affected
+${analysis.integrationPoints.map(ip =>
+  `- **${ip.type}**: ${ip.file} - ${ip.value}`
+).join('\n') || '- No integration points detected'}
 
-## Risk Assessment
-
-### 🔴 High Risk (${analysis.risks.high.length} files)
-${analysis.risks.high.map(r =>
-  `- ${r.file.replace(CONFIG.srcPath + '/', '')} (${r.loc} LOC) - ${r.reasons.join(', ')}`
-).join('\n') || '- No high-risk files detected'}
-
-### 🟡 Medium Risk (${analysis.risks.medium.length} files)
-${analysis.risks.medium.slice(0, 5).map(r =>
-  `- ${r.file.replace(CONFIG.srcPath + '/', '')} (${r.loc} LOC) - ${r.reasons.join(', ')}`
-).join('\n') || '- No medium-risk files detected'}
-
-### 🟢 Low Risk
-- **Files**: ${analysis.risks.low.length} files under 150 LOC with low complexity
-
-## Recommendations
-
-### Priority Actions
-${analysis.risks.high.length > 0 ?
-  '- 🔴 **Immediate**: Refactor high-risk files to reduce complexity\n' +
-  '- 🔴 **Critical**: Break large files (>250 LOC) into smaller modules' :
-  '- ✅ **Good**: No immediate high-risk issues detected'}
-
-### Quality Improvements
-- Consider breaking files >150 LOC into smaller, focused modules
-- Add unit tests for complex functions (complexity >${CONFIG.maxComplexity})
-- Review API integration patterns for consistency
-
-### Architecture Notes
-- Total codebase size: ${analysis.totalLOC.toLocaleString()} LOC
-- Average file maintainability: ${avgFileSize < 100 ? 'Good' : avgFileSize < 200 ? 'Fair' : 'Needs Attention'}
-- Complexity distribution: ${analysis.complexFunctions.length} functions need review
+### PR Size Validation
+- **Total Change Size**: ${analysis.totalLOCDelta.added + analysis.totalLOCDelta.deleted} LOC
+- **PR Limit Compliance**: ${(analysis.totalLOCDelta.added + analysis.totalLOCDelta.deleted) <= 300 ? '✅ Within 300 LOC limit' : '❌ Exceeds 300 LOC limit'}
 
 ---
 *Generated by CodeMap Subagent - ${new Date().toISOString()}*
-*Analysis scope: ${CONFIG.srcPath}/ directory*
+*Analysis scope: Git diff vs ${CONFIG.baseBranch}*
 `;
 
-  fs.writeFileSync(reportPath, report);
-  return reportPath;
+  // Generate RISKS-NEXT.md
+  const risksReport = `# ⚠️ Risk Assessment - Next Steps
+
+## High Priority Risks
+${analysis.risks.high.length > 0 ?
+  analysis.risks.high.map(r =>
+    `- 🔴 **${r.file}** (${r.status}): ${r.reasons.join(', ')}\n  - *Action*: ${getActionPlan(r)}`
+  ).join('\n') :
+  '- ✅ No high-priority risks detected'}
+
+## Medium Priority Risks
+${analysis.risks.medium.length > 0 ?
+  analysis.risks.medium.map(r =>
+    `- 🟡 **${r.file}** (${r.status}): ${r.reasons.join(', ')}\n  - *Monitor*: ${getMonitoringPlan(r)}`
+  ).join('\n') :
+  '- ✅ No medium-priority risks detected'}
+
+## Validation Required
+
+### Test Coverage
+- [ ] Unit tests for new functions in modified files
+- [ ] Integration tests for API changes
+- [ ] E2E smoke tests for user-facing changes
+${analysis.integrationPoints.filter(ip => ip.type === 'API endpoint').length > 0 ?
+  '- [ ] API endpoint validation tests' : ''}
+
+### Code Quality
+- [ ] TypeScript compilation passes
+- [ ] ESLint warnings resolved
+- [ ] Bundle size impact reviewed
+- [ ] Performance impact assessed
+
+### Integration Validation
+${analysis.integrationPoints.map(ip =>
+  `- [ ] Verify ${ip.type} in ${ip.file}`
+).join('\n') || '- [ ] No specific integration validations required'}
+
+## Pre-Merge Checklist
+
+### Critical Requirements
+- [ ] All high-risk items addressed or justified
+- [ ] PR stays within 300 LOC limit (Current: ${analysis.totalLOCDelta.added + analysis.totalLOCDelta.deleted} LOC)
+- [ ] Quality gates pass (npm run qa:all)
+- [ ] Smoke tests pass (npm run e2e:smoke)
+
+### Documentation
+- [ ] CODEMAP analysis reviewed
+- [ ] Risk mitigation plans documented
+- [ ] Breaking changes documented (if any)
+
+### Deployment Readiness
+- [ ] Staging environment tested
+- [ ] Performance benchmarks validated
+- [ ] Rollback plan prepared (if needed)
+
+---
+*Generated by CodeMap Subagent - ${new Date().toISOString()}*
+*Risk assessment based on git diff analysis*
+`;
+
+  fs.writeFileSync(codemapPath, codemapReport);
+  fs.writeFileSync(risksPath, risksReport);
+
+  return { codemapPath, risksPath };
+}
+
+/**
+ * Get action plan for high-risk item
+ */
+function getActionPlan(riskItem) {
+  if (riskItem.reasons.some(r => r.includes('Large file'))) {
+    return 'Consider breaking into smaller modules or components';
+  }
+  if (riskItem.reasons.some(r => r.includes('Large change'))) {
+    return 'Review change scope, consider splitting into multiple PRs';
+  }
+  if (riskItem.reasons.some(r => r.includes('Critical integration'))) {
+    return 'Thorough testing required, coordinate with dependent teams';
+  }
+  return 'Review and validate implementation approach';
+}
+
+/**
+ * Get monitoring plan for medium-risk item
+ */
+function getMonitoringPlan(riskItem) {
+  if (riskItem.reasons.some(r => r.includes('Medium'))) {
+    return 'Watch for complexity growth in future changes';
+  }
+  if (riskItem.reasons.some(r => r.includes('Critical integration'))) {
+    return 'Monitor dependent systems after deployment';
+  }
+  return 'Standard monitoring and validation';
 }
 
 /**
  * Display console summary
  */
 function displaySummary() {
-  console.log('📊 Analysis Summary:');
-  console.log(`   Files analyzed: ${analysis.files.length}`);
-  console.log(`   Total LOC: ${analysis.totalLOC.toLocaleString()}`);
-  console.log(`   Average file size: ${Math.round(analysis.totalLOC / analysis.files.length)} LOC`);
+  console.log('📊 Git Diff Analysis Summary:');
+  console.log(`   Changed files: ${analysis.changedFiles.length}`);
+  console.log(`   Added: ${analysis.newFiles.length} | Modified: ${analysis.modifiedFiles.length} | Deleted: ${analysis.deletedFiles.length}`);
+  console.log(`   LOC delta: +${analysis.totalLOCDelta.added}/-${analysis.totalLOCDelta.deleted}`);
+  console.log(`   Total change size: ${analysis.totalLOCDelta.added + analysis.totalLOCDelta.deleted} LOC`);
   console.log(`   High-risk files: ${analysis.risks.high.length}`);
-  console.log(`   Complex functions: ${analysis.complexFunctions.length}`);
-  console.log(`   API endpoints: ${analysis.apiEndpoints.length}`);
+  console.log(`   Medium-risk files: ${analysis.risks.medium.length}`);
+  console.log(`   Integration points: ${analysis.integrationPoints.length}`);
+  console.log(`   PR size compliance: ${(analysis.totalLOCDelta.added + analysis.totalLOCDelta.deleted) <= 300 ? '✅ Within 300 LOC' : '❌ Exceeds 300 LOC'}`);
 }
 
 /**
- * Ensure output directory exists
+ * Ensure output directory exists and return date-specific path
  */
 function ensureOutputDir() {
+  const date = new Date().toISOString().split('T')[0];
+  const dateDir = path.join(CONFIG.outputDir, date);
+
   if (!fs.existsSync(CONFIG.outputDir)) {
     fs.mkdirSync(CONFIG.outputDir, { recursive: true });
   }
+
+  if (!fs.existsSync(dateDir)) {
+    fs.mkdirSync(dateDir, { recursive: true });
+  }
+
+  return dateDir;
 }
 
 // Run analysis if called directly

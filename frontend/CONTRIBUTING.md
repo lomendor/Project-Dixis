@@ -41,67 +41,84 @@ We maintain high code quality through automated quality gates that must pass bef
   - Valid types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
   - Example: `feat(checkout): add payment validation with Zod schemas`
 - [ ] **Required sections**: PR body includes all required sections:
-  - [ ] **Summary**: Clear description of changes
-  - [ ] **Acceptance Criteria**: Specific requirements met
-  - [ ] **Test Plan**: How changes were tested
-  - [ ] **Reports**: Links to analysis reports
+  - [ ] **Summary**: Clear description of changes and scope
+  - [ ] **Acceptance Criteria**: Specific requirements met with checkboxes
+  - [ ] **Test Plan**: How changes were tested with commands used
+  - [ ] **Reports**: Links to 3 required reports (see below)
 
-#### 📊 Documentation & Reports
-- [ ] **Report links**: Include links to 3 reports in PR body:
-  - [ ] CODEMAP analysis (if applicable)
-  - [ ] TEST-REPORT (E2E results)
-  - [ ] RISKS-NEXT (assessment of implementation risks)
-- [ ] **Test summary**: Include test execution results or summary
+#### 📊 Documentation & Reports (REQUIRED)
+- [ ] **3 Required report links** in PR body:
+  - [ ] **CODEMAP**: Link to `docs/reports/YYYY-MM-DD/CODEMAP.md`
+  - [ ] **TEST-REPORT**: E2E test execution results summary
+  - [ ] **RISKS-NEXT**: Link to `docs/reports/YYYY-MM-DD/RISKS-NEXT.md`
+- [ ] **Test summary**: Include test execution results with pass/fail counts
+
+#### 🎯 Testing & Quality Requirements
+- [ ] **data-testid selectors**: All new interactive elements have `data-testid` attributes
+- [ ] **E2E test coverage**: User-facing changes include appropriate E2E test updates
+- [ ] **Test execution**: Run and document results of:
+  ```bash
+  npm run qa:all        # Quality gates
+  npm run e2e:smoke     # Smoke tests
+  npm run lhci          # Lighthouse CI
+  ```
 
 ### ⚖️ Size & Scope Limits
-- [ ] **300 LOC limit**: Total changes ≤300 lines of code
+- [ ] **300 LOC limit**: Total changes ≤300 lines of code (target: 200-300 LOC)
 - [ ] **Focused scope**: PR addresses single feature/fix, not multiple unrelated changes
+- [ ] **No drift**: No changes to CI/CD workflows, ports (3001/8001), or Next.js version (15.5.0)
 - [ ] **Breaking changes**: Clearly documented if introducing breaking changes
 
 ## 🔄 PR Workflow
 
 ### 1. Preparation Phase
 ```bash
-# Run full quality analysis
-npm run qa:all
-
-# Generate CodeMap analysis
+# Generate git diff-based analysis
 npm run subagent:codemap
 
 # Review analysis output
-cat docs/research/CODEMAP-*.md
+cat docs/reports/$(date +%Y-%m-%d)/CODEMAP.md
+cat docs/reports/$(date +%Y-%m-%d)/RISKS-NEXT.md
+
+# Run full quality analysis
+npm run qa:all
 ```
 
 ### 2. Development Phase
 ```bash
-# Ensure tests pass throughout development
+# Ensure quality gates pass throughout development
+npm run qa:all
+
+# Run smoke tests for critical paths
 npm run e2e:smoke
 
-# Check TypeScript compliance
-npm run qa:types
-
-# Validate bundle size impact
-npm run qa:size
+# Check performance impact
+npm run lhci
 ```
 
 ### 3. Pre-Submit Phase
 ```bash
-# Final quality gate check
+# Final quality gate validation
 npm run qa:all
 
-# Smoke test verification
-npm run e2e:smoke
+# Complete E2E test suite
+npm run e2e
+
+# Lighthouse CI validation
+npm run lhci
 
 # Build verification
 npm run build
 ```
 
-### 4. PR Submission
+### 4. PR Submission Requirements
 - Create PR with conventional commit title
-- Include all required sections in PR body
-- Reference CodeMap analysis if complexity changes made
-- Link to relevant test reports
-- Ensure CI passes all quality gates
+- Include all 4 required sections: Summary, Acceptance Criteria, Test Plan, Reports
+- Link to 3 required reports: CODEMAP, TEST-REPORT, RISKS-NEXT
+- Document test execution results with pass/fail counts
+- Ensure all data-testid selectors are present
+- Verify no CI/ports/version drift
+- Confirm ≤300 LOC limit compliance
 
 ## 🛡️ Automated Quality Gates
 
@@ -185,12 +202,64 @@ npm run qa:size
 - **E2E Test Guide**: `tests/e2e/README.md`
 
 ### Scripts Reference
-- `npm run qa:all` - Complete quality analysis
-- `npm run subagent:codemap` - Generate codebase analysis
+- `npm run qa:all` - Complete quality analysis (types, lint, knip, deps, size)
+- `npm run subagent:codemap` - Generate git diff-based CODEMAP and RISKS analysis
 - `npm run e2e:smoke` - Run critical smoke tests
-- `npm run qa:types` - TypeScript type checking
-- `npm run qa:lint` - ESLint validation
-- `npm run qa:size` - Bundle size analysis
+- `npm run e2e` - Run full E2E test suite
+- `npm run lhci` - Run Lighthouse CI performance audit
+- `npm run qa:types` - TypeScript type checking only
+- `npm run qa:lint` - ESLint validation only
+- `npm run qa:size` - Bundle size analysis only
+
+### E2E Testing Commands
+```bash
+# Development testing
+npm run e2e:smoke           # Quick smoke tests
+npm run e2e:ui              # Interactive test runner
+npm run e2e:debug           # Debug mode
+
+# CI/Production testing
+npm run e2e                 # Full test suite
+npm run test:e2e:analytics  # Analytics tests
+npm run test:e2e:performance-a11y  # Performance & accessibility
+```
+
+## 🎯 data-testid Requirements
+
+All interactive elements **MUST** include `data-testid` attributes for E2E testing:
+
+### Required Selectors
+```tsx
+// Buttons and actions
+<button data-testid="add-to-cart-btn">Add to Cart</button>
+<button data-testid="checkout-btn">Checkout</button>
+<button data-testid="submit-order-btn">Submit Order</button>
+
+// Form elements
+<input data-testid="search-input" placeholder="Search products..." />
+<select data-testid="category-filter">...</select>
+<textarea data-testid="message-input">...</textarea>
+
+// Navigation and links
+<nav data-testid="main-navigation">...</nav>
+<a data-testid="product-link" href="/product/123">...</a>
+
+// Content containers
+<div data-testid="product-card">...</div>
+<div data-testid="cart-item">...</div>
+<div data-testid="order-summary">...</div>
+
+// Status indicators
+<div data-testid="loading-spinner">...</div>
+<div data-testid="error-message">...</div>
+<div data-testid="success-toast">...</div>
+```
+
+### Naming Convention
+- Use kebab-case: `data-testid="product-card"`
+- Be specific: `data-testid="checkout-submit-btn"` not `data-testid="button"`
+- Include context: `data-testid="cart-item-remove-btn"`
+- Use consistent suffixes: `-btn`, `-input`, `-card`, `-container`
 
 ## 🎖️ Best Practices
 

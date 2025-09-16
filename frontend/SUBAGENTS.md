@@ -10,7 +10,7 @@
 
 ### 1. CodeMap Subagent
 
-**Purpose**: Map codebase structure, complexity, and integration risks
+**Purpose**: Analyze git diff changes to identify structural risks and complexity impact
 
 **Usage**:
 ```bash
@@ -18,71 +18,91 @@ npm run subagent:codemap
 ```
 
 **Outputs**:
-- `docs/research/CODEMAP-[timestamp].md` - Comprehensive code structure analysis
-- Console summary with key metrics and risk areas
+- `docs/reports/YYYY-MM-DD/CODEMAP.md` - Git diff-based change analysis
+- `docs/reports/YYYY-MM-DD/RISKS-NEXT.md` - Risk assessment for changes
+- Console summary with change impact and risk areas
 
 **Analysis Scope**:
-- File structure and dependencies
-- Component complexity (cyclomatic)
-- API integration points
-- Test coverage gaps
-- Potential refactoring opportunities
+- Git diff scan for current branch vs main
+- Changed files complexity assessment
+- Impact on existing integrations
+- LOC analysis for PR size validation
+- Risk categorization of modifications
 
 **Risk Detection**:
-- Files >300 LOC (breaking PR limits)
-- Circular dependencies
-- Missing TypeScript types
-- Untested critical paths
-- High-complexity functions
+- Files approaching >300 LOC (PR limit enforcement)
+- High-complexity function modifications
+- API endpoint changes impact
+- Critical path modifications
+- Missing test coverage for changes
 
 ## 🚀 Workflow Integration
 
 ### Pre-PR Analysis
 ```bash
-# Before starting feature work
+# Analyze changes before creating PR
 npm run subagent:codemap
 
 # Review generated analysis
-cat docs/research/CODEMAP-*.md
+cat docs/reports/$(date +%Y-%m-%d)/CODEMAP.md
+cat docs/reports/$(date +%Y-%m-%d)/RISKS-NEXT.md
 
-# Plan feature implementation based on risks
+# Address high-risk issues before PR submission
 ```
 
 ### Quality Gates Integration
-- **Automatic**: Runs in nightly CI workflow
-- **Manual**: Available via `npm run subagent:codemap`
-- **PR Triggered**: Danger.js checks for CODEMAP references in PR body
+- **Manual Trigger**: Run before PR creation
+- **PR References**: Include CODEMAP and RISKS-NEXT links in PR body
+- **Danger Validation**: Ensures PR references required reports
 
 ## 📊 CodeMap Output Format
 
+### CODEMAP.md
 ```markdown
-# 🗺️ CodeMap Analysis - [timestamp]
+# 🗺️ Git Diff CodeMap Analysis - [date]
 
-## Codebase Structure
-- Total Files: X
-- Total LOC: X
-- Average File Size: X LOC
-- Largest Files: [list with LOC counts]
+## Changed Files Overview
+- Modified Files: X
+- Added Files: X
+- Deleted Files: X
+- Total LOC Delta: +X/-X
 
-## Complexity Analysis
-- High Complexity Functions: [list with cyclomatic complexity]
-- Deeply Nested Components: [list with nesting depth]
-- Long Parameter Lists: [functions with >5 params]
+## File Change Analysis
+[List of changed files with LOC impact]
+- src/components/Feature.tsx (+45 LOC)
+- src/lib/api.ts (+12 LOC)
+- src/types/index.ts (+8 LOC)
 
-## Integration Points
-- API Endpoints: [list of discovered endpoints]
-- External Dependencies: [non-dev dependencies]
-- Internal Module Coupling: [high-coupling modules]
+## Complexity Impact
+- New Functions: [complexity analysis]
+- Modified Functions: [complexity changes]
+- Risk Assessment: [High/Medium/Low for each file]
 
-## Risk Assessment
-- 🔴 High Risk: [files >250 LOC, missing tests]
-- 🟡 Medium Risk: [files >150 LOC, moderate complexity]
-- 🟢 Low Risk: [well-tested, simple modules]
+## Integration Points Affected
+- API endpoints modified: [list]
+- Type definitions changed: [list]
+- Component interfaces updated: [list]
+```
 
-## Recommendations
-- Priority refactoring targets
-- Test coverage improvements
-- Architecture simplification opportunities
+### RISKS-NEXT.md
+```markdown
+# ⚠️ Risk Assessment - Next Steps
+
+## High Priority Risks
+- 🔴 [Specific risk with mitigation plan]
+
+## Medium Priority Risks
+- 🟡 [Specific risk with monitoring plan]
+
+## Validation Required
+- [ ] Test coverage for new functionality
+- [ ] API integration validation
+- [ ] Performance impact assessment
+
+## Pre-Merge Checklist
+- [ ] All high-risk items addressed
+- [ ] PR stays within 300 LOC limit
+- [ ] Quality gates pass
 ```
 
 ## 🛡️ Guardrails
