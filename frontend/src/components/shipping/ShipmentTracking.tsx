@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
+import {
+  OrderShipmentApiResponseSchema,
+  type OrderShipmentResponse
+} from '@/lib/shippingSchemas';
 
 interface ShipmentTrackingProps {
   trackingCode?: string;
@@ -17,15 +21,10 @@ interface TrackingEvent {
   description: string;
 }
 
-interface ShipmentData {
-  tracking_code: string;
-  status: 'pending' | 'labeled' | 'in_transit' | 'delivered' | 'failed';
-  carrier_code: string;
-  shipped_at?: string;
-  delivered_at?: string;
-  estimated_delivery?: string;
-  events: TrackingEvent[];
-}
+// Use Zod-inferred type for better type safety
+type ShipmentData = OrderShipmentResponse['data'] & {
+  events?: TrackingEvent[]; // Extended for tracking events
+};
 
 export default function ShipmentTracking({
   trackingCode,
@@ -52,9 +51,9 @@ export default function ShipmentTracking({
     try {
       let url: string;
       if (orderId) {
-        url = `/api/orders/${orderId}/shipment`;
+        url = `/api/v1/orders/${orderId}/shipment`;
       } else {
-        url = `/api/shipping/tracking/${codeToUse}`;
+        url = `/api/v1/shipping/tracking/${codeToUse}`;
       }
 
       const response = await fetch(url, {
@@ -64,16 +63,32 @@ export default function ShipmentTracking({
         }
       });
 
-      const data = await response.json();
+      const rawData = await response.json();
+
+      // Validate response using Zod schema
+      const parseResult = OrderShipmentApiResponseSchema.safeParse(rawData);
+
+      if (!parseResult.success) {
+        console.error('Invalid API response format:', parseResult.error);
+        throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
+      }
+
+      const data = parseResult.data;
 
       if (!response.ok) {
-        throw new Error(data.message || 'Αποτυχία ανάκτησης στοιχείων αποστολής');
+        const errorMessage = data.success === false ? data.message : 'Αποτυχία ανάκτησης στοιχείων αποστολής';
+        throw new Error(errorMessage);
       }
 
       if (data.success) {
-        setShipment(data.data);
+        // Extend the validated data with events (since tracking might not be in the schema)
+        const shipmentData: ShipmentData = {
+          ...data.data,
+          events: rawData.data?.events || []
+        };
+        setShipment(shipmentData);
       } else {
-        throw new Error(data.message || 'Δεν βρέθηκαν στοιχεία αποστολής');
+        throw new Error('message' in data ? data.message : 'Δεν βρέθηκαν στοιχεία αποστολής');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Σφάλμα δικτύου';
@@ -139,7 +154,7 @@ export default function ShipmentTracking({
   };
 
   return (
-    <div className={`shipment-tracking ${className}`}>
+    <div className={`shipment-tracking ${className}`} data-testid="shipment-tracking">
       {/* Search Form - only show if no tracking code provided */}
       {!trackingCode && !orderId && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
