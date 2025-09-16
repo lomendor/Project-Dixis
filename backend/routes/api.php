@@ -733,12 +733,22 @@ Route::get('v1/openapi.json', function () {
 Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     // Product management
     Route::patch('products/{product}/toggle', [App\Http\Controllers\Api\ProducerController::class, 'toggleProduct']);
-    
+
     // Dashboard
     Route::get('dashboard/kpi', [App\Http\Controllers\Api\ProducerController::class, 'kpi']);
     Route::get('dashboard/top-products', [App\Http\Controllers\Api\ProducerController::class, 'topProducts']);
-    
+
     // Messages
     Route::patch('messages/{message}/read', [App\Http\Controllers\Api\MessageController::class, 'markAsRead']);
     Route::post('messages/{message}/replies', [App\Http\Controllers\Api\MessageController::class, 'storeReply']);
+
+    // Producer Analytics
+    Route::prefix('analytics')->group(function () {
+        Route::get('sales', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'sales'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'orders'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('products', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'products'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+    });
 });
