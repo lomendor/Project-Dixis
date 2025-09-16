@@ -4,7 +4,7 @@ import { danger, warn, fail, message } from 'danger';
 const pr = danger.github.pr;
 const modifiedFiles = danger.git.modified_files;
 const createdFiles = danger.git.created_files;
-const deletedFiles = danger.git.deleted_files;
+// const deletedFiles = danger.git.deleted_files; // Not currently used
 const allFiles = [...modifiedFiles, ...createdFiles];
 
 // Check PR title follows conventional commit format
@@ -43,10 +43,8 @@ if (!prBody.toLowerCase().includes('test summary') && !prBody.toLowerCase().incl
 }
 
 // File size and count checks
-const bigFiles = allFiles.filter(file => {
-  const fileContents = danger.github.utils.fileContents;
-  return fileContents && fileContents.length > 1000;
-});
+// Future enhancement: Check for large files
+// const bigFiles = allFiles.filter(file => { ... });
 
 if (allFiles.length > 20) {
   warn(`⚠️ This PR modifies ${allFiles.length} files. Consider breaking it into smaller PRs.`);
