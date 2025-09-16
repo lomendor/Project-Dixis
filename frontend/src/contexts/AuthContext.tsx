@@ -14,7 +14,7 @@ interface AuthContextType {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => {
     try {
       setRegisterLoading(true);

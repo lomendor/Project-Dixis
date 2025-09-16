@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
+import AuthGuard from '@/components/AuthGuard';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency } from '@/env';
 
@@ -21,22 +21,11 @@ export default function ProducerDashboard() {
   const [topProducts, setTopProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, isProducer, user } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
-
-    if (isAuthenticated && !isProducer) {
-      router.push('/'); // Redirect consumers to home page
-      return;
-    }
-
     loadDashboardData();
-  }, [isAuthenticated, isProducer, router]);
+  }, []);
 
   const loadDashboardData = async () => {
     try {
@@ -57,9 +46,6 @@ export default function ProducerDashboard() {
     }
   };
 
-  if (!isAuthenticated || !isProducer) {
-    return null; // Will redirect in useEffect
-  }
 
 
   const statsCards: StatsCard[] = stats ? [
@@ -102,10 +88,11 @@ export default function ProducerDashboard() {
   ] : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AuthGuard requireAuth={true} requireRole="producer">
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -293,7 +280,8 @@ export default function ProducerDashboard() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }
