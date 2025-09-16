@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Http\Resources\OrderResource;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -76,12 +77,13 @@ class OrderController extends Controller
      * Create a new order with atomic transactions and stock validation.
      *
      * @param StoreOrderRequest $request
+     * @param InventoryService $inventoryService
      * @return OrderResource
      */
-    public function store(StoreOrderRequest $request): OrderResource
+    public function store(StoreOrderRequest $request, InventoryService $inventoryService): OrderResource
     {
         $this->authorize('create', Order::class);
-        return DB::transaction(function () use ($request) {
+        return DB::transaction(function () use ($request, $inventoryService) {
             $validated = $request->validated();
             $orderTotal = 0;
             $productData = [];
@@ -116,6 +118,10 @@ class OrderController extends Controller
                 // Update stock if it exists
                 if ($product->stock !== null) {
                     $product->decrement('stock', $itemData['quantity']);
+                    // Refresh the product to get updated stock value
+                    $product->refresh();
+                    // Check for low stock alerts
+                    $inventoryService->checkProductLowStock($product);
                 }
             }
 
