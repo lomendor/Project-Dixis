@@ -21,11 +21,15 @@ class ProducerAnalyticsTest extends TestCase
     {
         parent::setUp();
 
-        // Create producer and producer user
-        $this->producer = Producer::factory()->create(['name' => 'Test Producer']);
+        // Create producer user first
         $this->producerUser = User::factory()->create([
-            'producer_id' => $this->producer->id,
             'email' => 'producer@test.com'
+        ]);
+
+        // Create producer associated with the user
+        $this->producer = Producer::factory()->create([
+            'name' => 'Test Producer',
+            'user_id' => $this->producerUser->id
         ]);
     }
 
@@ -222,7 +226,7 @@ class ProducerAnalyticsTest extends TestCase
     public function test_producer_analytics_requires_producer_association()
     {
         // Create user without producer association
-        $regularUser = User::factory()->create(['producer_id' => null]);
+        $regularUser = User::factory()->create();
 
         $response = $this->actingAs($regularUser)
             ->getJson('/api/v1/producer/analytics/sales');

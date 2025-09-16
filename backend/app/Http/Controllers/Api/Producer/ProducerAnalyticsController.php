@@ -25,7 +25,7 @@ class ProducerAnalyticsController extends Controller
 
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer_id) {
+        if (!$user->producer) {
             return response()->json([
                 'success' => false,
                 'message' => 'User is not associated with a producer'
@@ -37,7 +37,7 @@ class ProducerAnalyticsController extends Controller
 
         try {
             $analytics = $this->producerAnalyticsService->getProducerSalesAnalytics(
-                $user->producer_id,
+                $user->producer->id,
                 $period,
                 $limit
             );
@@ -62,7 +62,7 @@ class ProducerAnalyticsController extends Controller
     {
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer_id) {
+        if (!$user->producer) {
             return response()->json([
                 'success' => false,
                 'message' => 'User is not associated with a producer'
@@ -70,7 +70,7 @@ class ProducerAnalyticsController extends Controller
         }
 
         try {
-            $analytics = $this->producerAnalyticsService->getProducerOrdersAnalytics($user->producer_id);
+            $analytics = $this->producerAnalyticsService->getProducerOrdersAnalytics($user->producer->id);
 
             return response()->json([
                 'success' => true,
@@ -96,7 +96,7 @@ class ProducerAnalyticsController extends Controller
 
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer_id) {
+        if (!$user->producer) {
             return response()->json([
                 'success' => false,
                 'message' => 'User is not associated with a producer'
@@ -107,7 +107,7 @@ class ProducerAnalyticsController extends Controller
 
         try {
             $analytics = $this->producerAnalyticsService->getProducerProductsAnalytics(
-                $user->producer_id,
+                $user->producer->id,
                 $limit
             );
 

@@ -80,25 +80,25 @@ class ProducerAnalyticsService
             return $this->getEmptyOrdersAnalytics();
         }
 
-        // Get orders containing producer's products
-        $orders = Order::whereHas('orderItems', function ($q) use ($productIds) {
+        // Base query for orders containing producer's products
+        $baseQuery = Order::whereHas('orderItems', function ($q) use ($productIds) {
             $q->whereIn('product_id', $productIds);
         });
 
         // Order status distribution
-        $byStatus = $orders->groupBy('status')
+        $byStatus = (clone $baseQuery)->groupBy('status')
             ->selectRaw('status, COUNT(*) as count')
             ->pluck('count', 'status')
             ->toArray();
 
         // Payment status distribution
-        $byPaymentStatus = $orders->groupBy('payment_status')
+        $byPaymentStatus = (clone $baseQuery)->groupBy('payment_status')
             ->selectRaw('payment_status, COUNT(*) as count')
             ->pluck('count', 'payment_status')
             ->toArray();
 
         // Recent orders (last 10)
-        $recentOrders = $orders->with('user')
+        $recentOrders = (clone $baseQuery)->with('user')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get()
@@ -164,7 +164,7 @@ class ProducerAnalyticsService
         $allProducts = Product::where('producer_id', $producerId);
         $totalProducts = $allProducts->count();
         $activeProducts = $allProducts->where('is_active', true)->count();
-        $outOfStock = $allProducts->where('stock_quantity', '<=', 0)->count();
+        $outOfStock = $allProducts->where('stock', '<=', 0)->count();
 
         $bestSeller = $topProducts->first();
 
