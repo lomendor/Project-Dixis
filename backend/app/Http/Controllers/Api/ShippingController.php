@@ -178,8 +178,8 @@ class ShippingController extends Controller
     private function createTemporaryOrder(array $items): Order
     {
         $order = Order::create([
-            'user_id' => Auth::id() ?? 0, // Use 0 for guest quotes
-            'status' => 'temp_quote',
+            'user_id' => Auth::id(), // Use NULL for guest quotes
+            'status' => 'pending', // Use valid status instead of temp_quote
             'payment_status' => 'pending',
             'payment_method' => 'temp',
             'shipping_method' => 'temp',
@@ -190,11 +190,14 @@ class ShippingController extends Controller
         ]);
 
         foreach ($items as $item) {
+            $product = \App\Models\Product::findOrFail($item['product_id']);
             $order->orderItems()->create([
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'price' => 0, // Will be calculated by ShippingService
-                'total' => 0
+                'unit_price' => $product->price,
+                'total_price' => $product->price * $item['quantity'],
+                'product_name' => $product->name,
+                'product_unit' => $product->unit ?? 'piece'
             ]);
         }
 

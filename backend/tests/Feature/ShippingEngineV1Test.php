@@ -40,9 +40,7 @@ class ShippingEngineV1Test extends TestCase
             'name' => 'Test Product',
             'price' => 10.00,
             'producer_id' => $producer->id,
-            'category_id' => $category->id,
-            'weight_kg' => 1.0,
-            'dimensions_cm' => '20x15x10'
+            'weight_per_unit' => 1.0
         ]);
     }
 
@@ -106,7 +104,7 @@ class ShippingEngineV1Test extends TestCase
         ];
 
         foreach ($testCases as [$postalCode, $expectedZone]) {
-            $zone = $this->invokePrivateMethod($this->shippingService, 'detectZone', [$postalCode]);
+            $zone = $this->shippingService->getZoneByPostalCode($postalCode);
             $this->assertEquals($expectedZone, $zone, "Postal code {$postalCode} should map to {$expectedZone}");
         }
     }
@@ -210,7 +208,7 @@ class ShippingEngineV1Test extends TestCase
     {
         $this->actingAs($this->testUser);
 
-        $response = $this->postJson('/api/shipping/quote', [
+        $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [
                 [
                     'product_id' => $this->testProduct->id,
@@ -242,12 +240,12 @@ class ShippingEngineV1Test extends TestCase
         $this->actingAs($this->testUser);
 
         // Missing required fields
-        $response = $this->postJson('/api/shipping/quote', []);
+        $response = $this->postJson('/api/v1/shipping/quote', []);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['items', 'postal_code']);
 
         // Invalid postal code
-        $response = $this->postJson('/api/shipping/quote', [
+        $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [
                 ['product_id' => $this->testProduct->id, 'quantity' => 1]
             ],
@@ -257,7 +255,7 @@ class ShippingEngineV1Test extends TestCase
             ->assertJsonValidationErrors(['postal_code']);
 
         // Invalid product
-        $response = $this->postJson('/api/shipping/quote', [
+        $response = $this->postJson('/api/v1/shipping/quote', [
             'items' => [
                 ['product_id' => 99999, 'quantity' => 1] // Non-existent product
             ],
@@ -274,7 +272,7 @@ class ShippingEngineV1Test extends TestCase
 
         $order = $this->createTestOrder(2.0);
 
-        $response = $this->postJson("/api/shipping/labels/{$order->id}");
+        $response = $this->postJson("/api/v1/shipping/labels/{$order->id}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -300,7 +298,7 @@ class ShippingEngineV1Test extends TestCase
 
         $order = $this->createTestOrder(2.0);
 
-        $response = $this->postJson("/api/shipping/labels/{$order->id}");
+        $response = $this->postJson("/api/v1/shipping/labels/{$order->id}");
         $response->assertStatus(403); // Forbidden
     }
 
@@ -313,7 +311,7 @@ class ShippingEngineV1Test extends TestCase
             'status' => 'in_transit'
         ]);
 
-        $response = $this->getJson("/api/shipping/tracking/{$shipment->tracking_code}");
+        $response = $this->getJson("/api/v1/shipping/tracking/{$shipment->tracking_code}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -361,8 +359,10 @@ class ShippingEngineV1Test extends TestCase
             'order_id' => $order->id,
             'product_id' => $this->testProduct->id,
             'quantity' => (int) ceil($totalWeight), // Approximate quantity based on weight
-            'price' => $this->testProduct->price,
-            'total' => $this->testProduct->price * ceil($totalWeight)
+            'unit_price' => $this->testProduct->price,
+            'total_price' => $this->testProduct->price * ceil($totalWeight),
+            'product_name' => $this->testProduct->name,
+            'product_unit' => $this->testProduct->unit ?? 'piece'
         ]);
 
         return $order;
