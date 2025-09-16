@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Payment\PaymentProviderFactory;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,9 @@ use Illuminate\Support\Facades\Validator;
 
 class RefundController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
     /**
      * Create a new refund for an order.
      *
@@ -49,6 +53,10 @@ class RefundController extends Controller
             );
 
             if ($result['success']) {
+                // Send refund issued notification
+                $refundAmount = ($result['amount_cents'] ?? 0) / 100; // Convert cents to euros
+                $this->notificationService->sendRefundIssuedNotification($order, $refundAmount);
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Επιστροφή χρημάτων ξεκίνησε επιτυχώς',

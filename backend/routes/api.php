@@ -121,6 +121,20 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 status checks per minute
     });
 
+    // Notifications (authenticated users)
+    Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\NotificationController::class, 'index'])
+            ->middleware('throttle:100,1'); // 100 requests per minute
+        Route::get('unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount'])
+            ->middleware('throttle:120,1'); // 120 requests per minute
+        Route::get('latest', [App\Http\Controllers\Api\NotificationController::class, 'latest'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::patch('{notification}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::patch('read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead'])
+            ->middleware('throttle:10,1'); // 10 requests per minute
+    });
+
 });
 
 // Webhook routes (no authentication - verified by signature)

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\CartItem;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     /**
      * Display user's orders.
      */
@@ -184,6 +189,9 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Send order placed notification
+            $this->notificationService->sendOrderPlacedNotification($order);
+
             // Load relationships for response
             $order->load(['orderItems.product.categories', 'orderItems.product.images', 'orderItems.product.producer']);
 
@@ -295,6 +303,9 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            // Send order placed notification
+            $this->notificationService->sendOrderPlacedNotification($order);
 
             // Load relationships and format response
             $order->load(['orderItems.product.categories', 'orderItems.product.images', 'orderItems.product.producer']);
