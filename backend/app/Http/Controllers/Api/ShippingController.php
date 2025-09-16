@@ -72,7 +72,7 @@ class ShippingController extends Controller
      */
     public function createLabel(Order $order): JsonResponse
     {
-        $this->authorize('manage-shipping'); // Admin only
+        $this->authorize('admin-access'); // Admin only
 
         try {
             $label = $this->shippingService->createLabel($order->id);
@@ -105,7 +105,7 @@ class ShippingController extends Controller
             $shipment = Shipment::where('tracking_code', $trackingCode)->firstOrFail();
 
             // Check if user can access this shipment
-            if (Auth::check() && $shipment->order->user_id !== Auth::id() && !Auth::user()->can('manage-shipping')) {
+            if (Auth::check() && $shipment->order->user_id !== Auth::id() && !Auth::user()->can('admin-access')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Δεν έχετε πρόσβαση σε αυτή την αποστολή'

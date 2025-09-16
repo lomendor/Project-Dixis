@@ -160,15 +160,20 @@ class ShippingService
         return [
             'cost_cents' => $shippingCost['cost_cents'],
             'cost_eur' => $shippingCost['cost_eur'],
-            'zone' => $shippingCost['zone_code'],
+            'zone_code' => $shippingCost['zone_code'],
             'zone_name' => $shippingCost['zone_name'],
+            'carrier_code' => $shippingCost['carrier_code'] ?? 'ELTA',
             'estimated_delivery_days' => $shippingCost['estimated_delivery_days'],
-            'breakdown' => array_merge($shippingCost['breakdown'], [
+            'breakdown' => [
+                'base_cost_cents' => $shippingCost['breakdown']['base_rate_cents'] ?? $shippingCost['cost_cents'],
+                'weight_adjustment_cents' => $shippingCost['breakdown']['weight_adjustment_cents'] ?? 0,
+                'volume_adjustment_cents' => 0, // For now, as per audit
+                'zone_multiplier' => $shippingCost['breakdown']['zone_multiplier'] ?? 1.0,
                 'actual_weight_kg' => $totalWeight,
                 'volumetric_weight_kg' => $volumetricWeight,
                 'postal_code' => $postalCode,
                 'profile_applied' => $producerProfile
-            ])
+            ]
         ];
     }
 
@@ -208,14 +213,29 @@ class ShippingService
     {
         $order = Order::with(['orderItems.product', 'user'])->findOrFail($orderId);
 
+        // Idempotency check: if label already exists, return existing
+        $existingShipment = Shipment::where('order_id', $orderId)->first();
+        if ($existingShipment && $existingShipment->label_url) {
+            return [
+                'tracking_code' => $existingShipment->tracking_code,
+                'label_url' => $existingShipment->label_url,
+                'carrier_code' => $existingShipment->carrier_code,
+                'status' => $existingShipment->status
+            ];
+        }
+
         // Generate tracking code
         $trackingCode = $this->generateTrackingCode();
+
+        // Map default carrier key to short code
+        $defaultCarrierKey = $this->carrierSettings['default_carrier'] ?? 'ELTA_COURIER';
+        $carrierCode = $this->mapCarrierKeyToCode($defaultCarrierKey);
 
         // Create or update shipment record
         $shipment = Shipment::firstOrCreate(
             ['order_id' => $orderId],
             [
-                'carrier_code' => $this->carrierSettings['default_carrier'] ?? 'ELTA',
+                'carrier_code' => $carrierCode,
                 'tracking_code' => $trackingCode,
                 'status' => 'labeled',
                 'label_url' => null, // Will be set after PDF generation
@@ -246,9 +266,25 @@ class ShippingService
             'tracking_code' => $trackingCode,
             'label_url' => $shipment->label_url,
             'carrier_code' => $shipment->carrier_code,
-            'status' => $shipment->status,
-            'filename' => $filename
+            'status' => $shipment->status
         ];
+    }
+
+    /**
+     * Map carrier key to short code
+     */
+    private function mapCarrierKeyToCode(string $carrierKey): string
+    {
+        $carrierMapping = [
+            'ELTA_COURIER' => 'ELTA',
+            'ACS_COURIER' => 'ACS',
+            'SPEEDEX_COURIER' => 'SPEEDEX',
+            'ELTA' => 'ELTA',
+            'ACS' => 'ACS',
+            'SPEEDEX' => 'SPEEDEX'
+        ];
+
+        return $carrierMapping[$carrierKey] ?? 'ELTA';
     }
 
     /**

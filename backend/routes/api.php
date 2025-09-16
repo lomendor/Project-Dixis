@@ -90,10 +90,24 @@ Route::prefix('v1')->group(function () {
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
     });
     
-    // Shipping (public - no auth required for quotes)
+    // Shipping routes
     Route::prefix('shipping')->group(function () {
-        Route::post('quote', [App\Http\Controllers\Api\ShippingController::class, 'quote'])
+        // Public quote endpoint
+        Route::post('quote', [App\Http\Controllers\Api\ShippingController::class, 'getQuote'])
             ->middleware('throttle:60,1'); // 60 quote requests per minute
+
+        // Public tracking endpoint
+        Route::get('tracking/{trackingCode}', [App\Http\Controllers\Api\ShippingController::class, 'getTracking'])
+            ->middleware('throttle:60,1'); // 60 tracking requests per minute
+
+        // Admin-only label creation
+        Route::post('labels/{order}', [App\Http\Controllers\Api\ShippingController::class, 'createLabel'])
+            ->middleware(['auth:sanctum', 'throttle:10,1']); // Admin only, 10 label requests per minute
+    });
+
+    // Order shipment details (authenticated users)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('orders/{order}/shipment', [App\Http\Controllers\Api\ShippingController::class, 'getOrderShipment']);
     });
 
     // Payment methods (public - no auth required)
