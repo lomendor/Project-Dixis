@@ -1,0 +1,102 @@
+{
+  "version": "2025-09-17",
+  "description": "Remote postal codes that require special handling and surcharges",
+  "remote_postal_codes": [
+    "19007", "19008", "19009",
+    "84001", "84002", "84003", "84004", "84005",
+    "85000", "85001", "85002", "85003", "85004", "85005",
+    "86001", "86002", "86003", "86004", "86005",
+    "87001", "87002", "87003", "87004", "87005",
+    "88001", "88002", "88003", "88004", "88005",
+    "89001", "89002", "89003", "89004", "89005",
+    "90001", "90002", "90003", "90004", "90005",
+    "91001", "91002", "91003", "91004", "91005"
+  ],
+  "remote_areas": {
+    "19007": {
+      "name": "Κυθήρων - Kythira Remote",
+      "description": "Remote areas of Kythira island",
+      "zone_override": "GR_REMOTE"
+    },
+    "19008": {
+      "name": "Αντικυθήρων - Antikythira",
+      "description": "Antikythira island (very remote)",
+      "zone_override": "GR_REMOTE"
+    },
+    "19009": {
+      "name": "Κάσου - Kasos",
+      "description": "Kasos island (remote)",
+      "zone_override": "GR_REMOTE"
+    },
+    "84001": {
+      "name": "Σύρου Απομακρυσμένες - Syros Remote",
+      "description": "Remote areas of Syros",
+      "zone_override": "GR_REMOTE"
+    },
+    "84002": {
+      "name": "Τήνου Απομακρυσμένες - Tinos Remote",
+      "description": "Remote areas of Tinos",
+      "zone_override": "GR_REMOTE"
+    },
+    "84003": {
+      "name": "Άνδρου Απομακρυσμένες - Andros Remote",
+      "description": "Remote areas of Andros",
+      "zone_override": "GR_REMOTE"
+    },
+    "84004": {
+      "name": "Μυκόνου Απομακρυσμένες - Mykonos Remote",
+      "description": "Remote areas of Mykonos",
+      "zone_override": "GR_REMOTE"
+    },
+    "84005": {
+      "name": "Πάρου Απομακρυσμένες - Paros Remote",
+      "description": "Remote areas of Paros",
+      "zone_override": "GR_REMOTE"
+    },
+    "85000": {
+      "name": "Δωδεκανήσου Απομακρυσμένες - Dodecanese Remote",
+      "description": "Remote areas of Dodecanese islands",
+      "zone_override": "GR_REMOTE"
+    },
+    "86001": {
+      "name": "Χίου Απομακρυσμένες - Chios Remote",
+      "description": "Remote mountainous areas of Chios",
+      "zone_override": "GR_REMOTE"
+    },
+    "87001": {
+      "name": "Κεφαλληνίας Απομακρυσμένες - Kefalonia Remote",
+      "description": "Remote areas of Kefalonia",
+      "zone_override": "GR_REMOTE"
+    },
+    "88001": {
+      "name": "Ζακύνθου Απομακρυσμένες - Zakynthos Remote",
+      "description": "Remote areas of Zakynthos",
+      "zone_override": "GR_REMOTE"
+    },
+    "89001": {
+      "name": "Κορφού Απομακρυσμένες - Corfu Remote",
+      "description": "Remote mountainous areas of Corfu",
+      "zone_override": "GR_REMOTE"
+    },
+    "90001": {
+      "name": "Λέσβου Απομακρυσμένες - Lesbos Remote",
+      "description": "Remote areas of Lesbos",
+      "zone_override": "GR_REMOTE"
+    },
+    "91001": {
+      "name": "Σάμου Απομακρυσμένες - Samos Remote",
+      "description": "Remote mountainous areas of Samos",
+      "zone_override": "GR_REMOTE"
+    },
+    "85001": {
+      "name": "Δωδεκανήσου Απομακρυσμένες - Dodecanese Remote",
+      "description": "Remote areas of Dodecanese",
+      "zone_override": "GR_REMOTE"
+    }
+  },
+  "metadata": {
+    "last_updated": "2025-09-17",
+    "source": "Greek postal service remote area classifications",
+    "notes": "Remote postal codes require additional surcharges and longer delivery times"
+  }
+}

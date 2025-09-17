@@ -69,10 +69,12 @@ class ShippingServiceTest extends TestCase
     public function test_zone_detection_comprehensive()
     {
         $zoneTestCases = [
-            // Test only basic zone detection (config-dependent)
+            // Test regular zone detection
             ['10431', 'GR_ATTICA'],  // Athens metro
             ['54001', 'GR_THESSALONIKI'],  // Thessaloniki
             ['70000', 'GR_CRETE'],   // Crete
+            ['84001', 'GR_REMOTE'],  // Remote area override
+            ['19007', 'GR_REMOTE'],  // Kythira remote
         ];
 
         foreach ($zoneTestCases as [$postalCode, $expectedZone]) {
@@ -107,14 +109,14 @@ class ShippingServiceTest extends TestCase
 
     public function test_weight_tier_classification()
     {
-        // Test weight tier classification through calculateShippingCost
+        // Test weight tier classification with new rate structure
         $testCases = [
-            // [weight, zone, expected_base_rate_range]
-            [0.5, 'GR_ATTICA', [300, 600]],   // 0-2kg tier
-            [2.0, 'GR_ATTICA', [300, 600]],   // 0-2kg tier
-            [3.5, 'GR_ATTICA', [400, 800]],   // 2-5kg tier (higher base)
-            [5.0, 'GR_ATTICA', [400, 800]],   // 2-5kg tier
-            [7.5, 'GR_ATTICA', [500, 1200]],  // >5kg tier (base + per kg)
+            // [weight, zone, expected_cost_range_cents]
+            [0.5, 'GR_ATTICA', [290, 290]],   // base_until_2kg = 2.90
+            [2.0, 'GR_ATTICA', [290, 290]],   // base_until_2kg = 2.90
+            [3.5, 'GR_ATTICA', [425, 425]],   // 2.90 + (1.5 * 0.90) = 4.25
+            [5.0, 'GR_ATTICA', [560, 560]],   // 2.90 + (3 * 0.90) = 5.60
+            [7.5, 'GR_ATTICA', [735, 735]],   // 2.90 + (3 * 0.90) + (2.5 * 0.70) = 7.35
         ];
 
         foreach ($testCases as [$weight, $zone, $expectedRange]) {
@@ -254,6 +256,8 @@ class ShippingServiceTest extends TestCase
             'base_rate',
             'extra_weight_kg',
             'extra_cost',
+            'island_multiplier',
+            'remote_surcharge',
             'billable_weight_kg',
         ];
 
@@ -261,11 +265,13 @@ class ShippingServiceTest extends TestCase
             $this->assertArrayHasKey($key, $breakdown, "Breakdown should include {$key}");
         }
 
-        // Verify mathematical consistency
-        $expectedTotal = $breakdown['base_rate'] + $breakdown['extra_cost'];
-        $this->assertEquals($result['cost_eur'], $expectedTotal, 0.01,
-            'Breakdown total should equal sum of components'
-        );
+        // Test island multiplier is applied
+        $this->assertIsFloat($breakdown['island_multiplier']);
+        $this->assertGreaterThanOrEqual(1.0, $breakdown['island_multiplier']);
+
+        // Test remote surcharge is present
+        $this->assertIsFloat($breakdown['remote_surcharge']);
+        $this->assertGreaterThanOrEqual(0.0, $breakdown['remote_surcharge']);
 
         // Test that billable weight matches input
         $this->assertEquals(3.0, $breakdown['billable_weight_kg']);
@@ -315,6 +321,149 @@ class ShippingServiceTest extends TestCase
         // Both should have proper zone identification
         $this->assertEquals($mainlandZone, $mainlandCost['zone_code']);
         $this->assertEquals($islandZone, $islandCost['zone_code']);
+
+        // Test island multiplier is applied
+        $this->assertGreaterThan(1.0, $islandCost['breakdown']['island_multiplier']);
+        $this->assertEquals(1.0, $mainlandCost['breakdown']['island_multiplier']);
+    }
+
+    public function test_remote_postal_code_detection()
+    {
+        // Test remote postal code detection and zone override
+        $remotePostalCodes = ['19007', '19008', '84001']; // Only codes with zone_override
+
+        foreach ($remotePostalCodes as $postalCode) {
+            $zone = $this->shippingService->getZoneByPostalCode($postalCode);
+            $this->assertEquals('GR_REMOTE', $zone,
+                "Remote postal code {$postalCode} should map to GR_REMOTE zone"
+            );
+        }
+    }
+
+    public function test_remote_surcharge_application()
+    {
+        // Test that remote areas get surcharge applied
+        $testWeight = 2.0;
+        $regularZone = 'GR_ATTICA';
+        $remoteZone = 'GR_REMOTE';
+
+        $regularCost = $this->shippingService->calculateShippingCost($testWeight, $regularZone);
+        $remoteCost = $this->shippingService->calculateShippingCost($testWeight, $remoteZone);
+
+        // Remote should have surcharge applied
+        $this->assertGreaterThan(0, $remoteCost['breakdown']['remote_surcharge']);
+        $this->assertEquals(0, $regularCost['breakdown']['remote_surcharge']);
+
+        // Remote should cost more due to surcharge
+        $this->assertGreaterThan($regularCost['cost_cents'], $remoteCost['cost_cents']);
+    }
+
+    public function test_step_based_rate_calculation()
+    {
+        // Test the new step-based rate calculation logic
+        $zone = 'GR_ATTICA';
+
+        // Test 1kg package (base rate only)
+        $result1kg = $this->shippingService->calculateShippingCost(1.0, $zone);
+        $this->assertEquals(290, $result1kg['cost_cents']); // 2.90 EUR
+
+        // Test 3kg package (base + step_kg_2_5)
+        $result3kg = $this->shippingService->calculateShippingCost(3.0, $zone);
+        $expectedCost = 2.90 + (1.0 * 0.90); // base + 1kg over 2kg
+        $this->assertEquals(round($expectedCost * 100), $result3kg['cost_cents']);
+
+        // Test 6kg package (base + step_kg_2_5 + step_kg_over_5)
+        $result6kg = $this->shippingService->calculateShippingCost(6.0, $zone);
+        $expectedCost = 2.90 + (3.0 * 0.90) + (1.0 * 0.70); // base + 3kg(2-5) + 1kg(over 5)
+        $this->assertEquals(round($expectedCost * 100), $result6kg['cost_cents']);
+    }
+
+    public function test_island_multiplier_application()
+    {
+        // Test island multiplier is correctly applied
+        $testWeight = 2.0;
+        $creteZone = 'GR_CRETE';
+
+        $result = $this->shippingService->calculateShippingCost($testWeight, $creteZone);
+
+        // Crete has island_multiplier of 1.15
+        $this->assertEquals(1.15, $result['breakdown']['island_multiplier']);
+
+        // Cost should be base rate * multiplier (GR_CRETE base_until_2kg = 6.20)
+        $baseRate = 6.20;
+        $expectedCost = $baseRate * 1.15;
+        $this->assertEquals(round($expectedCost * 100), $result['cost_cents']);
+    }
+
+    public function test_small_islands_highest_multiplier_vs_mainland()
+    {
+        // Test that GR_ISLANDS_SMALL has highest island multiplier vs mainland
+        $testWeight = 2.0;
+        $mainlandZone = 'GR_MAINLAND';
+        $smallIslandZone = 'GR_ISLANDS_SMALL';
+
+        $mainlandCost = $this->shippingService->calculateShippingCost($testWeight, $mainlandZone);
+        $smallIslandCost = $this->shippingService->calculateShippingCost($testWeight, $smallIslandZone);
+
+        // Small islands should have highest multiplier (1.30)
+        $this->assertEquals(1.30, $smallIslandCost['breakdown']['island_multiplier']);
+        $this->assertEquals(1.0, $mainlandCost['breakdown']['island_multiplier']);
+
+        // Small islands should cost significantly more
+        $this->assertGreaterThan($mainlandCost['cost_cents'], $smallIslandCost['cost_cents']);
+
+        // Verify the cost calculation includes multiplier effect
+        $baseRate = 9.80; // GR_ISLANDS_SMALL base_until_2kg
+        $expectedCost = $baseRate * 1.30;
+        $this->assertEquals(round($expectedCost * 100), $smallIslandCost['cost_cents']);
+
+        // Both should have proper zone identification
+        $this->assertEquals($mainlandZone, $mainlandCost['zone_code']);
+        $this->assertEquals($smallIslandZone, $smallIslandCost['zone_code']);
+    }
+
+    public function test_breakdown_cents_symmetry()
+    {
+        // Test that breakdown includes consistent cents fields
+        $testWeight = 3.5; // Triggers base + step calculation
+        $zone = 'GR_CRETE'; // Has island multiplier
+
+        $result = $this->shippingService->calculateShippingCost($testWeight, $zone);
+
+        // Verify breakdown structure completeness
+        $breakdown = $result['breakdown'];
+        $this->assertArrayHasKey('base_rate', $breakdown);
+        $this->assertArrayHasKey('extra_cost', $breakdown);
+        $this->assertArrayHasKey('island_multiplier', $breakdown);
+        $this->assertArrayHasKey('remote_surcharge', $breakdown);
+        $this->assertArrayHasKey('billable_weight_kg', $breakdown);
+
+        // Verify new cents fields for symmetry
+        $this->assertArrayHasKey('base_cost_cents', $breakdown);
+        $this->assertArrayHasKey('weight_adjustment_cents', $breakdown);
+        $this->assertArrayHasKey('volume_adjustment_cents', $breakdown);
+        $this->assertArrayHasKey('zone_multiplier', $breakdown);
+
+        // Verify numerical consistency
+        $this->assertIsNumeric($breakdown['base_rate']);
+        $this->assertIsNumeric($breakdown['extra_cost']);
+        $this->assertIsNumeric($breakdown['island_multiplier']);
+        $this->assertIsNumeric($breakdown['remote_surcharge']);
+        $this->assertIsNumeric($breakdown['base_cost_cents']);
+        $this->assertIsNumeric($breakdown['weight_adjustment_cents']);
+        $this->assertIsNumeric($breakdown['volume_adjustment_cents']);
+
+        // Verify cents fields consistency
+        $this->assertEquals(round($breakdown['base_rate'] * 100), $breakdown['base_cost_cents']);
+        $this->assertEquals(round($breakdown['extra_cost'] * 100), $breakdown['weight_adjustment_cents']);
+        $this->assertEquals(0, $breakdown['volume_adjustment_cents']); // Not used currently
+        $this->assertEquals($breakdown['island_multiplier'], $breakdown['zone_multiplier']);
+
+        // Verify breakdown math adds up
+        $baseWithSteps = $breakdown['base_rate'] + $breakdown['extra_cost'];
+        $withMultiplier = $baseWithSteps * $breakdown['island_multiplier'];
+        $finalCost = $withMultiplier + $breakdown['remote_surcharge'];
+        $this->assertEquals(round($finalCost * 100), $result['cost_cents']);
     }
 
     private function invokePrivateMethod($object, $methodName, array $parameters = [])

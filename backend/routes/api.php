@@ -163,6 +163,16 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:120,1'); // 120 requests per minute for dashboard
     });
 
+    // Admin Shipping (read-only rate tables interface)
+    Route::middleware('auth:sanctum')->prefix('admin/shipping')->group(function () {
+        Route::get('rates', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getRates'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('zones', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getZoneInfo'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('simulate', [App\Http\Controllers\Api\Admin\ShippingController::class, 'simulateQuote'])
+            ->middleware('throttle:30,1'); // 30 simulations per minute
+    });
+
 });
 
 // Webhook routes (no authentication - verified by signature)

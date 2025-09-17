@@ -98,8 +98,10 @@ class AcsCourierProvider implements CourierProviderInterface
         }
 
         try {
-            // Make actual ACS API call for tracking
-            $response = $this->makeAcsApiCall('GET', "/shipments/{$trackingCode}");
+            // Make actual ACS API call for tracking with retry mechanism
+            $response = $this->executeWithRetry(function () use ($trackingCode) {
+                return $this->makeAcsApiCall('GET', "/shipments/{$trackingCode}");
+            }, 'getTracking', $shipment->order_id);
 
             // Map ACS tracking response to internal format
             $trackingData = $this->mapAcsTrackingResponse($response, $trackingCode);

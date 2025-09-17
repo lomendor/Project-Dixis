@@ -232,28 +232,29 @@ class ShippingControllerWiringTest extends TestCase
 
     public function test_configuration_based_provider_selection_defaults_to_internal_when_none()
     {
-        // Default: none → internal
+        // Current default is 'none' → Internal provider
         putenv('COURIER_PROVIDER=none');
-        config(['services.courier.provider' => 'none']);
+        config(['courier.provider' => 'none']);
         $factory = app(CourierProviderFactory::class);
         $provider = $factory->make();
         $this->assertEquals('internal', $provider->getProviderCode());
     }
 
-    public function test_configuration_based_provider_selection_is_acs_when_explicitly_set()
+    public function test_provider_is_acs_when_env_explicitly_set()
     {
-        // Only assert ACS when explicitly enabled; skip on CI unless allowed.
+        // This scenario is environment-driven; keep it non-blocking on CI.
         putenv('COURIER_PROVIDER=acs');
-        config(['services.courier.provider' => 'acs']);
+        config(['courier.provider' => 'acs']);
         config([
             'services.acs.api_key' => 'test_key',
             'services.acs.client_id' => 'test_client',
         ]);
+        $factory = app(CourierProviderFactory::class);
+        $provider = $factory->make();
+        // If CI does not allow ACS flag, mark as skipped to avoid flakiness.
         if (! getenv('CI_ALLOW_ACS_PROVIDER_TESTS')) {
             $this->markTestSkipped('ACS provider assertion disabled on CI (set CI_ALLOW_ACS_PROVIDER_TESTS=1 to enable).');
         }
-        $factory = app(CourierProviderFactory::class);
-        $provider = $factory->make();
         $this->assertEquals('acs', $provider->getProviderCode());
     }
 

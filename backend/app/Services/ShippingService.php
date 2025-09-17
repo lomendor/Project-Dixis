@@ -15,6 +15,10 @@ class ShippingService
 
     private array $carrierSettings;
 
+    private array $rateTables;
+
+    private array $remotePostalCodes;
+
     public function __construct()
     {
         $this->loadConfiguration();
@@ -27,17 +31,23 @@ class ShippingService
     {
         $zonesPath = base_path('config/shipping/gr_zones.json');
         $profilesPath = base_path('config/shipping/profiles.json');
+        $ratesPath = base_path('config/shipping/rates.gr.json');
+        $remotePostalCodesPath = base_path('config/shipping/remote_postal_codes.json');
 
-        if (! file_exists($zonesPath) || ! file_exists($profilesPath)) {
+        if (! file_exists($zonesPath) || ! file_exists($profilesPath) || ! file_exists($ratesPath) || ! file_exists($remotePostalCodesPath)) {
             throw new \Exception('Shipping configuration files not found');
         }
 
         $zonesData = json_decode(file_get_contents($zonesPath), true);
         $profilesData = json_decode(file_get_contents($profilesPath), true);
+        $ratesData = json_decode(file_get_contents($ratesPath), true);
+        $remotePostalCodesData = json_decode(file_get_contents($remotePostalCodesPath), true);
 
         $this->zones = $zonesData['zones'] ?? [];
         $this->profiles = $profilesData;
         $this->carrierSettings = $profilesData['carrier_settings'] ?? [];
+        $this->rateTables = $ratesData;
+        $this->remotePostalCodes = $remotePostalCodesData;
     }
 
     /**
@@ -46,7 +56,7 @@ class ShippingService
      */
     public function computeVolumetricWeight(float $lengthCm, float $widthCm, float $heightCm): float
     {
-        $volumetricFactor = 5000; // Standard factor for domestic shipping
+        $volumetricFactor = $this->rateTables['volumetric_divisor'] ?? 5000;
         $volumetricWeight = ($lengthCm * $widthCm * $heightCm) / $volumetricFactor;
 
         return round($volumetricWeight, 2);
@@ -65,8 +75,18 @@ class ShippingService
      */
     public function getZoneByPostalCode(string $postalCode): string
     {
-        foreach ($this->zones as $zoneCode => $zone) {
-            foreach ($zone['postal_codes'] as $pattern) {
+        // First check if postal code is in remote areas list
+        if (in_array($postalCode, $this->remotePostalCodes['remote_postal_codes'] ?? [])) {
+            $remoteArea = $this->remotePostalCodes['remote_areas'][$postalCode] ?? null;
+            if ($remoteArea && isset($remoteArea['zone_override'])) {
+                return $remoteArea['zone_override'];
+            }
+        }
+
+        // Use postal code mapping from rate tables
+        $postalCodeMapping = $this->rateTables['postal_code_mapping'] ?? [];
+        foreach ($postalCodeMapping as $zoneCode => $patterns) {
+            foreach ($patterns as $pattern) {
                 $regex = '/^'.str_replace('*', '\d*', $pattern).'$/';
                 if (preg_match($regex, $postalCode)) {
                     return $zoneCode;
@@ -83,33 +103,64 @@ class ShippingService
      */
     public function calculateShippingCost(float $billableWeightKg, string $zoneCode): array
     {
-        if (! isset($this->zones[$zoneCode])) {
+        $carrierCode = 'INTERNAL_STANDARD';
+        $rateTable = $this->rateTables['tables'][$carrierCode][$zoneCode] ?? null;
+
+        if (! $rateTable) {
             throw new \Exception("Unknown shipping zone: {$zoneCode}");
         }
 
-        $zone = $this->zones[$zoneCode];
         $cost = 0;
+        $baseRate = 0;
+        $extraCost = 0;
 
         if ($billableWeightKg <= 2) {
-            $cost = $zone['base_rate_0_2kg'];
+            $cost = $rateTable['base_until_2kg'];
+            $baseRate = $cost;
         } elseif ($billableWeightKg <= 5) {
-            $cost = $zone['base_rate_2_5kg'];
+            $cost = $rateTable['base_until_2kg'] + (($billableWeightKg - 2) * $rateTable['step_kg_2_5']);
+            $baseRate = $rateTable['base_until_2kg'];
+            $extraCost = ($billableWeightKg - 2) * $rateTable['step_kg_2_5'];
         } else {
-            $extraWeight = $billableWeightKg - 5;
-            $cost = $zone['base_rate_2_5kg'] + ($extraWeight * $zone['per_kg_rate_above_5kg']);
+            $cost2to5 = 3 * $rateTable['step_kg_2_5']; // 3kg from 2-5kg
+            $costOver5 = ($billableWeightKg - 5) * $rateTable['step_kg_over_5'];
+            $cost = $rateTable['base_until_2kg'] + $cost2to5 + $costOver5;
+            $baseRate = $rateTable['base_until_2kg'];
+            $extraCost = $cost2to5 + $costOver5;
         }
 
+        // Apply island multiplier
+        $islandMultiplier = $rateTable['island_multiplier'] ?? 1.0;
+        $cost *= $islandMultiplier;
+
+        // Apply remote surcharge
+        $remoteSurcharge = $rateTable['remote_surcharge'] ?? 0;
+        $cost += $remoteSurcharge;
+
+        // Get zone name from legacy zones for compatibility
+        $zoneName = $this->zones[$zoneCode]['name'] ?? $zoneCode;
+
+        $costCents = round($cost * 100);
+        $costEur = $costCents / 100; // Ensure precision consistency
+
         return [
-            'cost_cents' => round($cost * 100), // Convert to cents
-            'cost_eur' => round($cost, 2),
+            'cost_cents' => $costCents,
+            'cost_eur' => $costEur,
             'zone_code' => $zoneCode,
-            'zone_name' => $zone['name'],
-            'estimated_delivery_days' => $zone['estimated_delivery_days'],
+            'zone_name' => $zoneName,
+            'estimated_delivery_days' => $rateTable['estimated_delivery_days'],
             'breakdown' => [
-                'base_rate' => $billableWeightKg <= 2 ? $zone['base_rate_0_2kg'] : $zone['base_rate_2_5kg'],
-                'extra_weight_kg' => $billableWeightKg > 5 ? $billableWeightKg - 5 : 0,
-                'extra_cost' => $billableWeightKg > 5 ? ($billableWeightKg - 5) * $zone['per_kg_rate_above_5kg'] : 0,
-                'billable_weight_kg' => $billableWeightKg,
+                'base_rate' => (float) $baseRate,
+                'extra_weight_kg' => (float) ($billableWeightKg > 2 ? $billableWeightKg - 2 : 0),
+                'extra_cost' => (float) $extraCost,
+                'island_multiplier' => (float) $islandMultiplier,
+                'remote_surcharge' => (float) $remoteSurcharge,
+                'billable_weight_kg' => (float) $billableWeightKg,
+                // Breakdown symmetry - consistent cents fields
+                'base_cost_cents' => round($baseRate * 100),
+                'weight_adjustment_cents' => round($extraCost * 100),
+                'volume_adjustment_cents' => 0, // Not used in current implementation
+                'zone_multiplier' => (float) $islandMultiplier,
             ],
         ];
     }
@@ -165,10 +216,12 @@ class ShippingService
             'carrier_code' => $shippingCost['carrier_code'] ?? 'ELTA',
             'estimated_delivery_days' => $shippingCost['estimated_delivery_days'],
             'breakdown' => [
-                'base_cost_cents' => $shippingCost['breakdown']['base_rate_cents'] ?? $shippingCost['cost_cents'],
-                'weight_adjustment_cents' => $shippingCost['breakdown']['weight_adjustment_cents'] ?? 0,
-                'volume_adjustment_cents' => 0, // For now, as per audit
-                'zone_multiplier' => $shippingCost['breakdown']['zone_multiplier'] ?? 1.0,
+                'base_rate' => $shippingCost['breakdown']['base_rate'],
+                'extra_weight_kg' => $shippingCost['breakdown']['extra_weight_kg'],
+                'extra_cost' => $shippingCost['breakdown']['extra_cost'],
+                'island_multiplier' => $shippingCost['breakdown']['island_multiplier'],
+                'remote_surcharge' => $shippingCost['breakdown']['remote_surcharge'],
+                'billable_weight_kg' => $shippingCost['breakdown']['billable_weight_kg'],
                 'actual_weight_kg' => $totalWeight,
                 'volumetric_weight_kg' => $volumetricWeight,
                 'postal_code' => $postalCode,
