@@ -307,6 +307,16 @@ class ShippingService
         // This is a stub implementation that generates a simple text-based "PDF"
         // In production, you would use a proper PDF library like TCPDF or DomPDF
 
+        // Extract shipping address fields safely
+        $shippingAddress = $order->shipping_address ?? [];
+        $street = $shippingAddress['street'] ?? 'N/A';
+        $city = $shippingAddress['city'] ?? 'N/A';
+        $postalCode = $shippingAddress['postal_code'] ?? 'N/A';
+
+        $totalWeight = $order->orderItems->sum(function ($item) {
+            return ($item->product->weight_per_unit ?? 0.5) * $item->quantity;
+        });
+
         $labelContent = "
 === SHIPPING LABEL ===
 
@@ -323,24 +333,22 @@ Tel: +30 210 1234567
 
 TO:
 {$order->user->name}
-{$order->shipping_address}
-{$order->city}, {$order->postal_code}
+{$street}
+{$city}, {$postalCode}
 Greece
 
 ORDER DETAILS:
 Total Items: {$order->orderItems->count()}
-Total Weight: ".$order->orderItems->sum(function ($item) {
-            return ($item->product->weight_per_unit ?? 0.5) * $item->quantity;
-        })." kg
+Total Weight: {$totalWeight} kg
 Order Value: €{$order->total}
 
 BARCODE: *{$shipment->tracking_code}*
 
-Generated: ".now()->format('Y-m-d H:i:s').'
+Generated: ".now()->format('Y-m-d H:i:s')."
 Label Format: PDF Stub v1.0
 
 === END LABEL ===
-        ';
+        ";
 
         return $labelContent;
     }
