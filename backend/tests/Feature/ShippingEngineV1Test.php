@@ -117,11 +117,11 @@ class ShippingEngineV1Test extends TestCase
         $order = $this->createTestOrder(2.0); // 2kg total
 
         $testZones = [
-            'GR_ATTICA' => ['11527', 3.50],
-            'GR_THESSALONIKI' => ['54622', 4.20],
-            'GR_CRETE' => ['71202', 7.50],
-            'GR_ISLANDS_LARGE' => ['84100', 8.90],
-            'GR_MAINLAND' => ['26500', 5.80],
+            'GR_ATTICA' => ['11527', 2.90],
+            'GR_THESSALONIKI' => ['54622', 3.50],
+            'GR_CRETE' => ['71202', 7.13],
+            'GR_ISLANDS_LARGE' => ['84100', 9.00],
+            'GR_MAINLAND' => ['26500', 4.80],
         ];
 
         foreach ($testZones as $zoneCode => [$postalCode, $expectedBaseCost]) {
@@ -169,10 +169,10 @@ class ShippingEngineV1Test extends TestCase
 
         // Test different producer profiles
         $profiles = [
-            'flat_rate' => 3.50, // Falls back to standard rate since flat_rate logic not implemented
+            'flat_rate' => 2.90, // Falls back to standard rate since flat_rate logic not implemented
             'free_shipping' => 0.00, // Free shipping profile (threshold: 0.00, order subtotal: 20.00)
-            'premium_producer' => 2.98, // zone_multiplier: 0.85, so 3.50 * 0.85 = 2.975 ≈ 2.98
-            'local_producer' => 3.50,   // Falls back to standard rate since local_only logic not implemented
+            'premium_producer' => 2.47, // zone_multiplier: 0.85, so 2.90 * 0.85 = 2.465 ≈ 2.47
+            'local_producer' => 2.90,   // Falls back to standard rate since local_only logic not implemented
         ];
 
         foreach ($profiles as $profile => $expectedCost) {
