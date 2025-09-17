@@ -7,6 +7,7 @@ use App\Services\Courier\CourierProviderFactory;
 use App\Services\Courier\InternalCourierProvider;
 use App\Services\ShippingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class CourierProviderFactoryTest extends TestCase
@@ -18,6 +19,17 @@ class CourierProviderFactoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Mock ACS API responses for factory tests
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+            ], 201),
+        ]);
 
         $shippingService = app(ShippingService::class);
         $this->factory = new CourierProviderFactory($shippingService);
