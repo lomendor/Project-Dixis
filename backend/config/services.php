@@ -63,4 +63,26 @@ return [
         'webhook_verification_key' => env('VIVA_WEBHOOK_VERIFICATION_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Courier Providers Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'courier' => [
+        'provider' => env('COURIER_PROVIDER', 'none'), // none|acs|elta|speedex
+        'fallback_enabled' => env('COURIER_FALLBACK_ENABLED', true),
+        'circuit_breaker' => env('COURIER_CIRCUIT_BREAKER', true),
+        'max_retries' => env('COURIER_MAX_RETRIES', 3),
+        'timeout' => env('COURIER_TIMEOUT', 30), // seconds
+    ],
+
+    'acs' => [
+        'api_base' => env('ACS_API_BASE', 'https://sandbox-api.acs.gr/v1'),
+        'api_key' => env('ACS_API_KEY'),
+        'client_id' => env('ACS_CLIENT_ID'),
+        'client_secret' => env('ACS_CLIENT_SECRET'),
+        'environment' => env('ACS_ENVIRONMENT', 'sandbox'), // sandbox or production
+    ],
+
 ];
