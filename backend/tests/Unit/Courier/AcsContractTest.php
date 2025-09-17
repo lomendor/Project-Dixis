@@ -9,6 +9,7 @@ use App\Models\Producer;
 use App\Models\User;
 use App\Services\Courier\AcsCourierProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AcsContractTest extends TestCase
@@ -26,6 +27,39 @@ class AcsContractTest extends TestCase
             'services.acs.api_key' => 'test_api_key',
             'services.acs.client_id' => 'test_client_id',
             'services.acs.client_secret' => 'test_client_secret',
+            'services.acs.api_base' => 'https://sandbox-api.acs.gr/v1',
+        ]);
+
+        // Mock successful HTTP responses for ACS API
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+            'sandbox-api.acs.gr/v1/shipments/*' => Http::response([
+                'tracking_code' => 'ACS123456789',
+                'status' => 'in_transit',
+                'estimated_delivery' => now()->addDays(2)->toDateString(),
+                'events' => [
+                    [
+                        'datetime' => now()->subHours(6)->toISOString(),
+                        'status' => 'picked_up',
+                        'location' => 'Athens Sorting Center',
+                        'description' => 'Package picked up from sender',
+                    ],
+                    [
+                        'datetime' => now()->subHours(2)->toISOString(),
+                        'status' => 'in_transit',
+                        'location' => 'Athens Hub',
+                        'description' => 'Package in transit to destination',
+                    ],
+                ],
+            ], 200),
         ]);
 
         $this->provider = new AcsCourierProvider();
@@ -96,8 +130,8 @@ class AcsContractTest extends TestCase
         // Verify tracking code format (ACS + 9 digits)
         $this->assertMatchesRegularExpression('/^ACS\d{9}$/', $result['tracking_code']);
 
-        // Verify label URL format
-        $this->assertStringContainsString('acs_label_', $result['label_url']);
+        // Verify label URL format (real ACS API response)
+        $this->assertStringContainsString('sandbox-api.acs.gr', $result['label_url']);
         $this->assertStringEndsWith('.pdf', $result['label_url']);
     }
 

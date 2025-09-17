@@ -9,6 +9,7 @@ use App\Models\Producer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -30,6 +31,46 @@ class ShippingProviderIntegrationTest extends TestCase
         Gate::define('admin-access', function ($user) {
             return $user->hasRole('admin');
         });
+
+        // Mock ACS API responses for integration tests
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+            'sandbox-api.acs.gr/v1/shipments/*' => Http::response([
+                'tracking_code' => 'ACS123456789',
+                'status' => 'in_transit',
+                'estimated_delivery' => now()->addDays(2)->toDateString(),
+                'events' => [
+                    [
+                        'datetime' => now()->subHours(6)->toISOString(),
+                        'status' => 'picked_up',
+                        'location' => 'Athens Sorting Center',
+                        'description' => 'Package picked up from sender',
+                    ],
+                    [
+                        'datetime' => now()->subHours(2)->toISOString(),
+                        'status' => 'in_transit',
+                        'location' => 'Athens Hub',
+                        'description' => 'Package in transit to destination',
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        // Configure ACS provider for tests
+        config([
+            'services.acs.api_key' => 'test_api_key',
+            'services.acs.client_id' => 'test_client_id',
+            'services.acs.client_secret' => 'test_client_secret',
+            'services.acs.api_base' => 'https://sandbox-api.acs.gr/v1',
+        ]);
 
         // Create admin user
         $this->admin = User::factory()->create();
