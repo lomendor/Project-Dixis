@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AnalyticsTest extends TestCase
 {
@@ -23,7 +23,7 @@ class AnalyticsTest extends TestCase
         // Create admin user for authentication
         $this->adminUser = User::factory()->create([
             'role' => 'admin',
-            'email' => 'admin@test.com'
+            'email' => 'admin@test.com',
         ]);
     }
 
@@ -33,13 +33,13 @@ class AnalyticsTest extends TestCase
         Order::factory()->count(5)->create([
             'payment_status' => 'paid',
             'total_amount' => 100.00,
-            'created_at' => now()
+            'created_at' => now(),
         ]);
 
         Order::factory()->count(3)->create([
             'payment_status' => 'paid',
             'total_amount' => 50.00,
-            'created_at' => now()->subDay()
+            'created_at' => now()->subDay(),
         ]);
 
         $response = $this->actingAs($this->adminUser)
@@ -52,15 +52,15 @@ class AnalyticsTest extends TestCase
                 'analytics' => [
                     'period',
                     'data' => [
-                        '*' => ['date', 'total_sales', 'order_count', 'average_order_value']
+                        '*' => ['date', 'total_sales', 'order_count', 'average_order_value'],
                     ],
                     'summary' => [
                         'total_revenue',
                         'total_orders',
                         'average_order_value',
-                        'period_growth'
-                    ]
-                ]
+                        'period_growth',
+                    ],
+                ],
             ]);
 
         $analytics = $response->json()['analytics'];
@@ -90,9 +90,9 @@ class AnalyticsTest extends TestCase
                         'total_orders',
                         'pending_orders',
                         'completed_orders',
-                        'cancelled_orders'
-                    ]
-                ]
+                        'cancelled_orders',
+                    ],
+                ],
             ]);
 
         $analytics = $response->json()['analytics'];
@@ -109,12 +109,12 @@ class AnalyticsTest extends TestCase
         $product1 = Product::factory()->create([
             'producer_id' => $producer->id,
             'name' => 'Product A',
-            'price' => 10.00
+            'price' => 10.00,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer->id,
             'name' => 'Product B',
-            'price' => 20.00
+            'price' => 20.00,
         ]);
 
         // Create orders with items
@@ -123,13 +123,13 @@ class AnalyticsTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product1->id,
             'quantity' => 5,
-            'total_price' => 50.00
+            'total_price' => 50.00,
         ]);
         OrderItem::factory()->create([
             'order_id' => $order->id,
             'product_id' => $product2->id,
             'quantity' => 2,
-            'total_price' => 40.00
+            'total_price' => 40.00,
         ]);
 
         $response = $this->actingAs($this->adminUser)
@@ -147,15 +147,15 @@ class AnalyticsTest extends TestCase
                             'price',
                             'total_quantity_sold',
                             'total_revenue',
-                            'order_count'
-                        ]
+                            'order_count',
+                        ],
                     ],
                     'summary' => [
                         'total_products',
                         'active_products',
-                        'out_of_stock'
-                    ]
-                ]
+                        'out_of_stock',
+                    ],
+                ],
             ]);
 
         $topProducts = $response->json()['analytics']['top_products'];
@@ -172,18 +172,18 @@ class AnalyticsTest extends TestCase
 
         $product1 = Product::factory()->create([
             'producer_id' => $producer1->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $order = Order::factory()->create(['payment_status' => 'paid']);
         OrderItem::factory()->create([
             'order_id' => $order->id,
             'product_id' => $product1->id,
-            'total_price' => 100.00
+            'total_price' => 100.00,
         ]);
 
         $response = $this->actingAs($this->adminUser)
@@ -203,10 +203,10 @@ class AnalyticsTest extends TestCase
                             'location',
                             'product_count',
                             'total_revenue',
-                            'order_count'
-                        ]
-                    ]
-                ]
+                            'order_count',
+                        ],
+                    ],
+                ],
             ]);
 
         $analytics = $response->json()['analytics'];
@@ -220,13 +220,13 @@ class AnalyticsTest extends TestCase
         Order::factory()->count(3)->create([
             'payment_status' => 'paid',
             'total_amount' => 100.00,
-            'created_at' => now()
+            'created_at' => now(),
         ]);
 
         Order::factory()->count(2)->create([
             'payment_status' => 'paid',
             'total_amount' => 50.00,
-            'created_at' => now()->subMonth()
+            'created_at' => now()->subMonth(),
         ]);
 
         User::factory()->count(5)->create();
@@ -244,22 +244,22 @@ class AnalyticsTest extends TestCase
                     'today' => [
                         'sales',
                         'orders',
-                        'average_order_value'
+                        'average_order_value',
                     ],
                     'month' => [
                         'sales',
                         'orders',
                         'average_order_value',
                         'sales_growth',
-                        'orders_growth'
+                        'orders_growth',
                     ],
                     'totals' => [
                         'users',
                         'producers',
                         'products',
-                        'lifetime_revenue'
-                    ]
-                ]
+                        'lifetime_revenue',
+                    ],
+                ],
             ]);
 
         $summary = $response->json()['summary'];

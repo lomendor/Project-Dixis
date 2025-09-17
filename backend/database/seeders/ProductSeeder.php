@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Category;
 use App\Models\Producer;
 use App\Models\Product;
-use App\Models\Category;
 use App\Models\ProductImage;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -19,18 +17,19 @@ class ProductSeeder extends Seeder
     {
         // Get the first producer (created in ProducerSeeder)
         $producer = Producer::first();
-        
-        if (!$producer) {
+
+        if (! $producer) {
             $this->command->warn('No producers found. Skipping product seeding.');
+
             return;
         }
-        
+
         // Get categories for assignment
         $vegetables = Category::where('slug', 'vegetables')->first();
         $fruits = Category::where('slug', 'fruits')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
         $herbs = Category::where('slug', 'herbs-spices')->first();
-        
+
         // Create products with categories and images
         $productsData = [
             [
@@ -53,7 +52,7 @@ class ProductSeeder extends Seeder
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa', 'is_primary' => true, 'sort_order' => 0],
                     ['url' => 'https://images.unsplash.com/photo-1546470427-a465b4e8c3c8', 'is_primary' => false, 'sort_order' => 1],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -74,7 +73,7 @@ class ProductSeeder extends Seeder
                 'categories' => [$vegetables],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -96,7 +95,7 @@ class ProductSeeder extends Seeder
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5', 'is_primary' => true, 'sort_order' => 0],
                     ['url' => 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d', 'is_primary' => false, 'sort_order' => 1],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -117,7 +116,7 @@ class ProductSeeder extends Seeder
                 'categories' => [$fruits],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -138,7 +137,7 @@ class ProductSeeder extends Seeder
                 'categories' => [$herbs],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
         ];
 
@@ -154,7 +153,7 @@ class ProductSeeder extends Seeder
             );
 
             // Attach categories
-            if (!empty($categories)) {
+            if (! empty($categories)) {
                 $product->categories()->sync(collect($categories)->pluck('id')->toArray());
             }
 
@@ -162,12 +161,12 @@ class ProductSeeder extends Seeder
             foreach ($images as $imageData) {
                 ProductImage::firstOrCreate([
                     'product_id' => $product->id,
-                    'url' => $imageData['url']
+                    'url' => $imageData['url'],
                 ], [
                     'product_id' => $product->id,
                     'url' => $imageData['url'],
                     'is_primary' => $imageData['is_primary'],
-                    'sort_order' => $imageData['sort_order']
+                    'sort_order' => $imageData['sort_order'],
                 ]);
             }
         }

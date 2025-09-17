@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\Category;
+use App\Models\Producer;
+use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('mvp')]
 class PublicProductsTest extends TestCase
@@ -19,14 +19,14 @@ class PublicProductsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create producer and categories for testing
         $user = User::factory()->create(['role' => 'producer']);
         $producer = Producer::factory()->create(['user_id' => $user->id]);
-        
+
         $vegetables = Category::create(['name' => 'Vegetables', 'slug' => 'vegetables']);
         $fruits = Category::create(['name' => 'Fruits', 'slug' => 'fruits']);
-        
+
         // Create active products
         $tomatoes = Product::factory()->create([
             'name' => 'Organic Tomatoes',
@@ -34,48 +34,48 @@ class PublicProductsTest extends TestCase
             'price' => 3.50,
             'producer_id' => $producer->id,
             'is_active' => true,
-            'is_organic' => true
+            'is_organic' => true,
         ]);
         $tomatoes->categories()->attach($vegetables->id);
-        
+
         $apples = Product::factory()->create([
             'name' => 'Fresh Apples',
             'description' => 'Crispy red apples',
             'price' => 4.00,
             'producer_id' => $producer->id,
             'is_active' => true,
-            'is_organic' => false
+            'is_organic' => false,
         ]);
         $apples->categories()->attach($fruits->id);
-        
+
         // Create second producer for producer filter tests
         $user2 = User::factory()->create(['role' => 'producer']);
         $producer2 = Producer::factory()->create(['user_id' => $user2->id, 'slug' => 'farm-fresh']);
-        
+
         $carrots = Product::factory()->create([
             'name' => 'Farm Carrots',
             'description' => 'Fresh farm carrots',
             'price' => 2.50,
             'producer_id' => $producer2->id,
             'is_active' => true,
-            'is_organic' => true
+            'is_organic' => true,
         ]);
         $carrots->categories()->attach($vegetables->id);
-        
+
         // Create inactive product
         $lettuce = Product::factory()->create([
             'name' => 'Fresh Lettuce',
             'producer_id' => $producer->id,
-            'is_active' => false
+            'is_active' => false,
         ]);
         $lettuce->categories()->attach($vegetables->id);
-        
+
         // Add images
         ProductImage::create([
             'product_id' => $tomatoes->id,
             'url' => 'https://example.com/tomatoes.jpg',
             'is_primary' => true,
-            'sort_order' => 0
+            'sort_order' => 0,
         ]);
     }
 
@@ -94,8 +94,8 @@ class PublicProductsTest extends TestCase
                         'price',
                         'categories',
                         'images',
-                        'producer'
-                    ]
+                        'producer',
+                    ],
                 ],
                 'first_page_url',
                 'from',
@@ -116,10 +116,10 @@ class PublicProductsTest extends TestCase
         $response = $this->get('/api/v1/public/products');
 
         $response->assertStatus(200);
-        
+
         $data = $response->json('data');
         $this->assertCount(3, $data); // Should only return active products
-        
+
         foreach ($data as $product) {
             $this->assertTrue($product['is_active']);
         }
@@ -131,7 +131,7 @@ class PublicProductsTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(0, count($data));
         $this->assertStringContainsStringIgnoringCase('tomatoes', $data[0]['name']);
     }
@@ -142,9 +142,9 @@ class PublicProductsTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(0, count($data));
-        
+
         // Check that returned products belong to vegetables category
         foreach ($data as $product) {
             $categoryNames = collect($product['categories'])->pluck('slug');
@@ -158,9 +158,9 @@ class PublicProductsTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(1, count($data));
-        
+
         // Check that products are sorted by price descending
         $prices = collect($data)->pluck('price');
         $sortedPrices = $prices->sort()->reverse()->values();
@@ -173,9 +173,9 @@ class PublicProductsTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(1, count($data));
-        
+
         // Check that products are sorted by name ascending
         $names = collect($data)->pluck('name');
         $sortedNames = $names->sort()->values();
@@ -206,9 +206,9 @@ class PublicProductsTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(0, count($data));
-        
+
         // Check that all returned products belong to the farm-fresh producer
         foreach ($data as $product) {
             $this->assertEquals('farm-fresh', $product['producer']['slug'] ?? '');
@@ -221,27 +221,27 @@ class PublicProductsTest extends TestCase
         $response = $this->get('/api/v1/public/products?min_price=3.00');
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         foreach ($data as $product) {
-            $this->assertGreaterThanOrEqual(3.00, (float)$product['price']);
+            $this->assertGreaterThanOrEqual(3.00, (float) $product['price']);
         }
-        
+
         // Test maximum price filter
         $response = $this->get('/api/v1/public/products?max_price=3.00');
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         foreach ($data as $product) {
-            $this->assertLessThanOrEqual(3.00, (float)$product['price']);
+            $this->assertLessThanOrEqual(3.00, (float) $product['price']);
         }
-        
+
         // Test price range filter
         $response = $this->get('/api/v1/public/products?min_price=2.50&max_price=3.50');
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         foreach ($data as $product) {
-            $price = (float)$product['price'];
+            $price = (float) $product['price'];
             $this->assertGreaterThanOrEqual(2.50, $price);
             $this->assertLessThanOrEqual(3.50, $price);
         }
@@ -253,17 +253,17 @@ class PublicProductsTest extends TestCase
         $response = $this->get('/api/v1/public/products?organic=true');
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(0, count($data));
         foreach ($data as $product) {
             $this->assertTrue($product['is_organic']);
         }
-        
+
         // Test organic=false filter
         $response = $this->get('/api/v1/public/products?organic=false');
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         $this->assertGreaterThan(0, count($data));
         foreach ($data as $product) {
             $this->assertFalse($product['is_organic']);
@@ -274,20 +274,20 @@ class PublicProductsTest extends TestCase
     {
         // Test combining multiple filters
         $response = $this->get('/api/v1/public/products?category=vegetables&organic=true&max_price=4.00');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         foreach ($data as $product) {
             // Should be organic
             $this->assertTrue($product['is_organic']);
-            
+
             // Should be in vegetables category
             $categoryNames = collect($product['categories'])->pluck('slug');
             $this->assertTrue($categoryNames->contains('vegetables'));
-            
+
             // Should be under max price
-            $this->assertLessThanOrEqual(4.00, (float)$product['price']);
+            $this->assertLessThanOrEqual(4.00, (float) $product['price']);
         }
     }
 }

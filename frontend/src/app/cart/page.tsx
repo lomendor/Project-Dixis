@@ -14,6 +14,7 @@ import { useCheckout } from '@/hooks/useCheckout';
 import { formatCurrency } from '@/env';
 import CartSummary from '@/components/cart/CartSummary';
 import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
+import { ShippingQuote } from '@/components/shipping';
 
 export default function Cart() {
 const {
@@ -58,16 +59,6 @@ const {
     }
   }, [selectedPaymentMethod, selectPaymentMethod]);
 
-  const handleShippingQuote = async () => {
-    if (!form.shipping?.postalCode || !form.shipping?.city) {
-      showToast('error', 'Συμπληρώστε ΤΚ και πόλη για υπολογισμό μεταφορικών');
-      return;
-    }
-    await getShippingQuote({
-      postal_code: form.shipping.postalCode,
-      city: form.shipping.city
-    });
-  };
 
 const handleCheckout = async () => {
     if (!selectedPaymentMethod) {
@@ -175,7 +166,7 @@ const handleCheckout = async () => {
 
           {/* Checkout Sidebar */}
           <div className="space-y-6">
-            {/* Shipping Info */}
+            {/* Shipping Quote */}
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-4">Στοιχεία Αποστολής</h3>
               <div className="space-y-4">
@@ -205,13 +196,30 @@ const handleCheckout = async () => {
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.city']}</p>
                   )}
                 </div>
-                <button
-                  onClick={handleShippingQuote}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  disabled={isLoading}
-                >
-                  Υπολογισμός Μεταφορικών
-                </button>
+
+                {/* New Shipping Quote Component */}
+                {cart && form.shipping?.postalCode && (
+                  <ShippingQuote
+                    items={cart.map(item => ({
+                      product_id: item.product_id,
+                      quantity: item.quantity
+                    }))}
+                    postalCode={form.shipping.postalCode}
+                    onQuoteReceived={(quote) => {
+                      // Auto-select the shipping method from the quote
+                      if (quote) {
+                        selectShippingMethod({
+                          id: 'shipping',
+                          name: `${quote.carrier_code} - ${quote.zone_code}`,
+                          description: `Παράδοση σε ${quote.estimated_delivery_days} εργάσιμες ημέρες`,
+                          price: quote.cost_cents / 100,
+                          estimated_days: quote.estimated_delivery_days
+                        });
+                      }
+                    }}
+                    className="mt-4"
+                  />
+                )}
               </div>
             </div>
 

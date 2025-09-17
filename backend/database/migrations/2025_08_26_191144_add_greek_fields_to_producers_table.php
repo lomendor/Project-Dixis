@@ -13,43 +13,43 @@ return new class extends Migration
     {
         Schema::table('producers', function (Blueprint $table) {
             // Greek tax compliance fields
-            if (!Schema::hasColumn('producers', 'tax_id')) {
+            if (! Schema::hasColumn('producers', 'tax_id')) {
                 $table->string('tax_id')->nullable()->comment('Greek AFM (Tax ID)');
             }
-            if (!Schema::hasColumn('producers', 'tax_office')) {
+            if (! Schema::hasColumn('producers', 'tax_office')) {
                 $table->string('tax_office')->nullable()->comment('Greek DOY (Tax Office)');
             }
-            
+
             // Location details
-            if (!Schema::hasColumn('producers', 'address')) {
+            if (! Schema::hasColumn('producers', 'address')) {
                 $table->string('address')->nullable();
             }
-            if (!Schema::hasColumn('producers', 'city')) {
+            if (! Schema::hasColumn('producers', 'city')) {
                 $table->string('city')->nullable();
             }
-            if (!Schema::hasColumn('producers', 'postal_code')) {
+            if (! Schema::hasColumn('producers', 'postal_code')) {
                 $table->string('postal_code')->nullable();
             }
-            if (!Schema::hasColumn('producers', 'region')) {
+            if (! Schema::hasColumn('producers', 'region')) {
                 $table->string('region')->nullable()->comment('Prefecture/Region');
             }
-            
+
             // GPS coordinates
-            if (!Schema::hasColumn('producers', 'latitude')) {
+            if (! Schema::hasColumn('producers', 'latitude')) {
                 $table->decimal('latitude', 10, 7)->nullable();
             }
-            if (!Schema::hasColumn('producers', 'longitude')) {
+            if (! Schema::hasColumn('producers', 'longitude')) {
                 $table->decimal('longitude', 10, 7)->nullable();
             }
-            
+
             // Social media and verification
-            if (!Schema::hasColumn('producers', 'social_media')) {
+            if (! Schema::hasColumn('producers', 'social_media')) {
                 $table->json('social_media')->nullable();
             }
-            if (!Schema::hasColumn('producers', 'verified')) {
+            if (! Schema::hasColumn('producers', 'verified')) {
                 $table->boolean('verified')->default(false);
             }
-            if (!Schema::hasColumn('producers', 'uses_custom_shipping_rates')) {
+            if (! Schema::hasColumn('producers', 'uses_custom_shipping_rates')) {
                 $table->boolean('uses_custom_shipping_rates')->default(false);
             }
         });

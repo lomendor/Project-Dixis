@@ -2,15 +2,14 @@
 
 namespace Tests\Feature\Api\V1;
 
-use PHPUnit\Framework\Attributes\Group;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Producer;
-use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 class OrdersTest extends TestCase
 {
@@ -34,7 +33,7 @@ class OrdersTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'quantity' => 2,
-                ]
+                ],
             ],
             'shipping_method' => 'HOME',
             'notes' => 'Test order',
@@ -61,8 +60,8 @@ class OrdersTest extends TestCase
                         'unit_price',
                         'total_price',
                         'product_name',
-                    ]
-                ]
+                    ],
+                ],
             ])
             ->assertJson([
                 'user_id' => $user->id,
@@ -112,9 +111,9 @@ class OrdersTest extends TestCase
                         'quantity',
                         'unit_price',
                         'total_price',
-                        'product'
-                    ]
-                ]
+                        'product',
+                    ],
+                ],
             ])
             ->assertJson([
                 'id' => $order->id,
@@ -133,7 +132,7 @@ class OrdersTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'quantity' => 1,
-                ]
+                ],
             ],
         ];
 

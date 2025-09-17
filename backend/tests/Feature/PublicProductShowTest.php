@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\Category;
+use App\Models\Producer;
+use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('mvp')]
 class PublicProductShowTest extends TestCase
@@ -17,43 +17,45 @@ class PublicProductShowTest extends TestCase
     use RefreshDatabase;
 
     protected $product;
+
     protected $category;
+
     protected $image;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create producer and category
         $user = User::factory()->create(['role' => 'producer']);
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $this->category = Category::create(['name' => 'Vegetables', 'slug' => 'vegetables']);
-        
+
         // Create active product
         $this->product = Product::factory()->create([
             'name' => 'Organic Tomatoes',
             'description' => 'Fresh organic tomatoes from local farm',
             'price' => 3.50,
             'producer_id' => $producer->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
-        
+
         // Attach category
         $this->product->categories()->attach($this->category->id);
-        
+
         // Create images (primary and secondary)
         $this->image = ProductImage::create([
             'product_id' => $this->product->id,
             'url' => 'https://example.com/tomatoes-primary.jpg',
             'is_primary' => true,
-            'sort_order' => 0
+            'sort_order' => 0,
         ]);
-        
+
         ProductImage::create([
             'product_id' => $this->product->id,
             'url' => 'https://example.com/tomatoes-secondary.jpg',
             'is_primary' => false,
-            'sort_order' => 1
+            'sort_order' => 1,
         ]);
     }
 
@@ -71,26 +73,26 @@ class PublicProductShowTest extends TestCase
                     '*' => [
                         'id',
                         'name',
-                        'slug'
-                    ]
+                        'slug',
+                    ],
                 ],
                 'images' => [
                     '*' => [
                         'id',
                         'url',
                         'is_primary',
-                        'sort_order'
-                    ]
+                        'sort_order',
+                    ],
                 ],
                 'producer' => [
                     'id',
-                    'name'
-                ]
+                    'name',
+                ],
             ])
             ->assertJson([
                 'id' => $this->product->id,
                 'name' => 'Organic Tomatoes',
-                'price' => '3.50'
+                'price' => '3.50',
             ]);
     }
 
@@ -99,14 +101,14 @@ class PublicProductShowTest extends TestCase
         $response = $this->get("/api/v1/public/products/{$this->product->id}");
 
         $response->assertStatus(200);
-        
+
         $images = $response->json('images');
         $this->assertCount(2, $images);
-        
+
         // First image should be primary
         $this->assertTrue($images[0]['is_primary']);
         $this->assertFalse($images[1]['is_primary']);
-        
+
         // Check sort order
         $this->assertEquals(0, $images[0]['sort_order']);
         $this->assertEquals(1, $images[1]['sort_order']);
@@ -117,7 +119,7 @@ class PublicProductShowTest extends TestCase
         $response = $this->get("/api/v1/public/products/{$this->product->id}");
 
         $response->assertStatus(200);
-        
+
         $categories = $response->json('categories');
         $this->assertCount(1, $categories);
         $this->assertEquals('Vegetables', $categories[0]['name']);
@@ -130,7 +132,7 @@ class PublicProductShowTest extends TestCase
         $response = $this->get("/api/v1/public/products/{$this->product->id}");
 
         $response->assertStatus(200);
-        
+
         $producer = $response->json('producer');
         $this->assertNotNull($producer);
         $this->assertArrayHasKey('id', $producer);
@@ -145,7 +147,7 @@ class PublicProductShowTest extends TestCase
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $inactiveProduct = Product::factory()->create([
             'producer_id' => $producer->id,
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         $response = $this->get("/api/v1/public/products/{$inactiveProduct->id}");
@@ -168,7 +170,7 @@ class PublicProductShowTest extends TestCase
             ->assertJsonStructure([
                 'id',
                 'name',
-                'description', 
+                'description',
                 'price',
                 'unit',
                 'stock',
@@ -177,7 +179,7 @@ class PublicProductShowTest extends TestCase
                 'images',
                 'producer',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ]);
     }
 }

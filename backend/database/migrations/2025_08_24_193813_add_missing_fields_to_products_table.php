@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             // Guard: check if columns don't exist
-            if (!Schema::hasColumn('products', 'weight_per_unit')) {
+            if (! Schema::hasColumn('products', 'weight_per_unit')) {
                 $table->decimal('weight_per_unit', 10, 3)->nullable()->after('price');
             }
-            if (!Schema::hasColumn('products', 'is_organic')) {
+            if (! Schema::hasColumn('products', 'is_organic')) {
                 $table->boolean('is_organic')->default(false)->after('category');
             }
         });

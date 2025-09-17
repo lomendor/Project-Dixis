@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Producer;
 use App\Models\Product;
 use App\Models\ProductImage;
-use Illuminate\Support\Str;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class E2ESeeder extends Seeder
 {
@@ -19,7 +18,7 @@ class E2ESeeder extends Seeder
     {
         // Create deterministic test users for E2E (in testing and local environments)
         if (app()->environment(['testing', 'local'])) {
-            
+
             // Test consumer user
             $testUser = User::firstOrCreate(
                 ['email' => 'test@dixis.local'],
@@ -126,7 +125,7 @@ class E2ESeeder extends Seeder
 
         foreach ($productsData as $productData) {
             $category = $categories[$productData['category']];
-            
+
             $product = Product::firstOrCreate(
                 ['slug' => $productData['slug']],
                 [
@@ -150,12 +149,12 @@ class E2ESeeder extends Seeder
             // Create product image
             ProductImage::firstOrCreate([
                 'product_id' => $product->id,
-                'url' => $productData['image_url']
+                'url' => $productData['image_url'],
             ], [
                 'product_id' => $product->id,
                 'url' => $productData['image_url'],
                 'is_primary' => true,
-                'sort_order' => 0
+                'sort_order' => 0,
             ]);
         }
 

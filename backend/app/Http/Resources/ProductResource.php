@@ -10,7 +10,6 @@ class ProductResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -20,10 +19,10 @@ class ProductResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'price' => number_format((float)$this->price, 2),
-            'discount_price' => $this->discount_price ? number_format((float)$this->discount_price, 2) : null,
+            'price' => number_format((float) $this->price, 2),
+            'discount_price' => $this->discount_price ? number_format((float) $this->discount_price, 2) : null,
             'has_discount' => $this->discount_price ? true : false,
-            'effective_price' => $this->discount_price ? number_format((float)$this->discount_price, 2) : number_format((float)$this->price, 2),
+            'effective_price' => $this->discount_price ? number_format((float) $this->discount_price, 2) : number_format((float) $this->price, 2),
             'weight_per_unit' => $this->weight_per_unit,
             'unit' => $this->unit,
             'stock' => $this->stock,

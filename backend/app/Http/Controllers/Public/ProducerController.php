@@ -4,16 +4,13 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Producer;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProducerController extends Controller
 {
     /**
      * Display a listing of active producers.
-     * 
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -21,33 +18,33 @@ class ProducerController extends Controller
         $search = $request->get('search');
         $sort = $request->get('sort', 'name');
         $direction = $request->get('dir', 'asc');
-        
+
         // Validate sort parameters
         $allowedSorts = ['name', 'location', 'created_at'];
         $sort = in_array($sort, $allowedSorts) ? $sort : 'name';
         $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
-        
+
         $query = Producer::query()
             ->with(['user:id,name,email'])
             ->where('is_active', true);
-        
+
         // Apply search filter
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'ILIKE', "%{$search}%")
-                  ->orWhere('description', 'ILIKE', "%{$search}%")
-                  ->orWhere('location', 'ILIKE', "%{$search}%")
-                  ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->where('name', 'ILIKE', "%{$search}%");
-                  });
+                    ->orWhere('description', 'ILIKE', "%{$search}%")
+                    ->orWhere('location', 'ILIKE', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'ILIKE', "%{$search}%");
+                    });
             });
         }
-        
+
         // Apply sorting
         $query->orderBy($sort, $direction);
-        
+
         $producers = $query->paginate($perPage);
-        
+
         // Transform the data to include only public information
         $producers->getCollection()->transform(function ($producer) {
             return [
@@ -63,29 +60,26 @@ class ProducerController extends Controller
                 'products_count' => $producer->products()->where('is_active', true)->count(),
             ];
         });
-        
+
         return response()->json($producers);
     }
-    
+
     /**
      * Display the specified producer.
-     * 
-     * @param int $id
-     * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
         $producer = Producer::with(['user:id,name,email'])
             ->where('is_active', true)
             ->findOrFail($id);
-        
+
         // Load active products with their categories and images
         $producer->load(['products' => function ($query) {
             $query->where('is_active', true)
-                  ->with(['categories:id,name,slug', 'images'])
-                  ->orderBy('name');
+                ->with(['categories:id,name,slug', 'images'])
+                ->orderBy('name');
         }]);
-        
+
         $data = [
             'id' => $producer->id,
             'name' => $producer->name,
@@ -119,7 +113,7 @@ class ProducerController extends Controller
             }),
             'total_active_products' => $producer->products->count(),
         ];
-        
+
         return response()->json($data);
     }
 }

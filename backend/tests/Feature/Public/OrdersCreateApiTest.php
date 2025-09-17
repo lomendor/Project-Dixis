@@ -4,11 +4,10 @@ namespace Tests\Feature\Public;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Product;
 use App\Models\Producer;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
@@ -18,21 +17,25 @@ class OrdersCreateApiTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $producer;
+
     protected $product1;
+
     protected $product2;
+
     protected $inactiveProduct;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test user
         $this->user = User::factory()->create();
-        
+
         // Create test producer
         $this->producer = Producer::factory()->create(['is_active' => true]);
-        
+
         // Create test products
         $this->product1 = Product::factory()->create([
             'name' => 'Test Oranges',
@@ -42,7 +45,7 @@ class OrdersCreateApiTest extends TestCase
             'is_active' => true,
             'producer_id' => $this->producer->id,
         ]);
-        
+
         $this->product2 = Product::factory()->create([
             'name' => 'Test Apples',
             'price' => 5.25,
@@ -51,7 +54,7 @@ class OrdersCreateApiTest extends TestCase
             'is_active' => true,
             'producer_id' => $this->producer->id,
         ]);
-        
+
         // Create inactive product
         $this->inactiveProduct = Product::factory()->create([
             'name' => 'Inactive Product',
@@ -106,23 +109,23 @@ class OrdersCreateApiTest extends TestCase
             ]);
 
         $responseData = $response->json('data');
-        
+
         // Verify order details
         $this->assertEquals('pending', $responseData['status']);
         $this->assertEquals(2, $responseData['items_count']);
         $this->assertEquals('EUR', $responseData['currency']);
-        
+
         // Verify total calculation: (10.50 * 2) + (5.25 * 3) = 21.00 + 15.75 = 36.75
         $this->assertEquals('36.75', $responseData['total']);
-        
+
         // Verify order number format
         $this->assertMatchesRegularExpression('/^ORD-\d{6}$/', $responseData['order_number']);
-        
+
         // Verify no PII is exposed
         $this->assertArrayNotHasKey('user_id', $responseData);
         $this->assertArrayNotHasKey('shipping_address', $responseData);
         $this->assertArrayNotHasKey('billing_address', $responseData);
-        
+
         // Verify database records
         $this->assertDatabaseHas('orders', [
             'user_id' => $this->user->id,
@@ -131,7 +134,7 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'HOME',
             'notes' => 'Test order notes',
         ]);
-        
+
         $this->assertDatabaseHas('order_items', [
             'product_id' => $this->product1->id,
             'quantity' => 2,
@@ -140,7 +143,7 @@ class OrdersCreateApiTest extends TestCase
             'product_name' => 'Test Oranges',
             'product_unit' => 'kg',
         ]);
-        
+
         $this->assertDatabaseHas('order_items', [
             'product_id' => $this->product2->id,
             'quantity' => 3,
@@ -149,7 +152,7 @@ class OrdersCreateApiTest extends TestCase
             'product_name' => 'Test Apples',
             'product_unit' => 'kg',
         ]);
-        
+
         // Verify stock was decremented
         $this->product1->refresh();
         $this->product2->refresh();
@@ -235,7 +238,7 @@ class OrdersCreateApiTest extends TestCase
             ->assertJson([
                 'message' => "Insufficient stock for product 'Test Apples'. Available: 50, requested: 60.",
             ]);
-        
+
         // Verify stock was not decremented
         $this->product2->refresh();
         $this->assertEquals(50, $this->product2->stock);
@@ -247,7 +250,7 @@ class OrdersCreateApiTest extends TestCase
         $initialOrderItemCount = OrderItem::count();
         $initialProduct1Stock = $this->product1->stock;
         $initialProduct2Stock = $this->product2->stock;
-        
+
         $orderData = [
             'items' => [
                 [
@@ -266,11 +269,11 @@ class OrdersCreateApiTest extends TestCase
         $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(409); // Should fail due to insufficient stock
-        
+
         // Verify no records were created (transaction was rolled back)
         $this->assertEquals($initialOrderCount, Order::count());
         $this->assertEquals($initialOrderItemCount, OrderItem::count());
-        
+
         // Verify no stock was decremented (transaction was rolled back)
         $this->product1->refresh();
         $this->product2->refresh();
@@ -296,28 +299,28 @@ class OrdersCreateApiTest extends TestCase
         $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201);
-        
+
         $responseData = $response->json('data');
-        
+
         // Verify required fields are present
         $requiredFields = ['id', 'order_number', 'status', 'total', 'currency', 'created_at', 'items_count', 'items'];
         foreach ($requiredFields as $field) {
             $this->assertArrayHasKey($field, $responseData);
         }
-        
+
         // Verify PII fields are NOT present
         $piiFields = ['user_id', 'email', 'phone', 'shipping_address', 'billing_address', 'payment_method'];
         foreach ($piiFields as $field) {
             $this->assertArrayNotHasKey($field, $responseData);
         }
-        
+
         // Verify currency was saved correctly
         $this->assertEquals('USD', $responseData['currency']);
-        
+
         // Verify items structure
         $this->assertIsArray($responseData['items']);
         $this->assertCount(1, $responseData['items']);
-        
+
         $item = $responseData['items'][0];
         $this->assertArrayHasKey('product_id', $item);
         $this->assertArrayHasKey('product_name', $item);
@@ -381,7 +384,7 @@ class OrdersCreateApiTest extends TestCase
         $response = $this->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201);
-        
+
         // Verify order was created without user_id
         $this->assertDatabaseHas('orders', [
             'user_id' => null,

@@ -20,15 +20,15 @@ class ProducerAnalyticsController extends Controller
     {
         $request->validate([
             'period' => 'string|in:daily,monthly',
-            'limit' => 'integer|min:1|max:365'
+            'limit' => 'integer|min:1|max:365',
         ]);
 
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ], 403);
         }
 
@@ -44,13 +44,13 @@ class ProducerAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'analytics' => $analytics
+                'analytics' => $analytics,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve sales analytics',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -62,10 +62,10 @@ class ProducerAnalyticsController extends Controller
     {
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ], 403);
         }
 
@@ -74,13 +74,13 @@ class ProducerAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'analytics' => $analytics
+                'analytics' => $analytics,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve orders analytics',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -91,15 +91,15 @@ class ProducerAnalyticsController extends Controller
     public function products(Request $request): JsonResponse
     {
         $request->validate([
-            'limit' => 'integer|min:1|max:50'
+            'limit' => 'integer|min:1|max:50',
         ]);
 
         // Get producer ID from authenticated user
         $user = $request->user();
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ], 403);
         }
 
@@ -113,13 +113,13 @@ class ProducerAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'analytics' => $analytics
+                'analytics' => $analytics,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve products analytics',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

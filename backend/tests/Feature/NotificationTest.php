@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Order;
 use App\Models\Notification;
+use App\Models\Order;
+use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class NotificationTest extends TestCase
 {
@@ -89,14 +89,14 @@ class NotificationTest extends TestCase
                         'read_at',
                         'created_at',
                         'updated_at',
-                    ]
+                    ],
                 ],
                 'pagination' => [
                     'current_page',
                     'last_page',
                     'per_page',
                     'total',
-                ]
+                ],
             ]);
 
         $this->assertCount(5, $response->json()['notifications']);

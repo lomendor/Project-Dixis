@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('product_images')) {
+        if (! Schema::hasTable('product_images')) {
             Schema::create('product_images', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('product_id')->constrained()->onDelete('cascade');
@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->boolean('is_primary')->default(false);
                 $table->smallInteger('sort_order')->default(0);
                 $table->timestamps();
-                
+
                 // Indexes
                 $table->index('product_id');
                 $table->index(['product_id', 'is_primary']);

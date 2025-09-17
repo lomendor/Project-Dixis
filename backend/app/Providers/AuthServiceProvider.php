@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\Product;
 use App\Models\Order;
-use App\Policies\ProductPolicy;
+use App\Models\Product;
 use App\Policies\OrderPolicy;
+use App\Policies\ProductPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -30,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('admin-access', fn ($user) => $user->role === 'admin');
         Gate::define('producer-access', fn ($user) => $user->role === 'producer' || $user->role === 'admin');
         Gate::define('consumer-access', fn ($user) => $user->role === 'consumer' || $user->role === 'admin');
-        
+
         // Specific action gates
         Gate::define('create-products', fn ($user) => $user->role === 'producer' || $user->role === 'admin');
         Gate::define('create-orders', fn ($user) => $user->role === 'consumer' || $user->role === 'admin');

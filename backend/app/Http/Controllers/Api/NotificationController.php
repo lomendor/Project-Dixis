@@ -10,9 +10,7 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
-    {
-    }
+    public function __construct(private NotificationService $notificationService) {}
 
     /**
      * Get user's notifications with pagination
@@ -25,7 +23,7 @@ class NotificationController extends Controller
 
         $query = $user->notifications()->latest();
 
-        if (!$showRead) {
+        if (! $showRead) {
             $query->unread();
         }
 
@@ -40,8 +38,8 @@ class NotificationController extends Controller
                 'per_page' => $notifications->perPage(),
                 'total' => $notifications->total(),
                 'from' => $notifications->firstItem(),
-                'to' => $notifications->lastItem()
-            ]
+                'to' => $notifications->lastItem(),
+            ],
         ]);
     }
 
@@ -55,7 +53,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'unread_count' => $count
+            'unread_count' => $count,
         ]);
     }
 
@@ -70,7 +68,7 @@ class NotificationController extends Controller
         if ($notification->user_id !== $user->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized access to notification'
+                'message' => 'Unauthorized access to notification',
             ], 403);
         }
 
@@ -78,7 +76,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Η ειδοποίηση επισημάνθηκε ως αναγνωσμένη'
+            'message' => 'Η ειδοποίηση επισημάνθηκε ως αναγνωσμένη',
         ]);
     }
 
@@ -92,7 +90,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Όλες οι ειδοποιήσεις επισημάνθηκαν ως αναγνωσμένες'
+            'message' => 'Όλες οι ειδοποιήσεις επισημάνθηκαν ως αναγνωσμένες',
         ]);
     }
 
@@ -109,7 +107,7 @@ class NotificationController extends Controller
         return response()->json([
             'success' => true,
             'notifications' => $notifications,
-            'unread_count' => $this->notificationService->getUnreadCount($user)
+            'unread_count' => $this->notificationService->getUnreadCount($user),
         ]);
     }
 }

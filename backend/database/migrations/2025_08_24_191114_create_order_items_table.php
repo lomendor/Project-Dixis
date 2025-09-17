@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('product_name'); // Store product name at time of order
             $table->string('product_unit')->nullable(); // Store unit at time of order
             $table->timestamps();
-            
+
             // Indexes
             $table->index('order_id');
             $table->index('product_id');

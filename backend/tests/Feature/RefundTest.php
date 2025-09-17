@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Order;
+use App\Models\User;
 use App\Services\Payment\PaymentProviderFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class RefundTest extends TestCase
 {
@@ -103,7 +103,7 @@ class RefundTest extends TestCase
         $response = $this->actingAs($user)
             ->postJson("/api/v1/refunds/orders/{$order->id}", [
                 'amount_cents' => 2000,
-                'reason' => 'customer_request'
+                'reason' => 'customer_request',
             ]);
 
         $response->assertStatus(200)
@@ -123,7 +123,7 @@ class RefundTest extends TestCase
                     'status',
                     'reason',
                     'created_at',
-                ]
+                ],
             ]);
     }
 
@@ -158,7 +158,7 @@ class RefundTest extends TestCase
                     'is_refunded',
                     'total_amount_cents',
                     'max_refundable_cents',
-                ]
+                ],
             ]);
 
         $refundInfo = $response->json()['refund_info'];

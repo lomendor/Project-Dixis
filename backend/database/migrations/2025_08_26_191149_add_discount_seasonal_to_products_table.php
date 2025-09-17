@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             // Discount pricing
-            if (!Schema::hasColumn('products', 'discount_price')) {
+            if (! Schema::hasColumn('products', 'discount_price')) {
                 $table->decimal('discount_price', 8, 2)->nullable()->comment('Sale/discount price');
             }
-            
+
             // Seasonal availability
-            if (!Schema::hasColumn('products', 'is_seasonal')) {
+            if (! Schema::hasColumn('products', 'is_seasonal')) {
                 $table->boolean('is_seasonal')->default(false);
             }
         });

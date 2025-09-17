@@ -2,19 +2,20 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProducerAnalyticsTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $producerUser;
+
     private Producer $producer;
 
     protected function setUp(): void
@@ -23,13 +24,13 @@ class ProducerAnalyticsTest extends TestCase
 
         // Create producer user first
         $this->producerUser = User::factory()->create([
-            'email' => 'producer@test.com'
+            'email' => 'producer@test.com',
         ]);
 
         // Create producer associated with the user
         $this->producer = Producer::factory()->create([
             'name' => 'Test Producer',
-            'user_id' => $this->producerUser->id
+            'user_id' => $this->producerUser->id,
         ]);
     }
 
@@ -39,43 +40,43 @@ class ProducerAnalyticsTest extends TestCase
         $product1 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'price' => 10.00,
-            'name' => 'Producer Product 1'
+            'name' => 'Producer Product 1',
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'price' => 20.00,
-            'name' => 'Producer Product 2'
+            'name' => 'Producer Product 2',
         ]);
 
         // Create orders with producer's products
         $order1 = Order::factory()->create([
             'payment_status' => 'paid',
             'total_amount' => 30.00,
-            'created_at' => now()
+            'created_at' => now(),
         ]);
         OrderItem::factory()->create([
             'order_id' => $order1->id,
             'product_id' => $product1->id,
             'quantity' => 2,
-            'total_price' => 20.00
+            'total_price' => 20.00,
         ]);
         OrderItem::factory()->create([
             'order_id' => $order1->id,
             'product_id' => $product2->id,
             'quantity' => 1,
-            'total_price' => 20.00
+            'total_price' => 20.00,
         ]);
 
         $order2 = Order::factory()->create([
             'payment_status' => 'paid',
             'total_amount' => 20.00,
-            'created_at' => now()->subDay()
+            'created_at' => now()->subDay(),
         ]);
         OrderItem::factory()->create([
             'order_id' => $order2->id,
             'product_id' => $product1->id,
             'quantity' => 2,
-            'total_price' => 20.00
+            'total_price' => 20.00,
         ]);
 
         $response = $this->actingAs($this->producerUser)
@@ -88,15 +89,15 @@ class ProducerAnalyticsTest extends TestCase
                 'analytics' => [
                     'period',
                     'data' => [
-                        '*' => ['date', 'total_sales', 'order_count', 'average_order_value']
+                        '*' => ['date', 'total_sales', 'order_count', 'average_order_value'],
                     ],
                     'summary' => [
                         'total_revenue',
                         'total_orders',
                         'average_order_value',
-                        'period_growth'
-                    ]
-                ]
+                        'period_growth',
+                    ],
+                ],
             ]);
 
         $analytics = $response->json()['analytics'];
@@ -108,20 +109,20 @@ class ProducerAnalyticsTest extends TestCase
     {
         // Create products for this producer
         $product = Product::factory()->create([
-            'producer_id' => $this->producer->id
+            'producer_id' => $this->producer->id,
         ]);
 
         // Create orders with different statuses containing producer's products
         $order1 = Order::factory()->create(['status' => 'pending']);
         OrderItem::factory()->create([
             'order_id' => $order1->id,
-            'product_id' => $product->id
+            'product_id' => $product->id,
         ]);
 
         $order2 = Order::factory()->create(['status' => 'delivered']);
         OrderItem::factory()->create([
             'order_id' => $order2->id,
-            'product_id' => $product->id
+            'product_id' => $product->id,
         ]);
 
         $response = $this->actingAs($this->producerUser)
@@ -139,9 +140,9 @@ class ProducerAnalyticsTest extends TestCase
                         'total_orders',
                         'pending_orders',
                         'completed_orders',
-                        'cancelled_orders'
-                    ]
-                ]
+                        'cancelled_orders',
+                    ],
+                ],
             ]);
 
         $analytics = $response->json()['analytics'];
@@ -156,12 +157,12 @@ class ProducerAnalyticsTest extends TestCase
         $product1 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Product A',
-            'price' => 10.00
+            'price' => 10.00,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Product B',
-            'price' => 20.00
+            'price' => 20.00,
         ]);
 
         // Create orders with items for this producer's products
@@ -170,13 +171,13 @@ class ProducerAnalyticsTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product1->id,
             'quantity' => 3,
-            'total_price' => 30.00
+            'total_price' => 30.00,
         ]);
         OrderItem::factory()->create([
             'order_id' => $order->id,
             'product_id' => $product2->id,
             'quantity' => 1,
-            'total_price' => 20.00
+            'total_price' => 20.00,
         ]);
 
         $response = $this->actingAs($this->producerUser)
@@ -194,15 +195,15 @@ class ProducerAnalyticsTest extends TestCase
                             'price',
                             'total_quantity_sold',
                             'total_revenue',
-                            'order_count'
-                        ]
+                            'order_count',
+                        ],
                     ],
                     'summary' => [
                         'total_products',
                         'active_products',
-                        'out_of_stock'
-                    ]
-                ]
+                        'out_of_stock',
+                    ],
+                ],
             ]);
 
         $topProducts = $response->json()['analytics']['top_products'];
@@ -234,7 +235,7 @@ class ProducerAnalyticsTest extends TestCase
         $response->assertStatus(403)
             ->assertJson([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ]);
 
         $response = $this->actingAs($regularUser)
@@ -243,7 +244,7 @@ class ProducerAnalyticsTest extends TestCase
         $response->assertStatus(403)
             ->assertJson([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ]);
 
         $response = $this->actingAs($regularUser)
@@ -252,7 +253,7 @@ class ProducerAnalyticsTest extends TestCase
         $response->assertStatus(403)
             ->assertJson([
                 'success' => false,
-                'message' => 'User is not associated with a producer'
+                'message' => 'User is not associated with a producer',
             ]);
     }
 
@@ -262,13 +263,13 @@ class ProducerAnalyticsTest extends TestCase
         $otherProducer = Producer::factory()->create(['name' => 'Other Producer']);
         $otherProduct = Product::factory()->create([
             'producer_id' => $otherProducer->id,
-            'name' => 'Other Producer Product'
+            'name' => 'Other Producer Product',
         ]);
 
         // Create product for our producer
         $myProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
-            'name' => 'My Product'
+            'name' => 'My Product',
         ]);
 
         // Create orders for both products
@@ -276,14 +277,14 @@ class ProducerAnalyticsTest extends TestCase
         OrderItem::factory()->create([
             'order_id' => $order1->id,
             'product_id' => $otherProduct->id,
-            'total_price' => 100.00
+            'total_price' => 100.00,
         ]);
 
         $order2 = Order::factory()->create(['payment_status' => 'paid']);
         OrderItem::factory()->create([
             'order_id' => $order2->id,
             'product_id' => $myProduct->id,
-            'total_price' => 50.00
+            'total_price' => 50.00,
         ]);
 
         // Test sales analytics - should only see own product sales
