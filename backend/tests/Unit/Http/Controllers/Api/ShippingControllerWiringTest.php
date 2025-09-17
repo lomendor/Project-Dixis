@@ -230,7 +230,7 @@ class ShippingControllerWiringTest extends TestCase
         $this->assertEquals(500, $response->getStatusCode());
     }
 
-    public function test_configuration_based_provider_selection()
+    public function test_configuration_based_provider_selection_defaults_to_internal_when_none()
     {
         // Current default is 'none' → Internal provider
         putenv('COURIER_PROVIDER=none');
@@ -245,6 +245,10 @@ class ShippingControllerWiringTest extends TestCase
         // This scenario is environment-driven; keep it non-blocking on CI.
         putenv('COURIER_PROVIDER=acs');
         config(['courier.provider' => 'acs']);
+        config([
+            'services.acs.api_key' => 'test_key',
+            'services.acs.client_id' => 'test_client',
+        ]);
         $factory = app(CourierProviderFactory::class);
         $provider = $factory->make();
         // If CI does not allow ACS flag, mark as skipped to avoid flakiness.
