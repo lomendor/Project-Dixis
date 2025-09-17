@@ -4,14 +4,15 @@ namespace App\Services\Payment;
 
 use App\Contracts\PaymentProviderInterface;
 use App\Models\Order;
-use Stripe\StripeClient;
-use Stripe\Exception\SignatureVerificationException;
-use Stripe\Webhook;
 use Illuminate\Support\Facades\Log;
+use Stripe\Exception\SignatureVerificationException;
+use Stripe\StripeClient;
+use Stripe\Webhook;
 
 class StripePaymentProvider implements PaymentProviderInterface
 {
     private StripeClient $stripe;
+
     private string $webhookSecret;
 
     public function __construct()
@@ -30,10 +31,10 @@ class StripePaymentProvider implements PaymentProviderInterface
 
             // Create or retrieve Stripe customer
             $customer = null;
-            if (!empty($customerData['email'])) {
+            if (! empty($customerData['email'])) {
                 $customer = $this->stripe->customers->create([
                     'email' => $customerData['email'],
-                    'name' => ($customerData['firstName'] ?? '') . ' ' . ($customerData['lastName'] ?? ''),
+                    'name' => ($customerData['firstName'] ?? '').' '.($customerData['lastName'] ?? ''),
                     'metadata' => [
                         'order_id' => $order->id,
                         'user_id' => $order->user_id,
@@ -230,7 +231,7 @@ class StripePaymentProvider implements PaymentProviderInterface
     public function refund(Order $order, ?int $amountCents = null, string $reason = 'requested_by_customer'): array
     {
         try {
-            if (!$order->payment_intent_id) {
+            if (! $order->payment_intent_id) {
                 return [
                     'success' => false,
                     'error' => 'no_payment_intent',
@@ -352,6 +353,7 @@ class StripePaymentProvider implements PaymentProviderInterface
 
                 default:
                     Log::info('Unhandled Stripe webhook event', ['type' => $event->type]);
+
                     return [
                         'success' => true,
                         'event_type' => $event->type,

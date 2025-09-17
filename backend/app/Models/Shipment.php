@@ -56,7 +56,7 @@ class Shipment extends Model
      */
     public function isTrackable(): bool
     {
-        return !empty($this->tracking_code) && $this->status !== 'pending';
+        return ! empty($this->tracking_code) && $this->status !== 'pending';
     }
 
     /**
@@ -64,7 +64,7 @@ class Shipment extends Model
      */
     public function getEstimatedDeliveryAttribute(): ?\Carbon\Carbon
     {
-        if (!$this->shipped_at) {
+        if (! $this->shipped_at) {
             return null;
         }
 

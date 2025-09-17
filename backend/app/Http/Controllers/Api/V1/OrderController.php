@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Http\Resources\OrderResource;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -19,9 +19,6 @@ class OrderController extends Controller
     /**
      * Display a listing of orders with pagination and filters.
      * Note: Demo visibility only, no PII exposed.
-     *
-     * @param Request $request
-     * @return AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -33,7 +30,7 @@ class OrderController extends Controller
         ]);
 
         $perPage = $request->get('per_page', 15);
-        
+
         $query = Order::query()
             ->withCount('orderItems')
             ->orderBy('created_at', 'desc');
@@ -54,7 +51,7 @@ class OrderController extends Controller
                 $query->where('id', -1);
             }
         }
-        
+
         $orders = $query->paginate($perPage);
 
         return OrderResource::collection($orders);
@@ -62,9 +59,6 @@ class OrderController extends Controller
 
     /**
      * Display the specified order with items.
-     *
-     * @param Order $order
-     * @return OrderResource
      */
     public function show(Order $order): OrderResource
     {
@@ -75,14 +69,11 @@ class OrderController extends Controller
 
     /**
      * Create a new order with atomic transactions and stock validation.
-     *
-     * @param StoreOrderRequest $request
-     * @param InventoryService $inventoryService
-     * @return OrderResource
      */
     public function store(StoreOrderRequest $request, InventoryService $inventoryService): OrderResource
     {
         $this->authorize('create', Order::class);
+
         return DB::transaction(function () use ($request, $inventoryService) {
             $validated = $request->validated();
             $orderTotal = 0;
@@ -95,7 +86,7 @@ class OrderController extends Controller
                     ->lockForUpdate() // Prevent race conditions on stock
                     ->first();
 
-                if (!$product) {
+                if (! $product) {
                     abort(400, "Product with ID {$itemData['product_id']} not found or inactive.");
                 }
 

@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\Notification;
-use Illuminate\Support\Facades\Mail;
+use App\Models\Producer;
+use App\Models\Product;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class InventoryService
 {
@@ -43,7 +43,7 @@ class InventoryService
      */
     private function sendLowStockAlert(Product $product): void
     {
-        if (!$product->producer || !$product->producer->user) {
+        if (! $product->producer || ! $product->producer->user) {
             return;
         }
 
@@ -60,7 +60,7 @@ class InventoryService
                 'product_id' => $product->id,
                 'product_name' => $product->name,
                 'current_stock' => $product->stock,
-                'threshold' => self::LOW_STOCK_THRESHOLD
+                'threshold' => self::LOW_STOCK_THRESHOLD,
             ],
             'is_read' => false,
         ]);
@@ -69,20 +69,20 @@ class InventoryService
         try {
             // For now, we'll just log the email that would be sent
             // In a real implementation, you'd create a Mail class and send it
-            Log::info("Low stock email notification", [
+            Log::info('Low stock email notification', [
                 'to' => $user->email,
                 'product_name' => $product->name,
                 'stock' => $product->stock,
-                'producer_name' => $producer->name
+                'producer_name' => $producer->name,
             ]);
 
             // Uncomment when email implementation is ready:
             // Mail::to($user->email)->send(new LowStockAlert($product, $producer));
         } catch (\Exception $e) {
-            Log::error("Failed to send low stock email notification", [
+            Log::error('Failed to send low stock email notification', [
                 'user_id' => $user->id,
                 'product_id' => $product->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

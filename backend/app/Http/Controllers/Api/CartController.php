@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
@@ -17,7 +17,7 @@ class CartController extends Controller
     public function index(Request $request): JsonResponse
     {
         $cartItems = $request->user()->cartItems()
-            ->with(['product.categories', 'product.images' => function($query) {
+            ->with(['product.categories', 'product.images' => function ($query) {
                 $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
             }, 'product.producer'])
             ->get();
@@ -46,7 +46,7 @@ class CartController extends Controller
             'total_items' => $cartItems->sum('quantity'),
             'total_amount' => number_format($cartItems->sum(function ($item) {
                 return $item->quantity * $item->product->price;
-            }), 2)
+            }), 2),
         ]);
     }
 
@@ -57,13 +57,13 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1|max:100'
+            'quantity' => 'required|integer|min:1|max:100',
         ]);
 
         $product = Product::findOrFail($request->product_id);
 
         // Check if product is active
-        if (!$product->is_active) {
+        if (! $product->is_active) {
             throw ValidationException::withMessages([
                 'product_id' => ['This product is not available for purchase.'],
             ]);
@@ -72,7 +72,7 @@ class CartController extends Controller
         // Check stock if available (nullable for now)
         if ($product->stock !== null && $request->quantity > $product->stock) {
             throw ValidationException::withMessages([
-                'quantity' => ['Not enough stock available. Only ' . $product->stock . ' items left.'],
+                'quantity' => ['Not enough stock available. Only '.$product->stock.' items left.'],
             ]);
         }
 
@@ -84,14 +84,14 @@ class CartController extends Controller
         if ($cartItem) {
             // Update quantity
             $newQuantity = $cartItem->quantity + $request->quantity;
-            
+
             // Check stock again for total quantity
             if ($product->stock !== null && $newQuantity > $product->stock) {
                 throw ValidationException::withMessages([
-                    'quantity' => ['Cannot add ' . $request->quantity . ' more items. You already have ' . $cartItem->quantity . ' in cart. Only ' . $product->stock . ' items available.'],
+                    'quantity' => ['Cannot add '.$request->quantity.' more items. You already have '.$cartItem->quantity.' in cart. Only '.$product->stock.' items available.'],
                 ]);
             }
-            
+
             $cartItem->update(['quantity' => $newQuantity]);
         } else {
             // Create new cart item
@@ -121,7 +121,7 @@ class CartController extends Controller
                 'subtotal' => number_format($cartItem->quantity * $cartItem->product->price, 2),
                 'created_at' => $cartItem->created_at,
                 'updated_at' => $cartItem->updated_at,
-            ]
+            ],
         ], 201);
     }
 
@@ -136,13 +136,13 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'quantity' => 'required|integer|min:1|max:100'
+            'quantity' => 'required|integer|min:1|max:100',
         ]);
 
         // Check stock if available
         if ($cartItem->product->stock !== null && $request->quantity > $cartItem->product->stock) {
             throw ValidationException::withMessages([
-                'quantity' => ['Not enough stock available. Only ' . $cartItem->product->stock . ' items left.'],
+                'quantity' => ['Not enough stock available. Only '.$cartItem->product->stock.' items left.'],
             ]);
         }
 
@@ -166,7 +166,7 @@ class CartController extends Controller
                 'subtotal' => number_format($cartItem->quantity * $cartItem->product->price, 2),
                 'created_at' => $cartItem->created_at,
                 'updated_at' => $cartItem->updated_at,
-            ]
+            ],
         ]);
     }
 
@@ -183,7 +183,7 @@ class CartController extends Controller
         $cartItem->delete();
 
         return response()->json([
-            'message' => 'Item removed from cart successfully'
+            'message' => 'Item removed from cart successfully',
         ]);
     }
 }

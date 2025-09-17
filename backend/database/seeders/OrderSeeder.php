@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Producer;
+use Illuminate\Database\Seeder;
 
 class OrderSeeder extends Seeder
 {
@@ -25,7 +23,7 @@ class OrderSeeder extends Seeder
         if (Order::count() < 10) {
             $existingOrderCount = Order::count();
             $ordersToCreate = 10 - $existingOrderCount;
-            
+
             for ($i = 0; $i < $ordersToCreate; $i++) {
                 $this->createOrderWithItems();
             }
@@ -36,7 +34,7 @@ class OrderSeeder extends Seeder
     {
         // Get available products
         $products = Product::with('producer')->get();
-        
+
         if ($products->isEmpty()) {
             // Fallback: create some basic products if none exist
             $this->call(ProductSeeder::class);
@@ -46,7 +44,7 @@ class OrderSeeder extends Seeder
         // Create order
         $subtotal = 0;
         $shippingCost = fake()->randomFloat(2, 0, 5);
-        
+
         $order = Order::create([
             'user_id' => null, // nullable as specified
             'status' => fake()->randomElement(['pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled']), // Updated to match new constraints
@@ -65,7 +63,7 @@ class OrderSeeder extends Seeder
         // Create 2-4 order items for this order
         $itemCount = fake()->numberBetween(2, 4);
         $randomProducts = $products->random(min($itemCount, $products->count()));
-        
+
         foreach ($randomProducts as $product) {
             $quantity = fake()->numberBetween(1, 3);
             $unitPrice = $product->price ?? fake()->randomFloat(2, 5, 25);

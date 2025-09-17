@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('producers', function (Blueprint $table) {
             // Guard: check if column doesn't exist
-            if (!Schema::hasColumn('producers', 'is_active')) {
+            if (! Schema::hasColumn('producers', 'is_active')) {
                 $table->boolean('is_active')->default(true)->after('status');
             }
         });

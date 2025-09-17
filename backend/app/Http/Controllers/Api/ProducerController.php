@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\InventoryService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProducerController extends Controller
 {
@@ -16,73 +16,73 @@ class ProducerController extends Controller
     public function toggleProduct(Request $request, Product $product): JsonResponse
     {
         $user = $request->user();
-        
+
         // Ensure user is authenticated
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
-        
+
         // Ensure product belongs to this producer
         if ($product->producer_id !== $user->producer->id) {
             return response()->json(['message' => 'Product not found'], 404);
         }
-        
+
         // Toggle the active status
-        $product->is_active = !$product->is_active;
+        $product->is_active = ! $product->is_active;
         $product->save();
-        
+
         return response()->json([
             'id' => $product->id,
             'is_active' => $product->is_active,
-            'message' => 'Product status updated successfully'
+            'message' => 'Product status updated successfully',
         ]);
     }
-    
+
     /**
      * Get KPI data for producer dashboard
      */
     public function kpi(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Ensure user is authenticated
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
-        
+
         $producer = $user->producer;
-        
+
         // Get real KPI data from database
         $totalProducts = $producer->products()->count();
         $activeProducts = $producer->products()->where('is_active', true)->count();
-        
+
         // Calculate orders and revenue from order_items via products
         $totalOrders = \DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('products.producer_id', $producer->id)
             ->distinct('order_items.order_id')
             ->count('order_items.order_id');
-            
+
         $revenue = \DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('products.producer_id', $producer->id)
             ->sum('order_items.total_price') ?? 0;
-        
+
         // Get unread messages count
         $unreadMessages = \App\Models\Message::where('producer_id', $producer->id)
             ->where('is_read', false)
             ->count();
-        
+
         return response()->json([
             'total_products' => $totalProducts,
             'active_products' => $activeProducts,
@@ -91,7 +91,7 @@ class ProducerController extends Controller
             'unread_messages' => $unreadMessages,
         ]);
     }
-    
+
     /**
      * Update stock level for a producer's product
      */
@@ -100,12 +100,12 @@ class ProducerController extends Controller
         $user = $request->user();
 
         // Ensure user is authenticated
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
 
@@ -130,7 +130,7 @@ class ProducerController extends Controller
             'name' => $product->name,
             'old_stock' => $oldStock,
             'new_stock' => $newStock,
-            'message' => 'Stock updated successfully'
+            'message' => 'Stock updated successfully',
         ]);
     }
 
@@ -142,12 +142,12 @@ class ProducerController extends Controller
         $user = $request->user();
 
         // Ensure user is authenticated
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
 
@@ -170,7 +170,7 @@ class ProducerController extends Controller
 
         // Apply search filter
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%'.$search.'%');
         }
 
         // Apply status filter
@@ -198,23 +198,23 @@ class ProducerController extends Controller
     public function topProducts(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Ensure user is authenticated
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
-        
+
         $producer = $user->producer;
-        
+
         // Validate limit parameter
         $limit = $request->query('limit', 10);
         $limit = max(1, min(50, (int) $limit)); // Between 1 and 50
-        
+
         // Get top-selling products by quantity sold
         $topProducts = \DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
@@ -234,9 +234,9 @@ class ProducerController extends Controller
                 \DB::raw('AVG(order_items.unit_price) as average_unit_price')
             )
             ->groupBy(
-                'products.id', 
-                'products.name', 
-                'products.unit', 
+                'products.id',
+                'products.name',
+                'products.unit',
                 'products.price',
                 'products.stock',
                 'products.is_active'
@@ -244,11 +244,11 @@ class ProducerController extends Controller
             ->orderBy('total_quantity_sold', 'desc')
             ->limit($limit)
             ->get();
-        
+
         // Also get products with no sales (for completeness if limit allows)
         if ($topProducts->count() < $limit) {
             $productIdsWithSales = $topProducts->pluck('id')->toArray();
-            
+
             $productsWithoutSales = $producer->products()
                 ->whereNotIn('id', $productIdsWithSales)
                 ->select('id', 'name', 'unit', 'price as current_price', 'stock', 'is_active')
@@ -268,10 +268,10 @@ class ProducerController extends Controller
                         'average_unit_price' => (float) $product->current_price,
                     ];
                 });
-            
+
             $topProducts = $topProducts->concat($productsWithoutSales);
         }
-        
+
         return response()->json([
             'top_products' => $topProducts->map(function ($product) {
                 return [

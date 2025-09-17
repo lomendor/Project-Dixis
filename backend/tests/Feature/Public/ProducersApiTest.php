@@ -15,18 +15,18 @@ class ProducersApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test producers
         Producer::factory()->create([
             'name' => 'Green Valley Farm',
             'is_active' => true,
         ]);
-        
+
         Producer::factory()->create([
             'name' => 'Mountain Harvest',
             'is_active' => true,
         ]);
-        
+
         Producer::factory()->create([
             'name' => 'Inactive Farm',
             'is_active' => false,
@@ -49,11 +49,11 @@ class ProducersApiTest extends TestCase
                         'location',
                         'website',
                         'is_active',
-                        'created_at'
-                    ]
+                        'created_at',
+                    ],
                 ],
                 'links',
-                'meta'
+                'meta',
             ])
             ->assertJsonCount(2, 'data'); // Only active producers
     }
@@ -63,9 +63,9 @@ class ProducersApiTest extends TestCase
         $response = $this->getJson('/api/v1/producers');
 
         $response->assertStatus(200);
-        
+
         $producerData = $response->json('data.0');
-        
+
         // Verify PII fields are not present
         $this->assertArrayNotHasKey('phone', $producerData);
         $this->assertArrayNotHasKey('email', $producerData);
@@ -110,8 +110,8 @@ class ProducersApiTest extends TestCase
                     'location',
                     'website',
                     'is_active',
-                    'created_at'
-                ]
+                    'created_at',
+                ],
             ])
             ->assertJsonPath('data.id', $producer->id)
             ->assertJsonPath('data.name', $producer->name)
@@ -125,9 +125,9 @@ class ProducersApiTest extends TestCase
         $response = $this->getJson("/api/v1/producers/{$producer->id}");
 
         $response->assertStatus(200);
-        
+
         $producerData = $response->json('data');
-        
+
         // Verify PII fields are not present
         $this->assertArrayNotHasKey('phone', $producerData);
         $this->assertArrayNotHasKey('email', $producerData);
@@ -162,13 +162,13 @@ class ProducersApiTest extends TestCase
                     'first',
                     'last',
                     'prev',
-                    'next'
+                    'next',
                 ],
                 'meta' => [
                     'current_page',
                     'per_page',
-                    'total'
-                ]
+                    'total',
+                ],
             ]);
     }
 }

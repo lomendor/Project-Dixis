@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Services\Payment\PaymentProviderFactory;
 use App\Services\NotificationService;
+use App\Services\Payment\PaymentProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,15 +13,10 @@ use Illuminate\Support\Facades\Validator;
 
 class RefundController extends Controller
 {
-    public function __construct(private NotificationService $notificationService)
-    {
-    }
+    public function __construct(private NotificationService $notificationService) {}
+
     /**
      * Create a new refund for an order.
-     *
-     * @param Request $request
-     * @param int $orderId
-     * @return JsonResponse
      */
     public function create(Request $request, int $orderId): JsonResponse
     {

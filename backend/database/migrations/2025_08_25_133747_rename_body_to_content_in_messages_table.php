@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasColumn('messages', 'body') && !Schema::hasColumn('messages', 'content')) {
+        if (Schema::hasColumn('messages', 'body') && ! Schema::hasColumn('messages', 'content')) {
             Schema::table('messages', function (Blueprint $table) {
                 $table->renameColumn('body', 'content');
             });
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('messages', 'content') && !Schema::hasColumn('messages', 'body')) {
+        if (Schema::hasColumn('messages', 'content') && ! Schema::hasColumn('messages', 'body')) {
             Schema::table('messages', function (Blueprint $table) {
                 $table->renameColumn('content', 'body');
             });
