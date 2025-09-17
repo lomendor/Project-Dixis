@@ -156,6 +156,11 @@ class ShippingService
                 'island_multiplier' => (float) $islandMultiplier,
                 'remote_surcharge' => (float) $remoteSurcharge,
                 'billable_weight_kg' => (float) $billableWeightKg,
+                // Breakdown symmetry - consistent cents fields
+                'base_cost_cents' => round($baseRate * 100),
+                'weight_adjustment_cents' => round($extraCost * 100),
+                'volume_adjustment_cents' => 0, // Not used in current implementation
+                'zone_multiplier' => (float) $islandMultiplier,
             ],
         ];
     }

@@ -395,6 +395,77 @@ class ShippingServiceTest extends TestCase
         $this->assertEquals(round($expectedCost * 100), $result['cost_cents']);
     }
 
+    public function test_small_islands_highest_multiplier_vs_mainland()
+    {
+        // Test that GR_ISLANDS_SMALL has highest island multiplier vs mainland
+        $testWeight = 2.0;
+        $mainlandZone = 'GR_MAINLAND';
+        $smallIslandZone = 'GR_ISLANDS_SMALL';
+
+        $mainlandCost = $this->shippingService->calculateShippingCost($testWeight, $mainlandZone);
+        $smallIslandCost = $this->shippingService->calculateShippingCost($testWeight, $smallIslandZone);
+
+        // Small islands should have highest multiplier (1.30)
+        $this->assertEquals(1.30, $smallIslandCost['breakdown']['island_multiplier']);
+        $this->assertEquals(1.0, $mainlandCost['breakdown']['island_multiplier']);
+
+        // Small islands should cost significantly more
+        $this->assertGreaterThan($mainlandCost['cost_cents'], $smallIslandCost['cost_cents']);
+
+        // Verify the cost calculation includes multiplier effect
+        $baseRate = 9.80; // GR_ISLANDS_SMALL base_until_2kg
+        $expectedCost = $baseRate * 1.30;
+        $this->assertEquals(round($expectedCost * 100), $smallIslandCost['cost_cents']);
+
+        // Both should have proper zone identification
+        $this->assertEquals($mainlandZone, $mainlandCost['zone_code']);
+        $this->assertEquals($smallIslandZone, $smallIslandCost['zone_code']);
+    }
+
+    public function test_breakdown_cents_symmetry()
+    {
+        // Test that breakdown includes consistent cents fields
+        $testWeight = 3.5; // Triggers base + step calculation
+        $zone = 'GR_CRETE'; // Has island multiplier
+
+        $result = $this->shippingService->calculateShippingCost($testWeight, $zone);
+
+        // Verify breakdown structure completeness
+        $breakdown = $result['breakdown'];
+        $this->assertArrayHasKey('base_rate', $breakdown);
+        $this->assertArrayHasKey('extra_cost', $breakdown);
+        $this->assertArrayHasKey('island_multiplier', $breakdown);
+        $this->assertArrayHasKey('remote_surcharge', $breakdown);
+        $this->assertArrayHasKey('billable_weight_kg', $breakdown);
+
+        // Verify new cents fields for symmetry
+        $this->assertArrayHasKey('base_cost_cents', $breakdown);
+        $this->assertArrayHasKey('weight_adjustment_cents', $breakdown);
+        $this->assertArrayHasKey('volume_adjustment_cents', $breakdown);
+        $this->assertArrayHasKey('zone_multiplier', $breakdown);
+
+        // Verify numerical consistency
+        $this->assertIsNumeric($breakdown['base_rate']);
+        $this->assertIsNumeric($breakdown['extra_cost']);
+        $this->assertIsNumeric($breakdown['island_multiplier']);
+        $this->assertIsNumeric($breakdown['remote_surcharge']);
+        $this->assertIsNumeric($breakdown['base_cost_cents']);
+        $this->assertIsNumeric($breakdown['weight_adjustment_cents']);
+        $this->assertIsNumeric($breakdown['volume_adjustment_cents']);
+
+        // Verify cents fields consistency
+        $this->assertEquals(round($breakdown['base_rate'] * 100), $breakdown['base_cost_cents']);
+        $this->assertEquals(round($breakdown['extra_cost'] * 100), $breakdown['weight_adjustment_cents']);
+        $this->assertEquals(0, $breakdown['volume_adjustment_cents']); // Not used currently
+        $this->assertEquals($breakdown['island_multiplier'], $breakdown['zone_multiplier']);
+
+        // Verify breakdown math adds up
+        $baseWithSteps = $breakdown['base_rate'] + $breakdown['extra_cost'];
+        $withMultiplier = $baseWithSteps * $breakdown['island_multiplier'];
+        $finalCost = $withMultiplier + $breakdown['remote_surcharge'];
+        $this->assertEquals(round($finalCost * 100), $result['cost_cents']);
+    }
+
     private function invokePrivateMethod($object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));
