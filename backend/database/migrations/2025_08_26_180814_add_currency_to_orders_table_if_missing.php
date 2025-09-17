@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'currency')) {
+            if (! Schema::hasColumn('orders', 'currency')) {
                 $table->string('currency', 3)->default('EUR')->after('shipping_method');
             }
         });

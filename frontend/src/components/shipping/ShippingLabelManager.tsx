@@ -4,6 +4,10 @@ import { useState } from 'react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
 import { formatCurrency } from '@/env';
+import {
+  ShippingLabelApiResponseSchema,
+  type ShippingLabelCreateResponse
+} from '@/lib/shippingSchemas';
 
 interface ShippingLabelManagerProps {
   orderId: number;
@@ -14,19 +18,17 @@ interface ShippingLabelManagerProps {
     shipping_address: string;
     total_amount: number;
   };
-  onLabelCreated?: (labelData: ShippingLabelData) => void;
+  onLabelCreated?: (labelData: ShippingLabelCreateResponse['data']) => void;
   className?: string;
 }
 
-interface ShippingLabelData {
-  tracking_code: string;
-  label_url: string;
-  carrier_code: string;
-  estimated_delivery_days: number;
-  zone_code: string;
-  billable_weight_kg: number;
-  shipping_cost_eur: number;
-}
+// Extend the Zod type with additional fields that might be returned
+type ShippingLabelData = ShippingLabelCreateResponse['data'] & {
+  estimated_delivery_days?: number;
+  zone_code?: string;
+  billable_weight_kg?: number;
+  shipping_cost_eur?: number;
+};
 
 export default function ShippingLabelManager({
   orderId,
@@ -44,7 +46,7 @@ export default function ShippingLabelManager({
     setError(null);
 
     try {
-      const response = await fetch(`/api/shipping/labels/${orderId}`, {
+      const response = await fetch(`/api/v1/shipping/labels/${orderId}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -52,18 +54,37 @@ export default function ShippingLabelManager({
         }
       });
 
-      const data = await response.json();
+      const rawData = await response.json();
+
+      // Validate response using Zod schema
+      const parseResult = ShippingLabelApiResponseSchema.safeParse(rawData);
+
+      if (!parseResult.success) {
+        console.error('Invalid API response format:', parseResult.error);
+        throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
+      }
+
+      const data = parseResult.data;
 
       if (!response.ok) {
-        throw new Error(data.message || 'Αποτυχία δημιουργίας ετικέτας');
+        const errorMessage = data.success === false ? data.message : 'Αποτυχία δημιουργίας ετικέτας';
+        throw new Error(errorMessage);
       }
 
       if (data.success) {
-        setLabelData(data.data);
+        // Extend the validated data with any additional fields from raw response
+        const labelData: ShippingLabelData = {
+          ...data.data,
+          estimated_delivery_days: rawData.data?.estimated_delivery_days,
+          zone_code: rawData.data?.zone_code,
+          billable_weight_kg: rawData.data?.billable_weight_kg,
+          shipping_cost_eur: rawData.data?.shipping_cost_eur
+        };
+        setLabelData(labelData);
         onLabelCreated?.(data.data);
         showToast('success', 'Η ετικέτα αποστολής δημιουργήθηκε επιτυχώς');
       } else {
-        throw new Error(data.message || 'Αποτυχία δημιουργίας ετικέτας');
+        throw new Error('message' in data ? data.message : 'Αποτυχία δημιουργίας ετικέτας');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Σφάλμα δικτύου';

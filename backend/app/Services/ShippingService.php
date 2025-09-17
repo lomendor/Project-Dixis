@@ -4,13 +4,15 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Shipment;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ShippingService
 {
     private array $zones;
+
     private array $profiles;
+
     private array $carrierSettings;
 
     public function __construct()
@@ -26,7 +28,7 @@ class ShippingService
         $zonesPath = base_path('config/shipping/gr_zones.json');
         $profilesPath = base_path('config/shipping/profiles.json');
 
-        if (!file_exists($zonesPath) || !file_exists($profilesPath)) {
+        if (! file_exists($zonesPath) || ! file_exists($profilesPath)) {
             throw new \Exception('Shipping configuration files not found');
         }
 
@@ -61,18 +63,19 @@ class ShippingService
     /**
      * Determine shipping zone based on postal code
      */
-    public function getZoneByPostalCode(string $postalCode): ?string
+    public function getZoneByPostalCode(string $postalCode): string
     {
         foreach ($this->zones as $zoneCode => $zone) {
             foreach ($zone['postal_codes'] as $pattern) {
-                $regex = '/^' . str_replace('*', '\d*', $pattern) . '$/';
+                $regex = '/^'.str_replace('*', '\d*', $pattern).'$/';
                 if (preg_match($regex, $postalCode)) {
                     return $zoneCode;
                 }
             }
         }
 
-        return null;
+        // Default to mainland zone for unknown postal codes
+        return 'GR_MAINLAND';
     }
 
     /**
@@ -80,7 +83,7 @@ class ShippingService
      */
     public function calculateShippingCost(float $billableWeightKg, string $zoneCode): array
     {
-        if (!isset($this->zones[$zoneCode])) {
+        if (! isset($this->zones[$zoneCode])) {
             throw new \Exception("Unknown shipping zone: {$zoneCode}");
         }
 
@@ -106,8 +109,8 @@ class ShippingService
                 'base_rate' => $billableWeightKg <= 2 ? $zone['base_rate_0_2kg'] : $zone['base_rate_2_5kg'],
                 'extra_weight_kg' => $billableWeightKg > 5 ? $billableWeightKg - 5 : 0,
                 'extra_cost' => $billableWeightKg > 5 ? ($billableWeightKg - 5) * $zone['per_kg_rate_above_5kg'] : 0,
-                'billable_weight_kg' => $billableWeightKg
-            ]
+                'billable_weight_kg' => $billableWeightKg,
+            ],
         ];
     }
 
@@ -133,7 +136,7 @@ class ShippingService
         }
 
         // Calculate volumetric weight (assuming cubic packaging)
-        $estimatedDimension = pow($totalVolume, 1/3); // Cube root for cubic package
+        $estimatedDimension = pow($totalVolume, 1 / 3); // Cube root for cubic package
         $volumetricWeight = $this->computeVolumetricWeight(
             $estimatedDimension,
             $estimatedDimension,
@@ -144,9 +147,6 @@ class ShippingService
 
         // Determine zone
         $zoneCode = $this->getZoneByPostalCode($postalCode);
-        if (!$zoneCode) {
-            throw new \Exception("Unable to determine shipping zone for postal code: {$postalCode}");
-        }
 
         // Calculate base cost
         $shippingCost = $this->calculateShippingCost($billableWeight, $zoneCode);
@@ -160,15 +160,20 @@ class ShippingService
         return [
             'cost_cents' => $shippingCost['cost_cents'],
             'cost_eur' => $shippingCost['cost_eur'],
-            'zone' => $shippingCost['zone_code'],
+            'zone_code' => $shippingCost['zone_code'],
             'zone_name' => $shippingCost['zone_name'],
+            'carrier_code' => $shippingCost['carrier_code'] ?? 'ELTA',
             'estimated_delivery_days' => $shippingCost['estimated_delivery_days'],
-            'breakdown' => array_merge($shippingCost['breakdown'], [
+            'breakdown' => [
+                'base_cost_cents' => $shippingCost['breakdown']['base_rate_cents'] ?? $shippingCost['cost_cents'],
+                'weight_adjustment_cents' => $shippingCost['breakdown']['weight_adjustment_cents'] ?? 0,
+                'volume_adjustment_cents' => 0, // For now, as per audit
+                'zone_multiplier' => $shippingCost['breakdown']['zone_multiplier'] ?? 1.0,
                 'actual_weight_kg' => $totalWeight,
                 'volumetric_weight_kg' => $volumetricWeight,
                 'postal_code' => $postalCode,
-                'profile_applied' => $producerProfile
-            ])
+                'profile_applied' => $producerProfile,
+            ],
         ];
     }
 
@@ -208,14 +213,29 @@ class ShippingService
     {
         $order = Order::with(['orderItems.product', 'user'])->findOrFail($orderId);
 
+        // Idempotency check: if label already exists, return existing
+        $existingShipment = Shipment::where('order_id', $orderId)->first();
+        if ($existingShipment && $existingShipment->label_url) {
+            return [
+                'tracking_code' => $existingShipment->tracking_code,
+                'label_url' => $existingShipment->label_url,
+                'carrier_code' => $existingShipment->carrier_code,
+                'status' => $existingShipment->status,
+            ];
+        }
+
         // Generate tracking code
         $trackingCode = $this->generateTrackingCode();
+
+        // Map default carrier key to short code
+        $defaultCarrierKey = $this->carrierSettings['default_carrier'] ?? 'ELTA_COURIER';
+        $carrierCode = $this->mapCarrierKeyToCode($defaultCarrierKey);
 
         // Create or update shipment record
         $shipment = Shipment::firstOrCreate(
             ['order_id' => $orderId],
             [
-                'carrier_code' => $this->carrierSettings['default_carrier'] ?? 'ELTA',
+                'carrier_code' => $carrierCode,
                 'tracking_code' => $trackingCode,
                 'status' => 'labeled',
                 'label_url' => null, // Will be set after PDF generation
@@ -232,14 +252,14 @@ class ShippingService
         if ($stored) {
             $shipment->update([
                 'label_url' => "storage/shipping/labels/{$filename}",
-                'status' => 'labeled'
+                'status' => 'labeled',
             ]);
         }
 
-        Log::info("Shipping label created", [
+        Log::info('Shipping label created', [
             'order_id' => $orderId,
             'tracking_code' => $trackingCode,
-            'filename' => $filename
+            'filename' => $filename,
         ]);
 
         return [
@@ -247,8 +267,24 @@ class ShippingService
             'label_url' => $shipment->label_url,
             'carrier_code' => $shipment->carrier_code,
             'status' => $shipment->status,
-            'filename' => $filename
         ];
+    }
+
+    /**
+     * Map carrier key to short code
+     */
+    private function mapCarrierKeyToCode(string $carrierKey): string
+    {
+        $carrierMapping = [
+            'ELTA_COURIER' => 'ELTA',
+            'ACS_COURIER' => 'ACS',
+            'SPEEDEX_COURIER' => 'SPEEDEX',
+            'ELTA' => 'ELTA',
+            'ACS' => 'ACS',
+            'SPEEDEX' => 'SPEEDEX',
+        ];
+
+        return $carrierMapping[$carrierKey] ?? 'ELTA';
     }
 
     /**
@@ -260,7 +296,7 @@ class ShippingService
         $timestamp = substr(time(), -6); // Last 6 digits of timestamp
         $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
 
-        return $prefix . $timestamp . $random;
+        return $prefix.$timestamp.$random;
     }
 
     /**
@@ -293,18 +329,18 @@ Greece
 
 ORDER DETAILS:
 Total Items: {$order->orderItems->count()}
-Total Weight: " . $order->orderItems->sum(function($item) {
-    return ($item->product->weight_per_unit ?? 0.5) * $item->quantity;
-}) . " kg
+Total Weight: ".$order->orderItems->sum(function ($item) {
+            return ($item->product->weight_per_unit ?? 0.5) * $item->quantity;
+        })." kg
 Order Value: €{$order->total}
 
 BARCODE: *{$shipment->tracking_code}*
 
-Generated: " . now()->format('Y-m-d H:i:s') . "
+Generated: ".now()->format('Y-m-d H:i:s').'
 Label Format: PDF Stub v1.0
 
 === END LABEL ===
-        ";
+        ';
 
         return $labelContent;
     }
@@ -316,16 +352,16 @@ Label Format: PDF Stub v1.0
     {
         $shipment = Shipment::where('tracking_code', $trackingCode)->first();
 
-        if (!$shipment) {
+        if (! $shipment) {
             return false;
         }
 
         $shipment->update(['status' => $status]);
 
-        Log::info("Shipment status updated", [
+        Log::info('Shipment status updated', [
             'tracking_code' => $trackingCode,
             'status' => $status,
-            'order_id' => $shipment->order_id
+            'order_id' => $shipment->order_id,
         ]);
 
         return true;
@@ -338,7 +374,7 @@ Label Format: PDF Stub v1.0
     {
         $shipment = Shipment::with('order')->where('tracking_code', $trackingCode)->first();
 
-        if (!$shipment) {
+        if (! $shipment) {
             return null;
         }
 
@@ -357,7 +393,7 @@ Label Format: PDF Stub v1.0
             'tracking_url' => $trackingUrl,
             'order_id' => $shipment->order_id,
             'created_at' => $shipment->created_at,
-            'updated_at' => $shipment->updated_at
+            'updated_at' => $shipment->updated_at,
         ];
     }
 }

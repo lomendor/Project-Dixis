@@ -9,9 +9,7 @@ use Illuminate\Http\Request;
 
 class AnalyticsController extends Controller
 {
-    public function __construct(private AnalyticsService $analyticsService)
-    {
-    }
+    public function __construct(private AnalyticsService $analyticsService) {}
 
     /**
      * Get sales analytics data
@@ -20,7 +18,7 @@ class AnalyticsController extends Controller
     {
         $request->validate([
             'period' => 'string|in:daily,monthly',
-            'limit' => 'integer|min:1|max:365'
+            'limit' => 'integer|min:1|max:365',
         ]);
 
         $period = $request->input('period', 'daily');
@@ -30,7 +28,7 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'analytics' => $analytics
+            'analytics' => $analytics,
         ]);
     }
 
@@ -43,7 +41,7 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'analytics' => $analytics
+            'analytics' => $analytics,
         ]);
     }
 
@@ -53,7 +51,7 @@ class AnalyticsController extends Controller
     public function products(Request $request): JsonResponse
     {
         $request->validate([
-            'limit' => 'integer|min:1|max:50'
+            'limit' => 'integer|min:1|max:50',
         ]);
 
         $limit = $request->input('limit', 10);
@@ -61,7 +59,7 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'analytics' => $analytics
+            'analytics' => $analytics,
         ]);
     }
 
@@ -74,7 +72,7 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'analytics' => $analytics
+            'analytics' => $analytics,
         ]);
     }
 
@@ -87,7 +85,7 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'summary' => $summary
+            'summary' => $summary,
         ]);
     }
 }

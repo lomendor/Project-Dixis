@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\Producer;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -47,8 +47,8 @@ class AnalyticsService
                 'total_revenue' => $sales->sum('total_sales'),
                 'total_orders' => $sales->sum('order_count'),
                 'average_order_value' => $sales->avg('average_order_value') ?? 0,
-                'period_growth' => $this->calculateGrowth($sales)
-            ]
+                'period_growth' => $this->calculateGrowth($sales),
+            ],
         ];
     }
 
@@ -61,14 +61,14 @@ class AnalyticsService
             ->groupBy('status')
             ->get()
             ->keyBy('status')
-            ->map(fn($item) => $item->count)
+            ->map(fn ($item) => $item->count)
             ->toArray();
 
         $paymentStatus = Order::select('payment_status', DB::raw('COUNT(*) as count'))
             ->groupBy('payment_status')
             ->get()
             ->keyBy('payment_status')
-            ->map(fn($item) => $item->count)
+            ->map(fn ($item) => $item->count)
             ->toArray();
 
         $recentOrders = Order::with('user')
@@ -82,7 +82,7 @@ class AnalyticsService
                     'total_amount' => $order->total_amount,
                     'status' => $order->status,
                     'payment_status' => $order->payment_status,
-                    'created_at' => $order->created_at->toISOString()
+                    'created_at' => $order->created_at->toISOString(),
                 ];
             });
 
@@ -95,7 +95,7 @@ class AnalyticsService
                 'pending_orders' => $ordersByStatus['pending'] ?? 0,
                 'completed_orders' => $ordersByStatus['delivered'] ?? 0,
                 'cancelled_orders' => $ordersByStatus['cancelled'] ?? 0,
-            ]
+            ],
         ];
     }
 
@@ -133,7 +133,7 @@ class AnalyticsService
                     'price' => $product->price,
                     'total_quantity_sold' => (int) $product->total_quantity_sold,
                     'total_revenue' => (float) $product->total_revenue,
-                    'order_count' => (int) $product->order_count
+                    'order_count' => (int) $product->order_count,
                 ];
             }),
             'summary' => [
@@ -142,7 +142,7 @@ class AnalyticsService
                 'out_of_stock' => $outOfStock,
                 'best_seller_id' => $topProducts->first()?->id,
                 'best_seller_name' => $topProducts->first()?->name,
-            ]
+            ],
         ];
     }
 
@@ -183,9 +183,9 @@ class AnalyticsService
                     'location' => $producer->location,
                     'product_count' => (int) $producer->product_count,
                     'total_revenue' => (float) $producer->total_revenue,
-                    'order_count' => (int) $producer->order_count
+                    'order_count' => (int) $producer->order_count,
                 ];
-            })
+            }),
         ];
     }
 
@@ -232,21 +232,21 @@ class AnalyticsService
             'today' => [
                 'sales' => $todaySales,
                 'orders' => $todayOrders,
-                'average_order_value' => $todayOrders > 0 ? $todaySales / $todayOrders : 0
+                'average_order_value' => $todayOrders > 0 ? $todaySales / $todayOrders : 0,
             ],
             'month' => [
                 'sales' => $monthSales,
                 'orders' => $monthOrders,
                 'average_order_value' => $monthOrders > 0 ? $monthSales / $monthOrders : 0,
                 'sales_growth' => round($salesGrowth, 2),
-                'orders_growth' => round($ordersGrowth, 2)
+                'orders_growth' => round($ordersGrowth, 2),
             ],
             'totals' => [
                 'users' => User::count(),
                 'producers' => Producer::count(),
                 'products' => Product::where('is_active', true)->count(),
-                'lifetime_revenue' => Order::where('payment_status', 'paid')->sum('total_amount')
-            ]
+                'lifetime_revenue' => Order::where('payment_status', 'paid')->sum('total_amount'),
+            ],
         ];
     }
 
@@ -269,7 +269,7 @@ class AnalyticsService
                 'date' => $date,
                 'total_sales' => $found ? (float) $found->total_sales : 0,
                 'order_count' => $found ? (int) $found->order_count : 0,
-                'average_order_value' => $found ? (float) $found->average_order_value : 0
+                'average_order_value' => $found ? (float) $found->average_order_value : 0,
             ];
         }
 

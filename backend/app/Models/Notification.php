@@ -9,16 +9,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Notification extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'type',
         'payload',
-        'read_at'
+        'read_at',
     ];
 
     protected $casts = [
         'payload' => 'array',
-        'read_at' => 'datetime'
+        'read_at' => 'datetime',
     ];
 
     /**

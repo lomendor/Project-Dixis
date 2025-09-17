@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Payment\PaymentProviderFactory;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class PaymentController extends Controller
 {
@@ -26,14 +25,14 @@ class PaymentController extends Controller
         if ($order->payment_status === 'paid') {
             return response()->json([
                 'message' => 'Order has already been paid',
-                'payment_status' => 'paid'
+                'payment_status' => 'paid',
             ], 400);
         }
 
         if ($order->status === 'cancelled') {
             return response()->json([
                 'message' => 'Cannot initialize payment for cancelled order',
-                'status' => 'cancelled'
+                'status' => 'cancelled',
             ], 400);
         }
 
@@ -52,7 +51,7 @@ class PaymentController extends Controller
                 'return_url' => $request->input('return_url'),
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'message' => 'Failed to initialize payment',
                     'error' => $result['error'] ?? 'unknown_error',
@@ -87,7 +86,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Payment initialization failed',
-                'error' => 'internal_server_error'
+                'error' => 'internal_server_error',
             ], 500);
         }
     }
@@ -110,7 +109,7 @@ class PaymentController extends Controller
             $paymentProvider = PaymentProviderFactory::create();
             $result = $paymentProvider->confirmPayment($order, $request->payment_intent_id);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 if ($result['requires_action'] ?? false) {
                     return response()->json([
                         'message' => 'Payment requires additional action',
@@ -154,7 +153,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Payment confirmation failed',
-                'error' => 'internal_server_error'
+                'error' => 'internal_server_error',
             ], 500);
         }
     }
@@ -169,9 +168,9 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        if (!$order->payment_intent_id) {
+        if (! $order->payment_intent_id) {
             return response()->json([
-                'message' => 'No payment to cancel for this order'
+                'message' => 'No payment to cancel for this order',
             ], 400);
         }
 
@@ -179,7 +178,7 @@ class PaymentController extends Controller
             $paymentProvider = PaymentProviderFactory::create();
             $result = $paymentProvider->cancelPayment($order, $order->payment_intent_id);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'message' => 'Payment cancellation failed',
                     'error' => $result['error'] ?? 'unknown_error',
@@ -210,7 +209,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Payment cancellation failed',
-                'error' => 'internal_server_error'
+                'error' => 'internal_server_error',
             ], 500);
         }
     }
@@ -225,7 +224,7 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        if (!$order->payment_intent_id) {
+        if (! $order->payment_intent_id) {
             return response()->json([
                 'message' => 'No payment found for this order',
                 'order' => [
@@ -240,7 +239,7 @@ class PaymentController extends Controller
             $paymentProvider = PaymentProviderFactory::create();
             $result = $paymentProvider->getPaymentStatus($order->payment_intent_id);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'message' => 'Failed to retrieve payment status',
                     'error' => $result['error'] ?? 'unknown_error',
@@ -277,7 +276,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Failed to retrieve payment status',
-                'error' => 'internal_server_error'
+                'error' => 'internal_server_error',
             ], 500);
         }
     }
@@ -306,7 +305,7 @@ class PaymentController extends Controller
 
             return response()->json([
                 'message' => 'Failed to retrieve payment methods',
-                'error' => 'internal_server_error'
+                'error' => 'internal_server_error',
             ], 500);
         }
     }

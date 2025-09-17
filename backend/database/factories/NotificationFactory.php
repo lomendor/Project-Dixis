@@ -20,21 +20,21 @@ class NotificationFactory extends Factory
         $types = ['order_placed', 'order_shipped', 'refund_issued'];
         $type = $this->faker->randomElement($types);
 
-        $payload = match($type) {
+        $payload = match ($type) {
             'order_placed' => [
                 'order_id' => $this->faker->numberBetween(1, 1000),
                 'total_amount' => $this->faker->randomFloat(2, 10, 500),
-                'message' => 'Η παραγγελία σας #' . $this->faker->numberBetween(1, 1000) . ' καταχωρήθηκε επιτυχώς!'
+                'message' => 'Η παραγγελία σας #'.$this->faker->numberBetween(1, 1000).' καταχωρήθηκε επιτυχώς!',
             ],
             'order_shipped' => [
                 'order_id' => $this->faker->numberBetween(1, 1000),
                 'tracking_number' => $this->faker->regexify('[A-Z]{2}[0-9]{10}'),
-                'message' => 'Η παραγγελία σας #' . $this->faker->numberBetween(1, 1000) . ' έχει αποσταλεί!'
+                'message' => 'Η παραγγελία σας #'.$this->faker->numberBetween(1, 1000).' έχει αποσταλεί!',
             ],
             'refund_issued' => [
                 'order_id' => $this->faker->numberBetween(1, 1000),
                 'refund_amount' => $this->faker->randomFloat(2, 5, 100),
-                'message' => 'Έγινε επιστροφή €' . $this->faker->randomFloat(2, 5, 100) . ' για την παραγγελία #' . $this->faker->numberBetween(1, 1000)
+                'message' => 'Έγινε επιστροφή €'.$this->faker->randomFloat(2, 5, 100).' για την παραγγελία #'.$this->faker->numberBetween(1, 1000),
             ]
         };
 

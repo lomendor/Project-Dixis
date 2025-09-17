@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Public;
 
-use App\Models\Product;
 use App\Models\Producer;
+use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
@@ -16,18 +16,18 @@ class ProductsApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create test products
         Product::factory()->create([
             'name' => 'Test Oranges',
             'is_active' => true,
         ]);
-        
+
         Product::factory()->create([
             'name' => 'Fresh Apples',
             'is_active' => true,
         ]);
-        
+
         Product::factory()->create([
             'name' => 'Inactive Product',
             'is_active' => false,
@@ -54,12 +54,12 @@ class ProductsApiTest extends TestCase
                             'name',
                             'slug',
                             'business_name',
-                            'location'
-                        ]
-                    ]
+                            'location',
+                        ],
+                    ],
                 ],
                 'links',
-                'meta'
+                'meta',
             ])
             ->assertJsonCount(2, 'data'); // Only active products
     }
@@ -106,9 +106,9 @@ class ProductsApiTest extends TestCase
                         'name',
                         'slug',
                         'business_name',
-                        'location'
-                    ]
-                ]
+                        'location',
+                    ],
+                ],
             ])
             ->assertJsonPath('data.id', $product->id)
             ->assertJsonPath('data.name', $product->name)
@@ -136,9 +136,9 @@ class ProductsApiTest extends TestCase
         $response = $this->getJson('/api/v1/products');
 
         $response->assertStatus(200);
-        
+
         $productData = $response->json('data.0');
-        
+
         // Verify producer PII fields are not present
         $this->assertArrayNotHasKey('phone', $productData['producer'] ?? []);
         $this->assertArrayNotHasKey('email', $productData['producer'] ?? []);
@@ -152,9 +152,9 @@ class ProductsApiTest extends TestCase
         $response = $this->getJson("/api/v1/products/{$product->id}");
 
         $response->assertStatus(200);
-        
+
         $productData = $response->json('data');
-        
+
         // Verify producer PII fields are not present
         $this->assertArrayNotHasKey('phone', $productData['producer'] ?? []);
         $this->assertArrayNotHasKey('email', $productData['producer'] ?? []);

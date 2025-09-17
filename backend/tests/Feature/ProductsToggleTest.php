@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Producer;
 use App\Models\Product;
-use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Group;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use PHPUnit\Framework\Attributes\Group;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 #[Group('mvp')]
 class ProductsToggleTest extends TestCase
@@ -20,7 +20,7 @@ class ProductsToggleTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Clear permission cache to ensure fresh data
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
@@ -30,20 +30,20 @@ class ProductsToggleTest extends TestCase
         // Create a producer user with role
         $user = User::factory()->create([
             'email' => 'producer1@test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
-        
+
         // Create producer profile for the user
         $producer = Producer::factory()->create([
             'user_id' => $user->id,
             'name' => 'Test Producer',
-            'business_name' => 'Test Producer LLC'
+            'business_name' => 'Test Producer LLC',
         ]);
-        
+
         // Create a product for this producer
         $product = Product::factory()->create([
             'producer_id' => $producer->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         Sanctum::actingAs($user);
@@ -51,14 +51,14 @@ class ProductsToggleTest extends TestCase
         $response = $this->patchJson("/api/v1/producer/products/{$product->id}/toggle");
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'id' => $product->id,
-                    'is_active' => !$product->is_active  // Should be toggled
-                ]);
+            ->assertJson([
+                'id' => $product->id,
+                'is_active' => ! $product->is_active,  // Should be toggled
+            ]);
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
-            'is_active' => !$product->is_active  // Should be toggled
+            'is_active' => ! $product->is_active,  // Should be toggled
         ]);
     }
 
@@ -67,26 +67,26 @@ class ProductsToggleTest extends TestCase
         // Create first producer user
         $user1 = User::factory()->create([
             'email' => 'producer2@test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
-        
+
         $producer1 = Producer::factory()->create([
-            'user_id' => $user1->id
+            'user_id' => $user1->id,
         ]);
-        
+
         // Create second producer user
         $user2 = User::factory()->create([
-            'email' => 'producer3@test.com', 
-            'role' => 'producer'
+            'email' => 'producer3@test.com',
+            'role' => 'producer',
         ]);
-        
+
         $producer2 = Producer::factory()->create([
-            'user_id' => $user2->id
+            'user_id' => $user2->id,
         ]);
-        
+
         // Create product for second producer
         $product = Product::factory()->create([
-            'producer_id' => $producer2->id
+            'producer_id' => $producer2->id,
         ]);
 
         // Try to toggle as first producer
@@ -102,15 +102,15 @@ class ProductsToggleTest extends TestCase
         // Create producer and product
         $user = User::factory()->create([
             'email' => 'producer4@test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
-        
+
         $producer = Producer::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
-        
+
         $product = Product::factory()->create([
-            'producer_id' => $producer->id
+            'producer_id' => $producer->id,
         ]);
 
         // Make request without authentication

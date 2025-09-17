@@ -2,30 +2,30 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class CoreDomainSmokeTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     /**
      * Test health check endpoint returns 200
      */
     public function test_health_check_returns_success(): void
     {
         $response = $this->get('/api/health');
-        
+
         $response->assertStatus(200)
             ->assertJson([
                 'status' => 'ok',
                 'database' => 'connected',
             ]);
     }
-    
+
     /**
      * Test products index returns 200 with JSON array
      */
@@ -35,9 +35,9 @@ class CoreDomainSmokeTest extends TestCase
         $producer = Producer::factory()->create();
         Product::factory()->create(['producer_id' => $producer->id]);
         Product::factory()->create(['producer_id' => $producer->id]);
-        
+
         $response = $this->get('/api/v1/products');
-        
+
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
@@ -51,15 +51,15 @@ class CoreDomainSmokeTest extends TestCase
                         'producer' => [
                             'id',
                             'name',
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'current_page',
                 'per_page',
-                'total'
+                'total',
             ]);
     }
-    
+
     /**
      * Test create order happy path returns 201
      */
@@ -73,21 +73,21 @@ class CoreDomainSmokeTest extends TestCase
             'price' => 10.00,
             'stock' => 100,
         ]);
-        
+
         $orderData = [
             'items' => [
                 [
                     'product_id' => $product->id,
                     'quantity' => 2,
-                ]
+                ],
             ],
             'shipping_method' => 'HOME',
             'notes' => 'Test order',
         ];
-        
+
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/v1/orders', $orderData);
-        
+
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'id',
@@ -106,8 +106,8 @@ class CoreDomainSmokeTest extends TestCase
                         'unit_price',
                         'total_price',
                         'product_name',
-                    ]
-                ]
+                    ],
+                ],
             ]);
     }
 }

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Tests\TestCase;
-use App\Models\Product;
 use App\Models\Producer;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PublicProductsTest extends TestCase
 {
@@ -19,10 +19,10 @@ class PublicProductsTest extends TestCase
         $producerProfile = Producer::factory()->create(['user_id' => $producer->id]);
         Product::factory()->create([
             'producer_id' => $producerProfile->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
-        $res = $this->getJson('/api/v1/public/products', ['Accept'=>'application/json']);
-        $res->assertStatus(200)->assertJsonStructure(['data' => [['id','name']]]);
+        $res = $this->getJson('/api/v1/public/products', ['Accept' => 'application/json']);
+        $res->assertStatus(200)->assertJsonStructure(['data' => [['id', 'name']]]);
     }
 }

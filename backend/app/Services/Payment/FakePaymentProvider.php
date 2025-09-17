@@ -14,8 +14,8 @@ class FakePaymentProvider implements PaymentProviderInterface
      */
     public function initPayment(Order $order, array $options = []): array
     {
-        $clientSecret = 'fake_pi_' . Str::random(24);
-        $paymentIntentId = 'fake_pi_' . Str::random(12);
+        $clientSecret = 'fake_pi_'.Str::random(24);
+        $paymentIntentId = 'fake_pi_'.Str::random(12);
 
         // Store fake payment intent ID in order for tracking
         $order->update([
@@ -54,7 +54,7 @@ class FakePaymentProvider implements PaymentProviderInterface
             return [
                 'success' => false,
                 'requires_action' => true,
-                'client_secret' => 'fake_pi_' . Str::random(24),
+                'client_secret' => 'fake_pi_'.Str::random(24),
                 'payment_intent_id' => $paymentIntentId,
             ];
         }
@@ -106,7 +106,7 @@ class FakePaymentProvider implements PaymentProviderInterface
                 'status' => 'failed',
                 'last_payment_error' => [
                     'code' => 'card_declined',
-                    'message' => 'Your card was declined.'
+                    'message' => 'Your card was declined.',
                 ],
             ];
         }
@@ -134,7 +134,7 @@ class FakePaymentProvider implements PaymentProviderInterface
      */
     public function refund(Order $order, ?int $amountCents = null, string $reason = 'requested_by_customer'): array
     {
-        if (!$order->payment_intent_id) {
+        if (! $order->payment_intent_id) {
             return [
                 'success' => false,
                 'error' => 'no_payment_intent',
@@ -164,7 +164,7 @@ class FakePaymentProvider implements PaymentProviderInterface
             ];
         }
 
-        $fakeRefundId = 'fake_re_' . Str::random(12);
+        $fakeRefundId = 'fake_re_'.Str::random(12);
 
         // Update order with fake refund info
         $currentRefunded = $order->refunded_amount_cents ?? 0;

@@ -15,8 +15,8 @@ class PaymentProviderFactory
         $provider = $provider ?? config('services.payment.provider', 'fake');
 
         return match ($provider) {
-            'fake' => new FakePaymentProvider(),
-            'stripe' => new StripePaymentProvider(),
+            'fake' => new FakePaymentProvider,
+            'stripe' => new StripePaymentProvider,
             'viva' => throw new InvalidArgumentException('Viva Payments provider not yet implemented'),
             default => throw new InvalidArgumentException("Unsupported payment provider: {$provider}"),
         };
@@ -36,7 +36,7 @@ class PaymentProviderFactory
             'stripe' => [
                 'name' => 'Stripe',
                 'description' => 'Credit card payments via Stripe',
-                'enabled' => !empty(config('services.stripe.secret_key')),
+                'enabled' => ! empty(config('services.stripe.secret_key')),
             ],
             'viva' => [
                 'name' => 'Viva Payments',
@@ -53,8 +53,8 @@ class PaymentProviderFactory
     {
         return match ($provider) {
             'fake' => true, // Always available
-            'stripe' => !empty(config('services.stripe.secret_key')) && !empty(config('services.stripe.public_key')),
-            'viva' => !empty(config('services.viva.merchant_id')) && !empty(config('services.viva.api_key')),
+            'stripe' => ! empty(config('services.stripe.secret_key')) && ! empty(config('services.stripe.public_key')),
+            'viva' => ! empty(config('services.viva.merchant_id')) && ! empty(config('services.viva.api_key')),
             default => false,
         };
     }

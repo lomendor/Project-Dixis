@@ -2,21 +2,22 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\CartItem;
-use App\Models\Category;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
 
 class CartTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $user;
+
     protected $product;
+
     protected $producer;
 
     protected function setUp(): void
@@ -26,7 +27,7 @@ class CartTest extends TestCase
         // Create user
         $this->user = User::factory()->create([
             'email' => 'cart-test@test.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         // Create producer and product
@@ -35,7 +36,7 @@ class CartTest extends TestCase
             'producer_id' => $this->producer->id,
             'price' => 10.50,
             'stock' => 100,
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -49,7 +50,7 @@ class CartTest extends TestCase
             ->assertJson([
                 'cart_items' => [],
                 'total_items' => 0,
-                'total_amount' => '0.00'
+                'total_amount' => '0.00',
             ]);
     }
 
@@ -59,7 +60,7 @@ class CartTest extends TestCase
 
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         $response->assertStatus(201)
@@ -72,16 +73,16 @@ class CartTest extends TestCase
                         'id',
                         'name',
                         'price',
-                        'unit'
+                        'unit',
                     ],
-                    'subtotal'
-                ]
+                    'subtotal',
+                ],
             ]);
 
         $this->assertDatabaseHas('cart_items', [
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
     }
 
@@ -92,13 +93,13 @@ class CartTest extends TestCase
         // Add item first time
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         // Add same item again
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 3
+            'quantity' => 3,
         ]);
 
         $response->assertStatus(201);
@@ -106,7 +107,7 @@ class CartTest extends TestCase
         $this->assertDatabaseHas('cart_items', [
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 5 // 2 + 3
+            'quantity' => 5, // 2 + 3
         ]);
     }
 
@@ -117,7 +118,7 @@ class CartTest extends TestCase
 
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         $response->assertStatus(422)
@@ -131,7 +132,7 @@ class CartTest extends TestCase
 
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 10 // More than available stock
+            'quantity' => 10, // More than available stock
         ]);
 
         $response->assertStatus(422)
@@ -146,13 +147,13 @@ class CartTest extends TestCase
         // Add 7 items first
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 7
+            'quantity' => 7,
         ]);
 
         // Try to add 5 more (total would be 12, but stock is 10)
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 5
+            'quantity' => 5,
         ]);
 
         $response->assertStatus(422)
@@ -164,7 +165,7 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 3
+            'quantity' => 3,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -184,17 +185,17 @@ class CartTest extends TestCase
                             'unit',
                             'categories',
                             'images',
-                            'producer'
+                            'producer',
                         ],
-                        'subtotal'
-                    ]
+                        'subtotal',
+                    ],
                 ],
                 'total_items',
-                'total_amount'
+                'total_amount',
             ])
             ->assertJson([
                 'total_items' => 3,
-                'total_amount' => '31.50' // 3 * 10.50
+                'total_amount' => '31.50', // 3 * 10.50
             ]);
     }
 
@@ -203,13 +204,13 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         Sanctum::actingAs($this->user);
 
         $response = $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 5
+            'quantity' => 5,
         ]);
 
         $response->assertStatus(200)
@@ -218,30 +219,30 @@ class CartTest extends TestCase
                 'cart_item' => [
                     'id',
                     'quantity',
-                    'subtotal'
-                ]
+                    'subtotal',
+                ],
             ]);
 
         $this->assertDatabaseHas('cart_items', [
             'id' => $cartItem->id,
-            'quantity' => 5
+            'quantity' => 5,
         ]);
     }
 
     public function test_cannot_update_cart_item_exceeding_stock(): void
     {
         $this->product->update(['stock' => 3]);
-        
+
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
 
         $response = $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 5 // More than stock
+            'quantity' => 5, // More than stock
         ]);
 
         $response->assertStatus(422)
@@ -254,13 +255,13 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $anotherUser->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
 
         $response = $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         $response->assertStatus(404);
@@ -271,7 +272,7 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -282,7 +283,7 @@ class CartTest extends TestCase
             ->assertJson(['message' => 'Item removed from cart successfully']);
 
         $this->assertDatabaseMissing('cart_items', [
-            'id' => $cartItem->id
+            'id' => $cartItem->id,
         ]);
     }
 
@@ -292,7 +293,7 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $anotherUser->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -306,22 +307,22 @@ class CartTest extends TestCase
     {
         // Test all endpoints without authentication
         $this->getJson('/api/v1/cart/items')->assertStatus(401);
-        
+
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ])->assertStatus(401);
-        
+
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
-        
+
         $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 2
+            'quantity' => 2,
         ])->assertStatus(401);
-        
+
         $this->deleteJson("/api/v1/cart/items/{$cartItem->id}")
             ->assertStatus(401);
     }
@@ -338,7 +339,7 @@ class CartTest extends TestCase
         // Test invalid product_id
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => 99999,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['product_id']);
@@ -346,7 +347,7 @@ class CartTest extends TestCase
         // Test invalid quantity (negative)
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => -1
+            'quantity' => -1,
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);
@@ -354,7 +355,7 @@ class CartTest extends TestCase
         // Test invalid quantity (too high)
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $this->product->id,
-            'quantity' => 101 // Max is 100
+            'quantity' => 101, // Max is 100
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);
@@ -365,7 +366,7 @@ class CartTest extends TestCase
         $cartItem = CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -377,14 +378,14 @@ class CartTest extends TestCase
 
         // Test invalid quantity (zero)
         $response = $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 0
+            'quantity' => 0,
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);
 
         // Test invalid quantity (too high)
         $response = $this->patchJson("/api/v1/cart/items/{$cartItem->id}", [
-            'quantity' => 101 // Max is 100
+            'quantity' => 101, // Max is 100
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);

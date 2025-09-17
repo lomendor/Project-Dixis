@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\Payment\PaymentProviderFactory;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -20,8 +20,9 @@ class WebhookController extends Controller
             $payload = $request->getContent();
             $signature = $request->header('Stripe-Signature');
 
-            if (!$signature) {
+            if (! $signature) {
                 Log::warning('Stripe webhook received without signature');
+
                 return response()->json(['error' => 'No signature provided'], 400);
             }
 
@@ -30,6 +31,7 @@ class WebhookController extends Controller
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('Stripe webhook: Invalid JSON payload');
+
                 return response()->json(['error' => 'Invalid JSON'], 400);
             }
 
@@ -37,7 +39,7 @@ class WebhookController extends Controller
             $stripeProvider = PaymentProviderFactory::create('stripe');
             $result = $stripeProvider->handleWebhook($payloadArray, $signature);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 Log::error('Stripe webhook processing failed', [
                     'error' => $result['error'] ?? 'unknown',
                     'message' => $result['error_message'] ?? 'Processing failed',
@@ -45,7 +47,7 @@ class WebhookController extends Controller
 
                 return response()->json([
                     'error' => $result['error'] ?? 'processing_failed',
-                    'message' => $result['error_message'] ?? 'Webhook processing failed'
+                    'message' => $result['error_message'] ?? 'Webhook processing failed',
                 ], 400);
             }
 
@@ -69,7 +71,7 @@ class WebhookController extends Controller
 
             return response()->json([
                 'error' => 'internal_server_error',
-                'message' => 'Webhook processing failed'
+                'message' => 'Webhook processing failed',
             ], 500);
         }
     }
@@ -83,7 +85,7 @@ class WebhookController extends Controller
 
         return response()->json([
             'message' => 'Viva Payments webhooks not yet implemented',
-            'status' => 'not_implemented'
+            'status' => 'not_implemented',
         ], 501);
     }
 
@@ -121,7 +123,7 @@ class WebhookController extends Controller
 
                     return response()->json([
                         'error' => 'unsupported_provider',
-                        'message' => "Webhooks not supported for provider: {$activeProvider}"
+                        'message' => "Webhooks not supported for provider: {$activeProvider}",
                     ], 400);
             }
 
@@ -132,7 +134,7 @@ class WebhookController extends Controller
 
             return response()->json([
                 'error' => 'internal_server_error',
-                'message' => 'Webhook processing failed'
+                'message' => 'Webhook processing failed',
             ], 500);
         }
     }

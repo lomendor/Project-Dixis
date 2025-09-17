@@ -1,9 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { formatCurrency } from '@/env';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
+import {
+  ShippingQuoteApiResponseSchema,
+  type ShippingQuoteResponse,
+  type ShippingQuoteRequest
+} from '@/lib/shippingSchemas';
 
 interface ShippingQuoteProps {
   items: Array<{
@@ -11,21 +16,8 @@ interface ShippingQuoteProps {
     quantity: number;
   }>;
   postalCode: string;
-  onQuoteReceived?: (quote: ShippingQuoteData) => void;
+  onQuoteReceived?: (quote: ShippingQuoteResponse['data']) => void;
   className?: string;
-}
-
-interface ShippingQuoteData {
-  cost_cents: number;
-  zone_code: string;
-  carrier_code: string;
-  estimated_delivery_days: number;
-  breakdown: {
-    base_cost_cents: number;
-    weight_adjustment_cents: number;
-    volume_adjustment_cents: number;
-    zone_multiplier: number;
-  };
 }
 
 export default function ShippingQuote({
@@ -34,12 +26,12 @@ export default function ShippingQuote({
   onQuoteReceived,
   className = ''
 }: ShippingQuoteProps) {
-  const [quote, setQuote] = useState<ShippingQuoteData | null>(null);
+  const [quote, setQuote] = useState<ShippingQuoteResponse['data'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
 
-  const fetchQuote = async () => {
+  const fetchQuote = useCallback(async () => {
     if (!items.length || !postalCode || postalCode.length !== 5) {
       return;
     }
@@ -48,29 +40,43 @@ export default function ShippingQuote({
     setError(null);
 
     try {
-      const response = await fetch('/api/shipping/quote', {
+      // Build request payload using Zod schema structure
+      const requestPayload: ShippingQuoteRequest = {
+        items,
+        postal_code: postalCode
+      };
+
+      const response = await fetch('/api/v1/shipping/quote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({
-          items,
-          postal_code: postalCode
-        })
+        body: JSON.stringify(requestPayload)
       });
 
-      const data = await response.json();
+      const rawData = await response.json();
+
+      // Validate response using Zod schema
+      const parseResult = ShippingQuoteApiResponseSchema.safeParse(rawData);
+
+      if (!parseResult.success) {
+        console.error('Invalid API response format:', parseResult.error);
+        throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
+      }
+
+      const data = parseResult.data;
 
       if (!response.ok) {
-        throw new Error(data.message || 'Αποτυχία υπολογισμού μεταφορικών');
+        const errorMessage = data.success === false ? data.message : 'Αποτυχία υπολογισμού μεταφορικών';
+        throw new Error(errorMessage);
       }
 
       if (data.success) {
         setQuote(data.data);
         onQuoteReceived?.(data.data);
       } else {
-        throw new Error(data.message || 'Αποτυχία υπολογισμού μεταφορικών');
+        throw new Error('message' in data ? data.message : 'Αποτυχία υπολογισμού μεταφορικών');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Σφάλμα δικτύου';
@@ -79,13 +85,36 @@ export default function ShippingQuote({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [items, postalCode, showToast]);
+
+  // Custom debounce implementation
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedFetchQuote = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      fetchQuote();
+    }, 300);
+  }, [fetchQuote]);
+
+  // Stable items dependency using JSON.stringify
+  const stableItemsKey = useMemo(
+    () => JSON.stringify(items),
+    [items]
+  );
 
   useEffect(() => {
     if (items.length > 0 && postalCode.length === 5) {
-      fetchQuote();
+      debouncedFetchQuote();
     }
-  }, [items, postalCode]);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [stableItemsKey, postalCode, debouncedFetchQuote]);
 
   const getZoneDisplayName = (zoneCode: string): string => {
     const zoneNames: Record<string, string> = {
@@ -110,7 +139,7 @@ export default function ShippingQuote({
 
   if (isLoading) {
     return (
-      <div className={`shipping-quote loading ${className}`}>
+      <div className={`shipping-quote loading ${className}`} data-testid="shipping-quote-loading">
         <div className="flex items-center justify-center p-4">
           <LoadingSpinner size="sm" />
           <span className="ml-2 text-sm text-gray-600">Υπολογισμός μεταφορικών...</span>
@@ -121,7 +150,7 @@ export default function ShippingQuote({
 
   if (error) {
     return (
-      <div className={`shipping-quote error ${className}`}>
+      <div className={`shipping-quote error ${className}`} data-testid="shipping-quote-error">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-start">
             <div className="flex-shrink-0">
@@ -149,7 +178,7 @@ export default function ShippingQuote({
   }
 
   return (
-    <div className={`shipping-quote success ${className}`}>
+    <div className={`shipping-quote success ${className}`} data-testid="shipping-quote-success">
       <div className="bg-green-50 border border-green-200 rounded-md p-4">
         <div className="flex items-start">
           <div className="flex-shrink-0">

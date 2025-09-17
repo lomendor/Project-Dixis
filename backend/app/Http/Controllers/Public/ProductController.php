@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -25,7 +25,7 @@ class ProductController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -70,7 +70,7 @@ class ProductController extends Controller
         // Sorting
         $sortField = $request->get('sort', 'created_at');
         $sortDir = $request->get('dir', 'desc');
-        
+
         $allowedSorts = ['price', 'name', 'created_at'];
         if (in_array($sortField, $allowedSorts)) {
             $query->orderBy($sortField, $sortDir === 'asc' ? 'asc' : 'desc');
@@ -85,7 +85,7 @@ class ProductController extends Controller
         // Transform the data to ensure consistent producer information
         $products->getCollection()->transform(function ($product) {
             $data = $product->toArray();
-            
+
             // Ensure producer information is properly formatted
             if ($product->producer) {
                 $data['producer'] = [
@@ -95,10 +95,10 @@ class ProductController extends Controller
                     'location' => $product->producer->location,
                 ];
             }
-            
+
             // Format price consistently
             $data['price'] = number_format($product->price, 2);
-            
+
             return $data;
         });
 
@@ -117,7 +117,7 @@ class ProductController extends Controller
             ->findOrFail($id);
 
         $data = $product->toArray();
-        
+
         // Ensure producer information is properly formatted
         if ($product->producer) {
             $data['producer'] = [
@@ -128,7 +128,7 @@ class ProductController extends Controller
                 'description' => $product->producer->description,
             ];
         }
-        
+
         // Format price consistently
         $data['price'] = number_format($product->price, 2);
 

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\ShippingService;
 use App\Models\Order;
 use App\Models\Shipment;
-use Illuminate\Http\Request;
+use App\Services\ShippingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +31,7 @@ class ShippingController extends Controller
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'postal_code' => 'required|string|regex:/^\d{5}$/',
-            'producer_profile' => 'nullable|string|in:flat_rate,free_shipping,premium_producer,local_producer'
+            'producer_profile' => 'nullable|string|in:flat_rate,free_shipping,premium_producer,local_producer',
         ]);
 
         try {
@@ -49,19 +49,19 @@ class ShippingController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $quote
+                'data' => $quote,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Shipping quote error', [
                 'message' => $e->getMessage(),
                 'items' => $validated['items'],
-                'postal_code' => $validated['postal_code']
+                'postal_code' => $validated['postal_code'],
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Αποτυχία υπολογισμού μεταφορικών'
+                'message' => 'Αποτυχία υπολογισμού μεταφορικών',
             ], 500);
         }
     }
@@ -72,25 +72,25 @@ class ShippingController extends Controller
      */
     public function createLabel(Order $order): JsonResponse
     {
-        $this->authorize('manage-shipping'); // Admin only
+        $this->authorize('admin-access'); // Admin only
 
         try {
             $label = $this->shippingService->createLabel($order->id);
 
             return response()->json([
                 'success' => true,
-                'data' => $label
+                'data' => $label,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Label creation error', [
                 'order_id' => $order->id,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Αποτυχία δημιουργίας ετικέτας'
+                'message' => 'Αποτυχία δημιουργίας ετικέτας',
             ], 500);
         }
     }
@@ -105,10 +105,10 @@ class ShippingController extends Controller
             $shipment = Shipment::where('tracking_code', $trackingCode)->firstOrFail();
 
             // Check if user can access this shipment
-            if (Auth::check() && $shipment->order->user_id !== Auth::id() && !Auth::user()->can('manage-shipping')) {
+            if (Auth::check() && $shipment->order->user_id !== Auth::id() && ! Auth::user()->can('admin-access')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Δεν έχετε πρόσβαση σε αυτή την αποστολή'
+                    'message' => 'Δεν έχετε πρόσβαση σε αυτή την αποστολή',
                 ], 403);
             }
 
@@ -119,18 +119,18 @@ class ShippingController extends Controller
                 'shipped_at' => $shipment->shipped_at?->toISOString(),
                 'delivered_at' => $shipment->delivered_at?->toISOString(),
                 'estimated_delivery' => $shipment->estimated_delivery?->toISOString(),
-                'events' => $shipment->tracking_events ?? []
+                'events' => $shipment->tracking_events ?? [],
             ];
 
             return response()->json([
                 'success' => true,
-                'data' => $trackingData
+                'data' => $trackingData,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Δεν βρέθηκε αποστολή με αυτόν τον κωδικό'
+                'message' => 'Δεν βρέθηκε αποστολή με αυτόν τον κωδικό',
             ], 404);
         }
     }
@@ -145,10 +145,10 @@ class ShippingController extends Controller
 
         $shipment = $order->shipment;
 
-        if (!$shipment) {
+        if (! $shipment) {
             return response()->json([
                 'success' => false,
-                'message' => 'Δεν βρέθηκαν στοιχεία αποστολής'
+                'message' => 'Δεν βρέθηκαν στοιχεία αποστολής',
             ], 404);
         }
 
@@ -163,12 +163,12 @@ class ShippingController extends Controller
             'delivered_at' => $shipment->delivered_at?->toISOString(),
             'estimated_delivery' => $shipment->estimated_delivery?->toISOString(),
             'is_trackable' => $shipment->isTrackable(),
-            'is_completed' => $shipment->isCompleted()
+            'is_completed' => $shipment->isCompleted(),
         ];
 
         return response()->json([
             'success' => true,
-            'data' => $shipmentData
+            'data' => $shipmentData,
         ]);
     }
 
@@ -178,23 +178,26 @@ class ShippingController extends Controller
     private function createTemporaryOrder(array $items): Order
     {
         $order = Order::create([
-            'user_id' => Auth::id() ?? 0, // Use 0 for guest quotes
-            'status' => 'temp_quote',
+            'user_id' => Auth::id(), // Use NULL for guest quotes
+            'status' => 'pending', // Use valid status instead of temp_quote
             'payment_status' => 'pending',
             'payment_method' => 'temp',
             'shipping_method' => 'temp',
             'currency' => 'EUR',
             'subtotal' => 0,
             'shipping_cost' => 0,
-            'total' => 0
+            'total' => 0,
         ]);
 
         foreach ($items as $item) {
+            $product = \App\Models\Product::findOrFail($item['product_id']);
             $order->orderItems()->create([
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'price' => 0, // Will be calculated by ShippingService
-                'total' => 0
+                'unit_price' => $product->price,
+                'total_price' => $product->price * $item['quantity'],
+                'product_name' => $product->name,
+                'product_unit' => $product->unit ?? 'piece',
             ]);
         }
 

@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Models\Notification;
-use App\Models\User;
 use App\Models\Order;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -23,7 +23,7 @@ class NotificationService
             'order_id' => $order->id,
             'total_amount' => $order->total_amount,
             'order_number' => $order->id,
-            'message' => 'Η παραγγελία σας #{order_id} καταχωρήθηκε επιτυχώς!'
+            'message' => 'Η παραγγελία σας #{order_id} καταχωρήθηκε επιτυχώς!',
         ]);
 
         $this->sendEmail($buyer->email, 'order_placed_buyer', [
@@ -38,7 +38,7 @@ class NotificationService
                 'order_id' => $order->id,
                 'buyer_name' => $buyer->name,
                 'total_amount' => $order->total_amount,
-                'message' => 'Νέα παραγγελία από {buyer_name} - #{order_id}'
+                'message' => 'Νέα παραγγελία από {buyer_name} - #{order_id}',
             ]);
 
             $this->sendEmail($producer->email, 'order_placed_producer', [
@@ -60,7 +60,7 @@ class NotificationService
         $this->createNotification($buyer, 'order_shipped', [
             'order_id' => $order->id,
             'tracking_number' => $order->tracking_number ?? null,
-            'message' => 'Η παραγγελία σας #{order_id} έχει αποσταλεί!'
+            'message' => 'Η παραγγελία σας #{order_id} έχει αποσταλεί!',
         ]);
 
         $this->sendEmail($buyer->email, 'order_shipped', [
@@ -80,7 +80,7 @@ class NotificationService
         $this->createNotification($buyer, 'refund_issued', [
             'order_id' => $order->id,
             'refund_amount' => $refundAmount,
-            'message' => 'Έγινε επιστροφή €{refund_amount} για την παραγγελία #{order_id}'
+            'message' => 'Έγινε επιστροφή €{refund_amount} για την παραγγελία #{order_id}',
         ]);
 
         $this->sendEmail($buyer->email, 'refund_issued', [
@@ -99,13 +99,13 @@ class NotificationService
             Notification::create([
                 'user_id' => $user->id,
                 'type' => $type,
-                'payload' => $payload
+                'payload' => $payload,
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to create notification', [
                 'user_id' => $user->id,
                 'type' => $type,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -123,14 +123,14 @@ class NotificationService
             Log::info('Email notification', [
                 'to' => $email,
                 'template' => $template,
-                'data' => $data
+                'data' => $data,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to send email notification', [
                 'email' => $email,
                 'template' => $template,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

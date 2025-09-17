@@ -3,11 +3,9 @@
 namespace App\Services;
 
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\OrderItem;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Producer;
+use App\Models\Product;
 
 class ProducerAnalyticsService
 {
@@ -17,7 +15,7 @@ class ProducerAnalyticsService
     public function getProducerSalesAnalytics(int $producerId, string $period = 'daily', int $limit = 30): array
     {
         // Validate period
-        if (!in_array($period, ['daily', 'monthly'])) {
+        if (! in_array($period, ['daily', 'monthly'])) {
             throw new \InvalidArgumentException('Period must be daily or monthly');
         }
 
@@ -63,8 +61,8 @@ class ProducerAnalyticsService
                 'total_revenue' => $sales->sum('total_sales'),
                 'total_orders' => $sales->sum('order_count'),
                 'average_order_value' => $sales->avg('average_order_value') ?? 0,
-                'period_growth' => $this->calculateGrowth($sales)
-            ]
+                'period_growth' => $this->calculateGrowth($sales),
+            ],
         ];
     }
 
@@ -109,7 +107,7 @@ class ProducerAnalyticsService
                     'total_amount' => $order->total_amount,
                     'status' => $order->status,
                     'payment_status' => $order->payment_status,
-                    'created_at' => $order->created_at->toISOString()
+                    'created_at' => $order->created_at->toISOString(),
                 ];
             });
 
@@ -121,8 +119,8 @@ class ProducerAnalyticsService
                 'total_orders' => array_sum($byStatus),
                 'pending_orders' => $byStatus['pending'] ?? 0,
                 'completed_orders' => ($byStatus['delivered'] ?? 0) + ($byStatus['completed'] ?? 0),
-                'cancelled_orders' => $byStatus['cancelled'] ?? 0
-            ]
+                'cancelled_orders' => $byStatus['cancelled'] ?? 0,
+            ],
         ];
     }
 
@@ -150,7 +148,7 @@ class ProducerAnalyticsService
                     'price' => $product->price,
                     'total_quantity_sold' => $totalQuantitySold,
                     'total_revenue' => $totalRevenue,
-                    'order_count' => $orderCount
+                    'order_count' => $orderCount,
                 ];
             })
             ->filter(function ($product) {
@@ -175,8 +173,8 @@ class ProducerAnalyticsService
                 'active_products' => $activeProducts,
                 'out_of_stock' => $outOfStock,
                 'best_seller_id' => $bestSeller['id'] ?? null,
-                'best_seller_name' => $bestSeller['name'] ?? null
-            ]
+                'best_seller_name' => $bestSeller['name'] ?? null,
+            ],
         ];
     }
 
@@ -200,7 +198,7 @@ class ProducerAnalyticsService
                 'date' => $date,
                 'total_sales' => $dayData ? (float) $dayData->total_sales : 0,
                 'order_count' => $dayData ? (int) $dayData->order_count : 0,
-                'average_order_value' => $dayData ? (float) $dayData->average_order_value : 0
+                'average_order_value' => $dayData ? (float) $dayData->average_order_value : 0,
             ];
         }
 
@@ -244,7 +242,7 @@ class ProducerAnalyticsService
                 'date' => $date,
                 'total_sales' => 0,
                 'order_count' => 0,
-                'average_order_value' => 0
+                'average_order_value' => 0,
             ];
         }
 
@@ -255,8 +253,8 @@ class ProducerAnalyticsService
                 'total_revenue' => 0,
                 'total_orders' => 0,
                 'average_order_value' => 0,
-                'period_growth' => 0
-            ]
+                'period_growth' => 0,
+            ],
         ];
     }
 
@@ -273,8 +271,8 @@ class ProducerAnalyticsService
                 'total_orders' => 0,
                 'pending_orders' => 0,
                 'completed_orders' => 0,
-                'cancelled_orders' => 0
-            ]
+                'cancelled_orders' => 0,
+            ],
         ];
     }
 }
