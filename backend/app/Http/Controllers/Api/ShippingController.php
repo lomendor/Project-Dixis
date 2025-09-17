@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Services\ShippingService;
+use App\Services\Courier\CourierProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,12 @@ use Illuminate\Support\Facades\Log;
 class ShippingController extends Controller
 {
     private ShippingService $shippingService;
+    private CourierProviderFactory $courierFactory;
 
-    public function __construct(ShippingService $shippingService)
+    public function __construct(ShippingService $shippingService, CourierProviderFactory $courierFactory)
     {
         $this->shippingService = $shippingService;
+        $this->courierFactory = $courierFactory;
     }
 
     /**
@@ -75,7 +78,15 @@ class ShippingController extends Controller
         $this->authorize('admin-access'); // Admin only
 
         try {
-            $label = $this->shippingService->createLabel($order->id);
+            // Use courier provider factory to get appropriate provider
+            $provider = $this->courierFactory->make();
+            $label = $provider->createLabel($order->id);
+
+            Log::info('Label created via provider', [
+                'order_id' => $order->id,
+                'provider' => $provider->getProviderCode(),
+                'tracking_code' => $label['tracking_code'] ?? null,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -112,15 +123,44 @@ class ShippingController extends Controller
                 ], 403);
             }
 
-            $trackingData = [
-                'tracking_code' => $shipment->tracking_code,
-                'status' => $shipment->status,
-                'carrier_code' => $shipment->carrier_code,
-                'shipped_at' => $shipment->shipped_at?->toISOString(),
-                'delivered_at' => $shipment->delivered_at?->toISOString(),
-                'estimated_delivery' => $shipment->estimated_delivery?->toISOString(),
-                'events' => $shipment->tracking_events ?? [],
-            ];
+            // Try to get enhanced tracking from provider, fallback to basic data
+            $provider = $this->courierFactory->make();
+            $providerTracking = $provider->getTracking($trackingCode);
+
+            if ($providerTracking) {
+                // Use enhanced tracking data from provider
+                $trackingData = [
+                    'tracking_code' => $providerTracking['tracking_code'],
+                    'status' => $providerTracking['status'],
+                    'carrier_code' => $providerTracking['carrier_code'],
+                    'shipped_at' => $shipment->shipped_at?->toISOString(),
+                    'delivered_at' => $shipment->delivered_at?->toISOString(),
+                    'estimated_delivery' => $providerTracking['estimated_delivery'] ?? $shipment->estimated_delivery?->toISOString(),
+                    'events' => $providerTracking['events'] ?? [],
+                ];
+
+                Log::info('Enhanced tracking retrieved via provider', [
+                    'tracking_code' => $trackingCode,
+                    'provider' => $provider->getProviderCode(),
+                    'events_count' => count($providerTracking['events'] ?? []),
+                ]);
+            } else {
+                // Fallback to basic shipment data
+                $trackingData = [
+                    'tracking_code' => $shipment->tracking_code,
+                    'status' => $shipment->status,
+                    'carrier_code' => $shipment->carrier_code,
+                    'shipped_at' => $shipment->shipped_at?->toISOString(),
+                    'delivered_at' => $shipment->delivered_at?->toISOString(),
+                    'estimated_delivery' => $shipment->estimated_delivery?->toISOString(),
+                    'events' => $shipment->tracking_events ?? [],
+                ];
+
+                Log::info('Fallback tracking data used', [
+                    'tracking_code' => $trackingCode,
+                    'provider' => $provider->getProviderCode(),
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
