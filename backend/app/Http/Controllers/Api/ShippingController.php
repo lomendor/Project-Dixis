@@ -82,6 +82,12 @@ class ShippingController extends Controller
             $provider = $this->courierFactory->make();
             $label = $provider->createLabel($order->id);
 
+            // Check if provider returned a normalized error
+            if (is_array($label) && isset($label['success']) && $label['success'] === false) {
+                $httpStatus = (int)($label['http'] ?? 502);
+                return response()->json($label, $httpStatus);
+            }
+
             Log::info('Label created via provider', [
                 'order_id' => $order->id,
                 'provider' => $provider->getProviderCode(),
@@ -126,6 +132,12 @@ class ShippingController extends Controller
             // Try to get enhanced tracking from provider, fallback to basic data
             $provider = $this->courierFactory->make();
             $providerTracking = $provider->getTracking($trackingCode);
+
+            // Check if provider returned a normalized error
+            if (is_array($providerTracking) && isset($providerTracking['success']) && $providerTracking['success'] === false) {
+                $httpStatus = (int)($providerTracking['http'] ?? 502);
+                return response()->json($providerTracking, $httpStatus);
+            }
 
             if ($providerTracking) {
                 // Use enhanced tracking data from provider
