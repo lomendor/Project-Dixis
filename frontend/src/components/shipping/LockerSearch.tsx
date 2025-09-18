@@ -6,7 +6,7 @@ import {
   LockerSearchResponseSchema,
   type LockerSearchResponse,
   type Locker
-} from '@dixis/contracts/shipping';
+} from '../../packages/contracts/src/shipping';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface LockerSearchProps {

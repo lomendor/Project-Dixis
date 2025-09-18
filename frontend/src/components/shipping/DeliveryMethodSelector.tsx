@@ -108,8 +108,9 @@ export default function DeliveryMethodSelector({
         setHomeQuote(homeResult);
 
         // Fetch locker quote if enabled
+        let lockerResult = null;
         if (lockersEnabled) {
-          const lockerResult = await fetchShippingQuote('LOCKER');
+          lockerResult = await fetchShippingQuote('LOCKER');
           setLockerQuote(lockerResult);
         }
 
