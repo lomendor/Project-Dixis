@@ -22,26 +22,33 @@ class ShippingCalibrate extends Command
         $results = [];
 
         foreach ($rows as $row) {
-            $quote = $shippingService->calculateShippingCost(
-                $row['weight_kg'],
-                [
-                    'length' => $row['length_cm'],
-                    'width' => $row['width_cm'],
-                    'height' => $row['height_cm']
-                ],
-                $row['postal_code']
+            // Calculate volumetric and billable weight
+            $volumetricWeight = $shippingService->computeVolumetricWeight(
+                $row['length_cm'],
+                $row['width_cm'],
+                $row['height_cm']
             );
+            $billableWeight = $shippingService->computeBillableWeight(
+                $row['weight_kg'],
+                $volumetricWeight
+            );
+
+            // Get zone from postal code
+            $zone = $shippingService->getZoneByPostalCode($row['postal_code']);
+
+            // Calculate shipping cost
+            $quote = $shippingService->calculateShippingCost($billableWeight, $zone);
 
             $results[] = [
                 'order_id' => $row['order_id'],
                 'postal_code' => $row['postal_code'],
-                'zone_code' => $quote['zone'] ?? 'mainland',
-                'billable_kg' => $quote['billable_weight'] ?? $row['weight_kg'],
-                'predicted_eur' => $quote['total_cost'] ?? 0,
+                'zone_code' => $zone,
+                'billable_kg' => $billableWeight,
+                'predicted_eur' => $quote['cost'] ?? 0,
                 'actual_eur' => $row['actual_receipt_eur'],
-                'error_eur' => ($quote['total_cost'] ?? 0) - $row['actual_receipt_eur'],
+                'error_eur' => ($quote['cost'] ?? 0) - $row['actual_receipt_eur'],
                 'error_pct' => $row['actual_receipt_eur'] > 0
-                    ? abs((($quote['total_cost'] ?? 0) - $row['actual_receipt_eur']) / $row['actual_receipt_eur'] * 100)
+                    ? abs((($quote['cost'] ?? 0) - $row['actual_receipt_eur']) / $row['actual_receipt_eur'] * 100)
                     : 0
             ];
         }
