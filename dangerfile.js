@@ -11,10 +11,16 @@ const { danger, warn, message, markdown, fail } = require('danger')
 
 const { pr, git } = danger
 
+// Null safety guards for undefined PR context
+if (!pr || !git) {
+  console.log('⚠️ DangerJS context incomplete - skipping quality gates')
+  return
+}
+
 // 🎯 Rule 1: Quality Gate - Large PR Block (LOC > 600)
 const changedFiles = git.created_files.concat(git.modified_files)
 const lineCount = git.lines_of_code
-const hasLargeDiffLabel = pr.labels.some(label => label.name === 'large-diff')
+const hasLargeDiffLabel = pr.labels?.some(label => label.name === 'large-diff') ?? false
 
 if (lineCount > 600 && !hasLargeDiffLabel) {
   fail(`🚫 **Large PR Blocked**: ${lineCount} lines of code changed. PRs > 600 LOC require 'large-diff' label for approval.`)
@@ -24,8 +30,8 @@ if (lineCount > 600 && !hasLargeDiffLabel) {
 
 // 🎯 Rule 2: Quality Gate - Documentation Reports Required
 const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-const hasReportLinks = pr.body.includes(`backend/docs/reports/${today}/`) ||
-                      pr.body.includes(`docs/reports/${today}/`)
+const hasReportLinks = pr.body?.includes(`backend/docs/reports/${today}/`) ||
+                      pr.body?.includes(`docs/reports/${today}/`)
 
 const hasSignificantChanges = lineCount > 100 ||
                              changedFiles.some(file => file.includes('backend/app/Http/') ||
@@ -48,10 +54,10 @@ if (controllerChanges.length > 0 && !hasTestChanges) {
 
 // 🎯 Rule 4: Quality Gate - Config Changes Require Risk Assessment
 const configChanges = changedFiles.filter(file => file.includes('backend/config/') || file.includes('config/'))
-const hasRiskAssessment = pr.body.toLowerCase().includes('risk') &&
-                          (pr.body.toLowerCase().includes('low') ||
-                           pr.body.toLowerCase().includes('medium') ||
-                           pr.body.toLowerCase().includes('high'))
+const hasRiskAssessment = pr.body?.toLowerCase().includes('risk') &&
+                          (pr.body?.toLowerCase().includes('low') ||
+                           pr.body?.toLowerCase().includes('medium') ||
+                           pr.body?.toLowerCase().includes('high'))
 
 if (configChanges.length > 0 && !hasRiskAssessment) {
   fail(`🚫 **Risk Assessment Required**: Configuration changes detected (${configChanges.join(', ')}) but no risk level mentioned in PR description.`)
@@ -105,8 +111,8 @@ if ((hasBackendChanges || hasFrontendChanges) && !hasTestFiles && !hasE2EFiles) 
 }
 
 // 🎯 Rule 5: Soft Warning - Skipped CI Jobs
-const prTitle = pr.title.toLowerCase()
-const prBody = pr.body.toLowerCase()
+const prTitle = pr.title?.toLowerCase() ?? ''
+const prBody = pr.body?.toLowerCase() ?? ''
 const hasSkippedTests = prTitle.includes('skip') || prBody.includes('skip') ||
                        prTitle.includes('[ci skip]') || prBody.includes('[ci skip]')
 
