@@ -80,3 +80,68 @@ export const TrackingResponseSchema = z.object({
 export type TrackingStatus = z.infer<typeof TrackingStatusSchema>
 export type TrackingEvent = z.infer<typeof TrackingEventSchema>
 export type TrackingResponse = z.infer<typeof TrackingResponseSchema>
+
+// Delivery Method Enum
+export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER'])
+export type DeliveryMethod = z.infer<typeof DeliveryMethodSchema>
+
+// Locker Information
+export const LockerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  address: z.string(),
+  provider: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+  postal_code: z.string().regex(/^\d{5}$/),
+  distance: z.number().optional(),
+  operating_hours: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export type Locker = z.infer<typeof LockerSchema>
+
+// Shipping Quote Schemas (for the new API)
+export const ShippingQuoteRequestSchema = z.object({
+  items: z.array(z.object({
+    product_id: z.number(),
+    quantity: z.number().positive()
+  })).min(1),
+  postal_code: z.string().regex(/^\d{5}$/),
+  delivery_method: DeliveryMethodSchema.optional().default('HOME'),
+})
+
+export const ShippingQuoteResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    cost_cents: z.number(),
+    cost_eur: z.number(),
+    carrier_code: z.string(),
+    zone_code: z.string(),
+    zone_name: z.string(),
+    estimated_delivery_days: z.number(),
+    delivery_method: DeliveryMethodSchema,
+    breakdown: z.object({
+      base_cost_cents: z.number(),
+      weight_adjustment_cents: z.number(),
+      volume_adjustment_cents: z.number(),
+      zone_multiplier: z.number(),
+      actual_weight_kg: z.number(),
+      volumetric_weight_kg: z.number(),
+      postal_code: z.string(),
+      profile_applied: z.string().nullable(),
+      locker_discount_cents: z.number().optional(),
+    })
+  })
+})
+
+export type ShippingQuoteRequest = z.infer<typeof ShippingQuoteRequestSchema>
+export type ShippingQuoteResponse = z.infer<typeof ShippingQuoteResponseSchema>
+
+// Locker Search Response
+export const LockerSearchResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.array(LockerSchema),
+})
+
+export type LockerSearchResponse = z.infer<typeof LockerSearchResponseSchema>
