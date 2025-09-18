@@ -6,7 +6,7 @@ import {
   LockerSearchResponseSchema,
   type LockerSearchResponse,
   type Locker
-} from '../../packages/contracts/src/shipping';
+} from '@dixis/contracts/shipping';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface LockerSearchProps {
@@ -47,6 +47,14 @@ export default function LockerSearch({
         }
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = typeof errorData === 'object' && errorData && 'message' in errorData
+          ? String(errorData.message)
+          : 'Αποτυχία αναζήτησης lockers';
+        throw new Error(errorMessage);
+      }
+
       const rawData = await response.json();
 
       // Validate response using Zod schema
@@ -59,21 +67,13 @@ export default function LockerSearch({
 
       const data = parseResult.data;
 
-      if (!response.ok) {
-        const errorMessage = data.success === false ? data.message : 'Αποτυχία αναζήτησης lockers';
-        throw new Error(errorMessage);
-      }
+      // Since parseResult.success is true, data.success is always true
+      setLockers(data.data);
+      setSearchAttempted(true);
 
-      if (data.success) {
-        setLockers(data.data);
-        setSearchAttempted(true);
-
-        // Auto-select first locker if none selected
-        if (data.data.length > 0 && !selectedLockerId) {
-          onLockerSelected(data.data[0].id);
-        }
-      } else {
-        throw new Error('message' in data ? data.message : 'Αποτυχία αναζήτησης lockers');
+      // Auto-select first locker if none selected
+      if (data.data.length > 0 && !selectedLockerId) {
+        onLockerSelected(data.data[0].id);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Σφάλμα δικτύου';
