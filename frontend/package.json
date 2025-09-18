@@ -47,6 +47,11 @@
     "prepare": "husky",
     "agent:limit-scan": "node scripts/limit-scan.js",
     "subagent:codemap": "node scripts/codemap-subagent.js",
+    "sub:auditor": "bash ../scripts/subagents.sh audit",
+    "sub:test-guardian": "bash ../scripts/subagents.sh tests",
+    "sub:scribe": "bash ../scripts/subagents.sh docs",
+    "sub:release": "bash ../scripts/subagents.sh release",
+    "sub:all": "bash ../scripts/subagents.sh all",
     "qa:smoke": "npm run type-check && npm run build && npm run e2e:smoke",
     "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v"
   },
