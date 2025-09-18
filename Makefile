@@ -5,7 +5,7 @@ BACKEND=backend
 FRONTEND=frontend
 LOGS=.logs
 
-.PHONY: help qa ci-local report fix clean install test build up down reset logs dev-backend dev-frontend
+.PHONY: help qa ci-local report fix clean install test build up down reset logs dev-backend dev-frontend calibrate
 
 # Default target
 help:
@@ -18,6 +18,7 @@ help:
 	@echo ""
 	@echo "📚 Documentation:"
 	@echo "  make report    - Generate reports (auditor + scribe)"
+	@echo "  make calibrate - Calibrate shipping rates from CSV samples"
 	@echo ""
 	@echo "🔧 Code Fixes:"
 	@echo "  make fix       - Auto-fix code style (pint + eslint --fix)"
@@ -145,3 +146,9 @@ dev-backend:
 dev-frontend:
 	@echo "🚀 Starting frontend development server..."
 	cd $(FRONTEND) && npm run dev
+
+# 📊 Shipping Calibration
+calibrate:
+	@echo "📊 Running shipping calibration..."
+	cd $(BACKEND) && php artisan shipping:calibrate docs/samples/orders-20.template.csv
+	@echo "✅ Calibration complete!"
