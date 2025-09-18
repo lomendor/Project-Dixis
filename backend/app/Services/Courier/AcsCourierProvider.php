@@ -38,16 +38,16 @@ class AcsCourierProvider implements CourierProviderInterface
         }
 
         // Generate idempotency key for this request
-        $idempotencyKey = $this->generateIdempotencyKey($order);
+        $idempotencyKey = hash('sha256', "order:{$orderId}");
 
         try {
             // Prepare shipment data for ACS API
             $shipmentData = $this->mapOrderToAcsRequest($order);
-            $shipmentData['idempotency_key'] = $idempotencyKey;
+            // Don't include idempotency in payload - use header instead
 
             // Make actual ACS API call with retry mechanism
-            $response = $this->executeWithRetry(function () use ($shipmentData) {
-                return $this->makeAcsApiCall('POST', '/shipments', $shipmentData);
+            $response = $this->executeWithRetry(function () use ($shipmentData, $idempotencyKey) {
+                return $this->makeAcsApiCall('POST', '/shipments', $shipmentData, $idempotencyKey);
             }, 'createLabel', $orderId);
 
             // Map ACS response to internal format
@@ -68,21 +68,12 @@ class AcsCourierProvider implements CourierProviderInterface
                 'order_id' => $orderId,
                 'tracking_code' => $labelData['tracking_code'],
                 'provider' => 'acs',
-                'acs_reference' => $response['shipment_id'] ?? null,
-                'idempotency_key' => $idempotencyKey,
             ]);
 
             return $this->formatLabelResponse($shipment);
 
         } catch (RequestException $e) {
-            Log::error('ACS API request failed after retries', [
-                'order_id' => $orderId,
-                'error' => $e->getMessage(),
-                'status_code' => $e->response?->status(),
-                'idempotency_key' => $idempotencyKey,
-            ]);
-
-            throw new \Exception("ACS API error: " . $e->getMessage());
+            return $this->mapAcsError($e, $e->response?->status(), 'createLabel');
         }
     }
 
@@ -120,14 +111,8 @@ class AcsCourierProvider implements CourierProviderInterface
             ];
 
         } catch (RequestException $e) {
-            Log::warning('ACS tracking API failed, using fallback', [
-                'tracking_code' => $trackingCode,
-                'error' => $e->getMessage(),
-                'status_code' => $e->response?->status(),
-            ]);
-
-            // Return null to trigger fallback to internal tracking
-            return null;
+            // Return normalized error for consistent handling
+            return $this->mapAcsError($e, $e->response?->status(), 'getTracking');
         }
     }
 
@@ -169,12 +154,17 @@ class AcsCourierProvider implements CourierProviderInterface
     /**
      * Make authenticated HTTP call to ACS API
      */
-    private function makeAcsApiCall(string $method, string $endpoint, array $data = []): array
+    private function makeAcsApiCall(string $method, string $endpoint, array $data = [], ?string $idempotencyKey = null): array
     {
         $timeout = config('services.courier.timeout', 30);
 
+        $headers = $this->getAuthHeaders();
+        if (strtoupper($method) === 'POST' && $idempotencyKey) {
+            $headers['Idempotency-Key'] = $idempotencyKey;
+        }
+
         $httpClient = Http::timeout($timeout)
-            ->withHeaders($this->getAuthHeaders());
+            ->withHeaders($headers);
 
         $url = $this->apiBase . $endpoint;
 
@@ -359,19 +349,68 @@ class AcsCourierProvider implements CourierProviderInterface
     }
 
     /**
-     * Generate idempotency key for API requests
+     * Map ACS API errors to normalized format
      */
-    private function generateIdempotencyKey(Order $order): string
+    private function mapAcsError(RequestException $e, ?int $statusCode, string $operation): array
     {
-        // Create a unique key based on order data that won't change
-        $keyData = [
-            'order_id' => $order->id,
-            'user_id' => $order->user_id,
-            'total' => $order->total,
-            'created_at' => $order->created_at->timestamp,
-        ];
+        $retryAfter = null;
+        if ($statusCode === 429 && $e->response) {
+            $retryAfter = $e->response->header('Retry-After');
+        }
 
-        return 'dixis_' . hash('sha256', json_encode($keyData));
+        $errorMap = match ($statusCode) {
+            400, 422 => [
+                'success' => false,
+                'code' => 'BAD_REQUEST',
+                'http' => 422,
+                'message' => 'Invalid request data',
+                'operation' => $operation,
+            ],
+            401 => [
+                'success' => false,
+                'code' => 'UNAUTHORIZED',
+                'http' => 401,
+                'message' => 'Authentication failed',
+                'operation' => $operation,
+            ],
+            403 => [
+                'success' => false,
+                'code' => 'FORBIDDEN',
+                'http' => 403,
+                'message' => 'Access forbidden',
+                'operation' => $operation,
+            ],
+            404 => [
+                'success' => false,
+                'code' => 'NOT_FOUND',
+                'http' => 404,
+                'message' => 'Resource not found',
+                'operation' => $operation,
+            ],
+            429 => [
+                'success' => false,
+                'code' => 'RATE_LIMIT',
+                'http' => 429,
+                'message' => 'Rate limit exceeded',
+                'operation' => $operation,
+                'retryAfter' => $retryAfter,
+            ],
+            default => [
+                'success' => false,
+                'code' => 'PROVIDER_UNAVAILABLE',
+                'http' => 503,
+                'message' => 'Courier service temporarily unavailable',
+                'operation' => $operation,
+            ],
+        };
+
+        Log::warning('ACS API error mapped', [
+            'operation' => $operation,
+            'status_code' => $statusCode,
+            'error_code' => $errorMap['code'],
+        ]);
+
+        return $errorMap;
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Producer;
+use App\Models\Shipment;
 use App\Models\User;
 use App\Services\Courier\AcsCourierProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,37 +31,8 @@ class AcsContractTest extends TestCase
             'services.acs.api_base' => 'https://sandbox-api.acs.gr/v1',
         ]);
 
-        // Mock successful HTTP responses for ACS API
-        Http::fake([
-            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
-            'sandbox-api.acs.gr/v1/shipments' => Http::response([
-                'shipment_id' => 'ACS123456789',
-                'tracking_code' => 'ACS123456789',
-                'awb_number' => 'ACS123456789',
-                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
-                'status' => 'created',
-                'estimated_delivery_days' => 2,
-            ], 201),
-            'sandbox-api.acs.gr/v1/shipments/*' => Http::response([
-                'tracking_code' => 'ACS123456789',
-                'status' => 'in_transit',
-                'estimated_delivery' => now()->addDays(2)->toDateString(),
-                'events' => [
-                    [
-                        'datetime' => now()->subHours(6)->toISOString(),
-                        'status' => 'picked_up',
-                        'location' => 'Athens Sorting Center',
-                        'description' => 'Package picked up from sender',
-                    ],
-                    [
-                        'datetime' => now()->subHours(2)->toISOString(),
-                        'status' => 'in_transit',
-                        'location' => 'Athens Hub',
-                        'description' => 'Package in transit to destination',
-                    ],
-                ],
-            ], 200),
-        ]);
+        // Don't set up global fakes - let each test set up its own
+        Http::preventStrayRequests();
 
         $this->provider = new AcsCourierProvider();
 
@@ -99,6 +71,10 @@ class AcsContractTest extends TestCase
 
     public function test_provider_is_healthy_with_proper_config()
     {
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+        ]);
+
         $this->assertTrue($this->provider->isHealthy());
     }
 
@@ -113,6 +89,18 @@ class AcsContractTest extends TestCase
 
     public function test_create_label_returns_expected_structure()
     {
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+        ]);
+
         $result = $this->provider->createLabel($this->testOrder->id);
 
         // Verify response structure matches our interface
@@ -137,6 +125,18 @@ class AcsContractTest extends TestCase
 
     public function test_create_label_is_idempotent()
     {
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+        ]);
+
         // Create label first time
         $firstResult = $this->provider->createLabel($this->testOrder->id);
 
@@ -150,6 +150,37 @@ class AcsContractTest extends TestCase
 
     public function test_get_tracking_returns_expected_structure()
     {
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+            'sandbox-api.acs.gr/v1/shipments/*' => Http::response([
+                'tracking_code' => 'ACS123456789',
+                'status' => 'in_transit',
+                'estimated_delivery' => now()->addDays(2)->toDateString(),
+                'events' => [
+                    [
+                        'datetime' => now()->subHours(6)->toISOString(),
+                        'status' => 'picked_up',
+                        'location' => 'Athens Sorting Center',
+                        'description' => 'Package picked up from sender',
+                    ],
+                    [
+                        'datetime' => now()->subHours(2)->toISOString(),
+                        'status' => 'in_transit',
+                        'location' => 'Athens Hub',
+                        'description' => 'Package in transit to destination',
+                    ],
+                ],
+            ], 200),
+        ]);
+
         // First create a label to have a tracking code
         $labelResult = $this->provider->createLabel($this->testOrder->id);
         $trackingCode = $labelResult['tracking_code'];
@@ -265,5 +296,155 @@ class AcsContractTest extends TestCase
 
         // Verify error code format
         $this->assertEquals('VALIDATION_ERROR', $error['code']);
+    }
+
+    public function test_create_label_includes_idempotency_header()
+    {
+        // Reset HTTP fake for this specific test
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([
+                'shipment_id' => 'ACS123456789',
+                'tracking_code' => 'ACS123456789',
+                'awb_number' => 'ACS123456789',
+                'label_pdf_url' => 'https://sandbox-api.acs.gr/v1/labels/ACS123456789.pdf',
+                'status' => 'created',
+                'estimated_delivery_days' => 2,
+            ], 201),
+        ]);
+
+        $result = $this->provider->createLabel($this->testOrder->id);
+
+        // Assert that POST requests include the Idempotency-Key header
+        Http::assertSent(function ($request) {
+            if ($request->method() === 'POST' && str_contains($request->url(), 'shipments')) {
+                return $request->hasHeader('Idempotency-Key') &&
+                       !empty($request->header('Idempotency-Key')[0]);
+            }
+            return true; // Allow other requests (like zones)
+        });
+
+        // Verify successful response (has tracking_code, not 'success' key)
+        $this->assertArrayHasKey('tracking_code', $result);
+        $this->assertArrayHasKey('label_url', $result);
+    }
+
+    public function test_error_mapping_for_bad_request_422()
+    {
+        // Create a new order for this test to avoid idempotency issues
+        $newOrder = Order::factory()->create([
+            'user_id' => $this->testOrder->user_id,
+            'total' => 50.00,
+            'status' => 'pending',
+        ]);
+
+        // Mock 422 error response
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([], 422),
+        ]);
+
+        $result = $this->provider->createLabel($newOrder->id);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('BAD_REQUEST', $result['code']);
+        $this->assertEquals(422, $result['http']);
+        $this->assertEquals('Invalid request data', $result['message']);
+    }
+
+    public function test_error_mapping_for_rate_limit_429()
+    {
+        // Create a new order for this test to avoid idempotency issues
+        $newOrder = Order::factory()->create([
+            'user_id' => $this->testOrder->user_id,
+            'total' => 60.00,
+            'status' => 'pending',
+        ]);
+
+        // Mock 429 error with Retry-After header
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::response([], 429, ['Retry-After' => '60']),
+        ]);
+
+        $result = $this->provider->createLabel($newOrder->id);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('RATE_LIMIT', $result['code']);
+        $this->assertEquals(429, $result['http']);
+        $this->assertEquals('60', $result['retryAfter']);
+    }
+
+    public function test_error_mapping_for_provider_unavailable_500()
+    {
+        // Create a new order for this test to avoid idempotency issues
+        $newOrder = Order::factory()->create([
+            'user_id' => $this->testOrder->user_id,
+            'total' => 70.00,
+            'status' => 'pending',
+        ]);
+
+        // Mock 500 server error
+        Http::fake([
+            'sandbox-api.acs.gr/v1/zones' => Http::response(['zones' => []], 200),
+            'sandbox-api.acs.gr/v1/shipments' => Http::sequence()
+                ->push([], 500) // First attempt fails
+                ->push([], 500) // Second attempt fails
+                ->push([], 500), // Third attempt fails
+        ]);
+
+        $result = $this->provider->createLabel($newOrder->id);
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('success', $result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('PROVIDER_UNAVAILABLE', $result['code']);
+        $this->assertEquals(503, $result['http']);
+        $this->assertEquals('Courier service temporarily unavailable', $result['message']);
+    }
+
+    public function test_tracking_with_retry_on_server_error()
+    {
+        // Create a shipment first
+        $shipment = Shipment::create([
+            'order_id' => $this->testOrder->id,
+            'tracking_code' => 'TEST_RETRY_123',
+            'carrier_code' => 'ACS',
+            'status' => 'in_transit',
+        ]);
+
+        // Mock sequence: fail twice, then succeed
+        Http::fake([
+            'sandbox-api.acs.gr/v1/shipments/TEST_RETRY_123' => Http::sequence()
+                ->push([], 500) // First attempt fails
+                ->push([], 500) // Second attempt fails
+                ->push([
+                    'tracking_code' => 'TEST_RETRY_123',
+                    'status' => 'delivered',
+                    'estimated_delivery' => now()->toDateString(),
+                    'events' => [
+                        [
+                            'datetime' => now()->toISOString(),
+                            'status' => 'delivered',
+                            'location' => 'Customer Address',
+                            'description' => 'Package delivered',
+                        ],
+                    ],
+                ], 200), // Third attempt succeeds
+        ]);
+
+        $result = $this->provider->getTracking('TEST_RETRY_123');
+
+        // Should succeed after retries
+        $this->assertNotNull($result);
+        $this->assertEquals('TEST_RETRY_123', $result['tracking_code'] ?? null);
+        $this->assertEquals('delivered', $result['status'] ?? null);
+
+        // Verify that 3 requests were made (original + 2 retries)
+        Http::assertSentCount(3);
     }
 }
