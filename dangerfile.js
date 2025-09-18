@@ -1,21 +1,60 @@
 // @ts-check
-const { danger, warn, message, markdown } = require('danger')
+const { danger, warn, message, markdown, fail } = require('danger')
 
 /**
- * TOOLS-03: DangerJS Gatekeeper - Soft Mode
- * 
- * Provides gentle warnings for PR quality without blocking merges.
- * Focus areas: LOC, artifacts, workflow changes, port/version compliance
+ * TOOLS-03: DangerJS Gatekeeper - Quality Gate++
+ *
+ * Enforces PR quality standards with hard gates for critical violations.
+ * Soft warnings for advisory guidance.
+ * Focus areas: LOC, documentation, tests, configurations
  */
 
 const { pr, git } = danger
 
-// 🎯 Rule 1: Large PR Warning (LOC > 300)
+// 🎯 Rule 1: Quality Gate - Large PR Block (LOC > 600)
 const changedFiles = git.created_files.concat(git.modified_files)
 const lineCount = git.lines_of_code
+const hasLargeDiffLabel = pr.labels.some(label => label.name === 'large-diff')
 
-if (lineCount > 300) {
+if (lineCount > 600 && !hasLargeDiffLabel) {
+  fail(`🚫 **Large PR Blocked**: ${lineCount} lines of code changed. PRs > 600 LOC require 'large-diff' label for approval.`)
+} else if (lineCount > 300) {
   warn(`📏 **Large PR Detected**: ${lineCount} lines of code changed. Consider breaking this into smaller PRs for easier review.`)
+}
+
+// 🎯 Rule 2: Quality Gate - Documentation Reports Required
+const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+const hasReportLinks = pr.body.includes(`backend/docs/reports/${today}/`) ||
+                      pr.body.includes(`docs/reports/${today}/`)
+
+const hasSignificantChanges = lineCount > 100 ||
+                             changedFiles.some(file => file.includes('backend/app/Http/') ||
+                                                       file.includes('backend/config/') ||
+                                                       file.includes('backend/database/'))
+
+if (hasSignificantChanges && !hasReportLinks) {
+  fail(`🚫 **Missing Documentation**: Significant changes detected but no links to today's reports (${today}) found in PR description.`)
+}
+
+// 🎯 Rule 3: Quality Gate - Controller Changes Require Tests
+const controllerChanges = changedFiles.filter(file => file.includes('backend/app/Http/Controllers/'))
+const hasTestChanges = changedFiles.some(file =>
+  file.includes('test') || file.includes('spec') || file.includes('Test.php')
+)
+
+if (controllerChanges.length > 0 && !hasTestChanges) {
+  fail(`🚫 **Controller Tests Required**: Backend controllers modified (${controllerChanges.join(', ')}) but no test files updated.`)
+}
+
+// 🎯 Rule 4: Quality Gate - Config Changes Require Risk Assessment
+const configChanges = changedFiles.filter(file => file.includes('backend/config/') || file.includes('config/'))
+const hasRiskAssessment = pr.body.toLowerCase().includes('risk') &&
+                          (pr.body.toLowerCase().includes('low') ||
+                           pr.body.toLowerCase().includes('medium') ||
+                           pr.body.toLowerCase().includes('high'))
+
+if (configChanges.length > 0 && !hasRiskAssessment) {
+  fail(`🚫 **Risk Assessment Required**: Configuration changes detected (${configChanges.join(', ')}) but no risk level mentioned in PR description.`)
 }
 
 // 🎯 Rule 2: Workflow Changes Alert
@@ -65,9 +104,19 @@ if ((hasBackendChanges || hasFrontendChanges) && !hasTestFiles && !hasE2EFiles) 
   warn(`🧪 **Test Coverage**: Consider adding tests for your changes. Backend/Frontend changes detected but no test files modified.`)
 }
 
+// 🎯 Rule 5: Soft Warning - Skipped CI Jobs
+const prTitle = pr.title.toLowerCase()
+const prBody = pr.body.toLowerCase()
+const hasSkippedTests = prTitle.includes('skip') || prBody.includes('skip') ||
+                       prTitle.includes('[ci skip]') || prBody.includes('[ci skip]')
+
+if (hasSkippedTests && (hasFrontendChanges || hasE2EFiles)) {
+  warn(`⚠️ **Test Coverage**: Frontend/E2E changes detected but tests may be skipped. Ensure Lighthouse and E2E tests run before merge.`)
+}
+
 // 🎯 Rule 6: Documentation Reminder
-const hasDocChanges = changedFiles.some(file => 
-  file.includes('README') || 
+const hasDocChanges = changedFiles.some(file =>
+  file.includes('README') ||
   file.includes('CLAUDE.md') ||
   file.includes('.md')
 )
@@ -87,10 +136,16 @@ const stats = {
 }
 
 markdown(`
-## 🎯 TOOLS-03 Gatekeeper Summary
+## 🎯 TOOLS-03 Quality Gate++ Summary
 
 ${Object.entries(stats).map(([key, value]) => `**${key}**: ${value}`).join('\n')}
 
+### Quality Gates Enforced 🚫
+- Large PRs (>600 LOC) require \`large-diff\` label
+- Significant changes require documentation reports
+- Controller changes require test updates
+- Config changes require risk assessment
+
 ---
-*Soft mode enabled - All checks are advisory only* 🟡
+*Quality gates active - Some violations will block merge* 🔴
 `)
