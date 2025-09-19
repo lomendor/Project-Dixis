@@ -32,7 +32,13 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
-      
+
+      - name: Install contracts dependencies
+        run: |
+          cd ../packages/contracts
+          npm ci
+          cd ../../frontend
+
       - name: Run TypeScript type check (strict)
         run: npm run type-check
 

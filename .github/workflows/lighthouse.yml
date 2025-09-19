@@ -44,7 +44,10 @@ jobs:
         
       - name: Install frontend dependencies
         run: cd frontend && npm ci
-        
+
+      - name: Install contracts dependencies
+        run: cd packages/contracts && npm ci
+
       - name: Setup backend environment
         run: |
           cd backend
