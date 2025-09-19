@@ -60,7 +60,13 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
-      
+
+      - name: Install contracts dependencies
+        run: |
+          cd ../packages/contracts
+          npm ci
+          cd ../../frontend
+
       # Temporarily disabled for hotfix
       # - name: Run ESLint
       #   run: npm run lint
