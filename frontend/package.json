@@ -53,7 +53,9 @@
     "sub:release": "bash ../scripts/subagents.sh release",
     "sub:all": "bash ../scripts/subagents.sh all",
     "qa:smoke": "npm run type-check && npm run build && npm run e2e:smoke",
-    "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v"
+    "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v",
+    "start:ci": "next start -p 3100",
+    "mock:api": "node ../scripts/mock-api/lhci-mock.cjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.1.0",
