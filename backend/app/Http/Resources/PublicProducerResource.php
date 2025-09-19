@@ -11,7 +11,6 @@ class PublicProducerResource extends JsonResource
      * Transform the resource into an array for public API consumption.
      * Excludes PII and sensitive business information.
      *
-     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array

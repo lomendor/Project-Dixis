@@ -1,9 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -21,7 +20,7 @@ return new class extends Migration
                 // Index might already exist, or syntax not supported - ignore
             }
         }
-        
+
         if (Schema::hasColumn('producers', 'latitude') && Schema::hasColumn('producers', 'longitude')) {
             try {
                 // Try to create composite index on (latitude, longitude) - idempotent with try-catch
@@ -43,7 +42,7 @@ return new class extends Migration
         } catch (\Exception $e) {
             // Index might not exist - ignore
         }
-        
+
         try {
             DB::statement('DROP INDEX producers_tax_id_unique_lower_idx');
         } catch (\Exception $e) {

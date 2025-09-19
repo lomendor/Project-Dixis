@@ -1,0 +1,86 @@
+[
+  {
+    "id": "BN_ATH_001",
+    "name": "BoxNow Κολωνάκι",
+    "address": "Σκουφά 12, Κολωνάκι, Αθήνα",
+    "provider": "BoxNow",
+    "lat": 37.9777,
+    "lng": 23.7442,
+    "postal_code": "10673",
+    "distance": 0.5,
+    "operating_hours": "24/7",
+    "notes": "Κοντά στο μετρό Ευαγγελισμός"
+  },
+  {
+    "id": "BN_ATH_002",
+    "name": "BoxNow Εξάρχεια",
+    "address": "Μεσολογγίου 8, Εξάρχεια, Αθήνα",
+    "provider": "BoxNow",
+    "lat": 37.9838,
+    "lng": 23.7275,
+    "postal_code": "10683",
+    "distance": 1.2,
+    "operating_hours": "06:00-24:00",
+    "notes": "Κοντά στη πλατεία Εξαρχείων"
+  },
+  {
+    "id": "BN_ATH_003",
+    "name": "BoxNow Κυψέλη",
+    "address": "Φωκίωνος Νέγρη 45, Κυψέλη, Αθήνα",
+    "provider": "BoxNow",
+    "lat": 38.0156,
+    "lng": 23.7367,
+    "postal_code": "11363",
+    "distance": 2.1,
+    "operating_hours": "24/7",
+    "notes": null
+  },
+  {
+    "id": "BN_THM_001",
+    "name": "BoxNow Θεσσαλονίκη Κέντρο",
+    "address": "Τσιμισκή 15, Θεσσαλονίκη",
+    "provider": "BoxNow",
+    "lat": 40.6401,
+    "lng": 22.9444,
+    "postal_code": "54624",
+    "distance": 0.3,
+    "operating_hours": "24/7",
+    "notes": "Στο κέντρο της πόλης"
+  },
+  {
+    "id": "BN_THM_002",
+    "name": "BoxNow Καμάρα",
+    "address": "Εγνατία 78, Καμάρα, Θεσσαλονίκη",
+    "provider": "BoxNow",
+    "lat": 40.6352,
+    "lng": 22.9447,
+    "postal_code": "54630",
+    "distance": 1.5,
+    "operating_hours": "06:00-22:00",
+    "notes": "Κοντά σε στάση λεωφορείου"
+  },
+  {
+    "id": "BN_PAT_001",
+    "name": "BoxNow Πάτρα",
+    "address": "Μαιζώνος 12, Πάτρα",
+    "provider": "BoxNow",
+    "lat": 38.2466,
+    "lng": 21.7346,
+    "postal_code": "26221",
+    "distance": 0.8,
+    "operating_hours": "24/7",
+    "notes": "Κεντρική τοποθεσία"
+  },
+  {
+    "id": "BN_HER_001",
+    "name": "BoxNow Ηράκλειο",
+    "address": "25ης Αυγούστου 23, Ηράκλειο",
+    "provider": "BoxNow",
+    "lat": 35.3387,
+    "lng": 25.1442,
+    "postal_code": "71202",
+    "distance": 1.0,
+    "operating_hours": "24/7",
+    "notes": "Κοντά στο λιμάνι"
+  }
+]

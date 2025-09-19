@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Producer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\Producer;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
@@ -19,10 +19,11 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         $name = fake()->words(3, true);
+
         return [
             'producer_id' => Producer::factory(),
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . fake()->unique()->randomNumber(5),
+            'slug' => Str::slug($name).'-'.fake()->unique()->randomNumber(5),
             'description' => fake()->paragraph(),
             'price' => fake()->randomFloat(2, 5, 100),
             'weight_per_unit' => fake()->randomFloat(3, 0.1, 5.0),

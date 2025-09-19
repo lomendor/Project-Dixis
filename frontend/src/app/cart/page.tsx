@@ -13,19 +13,24 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { useCheckout } from '@/hooks/useCheckout';
 import { formatCurrency } from '@/env';
 import CartSummary from '@/components/cart/CartSummary';
+import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
+import { DeliveryMethodSelector } from '@/components/shipping';
+import type { PaymentMethod } from '@dixis/contracts/shipping';
 
 export default function Cart() {
-  const {
+const {
     cart,
     isLoading,
     error,
     shippingMethods,
     selectedShippingMethod,
+    selectedPaymentMethod,
     form,
     formErrors,
     loadCart,
     getShippingQuote,
     selectShippingMethod,
+    selectPaymentMethod,
     updateShippingInfo,
     validateForm,
     calculateOrderSummary,
@@ -40,7 +45,7 @@ export default function Cart() {
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -48,30 +53,63 @@ export default function Cart() {
     loadCart();
   }, [isAuthenticated, authLoading, router, loadCart]);
 
-  const handleShippingQuote = async () => {
-    if (!form.shipping?.postalCode || !form.shipping?.city) {
-      showToast('error', 'Συμπληρώστε ΤΚ και πόλη για υπολογισμό μεταφορικών');
+  // Auto-select default payment method if none selected
+  useEffect(() => {
+    if (!selectedPaymentMethod && PAYMENT_METHODS.length > 0) {
+      selectPaymentMethod(PAYMENT_METHODS[0]);
+    }
+  }, [selectedPaymentMethod, selectPaymentMethod]);
+
+
+const handleCheckout = async () => {
+    if (!selectedPaymentMethod) {
+      showToast('error', 'Επιλέξτε μέθοδο πληρωμής');
       return;
     }
-    await getShippingQuote({
-      postal_code: form.shipping.postalCode,
-      city: form.shipping.city
-    });
-  };
 
-  const handleCheckout = async () => {
     if (orderSummary && cart) {
-      trackCheckoutStart(orderSummary.total_amount, cart.length, user?.id?.toString());
+      const totalWithPaymentFees = orderSummary.subtotal + orderSummary.shipping_cost + orderSummary.tax_amount + calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal);
+      trackCheckoutStart(totalWithPaymentFees, cart.length, user?.id?.toString());
     }
-    const order = await processCheckout();
-    if (order && orderSummary && cart) {
-      trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
-      showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
-      router.push(`/orders/${order.id}`);
+
+    // For cash on delivery, proceed with the existing flow
+    if (selectedPaymentMethod.type === 'cash_on_delivery') {
+      const order = await processCheckout();
+      if (order && orderSummary && cart) {
+        trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
+        showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
+        router.push(`/orders/${order.id}`);
+      }
+      return;
     }
+
+    // For card payments, redirect to payment page
+    if (selectedPaymentMethod.type === 'card') {
+      // Create order first, then redirect to payment page
+      const order = await processCheckout();
+      if (order) {
+        router.push(`/checkout/payment/${order.id}`);
+      }
+      return;
+    }
+
+    showToast('error', 'Μέθοδος πληρωμής δεν υποστηρίζεται');
   };
 
   const orderSummary = calculateOrderSummary();
+
+  // Map frontend payment method type to shipping contract PaymentMethod enum
+  const getShippingPaymentMethod = (paymentMethod: typeof selectedPaymentMethod): PaymentMethod => {
+    if (!paymentMethod) return 'CARD';
+    switch (paymentMethod.type) {
+      case 'cash_on_delivery':
+        return 'COD';
+      case 'card':
+        return 'CARD';
+      default:
+        return 'CARD';
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -119,7 +157,7 @@ export default function Cart() {
     <>
       <Navigation />
       <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Καλάθι Αγορών</h1>
+        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>
         
         {/* Cart Items */}
         <div className="grid md:grid-cols-3 gap-8">
@@ -128,7 +166,7 @@ export default function Cart() {
               {cart.map((item) => (
                 <div key={item.id} className="border rounded-lg p-4 flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold">{item.name}</h3>
+                    <h3 className="font-semibold" data-testid="product-title">{item.name}</h3>
                     <p className="text-sm text-gray-600">Παραγωγός: {item.producer_name}</p>
                     <p className="font-medium">{formatCurrency(item.price)} x {item.quantity}</p>
                   </div>
@@ -142,9 +180,9 @@ export default function Cart() {
 
           {/* Checkout Sidebar */}
           <div className="space-y-6">
-            {/* Shipping Info */}
+            {/* Shipping Quote */}
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-4">Στοιχεία Αποστολής</h3>
+              <h2 className="font-semibold mb-4">Στοιχεία Αποστολής</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
@@ -172,20 +210,38 @@ export default function Cart() {
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.city']}</p>
                   )}
                 </div>
-                <button
-                  onClick={handleShippingQuote}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  disabled={isLoading}
-                >
-                  Υπολογισμός Μεταφορικών
-                </button>
+
+                {/* Delivery Method Selector with Locker Support */}
+                {cart && form.shipping?.postalCode && (
+                  <DeliveryMethodSelector
+                    items={cart.map(item => ({
+                      product_id: item.product_id,
+                      quantity: item.quantity
+                    }))}
+                    postalCode={form.shipping.postalCode}
+                    paymentMethod={getShippingPaymentMethod(selectedPaymentMethod)}
+                    onQuoteReceived={(quote) => {
+                      // Auto-select the shipping method from the quote
+                      if (quote) {
+                        selectShippingMethod({
+                          id: 'shipping',
+                          name: `${quote.carrier_code} - ${quote.zone_code}`,
+                          description: `Παράδοση σε ${quote.estimated_delivery_days} εργάσιμες ημέρες`,
+                          price: quote.cost_cents / 100,
+                          estimated_days: quote.estimated_delivery_days
+                        });
+                      }
+                    }}
+                    className="mt-4"
+                  />
+                )}
               </div>
             </div>
 
             {/* Shipping Methods */}
             {shippingMethods && shippingMethods.length > 0 && (
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-4">Μέθοδος Αποστολής</h3>
+                <h2 className="font-semibold mb-4">Μέθοδος Αποστολής</h2>
                 <div className="space-y-2">
                   {shippingMethods.map((method) => (
                     <label key={method.id} className="flex items-center">
@@ -208,19 +264,50 @@ export default function Cart() {
               </div>
             )}
 
+            {/* Payment Methods */}
+            <div className="border rounded-lg p-4">
+              <h2 className="font-semibold mb-4">Μέθοδος Πληρωμής</h2>
+              <div className="space-y-2">
+                {PAYMENT_METHODS.map((method) => {
+                  const paymentFees = calculatePaymentFees(method, orderSummary?.subtotal || 0);
+                  return (
+                    <label key={method.id} className="flex items-center">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value={method.id}
+                        checked={selectedPaymentMethod?.id === method.id}
+                        onChange={() => selectPaymentMethod(method)}
+                        className="mr-2"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium">{method.name}</div>
+                        <div className="text-sm text-gray-600">{method.description}</div>
+                      </div>
+                      {paymentFees > 0 && (
+                        <div className="text-sm text-gray-600">
+                          +{formatCurrency(paymentFees)} χρέωση
+                        </div>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Order Summary */}
-            {orderSummary && (
+{orderSummary && (
               <CartSummary
                 orderSummary={{
                   subtotal: orderSummary.subtotal,
                   shipping_cost: orderSummary.shipping_cost,
                   tax_amount: orderSummary.tax_amount,
-                  payment_fees: orderSummary.payment_fees || 0,
-                  total_amount: orderSummary.total_amount
+                  payment_fees: selectedPaymentMethod ? calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal) : 0,
+                  total_amount: orderSummary.subtotal + orderSummary.shipping_cost + orderSummary.tax_amount + (selectedPaymentMethod ? calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal) : 0)
                 }}
                 onCheckout={handleCheckout}
                 isLoading={isLoading}
-                disabled={!orderSummary}
+                disabled={!orderSummary || !selectedPaymentMethod}
               />
             )}
 

@@ -8,23 +8,20 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     continue-on-error: true  # Don't block the build
-    
+
     steps:
       - uses: actions/checkout@v4
-      
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-          
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
       - name: Install contracts dependencies
         run: cd packages/contracts && npm ci
-        
       - name: Build frontend
         run: |
           cd frontend
@@ -54,15 +51,13 @@ jobs:
           npm run start:ci &
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
-        
       - name: Wait for services
         run: |
           npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
           npx wait-on --timeout 90000 http://localhost:3100
-        
+
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
-        
       - name: Lighthouse CI (use existing server)
         continue-on-error: ${{ github.event_name == 'pull_request' }}
         working-directory: frontend
@@ -86,3 +81,49 @@ jobs:
         with:
           name: lighthouseci
           path: frontend/.lighthouseci
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: |
+            frontend/.lighthouseci/
+          retention-days: 7
+
+      - name: Create reports directory
+        run: |
+          mkdir -p docs/reports/$(date +%Y-%m-%d)
+
+      - name: Generate Lighthouse summary
+        if: always()
+        run: |
+          cd frontend
+          if [ -d ".lighthouseci" ]; then
+            echo "# 🏍️ Lighthouse CI Summary - $(date +%Y-%m-%d)" > ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "## 📊 Performance Metrics" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "*Analysis using mock API (ports 3100/3200) - no database dependencies*" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Next.js: http://localhost:3100" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Mock API: http://localhost:3200" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "Generated on: $(date)" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+          fi
+
+      - name: Upload Lighthouse summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-summary
+          path: docs/reports/*/LHCI-SUMMARY.md
+          retention-days: 7
+
+      - name: Cleanup background processes
+        if: always()
+        run: |
+          echo "Stopping background processes..."
+          # Kill any processes on the ports
+          lsof -ti:3200 | xargs -r kill 2>/dev/null || true
+          lsof -ti:3100 | xargs -r kill 2>/dev/null || true

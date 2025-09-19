@@ -25,7 +25,7 @@ return new class extends Migration
             $table->json('billing_address')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             // Indexes
             $table->index('user_id');
             $table->index(['status', 'payment_status']);

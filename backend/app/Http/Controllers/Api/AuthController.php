@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -22,13 +20,13 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:consumer,producer,admin'
+            'role' => 'required|string|in:consumer,producer,admin',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -55,7 +53,7 @@ class AuthController extends Controller
                 'updated_at' => $user->updated_at,
             ],
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ], 201);
     }
 
@@ -66,15 +64,15 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid credentials',
-                'error' => 'The provided credentials are incorrect.'
+                'error' => 'The provided credentials are incorrect.',
             ], 401);
         }
 
@@ -96,7 +94,7 @@ class AuthController extends Controller
                 'updated_at' => $user->updated_at,
             ],
             'token' => $token,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -109,7 +107,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Logged out successfully'
+            'message' => 'Logged out successfully',
         ]);
     }
 
@@ -122,7 +120,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
-            'message' => 'Logged out from all devices successfully'
+            'message' => 'Logged out from all devices successfully',
         ]);
     }
 
@@ -140,7 +138,7 @@ class AuthController extends Controller
                 'email_verified_at' => $request->user()->email_verified_at,
                 'created_at' => $request->user()->created_at,
                 'updated_at' => $request->user()->updated_at,
-            ]
+            ],
         ]);
     }
 }

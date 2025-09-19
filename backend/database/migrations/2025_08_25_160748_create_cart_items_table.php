@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('cart_items')) {
+        if (! Schema::hasTable('cart_items')) {
             Schema::create('cart_items', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('user_id'); // NO FK inline - will add later
                 $table->unsignedBigInteger('product_id'); // NO FK inline - will add later
                 $table->integer('quantity');
                 $table->timestamps();
-                
+
                 // Indexes
                 $table->index('user_id');
                 $table->index('product_id');

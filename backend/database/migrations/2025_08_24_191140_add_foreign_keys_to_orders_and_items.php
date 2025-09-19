@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,7 +14,7 @@ return new class extends Migration
     {
         // Database-agnostic FK constraint handling
         $driver = DB::connection()->getDriverName();
-        
+
         // Add FK to orders table
         Schema::table('orders', function (Blueprint $table) use ($driver) {
             // Drop constraint if exists (database-agnostic)
@@ -28,12 +28,12 @@ return new class extends Migration
                     // Constraint doesn't exist, continue
                 }
             }
-            
+
             // Add FK constraint
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
 
-        // Add FKs to order_items table  
+        // Add FKs to order_items table
         Schema::table('order_items', function (Blueprint $table) use ($driver) {
             // Drop constraints if exist (database-agnostic)
             if ($driver === 'pgsql') {
@@ -52,7 +52,7 @@ return new class extends Migration
                     // Constraint doesn't exist, continue
                 }
             }
-            
+
             // Add FK constraints
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
@@ -66,7 +66,7 @@ return new class extends Migration
     {
         // Database-agnostic FK constraint handling
         $driver = DB::connection()->getDriverName();
-        
+
         // Drop FK constraints from order_items table
         if ($driver === 'pgsql') {
             DB::statement('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS order_items_order_id_foreign');
@@ -84,7 +84,7 @@ return new class extends Migration
                 // Constraint doesn't exist, continue
             }
         }
-        
+
         // Drop FK constraint from orders table
         if ($driver === 'pgsql') {
             DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_user_id_foreign');

@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Category;
 use App\Models\Producer;
 use App\Models\Product;
-use App\Models\Category;
 use App\Models\ProductImage;
+use Illuminate\Database\Seeder;
 
 class GreekProductSeeder extends Seeder
 {
@@ -19,18 +17,19 @@ class GreekProductSeeder extends Seeder
     {
         // Get the first producer (created in ProducerSeeder)
         $producer = Producer::first();
-        
-        if (!$producer) {
+
+        if (! $producer) {
             $this->command->warn('No producers found. Skipping Greek product seeding.');
+
             return;
         }
-        
+
         // Get categories for assignment
         $vegetables = Category::where('slug', 'vegetables')->first();
         $fruits = Category::where('slug', 'fruits')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
         $herbs = Category::where('slug', 'herbs-spices')->first();
-        
+
         // Create Greek products for testing Greek normalization
         $greekProductsData = [
             [
@@ -52,7 +51,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$fruits],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1547036967-23d11aacaee0', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -73,7 +72,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$oliveOil],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -94,7 +93,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$fruits],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -115,7 +114,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$vegetables],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -136,7 +135,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$herbs],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
             [
                 'product_data' => [
@@ -157,7 +156,7 @@ class GreekProductSeeder extends Seeder
                 'categories' => [$vegetables], // Using vegetables category as dairy might not exist
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7', 'is_primary' => true, 'sort_order' => 0],
-                ]
+                ],
             ],
         ];
 
@@ -173,7 +172,7 @@ class GreekProductSeeder extends Seeder
             );
 
             // Attach categories
-            if (!empty($categories)) {
+            if (! empty($categories)) {
                 $product->categories()->sync(collect($categories)->pluck('id')->toArray());
             }
 
@@ -181,12 +180,12 @@ class GreekProductSeeder extends Seeder
             foreach ($images as $imageData) {
                 ProductImage::firstOrCreate([
                     'product_id' => $product->id,
-                    'url' => $imageData['url']
+                    'url' => $imageData['url'],
                 ], [
                     'product_id' => $product->id,
                     'url' => $imageData['url'],
                     'is_primary' => $imageData['is_primary'],
-                    'sort_order' => $imageData['sort_order']
+                    'sort_order' => $imageData['sort_order'],
                 ]);
             }
         }

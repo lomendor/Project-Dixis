@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             // Add new required fields if they don't exist
-            if (!Schema::hasColumn('orders', 'payment_method')) {
+            if (! Schema::hasColumn('orders', 'payment_method')) {
                 $table->string('payment_method')->nullable();
             }
-            
-            if (!Schema::hasColumn('orders', 'shipping_cost')) {
+
+            if (! Schema::hasColumn('orders', 'shipping_cost')) {
                 $table->decimal('shipping_cost', 10, 2)->default(0);
             }
-            
-            if (!Schema::hasColumn('orders', 'total')) {
+
+            if (! Schema::hasColumn('orders', 'total')) {
                 $table->decimal('total', 10, 2)->default(0);
             }
         });
@@ -37,11 +37,11 @@ return new class extends Migration
             if (Schema::hasColumn('orders', 'payment_method')) {
                 $table->dropColumn('payment_method');
             }
-            
+
             if (Schema::hasColumn('orders', 'shipping_cost')) {
                 $table->dropColumn('shipping_cost');
             }
-            
+
             if (Schema::hasColumn('orders', 'total')) {
                 $table->dropColumn('total');
             }

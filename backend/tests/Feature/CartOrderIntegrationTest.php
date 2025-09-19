@@ -2,26 +2,29 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\CartItem;
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Category;
 use App\Models\Message;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
 
 class CartOrderIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $customer;
+
     protected $producer;
+
     protected $producerUser;
+
     protected $products;
 
     protected function setUp(): void
@@ -34,18 +37,18 @@ class CartOrderIntegrationTest extends TestCase
         // Create customer
         $this->customer = User::factory()->create([
             'email' => 'customer@integration-test.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         // Create producer user and profile
         $this->producerUser = User::factory()->create([
             'email' => 'producer@integration-test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
 
         $this->producer = Producer::factory()->create([
             'user_id' => $this->producerUser->id,
-            'name' => 'Test Producer'
+            'name' => 'Test Producer',
         ]);
 
         // Create categories
@@ -54,21 +57,21 @@ class CartOrderIntegrationTest extends TestCase
 
         // Create products
         $this->products = collect();
-        
+
         for ($i = 1; $i <= 5; $i++) {
             $product = Product::factory()->create([
                 'producer_id' => $this->producer->id,
                 'name' => "Product {$i}",
                 'price' => 10.00 * $i, // 10, 20, 30, 40, 50
                 'stock' => 50,
-                'is_active' => true
+                'is_active' => true,
             ]);
-            
+
             // Attach random categories
             $product->categories()->attach(
                 [$category1->id, $category2->id][array_rand([$category1->id, $category2->id])]
             );
-            
+
             $this->products->push($product);
         }
     }
@@ -85,21 +88,21 @@ class CartOrderIntegrationTest extends TestCase
         // Add first product
         $response1 = $this->postJson('/api/v1/cart/items', [
             'product_id' => $product1->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
         $response1->assertStatus(201);
 
         // Add second product
         $response2 = $this->postJson('/api/v1/cart/items', [
             'product_id' => $product2->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
         $response2->assertStatus(201);
 
         // Add third product
         $response3 = $this->postJson('/api/v1/cart/items', [
             'product_id' => $product3->id,
-            'quantity' => 3
+            'quantity' => 3,
         ]);
         $response3->assertStatus(201);
 
@@ -108,15 +111,15 @@ class CartOrderIntegrationTest extends TestCase
         $cartResponse->assertStatus(200)
             ->assertJson([
                 'total_items' => 6, // 2 + 1 + 3
-                'total_amount' => '130.00' // (2*10) + (1*20) + (3*30) = 130.00
+                'total_amount' => '130.00', // (2*10) + (1*20) + (3*30) = 130.00
             ]);
 
         // Step 3: Update cart item
         $cartItems = CartItem::where('user_id', $this->customer->id)->get();
         $firstCartItem = $cartItems->first();
-        
+
         $updateResponse = $this->patchJson("/api/v1/cart/items/{$firstCartItem->id}", [
-            'quantity' => 4 // Change from 2 to 4
+            'quantity' => 4, // Change from 2 to 4
         ]);
         $updateResponse->assertStatus(200);
 
@@ -129,15 +132,15 @@ class CartOrderIntegrationTest extends TestCase
         $updatedCartResponse = $this->getJson('/api/v1/cart/items');
         $updatedCartResponse->assertStatus(200)
             ->assertJson([
-                'total_items' => 5 // 4 + 1 (removed the 3rd product)
+                'total_items' => 5, // 4 + 1 (removed the 3rd product)
             ]);
 
         // Step 6: Checkout
         $checkoutResponse = $this->postJson('/api/v1/orders/checkout', [
             'shipping_method' => 'HOME',
-            'notes' => 'Integration test order'
+            'notes' => 'Integration test order',
         ]);
-        
+
         $checkoutResponse->assertStatus(201)
             ->assertJsonStructure([
                 'message',
@@ -147,14 +150,14 @@ class CartOrderIntegrationTest extends TestCase
                     'tax_amount',
                     'shipping_amount',
                     'total_amount',
-                    'items'
-                ]
+                    'items',
+                ],
             ]);
 
         // Step 7: Verify order was created correctly
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('order_items', 2); // Only 2 products remaining after removal
-        
+
         $order = Order::first();
         $expectedSubtotal = (4 * 10.00) + (1 * 20.00); // 60.00
         $expectedTax = $expectedSubtotal * 0.10; // 6.00
@@ -180,7 +183,7 @@ class CartOrderIntegrationTest extends TestCase
             ->assertJson([
                 'id' => $order->id,
                 'payment_status' => 'pending',
-                'status' => 'pending'
+                'status' => 'pending',
             ]);
     }
 
@@ -193,27 +196,27 @@ class CartOrderIntegrationTest extends TestCase
 
         // Test KPI endpoint
         $kpiResponse = $this->getJson('/api/v1/producer/dashboard/kpi');
-        
+
         $kpiResponse->assertStatus(200)
             ->assertJsonStructure([
                 'total_products',
                 'active_products',
                 'total_orders',
                 'revenue',
-                'unread_messages'
+                'unread_messages',
             ]);
 
         $kpiData = $kpiResponse->json();
-        
+
         // Verify KPI data
         $this->assertEquals(5, $kpiData['total_products']); // 5 products created in setUp
         $this->assertEquals(5, $kpiData['active_products']); // All active
         $this->assertGreaterThan(0, $kpiData['total_orders']); // Should have orders
         $this->assertGreaterThan(0, $kpiData['revenue']); // Should have revenue
-        
+
         // Test top products endpoint
         $topProductsResponse = $this->getJson('/api/v1/producer/dashboard/top-products?limit=3');
-        
+
         $topProductsResponse->assertStatus(200)
             ->assertJsonStructure([
                 'top_products' => [
@@ -224,16 +227,16 @@ class CartOrderIntegrationTest extends TestCase
                         'total_quantity_sold',
                         'total_revenue',
                         'total_orders',
-                        'average_unit_price'
-                    ]
+                        'average_unit_price',
+                    ],
                 ],
                 'limit',
-                'total_products_shown'
+                'total_products_shown',
             ]);
 
         $topProductsData = $topProductsResponse->json();
         $this->assertLessThanOrEqual(3, count($topProductsData['top_products']));
-        
+
         // Verify products are sorted by quantity sold (descending)
         $quantities = array_column($topProductsData['top_products'], 'total_quantity_sold');
         $sortedQuantities = $quantities;
@@ -246,7 +249,7 @@ class CartOrderIntegrationTest extends TestCase
         // Create second customer
         $customer2 = User::factory()->create([
             'email' => 'customer2@integration-test.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         $product = $this->products->first();
@@ -255,14 +258,14 @@ class CartOrderIntegrationTest extends TestCase
         Sanctum::actingAs($this->customer);
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ])->assertStatus(201);
 
         // Customer 2 adds to cart
         Sanctum::actingAs($customer2);
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $product->id,
-            'quantity' => 5
+            'quantity' => 5,
         ])->assertStatus(201);
 
         // Verify customer 1's cart
@@ -296,16 +299,16 @@ class CartOrderIntegrationTest extends TestCase
         // Create another producer
         $anotherProducerUser = User::factory()->create([
             'email' => 'producer2@integration-test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
 
         $anotherProducer = Producer::factory()->create([
-            'user_id' => $anotherProducerUser->id
+            'user_id' => $anotherProducerUser->id,
         ]);
 
         // Create products for the other producer
         Product::factory()->count(3)->create([
-            'producer_id' => $anotherProducer->id
+            'producer_id' => $anotherProducer->id,
         ]);
 
         // Create orders for both producers
@@ -314,14 +317,14 @@ class CartOrderIntegrationTest extends TestCase
         // Test original producer KPI
         Sanctum::actingAs($this->producerUser);
         $kpiResponse = $this->getJson('/api/v1/producer/dashboard/kpi');
-        
+
         $kpiData = $kpiResponse->json();
         $this->assertEquals(5, $kpiData['total_products']); // Only own products
 
         // Test other producer KPI
         Sanctum::actingAs($anotherProducerUser);
         $kpiResponse2 = $this->getJson('/api/v1/producer/dashboard/kpi');
-        
+
         $kpiData2 = $kpiResponse2->json();
         $this->assertEquals(3, $kpiData2['total_products']); // Only own products
         $this->assertEquals(0, $kpiData2['total_orders']); // No orders for this producer
@@ -337,18 +340,18 @@ class CartOrderIntegrationTest extends TestCase
         Sanctum::actingAs($this->customer);
         $this->postJson('/api/v1/cart/items', [
             'product_id' => $product->id,
-            'quantity' => 5
+            'quantity' => 5,
         ])->assertStatus(201);
 
         // Create second customer who tries to add to cart
         $customer2 = User::factory()->create();
-        
+
         Sanctum::actingAs($customer2);
         $response = $this->postJson('/api/v1/cart/items', [
             'product_id' => $product->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
-        
+
         // Should succeed as cart doesn't reserve stock
         $response->assertStatus(201);
 
@@ -367,11 +370,11 @@ class CartOrderIntegrationTest extends TestCase
     {
         // Create test customers
         $customers = User::factory()->count(3)->create(['role' => 'consumer']);
-        
+
         // Use valid constraint values from original schema
         $validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
         $validPaymentStatuses = ['pending', 'paid', 'failed'];
-        
+
         foreach ($customers as $index => $customer) {
             // Create order with constraint-compatible values
             $order = Order::create([
@@ -382,12 +385,12 @@ class CartOrderIntegrationTest extends TestCase
                 'total_amount' => 60.00 + ($index * 22),
                 'payment_status' => $validPaymentStatuses[array_rand($validPaymentStatuses)],
                 'status' => $validStatuses[array_rand($validStatuses)],
-                'shipping_method' => 'HOME'
+                'shipping_method' => 'HOME',
             ]);
 
             // Create order items with different quantities to test top products
             $productsToOrder = $this->products->take(3);
-            
+
             foreach ($productsToOrder as $productIndex => $product) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -396,7 +399,7 @@ class CartOrderIntegrationTest extends TestCase
                     'unit_price' => $product->price,
                     'total_price' => $product->price * (($index + 1) * ($productIndex + 1)),
                     'product_name' => $product->name,
-                    'product_unit' => $product->unit ?? 'unit'
+                    'product_unit' => $product->unit ?? 'unit',
                 ]);
             }
         }
@@ -404,7 +407,7 @@ class CartOrderIntegrationTest extends TestCase
         // Create some unread messages for the producer
         Message::factory()->count(2)->create([
             'producer_id' => $this->producer->id,
-            'is_read' => false
+            'is_read' => false,
         ]);
     }
 
@@ -415,8 +418,8 @@ class CartOrderIntegrationTest extends TestCase
     {
         try {
             // Drop any ghost constraints that interfere with tests
-            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_new_check");
-            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_new_check');
+            DB::statement('ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check');
         } catch (\Exception $e) {
             // Ignore if constraint doesn't exist or other errors
         }

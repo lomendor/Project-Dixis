@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -19,7 +18,7 @@ return new class extends Migration
                 $table->dropColumn('role');
             }
         });
-        
+
         // Add enum role column
         Schema::table('users', function (Blueprint $table) {
             $table->enum('role', ['admin', 'producer', 'consumer'])->default('consumer')->after('email_verified_at');
@@ -36,7 +35,7 @@ return new class extends Migration
                 $table->dropColumn('role');
             }
         });
-        
+
         Schema::table('users', function (Blueprint $table) {
             $table->string('role')->default('consumer')->after('email_verified_at');
         });

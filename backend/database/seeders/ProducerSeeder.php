@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use App\Models\User;
 
 class ProducerSeeder extends Seeder
 {
@@ -17,16 +15,17 @@ class ProducerSeeder extends Seeder
     {
         // Get the producer user created in DatabaseSeeder
         $producerUser = User::where('email', 'producer@example.com')->first();
-        
-        if (!$producerUser) {
+
+        if (! $producerUser) {
             $this->command->warn('Producer user not found. Skipping producer seeding.');
+
             return;
         }
-        
+
         // Create producer idempotently
         $existingProducer = DB::table('producers')->where('user_id', $producerUser->id)->first();
-        
-        if (!$existingProducer) {
+
+        if (! $existingProducer) {
             $producerData = [
                 'user_id' => $producerUser->id,
                 'name' => 'Green Farm Co.',
@@ -45,7 +44,7 @@ class ProducerSeeder extends Seeder
             DB::table('producers')->insert($producerData);
         }
     }
-    
+
     /**
      * Generate collision-safe unique slug
      */
@@ -53,12 +52,12 @@ class ProducerSeeder extends Seeder
     {
         $slug = $baseSlug;
         $counter = 1;
-        
+
         while (DB::table('producers')->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $counter++;
         }
-        
+
         return $slug;
     }
 }

@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Models\Producer;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProducerValidationTest extends TestCase
 {
@@ -15,7 +14,7 @@ class ProducerValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create a user for producer relationship
         $this->user = User::factory()->create();
     }
@@ -88,11 +87,11 @@ class ProducerValidationTest extends TestCase
         $this->assertEquals('Attica', $producer->region);
         $this->assertEquals(37.9755, $producer->latitude);
         $this->assertEquals(23.7348, $producer->longitude);
-        
+
         // Test social_media array cast
         $this->assertIsArray($producer->social_media);
         $this->assertEquals('https://facebook.com/test', $producer->social_media['facebook']);
-        
+
         // Test boolean casts and is_verified accessor
         $this->assertTrue($producer->verified);
         $this->assertTrue($producer->is_verified); // Tests accessor

@@ -13,8 +13,8 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => $this->faker->randomElement([
-                'Fruits', 'Vegetables', 'Herbs', 'Dairy', 'Meat', 
-                'Bakery', 'Beverages', 'Spices', 'Grains', 'Nuts'
+                'Fruits', 'Vegetables', 'Herbs', 'Dairy', 'Meat',
+                'Bakery', 'Beverages', 'Spices', 'Grains', 'Nuts',
             ]),
             'slug' => $this->faker->unique()->slug(2),
         ];
