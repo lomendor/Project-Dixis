@@ -209,6 +209,7 @@ Use Laravel Sanctum for API authentication. After seeding, check logs for demo u
 - **API v1 Endpoints**: [`backend/docs/API.md`](backend/docs/API.md)
 - **OpenAPI Spec**: [`backend/docs/openapi.yml`](backend/docs/openapi.yml) 
 - **Postman Collection**: [`backend/docs/collections/`](backend/docs/collections/)
+- **Runtime Validation & Contracts**: [`docs/RUNTIME-VALIDATION.md`](docs/RUNTIME-VALIDATION.md)
 - **Release v0.2.0**: [Producer System Integration](https://github.com/lomendor/Project-Dixis/releases/tag/v0.2.0)
 
 ## 🔧 Development
