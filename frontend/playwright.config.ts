@@ -47,7 +47,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: '.auth/consumer.json'
       },
-      testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
+      testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/auth-ux.spec.ts']
     },
     { 
       name: 'producer',
@@ -61,7 +61,7 @@ export default defineConfig({
     { 
       name: 'guest',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: ['**/smoke.spec.ts', '**/register.spec.ts', '**/e3-docs-smoke.spec.ts']
+      testMatch: ['**/smoke.spec.ts', '**/register.spec.ts', '**/e3-docs-smoke.spec.ts', '**/auth-ux.spec.ts', '**/role-access.spec.ts']
     }
   ],
 

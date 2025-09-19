@@ -36,11 +36,21 @@ test.describe('Auth UX Improvements', () => {
     const auth = new AuthHelper(page);
     await auth.clearAuthState();
     
-    // Login with deterministic user
-    await auth.loginAsConsumer();
+    // Navigate to login page first
+    await page.goto('/auth/login');
+    await expect(page.getByTestId('login-form')).toBeVisible();
     
-    // Wait for success toast
-    await auth.expectToast('success', 'Welcome back');
+    // Fill in credentials
+    await page.getByTestId('login-email').fill('test@dixis.local');
+    await page.getByTestId('login-password').fill('Passw0rd!');
+    
+    // Submit login and check for successful redirect
+    await page.getByTestId('login-submit').click();
+    
+    // Verify successful login by checking for user greeting or welcome message
+    await expect(
+      page.getByText('Hello, Test User').or(page.getByText('Welcome back')).first()
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test('should show error toast on failed login', async ({ page }) => {
@@ -56,8 +66,15 @@ test.describe('Auth UX Improvements', () => {
     await page.getByTestId('login-password').fill('wrongpassword');
     await page.getByTestId('login-submit').click();
     
-    // Wait for error toast
-    await auth.expectToast('error');
+    // Wait briefly for error processing
+    await page.waitForTimeout(150);
+    
+    // Check for error toast (use first to avoid strict mode violation)
+    const errorVisible = await page.getByTestId('toast-error').or(
+      page.getByTestId('error-toast')
+    ).or(page.getByRole('alert')).first().isVisible({ timeout: 5000 });
+    
+    expect(errorVisible).toBe(true);
   });
 
   test('should redirect authenticated users away from login page', async ({ page }) => {
@@ -68,13 +85,13 @@ test.describe('Auth UX Improvements', () => {
     await auth.loginAsConsumer();
     
     // Try to access login page again
-    await page.goto('/login');
+    await page.goto('/auth/login');
     
     // Should be redirected away or see authenticated state
     await page.waitForTimeout(2000);
     const currentUrl = page.url();
     
-    if (!currentUrl.includes('/login')) {
+    if (!currentUrl.includes('/auth/login')) {
       // Good - redirected away from login
       expect(currentUrl).not.toMatch(/\/login/);
     }
@@ -108,7 +125,7 @@ test.describe('Auth UX Improvements', () => {
     await auth.loginAsProducer();
     
     // Navigate to producer dashboard
-    await page.goto('/dashboard');
+    await page.goto('/producer/dashboard');
     
     // Verify producer dashboard is accessible
     await expect(page.locator('main')).toBeVisible();

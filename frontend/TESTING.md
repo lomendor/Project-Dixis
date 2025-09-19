@@ -63,6 +63,12 @@ npm run e2e:debug
 - `PLAYWRIGHT_BASE_URL`: Frontend URL (default: http://localhost:3001)
 - `NEXT_PUBLIC_API_BASE_URL`: Backend API URL (default: http://127.0.0.1:8001/api/v1)
 
+#### Metadata Configuration (App Router)
+- **Single Source of Truth**: All page metadata is centralized in `src/app/layout.tsx`
+- **Site Title**: "Project Dixis - Local Producer Marketplace" (matches smoke E2E tests)
+- **No Duplicate Metadata**: Individual pages should not export duplicate `metadata` objects
+- **Test Helper**: `getExpectedSiteTitle()` returns the expected title for E2E tests
+
 #### Browsers Tested
 - Chromium (primary)
 - Firefox
