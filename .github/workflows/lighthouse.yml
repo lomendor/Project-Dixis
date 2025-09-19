@@ -36,7 +36,7 @@ jobs:
         run: npm install -g wait-on
 
       - name: Install express for mock API
-        run: cd frontend && npm install express
+        run: npm install express
 
       - name: Start mock API and Next
         run: |
