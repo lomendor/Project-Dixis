@@ -35,6 +35,7 @@ class ShippingController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'postal_code' => 'required|string|regex:/^\d{5}$/',
             'producer_profile' => 'nullable|string|in:flat_rate,free_shipping,premium_producer,local_producer',
+            'payment_method' => 'nullable|string|in:CARD,COD',
         ]);
 
         try {
@@ -44,7 +45,8 @@ class ShippingController extends Controller
             $quote = $this->shippingService->getQuote(
                 $tempOrder->id,
                 $validated['postal_code'],
-                $validated['producer_profile'] ?? null
+                $validated['producer_profile'] ?? null,
+                $validated['payment_method'] ?? 'CARD'
             );
 
             // Clean up temporary order

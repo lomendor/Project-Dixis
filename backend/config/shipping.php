@@ -34,6 +34,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cash on Delivery (COD)
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Cash on Delivery payment method.
+    | When enabled, adds COD fee to shipping quotes.
+    |
+    */
+    'enable_cod' => env('SHIPPING_ENABLE_COD', false),
+    'cod_fee_eur' => env('SHIPPING_COD_FEE_EUR', 4.00),
+
+    /*
+    |--------------------------------------------------------------------------
     | Rate Tables
     |--------------------------------------------------------------------------
     |

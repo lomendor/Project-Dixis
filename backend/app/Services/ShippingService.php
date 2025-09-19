@@ -101,7 +101,7 @@ class ShippingService
     /**
      * Calculate shipping cost for given parameters
      */
-    public function calculateShippingCost(float $billableWeightKg, string $zoneCode, string $deliveryMethod = 'HOME'): array
+    public function calculateShippingCost(float $billableWeightKg, string $zoneCode, string $deliveryMethod = 'HOME', string $paymentMethod = 'CARD'): array
     {
         $carrierCode = 'INTERNAL_STANDARD';
         $rateTable = $this->rateTables['tables'][$carrierCode][$zoneCode] ?? null;
@@ -144,12 +144,20 @@ class ShippingService
             $cost = max(0, $cost - $lockerDiscountEur); // Don't go below 0
         }
 
+        // Apply COD fee if applicable
+        $codFeeEur = 0;
+        if ($paymentMethod === 'COD' && config('shipping.enable_cod', false)) {
+            $codFeeEur = (float) config('shipping.cod_fee_eur', 4.00);
+            $cost += $codFeeEur;
+        }
+
         // Get zone name from legacy zones for compatibility
         $zoneName = $this->zones[$zoneCode]['name'] ?? $zoneCode;
 
         $costCents = round($cost * 100);
         $costEur = $costCents / 100; // Ensure precision consistency
         $lockerDiscountCents = (int) round($lockerDiscountEur * 100);
+        $codFeeCents = (int) round($codFeeEur * 100);
 
         return [
             'cost_cents' => $costCents,
@@ -158,6 +166,7 @@ class ShippingService
             'zone_name' => $zoneName,
             'estimated_delivery_days' => $rateTable['estimated_delivery_days'],
             'delivery_method' => $deliveryMethod,
+            'payment_method' => $paymentMethod,
             'breakdown' => [
                 'base_rate' => (float) $baseRate,
                 'extra_weight_kg' => (float) ($billableWeightKg > 2 ? $billableWeightKg - 2 : 0),
@@ -166,6 +175,8 @@ class ShippingService
                 'remote_surcharge' => (float) $remoteSurcharge,
                 'billable_weight_kg' => (float) $billableWeightKg,
                 'locker_discount_cents' => $lockerDiscountCents,
+                'cod_fee_cents' => $codFeeCents,
+                'payment_method' => $paymentMethod,
                 // Breakdown symmetry - consistent cents fields
                 'base_cost_cents' => (int) round($baseRate * 100),
                 'weight_adjustment_cents' => (int) round($extraCost * 100),
@@ -178,7 +189,7 @@ class ShippingService
     /**
      * Get shipping quote for an order
      */
-    public function getQuote(int $orderId, string $postalCode, ?string $producerProfile = null): array
+    public function getQuote(int $orderId, string $postalCode, ?string $producerProfile = null, string $paymentMethod = 'CARD'): array
     {
         $order = Order::with('orderItems.product')->findOrFail($orderId);
 
@@ -210,7 +221,7 @@ class ShippingService
         $zoneCode = $this->getZoneByPostalCode($postalCode);
 
         // Calculate base cost
-        $shippingCost = $this->calculateShippingCost($billableWeight, $zoneCode);
+        $shippingCost = $this->calculateShippingCost($billableWeight, $zoneCode, 'HOME', $paymentMethod);
 
         // Apply producer profile adjustments
         if ($producerProfile && isset($this->profiles['producer_profiles'][$producerProfile])) {
@@ -225,6 +236,8 @@ class ShippingService
             'zone_name' => $shippingCost['zone_name'],
             'carrier_code' => $shippingCost['carrier_code'] ?? 'ELTA',
             'estimated_delivery_days' => $shippingCost['estimated_delivery_days'],
+            'delivery_method' => $shippingCost['delivery_method'],
+            'payment_method' => $shippingCost['payment_method'],
             'breakdown' => [
                 'base_rate' => $shippingCost['breakdown']['base_rate'],
                 'extra_weight_kg' => $shippingCost['breakdown']['extra_weight_kg'],
@@ -232,6 +245,9 @@ class ShippingService
                 'island_multiplier' => $shippingCost['breakdown']['island_multiplier'],
                 'remote_surcharge' => $shippingCost['breakdown']['remote_surcharge'],
                 'billable_weight_kg' => $shippingCost['breakdown']['billable_weight_kg'],
+                'locker_discount_cents' => $shippingCost['breakdown']['locker_discount_cents'] ?? 0,
+                'cod_fee_cents' => $shippingCost['breakdown']['cod_fee_cents'] ?? 0,
+                'payment_method' => $shippingCost['breakdown']['payment_method'],
                 'actual_weight_kg' => $totalWeight,
                 'volumetric_weight_kg' => $volumetricWeight,
                 'postal_code' => $postalCode,
