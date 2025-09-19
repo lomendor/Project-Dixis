@@ -14,7 +14,7 @@ import { useCheckout } from '@/hooks/useCheckout';
 import { formatCurrency } from '@/env';
 import CartSummary from '@/components/cart/CartSummary';
 import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
-import { ShippingQuote } from '@/components/shipping';
+import { DeliveryMethodSelector } from '@/components/shipping';
 
 export default function Cart() {
 const {
@@ -197,9 +197,9 @@ const handleCheckout = async () => {
                   )}
                 </div>
 
-                {/* New Shipping Quote Component */}
+                {/* Delivery Method Selector with Locker Support */}
                 {cart && form.shipping?.postalCode && (
-                  <ShippingQuote
+                  <DeliveryMethodSelector
                     items={cart.map(item => ({
                       product_id: item.product_id,
                       quantity: item.quantity

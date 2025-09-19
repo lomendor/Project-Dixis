@@ -103,6 +103,10 @@ Route::prefix('v1')->group(function () {
         // Admin-only label creation
         Route::post('labels/{order}', [App\Http\Controllers\Api\ShippingController::class, 'createLabel'])
             ->middleware(['auth:sanctum', 'throttle:10,1']); // Admin only, 10 label requests per minute
+
+        // Public locker search endpoint (feature-flagged)
+        Route::get('lockers/search', [App\Http\Controllers\Api\LockerController::class, 'search'])
+            ->middleware('throttle:60,1'); // 60 locker search requests per minute
     });
 
     // Order shipment details (authenticated users)

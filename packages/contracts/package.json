@@ -20,8 +20,8 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {
-    "zod": "^3.23.8"
+  "dependencies": {
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
@@ -29,5 +29,8 @@
   "files": [
     "dist/**/*",
     "src/**/*"
-  ]
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

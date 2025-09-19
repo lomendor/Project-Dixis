@@ -101,7 +101,7 @@ class ShippingService
     /**
      * Calculate shipping cost for given parameters
      */
-    public function calculateShippingCost(float $billableWeightKg, string $zoneCode): array
+    public function calculateShippingCost(float $billableWeightKg, string $zoneCode, string $deliveryMethod = 'HOME'): array
     {
         $carrierCode = 'INTERNAL_STANDARD';
         $rateTable = $this->rateTables['tables'][$carrierCode][$zoneCode] ?? null;
@@ -137,11 +137,19 @@ class ShippingService
         $remoteSurcharge = $rateTable['remote_surcharge'] ?? 0;
         $cost += $remoteSurcharge;
 
+        // Apply locker discount if applicable
+        $lockerDiscountEur = 0;
+        if ($deliveryMethod === 'LOCKER' && config('shipping.enable_lockers', false)) {
+            $lockerDiscountEur = (float) config('shipping.locker_discount_eur', 0);
+            $cost = max(0, $cost - $lockerDiscountEur); // Don't go below 0
+        }
+
         // Get zone name from legacy zones for compatibility
         $zoneName = $this->zones[$zoneCode]['name'] ?? $zoneCode;
 
         $costCents = round($cost * 100);
         $costEur = $costCents / 100; // Ensure precision consistency
+        $lockerDiscountCents = (int) round($lockerDiscountEur * 100);
 
         return [
             'cost_cents' => $costCents,
@@ -149,6 +157,7 @@ class ShippingService
             'zone_code' => $zoneCode,
             'zone_name' => $zoneName,
             'estimated_delivery_days' => $rateTable['estimated_delivery_days'],
+            'delivery_method' => $deliveryMethod,
             'breakdown' => [
                 'base_rate' => (float) $baseRate,
                 'extra_weight_kg' => (float) ($billableWeightKg > 2 ? $billableWeightKg - 2 : 0),
@@ -156,9 +165,10 @@ class ShippingService
                 'island_multiplier' => (float) $islandMultiplier,
                 'remote_surcharge' => (float) $remoteSurcharge,
                 'billable_weight_kg' => (float) $billableWeightKg,
+                'locker_discount_cents' => $lockerDiscountCents,
                 // Breakdown symmetry - consistent cents fields
-                'base_cost_cents' => round($baseRate * 100),
-                'weight_adjustment_cents' => round($extraCost * 100),
+                'base_cost_cents' => (int) round($baseRate * 100),
+                'weight_adjustment_cents' => (int) round($extraCost * 100),
                 'volume_adjustment_cents' => 0, // Not used in current implementation
                 'zone_multiplier' => (float) $islandMultiplier,
             ],

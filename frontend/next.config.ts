@@ -1,16 +1,17 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   // Fix "inferred workspace root" warning
   outputFileTracingRoot: __dirname,
-  
+
   // Instrumentation is enabled by default in Next.js 15
-  
+
   // Temporarily disable ESLint during build for hotfix
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   // Image optimization for external sources
   images: {
     remotePatterns: [
@@ -27,6 +28,15 @@ const nextConfig: NextConfig = {
         pathname: '/storage/**',
       },
     ],
+  },
+
+  // Webpack configuration to handle module resolution
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@dixis/contracts': path.resolve(__dirname, '../packages/contracts/src'),
+    }
+    return config
   },
 };
 
