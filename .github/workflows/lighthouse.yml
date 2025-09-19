@@ -32,10 +32,11 @@ jobs:
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
 
-      - name: Install wait-on utility and express
-        run: |
-          npm install -g wait-on
-          npm install -g express
+      - name: Install wait-on utility
+        run: npm install -g wait-on
+
+      - name: Install express for mock API
+        run: cd frontend && npm install express
 
       - name: Start mock API and Next
         run: |
