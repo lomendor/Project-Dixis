@@ -43,7 +43,7 @@ module.exports = [
       'react/jsx-key': 'error',
       
       // General code quality
-      'no-console': 'warn',
+      'no-console': ['warn', { 'allow': ['info', 'warn'] }],
       'prefer-const': 'error',
       'no-var': 'error',
       

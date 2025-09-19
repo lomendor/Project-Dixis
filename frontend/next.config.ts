@@ -31,11 +31,15 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack configuration to handle module resolution
-  webpack: (config) => {
+  webpack: (config, { dev }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@dixis/contracts': path.resolve(__dirname, '../packages/contracts/src'),
     }
+
+    // Note: Console removal in production handled by ESLint rules instead of webpack
+    // to avoid conflicts with Next.js internal modules
+
     return config
   },
 };

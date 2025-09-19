@@ -233,7 +233,7 @@ export default function ProducerProductsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="page-title">
                 Διαχείριση Προϊόντων
               </h1>
               <p className="text-gray-600">

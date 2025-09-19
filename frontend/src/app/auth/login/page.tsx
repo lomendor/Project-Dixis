@@ -60,9 +60,9 @@ export default function Login() {
           <Link href="/" className="text-2xl font-bold text-green-600">
             Project Dixis
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h1 className="mt-6 text-3xl font-bold text-gray-900" data-testid="page-title">
             Σύνδεση στον Λογαριασμό σας
-          </h2>
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
             Ή{' '}
             <Link

@@ -157,7 +157,7 @@ const handleCheckout = async () => {
     <>
       <Navigation />
       <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Καλάθι Αγορών</h1>
+        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>
         
         {/* Cart Items */}
         <div className="grid md:grid-cols-3 gap-8">
@@ -166,7 +166,7 @@ const handleCheckout = async () => {
               {cart.map((item) => (
                 <div key={item.id} className="border rounded-lg p-4 flex items-center justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold">{item.name}</h3>
+                    <h3 className="font-semibold" data-testid="product-title">{item.name}</h3>
                     <p className="text-sm text-gray-600">Παραγωγός: {item.producer_name}</p>
                     <p className="font-medium">{formatCurrency(item.price)} x {item.quantity}</p>
                   </div>
@@ -182,7 +182,7 @@ const handleCheckout = async () => {
           <div className="space-y-6">
             {/* Shipping Quote */}
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-4">Στοιχεία Αποστολής</h3>
+              <h2 className="font-semibold mb-4">Στοιχεία Αποστολής</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
@@ -241,7 +241,7 @@ const handleCheckout = async () => {
             {/* Shipping Methods */}
             {shippingMethods && shippingMethods.length > 0 && (
               <div className="border rounded-lg p-4">
-                <h3 className="font-semibold mb-4">Μέθοδος Αποστολής</h3>
+                <h2 className="font-semibold mb-4">Μέθοδος Αποστολής</h2>
                 <div className="space-y-2">
                   {shippingMethods.map((method) => (
                     <label key={method.id} className="flex items-center">
@@ -266,7 +266,7 @@ const handleCheckout = async () => {
 
             {/* Payment Methods */}
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-4">Μέθοδος Πληρωμής</h3>
+              <h2 className="font-semibold mb-4">Μέθοδος Πληρωμής</h2>
               <div className="space-y-2">
                 {PAYMENT_METHODS.map((method) => {
                   const paymentFees = calculatePaymentFees(method, orderSummary?.subtotal || 0);
