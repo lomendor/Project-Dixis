@@ -32,22 +32,32 @@ jobs:
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
 
-      - name: Install wait-on utility
-        run: npm install -g wait-on
+      - name: Install wait-on utility and express
+        run: |
+          npm install -g wait-on
+          npm install -g express
 
       - name: Start mock API and Next
         run: |
           cd frontend
-          npm run mock:api &
-          sleep 2
+          echo "Starting mock API..."
+          MOCK_PORT=3200 npm run mock:api > mock-api.log 2>&1 &
+          sleep 5
+          echo "Mock API startup logs (first 20 lines):"
+          head -20 mock-api.log || echo "No mock API logs yet"
+          echo "Checking if mock API bound to port 3200..."
+          lsof -i :3200 || echo "No process on port 3200"
+          echo "Testing direct curl to mock API health endpoint..."
+          curl -v http://localhost:3200/api/v1/health || echo "Curl failed"
+          echo "Starting Next.js..."
           npm run start:ci &
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
 
       - name: Wait for services
         run: |
-          npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
-          npx wait-on --timeout 90000 http://localhost:3100
+          npx wait-on --timeout 120000 http://localhost:3200/api/v1/health
+          npx wait-on --timeout 120000 http://localhost:3100
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
