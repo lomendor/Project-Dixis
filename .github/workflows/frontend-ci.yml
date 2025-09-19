@@ -158,7 +158,11 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
-      
+
+      - name: Install contracts dependencies
+        working-directory: packages/contracts
+        run: npm ci
+
       - name: Install Playwright Browsers
         working-directory: frontend
         run: npx playwright install --with-deps chromium
