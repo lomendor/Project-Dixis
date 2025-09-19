@@ -8,83 +8,63 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     continue-on-error: true  # Don't block the build
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
-          
-      - name: Install backend dependencies
-        run: cd backend && composer install --no-progress --prefer-dist --optimize-autoloader
-        
+
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
       - name: Install contracts dependencies
         run: cd packages/contracts && npm ci
 
-      - name: Setup backend environment
+      - name: Start mock API
         run: |
-          cd backend
-          cp .env.example .env
-          php artisan key:generate
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=dixis_test" >> .env
-          echo "DB_USERNAME=postgres" >> .env
-          echo "DB_PASSWORD=postgres" >> .env
-        
-      - name: Setup database
-        run: cd backend && php artisan migrate:fresh --seed
-        
-      - name: Start backend server
-        run: cd backend && php artisan serve --host=127.0.0.1 --port=8001 &
-        
+          cd scripts/mock-api
+          node lhci-mock.js &
+          echo "Mock API PID: $!" > /tmp/mock-api.pid
+        env:
+          MOCK_PORT: 3200
+
       - name: Build frontend
         run: |
           cd frontend
           npm run build
-        
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+
       - name: Install wait-on utility
         run: npm install -g wait-on
-        
-      - name: Wait for backend service
+
+      - name: Start Next.js server
         run: |
-          wait-on http://127.0.0.1:8001/api/health --timeout 90000
-        
+          cd frontend
+          npm run start:ci &
+          echo "Next.js PID: $!" > /tmp/nextjs.pid
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for mock API..."
+          wait-on http://localhost:3200/api/v1/health --timeout 30000
+          echo "Waiting for Next.js..."
+          wait-on http://localhost:3100 --timeout 30000
+
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
-        
+
       - name: Run Lighthouse CI
         run: |
           cd frontend
-          lhci autorun --collect.staticDistDir=.next --upload.target=temporary-public-storage
+          lhci autorun --collect.startServerCommand="echo 'already started'" --collect.url=http://localhost:3100 --upload.target=temporary-public-storage
         timeout-minutes: 10
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -111,7 +91,10 @@ jobs:
             echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "## 📊 Performance Metrics" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "*Static build analysis with continue-on-error for PR flow*" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "*Analysis using mock API (ports 3100/3200) - no database dependencies*" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Next.js: http://localhost:3100" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Mock API: http://localhost:3200" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "Generated on: $(date)" >> ../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
           fi
@@ -123,3 +106,17 @@ jobs:
           name: lighthouse-summary
           path: docs/reports/*/LHCI-SUMMARY.md
           retention-days: 7
+
+      - name: Cleanup background processes
+        if: always()
+        run: |
+          echo "Stopping background processes..."
+          if [ -f /tmp/mock-api.pid ]; then
+            kill $(cat /tmp/mock-api.pid) 2>/dev/null || true
+          fi
+          if [ -f /tmp/nextjs.pid ]; then
+            kill $(cat /tmp/nextjs.pid) 2>/dev/null || true
+          fi
+          # Kill any remaining processes on the ports
+          lsof -ti:3200 | xargs -r kill 2>/dev/null || true
+          lsof -ti:3100 | xargs -r kill 2>/dev/null || true
