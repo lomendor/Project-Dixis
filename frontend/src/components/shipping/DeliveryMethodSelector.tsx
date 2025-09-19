@@ -5,6 +5,7 @@ import { useToast } from '@/contexts/ToastContext';
 import {
   DeliveryMethodSchema,
   type DeliveryMethod,
+  type PaymentMethod,
   type ShippingQuoteRequest,
   type ShippingQuoteResponse,
   type LockerSearchResponse
@@ -19,6 +20,7 @@ interface DeliveryMethodSelectorProps {
     quantity: number;
   }>;
   postalCode: string;
+  paymentMethod?: PaymentMethod;
   onQuoteReceived?: (quote: ShippingQuoteResponse['data']) => void;
   className?: string;
 }
@@ -26,6 +28,7 @@ interface DeliveryMethodSelectorProps {
 export default function DeliveryMethodSelector({
   items,
   postalCode,
+  paymentMethod = 'CARD',
   onQuoteReceived,
   className = ''
 }: DeliveryMethodSelectorProps) {
@@ -63,7 +66,8 @@ export default function DeliveryMethodSelector({
       const requestPayload: ShippingQuoteRequest = {
         items,
         postal_code: postalCode,
-        delivery_method: deliveryMethod
+        delivery_method: deliveryMethod,
+        payment_method: paymentMethod
       };
 
       const response = await fetch('/api/v1/shipping/quote', {
@@ -90,7 +94,7 @@ export default function DeliveryMethodSelector({
       console.error('Shipping quote error:', err);
       throw err;
     }
-  }, [items, postalCode]);
+  }, [items, postalCode, paymentMethod]);
 
   // Fetch both quotes when postal code or items change
   useEffect(() => {
@@ -129,7 +133,7 @@ export default function DeliveryMethodSelector({
     };
 
     fetchQuotes();
-  }, [postalCode, items, selectedMethod, lockersEnabled, fetchShippingQuote, onQuoteReceived, showToast]);
+  }, [postalCode, items, selectedMethod, lockersEnabled, paymentMethod, fetchShippingQuote, onQuoteReceived, showToast]);
 
   const handleMethodChange = (method: DeliveryMethod) => {
     setSelectedMethod(method);

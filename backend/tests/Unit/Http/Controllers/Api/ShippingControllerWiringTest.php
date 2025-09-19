@@ -269,6 +269,155 @@ class ShippingControllerWiringTest extends TestCase
         $this->assertTrue($provider->isHealthy());
     }
 
+    public function test_get_quote_accepts_cod_payment_method()
+    {
+        // Enable COD for testing
+        config(['shipping.enable_cod' => true, 'shipping.cod_fee_eur' => 4.00]);
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Create valid products for testing
+        $product1 = \App\Models\Product::factory()->create();
+        $product2 = \App\Models\Product::factory()->create();
+
+        // Create valid request data
+        $requestData = [
+            'items' => [
+                ['product_id' => $product1->id, 'quantity' => 2],
+                ['product_id' => $product2->id, 'quantity' => 1],
+            ],
+            'postal_code' => '10431',
+            'payment_method' => 'COD',
+        ];
+
+        $request = Request::create('/api/shipping/quote', 'POST', $requestData);
+
+        try {
+            $response = $this->controller->getQuote($request);
+            $responseData = $response->getData(true);
+
+            // Should not fail validation
+            $this->assertTrue($responseData['success']);
+            $this->assertArrayHasKey('data', $responseData);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->fail('COD payment method should be valid but validation failed: ' . json_encode($e->errors()));
+        } catch (\Exception $e) {
+            // Accept config-related errors for unit test environment
+            $this->assertTrue(
+                str_contains($e->getMessage(), 'No query results for model') ||
+                str_contains($e->getMessage(), 'Shipping configuration files not found'),
+                'Expected config or model error, got: ' . $e->getMessage()
+            );
+        }
+    }
+
+    public function test_get_quote_accepts_card_payment_method()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Create valid product for testing
+        $product = \App\Models\Product::factory()->create();
+
+        $requestData = [
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1],
+            ],
+            'postal_code' => '10431',
+            'payment_method' => 'CARD',
+        ];
+
+        $request = Request::create('/api/shipping/quote', 'POST', $requestData);
+
+        try {
+            $response = $this->controller->getQuote($request);
+            $responseData = $response->getData(true);
+
+            // Should not fail validation
+            $this->assertTrue($responseData['success']);
+            $this->assertArrayHasKey('data', $responseData);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->fail('CARD payment method should be valid but validation failed: ' . json_encode($e->errors()));
+        } catch (\Exception $e) {
+            // Accept config-related errors for unit test environment
+            $this->assertTrue(
+                str_contains($e->getMessage(), 'No query results for model') ||
+                str_contains($e->getMessage(), 'Shipping configuration files not found'),
+                'Expected config or model error, got: ' . $e->getMessage()
+            );
+        }
+    }
+
+    public function test_get_quote_rejects_invalid_payment_method()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Create valid product for testing
+        $product = \App\Models\Product::factory()->create();
+
+        $requestData = [
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1],
+            ],
+            'postal_code' => '10431',
+            'payment_method' => 'INVALID_METHOD',
+        ];
+
+        $request = Request::create('/api/shipping/quote', 'POST', $requestData);
+
+        try {
+            $response = $this->controller->getQuote($request);
+            $this->fail('Invalid payment method should fail validation');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // This is expected - validation should fail for invalid payment method
+            $this->assertArrayHasKey('payment_method', $e->errors());
+        } catch (\Exception $e) {
+            $this->fail('Expected validation exception, got: ' . $e->getMessage());
+        }
+    }
+
+    public function test_get_quote_works_without_payment_method()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Create valid product for testing
+        $product = \App\Models\Product::factory()->create();
+
+        // Request without payment_method should default to CARD
+        $requestData = [
+            'items' => [
+                ['product_id' => $product->id, 'quantity' => 1],
+            ],
+            'postal_code' => '10431',
+        ];
+
+        $request = Request::create('/api/shipping/quote', 'POST', $requestData);
+
+        try {
+            $response = $this->controller->getQuote($request);
+            $responseData = $response->getData(true);
+
+            // Should not fail validation (payment_method is nullable)
+            $this->assertTrue($responseData['success']);
+            $this->assertArrayHasKey('data', $responseData);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->fail('Missing payment method should default to CARD and not fail validation: ' . json_encode($e->errors()));
+        } catch (\Exception $e) {
+            // Accept config-related errors for unit test environment
+            $this->assertTrue(
+                str_contains($e->getMessage(), 'No query results for model') ||
+                str_contains($e->getMessage(), 'Shipping configuration files not found'),
+                'Expected config or model error, got: ' . $e->getMessage()
+            );
+        }
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();

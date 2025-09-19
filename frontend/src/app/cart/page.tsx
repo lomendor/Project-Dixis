@@ -15,6 +15,7 @@ import { formatCurrency } from '@/env';
 import CartSummary from '@/components/cart/CartSummary';
 import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
 import { DeliveryMethodSelector } from '@/components/shipping';
+import type { PaymentMethod } from '@dixis/contracts/shipping';
 
 export default function Cart() {
 const {
@@ -96,6 +97,19 @@ const handleCheckout = async () => {
   };
 
   const orderSummary = calculateOrderSummary();
+
+  // Map frontend payment method type to shipping contract PaymentMethod enum
+  const getShippingPaymentMethod = (paymentMethod: typeof selectedPaymentMethod): PaymentMethod => {
+    if (!paymentMethod) return 'CARD';
+    switch (paymentMethod.type) {
+      case 'cash_on_delivery':
+        return 'COD';
+      case 'card':
+        return 'CARD';
+      default:
+        return 'CARD';
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -205,6 +219,7 @@ const handleCheckout = async () => {
                       quantity: item.quantity
                     }))}
                     postalCode={form.shipping.postalCode}
+                    paymentMethod={getShippingPaymentMethod(selectedPaymentMethod)}
                     onQuoteReceived={(quote) => {
                       // Auto-select the shipping method from the quote
                       if (quote) {

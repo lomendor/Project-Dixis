@@ -85,6 +85,10 @@ export type TrackingResponse = z.infer<typeof TrackingResponseSchema>
 export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER'])
 export type DeliveryMethod = z.infer<typeof DeliveryMethodSchema>
 
+// Payment Method Enum
+export const PaymentMethodSchema = z.enum(['CARD', 'COD'])
+export type PaymentMethod = z.infer<typeof PaymentMethodSchema>
+
 // Locker Information
 export const LockerSchema = z.object({
   id: z.string(),
@@ -109,6 +113,7 @@ export const ShippingQuoteRequestSchema = z.object({
   })).min(1),
   postal_code: z.string().regex(/^\d{5}$/),
   delivery_method: DeliveryMethodSchema.optional().default('HOME'),
+  payment_method: PaymentMethodSchema.optional().default('CARD'),
 })
 
 export const ShippingQuoteResponseSchema = z.object({
@@ -121,6 +126,7 @@ export const ShippingQuoteResponseSchema = z.object({
     zone_name: z.string(),
     estimated_delivery_days: z.number(),
     delivery_method: DeliveryMethodSchema,
+    payment_method: PaymentMethodSchema,
     breakdown: z.object({
       base_cost_cents: z.number(),
       weight_adjustment_cents: z.number(),
@@ -131,6 +137,8 @@ export const ShippingQuoteResponseSchema = z.object({
       postal_code: z.string(),
       profile_applied: z.string().nullable(),
       locker_discount_cents: z.number().optional(),
+      cod_fee_cents: z.number().optional(),
+      payment_method: PaymentMethodSchema,
     })
   })
 })
