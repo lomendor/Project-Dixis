@@ -57,19 +57,27 @@ jobs:
 
       - name: Wait for services
         run: |
-          npx wait-on --timeout 120000 http://localhost:3200/api/v1/health
-          npx wait-on --timeout 120000 http://localhost:3100
+          npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
+          npx wait-on --timeout 90000 http://localhost:3100
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
 
-      - name: Run Lighthouse CI
-        run: |
-          cd frontend
-          lhci autorun --collect.startServerCommand="echo 'already started'" --collect.url=http://localhost:3100 --upload.target=temporary-public-storage
-        timeout-minutes: 10
+      - name: Lighthouse CI (use existing server)
+        working-directory: frontend
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+          NODE_ENV: production
+          CI: true
+        run: |
+          npx @lhci/cli autorun \
+            --collect.url=http://localhost:3100 \
+            --collect.startServerCommand="echo already started" \
+            --assert.preset=lighthouse:recommended \
+            --upload.target=filesystem \
+            --upload.outputDir=.lighthouseci
+        timeout-minutes: 10
           
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
