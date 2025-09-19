@@ -89,9 +89,9 @@ export default function Register() {
           <Link href="/" className="text-2xl font-bold text-green-600">
             Project Dixis
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h1 className="mt-6 text-3xl font-bold text-gray-900" data-testid="page-title">
             Create your account
-          </h2>
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
             Or{' '}
             <Link
