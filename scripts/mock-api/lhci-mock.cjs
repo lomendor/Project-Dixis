@@ -1,24 +1,31 @@
+/**
+ * Mock API server for Lighthouse CI testing
+ * Provides minimal endpoints needed for Next.js app to function during CI
+ */
+
 const express = require('express');
 const app = express();
-app.use(express.json());
 
-// CORS headers for frontend requests
+// Middleware
+app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
 
-// Minimal endpoints used by homepage/products/categories
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  // Simple logging
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
+});
 app.get('/api/v1/health', (_, res) => {
   res.json({ ok: true, status: 'healthy', timestamp: new Date().toISOString() });
 });
 
+// Mock products endpoint
 app.get('/api/v1/products', (req, res) => {
   const items = [
     {
@@ -65,6 +72,30 @@ app.get('/api/v1/products', (req, res) => {
   });
 });
 
+// Legacy endpoint for older frontend versions
+app.get('/api/v1/public/products', (_, res) => {
+  res.json({
+    data: [
+      {
+        id: 1,
+        name: 'Μοκ Προϊόν 1',
+        price: 10.50,
+        stock: 100,
+        producer: { id: 1, name: 'Παραγωγός 1' }
+      },
+      {
+        id: 2,
+        name: 'Μοκ Προϊόν 2',
+        price: 25.00,
+        stock: 50,
+        producer: { id: 2, name: 'Παραγωγός 2' }
+      }
+    ],
+    meta: { total: 2, page: 1 }
+  });
+});
+
+// Mock categories endpoint
 app.get('/api/v1/categories', (_, res) => {
   res.json({
     success: true,
@@ -76,6 +107,18 @@ app.get('/api/v1/categories', (_, res) => {
   });
 });
 
+// Legacy categories endpoint
+app.get('/api/v1/public/categories', (_, res) => {
+  res.json({
+    data: [
+      { id: 1, name: 'Λαχανικά' },
+      { id: 2, name: 'Φρούτα' },
+      { id: 3, name: 'Γαλακτοκομικά' }
+    ]
+  });
+});
+
+// Mock shipping quote endpoint
 app.post('/api/v1/shipping/quote', (req, res) => {
   const { payment_method = 'CARD', postal_code = '11111' } = req.body || {};
   const codFee = payment_method === 'COD' ? 400 : 0; // 4 EUR in cents
@@ -107,6 +150,39 @@ app.post('/api/v1/shipping/quote', (req, res) => {
   });
 });
 
+// Mock cart endpoint
+app.get('/api/v1/cart', (_, res) => {
+  res.json({
+    data: {
+      items: [],
+      total: 0
+    }
+  });
+});
+
+// Mock orders endpoint
+app.get('/api/v1/orders', (_, res) => {
+  res.json({
+    data: [],
+    meta: { total: 0, page: 1 }
+  });
+});
+
+// Mock auth endpoints
+app.post('/api/v1/auth/login', (_, res) => {
+  res.status(401).json({ message: 'Mock API - auth not implemented' });
+});
+
+app.post('/api/v1/auth/register', (_, res) => {
+  res.status(401).json({ message: 'Mock API - registration not implemented' });
+});
+
+// Mock user endpoint
+app.get('/api/v1/user', (_, res) => {
+  res.status(401).json({ message: 'Unauthenticated' });
+});
+
+// Mock product detail endpoint
 app.get('/api/v1/products/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const product = {
@@ -125,18 +201,36 @@ app.get('/api/v1/products/:id', (req, res) => {
   res.json({ success: true, data: product });
 });
 
-// Catch-all for unhandled endpoints
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Mock API: Endpoint ${req.method} ${req.path} not implemented`
+// Legacy product detail endpoint
+app.get('/api/v1/public/products/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  res.json({
+    data: {
+      id,
+      name: `Μοκ Προϊόν ${id}`,
+      description: 'Περιγραφή προϊόντος για Lighthouse testing',
+      price: 15.50,
+      stock: 75,
+      producer: {
+        id: 1,
+        name: 'Τοπικός Παραγωγός',
+        location: 'Αθήνα'
+      }
+    }
   });
 });
 
+// Catch-all for unmatched routes
+app.use((req, res) => {
+  console.log(`Mock API: Unmatched route ${req.method} ${req.url}`);
+  res.status(404).json({ error: 'Not found', path: req.url });
+});
+
+// Start server
 const port = process.env.MOCK_PORT || 3200;
 const server = app.listen(port, () => {
-  console.log(`🚀 LHCI Mock API running on port ${port}`);
-  console.log(`   Health: http://localhost:${port}/api/v1/health`);
+  console.log(`🚀 Mock API server running on http://localhost:${port}`);
+  console.log(`   Health check: http://localhost:${port}/api/v1/health`);
   console.log(`   Products: http://localhost:${port}/api/v1/products`);
 });
 
@@ -145,6 +239,14 @@ process.on('SIGTERM', () => {
   console.log('🛑 LHCI Mock API shutting down...');
   server.close(() => {
     console.log('✅ LHCI Mock API closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down mock API...');
+  server.close(() => {
+    console.log('Mock API server closed');
     process.exit(0);
   });
 });
