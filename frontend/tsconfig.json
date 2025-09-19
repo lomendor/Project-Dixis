@@ -41,8 +41,10 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "vitest.config*.ts",
-    // ρητά legacy directories  
+    // ρητά legacy directories
     "../GitHub-Dixis-Project-1/**",
-    "../Dixis-Project-1/**"
+    "../Dixis-Project-1/**",
+    // Exclude packages directory from type checking
+    "../packages/**/*"
   ]
 }
