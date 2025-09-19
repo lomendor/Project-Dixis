@@ -25,14 +25,6 @@ jobs:
       - name: Install contracts dependencies
         run: cd packages/contracts && npm ci
 
-      - name: Start mock API
-        run: |
-          cd scripts/mock-api
-          node lhci-mock.js &
-          echo "Mock API PID: $!" > /tmp/mock-api.pid
-        env:
-          MOCK_PORT: 3200
-
       - name: Build frontend
         run: |
           cd frontend
@@ -43,20 +35,19 @@ jobs:
       - name: Install wait-on utility
         run: npm install -g wait-on
 
-      - name: Start Next.js server
+      - name: Start mock API and Next
         run: |
           cd frontend
+          npm run mock:api &
+          sleep 2
           npm run start:ci &
-          echo "Next.js PID: $!" > /tmp/nextjs.pid
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
 
       - name: Wait for services
         run: |
-          echo "Waiting for mock API..."
-          wait-on http://localhost:3200/api/v1/health --timeout 30000
-          echo "Waiting for Next.js..."
-          wait-on http://localhost:3100 --timeout 30000
+          npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
+          npx wait-on --timeout 90000 http://localhost:3100
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
@@ -111,12 +102,6 @@ jobs:
         if: always()
         run: |
           echo "Stopping background processes..."
-          if [ -f /tmp/mock-api.pid ]; then
-            kill $(cat /tmp/mock-api.pid) 2>/dev/null || true
-          fi
-          if [ -f /tmp/nextjs.pid ]; then
-            kill $(cat /tmp/nextjs.pid) 2>/dev/null || true
-          fi
-          # Kill any remaining processes on the ports
+          # Kill any processes on the ports
           lsof -ti:3200 | xargs -r kill 2>/dev/null || true
           lsof -ti:3100 | xargs -r kill 2>/dev/null || true
