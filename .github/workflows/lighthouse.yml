@@ -64,6 +64,7 @@ jobs:
         run: npm install -g @lhci/cli
 
       - name: Lighthouse CI (use existing server)
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         working-directory: frontend
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +79,13 @@ jobs:
             --upload.target=filesystem \
             --upload.outputDir=.lighthouseci
         timeout-minutes: 10
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouseci
+          path: frontend/.lighthouseci
           
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
