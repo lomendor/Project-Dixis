@@ -10,19 +10,19 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
     
     // Test basic search functionality
-    await page.fill('input[placeholder="Search products..."]', 'apple');
+    await page.fill('[data-testid="search-input"]', 'apple');
     await page.waitForTimeout(1000); // Wait for search to complete
-    
+
     // Should show search results
     const searchResults = await page.locator('[data-testid="product-card"]').count();
     console.log(`Search results for "apple": ${searchResults}`);
-    
+
     // Clear search
-    await page.fill('input[placeholder="Search products..."]', '');
+    await page.fill('[data-testid="search-input"]', '');
     await page.waitForTimeout(1000);
     
     // Test filter panel
-    await page.click('button:has-text("Filters")');
+    await page.click('[data-testid="filters-button"]');
     await expect(page.locator('.bg-white.p-6.rounded-lg.shadow-md')).toBeVisible();
     
     // Test category filter
@@ -31,8 +31,8 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(1000);
     
     // Test price filter
-    await page.fill('input[placeholder="Min"]', '5');
-    await page.fill('input[placeholder="Max"]', '20');
+    await page.fill('[data-testid="min-price-input"]', '5');
+    await page.fill('[data-testid="max-price-input"]', '20');
     await page.waitForTimeout(1000);
     
     // Test organic filter
@@ -51,10 +51,10 @@ test.describe('Catalog Filters & Search', () => {
     }
     
     // Verify that filters are active
-    const filterBadge = page.locator('span:has-text("Clear All")').first();
-    
+    const filterBadge = page.locator('[data-testid="clear-all-button"]').first();
+
     // Clear all filters
-    await page.click('button:has-text("Clear All")');
+    await page.click('[data-testid="clear-all-button"]');
     await page.waitForTimeout(1000);
     
     // Verify products are shown again - just check visibility directly
@@ -68,17 +68,17 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForLoadState('networkidle');
     
     // Apply search filter
-    await page.fill('input[placeholder="Search products..."]', 'fresh');
+    await page.fill('[data-testid="search-input"]', 'fresh');
     await page.waitForTimeout(1000);
     
     // Open filters and apply category filter
-    await page.click('button:has-text("Filters")');
-    const categorySelect = page.locator('label:has-text("Category")').locator('..').locator('select');
+    await page.click('[data-testid="filters-button"]');
+    const categorySelect = page.locator('[data-testid="category-select"]');
     await categorySelect.selectOption({ index: 1 });
     await page.waitForTimeout(1000);
     
     // Verify filter badge shows active filters
-    const filterButton = page.locator('button:has-text("Filters")');
+    const filterButton = page.locator('[data-testid="filters-button"]');
     await expect(filterButton.locator('.bg-green-500')).toBeVisible();
     
     console.log('✅ Filter persistence test completed');
@@ -89,15 +89,15 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForLoadState('networkidle');
     
     // Apply filters that return no results
-    await page.fill('input[placeholder="Search products..."]', 'nonexistentproduct12345');
+    await page.fill('[data-testid="search-input"]', 'nonexistentproduct12345');
     await page.waitForTimeout(2000);
     
     // Should show empty state
-    await expect(page.locator('text=No products found')).toBeVisible();
-    await expect(page.locator('button:has-text("Clear Filters")')).toBeVisible();
-    
+    await expect(page.locator('text=Δεν βρέθηκαν προϊόντα')).toBeVisible();
+    await expect(page.locator('[data-testid="empty-state-action-button"]')).toBeVisible();
+
     // Clear filters using empty state button
-    await page.click('button:has-text("Clear Filters")');
+    await page.click('[data-testid="empty-state-action-button"]');
     await page.waitForTimeout(1000);
     
     // Should show products again  

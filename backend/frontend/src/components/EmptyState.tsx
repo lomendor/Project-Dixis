@@ -42,6 +42,7 @@ export default function EmptyState({
             </Link>
           ) : onAction ? (
             <button
+              data-testid="empty-state-action-button"
               onClick={onAction}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
