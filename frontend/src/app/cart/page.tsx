@@ -157,8 +157,7 @@ const handleCheckout = async () => {
     <>
       <Navigation />
       <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>
-        
+        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>        
         {/* Cart Items */}
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
