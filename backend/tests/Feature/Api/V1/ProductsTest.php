@@ -75,6 +75,7 @@ class ProductsTest extends TestCase
         
         $productData = [
             'name' => 'Fresh Tomatoes',
+            'title' => 'Fresh Tomatoes',
             'description' => 'Organic fresh tomatoes from local farm',
             'price' => 3.50,
             'discount_price' => 2.99,
@@ -138,6 +139,7 @@ class ProductsTest extends TestCase
         
         $productData = [
             'name' => 'Fresh Tomatoes',
+            'title' => 'Fresh Tomatoes',
             'price' => 3.50,
             'producer_id' => $producer->id,
         ];
@@ -167,6 +169,7 @@ class ProductsTest extends TestCase
         
         $productData = [
             'name' => 'Expensive Item',
+            'title' => 'Expensive Item',
             'price' => 10.00,
             'discount_price' => 15.00, // Invalid: discount > price
             'producer_id' => $producer->id,

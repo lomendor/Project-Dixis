@@ -30,6 +30,7 @@ class PublicProductsTest extends TestCase
         // Create active products
         $tomatoes = Product::factory()->create([
             'name' => 'Organic Tomatoes',
+            'title' => 'Organic Tomatoes',
             'description' => 'Fresh organic tomatoes',
             'price' => 3.50,
             'producer_id' => $producer->id,
@@ -40,6 +41,7 @@ class PublicProductsTest extends TestCase
         
         $apples = Product::factory()->create([
             'name' => 'Fresh Apples',
+            'title' => 'Fresh Apples',
             'description' => 'Crispy red apples',
             'price' => 4.00,
             'producer_id' => $producer->id,
@@ -54,6 +56,7 @@ class PublicProductsTest extends TestCase
         
         $carrots = Product::factory()->create([
             'name' => 'Farm Carrots',
+            'title' => 'Farm Carrots',
             'description' => 'Fresh farm carrots',
             'price' => 2.50,
             'producer_id' => $producer2->id,
@@ -65,6 +68,7 @@ class PublicProductsTest extends TestCase
         // Create inactive product
         $lettuce = Product::factory()->create([
             'name' => 'Fresh Lettuce',
+            'title' => 'Fresh Lettuce',
             'producer_id' => $producer->id,
             'is_active' => false
         ]);

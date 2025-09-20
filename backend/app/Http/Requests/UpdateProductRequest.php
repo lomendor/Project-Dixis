@@ -25,6 +25,7 @@ class UpdateProductRequest extends FormRequest
         
         return [
             'name' => 'sometimes|required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products,slug,' . $productId,
             'description' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',

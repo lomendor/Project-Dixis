@@ -37,6 +37,7 @@ class OrderTest extends TestCase
         $this->product1 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Test Product 1',
+            'title' => 'Test Product 1',
             'price' => 15.00,
             'stock' => 50,
             'is_active' => true
@@ -45,6 +46,7 @@ class OrderTest extends TestCase
         $this->product2 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Test Product 2',
+            'title' => 'Test Product 2',
             'price' => 25.50,
             'stock' => 30,
             'is_active' => true
@@ -407,12 +409,16 @@ class OrderTest extends TestCase
         // Create products with different scenarios
         $inactiveProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
+            'name' => 'Inactive Product',
+            'title' => 'Inactive Product',
             'price' => 10.00,
             'is_active' => false
         ]);
         
         $lowStockProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
+            'name' => 'Low Stock Product',
+            'title' => 'Low Stock Product',
             'price' => 20.00,
             'stock' => 1
         ]);

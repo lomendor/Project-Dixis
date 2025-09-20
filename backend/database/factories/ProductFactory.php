@@ -22,6 +22,7 @@ class ProductFactory extends Factory
         return [
             'producer_id' => Producer::factory(),
             'name' => $name,
+            'title' => $name,
             'slug' => Str::slug($name) . '-' . fake()->unique()->randomNumber(5),
             'description' => fake()->paragraph(),
             'price' => fake()->randomFloat(2, 5, 100),

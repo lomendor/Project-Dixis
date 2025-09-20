@@ -52,6 +52,7 @@ class FrontendSmokeTest extends TestCase
         $this->product = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Organic Tomatoes',
+            'title' => 'Organic Tomatoes',
             'description' => 'Fresh organic tomatoes from local farm',
             'price' => 3.50,
             'is_active' => true
@@ -258,6 +259,7 @@ class FrontendSmokeTest extends TestCase
         $appleProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Fresh Apples',
+            'title' => 'Fresh Apples',
             'description' => 'Crispy red apples',
             'price' => 4.00,
             'is_active' => true
