@@ -1,0 +1,61 @@
+# Repo Status Snapshot (2025-09-20)
+Analyzed PRs: 47
+
+## Ready to merge
+_none_
+
+## Needs rebase
+- #42 feat: Greek-Insensitive Search & i18n - MVP Polish Pack 01 — pr-b/greek-search-i18n (updated 21d)
+- #41 feat: Enhanced Cart State & PDP Binding - MVP Polish Pack 01 — pr-a/fe-state-pdp (updated 21d)
+
+## Blocked by CI
+- #212 ci: fix PR #172 CI (Node20, zod, Danger) — ci/fix-pr172-node20-zod-danger (updated 0d)
+- #164 feat(db): initial MVP ERD + seeds — feat/erd-mvp-implementation (updated 4d)
+- #162 chore(deps-dev): bump @types/node from 24.3.1 to 24.4.0 in /backend/frontend — dependabot/npm_and_yarn/backend/frontend/types/node-24.4.0 (updated 4d)
+- #161 chore(deps-dev): bump eslint-config-next from 15.5.0 to 15.5.3 in /backend/frontend — dependabot/npm_and_yarn/backend/frontend/eslint-config-next-15.5.3 (updated 4d)
+- #159 chore(deps-dev): bump @tailwindcss/postcss from 4.1.12 to 4.1.13 in /backend/frontend — dependabot/npm_and_yarn/backend/frontend/tailwindcss/postcss-4.1.13 (updated 4d)
+- #114 PR #114: Auth smoke bootstrap - Global setup fixes — fix/auth-smoke-bootstrap (updated 13d)
+- #113 ULTRATHINK Step 1: Stable empty cart message selector — fix/e2e-stable-empty-cart-messaging (updated 13d)
+- #112 fix(e2e): deterministic login fixtures for integration tests — fix/e2e-deterministic-login-fixtures (updated 13d)
+- #111 chore(e2e): split smoke vs integration + quarantine failing suites — chore/smoke-integration-split (updated 13d)
+- #66 feat(a11y/perf): PP03-F - Comprehensive accessibility and performance optimization — feature/pr-pp03-f-a11y-performance (updated 16d)
+- #65 feat(analytics): PP03-E - Comprehensive analytics & observability finalization [TRIGGER-CI] — feature/pp03-e-analytics-final (updated 16d)
+- #64 feat(admin): PP03-C - Admin Lite Dashboard for producer management [TRIGGER-CI] — feature/pp03-c-admin-lite (updated 16d)
+- #50 PR-HY-D: Developer hygiene (≤300 LOC) — feature/pr-hy-d-developer-hygiene (updated 20d)
+- #48 🌟 PR-PP02-E: SEO Basics - POLISH PACK 02 COMPLETE! — feature/pr-pp02-e-seo-basics (updated 21d)
+- #47 ⚡ PR-PP02-D: Performance & Accessibility Improvements — feature/pr-pp02-d-performance-accessibility (updated 21d)
+- #45 PR-PP02-C: Analytics & Observability - Comprehensive tracking and error boundary system — pr-pp02-c/analytics-observability (updated 21d)
+- #44 feat: Admin Lite Dashboard - Polish Pack 02-B — pr-pp02-b/admin-lite (updated 21d)
+- #43 feat: PDP Data Robustness - Polish Pack 02-A — pr-pp02-a/pdp-robustness (updated 21d)
+- #39 feat: CI+E2E Guardrails and Shipping Tests (PR #3) — feat/ci-e2e-guardrails (updated 21d)
+- #38 feat: Complete Checkout Flow with Shipping (PR #2) — feat/checkout-flow-completion (updated 21d)
+- #37 feat: Frontend Cart/Checkout Shipping Integration (PR #1) — feat/frontend-shipping-integration (updated 21d)
+- #36 🚀 E2E Stabilization: Production-Ready Foundation — feat/e2e-hardening (updated 21d)
+- #34 chore(deps): bump react and @types/react in /backend/frontend — dependabot/npm_and_yarn/backend/frontend/multi-70832524d6 (updated 6d)
+- #33 chore(deps): bump react-dom and @types/react-dom in /backend/frontend — dependabot/npm_and_yarn/backend/frontend/multi-0c18ad9c18 (updated 6d)
+
+## Stale > 14 days
+- #100 feat(validation): Backend Schema Validation Enhancement [BACKEND-SCHEMA-FIX] — tools/backend-schema-fix (updated 15d)
+- #99 feat(e2e): E2E Stability Enhancement - Deterministic Login Flow [E2E-STAB-LOGIN] — tools/e2e-stab-login (updated 15d)
+- #98 docs(audit): Comprehensive CI/CD Health Audit + Micro-PR Strategy — docs/audit-ci-20250905 (updated 15d)
+- #94 feat(validation/auth): core auth schemas [PR-88B] — feature/pr-88b-auth-schemas (updated 15d)
+- #93 feat(validation): Environment validation core with runtime safety [PR-88A] — feature/pr-88a-env-validation-core (updated 15d)
+- #84 PR-QA-02: Comprehensive Zod Validation & Runtime Safety — feature/pr-qa-02-zod-validation-runtime-safety (updated 16d)
+- #52 PR-HY-C: Essential hooks & utils with Greek normalization (≤300 LOC) — feature/pr-hy-c-hooks-utils (updated 16d)
+- #51 PR-HY-B: ENV centralization + Greek locale defaults (≤300 LOC) — feature/pr-hy-b-env-centralization (updated 20d)
+- #49 feat: Repo Hygiene Sprint + Greek i18n/Currency Polish (HY-A→HY-D + UI-A) — feature/pr-hy-a-frontend-structure-refactor (updated 20d)
+- #46 📋 COMPREHENSIVE FRONTEND AUDIT: OLD vs CURRENT - Gap Analysis & 2-Week Roadmap — feature/comprehensive-frontend-audit (updated 21d)
+- #3 Monorepo layout: /backend & /frontend (history-preserving) — legacy-refactor/monorepo-layout (updated 16d)
+- #2 Legacy import (read-only) — assessment — legacy-import (updated 16d)
+
+## Other (needs human review)
+- #211 test(seed): cover NOT NULL via factories/seeders (CartItem, Shipment, Roles/Permissions) — fix/factory-notnull-gaps (updated 0d)
+- #170 feat(account): Customer Orders History & Details (≤350 LOC) — feat/account-orders-history (updated 4d)
+- #168 feat(admin): light panel with producers/products/orders management — feat/admin-light-panel (updated 4d)
+- #166 feat(product-crud): Product CRUD for approved producers (≤300 LOC) — feat/product-crud-producer-management (updated 0d)
+- #158 feat(api): checkout resilience + extended tests (≤300 LOC) — feature/pr-d-checkout-resilience (updated 5d)
+- #157 refactor(cart/ui): summary hygiene + lean smoke (≤200 LOC) — feat/cart-summary-hygiene (updated 5d)
+- #109 fix(e2e): stabilize smoke (nav + mobile) — backend-free — fix/e2e-smoke-nav-mobile (updated 14d)
+- #88 feat(validation): Implement comprehensive Zod validation system [PR-84A] — feature/pr-84a-zod-validation-foundation (updated 1d)
+- #20 chore(deps): bump actions/checkout from 4 to 5 — dependabot/github_actions/actions/checkout-5 (updated 0d)
+
