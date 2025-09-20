@@ -37,6 +37,7 @@ class ProductSeeder extends Seeder
                 'product_data' => [
                     'producer_id' => $producer->id,
                     'name' => 'Organic Tomatoes',
+                    'title' => 'Organic Tomatoes',
                     'slug' => 'organic-tomatoes',
                     'description' => 'Fresh organic tomatoes grown without pesticides',
                     'price' => 3.50,
@@ -59,6 +60,7 @@ class ProductSeeder extends Seeder
                 'product_data' => [
                     'producer_id' => $producer->id,
                     'name' => 'Fresh Lettuce',
+                    'title' => 'Fresh Lettuce',
                     'slug' => 'fresh-lettuce',
                     'description' => 'Crispy fresh lettuce perfect for salads',
                     'price' => 2.25,
@@ -80,6 +82,7 @@ class ProductSeeder extends Seeder
                 'product_data' => [
                     'producer_id' => $producer->id,
                     'name' => 'Extra Virgin Olive Oil',
+                    'title' => 'Extra Virgin Olive Oil',
                     'slug' => 'extra-virgin-olive-oil',
                     'description' => 'Premium Greek olive oil from Crete',
                     'price' => 12.00,
@@ -102,6 +105,7 @@ class ProductSeeder extends Seeder
                 'product_data' => [
                     'producer_id' => $producer->id,
                     'name' => 'Fresh Apples',
+                    'title' => 'Fresh Apples',
                     'slug' => 'fresh-apples',
                     'description' => 'Crispy red apples from local orchards',
                     'price' => 4.00,
@@ -123,6 +127,7 @@ class ProductSeeder extends Seeder
                 'product_data' => [
                     'producer_id' => $producer->id,
                     'name' => 'Greek Oregano',
+                    'title' => 'Greek Oregano',
                     'slug' => 'greek-oregano',
                     'description' => 'Aromatic Greek oregano, dried and packaged',
                     'price' => 5.50,
