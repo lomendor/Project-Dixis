@@ -22,7 +22,7 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(1000);
     
     // Test filter panel
-    await page.click('button:has-text("Filters")');
+    await page.click('[data-testid="filters-button"]');
     await expect(page.locator('.bg-white.p-6.rounded-lg.shadow-md')).toBeVisible();
     
     // Test category filter
@@ -72,13 +72,13 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(1000);
     
     // Open filters and apply category filter
-    await page.click('button:has-text("Filters")');
+    await page.click('[data-testid="filters-button"]');
     const categorySelect = page.locator('label:has-text("Category")').locator('..').locator('select');
     await categorySelect.selectOption({ index: 1 });
     await page.waitForTimeout(1000);
     
     // Verify filter badge shows active filters
-    const filterButton = page.locator('button:has-text("Filters")');
+    const filterButton = page.locator('[data-testid="filters-button"]');
     await expect(filterButton.locator('.bg-green-500')).toBeVisible();
     
     console.log('✅ Filter persistence test completed');
