@@ -159,7 +159,7 @@ export function useProducerRouteGuard() {
 
     // Admin routes
     if (path.startsWith('/admin')) {
-      if (user?.role !== 'admin') {
+      if ((user?.role as 'consumer' | 'producer' | 'admin') !== 'admin') {
         return {
           hasAccess: false,
           redirectTo: '/',

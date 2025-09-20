@@ -99,6 +99,7 @@ export interface User {
   role: 'consumer' | 'producer' | 'admin';
   address?: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface AuthResponse {
