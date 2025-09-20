@@ -190,3 +190,7 @@ e2e-tests	Wait for frontend server	2025-09-20T21:29:25.2845696Z   % Total    % R
 e2e-tests	Wait for frontend server	2025-09-20T21:29:25.2846639Z                                  Dload  Upload   Total  
 ```
 
+
+### Frontend-tests micro-fix applied at 2025-09-21T00:58:56+03:00
+Kind: eslint-any-fix
+
