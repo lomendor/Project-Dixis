@@ -1,0 +1,4 @@
+order_id,weight_kg,length_cm,width_cm,height_cm,postal_code,actual_receipt_eur
+TEST-001,0.5,20,15,10,10671,0.00
+TEST-002,2.5,30,25,20,49100,0.00
+TEST-003,7.0,40,35,30,73100,0.00
