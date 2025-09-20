@@ -71,6 +71,11 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class, // New structured order seeder
         ]);
 
+        // Ensure base roles/permissions exist for tests & seeds
+        if (class_exists(\Database\Seeders\PermissionsRolesSeeder::class)) {
+            $this->call(\Database\Seeders\PermissionsRolesSeeder::class);
+        }
+
         // E2E deterministic data for testing and local environments
         if (app()->environment(['testing', 'local'])) {
             $this->call([
