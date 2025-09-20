@@ -3,23 +3,20 @@ name: Frontend E2E Tests
 on:
   push:
     paths:
-      - 'backend/frontend/**'
-      - 'backend/app/**'
-      - 'backend/database/**'
-      - 'backend/routes/**'
-      - '.github/workflows/frontend-e2e.yml'
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/**'
   pull_request:
     paths:
-      - 'backend/frontend/**'
-      - 'backend/app/**'
-      - 'backend/database/**'
-      - 'backend/routes/**'
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/**'
   schedule:
     - cron: '0 3 * * *'  # Daily at 3:00 UTC
   workflow_dispatch:
 
 concurrency:
-  group: frontend-e2e-${{ github.ref }}
+  group: ci-${{ github.ref_name }}-${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
@@ -29,7 +26,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: backend/frontend
+        working-directory: frontend
     
     env:
       NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
@@ -57,15 +54,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          node-version: '20.x'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
       
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('backend/frontend/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-playwright-
       
       # Backend setup
@@ -121,7 +121,7 @@ jobs:
       
       # Frontend setup
       - name: Install frontend dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       
       - name: Set API base URL
         run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
@@ -130,10 +130,10 @@ jobs:
         run: npx playwright install --with-deps
       
       - name: Build frontend
-        run: npm run build || echo "no build step"
-      
+        run: pnpm run build || echo "no build step"
+
       - name: Start frontend server
-        run: nohup npm run start -- -p 3001 > ../frontend.log 2>&1 &
+        run: nohup pnpm run start -- -p 3001 > ../frontend.log 2>&1 &
       
       - name: Wait for frontend server
         run: |
@@ -149,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: backend/frontend/playwright-report
+          path: frontend/playwright-report
           retention-days: 3
 
       - name: Upload test artifacts (on failure)
@@ -158,6 +158,6 @@ jobs:
         with:
           name: pw-artifacts
           path: |
-            backend/frontend/test-results
-            backend/frontend/playwright/.cache
+            frontend/test-results
+            frontend/playwright/.cache
           retention-days: 3
