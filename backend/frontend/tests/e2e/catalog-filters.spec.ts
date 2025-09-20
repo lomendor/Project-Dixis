@@ -31,8 +31,8 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(1000);
     
     // Test price filter
-    await page.fill('input[placeholder="Min"]', '5');
-    await page.fill('input[placeholder="Max"]', '20');
+    await page.fill('[data-testid="min-price-input"]', '5');
+    await page.fill('[data-testid="max-price-input"]', '20');
     await page.waitForTimeout(1000);
     
     // Test organic filter
@@ -51,10 +51,10 @@ test.describe('Catalog Filters & Search', () => {
     }
     
     // Verify that filters are active
-    const filterBadge = page.locator('span:has-text("Clear All")').first();
-    
+    const filterBadge = page.locator('[data-testid="clear-all-button"]').first();
+
     // Clear all filters
-    await page.click('button:has-text("Clear All")');
+    await page.click('[data-testid="clear-all-button"]');
     await page.waitForTimeout(1000);
     
     // Verify products are shown again - just check visibility directly
@@ -73,7 +73,7 @@ test.describe('Catalog Filters & Search', () => {
     
     // Open filters and apply category filter
     await page.click('[data-testid="filters-button"]');
-    const categorySelect = page.locator('label:has-text("Category")').locator('..').locator('select');
+    const categorySelect = page.locator('[data-testid="category-select"]');
     await categorySelect.selectOption({ index: 1 });
     await page.waitForTimeout(1000);
     
@@ -93,11 +93,11 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForTimeout(2000);
     
     // Should show empty state
-    await expect(page.locator('text=No products found')).toBeVisible();
-    await expect(page.locator('button:has-text("Clear Filters")')).toBeVisible();
-    
+    await expect(page.locator('text=Δεν βρέθηκαν προϊόντα')).toBeVisible();
+    await expect(page.locator('[data-testid="empty-state-action-button"]')).toBeVisible();
+
     // Clear filters using empty state button
-    await page.click('button:has-text("Clear Filters")');
+    await page.click('[data-testid="empty-state-action-button"]');
     await page.waitForTimeout(1000);
     
     // Should show products again  

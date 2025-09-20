@@ -101,6 +101,7 @@ export default function Home() {
                 </button>
                 {hasActiveFilters && (
                   <button
+                    data-testid="clear-all-button"
                     onClick={clearAllFilters}
                     className="px-4 py-2 text-gray-600 hover:text-gray-800"
                   >
@@ -120,6 +121,7 @@ export default function Home() {
                       {getGreekLabel('search.category', 'Κατηγορία')}
                     </label>
                     <select
+                      data-testid="category-select"
                       value={filters.category}
                       onChange={(e) => updateFilter('category', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -160,6 +162,7 @@ export default function Home() {
                     <div className="flex gap-2">
                       <input
                         type="number"
+                        data-testid="min-price-input"
                         placeholder="Ελάχιστο"
                         value={filters.minPrice}
                         onChange={(e) => updateFilter('minPrice', e.target.value)}
@@ -168,6 +171,7 @@ export default function Home() {
                       <span className="self-center text-gray-500">-</span>
                       <input
                         type="number"
+                        data-testid="max-price-input"
                         placeholder="Μέγιστο"
                         value={filters.maxPrice}
                         onChange={(e) => updateFilter('maxPrice', e.target.value)}
