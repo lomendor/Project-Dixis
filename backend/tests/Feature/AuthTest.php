@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('auth')]
 class AuthTest extends TestCase
@@ -21,7 +20,7 @@ class AuthTest extends TestCase
             'email' => 'john@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
@@ -36,26 +35,26 @@ class AuthTest extends TestCase
                     'role',
                     'email_verified_at',
                     'created_at',
-                    'updated_at'
+                    'updated_at',
                 ],
                 'token',
-                'token_type'
+                'token_type',
             ])
             ->assertJson([
                 'message' => 'User registered successfully',
                 'user' => [
                     'name' => 'John Doe',
                     'email' => 'john@example.com',
-                    'role' => 'consumer'
+                    'role' => 'consumer',
                 ],
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
             ]);
 
         // Assert user was created in database
         $this->assertDatabaseHas('users', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         // Assert token was created
@@ -70,7 +69,7 @@ class AuthTest extends TestCase
             'email' => 'invalid-email',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
@@ -86,7 +85,7 @@ class AuthTest extends TestCase
             'email' => 'john@example.com',
             'password' => 'password123',
             'password_confirmation' => 'differentpassword',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
@@ -102,7 +101,7 @@ class AuthTest extends TestCase
             'email' => 'john@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => 'invalid-role'
+            'role' => 'invalid-role',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
@@ -121,7 +120,7 @@ class AuthTest extends TestCase
             'email' => 'john@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ];
 
         $response = $this->postJson('/api/v1/auth/register', $userData);
@@ -135,12 +134,12 @@ class AuthTest extends TestCase
         // Create user with known password
         $user = User::factory()->create([
             'email' => 'john@example.com',
-            'password' => Hash::make('password123')
+            'password' => Hash::make('password123'),
         ]);
 
         $loginData = [
             'email' => 'john@example.com',
-            'password' => 'password123'
+            'password' => 'password123',
         ];
 
         $response = $this->postJson('/api/v1/auth/login', $loginData);
@@ -155,14 +154,14 @@ class AuthTest extends TestCase
                     'role',
                     'email_verified_at',
                     'created_at',
-                    'updated_at'
+                    'updated_at',
                 ],
                 'token',
-                'token_type'
+                'token_type',
             ])
             ->assertJson([
                 'message' => 'Login successful',
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
             ]);
 
         // Assert token was created
@@ -174,31 +173,35 @@ class AuthTest extends TestCase
         // Create user with known password
         User::factory()->create([
             'email' => 'john@example.com',
-            'password' => Hash::make('password123')
+            'password' => Hash::make('password123'),
         ]);
 
         $loginData = [
             'email' => 'john@example.com',
-            'password' => 'wrongpassword'
+            'password' => 'wrongpassword',
         ];
 
         $response = $this->postJson('/api/v1/auth/login', $loginData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials',
+            ]);
     }
 
     public function test_user_cannot_login_with_nonexistent_email(): void
     {
         $loginData = [
             'email' => 'nonexistent@example.com',
-            'password' => 'password123'
+            'password' => 'password123',
         ];
 
         $response = $this->postJson('/api/v1/auth/login', $loginData);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Invalid credentials',
+            ]);
     }
 
     public function test_authenticated_user_can_logout(): void
@@ -207,12 +210,12 @@ class AuthTest extends TestCase
         $token = $user->createToken('test-token');
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token->plainTextToken,
+            'Authorization' => 'Bearer '.$token->plainTextToken,
         ])->postJson('/api/v1/auth/logout');
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Logged out successfully'
+                'message' => 'Logged out successfully',
             ]);
 
         // Assert token was deleted
@@ -234,7 +237,7 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Logged out from all devices successfully'
+                'message' => 'Logged out from all devices successfully',
             ]);
 
         // Assert all tokens were deleted
@@ -246,7 +249,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create([
             'name' => 'John Doe',
             'email' => 'john@example.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -261,15 +264,15 @@ class AuthTest extends TestCase
                     'role',
                     'email_verified_at',
                     'created_at',
-                    'updated_at'
-                ]
+                    'updated_at',
+                ],
             ])
             ->assertJson([
                 'user' => [
                     'name' => 'John Doe',
                     'email' => 'john@example.com',
-                    'role' => 'consumer'
-                ]
+                    'role' => 'consumer',
+                ],
             ]);
     }
 

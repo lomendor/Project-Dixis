@@ -1,0 +1,108 @@
+name: Danger PR Gatekeeper
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  danger:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Soft warnings, don't block
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for proper diffs
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '18'
+          
+      - name: Install Danger
+        run: npm install -g danger
+        
+      - name: Create Dangerfile
+        run: |
+          cat > Dangerfile.js << 'EOF'
+          import { danger, warn, message } from 'danger';
+          
+          const pr = danger.github.pr;
+          const git = danger.git;
+          
+          // Check PR size (soft warning if > 300 LOC)
+          const bigPRThreshold = 300;
+          const totalChanges = git.insertions + git.deletions;
+          if (totalChanges > bigPRThreshold) {
+            warn(`⚠️ Large PR detected (${totalChanges} LOC). Consider breaking into smaller PRs for easier review.`);
+          }
+          
+          // Check if CI YAML files are modified
+          const workflowFiles = git.modified_files.filter(file => 
+            file.includes('.github/workflows/') || 
+            file.includes('playwright.config') ||
+            file.includes('package.json')
+          );
+          if (workflowFiles.length > 0) {
+            warn(`🔧 Infrastructure files modified: ${workflowFiles.join(', ')}. Please verify CI still passes.`);
+          }
+          
+          // Check for port changes
+          const hasPortChanges = git.modified_files.some(file => {
+            if (file.includes('src/') || file.includes('app/')) {
+              const diff = git.diffForFile(file);
+              return diff && (diff.added.includes(':3000') || diff.added.includes(':8000'));
+            }
+            return false;
+          });
+          if (hasPortChanges) {
+            warn(`🚨 Port changes detected (3000/8000). Should use 3001/8001 per guardrails.`);
+          }
+          
+          // Check for Next.js version changes
+          const packageJsonFiles = git.modified_files.filter(file => file.includes('package.json'));
+          if (packageJsonFiles.length > 0) {
+            packageJsonFiles.forEach(file => {
+              const diff = git.diffForFile(file);
+              if (diff && (diff.added.includes('"next"') || diff.added.includes('"react"'))) {
+                warn(`📦 Framework version changes in ${file}. Verify 15.5.0 pinning maintained.`);
+              }
+            });
+          }
+          
+          // Check for missing "Generated-by" in commit message (soft reminder)
+          const commits = git.commits;
+          const hasGeneratedBy = commits.some(commit => 
+            commit.message.includes('Generated-by') || 
+            commit.message.includes('generated-by')
+          );
+          if (!hasGeneratedBy && totalChanges > 50) {
+            message(`💡 Consider adding "Generated-by: [tool/agent]" to commit messages for traceability.`);
+          }
+          
+          // Check for missing artifacts (if E2E tests are added/modified)
+          const e2eFiles = git.modified_files.filter(file => 
+            file.includes('/e2e/') || file.includes('test') && file.includes('.spec.')
+          );
+          if (e2eFiles.length > 0) {
+            message(`🧪 E2E tests modified. Verify test-results/ and playwright-report/ artifacts are uploaded in CI.`);
+          }
+          
+          // Positive reinforcement
+          if (totalChanges <= bigPRThreshold && workflowFiles.length === 0) {
+            message(`✅ PR size looks good (${totalChanges} LOC). Clean and focused changes!`);
+          }
+          
+          // PR description check
+          if (!pr.body || pr.body.length < 50) {
+            warn(`📝 PR description seems brief. Consider adding more context about changes and testing.`);
+          }
+          EOF
+        
+      - name: Run Danger
+        run: |
+          echo "⚠️ Danger temporarily disabled - permissions issue"
+          echo "This would run: danger ci"
+          # danger ci
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}

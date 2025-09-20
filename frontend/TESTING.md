@@ -1,0 +1,209 @@
+# Testing Guide - Project Dixis
+
+## Unit Testing with Vitest & MSW
+
+### API Testing Patterns
+Unit tests use **MSW (Mock Service Worker)** for API mocking with realistic response patterns. See `tests/unit/checkout-api-extended.spec.ts` for comprehensive examples including retry logic, Greek postal codes, and network resilience scenarios.
+
+## E2E Testing with Playwright
+
+### Prerequisites
+```bash
+# Ensure backend is running on port 8001
+cd backend && php artisan serve --host=127.0.0.1 --port=8001
+
+# Ensure frontend is running on port 3001  
+cd backend/frontend && NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
+```
+
+### Test Suites
+
+#### Analytics & Observability Tests
+**Test File**: `tests/e2e/analytics-observability.spec.ts`  
+**Coverage**: 7 comprehensive scenarios testing analytics tracking and error boundary functionality
+
+**Run Analytics Tests Only:**
+```bash
+npm run test:e2e:analytics
+```
+
+**Test Scenarios:**
+1. **Page View Analytics**: Automatic tracking verification
+2. **Error Boundary Display**: User-friendly error page with recovery options
+3. **Analytics Events Viewer**: Real-time event display and management  
+4. **Add to Cart Tracking**: Product interaction analytics
+5. **React Error Catching**: Component-level error boundary functionality
+6. **Event Download**: JSON export functionality
+7. **Console Error Logging**: Error tracking and analytics integration
+
+**Expected Results**: 7/7 PASS ✅
+
+**Evidence Artifacts Generated:**
+- `test-results/analytics-page-views.png`
+- `test-results/error-boundary-active.png`
+- `test-results/error-boundary-recovery.png`
+- `test-results/analytics-events-display.png`
+- `test-results/add-to-cart-tracked.png`
+- `test-results/react-component-error-caught.png`
+- `test-results/analytics-download-triggered.png`
+- `playwright-report/` (HTML report)
+
+#### All E2E Tests
+```bash
+npm run test:e2e
+```
+
+#### Interactive Testing
+```bash
+# Run with UI mode for debugging
+npm run test:e2e:ui
+
+# Run with debug mode for step-by-step execution
+npm run e2e:debug
+```
+
+### Test Configuration
+
+#### Environment Variables
+- `PLAYWRIGHT_BASE_URL`: Frontend URL (default: http://localhost:3001)
+- `NEXT_PUBLIC_API_BASE_URL`: Backend API URL (default: http://127.0.0.1:8001/api/v1)
+
+#### Browsers Tested
+- Chromium (primary)
+- Firefox
+- WebKit (Safari)
+
+### Troubleshooting
+
+#### Common Issues
+1. **Port Conflicts**: Ensure ports 3001 and 8001 are available
+2. **Database Issues**: Run `php artisan migrate:fresh --seed` before testing
+3. **Test Failures**: Check that both frontend and backend servers are running
+
+#### Debugging Failed Tests
+```bash
+# View HTML report
+npx playwright show-report
+
+# Run specific test with debug
+npx playwright test tests/e2e/analytics-observability.spec.ts --debug
+
+# Run with trace
+npx playwright test --trace on
+```
+
+### Analytics Testing Details
+
+The analytics system tracks:
+- **Page Views**: Automatic tracking on route changes
+- **User Interactions**: Add to cart, checkout start, order complete
+- **Error Events**: Error boundary triggers with full context
+- **User Sessions**: Session management with localStorage persistence
+
+**Testing Strategy:**
+- Real browser interaction simulation
+- Local storage verification
+- UI state validation
+- Error boundary trigger and recovery testing
+- Event data structure validation
+
+**Test Data Management:**
+- Each test starts with clean analytics state
+- Events are cleared between test scenarios
+- Global `window.__ANALYTICS` exposure for verification
+
+## Unit Testing
+
+### Checkout API Extensions
+**Test File**: `tests/unit/checkout-api-extended.spec.ts`  
+**Coverage**: Comprehensive testing of retry utilities, error categorization, and Greek postal code handling
+
+**Run Unit Tests:**
+```bash
+npm run test:unit
+```
+
+#### Key Features Tested
+
+**1. Retry with Backoff (`retryWithBackoff`)**
+```typescript
+import { retryWithBackoff } from '@/lib/api/checkout';
+
+// Basic retry with exponential backoff
+await retryWithBackoff(apiCall, { 
+  retries: 3, 
+  baseMs: 250,
+  jitter: true 
+});
+
+// With abort signal for timeout control
+const controller = new AbortController();
+await retryWithBackoff(apiCall, { 
+  abortSignal: controller.signal 
+});
+```
+
+**2. Error Categorization (`categorizeError`)**  
+Automatically categorizes API errors into actionable types:
+- `network`: Connection failures, fetch errors
+- `timeout`: Request timeouts
+- `validation`: HTTP 4xx, validation errors  
+- `server`: HTTP 5xx, internal server errors
+- `unknown`: Unclassified errors
+
+**3. Greek Postal Code Zones**
+Zone-based shipping calculation with validation:
+- **Athens Metro** (10xxx-12xxx): €3.50, 1-day delivery
+- **Thessaloniki** (54xxx-56xxx): €4.00, 2-day delivery  
+- **Islands** (80xxx-85xxx): €8.00, 4-day delivery
+- **Other Greece**: €5.50, 2-day delivery
+
+#### Test Scenarios Covered
+- Success on first attempt
+- Retry logic with exponential backoff
+- Abort signal handling
+- Error categorization accuracy
+- Greek postal code edge cases
+- Network failure scenarios
+- Validation error handling
+- Concurrent operation performance
+
+### Checkout API Performance Testing
+
+**Test File**: `tests/unit/checkout-api-performance.spec.ts`
+**Coverage**: Circuit breaker patterns, concurrency stress testing, timeout handling
+
+**Performance Test Scenarios:**
+1. **Concurrent Operations**: 10 parallel cart operations, 3 parallel checkouts with progressive delays
+2. **Timeout Handling**: Slow server responses (1.5s+), request timeouts (8s+)
+3. **Circuit Breaker**: Failure threshold testing, automatic reset after timeout, response time metrics
+4. **Resource Management**: Memory pressure testing (50+ operations), cleanup verification
+5. **Greek Postal Edge Cases**: Remote islands (19010, 83103), validation (00000 invalid, 10671 valid)
+
+**Circuit Breaker Usage:**
+```typescript
+import { checkoutCircuitBreaker } from '@/lib/api/checkout-monitor'
+
+// Wrap checkout operations
+const result = await checkoutCircuitBreaker.execute(() => 
+  checkoutApi.processValidatedCheckout(form)
+)
+
+// Monitor health
+const health = checkoutCircuitBreaker.getHealthStatus()
+// { state: 'CLOSED'|'OPEN'|'HALF_OPEN', failureRate: 0.2, avgResponseTime: 150, isHealthy: true }
+```
+
+**MSW Test Handlers:**
+- `rateLimitHandlers`: Rate limiting simulation (429 after 5 requests)
+- `networkPartitionHandlers`: Partial failures (cart OK, checkout fails)  
+- `greekPostalHandlers`: Islands shipping costs, postal code validation
+- `circuitBreakerTestHandlers`: 30% failure rate for breaker testing
+
+### Continuous Integration
+
+Tests run automatically in CI/CD pipeline with:
+- Artifact retention on failure (3 days)
+- Video recording for debugging
+- Screenshot capture on test failure
+- HTML report generation

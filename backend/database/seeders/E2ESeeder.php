@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Producer;
 use App\Models\Product;
 use App\Models\ProductImage;
-use Illuminate\Support\Str;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class E2ESeeder extends Seeder
 {
@@ -17,7 +16,39 @@ class E2ESeeder extends Seeder
      */
     public function run(): void
     {
-        // Create test user for E2E
+        // Create deterministic test users for E2E (in testing and local environments)
+        if (app()->environment(['testing', 'local'])) {
+
+            // Test consumer user
+            $testUser = User::firstOrCreate(
+                ['email' => 'test@dixis.local'],
+                [
+                    'name' => 'Test User',
+                    'email' => 'test@dixis.local',
+                    'role' => 'consumer',
+                    'password' => bcrypt('Passw0rd!'),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Test producer user
+            $testProducerUser = User::firstOrCreate(
+                ['email' => 'producer@dixis.local'],
+                [
+                    'name' => 'Test Producer User',
+                    'email' => 'producer@dixis.local',
+                    'role' => 'producer',
+                    'password' => bcrypt('Passw0rd!'),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            echo "🔐 E2E Test Users Created:\n";
+            echo "   Consumer: test@dixis.local / Passw0rd!\n";
+            echo "   Producer: producer@dixis.local / Passw0rd!\n";
+        }
+
+        // Create legacy test user for backwards compatibility
         $e2eUser = User::firstOrCreate(
             ['email' => 'e2e@example.com'],
             [
@@ -58,8 +89,18 @@ class E2ESeeder extends Seeder
             );
         }
 
-        // Create 6 deterministic products
+        // Create 3 core deterministic products for E2E search testing (minimal set)
         $productsData = [
+            [
+                'name' => 'Πορτοκάλια E2E Test',
+                'slug' => 'portokalia-e2e-test',
+                'description' => 'Φρέσκα πορτοκάλια για E2E δοκιμές',
+                'price' => 3.75,
+                'unit' => 'kg',
+                'stock' => 60,
+                'category' => 'e2e-fruits',
+                'image_url' => 'https://images.unsplash.com/photo-1547514701-42782101795e',
+            ],
             [
                 'name' => 'E2E Test Tomatoes',
                 'slug' => 'e2e-test-tomatoes',
@@ -71,49 +112,9 @@ class E2ESeeder extends Seeder
                 'image_url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa',
             ],
             [
-                'name' => 'E2E Test Lettuce',
-                'slug' => 'e2e-test-lettuce',
-                'description' => 'Crispy test lettuce for E2E testing',
-                'price' => 2.50,
-                'unit' => 'piece',
-                'stock' => 50,
-                'category' => 'e2e-vegetables',
-                'image_url' => 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1',
-            ],
-            [
-                'name' => 'E2E Test Apples',
-                'slug' => 'e2e-test-apples',
-                'description' => 'Sweet test apples for E2E testing',
-                'price' => 4.25,
-                'unit' => 'kg',
-                'stock' => 75,
-                'category' => 'e2e-fruits',
-                'image_url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
-            ],
-            [
-                'name' => 'E2E Test Oranges',
-                'slug' => 'e2e-test-oranges',
-                'description' => 'Juicy test oranges for E2E testing',
-                'price' => 3.75,
-                'unit' => 'kg',
-                'stock' => 60,
-                'category' => 'e2e-fruits',
-                'image_url' => 'https://images.unsplash.com/photo-1547514701-42782101795e',
-            ],
-            [
-                'name' => 'E2E Test Oregano',
-                'slug' => 'e2e-test-oregano',
-                'description' => 'Aromatic test oregano for E2E testing',
-                'price' => 5.99,
-                'unit' => 'packet',
-                'stock' => 25,
-                'category' => 'e2e-herbs',
-                'image_url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9',
-            ],
-            [
-                'name' => 'E2E Test Basil',
-                'slug' => 'e2e-test-basil',
-                'description' => 'Fresh test basil for E2E testing',
+                'name' => 'Ελληνικό Βασιλικό',
+                'slug' => 'elliniko-vasiliko',
+                'description' => 'Αρωματικό βασιλικό για E2E δοκιμές',
                 'price' => 4.50,
                 'unit' => 'packet',
                 'stock' => 30,
@@ -124,7 +125,7 @@ class E2ESeeder extends Seeder
 
         foreach ($productsData as $productData) {
             $category = $categories[$productData['category']];
-            
+
             $product = Product::firstOrCreate(
                 ['slug' => $productData['slug']],
                 [
@@ -148,15 +149,15 @@ class E2ESeeder extends Seeder
             // Create product image
             ProductImage::firstOrCreate([
                 'product_id' => $product->id,
-                'url' => $productData['image_url']
+                'url' => $productData['image_url'],
             ], [
                 'product_id' => $product->id,
                 'url' => $productData['image_url'],
                 'is_primary' => true,
-                'sort_order' => 0
+                'sort_order' => 0,
             ]);
         }
 
-        echo "✅ E2E Seeder: Created 1 user, 3 categories, 6 products\n";
+        echo "✅ E2E Seeder: Created deterministic users, 3 categories, 3 products (Greek & English for search)\n";
     }
 }

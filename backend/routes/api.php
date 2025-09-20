@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/health', function () {
     try {
@@ -10,7 +10,7 @@ Route::get('/health', function () {
         DB::connection()->getPdo();
         $dbStatus = 'connected';
     } catch (\Exception $e) {
-        $dbStatus = 'failed: ' . $e->getMessage();
+        $dbStatus = 'failed: '.$e->getMessage();
     }
 
     return response()->json([
@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1/auth')->group(function () {
     Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
-    
+
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
@@ -43,15 +43,15 @@ Route::prefix('v1')->group(function () {
     // Products (public, read-only)
     Route::get('products', [App\Http\Controllers\Api\V1\ProductController::class, 'index'])->name('api.v1.products.index');
     Route::get('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'show'])->name('api.v1.products.show');
-    
+
     // Products CRUD (authenticated)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('products', [App\Http\Controllers\Api\V1\ProductController::class, 'store'])->name('api.v1.products.store');
         Route::patch('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'update'])->name('api.v1.products.update');
         Route::delete('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'destroy'])->name('api.v1.products.destroy');
     });
-    
-    // Authenticated user orders 
+
+    // Authenticated user orders
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index'])->name('api.v1.orders.index');
         Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show'])->name('api.v1.orders.show');
@@ -60,27 +60,27 @@ Route::prefix('v1')->group(function () {
         Route::post('orders/checkout', [App\Http\Controllers\Api\OrderController::class, 'checkout'])->name('api.v1.orders.checkout')
             ->middleware('throttle:5,1'); // 5 checkouts per minute
     });
-    
+
     // Producers (public, read-only)
     Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index');
     Route::get('producers/{producer}', [App\Http\Controllers\Api\V1\ProducerController::class, 'show'])->name('api.v1.producers.show');
-    
+
     // Enhanced Public Products API
     Route::prefix('public')->group(function () {
         Route::get('products', [App\Http\Controllers\Public\ProductController::class, 'index']);
         Route::get('products/{id}', [App\Http\Controllers\Public\ProductController::class, 'show']);
-        
+
         // Public Producers API
         Route::get('producers', [App\Http\Controllers\Public\ProducerController::class, 'index']);
         Route::get('producers/{id}', [App\Http\Controllers\Public\ProducerController::class, 'show']);
-        
+
         // Public Orders API (demo access - no PII exposed)
         Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.public.orders.index');
         Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.public.orders.show');
         Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
             ->middleware('throttle:10,1'); // 10 requests per minute for order creation
     });
-    
+
     // Cart (authenticated)
     Route::middleware('auth:sanctum')->prefix('cart')->group(function () {
         Route::get('items', [App\Http\Controllers\Api\CartController::class, 'index']);
@@ -89,7 +89,101 @@ Route::prefix('v1')->group(function () {
         Route::patch('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
     });
-    
+
+    // Shipping routes
+    Route::prefix('shipping')->group(function () {
+        // Public quote endpoint
+        Route::post('quote', [App\Http\Controllers\Api\ShippingController::class, 'getQuote'])
+            ->middleware('throttle:60,1'); // 60 quote requests per minute
+
+        // Public tracking endpoint
+        Route::get('tracking/{trackingCode}', [App\Http\Controllers\Api\ShippingController::class, 'getTracking'])
+            ->middleware('throttle:60,1'); // 60 tracking requests per minute
+
+        // Admin-only label creation
+        Route::post('labels/{order}', [App\Http\Controllers\Api\ShippingController::class, 'createLabel'])
+            ->middleware(['auth:sanctum', 'throttle:10,1']); // Admin only, 10 label requests per minute
+
+        // Public locker search endpoint (feature-flagged)
+        Route::get('lockers/search', [App\Http\Controllers\Api\LockerController::class, 'search'])
+            ->middleware('throttle:60,1'); // 60 locker search requests per minute
+    });
+
+    // Order shipment details (authenticated users)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('orders/{order}/shipment', [App\Http\Controllers\Api\ShippingController::class, 'getOrderShipment']);
+    });
+
+    // Payment methods (public - no auth required)
+    Route::get('payment/methods', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentMethods']);
+
+    // Payments (authenticated)
+    Route::middleware('auth:sanctum')->prefix('payments')->group(function () {
+        Route::post('orders/{order}/init', [App\Http\Controllers\Api\PaymentController::class, 'initPayment'])
+            ->middleware('throttle:10,1'); // 10 payment inits per minute
+        Route::post('orders/{order}/confirm', [App\Http\Controllers\Api\PaymentController::class, 'confirmPayment'])
+            ->middleware('throttle:20,1'); // 20 confirmations per minute
+        Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\PaymentController::class, 'cancelPayment'])
+            ->middleware('throttle:10,1'); // 10 cancellations per minute
+        Route::get('orders/{order}/status', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentStatus'])
+            ->middleware('throttle:30,1'); // 30 status checks per minute
+    });
+
+    // Refunds (admin only - simplified auth for now)
+    Route::middleware('auth:sanctum')->prefix('refunds')->group(function () {
+        Route::get('orders', [App\Http\Controllers\Api\RefundController::class, 'index'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::post('orders/{order}', [App\Http\Controllers\Api\RefundController::class, 'create'])
+            ->middleware('throttle:5,1'); // 5 refunds per minute
+        Route::get('orders/{order}', [App\Http\Controllers\Api\RefundController::class, 'show'])
+            ->middleware('throttle:30,1'); // 30 status checks per minute
+    });
+
+    // Notifications (authenticated users)
+    Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\NotificationController::class, 'index'])
+            ->middleware('throttle:100,1'); // 100 requests per minute
+        Route::get('unread-count', [App\Http\Controllers\Api\NotificationController::class, 'unreadCount'])
+            ->middleware('throttle:120,1'); // 120 requests per minute
+        Route::get('latest', [App\Http\Controllers\Api\NotificationController::class, 'latest'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::patch('{notification}/read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::patch('read-all', [App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead'])
+            ->middleware('throttle:10,1'); // 10 requests per minute
+    });
+
+    // Admin Analytics (simplified auth for now - should be admin middleware in production)
+    Route::middleware('auth:sanctum')->prefix('admin/analytics')->group(function () {
+        Route::get('sales', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'sales'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('orders', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'orders'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('products', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'products'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('producers', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'producers'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('dashboard', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'dashboard'])
+            ->middleware('throttle:120,1'); // 120 requests per minute for dashboard
+    });
+
+    // Admin Shipping (read-only rate tables interface)
+    Route::middleware('auth:sanctum')->prefix('admin/shipping')->group(function () {
+        Route::get('rates', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getRates'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('zones', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getZoneInfo'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('simulate', [App\Http\Controllers\Api\Admin\ShippingController::class, 'simulateQuote'])
+            ->middleware('throttle:30,1'); // 30 simulations per minute
+    });
+
+});
+
+// Webhook routes (no authentication - verified by signature)
+Route::prefix('webhooks')->group(function () {
+    Route::post('stripe', [App\Http\Controllers\Api\WebhookController::class, 'stripe']);
+    Route::post('viva', [App\Http\Controllers\Api\WebhookController::class, 'viva']);
+    Route::post('payment', [App\Http\Controllers\Api\WebhookController::class, 'payment']);
 });
 
 // OpenAPI Documentation
@@ -104,8 +198,8 @@ Route::get('v1/openapi.json', function () {
         'servers' => [
             [
                 'url' => url('/api'),
-                'description' => 'Production API Server'
-            ]
+                'description' => 'Production API Server',
+            ],
         ],
         'paths' => [
             '/health' => [
@@ -123,14 +217,14 @@ Route::get('v1/openapi.json', function () {
                                             'status' => ['type' => 'string', 'example' => 'ok'],
                                             'database' => ['type' => 'string', 'example' => 'connected'],
                                             'timestamp' => ['type' => 'string', 'format' => 'date-time'],
-                                            'version' => ['type' => 'string', 'example' => '11.45.2']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                            'version' => ['type' => 'string', 'example' => '11.45.2'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             '/v1/public/products' => [
                 'get' => [
@@ -141,32 +235,32 @@ Route::get('v1/openapi.json', function () {
                             'name' => 'search',
                             'in' => 'query',
                             'description' => 'Search in product name and description',
-                            'schema' => ['type' => 'string']
+                            'schema' => ['type' => 'string'],
                         ],
                         [
                             'name' => 'category',
-                            'in' => 'query', 
+                            'in' => 'query',
                             'description' => 'Filter by category slug',
-                            'schema' => ['type' => 'string']
+                            'schema' => ['type' => 'string'],
                         ],
                         [
                             'name' => 'sort',
                             'in' => 'query',
                             'description' => 'Sort field (price, name, created_at)',
-                            'schema' => ['type' => 'string', 'enum' => ['price', 'name', 'created_at']]
+                            'schema' => ['type' => 'string', 'enum' => ['price', 'name', 'created_at']],
                         ],
                         [
                             'name' => 'dir',
                             'in' => 'query',
-                            'description' => 'Sort direction (asc, desc)', 
-                            'schema' => ['type' => 'string', 'enum' => ['asc', 'desc']]
+                            'description' => 'Sort direction (asc, desc)',
+                            'schema' => ['type' => 'string', 'enum' => ['asc', 'desc']],
                         ],
                         [
                             'name' => 'per_page',
                             'in' => 'query',
                             'description' => 'Items per page (max 100)',
-                            'schema' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100]
-                        ]
+                            'schema' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
@@ -179,17 +273,17 @@ Route::get('v1/openapi.json', function () {
                                             'current_page' => ['type' => 'integer'],
                                             'data' => [
                                                 'type' => 'array',
-                                                'items' => ['$ref' => '#/components/schemas/Product']
+                                                'items' => ['$ref' => '#/components/schemas/Product'],
                                             ],
                                             'total' => ['type' => 'integer'],
-                                            'per_page' => ['type' => 'integer']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                            'per_page' => ['type' => 'integer'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             '/v1/public/products/{id}' => [
                 'get' => [
@@ -201,23 +295,23 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Product ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
                             'description' => 'Product details',
                             'content' => [
                                 'application/json' => [
-                                    'schema' => ['$ref' => '#/components/schemas/Product']
-                                ]
-                            ]
+                                    'schema' => ['$ref' => '#/components/schemas/Product'],
+                                ],
+                            ],
                         ],
                         '404' => [
-                            'description' => 'Product not found'
-                        ]
-                    ]
-                ]
+                            'description' => 'Product not found',
+                        ],
+                    ],
+                ],
             ],
             '/v1/producer/dashboard/kpi' => [
                 'get' => [
@@ -235,14 +329,14 @@ Route::get('v1/openapi.json', function () {
                                             'total_products' => ['type' => 'integer'],
                                             'active_products' => ['type' => 'integer'],
                                             'total_orders' => ['type' => 'integer'],
-                                            'revenue' => ['type' => 'number']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                            'revenue' => ['type' => 'number'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             '/v1/producer/products/{product}/toggle' => [
                 'patch' => [
@@ -255,20 +349,20 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Product ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
                             'description' => 'Product status toggled successfully',
                             'content' => [
                                 'application/json' => [
-                                    'schema' => ['$ref' => '#/components/schemas/Product']
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'schema' => ['$ref' => '#/components/schemas/Product'],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             '/v1/producer/messages/{message}/read' => [
                 'patch' => [
@@ -281,15 +375,15 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Message ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
-                            'description' => 'Message marked as read'
-                        ]
-                    ]
-                ]
+                            'description' => 'Message marked as read',
+                        ],
+                    ],
+                ],
             ],
             '/v1/producer/messages/{message}/replies' => [
                 'post' => [
@@ -302,8 +396,8 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Message ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'requestBody' => [
                         'required' => true,
@@ -312,19 +406,19 @@ Route::get('v1/openapi.json', function () {
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'content' => ['type' => 'string']
+                                        'content' => ['type' => 'string'],
                                     ],
-                                    'required' => ['content']
-                                ]
-                            ]
-                        ]
+                                    'required' => ['content'],
+                                ],
+                            ],
+                        ],
                     ],
                     'responses' => [
                         '201' => [
-                            'description' => 'Reply sent successfully'
-                        ]
-                    ]
-                ]
+                            'description' => 'Reply sent successfully',
+                        ],
+                    ],
+                ],
             ],
             '/v1/producer/dashboard/top-products' => [
                 'get' => [
@@ -336,8 +430,8 @@ Route::get('v1/openapi.json', function () {
                             'name' => 'limit',
                             'in' => 'query',
                             'description' => 'Maximum number of products to return (1-50)',
-                            'schema' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 10]
-                        ]
+                            'schema' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 50, 'default' => 10],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
@@ -349,17 +443,17 @@ Route::get('v1/openapi.json', function () {
                                         'properties' => [
                                             'top_products' => [
                                                 'type' => 'array',
-                                                'items' => ['$ref' => '#/components/schemas/ProductAnalytics']
+                                                'items' => ['$ref' => '#/components/schemas/ProductAnalytics'],
                                             ],
                                             'limit' => ['type' => 'integer'],
-                                            'total_products_shown' => ['type' => 'integer']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                            'total_products_shown' => ['type' => 'integer'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             '/v1/cart/items' => [
                 'get' => [
@@ -376,16 +470,16 @@ Route::get('v1/openapi.json', function () {
                                         'properties' => [
                                             'cart_items' => [
                                                 'type' => 'array',
-                                                'items' => ['$ref' => '#/components/schemas/CartItem']
+                                                'items' => ['$ref' => '#/components/schemas/CartItem'],
                                             ],
                                             'total_items' => ['type' => 'integer'],
-                                            'total_amount' => ['type' => 'string', 'format' => 'decimal']
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                            'total_amount' => ['type' => 'string', 'format' => 'decimal'],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 'post' => [
                     'summary' => 'Add Item to Cart',
@@ -399,12 +493,12 @@ Route::get('v1/openapi.json', function () {
                                     'type' => 'object',
                                     'properties' => [
                                         'product_id' => ['type' => 'integer'],
-                                        'quantity' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100]
+                                        'quantity' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
                                     ],
-                                    'required' => ['product_id', 'quantity']
-                                ]
-                            ]
-                        ]
+                                    'required' => ['product_id', 'quantity'],
+                                ],
+                            ],
+                        ],
                     ],
                     'responses' => [
                         '201' => [
@@ -415,17 +509,17 @@ Route::get('v1/openapi.json', function () {
                                         'type' => 'object',
                                         'properties' => [
                                             'message' => ['type' => 'string'],
-                                            'cart_item' => ['$ref' => '#/components/schemas/CartItem']
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'cart_item' => ['$ref' => '#/components/schemas/CartItem'],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         '422' => [
-                            'description' => 'Validation errors (stock insufficient, product inactive, etc.)'
-                        ]
-                    ]
-                ]
+                            'description' => 'Validation errors (stock insufficient, product inactive, etc.)',
+                        ],
+                    ],
+                ],
             ],
             '/v1/cart/items/{cartItem}' => [
                 'patch' => [
@@ -438,8 +532,8 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Cart Item ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'requestBody' => [
                         'required' => true,
@@ -448,12 +542,12 @@ Route::get('v1/openapi.json', function () {
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'quantity' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100]
+                                        'quantity' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
                                     ],
-                                    'required' => ['quantity']
-                                ]
-                            ]
-                        ]
+                                    'required' => ['quantity'],
+                                ],
+                            ],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
@@ -464,19 +558,19 @@ Route::get('v1/openapi.json', function () {
                                         'type' => 'object',
                                         'properties' => [
                                             'message' => ['type' => 'string'],
-                                            'cart_item' => ['$ref' => '#/components/schemas/CartItem']
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'cart_item' => ['$ref' => '#/components/schemas/CartItem'],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         '404' => [
-                            'description' => 'Cart item not found'
+                            'description' => 'Cart item not found',
                         ],
                         '422' => [
-                            'description' => 'Validation errors (stock insufficient, etc.)'
-                        ]
-                    ]
+                            'description' => 'Validation errors (stock insufficient, etc.)',
+                        ],
+                    ],
                 ],
                 'delete' => [
                     'summary' => 'Remove Cart Item',
@@ -488,18 +582,18 @@ Route::get('v1/openapi.json', function () {
                             'in' => 'path',
                             'required' => true,
                             'description' => 'Cart Item ID',
-                            'schema' => ['type' => 'integer']
-                        ]
+                            'schema' => ['type' => 'integer'],
+                        ],
                     ],
                     'responses' => [
                         '200' => [
-                            'description' => 'Item removed from cart successfully'
+                            'description' => 'Item removed from cart successfully',
                         ],
                         '404' => [
-                            'description' => 'Cart item not found'
-                        ]
-                    ]
-                ]
+                            'description' => 'Cart item not found',
+                        ],
+                    ],
+                ],
             ],
             '/v1/orders/checkout' => [
                 'post' => [
@@ -516,13 +610,13 @@ Route::get('v1/openapi.json', function () {
                                         'shipping_method' => [
                                             'type' => 'string',
                                             'enum' => ['HOME', 'PICKUP', 'COURIER'],
-                                            'default' => 'HOME'
+                                            'default' => 'HOME',
                                         ],
-                                        'notes' => ['type' => 'string', 'maxLength' => 500]
-                                    ]
-                                ]
-                            ]
-                        ]
+                                        'notes' => ['type' => 'string', 'maxLength' => 500],
+                                    ],
+                                ],
+                            ],
+                        ],
                     ],
                     'responses' => [
                         '201' => [
@@ -533,26 +627,26 @@ Route::get('v1/openapi.json', function () {
                                         'type' => 'object',
                                         'properties' => [
                                             'message' => ['type' => 'string'],
-                                            'order' => ['$ref' => '#/components/schemas/Order']
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'order' => ['$ref' => '#/components/schemas/Order'],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         '422' => [
-                            'description' => 'Validation errors (empty cart, inactive products, insufficient stock)'
-                        ]
-                    ]
-                ]
-            ]
+                            'description' => 'Validation errors (empty cart, inactive products, insufficient stock)',
+                        ],
+                    ],
+                ],
+            ],
         ],
         'components' => [
             'securitySchemes' => [
                 'sanctum' => [
                     'type' => 'http',
                     'scheme' => 'bearer',
-                    'bearerFormat' => 'token'
-                ]
+                    'bearerFormat' => 'token',
+                ],
             ],
             'schemas' => [
                 'Product' => [
@@ -572,9 +666,9 @@ Route::get('v1/openapi.json', function () {
                                 'properties' => [
                                     'id' => ['type' => 'integer'],
                                     'name' => ['type' => 'string'],
-                                    'slug' => ['type' => 'string']
-                                ]
-                            ]
+                                    'slug' => ['type' => 'string'],
+                                ],
+                            ],
                         ],
                         'images' => [
                             'type' => 'array',
@@ -584,20 +678,20 @@ Route::get('v1/openapi.json', function () {
                                     'id' => ['type' => 'integer'],
                                     'url' => ['type' => 'string'],
                                     'is_primary' => ['type' => 'boolean'],
-                                    'sort_order' => ['type' => 'integer']
-                                ]
-                            ]
+                                    'sort_order' => ['type' => 'integer'],
+                                ],
+                            ],
                         ],
                         'producer' => [
                             'type' => 'object',
                             'properties' => [
                                 'id' => ['type' => 'integer'],
-                                'name' => ['type' => 'string']
-                            ]
+                                'name' => ['type' => 'string'],
+                            ],
                         ],
                         'created_at' => ['type' => 'string', 'format' => 'date-time'],
-                        'updated_at' => ['type' => 'string', 'format' => 'date-time']
-                    ]
+                        'updated_at' => ['type' => 'string', 'format' => 'date-time'],
+                    ],
                 ],
                 'CartItem' => [
                     'type' => 'object',
@@ -607,8 +701,8 @@ Route::get('v1/openapi.json', function () {
                         'product' => ['$ref' => '#/components/schemas/Product'],
                         'subtotal' => ['type' => 'string', 'format' => 'decimal'],
                         'created_at' => ['type' => 'string', 'format' => 'date-time'],
-                        'updated_at' => ['type' => 'string', 'format' => 'date-time']
-                    ]
+                        'updated_at' => ['type' => 'string', 'format' => 'date-time'],
+                    ],
                 ],
                 'Order' => [
                     'type' => 'object',
@@ -626,9 +720,9 @@ Route::get('v1/openapi.json', function () {
                         'updated_at' => ['type' => 'string', 'format' => 'date-time'],
                         'items' => [
                             'type' => 'array',
-                            'items' => ['$ref' => '#/components/schemas/OrderItem']
-                        ]
-                    ]
+                            'items' => ['$ref' => '#/components/schemas/OrderItem'],
+                        ],
+                    ],
                 ],
                 'OrderItem' => [
                     'type' => 'object',
@@ -640,8 +734,8 @@ Route::get('v1/openapi.json', function () {
                         'quantity' => ['type' => 'integer'],
                         'unit_price' => ['type' => 'string', 'format' => 'decimal'],
                         'total_price' => ['type' => 'string', 'format' => 'decimal'],
-                        'product' => ['$ref' => '#/components/schemas/Product']
-                    ]
+                        'product' => ['$ref' => '#/components/schemas/Product'],
+                    ],
                 ],
                 'ProductAnalytics' => [
                     'type' => 'object',
@@ -655,24 +749,36 @@ Route::get('v1/openapi.json', function () {
                         'total_quantity_sold' => ['type' => 'integer'],
                         'total_revenue' => ['type' => 'string', 'format' => 'decimal'],
                         'total_orders' => ['type' => 'integer'],
-                        'average_unit_price' => ['type' => 'string', 'format' => 'decimal']
-                    ]
-                ]
-            ]
-        ]
+                        'average_unit_price' => ['type' => 'string', 'format' => 'decimal'],
+                    ],
+                ],
+            ],
+        ],
     ]);
 });
 
 // Producer API routes
 Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     // Product management
+    Route::get('products', [App\Http\Controllers\Api\ProducerController::class, 'getProducts']);
     Route::patch('products/{product}/toggle', [App\Http\Controllers\Api\ProducerController::class, 'toggleProduct']);
-    
+    Route::patch('products/{product}/stock', [App\Http\Controllers\Api\ProducerController::class, 'updateStock']);
+
     // Dashboard
     Route::get('dashboard/kpi', [App\Http\Controllers\Api\ProducerController::class, 'kpi']);
     Route::get('dashboard/top-products', [App\Http\Controllers\Api\ProducerController::class, 'topProducts']);
-    
+
     // Messages
     Route::patch('messages/{message}/read', [App\Http\Controllers\Api\MessageController::class, 'markAsRead']);
     Route::post('messages/{message}/replies', [App\Http\Controllers\Api\MessageController::class, 'storeReply']);
+
+    // Producer Analytics
+    Route::prefix('analytics')->group(function () {
+        Route::get('sales', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'sales'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'orders'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::get('products', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'products'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+    });
 });

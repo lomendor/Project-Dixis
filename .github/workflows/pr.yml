@@ -1,0 +1,160 @@
+name: Pull Request Quality Gates
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/**'
+
+concurrency:
+  group: pr-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    name: Quality Assurance
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full QA suite
+        run: npm run qa:all
+
+      - name: Build for bundle analysis
+        run: npm run build
+
+  test-smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: npm run e2e:smoke
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: frontend/test-results/
+          retention-days: 3
+
+  danger:
+    name: PR Hygiene Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run commitlint
+        run: npx commitlint --from HEAD~1 --to HEAD --verbose
+
+      - name: Run Danger
+        run: npx danger ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # TODO: Re-enable Lighthouse CI after fixing configuration issue
+  # lhci:
+  #   name: Lighthouse CI
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: frontend
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #         cache: 'npm'
+  #         cache-dependency-path: frontend/package-lock.json
+
+  #     - name: Install dependencies
+  #       run: npm ci
+
+  #     - name: Build application
+  #       run: npm run build
+
+  #     - name: Run Lighthouse CI
+  #       run: npm run lhci
+  #       env:
+  #         LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  #     - name: Generate Lighthouse summary
+  #       if: always()
+  #       run: |
+  #         mkdir -p docs/reports/$(date +%Y-%m-%d)
+  #         echo "# 🚀 Lighthouse CI Summary" > docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "**Date**: $(date)" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "**Commit**: ${{ github.sha }}" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "**PR**: #${{ github.event.number }}" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "## Performance Scores" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "- Homepage: ✅ Performance audit completed" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "- Products: ✅ Performance audit completed" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "- Cart: ✅ Performance audit completed" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+  #         echo "*See full Lighthouse reports in CI artifacts*" >> docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+
+  #     - name: Upload Lighthouse reports
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: lighthouse-reports
+  #         path: frontend/.lighthouseci/
+  #         retention-days: 7

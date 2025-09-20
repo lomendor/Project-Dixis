@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid postal code format",
+    "details": {
+      "field": "delivery_address.postal_code",
+      "value": "123",
+      "expected_format": "5 digits (e.g., 11527)"
+    }
+  },
+  "metadata": {
+    "request_id": "req_acs_error_20250917_789012",
+    "timestamp": "2025-09-17T15:30:00Z",
+    "api_version": "v1"
+  }
+}

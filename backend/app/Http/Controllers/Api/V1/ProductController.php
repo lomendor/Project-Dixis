@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Http\Resources\ProductResource;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use Illuminate\Http\Request;
+use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Str;
 
@@ -16,9 +16,6 @@ class ProductController extends Controller
 {
     /**
      * Display a listing of products with optional search, filtering, and pagination.
-     *
-     * @param Request $request
-     * @return AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -50,8 +47,8 @@ class ProductController extends Controller
         if ($search = $request->get('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('slug', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%");
+                    ->orWhere('slug', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
             });
         }
 
@@ -91,21 +88,25 @@ class ProductController extends Controller
         $perPage = $request->get('per_page', 15);
         $products = $query->paginate($perPage);
 
-        return ProductResource::collection($products);
+        return ProductResource::collection($products)->additional([
+            'current_page' => $products->currentPage(),
+            'per_page' => $products->perPage(),
+            'total' => $products->total(),
+            'last_page' => $products->lastPage(),
+            'from' => $products->firstItem(),
+            'to' => $products->lastItem(),
+        ]);
     }
 
     /**
      * Store a newly created product in storage.
-     *
-     * @param StoreProductRequest $request
-     * @return ProductResource
      */
     public function store(StoreProductRequest $request): ProductResource
     {
         $this->authorize('create', Product::class);
-        
+
         $data = $request->validated();
-        
+
         // Generate slug if not provided
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -119,14 +120,11 @@ class ProductController extends Controller
 
     /**
      * Display the specified product.
-     *
-     * @param Product $product
-     * @return ProductResource
      */
     public function show(Product $product): ProductResource
     {
         // Only show active products
-        abort_if(!$product->is_active, 404);
+        abort_if(! $product->is_active, 404);
 
         // Eager load producer
         $product->load('producer');
@@ -136,17 +134,13 @@ class ProductController extends Controller
 
     /**
      * Update the specified product in storage.
-     *
-     * @param UpdateProductRequest $request
-     * @param Product $product
-     * @return ProductResource
      */
     public function update(UpdateProductRequest $request, Product $product): ProductResource
     {
         $this->authorize('update', $product);
-        
+
         $data = $request->validated();
-        
+
         // Generate slug if name is updated but slug is not provided
         if (isset($data['name']) && empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -160,14 +154,11 @@ class ProductController extends Controller
 
     /**
      * Remove the specified product from storage.
-     *
-     * @param Product $product
-     * @return JsonResponse
      */
     public function destroy(Product $product): JsonResponse
     {
         $this->authorize('delete', $product);
-        
+
         $product->delete();
 
         return response()->json(['message' => 'Product deleted successfully'], 204);

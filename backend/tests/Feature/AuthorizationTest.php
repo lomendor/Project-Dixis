@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Group;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('auth')]
 class AuthorizationTest extends TestCase
@@ -67,7 +67,7 @@ class AuthorizationTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'quantity' => 2,
-                ]
+                ],
             ],
             'currency' => 'EUR',
             'shipping_method' => 'HOME',
@@ -91,7 +91,7 @@ class AuthorizationTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'quantity' => 1,
-                ]
+                ],
             ],
             'currency' => 'EUR',
             'shipping_method' => 'HOME',
@@ -108,7 +108,7 @@ class AuthorizationTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $producer = Producer::factory()->create();
-        
+
         // Admin can create products
         $productData = [
             'name' => 'Admin Test Product',
@@ -128,7 +128,7 @@ class AuthorizationTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'quantity' => 1,
-                ]
+                ],
             ],
             'currency' => 'EUR',
             'shipping_method' => 'HOME',

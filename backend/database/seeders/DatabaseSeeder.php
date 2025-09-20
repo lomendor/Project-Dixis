@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'producer@example.com'],
             [
                 'name' => 'Producer User',
-                'email' => 'producer@example.com', 
+                'email' => 'producer@example.com',
                 'role' => 'producer',
                 'password' => bcrypt('password'),
                 'email_verified_at' => now(),
@@ -71,6 +71,13 @@ class DatabaseSeeder extends Seeder
             OrderSeeder::class, // New structured order seeder
         ]);
 
+        // E2E deterministic data for testing and local environments
+        if (app()->environment(['testing', 'local'])) {
+            $this->call([
+                E2ESeeder::class,
+            ]);
+        }
+
         // Create demo orders after products exist (idempotent)
         $this->createDemoOrders($consumer);
         $this->createEnhancedDemoOrders();
@@ -84,7 +91,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $products = Product::take(3)->get();
-        
+
         if ($products->count() > 0) {
             // Create first demo order
             $order1 = Order::create([
@@ -174,16 +181,16 @@ class DatabaseSeeder extends Seeder
             ['days_ago' => 5, 'orders' => 3],
             ['days_ago' => 10, 'orders' => 2],
             ['days_ago' => 15, 'orders' => 4],
-            
+
             // Last month
             ['days_ago' => 35, 'orders' => 5],
             ['days_ago' => 45, 'orders' => 3],
             ['days_ago' => 50, 'orders' => 2],
-            
+
             // Two months ago
             ['days_ago' => 65, 'orders' => 4],
             ['days_ago' => 75, 'orders' => 3],
-            
+
             // Three months ago
             ['days_ago' => 90, 'orders' => 2],
         ];
@@ -192,19 +199,19 @@ class DatabaseSeeder extends Seeder
             for ($i = 0; $i < $period['orders']; $i++) {
                 $customer = $customers->random();
                 $orderDate = now()->subDays($period['days_ago'])->addHours(rand(-12, 12));
-                
+
                 // Create order with realistic data
                 $subtotal = 0;
                 $selectedProducts = $products->random(rand(1, 4));
-                
+
                 $order = Order::create([
                     'user_id' => $customer->id,
                     'subtotal' => 0, // Will calculate below
                     'tax_amount' => 0,
                     'shipping_amount' => collect(['HOME', 'PICKUP', 'COURIER'])->random() === 'PICKUP' ? 0 : 5.00,
                     'total_amount' => 0,
-                    'payment_status' => collect(['paid', 'paid', 'paid', 'pending', 'failed'])->random(), // 60% paid
-                    'status' => collect(['completed', 'completed', 'shipped', 'paid', 'pending'])->random(),
+                    'payment_status' => collect(['paid', 'paid', 'completed', 'pending', 'failed'])->random(), // Updated for new constraints
+                    'status' => collect(['completed', 'completed', 'shipped', 'confirmed', 'pending'])->random(),
                     'shipping_method' => collect(['HOME', 'PICKUP', 'COURIER'])->random(),
                     'notes' => rand(0, 1) ? "Demo order notes #{$i}" : null,
                     'created_at' => $orderDate,
@@ -234,7 +241,7 @@ class DatabaseSeeder extends Seeder
                 // Update order totals
                 $taxAmount = $subtotal * 0.10; // 10% tax
                 $totalAmount = $subtotal + $taxAmount + $order->shipping_amount;
-                
+
                 $order->update([
                     'subtotal' => $subtotal,
                     'tax_amount' => $taxAmount,
@@ -251,7 +258,7 @@ class DatabaseSeeder extends Seeder
     {
         $producers = \App\Models\Producer::all();
         $customers = User::where('role', 'consumer')->get();
-        
+
         // If no customers exist, create some
         if ($customers->isEmpty()) {
             for ($i = 1; $i <= 3; $i++) {
@@ -268,7 +275,7 @@ class DatabaseSeeder extends Seeder
                 $customers->push($customer);
             }
         }
-        
+
         foreach ($producers as $producer) {
             // Skip if producer already has messages (idempotent)
             if (\App\Models\Message::where('producer_id', $producer->id)->exists()) {
@@ -281,7 +288,7 @@ class DatabaseSeeder extends Seeder
                 \App\Models\Message::create([
                     'user_id' => $customer->id,
                     'producer_id' => $producer->id,
-                    'content' => "This is a demo message for testing KPI functionality. Message #" . ($i + 1) . " from customer.",
+                    'content' => 'This is a demo message for testing KPI functionality. Message #'.($i + 1).' from customer.',
                     'is_read' => rand(0, 1) == 1, // 50% chance of being read
                     'created_at' => now()->subDays(rand(1, 30)),
                 ]);

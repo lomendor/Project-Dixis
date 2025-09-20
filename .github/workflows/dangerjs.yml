@@ -1,0 +1,67 @@
+name: DangerJS Gatekeeper
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: dangerjs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  danger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    permissions:
+      contents: read
+      pull-requests: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate diff analysis
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+      
+      - name: Install DangerJS
+        run: |
+          npm install --no-save danger@11.x
+          npm list danger || echo "DangerJS installed globally"
+      
+      - name: Run DangerJS
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx danger ci --failOnErrors --verbose
+      
+      - name: Comment on successful run
+        if: success()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            // Only comment once per PR to avoid spam
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🎯 DangerJS Gatekeeper')
+            );
+            
+            if (!botComment) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '🎯 **DangerJS Gatekeeper**: Quality checks completed successfully! ✅'
+              });
+            }
