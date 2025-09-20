@@ -25,7 +25,7 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
@@ -38,12 +38,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install contracts dependencies
-        run: |
-          cd ../packages/contracts
-          pnpm install --frozen-lockfile || echo "No contracts directory found"
-          cd ../../frontend
 
       - name: Run TypeScript type check (strict)
         run: pnpm run type-check
@@ -69,12 +63,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Install contracts dependencies
-        run: |
-          cd ../packages/contracts
-          pnpm install --frozen-lockfile || echo "No contracts directory found"
-          cd ../../frontend
 
       # Temporarily disabled for hotfix
       # - name: Run ESLint
