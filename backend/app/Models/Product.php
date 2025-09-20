@@ -38,6 +38,22 @@ class Product extends Model
         'updated_at' => 'datetime',
     ];
 
+    // Ensure NOT NULL 'title' while keeping API/tests flexible:
+    protected static function booted()
+    {
+        static::creating(function (Product $product) {
+            if (empty($product->title) && !empty($product->name)) {
+                $product->title = $product->name;
+            }
+        });
+        static::updating(function (Product $product) {
+            // If title left null/empty on update, keep it aligned with name
+            if (empty($product->title) && !empty($product->name)) {
+                $product->title = $product->name;
+            }
+        });
+    }
+
     /**
      * Get the producer that owns the product.
      */
