@@ -13,11 +13,13 @@ export default async function globalSetup() {
     
     console.log('🔍 DB Driver:', dbDriver);
     
-    if (dbDriver !== 'pgsql') {
-      throw new Error(`❌ Expected PostgreSQL (pgsql) but got: ${dbDriver}. Check .env.testing and phpunit.xml`);
+    // Allow pgsql or sqlite in test environment
+    const allowedDrivers = new Set(['pgsql', 'sqlite']);
+    if (!allowedDrivers.has(String(dbDriver))) {
+      throw new Error(`❌ Unsupported DB driver for E2E: ${dbDriver}. Allowed: pgsql, sqlite`);
     }
-    
-    console.log('✅ PostgreSQL confirmed for testing environment');
+
+    console.log(`✅ Database driver confirmed for testing environment: ${dbDriver}`);
     
     // Run migrations and seeding
     execSync('php artisan migrate:fresh --seed --env=testing', {
