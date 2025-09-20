@@ -3,6 +3,13 @@ name: Lighthouse CI
 on:
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/**'
+
+concurrency:
+  group: ci-${{ github.ref_name }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   lighthouse:
@@ -14,66 +21,52 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install frontend dependencies
-        run: cd frontend && npm ci
+          node-version: '20.x'
 
-      - name: Install contracts dependencies
-        run: cd packages/contracts && npm ci
-      - name: Build frontend
-        run: |
-          cd frontend
-          npm run build
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps (workspace)
+        run: pnpm -w install --frozen-lockfile
+      - name: Build frontend (bind mock API)
         env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
+        run: pnpm -w --filter frontend run build
 
       - name: Install wait-on utility
-        run: npm install -g wait-on
+        run: pnpm add -g wait-on
 
-      - name: Install express for mock API
-        run: npm install express
-
-      - name: Start mock API and Next
+      - name: Ensure ports free (3010, 4010)
         run: |
-          cd frontend
-          echo "Starting mock API..."
-          MOCK_PORT=3200 npm run mock:api > mock-api.log 2>&1 &
-          sleep 5
-          echo "Mock API startup logs (first 20 lines):"
-          head -20 mock-api.log || echo "No mock API logs yet"
-          echo "Checking if mock API bound to port 3200..."
-          lsof -i :3200 || echo "No process on port 3200"
-          echo "Testing direct curl to mock API health endpoint..."
-          curl -v http://localhost:3200/api/v1/health || echo "Curl failed"
-          echo "Starting Next.js..."
-          npm run start:ci &
-        env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
-      - name: Wait for services
-        run: |
-          npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
-          npx wait-on --timeout 90000 http://localhost:3100
+          if lsof -i :3010 -t >/dev/null 2>&1; then
+            kill -9 $(lsof -i :3010 -t) || true
+          fi
+          if lsof -i :4010 -t >/dev/null 2>&1; then
+            kill -9 $(lsof -i :4010 -t) || true
+          fi
 
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
-      - name: Lighthouse CI (use existing server)
-        continue-on-error: ${{ github.event_name == 'pull_request' }}
-        working-directory: frontend
+      - name: Start mock API (4010)
+        run: |
+          node scripts/lhci-mock-api.js &
+          npx wait-on http://localhost:4010/health
+
+      - name: Start Next server (3010)
+        run: |
+          (pnpm -w --filter frontend run start -- -p 3010 &) && npx wait-on http://localhost:3010
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
           NODE_ENV: production
-          CI: true
+          NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
+      - name: Install Lighthouse CI
+        run: pnpm add -g @lhci/cli
+
+      - name: Run LHCI
+        env:
+          TEST_BASE_URL: http://localhost:3010
         run: |
-          npx @lhci/cli autorun \
-            --collect.url=http://localhost:3100 \
-            --collect.startServerCommand="echo already started" \
-            --assert.preset=lighthouse:recommended \
-            --upload.target=filesystem \
-            --upload.outputDir=.lighthouseci
-        timeout-minutes: 10
+          npx @lhci/cli autorun --collect.url=http://localhost:3010 --assert.preset=lighthouse:recommended
 
       - name: Upload Lighthouse artifacts
         if: always()
