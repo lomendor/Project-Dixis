@@ -1,0 +1,80 @@
+Smoke Tests	Set up job	﻿2025-09-20T08:40:01.1988996Z Current runner version: '2.328.0'
+Smoke Tests	Set up job	2025-09-20T08:40:01.2013473Z ##[group]Runner Image Provisioner
+Smoke Tests	Set up job	2025-09-20T08:40:01.2014297Z Hosted Compute Agent
+Smoke Tests	Set up job	2025-09-20T08:40:01.2014791Z Version: 20250829.383
+Smoke Tests	Set up job	2025-09-20T08:40:01.2015496Z Commit: 27cb235aab5b0e52e153a26cd86b4742e89dac5d
+Smoke Tests	Set up job	2025-09-20T08:40:01.2016194Z Build Date: 2025-08-29T13:48:48Z
+Smoke Tests	Set up job	2025-09-20T08:40:01.2016742Z ##[endgroup]
+Smoke Tests	Set up job	2025-09-20T08:40:01.2017377Z ##[group]Operating System
+Smoke Tests	Set up job	2025-09-20T08:40:01.2017907Z Ubuntu
+Smoke Tests	Set up job	2025-09-20T08:40:01.2018369Z 24.04.3
+Smoke Tests	Set up job	2025-09-20T08:40:01.2018862Z LTS
+Smoke Tests	Set up job	2025-09-20T08:40:01.2019318Z ##[endgroup]
+Smoke Tests	Set up job	2025-09-20T08:40:01.2019762Z ##[group]Runner Image
+Smoke Tests	Set up job	2025-09-20T08:40:01.2020394Z Image: ubuntu-24.04
+Smoke Tests	Set up job	2025-09-20T08:40:01.2020872Z Version: 20250907.24.1
+Smoke Tests	Set up job	2025-09-20T08:40:01.2021896Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250907.24/images/ubuntu/Ubuntu2404-Readme.md
+Smoke Tests	Set up job	2025-09-20T08:40:01.2023726Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250907.24
+Smoke Tests	Set up job	2025-09-20T08:40:01.2024855Z ##[endgroup]
+Smoke Tests	Set up job	2025-09-20T08:40:01.2026036Z ##[group]GITHUB_TOKEN Permissions
+Smoke Tests	Set up job	2025-09-20T08:40:01.2027793Z Contents: read
+Smoke Tests	Set up job	2025-09-20T08:40:01.2028382Z Metadata: read
+Smoke Tests	Set up job	2025-09-20T08:40:01.2028913Z Packages: read
+Smoke Tests	Set up job	2025-09-20T08:40:01.2029378Z ##[endgroup]
+Smoke Tests	Set up job	2025-09-20T08:40:01.2031842Z Secret source: Actions
+Smoke Tests	Set up job	2025-09-20T08:40:01.2032807Z Prepare workflow directory
+Smoke Tests	Set up job	2025-09-20T08:40:01.2453226Z Prepare all required actions
+Smoke Tests	Set up job	2025-09-20T08:40:01.2489727Z Getting action download info
+Smoke Tests	Set up job	2025-09-20T08:40:01.6533565Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+Smoke Tests	Set up job	2025-09-20T08:40:01.8224354Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Smoke Tests	Set up job	2025-09-20T08:40:01.9604154Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Smoke Tests	Set up job	2025-09-20T08:40:02.2044278Z Complete job name: Smoke Tests
+Smoke Tests	Checkout	﻿2025-09-20T08:40:02.2746216Z ##[group]Run actions/checkout@v4
+Smoke Tests	Checkout	2025-09-20T08:40:02.2747116Z with:
+Smoke Tests	Checkout	2025-09-20T08:40:02.2747587Z   repository: lomendor/Project-Dixis
+Smoke Tests	Checkout	2025-09-20T08:40:02.2748297Z   token: ***
+Smoke Tests	Checkout	2025-09-20T08:40:02.2748704Z   ssh-strict: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2749127Z   ssh-user: git
+Smoke Tests	Checkout	2025-09-20T08:40:02.2749551Z   persist-credentials: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2750012Z   clean: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2750441Z   sparse-checkout-cone-mode: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2750939Z   fetch-depth: 1
+Smoke Tests	Checkout	2025-09-20T08:40:02.2751349Z   fetch-tags: false
+Smoke Tests	Checkout	2025-09-20T08:40:02.2751794Z   show-progress: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2752214Z   lfs: false
+Smoke Tests	Checkout	2025-09-20T08:40:02.2752845Z   submodules: false
+Smoke Tests	Checkout	2025-09-20T08:40:02.2753307Z   set-safe-directory: true
+Smoke Tests	Checkout	2025-09-20T08:40:02.2754050Z ##[endgroup]
+Smoke Tests	Checkout	2025-09-20T08:40:02.3855905Z Syncing repository: lomendor/Project-Dixis
+Smoke Tests	Checkout	2025-09-20T08:40:02.3857750Z ##[group]Getting Git version info
+Smoke Tests	Checkout	2025-09-20T08:40:02.3858562Z Working directory is '/home/runner/work/Project-Dixis/Project-Dixis'
+Smoke Tests	Checkout	2025-09-20T08:40:02.3859715Z [command]/usr/bin/git version
+Smoke Tests	Checkout	2025-09-20T08:40:02.3941492Z git version 2.51.0
+Smoke Tests	Checkout	2025-09-20T08:40:02.3968238Z ##[endgroup]
+Smoke Tests	Checkout	2025-09-20T08:40:02.3984330Z Temporarily overriding HOME='/home/runner/work/_temp/97bac1b9-fda8-426f-850e-afca2fce3d43' before making global git config changes
+Smoke Tests	Checkout	2025-09-20T08:40:02.3987082Z Adding repository directory to the temporary git global config as a safe directory
+Smoke Tests	Checkout	2025-09-20T08:40:02.3991304Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Project-Dixis/Project-Dixis
+Smoke Tests	Checkout	2025-09-20T08:40:02.4027816Z Deleting the contents of '/home/runner/work/Project-Dixis/Project-Dixis'
+Smoke Tests	Checkout	2025-09-20T08:40:02.4031532Z ##[group]Initializing the repository
+Smoke Tests	Checkout	2025-09-20T08:40:02.4036626Z [command]/usr/bin/git init /home/runner/work/Project-Dixis/Project-Dixis
+Smoke Tests	Checkout	2025-09-20T08:40:02.4151979Z hint: Using 'master' as the name for the initial branch. This default branch name
+Smoke Tests	Checkout	2025-09-20T08:40:02.4153647Z hint: is subject to change. To configure the initial branch name to use in all
+Smoke Tests	Checkout	2025-09-20T08:40:02.4155233Z hint: of your new repositories, which will suppress this warning, call:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4156624Z hint:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4157648Z hint: 	git config --global init.defaultBranch <name>
+Smoke Tests	Checkout	2025-09-20T08:40:02.4159209Z hint:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4160415Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Smoke Tests	Checkout	2025-09-20T08:40:02.4162407Z hint: 'development'. The just-created branch can be renamed via this command:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4164241Z hint:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4165080Z hint: 	git branch -m <name>
+Smoke Tests	Checkout	2025-09-20T08:40:02.4165929Z hint:
+Smoke Tests	Checkout	2025-09-20T08:40:02.4167054Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Smoke Tests	Checkout	2025-09-20T08:40:02.4169222Z Initialized empty Git repository in /home/runner/work/Project-Dixis/Project-Dixis/.git/
+Smoke Tests	Checkout	2025-09-20T08:40:02.4173410Z [command]/usr/bin/git remote add origin https://github.com/lomendor/Project-Dixis
+Smoke Tests	Checkout	2025-09-20T08:40:02.4208876Z ##[endgroup]
+Smoke Tests	Checkout	2025-09-20T08:40:02.4209749Z ##[group]Disabling automatic garbage collection
+Smoke Tests	Checkout	2025-09-20T08:40:02.4212879Z [command]/usr/bin/git config --local gc.auto 0
+Smoke Tests	Checkout	2025-09-20T08:40:02.4244427Z ##[endgroup]
+Smoke Tests	Checkout	2025-09-20T08:40:02.4245309Z ##[group]Setting up auth
+Smoke Tests	Checkout	2025-09-20T08:40:02.4251547Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Smoke Tests	Checkout	2025-09-20T08:40:02.4284977Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"

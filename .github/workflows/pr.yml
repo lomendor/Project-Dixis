@@ -18,6 +18,13 @@ jobs:
     defaults:
       run:
         working-directory: frontend
+    env:
+      NODE_VERSION: '20'
+      PORT: 4011
+      TEST_BASE_URL: http://localhost:4011
+      CI: true
+      HUSKY: 0
+      SKIP_PREPARE: true
 
     steps:
       - name: Checkout
@@ -45,6 +52,13 @@ jobs:
     defaults:
       run:
         working-directory: frontend
+    env:
+      NODE_VERSION: '20'
+      PORT: 4012
+      TEST_BASE_URL: http://localhost:4012
+      CI: true
+      HUSKY: 0
+      SKIP_PREPARE: true
 
     steps:
       - name: Checkout
@@ -62,6 +76,15 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application
+        run: PORT=4012 npm run start:ci &
+
+      - name: Wait for application
+        run: npx wait-on $TEST_BASE_URL --timeout 60000
 
       - name: Run smoke tests
         run: npm run e2e:smoke
@@ -81,6 +104,11 @@ jobs:
     defaults:
       run:
         working-directory: frontend
+    env:
+      NODE_VERSION: '20'
+      CI: true
+      HUSKY: 0
+      SKIP_PREPARE: true
 
     steps:
       - name: Checkout

@@ -1,0 +1,80 @@
+backend	Set up job	﻿2025-09-20T08:39:59.8422898Z Current runner version: '2.328.0'
+backend	Set up job	2025-09-20T08:39:59.8446919Z ##[group]Runner Image Provisioner
+backend	Set up job	2025-09-20T08:39:59.8447811Z Hosted Compute Agent
+backend	Set up job	2025-09-20T08:39:59.8448365Z Version: 20250829.383
+backend	Set up job	2025-09-20T08:39:59.8449060Z Commit: 27cb235aab5b0e52e153a26cd86b4742e89dac5d
+backend	Set up job	2025-09-20T08:39:59.8449754Z Build Date: 2025-08-29T13:48:48Z
+backend	Set up job	2025-09-20T08:39:59.8450361Z ##[endgroup]
+backend	Set up job	2025-09-20T08:39:59.8451165Z ##[group]Operating System
+backend	Set up job	2025-09-20T08:39:59.8451919Z Ubuntu
+backend	Set up job	2025-09-20T08:39:59.8452390Z 24.04.3
+backend	Set up job	2025-09-20T08:39:59.8452864Z LTS
+backend	Set up job	2025-09-20T08:39:59.8453390Z ##[endgroup]
+backend	Set up job	2025-09-20T08:39:59.8453918Z ##[group]Runner Image
+backend	Set up job	2025-09-20T08:39:59.8454501Z Image: ubuntu-24.04
+backend	Set up job	2025-09-20T08:39:59.8455069Z Version: 20250907.24.1
+backend	Set up job	2025-09-20T08:39:59.8456101Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250907.24/images/ubuntu/Ubuntu2404-Readme.md
+backend	Set up job	2025-09-20T08:39:59.8457441Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250907.24
+backend	Set up job	2025-09-20T08:39:59.8458690Z ##[endgroup]
+backend	Set up job	2025-09-20T08:39:59.8459850Z ##[group]GITHUB_TOKEN Permissions
+backend	Set up job	2025-09-20T08:39:59.8461892Z Contents: read
+backend	Set up job	2025-09-20T08:39:59.8462506Z Metadata: read
+backend	Set up job	2025-09-20T08:39:59.8463078Z Packages: read
+backend	Set up job	2025-09-20T08:39:59.8463613Z ##[endgroup]
+backend	Set up job	2025-09-20T08:39:59.8465605Z Secret source: Actions
+backend	Set up job	2025-09-20T08:39:59.8466466Z Prepare workflow directory
+backend	Set up job	2025-09-20T08:39:59.8938750Z Prepare all required actions
+backend	Set up job	2025-09-20T08:39:59.8988257Z Getting action download info
+backend	Set up job	2025-09-20T08:40:00.2941880Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+backend	Set up job	2025-09-20T08:40:00.5001232Z Download action repository 'shivammathur/setup-php@v2' (SHA:bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f)
+backend	Set up job	2025-09-20T08:40:01.1951693Z Complete job name: backend
+backend	Initialize containers	﻿2025-09-20T08:40:01.2454727Z ##[group]Checking docker version
+backend	Initialize containers	2025-09-20T08:40:01.2467600Z ##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+backend	Initialize containers	2025-09-20T08:40:01.3321247Z '1.48'
+backend	Initialize containers	2025-09-20T08:40:01.3333647Z Docker daemon API version: '1.48'
+backend	Initialize containers	2025-09-20T08:40:01.3334527Z ##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+backend	Initialize containers	2025-09-20T08:40:01.3491028Z '1.48'
+backend	Initialize containers	2025-09-20T08:40:01.3504544Z Docker client API version: '1.48'
+backend	Initialize containers	2025-09-20T08:40:01.3509873Z ##[endgroup]
+backend	Initialize containers	2025-09-20T08:40:01.3513490Z ##[group]Clean up resources from previous jobs
+backend	Initialize containers	2025-09-20T08:40:01.3519001Z ##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=3320d5"
+backend	Initialize containers	2025-09-20T08:40:01.3654075Z ##[command]/usr/bin/docker network prune --force --filter "label=3320d5"
+backend	Initialize containers	2025-09-20T08:40:01.3779398Z ##[endgroup]
+backend	Initialize containers	2025-09-20T08:40:01.3779978Z ##[group]Create local container network
+backend	Initialize containers	2025-09-20T08:40:01.3789987Z ##[command]/usr/bin/docker network create --label 3320d5 github_network_1b6a44222e4542b6ab8ef1e61dce9a47
+backend	Initialize containers	2025-09-20T08:40:01.4292733Z 5780a9cc3b053dc509592e6e95125c75d3c4dedbbcc9eada63c53f158c4849fc
+backend	Initialize containers	2025-09-20T08:40:01.4312778Z ##[endgroup]
+backend	Initialize containers	2025-09-20T08:40:01.4340022Z ##[group]Starting postgres service container
+backend	Initialize containers	2025-09-20T08:40:01.4359800Z ##[command]/usr/bin/docker pull postgres:15
+backend	Initialize containers	2025-09-20T08:40:02.4809379Z 15: Pulling from library/postgres
+backend	Initialize containers	2025-09-20T08:40:02.7401515Z ce1261c6d567: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7402917Z 80ed16669c95: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7404140Z 4e5806601837: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7405222Z b18445125df5: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7406687Z 874a3ca0fb79: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7408072Z 38a0056e8c05: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7409054Z cb4494753109: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7409902Z 9286f415f93a: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7410739Z 60570350e677: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7411773Z 0b33c9cfc245: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7412673Z f082d788df98: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7413534Z b2ae65346945: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7414536Z 3e69ab42557e: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7415409Z f35e17a433de: Pulling fs layer
+backend	Initialize containers	2025-09-20T08:40:02.7416274Z 9286f415f93a: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7417410Z b2ae65346945: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7418147Z 0b33c9cfc245: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7418873Z 60570350e677: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7419584Z f082d788df98: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7420314Z 874a3ca0fb79: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7421252Z 3e69ab42557e: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7422235Z 38a0056e8c05: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7423212Z f35e17a433de: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7424176Z cb4494753109: Waiting
+backend	Initialize containers	2025-09-20T08:40:02.7425155Z b18445125df5: Waiting
+backend	Initialize containers	2025-09-20T08:40:03.0064397Z 80ed16669c95: Download complete
+backend	Initialize containers	2025-09-20T08:40:03.0570607Z 4e5806601837: Verifying Checksum
+backend	Initialize containers	2025-09-20T08:40:03.0572824Z 4e5806601837: Download complete
+backend	Initialize containers	2025-09-20T08:40:03.2257849Z ce1261c6d567: Verifying Checksum
+backend	Initialize containers	2025-09-20T08:40:03.2258490Z ce1261c6d567: Download complete
+backend	Initialize containers	2025-09-20T08:40:03.2779759Z b18445125df5: Download complete

@@ -1,0 +1,80 @@
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:04.7359994Z node: v20.19.5
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:04.7360604Z npm: 10.8.2
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:04.7360966Z yarn: 1.22.22
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:04.7363045Z ##[endgroup]
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:04.7391829Z [command]/opt/hostedtoolcache/node/20.19.5/x64/bin/npm config get cache
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:05.0566540Z /home/runner/.npm
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:05.2750368Z Cache hit for: node-cache-Linux-x64-npm-293628c5a38b8f23887ffd4671116a273ba70156e0aac05412b18ef525fdc791
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:06.4960313Z Received 41943040 of 223730992 (18.7%), 40.0 MBs/sec
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:07.5013431Z Received 206953776 of 223730992 (92.5%), 98.7 MBs/sec
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:07.5887636Z Received 223730992 of 223730992 (100.0%), 101.9 MBs/sec
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:07.5889777Z Cache Size: ~213 MB (223730992 B)
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:07.5926996Z [command]/usr/bin/tar -xf /home/runner/work/_temp/7af12865-9ff6-43f0-a102-82ffb1bee0c6/cache.tzst -P -C /home/runner/work/Project-Dixis/Project-Dixis --use-compress-program unzstd
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:08.0604702Z Cache restored successfully
+PR Hygiene Check	Setup Node.js	2025-09-20T08:40:08.1041206Z Cache restored from key: node-cache-Linux-x64-npm-293628c5a38b8f23887ffd4671116a273ba70156e0aac05412b18ef525fdc791
+PR Hygiene Check	Install dependencies	﻿2025-09-20T08:40:08.1221161Z ##[group]Run npm ci
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:08.1221511Z [36;1mnpm ci[0m
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:08.1362928Z shell: /usr/bin/bash -e {0}
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:08.1363319Z ##[endgroup]
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:17.2474133Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:17.3827931Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:17.4483918Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:17.5674783Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:17.6973454Z npm warn deprecated @gitbeaker/node@35.8.1: Please use its successor @gitbeaker/rest
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.0521699Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.0522567Z > frontend@0.1.0 prepare
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.0523280Z > husky
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.0616960Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1326594Z .git can't be found
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1327326Z added 1138 packages, and audited 1139 packages in 18s
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1327803Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1328070Z 252 packages are looking for funding
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1328521Z   run `npm fund` for details
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1878582Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1879390Z 22 vulnerabilities (8 low, 6 moderate, 8 high)
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1879962Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1880405Z To address issues that do not require attention, run:
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1881041Z   npm audit fix
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1881291Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1881730Z To address all issues (including breaking changes), run:
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1882668Z   npm audit fix --force
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1882882Z 
+PR Hygiene Check	Install dependencies	2025-09-20T08:40:26.1883034Z Run `npm audit` for details.
+PR Hygiene Check	Run commitlint	﻿2025-09-20T08:40:26.2871642Z ##[group]Run npx commitlint --from HEAD~1 --to HEAD --verbose
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:26.2872340Z [36;1mnpx commitlint --from HEAD~1 --to HEAD --verbose[0m
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:26.2903589Z shell: /usr/bin/bash -e {0}
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:26.2903839Z ##[endgroup]
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1378671Z file:///home/runner/work/Project-Dixis/Project-Dixis/frontend/node_modules/@commitlint/cli/lib/cli.js:132
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1379734Z         throw err;
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1380089Z         ^
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1380260Z 
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1380939Z Error: fatal: ambiguous argument 'HEAD~1..HEAD': unknown revision or path not in the working tree.
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1382185Z Use '--' to separate paths from revisions, like this:
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1382884Z 'git <command> [<revision>...] -- [<file>...]'
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1383194Z 
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1384000Z     at Transform.transform [as _transform] (/home/runner/work/Project-Dixis/Project-Dixis/frontend/node_modules/git-raw-commits/index.js:100:36)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1385155Z     at Transform._write (node:internal/streams/transform:171:8)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1386018Z     at writeOrBuffer (node:internal/streams/writable:572:12)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1386602Z     at _write (node:internal/streams/writable:501:10)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1387223Z     at Writable.write (node:internal/streams/writable:510:10)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1387859Z     at Socket.ondata (node:internal/streams/readable:1009:22)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1388379Z     at Socket.emit (node:events:536:35)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1388927Z     at addChunk (node:internal/streams/readable:561:12)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1389728Z     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1390546Z     at Readable.push (node:internal/streams/readable:392:5)
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1390916Z 
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1391133Z Node.js v20.19.5
+PR Hygiene Check	Run commitlint	2025-09-20T08:40:27.1549621Z ##[error]Process completed with exit code 1.
+PR Hygiene Check	Post Checkout	﻿2025-09-20T08:40:27.1660720Z Post job cleanup.
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2592803Z [command]/usr/bin/git version
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2628728Z git version 2.51.0
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2677229Z Temporarily overriding HOME='/home/runner/work/_temp/e88f56a6-1a23-4cfd-8431-f3df59866720' before making global git config changes
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2678414Z Adding repository directory to the temporary git global config as a safe directory
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2681902Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Project-Dixis/Project-Dixis
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2715616Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2747322Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2973622Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.2993636Z http.https://github.com/.extraheader
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.3005991Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+PR Hygiene Check	Post Checkout	2025-09-20T08:40:27.3036284Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+PR Hygiene Check	Complete job	﻿2025-09-20T08:40:27.3356989Z Cleaning up orphan processes
