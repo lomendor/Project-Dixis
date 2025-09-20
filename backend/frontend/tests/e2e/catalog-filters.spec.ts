@@ -10,15 +10,15 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
     
     // Test basic search functionality
-    await page.fill('input[placeholder="Search products..."]', 'apple');
+    await page.fill('[data-testid="search-input"]', 'apple');
     await page.waitForTimeout(1000); // Wait for search to complete
-    
+
     // Should show search results
     const searchResults = await page.locator('[data-testid="product-card"]').count();
     console.log(`Search results for "apple": ${searchResults}`);
-    
+
     // Clear search
-    await page.fill('input[placeholder="Search products..."]', '');
+    await page.fill('[data-testid="search-input"]', '');
     await page.waitForTimeout(1000);
     
     // Test filter panel
@@ -68,7 +68,7 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForLoadState('networkidle');
     
     // Apply search filter
-    await page.fill('input[placeholder="Search products..."]', 'fresh');
+    await page.fill('[data-testid="search-input"]', 'fresh');
     await page.waitForTimeout(1000);
     
     // Open filters and apply category filter
@@ -89,7 +89,7 @@ test.describe('Catalog Filters & Search', () => {
     await page.waitForLoadState('networkidle');
     
     // Apply filters that return no results
-    await page.fill('input[placeholder="Search products..."]', 'nonexistentproduct12345');
+    await page.fill('[data-testid="search-input"]', 'nonexistentproduct12345');
     await page.waitForTimeout(2000);
     
     // Should show empty state

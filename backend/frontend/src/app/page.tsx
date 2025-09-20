@@ -65,6 +65,7 @@ export default function Home() {
               <div className="flex-1 relative">
                 <input
                   type="text"
+                  data-testid="search-input"
                   placeholder={getGreekLabel('search.placeholder', 'Αναζήτηση προϊόντων...')}
                   value={filters.search}
                   onChange={(e) => updateFilter('search', e.target.value)}
