@@ -30,70 +30,46 @@ jobs:
             echo "No contracts directory found"
           fi
 
-      - name: Build frontend
+      - name: Build frontend (bind mock API)
         working-directory: backend/frontend
-        run: npm run build
         env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
-          NEXT_TELEMETRY_DISABLED: '1'
+          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
+        run: npm run build
 
       - name: Install wait-on utility
         run: npm install -g wait-on
 
-      - name: Install express for mock API
-        working-directory: backend/frontend
-        run: npm install express
-
-      - name: Ensure port free (3010)
+      - name: Ensure ports free (3010, 4010)
         run: |
           if lsof -i :3010 -t >/dev/null 2>&1; then
             kill -9 $(lsof -i :3010 -t) || true
           fi
+          if lsof -i :4010 -t >/dev/null 2>&1; then
+            kill -9 $(lsof -i :4010 -t) || true
+          fi
 
-      - name: Start mock API and Next
+      - name: Start mock API (4010)
+        run: |
+          node scripts/lhci-mock-api.js &
+          npx wait-on http://localhost:4010/health
+
+      - name: Start Next server (3010)
         working-directory: backend/frontend
         run: |
-          echo "Starting mock API..."
-          MOCK_PORT=3200 npm run mock:api > mock-api.log 2>&1 &
-          sleep 5
-          echo "Mock API startup logs (first 20 lines):"
-          head -20 mock-api.log || echo "No mock API logs yet"
-          echo "Checking if mock API bound to port 3200..."
-          lsof -i :3200 || echo "No process on port 3200"
-          echo "Testing direct curl to mock API health endpoint..."
-          curl -v http://localhost:3200/api/v1/health || echo "Curl failed"
-          echo "Starting Next.js on port 3010..."
-          PORT=3010 npm run start &
-          npx wait-on http://localhost:3010
+          (npm run start -- -p 3010 &) && npx wait-on http://localhost:3010
         env:
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+          NODE_ENV: production
           NEXT_TELEMETRY_DISABLED: '1'
-
-      - name: Wait for services
-        run: |
-          npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
-          npx wait-on --timeout 90000 http://localhost:3010
+          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
-      - name: Lighthouse CI (use existing server)
-        continue-on-error: ${{ github.event_name == 'pull_request' }}
-        working-directory: backend/frontend
+
+      - name: Run LHCI
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
           TEST_BASE_URL: http://localhost:3010
-          NODE_ENV: production
-          CI: true
-          NEXT_TELEMETRY_DISABLED: '1'
         run: |
-          npx @lhci/cli autorun \
-            --collect.url=http://localhost:3010 \
-            --collect.startServerCommand="echo already started" \
-            --assert.preset=lighthouse:recommended \
-            --upload.target=filesystem \
-            --upload.outputDir=.lighthouseci
-        timeout-minutes: 10
+          npx @lhci/cli autorun --collect.url=http://localhost:3010 --assert.preset=lighthouse:recommended
 
       - name: Upload Lighthouse artifacts
         if: always()
@@ -124,10 +100,10 @@ jobs:
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "## 📊 Performance Metrics" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "*Analysis using mock API (ports 3010/3200) - no database dependencies*" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "*Analysis using mock API (ports 3010/4010) - no database dependencies*" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "- Next.js: http://localhost:3010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "- Mock API: http://localhost:3200" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Mock API: http://localhost:4010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "Generated on: $(date)" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
           fi
@@ -145,5 +121,5 @@ jobs:
         run: |
           echo "Stopping background processes..."
           # Kill any processes on the ports
-          lsof -ti:3200 | xargs -r kill 2>/dev/null || true
+          lsof -ti:4010 | xargs -r kill 2>/dev/null || true
           lsof -ti:3010 | xargs -r kill 2>/dev/null || true
