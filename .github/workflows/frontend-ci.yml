@@ -169,15 +169,23 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: backend/frontend/package-lock.json
-      
+
       - name: Install frontend dependencies
         working-directory: backend/frontend
         run: npm ci
-      
+
+      - name: Install contracts dependencies
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+          else
+            echo "No contracts directory found"
+          fi
       - name: Install Playwright Browsers
         working-directory: backend/frontend
         run: npx playwright install --with-deps chromium
-      
+
       - name: Start Next.js server (production build for E2E)
         working-directory: backend/frontend
         env:

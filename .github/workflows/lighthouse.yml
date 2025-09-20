@@ -29,7 +29,6 @@ jobs:
           else
             echo "No contracts directory found"
           fi
-
       - name: Build frontend (bind mock API)
         working-directory: backend/frontend
         env:
@@ -64,7 +63,6 @@ jobs:
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
-
       - name: Run LHCI
         env:
           TEST_BASE_URL: http://localhost:3010
