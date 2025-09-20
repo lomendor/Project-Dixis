@@ -121,19 +121,24 @@ jobs:
       
       # Frontend setup
       - name: Install frontend dependencies
+        working-directory: backend/frontend
         run: npm ci
       
       - name: Set API base URL
+        working-directory: backend/frontend
         run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
       
       - name: Install Playwright browsers with dependencies
+        working-directory: backend/frontend
         run: npx playwright install --with-deps
       
       - name: Build frontend
+        working-directory: backend/frontend
         run: npm run build || echo "no build step"
       
       - name: Start frontend server
-        run: nohup npm run start -- -p 3001 > ../frontend.log 2>&1 &
+        working-directory: backend/frontend
+        run: nohup npm run start -- -p 3001 > frontend.log 2>&1 &
       
       - name: Wait for frontend server
         run: |
@@ -141,6 +146,7 @@ jobs:
       
       # Run E2E tests
       - name: Run E2E
+        working-directory: backend/frontend
         run: npx playwright test
       
       # Artifacts ΜΟΝΟ σε αποτυχία
