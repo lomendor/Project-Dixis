@@ -59,11 +59,11 @@ export default function CartMiniPanel({
       <div className="flex items-center justify-between mb-3" data-testid="mini-panel-header">
         <div className="flex items-center">
           <ShoppingCartIcon />
-          <span className="ml-2 font-medium text-gray-800" data-testid="item-count">
+          <span className="ml-2 font-medium text-gray-800" data-testid="cart-items-count">
             {itemCount} {itemCount === 1 ? 'προϊόν' : 'προϊόντα'}
           </span>
         </div>
-        <span className="font-bold text-lg text-green-600" data-testid="mini-total">
+        <span className="font-bold text-lg text-green-600" data-testid="cart-total-amount">
           {formatCurrency(totalAmount)}
         </span>
       </div>
@@ -98,7 +98,7 @@ export default function CartMiniPanel({
       </div>
 
       <div className="space-y-2">
-        <Link href="/cart" onClick={onViewCart} className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors" data-testid="view-cart-btn">Προβολή καλαθιού</Link>
+        <Link href="/cart" onClick={onViewCart} className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors" data-testid="cart-view-link">Προβολή καλαθιού</Link>
         <Link href="/checkout" className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors" data-testid="checkout-cta-btn">Ολοκλήρωση παραγγελίας</Link>
       </div>
     </div>

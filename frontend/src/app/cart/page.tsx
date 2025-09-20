@@ -305,6 +305,7 @@ const handleCheckout = async () => {
                   payment_fees: selectedPaymentMethod ? calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal) : 0,
                   total_amount: orderSummary.subtotal + orderSummary.shipping_cost + orderSummary.tax_amount + (selectedPaymentMethod ? calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal) : 0)
                 }}
+                itemsCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 onCheckout={handleCheckout}
                 isLoading={isLoading}
                 disabled={!orderSummary || !selectedPaymentMethod}

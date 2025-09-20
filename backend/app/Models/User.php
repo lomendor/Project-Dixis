@@ -74,6 +74,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the addresses for the user.
+     */
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /**
      * Get the notifications for the user.
      */
     public function notifications()
