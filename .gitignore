@@ -149,10 +149,8 @@ backend/yarn-error.log
 playwright-report/
 e2e-artifacts/
 test-results/
-screenshots/
-/frontend/test-results/
-/frontend/playwright-report/
-/frontend/screenshots/
+/backend/frontend/test-results/
+/backend/frontend/playwright-report/
 traces/
 *.trace.zip
 *.webm
@@ -160,14 +158,6 @@ traces/
 *.png
 *.zip
 
-# Lighthouse reports
-lighthouse-reports/
-lighthouse-report/
-/frontend/lighthouse-reports/
-/frontend/lighthouse-report/
-*.lighthouse.json
-*.lighthouse.html
-
 # Keep test files accessible
-!/frontend/tests/**
+!/backend/frontend/tests/**
 backend/.env.testing.bak

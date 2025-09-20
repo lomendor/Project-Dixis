@@ -3,11 +3,11 @@ name: frontend-ci
 on:
   push:
     paths:
-      - 'frontend/**'
+      - 'backend/frontend/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
     paths:
-      - 'frontend/**'
+      - 'backend/frontend/**'
   workflow_dispatch:
 
 concurrency:
@@ -19,26 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: backend/frontend
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: backend/frontend/package-lock.json
       
       - name: Install dependencies
         run: npm ci
-
-      - name: Install contracts dependencies
-        run: |
-          cd ../packages/contracts
-          npm ci
-          cd ../../frontend
-
+      
       - name: Run TypeScript type check (strict)
         run: npm run type-check
 
@@ -47,29 +41,22 @@ jobs:
     needs: type-check
     defaults:
       run:
-        working-directory: frontend
+        working-directory: backend/frontend
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: backend/frontend/package-lock.json
       
       - name: Install dependencies
         run: npm ci
-
-      - name: Install contracts dependencies
-        run: |
-          cd ../packages/contracts
-          npm ci
-          cd ../../frontend
-
-      # Temporarily disabled for hotfix
-      # - name: Run ESLint
-      #   run: npm run lint
+      
+      - name: Run ESLint
+        run: npm run lint
       
       - name: Build application
         run: npm run build
@@ -79,7 +66,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build-failure
-          path: frontend/.next/
+          path: backend/frontend/.next/
           retention-days: 3
 
   e2e-tests:
@@ -149,26 +136,22 @@ jobs:
         
       # Setup frontend
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: backend/frontend/package-lock.json
       
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: backend/frontend
         run: npm ci
-
-      - name: Install contracts dependencies
-        working-directory: packages/contracts
-        run: npm ci
-
+      
       - name: Install Playwright Browsers
-        working-directory: frontend
+        working-directory: backend/frontend
         run: npx playwright install --with-deps chromium
       
       - name: Start Next.js server (production build for E2E)
-        working-directory: frontend
+        working-directory: backend/frontend
         env:
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
         run: |
@@ -191,29 +174,28 @@ jobs:
             -d '{"zip":"11527","city":"Athens","weight":2.0,"volume":0.01}' || exit 1
           echo "✅ Shipping API verified"
       
-      # Temporarily disabled for hotfix
-      # - name: Run shipping integration E2E tests
-      #   working-directory: frontend
-      #   run: npx playwright test shipping-checkout-e2e.spec.ts --project=chromium
-      #   env:
-      #     CI: true
-      #     PLAYWRIGHT_BASE_URL: http://localhost:3001
-      #     NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+      - name: Run shipping integration E2E tests
+        working-directory: backend/frontend
+        run: npx playwright test shipping-checkout-e2e.spec.ts --project=chromium
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
           
-      # - name: Run all E2E tests
-      #   working-directory: frontend
-      #   run: npx playwright test --project=chromium
-      #   env:
-      #     CI: true
-      #     PLAYWRIGHT_BASE_URL: http://localhost:3001
-      #     NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+      - name: Run all E2E tests
+        working-directory: backend/frontend
+        run: npx playwright test --project=chromium
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3001
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       
       - name: Upload E2E test results (on failure only)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-results-failure
-          path: frontend/playwright-report/
+          path: backend/frontend/playwright-report/
           retention-days: 3
       
       - name: Upload E2E videos and screenshots (on failure only)
@@ -222,9 +204,9 @@ jobs:
         with:
           name: e2e-videos-screenshots-failure
           path: |
-            frontend/test-results/**/*.webm
-            frontend/test-results/**/*.png
-            frontend/playwright-report/**/*.png
+            backend/frontend/test-results/**/*.webm
+            backend/frontend/test-results/**/*.png
+            backend/frontend/playwright-report/**/*.png
           retention-days: 5
       
       - name: Upload E2E traces (on failure only)
@@ -232,5 +214,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-traces-failure
-          path: frontend/test-results/**/*.zip
+          path: backend/frontend/test-results/**/*.zip
           retention-days: 3
