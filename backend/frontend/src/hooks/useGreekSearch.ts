@@ -243,12 +243,12 @@ export function useGreekSearch(): UseGreekSearchReturn {
   }, []);
 
   const hasActiveFilters = useMemo(() => {
-    return filters.search || 
+    return Boolean(filters.search || 
            filters.category || 
            filters.producer || 
            filters.minPrice || 
            filters.maxPrice || 
-           filters.organic !== null;
+           filters.organic !== null)
   }, [filters]);
 
   const refreshProducts = useCallback(() => {

@@ -262,12 +262,12 @@ export const GREEK_LABELS = {
  */
 export function getGreekLabel(path: string, fallback?: string): string {
   const keys = path.split('.');
-  let current: any = GREEK_LABELS;
-  
+  let current: unknown = GREEK_LABELS;
+
   for (const key of keys) {
-    current = current?.[key];
+    current = (current as Record<string, unknown>)?.[key];
     if (!current) break;
   }
-  
-  return current || fallback || path;
+
+  return (current as string) || fallback || path;
 }
