@@ -132,6 +132,7 @@ class E2ESeeder extends Seeder
                 [
                     'producer_id' => $e2eProducer->id,
                     'name' => $productData['name'],
+                    'title' => $productData['name'],
                     'slug' => $productData['slug'],
                     'description' => $productData['description'],
                     'price' => $productData['price'],
