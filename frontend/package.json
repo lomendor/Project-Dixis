@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "start:ci": "next start -p 3100",
+    "start:ci": "next start -p 3001",
     "mock:api": "node ../scripts/mock-api/lhci-mock.cjs",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -56,7 +56,7 @@
     "sub:all": "bash ../scripts/subagents.sh all",
     "qa:smoke": "npm run type-check && npm run build && npm run e2e:smoke",
     "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v",
-    "start:ci": "next start -p 3100",
+    "start:ci": "next start -p 3001",
     "mock:api": "node ../scripts/mock-api/lhci-mock.cjs"
   },
   "dependencies": {
