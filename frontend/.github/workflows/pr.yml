@@ -12,9 +12,6 @@ jobs:
   qa-checks:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -24,36 +21,37 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript type checking
-        run: npm run qa:types
+        run: pnpm run qa:types
 
       - name: ESLint validation
-        run: npm run qa:lint
+        run: pnpm run qa:lint
 
       - name: Unused code analysis
-        run: npm run qa:knip
+        run: pnpm run qa:knip
 
       - name: Dependency audit
-        run: npm run qa:deps
+        run: pnpm run qa:deps
 
       - name: Bundle size analysis
-        run: npm run qa:size
+        run: pnpm run qa:size
 
       - name: Build verification
-        run: npm run build
+        run: pnpm run build
 
   smoke-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout code
@@ -63,20 +61,24 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
 
       - name: Build application
-        run: npm run build
+        run: pnpm run build
 
       - name: Run smoke tests
-        run: npm run e2e:smoke
+        run: pnpm run e2e:smoke
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -91,9 +93,6 @@ jobs:
   danger-pr-check:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    defaults:
-      run:
-        working-directory: frontend
 
     steps:
       - name: Checkout PR
@@ -105,11 +104,15 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run Danger.js
         run: npx danger ci
