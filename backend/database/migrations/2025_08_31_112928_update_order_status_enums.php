@@ -12,16 +12,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // First, fix existing data that violates the new constraints
-        $this->fixOrdersConstraints();
+        // Run Postgres-specific maintenance only on pgsql.
+        // In CI we use SQLite for speed; SQLite does not support these statements.
+        if (DB::getDriverName() === 'pgsql') {
+            // First, fix existing data that violates the new constraints
+            $this->fixOrdersConstraints();
 
-        // Update payment_status enum to include 'completed' and 'refunded'
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
-        DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_payment_status_check CHECK (payment_status IN ('pending', 'paid', 'completed', 'failed', 'refunded'))");
+            // Update payment_status enum to include 'completed' and 'refunded'
+            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_payment_status_check CHECK (payment_status IN ('pending', 'paid', 'completed', 'failed', 'refunded'))");
 
-        // Update status enum to include 'confirmed' and 'delivered'
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
-        DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled'))");
+            // Update status enum to include 'confirmed' and 'delivered'
+            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'completed', 'delivered', 'cancelled'))");
+        } else {
+            // NO-OP for non-pgsql drivers (sqlite/mysql) to keep migrations green in CI.
+            // Business semantics preserved on Postgres production.
+        }
     }
 
     /**
@@ -67,11 +74,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert to original constraints
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
-        DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_payment_status_check CHECK (payment_status IN ('pending', 'paid', 'failed'))");
+        if (DB::getDriverName() === 'pgsql') {
+            // Revert to original constraints
+            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check");
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_payment_status_check CHECK (payment_status IN ('pending', 'paid', 'failed'))");
 
-        DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
-        DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('pending', 'processing', 'shipped', 'completed', 'cancelled'))");
+            DB::statement("ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check");
+            DB::statement("ALTER TABLE orders ADD CONSTRAINT orders_status_check CHECK (status IN ('pending', 'processing', 'shipped', 'completed', 'cancelled'))");
+        }
     }
 };
