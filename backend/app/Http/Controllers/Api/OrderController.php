@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\CartItem;
-use Illuminate\Http\Request;
+use App\Services\InventoryService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private NotificationService $notificationService,
+        private InventoryService $inventoryService
+    ) {}
+
     /**
      * Display user's orders.
      */
@@ -23,7 +30,7 @@ class OrderController extends Controller
             ->with(['orderItems.product.categories', 'orderItems.product.images', 'orderItems.product.producer'])
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return response()->json([
             'orders' => $orders->map(function ($order) {
                 return [
@@ -57,7 +64,7 @@ class OrderController extends Controller
                         ];
                     }),
                 ];
-            })
+            }),
         ]);
     }
 
@@ -93,10 +100,11 @@ class OrderController extends Controller
 
             foreach ($cartItems as $cartItem) {
                 $product = $cartItem->product;
-                
+
                 // Check if product is still active
-                if (!$product->is_active) {
+                if (! $product->is_active) {
                     $unavailableProducts[] = $product->name;
+
                     continue;
                 }
 
@@ -105,8 +113,9 @@ class OrderController extends Controller
                     $insufficientStock[] = [
                         'product' => $product->name,
                         'requested' => $cartItem->quantity,
-                        'available' => $product->stock
+                        'available' => $product->stock,
                     ];
+
                     continue;
                 }
 
@@ -125,19 +134,19 @@ class OrderController extends Controller
             }
 
             // Handle validation errors
-            if (!empty($unavailableProducts)) {
+            if (! empty($unavailableProducts)) {
                 throw ValidationException::withMessages([
-                    'products' => ['The following products are no longer available: ' . implode(', ', $unavailableProducts)],
+                    'products' => ['The following products are no longer available: '.implode(', ', $unavailableProducts)],
                 ]);
             }
 
-            if (!empty($insufficientStock)) {
+            if (! empty($insufficientStock)) {
                 $stockErrors = [];
                 foreach ($insufficientStock as $stockError) {
                     $stockErrors[] = "{$stockError['product']}: requested {$stockError['requested']}, only {$stockError['available']} available";
                 }
                 throw ValidationException::withMessages([
-                    'stock' => ['Insufficient stock for: ' . implode('; ', $stockErrors)],
+                    'stock' => ['Insufficient stock for: '.implode('; ', $stockErrors)],
                 ]);
             }
 
@@ -171,11 +180,15 @@ class OrderController extends Controller
                 OrderItem::create($itemData);
             }
 
-            // Reduce stock for products with stock tracking
+            // Reduce stock for products with stock tracking and check for low stock alerts
             foreach ($cartItems as $cartItem) {
                 $product = $cartItem->product;
                 if ($product->stock !== null) {
                     $product->decrement('stock', $cartItem->quantity);
+                    // Refresh the product to get updated stock value
+                    $product->refresh();
+                    // Check for low stock alerts
+                    $this->inventoryService->checkProductLowStock($product);
                 }
             }
 
@@ -183,6 +196,9 @@ class OrderController extends Controller
             CartItem::where('user_id', $request->user()->id)->delete();
 
             DB::commit();
+
+            // Send order placed notification
+            $this->notificationService->sendOrderPlacedNotification($order);
 
             // Load relationships for response
             $order->load(['orderItems.product.categories', 'orderItems.product.images', 'orderItems.product.producer']);
@@ -218,7 +234,7 @@ class OrderController extends Controller
                             ] : null,
                         ];
                     }),
-                ]
+                ],
             ], 201);
 
         } catch (ValidationException $e) {
@@ -226,9 +242,10 @@ class OrderController extends Controller
             throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Failed to create order',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -239,7 +256,7 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $this->authorize('create', Order::class);
-        
+
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -251,13 +268,31 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate totals
+            // Validate products and check stock, calculate totals
             $subtotal = 0;
             $orderItems = [];
+            $productData = [];
 
             foreach ($validated['items'] as $item) {
-                $product = Product::find($item['product_id']);
-                $unitPrice = $product->price ?? 0;
+                $product = Product::where('id', $item['product_id'])
+                    ->where('is_active', true)
+                    ->lockForUpdate() // Prevent race conditions on stock
+                    ->first();
+
+                if (! $product) {
+                    throw ValidationException::withMessages([
+                        'items' => ["Product with ID {$item['product_id']} not found or inactive."],
+                    ]);
+                }
+
+                // Check stock if available
+                if ($product->stock !== null && $product->stock < $item['quantity']) {
+                    throw ValidationException::withMessages([
+                        'stock' => ["Insufficient stock for product '{$product->name}'. Available: {$product->stock}, requested: {$item['quantity']}."],
+                    ]);
+                }
+
+                $unitPrice = $product->price;
                 $totalPrice = $unitPrice * $item['quantity'];
                 $subtotal += $totalPrice;
 
@@ -268,6 +303,11 @@ class OrderController extends Controller
                     'total_price' => $totalPrice,
                     'product_name' => $product->name,
                     'product_unit' => $product->unit ?? 'unit',
+                ];
+
+                $productData[] = [
+                    'product' => $product,
+                    'quantity' => $item['quantity'],
                 ];
             }
 
@@ -294,7 +334,25 @@ class OrderController extends Controller
                 OrderItem::create($itemData);
             }
 
+            // Update stock and check for low stock alerts
+            foreach ($productData as $data) {
+                $product = $data['product'];
+                $quantity = $data['quantity'];
+
+                // Update stock if it exists
+                if ($product->stock !== null) {
+                    $product->decrement('stock', $quantity);
+                    // Refresh the product to get updated stock value
+                    $product->refresh();
+                    // Check for low stock alerts
+                    $this->inventoryService->checkProductLowStock($product);
+                }
+            }
+
             DB::commit();
+
+            // Send order placed notification
+            $this->notificationService->sendOrderPlacedNotification($order);
 
             // Load relationships and format response
             $order->load(['orderItems.product.categories', 'orderItems.product.images', 'orderItems.product.producer']);
@@ -332,9 +390,16 @@ class OrderController extends Controller
                 }),
             ], 201);
 
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to create order'], 500);
+
+            return response()->json([
+                'message' => 'Failed to create order',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 

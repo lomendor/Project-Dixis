@@ -14,11 +14,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $perPage = min($request->get('per_page', 15), 100); // Max 100 items per page
-        
+
         $products = Product::with('producer')
             ->where('is_active', true)
             ->paginate($perPage);
-        
+
         return response()->json($products);
     }
 
@@ -28,7 +28,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('producer');
-        
+
         return response()->json($product);
     }
 }

@@ -16,9 +16,10 @@ function ToastItem({ toast }: ToastProps) {
       const timer = setTimeout(() => {
         removeToast(toast.id);
       }, toast.duration);
-      
+
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [toast.id, toast.duration, removeToast]);
 
   // Announce to screen readers when toast appears

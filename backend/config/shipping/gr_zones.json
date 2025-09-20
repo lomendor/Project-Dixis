@@ -1,0 +1,95 @@
+{
+  "volumetric_factor": 5000,
+  "currency": "EUR",
+  "weight_unit": "kg",
+  "dimension_unit": "cm",
+  "zones": {
+    "GR_ATTICA": {
+      "name": "Αττική - Athens Metropolitan Area",
+      "description": "Greater Athens, Piraeus, surrounding suburbs",
+      "postal_codes": [
+        "10*", "11*", "12*", "13*", "14*", "15*", "16*", "17*", "18*", "19*"
+      ],
+      "base_rate_0_2kg": 3.50,
+      "base_rate_2_5kg": 5.20,
+      "per_kg_rate_above_5kg": 1.80,
+      "max_weight_kg": 30,
+      "estimated_delivery_days": 1
+    },
+    "GR_THESSALONIKI": {
+      "name": "Θεσσαλονίκη - Thessaloniki Metropolitan Area",
+      "description": "Greater Thessaloniki and surrounding areas",
+      "postal_codes": [
+        "53*", "54*", "55*", "56*", "57*"
+      ],
+      "base_rate_0_2kg": 4.20,
+      "base_rate_2_5kg": 6.50,
+      "per_kg_rate_above_5kg": 2.10,
+      "max_weight_kg": 30,
+      "estimated_delivery_days": 2
+    },
+    "GR_MAINLAND": {
+      "name": "Ηπειρωτική Ελλάδα - Mainland Greece",
+      "description": "Central Greece, Peloponnese, Macedonia, Thrace, Epirus",
+      "postal_codes": [
+        "20*", "21*", "22*", "23*", "24*", "25*", "26*", "27*", "28*", "29*",
+        "30*", "31*", "32*", "33*", "34*", "35*", "36*", "37*", "38*", "39*",
+        "40*", "41*", "42*", "43*", "44*", "45*", "46*", "47*", "48*", "49*",
+        "50*", "51*", "52*", "58*", "59*", "60*", "61*", "62*", "63*", "64*",
+        "65*", "66*", "67*", "68*", "69*"
+      ],
+      "base_rate_0_2kg": 5.80,
+      "base_rate_2_5kg": 8.20,
+      "per_kg_rate_above_5kg": 2.40,
+      "max_weight_kg": 30,
+      "estimated_delivery_days": 3
+    },
+    "GR_CRETE": {
+      "name": "Κρήτη - Crete",
+      "description": "Island of Crete",
+      "postal_codes": [
+        "70*", "71*", "72*", "73*", "74*"
+      ],
+      "base_rate_0_2kg": 7.50,
+      "base_rate_2_5kg": 11.20,
+      "per_kg_rate_above_5kg": 3.20,
+      "max_weight_kg": 25,
+      "estimated_delivery_days": 4
+    },
+    "GR_ISLANDS_LARGE": {
+      "name": "Μεγάλα Νησιά - Large Islands",
+      "description": "Rhodes, Corfu, Lesbos, Chios, Samos, Naxos, Paros, Mykonos, Santorini",
+      "postal_codes": [
+        "49*", "80*", "81*", "82*", "83*", "84*", "85*"
+      ],
+      "base_rate_0_2kg": 8.90,
+      "base_rate_2_5kg": 13.50,
+      "per_kg_rate_above_5kg": 3.80,
+      "max_weight_kg": 20,
+      "estimated_delivery_days": 5
+    },
+    "GR_ISLANDS_SMALL": {
+      "name": "Μικρά Νησιά - Small Islands",
+      "description": "Small Greek islands and remote areas",
+      "postal_codes": [
+        "86*", "87*", "88*", "89*", "90*", "91*"
+      ],
+      "base_rate_0_2kg": 12.50,
+      "base_rate_2_5kg": 18.80,
+      "per_kg_rate_above_5kg": 4.50,
+      "max_weight_kg": 15,
+      "estimated_delivery_days": 7
+    }
+  },
+  "special_handling": {
+    "fragile_surcharge_percentage": 15,
+    "perishable_surcharge_percentage": 20,
+    "express_delivery_multiplier": 1.5,
+    "saturday_delivery_surcharge": 5.00
+  },
+  "restrictions": {
+    "min_weight_kg": 0.1,
+    "max_dimension_cm": 120,
+    "max_combined_dimensions_cm": 300
+  }
+}

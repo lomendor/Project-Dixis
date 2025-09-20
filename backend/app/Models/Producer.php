@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Producer extends Model
 {
@@ -13,7 +13,7 @@ class Producer extends Model
     protected $fillable = [
         'name',
         'slug',
-        'business_name', 
+        'business_name',
         'tax_id',
         'tax_office',
         'description',
@@ -37,7 +37,7 @@ class Producer extends Model
 
     protected $casts = [
         'latitude' => 'decimal:7',
-        'longitude' => 'decimal:7', 
+        'longitude' => 'decimal:7',
         'social_media' => 'array',
         'verified' => 'boolean',
         'uses_custom_shipping_rates' => 'boolean',

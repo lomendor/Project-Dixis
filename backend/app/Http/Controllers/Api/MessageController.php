@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MessageController extends Controller
@@ -16,24 +16,24 @@ class MessageController extends Controller
     public function markAsRead(Request $request, Message $message): Response|JsonResponse
     {
         $user = $request->user();
-        
+
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
-        
+
         // Ensure message is for this producer
         if ($message->producer_id !== $user->producer->id) {
             return response()->json(['message' => 'Message not found'], 404);
         }
-        
+
         // Mark as read
         $message->is_read = true;
         $message->save();
-        
+
         return response()->noContent();
     }
-    
+
     /**
      * Store a reply to a message
      */
@@ -42,19 +42,19 @@ class MessageController extends Controller
         $request->validate([
             'content' => 'required|string|max:5000',
         ]);
-        
+
         $user = $request->user();
-        
+
         // Ensure user has a producer profile
-        if (!$user->producer) {
+        if (! $user->producer) {
             return response()->json(['message' => 'Producer profile not found'], 403);
         }
-        
+
         // Ensure parent message exists and is for this producer
         if ($message->producer_id !== $user->producer->id) {
             return response()->json(['message' => 'Message not found'], 404);
         }
-        
+
         // Create the reply
         $reply = Message::create([
             'content' => $request->content,
@@ -63,7 +63,7 @@ class MessageController extends Controller
             'parent_id' => $message->id,
             'is_read' => false,
         ]);
-        
+
         return response()->json($reply, 201);
     }
 }

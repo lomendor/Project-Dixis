@@ -1,0 +1,118 @@
+{
+  "default_profile": {
+    "name": "Default Shipping Profile",
+    "description": "Standard shipping rates using zone-based pricing",
+    "type": "zone_based",
+    "enabled": true,
+    "free_shipping_threshold": 50.00,
+    "pickup_available": true,
+    "pickup_locations": [
+      {
+        "name": "Main Warehouse",
+        "address": "Διεύθυνση Κεντρικής Αποθήκης",
+        "city": "Athens",
+        "postal_code": "10551",
+        "hours": "Monday-Friday 9:00-17:00"
+      }
+    ]
+  },
+  "producer_profiles": {
+    "flat_rate": {
+      "name": "Flat Rate Shipping",
+      "description": "Fixed shipping cost regardless of weight or destination",
+      "type": "flat_rate",
+      "enabled": true,
+      "rates": {
+        "domestic": 6.50,
+        "islands": 12.00
+      },
+      "free_shipping_threshold": 75.00,
+      "pickup_available": true
+    },
+    "free_shipping": {
+      "name": "Free Shipping Only",
+      "description": "No shipping charges, only pickup or free delivery",
+      "type": "free_only",
+      "enabled": true,
+      "rates": {
+        "domestic": 0.00,
+        "islands": 0.00
+      },
+      "free_shipping_threshold": 0.00,
+      "pickup_available": true,
+      "delivery_radius_km": 20
+    },
+    "premium_producer": {
+      "name": "Premium Producer Profile",
+      "description": "Enhanced shipping options with express delivery",
+      "type": "zone_based_premium",
+      "enabled": true,
+      "zone_multiplier": 0.85,
+      "express_available": true,
+      "express_multiplier": 1.8,
+      "free_shipping_threshold": 40.00,
+      "pickup_available": true,
+      "special_handling": {
+        "cold_chain": true,
+        "fragile_packaging": true,
+        "same_day_delivery": true
+      }
+    },
+    "local_producer": {
+      "name": "Local Producer Profile",
+      "description": "Local delivery only with reduced rates",
+      "type": "local_only",
+      "enabled": true,
+      "delivery_zones": ["GR_ATTICA", "GR_THESSALONIKI"],
+      "rates": {
+        "local_delivery": 2.50,
+        "same_day": 5.00
+      },
+      "free_shipping_threshold": 25.00,
+      "pickup_available": true,
+      "max_delivery_distance_km": 50
+    }
+  },
+  "carrier_settings": {
+    "default_carrier": "ELTA_COURIER",
+    "carriers": {
+      "ELTA_COURIER": {
+        "name": "ΕΛΤΑ Courier",
+        "code": "ELTA",
+        "tracking_url_template": "https://www.elta-courier.gr/track/{tracking_code}",
+        "api_enabled": false,
+        "supported_services": ["standard", "express", "cod"]
+      },
+      "ACS_COURIER": {
+        "name": "ACS Courier",
+        "code": "ACS",
+        "tracking_url_template": "https://www.acscourier.net/track/{tracking_code}",
+        "api_enabled": false,
+        "supported_services": ["standard", "express", "same_day"]
+      },
+      "SPEEDEX": {
+        "name": "Speedex Courier",
+        "code": "SPX",
+        "tracking_url_template": "https://www.speedex.gr/track/{tracking_code}",
+        "api_enabled": false,
+        "supported_services": ["standard", "express"]
+      }
+    }
+  },
+  "label_settings": {
+    "format": "PDF",
+    "size": "A4",
+    "include_barcode": true,
+    "include_qr_code": true,
+    "logo_enabled": true,
+    "return_address": {
+      "name": "Project Dixis Marketplace",
+      "address": "Κεντρική Διεύθυνση",
+      "city": "Athens",
+      "postal_code": "10551",
+      "country": "Greece",
+      "phone": "+30 210 1234567",
+      "email": "shipping@dixis.gr"
+    }
+  }
+}

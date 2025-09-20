@@ -1,0 +1,14 @@
+# Baseline Audit — LH Quick Wins (post-merge)
+- Headings fixed (single <h1> per page; proper <h2>/<h3>), small contrast bump, console noise reduced via ESLint.
+- CI policy: LH assertions warn-only on PRs, enforced on main.
+- Snapshot (latest LH warnings preview):
+- color-contrast: score=null (Background and foreground colors have a sufficient contrast ratio)
+- csp-xss: score=0 (Ensure CSP is effective against XSS attacks)
+- errors-in-console: score=0 (Browser errors were logged to the console)
+- heading-order: score=0 (Heading elements are not in a sequentially-descending order)
+- installable-manifest: score=0 (Web app manifest or service worker do not meet the installability requirements)
+- largest-contentful-paint: score=0.82 (Largest Contentful Paint)
+- render-blocking-resources: score=0 (Eliminate render-blocking resources)
+- service-worker: score=0 (Does not register a service worker that controls page and start_url)
+- themed-omnibox: score=0 (Does not set a theme color for the address bar)
+- uses-text-compression: score=0 (Enable text compression)

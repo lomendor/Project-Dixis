@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 return new class extends Migration
@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::table('producers', function (Blueprint $table) {
             // Guard: check if slug column doesn't exist
-            if (!Schema::hasColumn('producers', 'slug')) {
+            if (! Schema::hasColumn('producers', 'slug')) {
                 // Add as nullable first
                 $table->string('slug')->nullable()->after('name');
             }
         });
-        
+
         // Populate existing rows with slugs
         $producers = DB::table('producers')->whereNull('slug')->get();
         foreach ($producers as $producer) {
@@ -28,23 +28,23 @@ return new class extends Migration
             $slug = $this->generateUniqueSlug($baseSlug);
             DB::table('producers')->where('id', $producer->id)->update(['slug' => $slug]);
         }
-        
+
         // Now make slug NOT NULL and unique
         Schema::table('producers', function (Blueprint $table) {
             $table->string('slug')->nullable(false)->unique()->change();
         });
     }
-    
+
     private function generateUniqueSlug(string $baseSlug): string
     {
         $slug = $baseSlug;
         $counter = 1;
-        
+
         while (DB::table('producers')->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
+            $slug = $baseSlug.'-'.$counter;
             $counter++;
         }
-        
+
         return $slug;
     }
 

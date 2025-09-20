@@ -13,7 +13,7 @@ class OrderPolicy
      */
     public function view(?User $user, Order $order): bool
     {
-        if (!$user) {
+        if (! $user) {
             return false; // Anonymous users cannot view orders
         }
 
@@ -42,10 +42,10 @@ class OrderPolicy
     public function create(?User $user): bool
     {
         // Allow guest orders (user = null)
-        if (!$user) {
+        if (! $user) {
             return true;
         }
-        
+
         // Allow authenticated consumers and admins, but NOT producers
         return $user->role === 'consumer' || $user->role === 'admin';
     }

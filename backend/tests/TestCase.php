@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -14,6 +15,7 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         // CI hardening: RefreshDatabase ensures clean test state
-        // Note: preventStrayRequests() not available in this Laravel version
+        // Prevent stray HTTP requests during tests
+        Http::preventStrayRequests();
     }
 }

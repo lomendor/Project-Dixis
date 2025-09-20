@@ -1,0 +1,34 @@
+{
+  "success": true,
+  "data": {
+    "tracking_code": "ACS123456789",
+    "label_url": "https://acs-api.gr/labels/ACS123456789.pdf",
+    "service_type": "standard",
+    "carrier_code": "ACS",
+    "status": "labeled",
+    "estimated_delivery_days": 2,
+    "cost": {
+      "amount": 4.50,
+      "currency": "EUR"
+    },
+    "pickup": {
+      "date": "2025-09-18",
+      "time_window": "09:00-17:00"
+    },
+    "delivery": {
+      "estimated_date": "2025-09-20",
+      "zone": "ATTICA",
+      "address": {
+        "street": "Shipping Address 123",
+        "city": "Athens",
+        "postal_code": "11527",
+        "country": "GR"
+      }
+    }
+  },
+  "metadata": {
+    "request_id": "req_acs_20250917_123456",
+    "timestamp": "2025-09-17T14:30:00Z",
+    "api_version": "v1"
+  }
+}

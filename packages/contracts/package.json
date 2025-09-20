@@ -1,0 +1,36 @@
+{
+  "name": "@dixis/contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared TypeScript contracts and Zod schemas for Project-Dixis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./shipping": {
+      "import": "./dist/shipping.js",
+      "types": "./dist/shipping.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
