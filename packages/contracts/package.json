@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Shared TypeScript contracts and Zod schemas for Project-Dixis",
+  "engines": {
+    "node": ">=20"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
