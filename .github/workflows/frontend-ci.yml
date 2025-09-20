@@ -35,6 +35,8 @@ jobs:
       
       - name: Run TypeScript type check (strict)
         run: npm run type-check
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -77,6 +79,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: project_dixis_test
         options: >-
@@ -129,6 +132,8 @@ jobs:
         run: |
           lsof -ti :3000 | xargs -r kill -9 || true
           lsof -ti :3001 | xargs -r kill -9 || true
+          lsof -ti :3010 | xargs -r kill -9 || true
+          lsof -ti :3030 | xargs -r kill -9 || true
           lsof -ti :8001 | xargs -r kill -9 || true
       
       - name: Start Laravel server
@@ -154,9 +159,10 @@ jobs:
         working-directory: backend/frontend
         env:
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          NEXT_TELEMETRY_DISABLED: 1
         run: |
           npm run build
-          PORT=3001 npm start &
+          PORT=3030 npm start &
       
       - name: Wait for servers to be ready
         run: |
@@ -165,7 +171,7 @@ jobs:
           echo "✅ API server ready"
           
           echo "Waiting for frontend server..."
-          timeout 60 bash -c 'until curl -f http://localhost:3001; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3030; do sleep 2; done'
           echo "✅ Frontend server ready"
           
           echo "Verifying shipping quote API..."
@@ -179,16 +185,18 @@ jobs:
         run: npx playwright test shipping-checkout-e2e.spec.ts --project=chromium
         env:
           CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3001
+          PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          NEXT_TELEMETRY_DISABLED: 1
           
       - name: Run all E2E tests
         working-directory: backend/frontend
         run: npx playwright test --project=chromium
         env:
           CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3001
+          PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          NEXT_TELEMETRY_DISABLED: 1
       
       - name: Upload E2E test results (on failure only)
         if: failure()

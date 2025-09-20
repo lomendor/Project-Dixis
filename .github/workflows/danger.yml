@@ -81,11 +81,24 @@ jobs:
           }
           
           // Check for missing artifacts (if E2E tests are added/modified)
-          const e2eFiles = git.modified_files.filter(file => 
+          const e2eFiles = git.modified_files.filter(file =>
             file.includes('/e2e/') || file.includes('test') && file.includes('.spec.')
           );
           if (e2eFiles.length > 0) {
             message(`🧪 E2E tests modified. Verify test-results/ and playwright-report/ artifacts are uploaded in CI.`);
+          }
+
+          // Docs gate requirement - check for report links
+          const hasDocsChanges = git.modified_files.some(file =>
+            file.includes('docs/') || file.includes('README') || file.includes('.md')
+          );
+          if (hasDocsChanges) {
+            message(`📚 Documentation changes detected. Ensure report links are updated in relevant docs.`);
+          }
+
+          // Check for missing report links when CI workflows are modified
+          if (workflowFiles.length > 0) {
+            message(`🔗 CI workflows modified. Verify artifact upload paths and report links are consistent across workflows.`);
           }
           
           // Positive reinforcement
@@ -101,8 +114,7 @@ jobs:
         
       - name: Run Danger
         run: |
-          echo "⚠️ Danger temporarily disabled - permissions issue"
-          echo "This would run: danger ci"
-          # danger ci
+          echo "🚀 Running Danger CI checks..."
+          danger ci
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
