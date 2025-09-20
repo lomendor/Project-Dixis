@@ -2,23 +2,26 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Product;
-use App\Models\Producer;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $user;
+
     protected $product1;
+
     protected $product2;
+
     protected $producer;
 
     protected function setUp(): void
@@ -28,26 +31,26 @@ class OrderTest extends TestCase
         // Create user
         $this->user = User::factory()->create([
             'email' => 'order-test@test.com',
-            'role' => 'consumer'
+            'role' => 'consumer',
         ]);
 
         // Create producer and products
         $this->producer = Producer::factory()->create();
-        
+
         $this->product1 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Test Product 1',
             'price' => 15.00,
             'stock' => 50,
-            'is_active' => true
+            'is_active' => true,
         ]);
-        
+
         $this->product2 = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'name' => 'Test Product 2',
             'price' => 25.50,
             'stock' => 30,
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -57,20 +60,20 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
-        
+
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product2->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson('/api/v1/orders/checkout', [
             'shipping_method' => 'HOME',
-            'notes' => 'Test order'
+            'notes' => 'Test order',
         ]);
 
         $response->assertStatus(201)
@@ -94,10 +97,10 @@ class OrderTest extends TestCase
                             'product_name',
                             'quantity',
                             'unit_price',
-                            'total_price'
-                        ]
-                    ]
-                ]
+                            'total_price',
+                        ],
+                    ],
+                ],
             ]);
 
         // Verify order was created correctly
@@ -115,7 +118,7 @@ class OrderTest extends TestCase
             'payment_status' => 'pending',
             'status' => 'pending',
             'shipping_method' => 'HOME',
-            'notes' => 'Test order'
+            'notes' => 'Test order',
         ]);
 
         // Verify order items were created
@@ -124,7 +127,7 @@ class OrderTest extends TestCase
             'quantity' => 2,
             'unit_price' => 15.00,
             'total_price' => 30.00,
-            'product_name' => 'Test Product 1'
+            'product_name' => 'Test Product 1',
         ]);
 
         $this->assertDatabaseHas('order_items', [
@@ -132,7 +135,7 @@ class OrderTest extends TestCase
             'quantity' => 1,
             'unit_price' => 25.50,
             'total_price' => 25.50,
-            'product_name' => 'Test Product 2'
+            'product_name' => 'Test Product 2',
         ]);
 
         // Verify cart was cleared after checkout
@@ -144,13 +147,13 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
 
         $response = $this->postJson('/api/v1/orders/checkout', [
-            'shipping_method' => 'PICKUP'
+            'shipping_method' => 'PICKUP',
         ]);
 
         $response->assertStatus(201);
@@ -163,7 +166,7 @@ class OrderTest extends TestCase
             'user_id' => $this->user->id,
             'shipping_amount' => 0.00,
             'total_amount' => $totalAmount,
-            'shipping_method' => 'PICKUP'
+            'shipping_method' => 'PICKUP',
         ]);
     }
 
@@ -184,7 +187,7 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -202,7 +205,7 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 5 // More than stock
+            'quantity' => 5, // More than stock
         ]);
 
         Sanctum::actingAs($this->user);
@@ -218,21 +221,21 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         Sanctum::actingAs($this->user);
 
         // Test invalid shipping method
         $response = $this->postJson('/api/v1/orders/checkout', [
-            'shipping_method' => 'INVALID'
+            'shipping_method' => 'INVALID',
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['shipping_method']);
 
         // Test notes too long
         $response = $this->postJson('/api/v1/orders/checkout', [
-            'notes' => str_repeat('a', 501) // Max is 500
+            'notes' => str_repeat('a', 501), // Max is 500
         ]);
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['notes']);
@@ -246,15 +249,15 @@ class OrderTest extends TestCase
             'items' => [
                 [
                     'product_id' => $this->product1->id,
-                    'quantity' => 2
+                    'quantity' => 2,
                 ],
                 [
                     'product_id' => $this->product2->id,
-                    'quantity' => 1
-                ]
+                    'quantity' => 1,
+                ],
             ],
             'shipping_method' => 'COURIER',
-            'notes' => 'Manual test order'
+            'notes' => 'Manual test order',
         ]);
 
         $response->assertStatus(201)
@@ -266,7 +269,7 @@ class OrderTest extends TestCase
                 'total_amount',
                 'payment_status',
                 'status',
-                'order_items'
+                'order_items',
             ]);
 
         // Verify order was created
@@ -281,12 +284,12 @@ class OrderTest extends TestCase
             'subtotal' => 50.00,
             'tax_amount' => 5.00,
             'shipping_amount' => 5.00,
-            'total_amount' => 60.00
+            'total_amount' => 60.00,
         ]);
 
         OrderItem::factory()->create([
             'order_id' => $order->id,
-            'product_id' => $this->product1->id
+            'product_id' => $this->product1->id,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -311,23 +314,23 @@ class OrderTest extends TestCase
                                 'product_name',
                                 'quantity',
                                 'unit_price',
-                                'total_price'
-                            ]
-                        ]
-                    ]
-                ]
+                                'total_price',
+                            ],
+                        ],
+                    ],
+                ],
             ]);
     }
 
     public function test_get_specific_order(): void
     {
         $order = Order::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
 
         OrderItem::factory()->create([
             'order_id' => $order->id,
-            'product_id' => $this->product1->id
+            'product_id' => $this->product1->id,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -344,7 +347,7 @@ class OrderTest extends TestCase
                 'total_amount',
                 'payment_status',
                 'status',
-                'order_items'
+                'order_items',
             ]);
     }
 
@@ -352,7 +355,7 @@ class OrderTest extends TestCase
     {
         $anotherUser = User::factory()->create();
         $order = Order::factory()->create([
-            'user_id' => $anotherUser->id
+            'user_id' => $anotherUser->id,
         ]);
 
         Sanctum::actingAs($this->user);
@@ -366,13 +369,13 @@ class OrderTest extends TestCase
     {
         // Test without authentication
         $this->getJson('/api/v1/orders')->assertStatus(401);
-        
+
         $this->postJson('/api/v1/orders/checkout')->assertStatus(401);
-        
+
         $this->postJson('/api/v1/orders', [
-            'items' => [['product_id' => $this->product1->id, 'quantity' => 1]]
+            'items' => [['product_id' => $this->product1->id, 'quantity' => 1]],
         ])->assertStatus(401);
-        
+
         $order = Order::factory()->create(['user_id' => $this->user->id]);
         $this->getJson("/api/v1/orders/{$order->id}")->assertStatus(401);
     }
@@ -382,7 +385,7 @@ class OrderTest extends TestCase
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
 
         // Change product price after adding to cart
@@ -398,7 +401,7 @@ class OrderTest extends TestCase
         // Verify order item uses the current product price (not cart price)
         $this->assertDatabaseHas('order_items', [
             'product_id' => $this->product1->id,
-            'unit_price' => 999.99 // Current price at time of checkout
+            'unit_price' => 999.99, // Current price at time of checkout
         ]);
     }
 
@@ -408,32 +411,32 @@ class OrderTest extends TestCase
         $inactiveProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'price' => 10.00,
-            'is_active' => false
+            'is_active' => false,
         ]);
-        
+
         $lowStockProduct = Product::factory()->create([
             'producer_id' => $this->producer->id,
             'price' => 20.00,
-            'stock' => 1
+            'stock' => 1,
         ]);
 
         // Add items to cart
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $this->product1->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
-        
+
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $inactiveProduct->id,
-            'quantity' => 1
+            'quantity' => 1,
         ]);
-        
+
         CartItem::create([
             'user_id' => $this->user->id,
             'product_id' => $lowStockProduct->id,
-            'quantity' => 5 // More than stock
+            'quantity' => 5, // More than stock
         ]);
 
         Sanctum::actingAs($this->user);
@@ -446,7 +449,7 @@ class OrderTest extends TestCase
         $responseData = $response->json();
         $this->assertArrayHasKey('errors', $responseData);
         $this->assertTrue(
-            isset($responseData['errors']['products']) || 
+            isset($responseData['errors']['products']) ||
             isset($responseData['errors']['stock'])
         );
     }

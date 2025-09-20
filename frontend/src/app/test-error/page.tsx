@@ -22,7 +22,7 @@ export default function TestErrorPage() {
   };
   
   // Component that throws error on render
-  const TriggerErrorComponent = () => {
+  const TriggerErrorComponent = (): null => {
     if (shouldThrowError) {
       throw new Error('This is a test error to demonstrate the Error Boundary functionality!');
     }

@@ -22,10 +22,10 @@ class UpdateProducerRequest extends FormRequest
     public function rules(): array
     {
         $producerId = $this->route('producer') ? $this->route('producer')->id ?? $this->route('producer') : null;
-        
+
         return [
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:producers,slug,' . $producerId,
+            'slug' => 'nullable|string|max:255|unique:producers,slug,'.$producerId,
             'business_name' => 'nullable|string|max:255',
             'tax_id' => 'nullable|string|max:20',
             'tax_office' => 'nullable|string|max:255',

@@ -2,40 +2,41 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Producer;
 use App\Models\Product;
-use Laravel\Sanctum\Sanctum;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 #[Group('mvp')]
 class ProducerKpiTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     protected $user;
+
     protected $producer;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create producer user with role
         $this->user = User::factory()->create([
             'email' => 'kpi-producer@test.com',
-            'role' => 'producer'
+            'role' => 'producer',
         ]);
-        
+
         // Create producer profile
         $this->producer = Producer::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
-        
+
         // Create some products for the producer
         Product::factory()->count(3)->create([
-            'producer_id' => $this->producer->id
+            'producer_id' => $this->producer->id,
         ]);
     }
 
@@ -59,7 +60,7 @@ class ProducerKpiTest extends TestCase
             'active_products',
             'total_orders',
             'revenue',
-            'unread_messages'
+            'unread_messages',
         ]);
 
         // Assert all values are numeric
@@ -98,7 +99,7 @@ class ProducerKpiTest extends TestCase
         $response->assertStatus(200);
 
         $data = $response->json();
-        
+
         // With test data, products should be non-zero, others can be zero initially
         $this->assertGreaterThanOrEqual(0, $data['total_orders'], 'Total orders should be >= 0');
         $this->assertGreaterThanOrEqual(0, $data['revenue'], 'Revenue should be >= 0');
@@ -113,16 +114,16 @@ class ProducerKpiTest extends TestCase
     public function test_kpi_endpoint_performance()
     {
         Sanctum::actingAs($this->user);
-        
+
         $startTime = microtime(true);
         $response = $this->getJson('/api/v1/producer/dashboard/kpi');
         $endTime = microtime(true);
-        
+
         $responseTime = ($endTime - $startTime) * 1000; // Convert to milliseconds
-        
+
         // Assert response is under 1 second (1000ms)
         $this->assertLessThan(1000, $responseTime, 'KPI endpoint should respond within 1 second');
-        
+
         // Assert successful response
         $response->assertStatus(200);
     }

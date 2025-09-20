@@ -14,7 +14,7 @@ interface AuthContextType {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -38,12 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (typeof window !== 'undefined' && localStorage.getItem('auth_token') === 'mock_token') {
         try {
           const role = (localStorage.getItem('user_role') || 'consumer') as 'consumer' | 'producer';
-          setUser({ 
-            id: 1, 
-            name: 'Test User', 
-            email: 'test@dixis.local', 
+          setUser({
+            id: 1,
+            name: 'Test User',
+            email: 'test@dixis.local',
             role,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           });
           setLoading(false);
           return; // Skip real /auth/me API call
@@ -106,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer';
+    role: 'consumer' | 'producer' | 'admin';
   }) => {
     try {
       setRegisterLoading(true);

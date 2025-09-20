@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Api\V1;
 
-use PHPUnit\Framework\Attributes\Group;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\Producer;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 class ProductsTest extends TestCase
 {
@@ -34,11 +33,11 @@ class ProductsTest extends TestCase
                         'price',
                         'stock',
                         'is_active',
-                        'created_at'
-                    ]
+                        'created_at',
+                    ],
                 ],
                 'links',
-                'meta'
+                'meta',
             ]);
     }
 
@@ -60,8 +59,8 @@ class ProductsTest extends TestCase
                     'price',
                     'stock',
                     'is_active',
-                    'created_at'
-                ]
+                    'created_at',
+                ],
             ])
             ->assertJsonPath('data.id', $product->id)
             ->assertJsonPath('data.name', $product->name);
@@ -72,7 +71,7 @@ class ProductsTest extends TestCase
     {
         $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
-        
+
         $productData = [
             'name' => 'Fresh Tomatoes',
             'description' => 'Organic fresh tomatoes from local farm',
@@ -114,8 +113,8 @@ class ProductsTest extends TestCase
                     'is_active',
                     'created_at',
                     'updated_at',
-                    'producer'
-                ]
+                    'producer',
+                ],
             ])
             ->assertJsonPath('data.name', 'Fresh Tomatoes')
             ->assertJsonPath('data.price', '3.50')
@@ -135,7 +134,7 @@ class ProductsTest extends TestCase
     public function test_unauthenticated_user_cannot_create_product(): void
     {
         $producer = Producer::factory()->create();
-        
+
         $productData = [
             'name' => 'Fresh Tomatoes',
             'price' => 3.50,
@@ -164,7 +163,7 @@ class ProductsTest extends TestCase
     {
         $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
-        
+
         $productData = [
             'name' => 'Expensive Item',
             'price' => 10.00,
@@ -184,7 +183,7 @@ class ProductsTest extends TestCase
         $user = User::factory()->producer()->create();
         $producer = Producer::factory()->create(['user_id' => $user->id]);
         $product = Product::factory()->create(['producer_id' => $producer->id]);
-        
+
         $updateData = [
             'name' => 'Updated Product Name',
             'price' => 25.99,
@@ -214,9 +213,9 @@ class ProductsTest extends TestCase
         $product = Product::factory()->create([
             'producer_id' => $producer->id,
             'name' => 'Original Name',
-            'slug' => 'original-name'
+            'slug' => 'original-name',
         ]);
-        
+
         $updateData = ['name' => 'New Product Name'];
 
         $response = $this->actingAs($user)->patchJson("/api/v1/products/{$product->id}", $updateData);
@@ -230,7 +229,7 @@ class ProductsTest extends TestCase
     {
         $producer = Producer::factory()->create();
         $product = Product::factory()->create(['producer_id' => $producer->id]);
-        
+
         $updateData = ['name' => 'Unauthorized Update'];
 
         $response = $this->patchJson("/api/v1/products/{$product->id}", $updateData);
@@ -311,16 +310,16 @@ class ProductsTest extends TestCase
     {
         $producer = Producer::factory()->create();
         Product::factory()->create([
-            'producer_id' => $producer->id, 
+            'producer_id' => $producer->id,
             'name' => 'Fresh Tomatoes',
             'description' => 'Red juicy tomatoes',
-            'is_active' => true
+            'is_active' => true,
         ]);
         Product::factory()->create([
-            'producer_id' => $producer->id, 
+            'producer_id' => $producer->id,
             'name' => 'Green Apples',
             'description' => 'Crispy green apples',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $response = $this->getJson('/api/v1/products?q=tomato');

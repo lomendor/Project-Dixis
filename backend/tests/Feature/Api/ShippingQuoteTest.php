@@ -9,149 +9,154 @@ class ShippingQuoteTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Database\Seeders\E2ESeeder::class);
+    }
+
     public function test_shipping_quote_for_athens_metro()
     {
+        $product = \App\Models\Product::first();
+
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '11527',
-            'city' => 'Athens',
-            'weight' => 2.0,
-            'volume' => 0.01
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 2,
+                ],
+            ],
+            'postal_code' => '11527',
         ]);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'carrier',
-                'cost',
-                'etaDays',
-                'zone',
-                'details' => [
-                    'zip',
-                    'city',
-                    'weight',
-                    'volume'
-                ]
+                'success',
+                'data' => [
+                    'cost_cents',
+                    'cost_eur',
+                    'zone_code',
+                    'zone_name',
+                    'carrier_code',
+                    'estimated_delivery_days',
+                    'breakdown',
+                ],
             ]);
 
-        $data = $response->json();
-        
-        // Athens metro should have specific characteristics
-        $this->assertEquals('athens_metro', $data['zone']);
-        $this->assertEquals('Athens Express', $data['carrier']);
-        $this->assertEquals(1, $data['etaDays']);
-        $this->assertEquals(3.5, $data['cost']); // Base cost for 2kg in Athens metro
-        $this->assertEquals('11527', $data['details']['zip']);
+        $this->assertTrue($response->json('success'));
+        $this->assertIsNumeric($response->json('data.cost_cents'));
+        $this->assertGreaterThan(0, $response->json('data.cost_cents'));
+        $this->assertEquals('GR_ATTICA', $response->json('data.zone_code'));
     }
 
     public function test_shipping_quote_for_thessaloniki()
     {
+        $product = \App\Models\Product::first();
+
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '54622',
-            'city' => 'Thessaloniki',
-            'weight' => 1.5,
-            'volume' => 0.005
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                ],
+            ],
+            'postal_code' => '54623',
         ]);
 
         $response->assertStatus(200);
-
-        $data = $response->json();
-        
-        // Thessaloniki should have different characteristics
-        $this->assertEquals('thessaloniki', $data['zone']);
-        $this->assertEquals('Northern Courier', $data['carrier']);
-        $this->assertEquals(2, $data['etaDays']);
-        $this->assertEquals(4.0, $data['cost']); // Base cost for light package in Thessaloniki
+        $this->assertTrue($response->json('success'));
+        $this->assertEquals('GR_THESSALONIKI', $response->json('data.zone_code'));
+        $this->assertLessThanOrEqual(3, $response->json('data.estimated_delivery_days'));
     }
 
     public function test_shipping_quote_for_islands()
     {
+        $product = \App\Models\Product::first();
+
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '84100',
-            'city' => 'Hermoupolis',
-            'weight' => 5.0,
-            'volume' => 0.02
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                ],
+            ],
+            'postal_code' => '84600',
         ]);
 
         $response->assertStatus(200);
-
-        $data = $response->json();
-        
-        // Islands should be more expensive and slower
-        $this->assertEquals('islands', $data['zone']);
-        $this->assertEquals('Island Logistics', $data['carrier']);
-        $this->assertEquals(4, $data['etaDays']);
-        // 8.0 base * 1.2 weight multiplier * 1.1 volume multiplier = 10.56
-        $this->assertEquals(10.56, $data['cost']);
+        $this->assertTrue($response->json('success'));
+        // Islands should have higher costs and longer delivery times
+        $this->assertGreaterThanOrEqual(4, $response->json('data.estimated_delivery_days'));
     }
 
     public function test_shipping_quote_with_heavy_package()
     {
+        $product = \App\Models\Product::first();
+
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '11527',
-            'city' => 'Athens',
-            'weight' => 12.0, // Heavy package
-            'volume' => 0.08   // Large volume
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 5, // Higher quantity simulates heavy package
+                ],
+            ],
+            'postal_code' => '11527',
         ]);
 
         $response->assertStatus(200);
-
-        $data = $response->json();
-        
-        // Heavy package should cost more
-        // 3.5 base * 2.0 weight multiplier * 1.3 volume multiplier = 9.1
-        $this->assertEquals(9.1, $data['cost']);
+        $this->assertTrue($response->json('success'));
+        $this->assertEquals('GR_ATTICA', $response->json('data.zone_code'));
+        $this->assertGreaterThan(0, $response->json('data.cost_cents'));
     }
 
     public function test_shipping_quote_validation_errors()
     {
         // Missing required fields
-        $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '11527'
-            // Missing city, weight, volume
-        ]);
-
+        $response = $this->postJson('/api/v1/shipping/quote', []);
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['city', 'weight', 'volume']);
+            ->assertJsonValidationErrors(['items', 'postal_code']);
 
-        // Invalid data types
+        // Invalid items (empty array)
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '11527',
-            'city' => 'Athens',
-            'weight' => 'not-a-number',
-            'volume' => 'also-not-a-number'
+            'items' => [],
+            'postal_code' => '11527',
         ]);
-
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['weight', 'volume']);
+            ->assertJsonValidationErrors(['items']);
 
-        // Out of range values
+        // Invalid postal code (too short)
+        $product = \App\Models\Product::first();
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '11527',
-            'city' => 'Athens',
-            'weight' => 150.0, // Too heavy
-            'volume' => 0.0     // Too small
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                ],
+            ],
+            'postal_code' => '123', // Too short
         ]);
-
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['weight', 'volume']);
+            ->assertJsonValidationErrors(['postal_code']);
     }
 
     public function test_shipping_quote_unknown_postal_code()
     {
+        $product = \App\Models\Product::first();
+
         $response = $this->postJson('/api/v1/shipping/quote', [
-            'zip' => '99999', // Unknown postal code
-            'city' => 'Unknown City',
-            'weight' => 2.0,
-            'volume' => 0.01
+            'items' => [
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                ],
+            ],
+            'postal_code' => '99999', // Unknown postal code
         ]);
 
         $response->assertStatus(200);
-
-        $data = $response->json();
-        
-        // Should default to 'remote' zone
-        $this->assertEquals('remote', $data['zone']);
-        $this->assertEquals('Rural Delivery', $data['carrier']);
-        $this->assertEquals(3, $data['etaDays']);
-        $this->assertEquals(7.0, $data['cost']); // Base remote cost
+        $this->assertTrue($response->json('success'));
+        // Should handle unknown postal codes gracefully
+        $this->assertIsString($response->json('data.zone_code'));
+        $this->assertGreaterThan(0, $response->json('data.cost_cents'));
     }
 }

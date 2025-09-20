@@ -22,10 +22,10 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         $productId = $this->route('product') ? $this->route('product')->id ?? $this->route('product') : null;
-        
+
         return [
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:products,slug,' . $productId,
+            'slug' => 'nullable|string|max:255|unique:products,slug,'.$productId,
             'description' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',
             'discount_price' => 'nullable|numeric|min:0',

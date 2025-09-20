@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind locker provider interface to mock implementation
+        $this->app->bind(
+            \App\Services\Lockers\LockerProvider::class,
+            \App\Services\Lockers\MockBoxNowProvider::class
+        );
     }
 
     /**

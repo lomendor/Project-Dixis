@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('order_items', function (Blueprint $table) {
             // Add producer_id field if it doesn't exist
-            if (!Schema::hasColumn('order_items', 'producer_id')) {
+            if (! Schema::hasColumn('order_items', 'producer_id')) {
                 $table->unsignedBigInteger('producer_id')->nullable()->after('product_id');
                 $table->index('producer_id');
             }

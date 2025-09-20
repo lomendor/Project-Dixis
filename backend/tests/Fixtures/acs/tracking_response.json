@@ -1,0 +1,54 @@
+{
+  "success": true,
+  "data": {
+    "tracking_code": "ACS123456789",
+    "status": "in_transit",
+    "carrier_code": "ACS",
+    "service_type": "standard",
+    "estimated_delivery": "2025-09-20",
+    "current_location": {
+      "facility": "Athens Sorting Center",
+      "city": "Athens",
+      "country": "GR"
+    },
+    "events": [
+      {
+        "timestamp": "2025-09-17T08:30:00Z",
+        "status": "picked_up",
+        "location": "Sender Location",
+        "description": "Package picked up from sender",
+        "facility": "Athens Collection Point"
+      },
+      {
+        "timestamp": "2025-09-17T12:15:00Z",
+        "status": "in_transit",
+        "location": "Athens Hub",
+        "description": "Package arrived at sorting facility",
+        "facility": "Athens Sorting Center"
+      },
+      {
+        "timestamp": "2025-09-17T14:45:00Z",
+        "status": "in_transit",
+        "location": "Athens Hub",
+        "description": "Package processed and dispatched",
+        "facility": "Athens Sorting Center"
+      }
+    ],
+    "delivery_info": {
+      "recipient": "John Doe",
+      "address": {
+        "street": "Delivery Address 456",
+        "city": "Thessaloniki",
+        "postal_code": "54623",
+        "country": "GR"
+      },
+      "delivery_window": "09:00-18:00",
+      "special_instructions": null
+    }
+  },
+  "metadata": {
+    "request_id": "req_acs_tracking_20250917_654321",
+    "timestamp": "2025-09-17T15:00:00Z",
+    "api_version": "v1"
+  }
+}

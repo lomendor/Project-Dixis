@@ -1,0 +1,124 @@
+name: Nightly Quality Checks
+
+on:
+  schedule:
+    # Run at 2 AM UTC daily
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  nightly-lighthouse:
+    runs-on: ubuntu-latest
+    # No continue-on-error - this should block/fail for nightly
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dixis_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: cd backend && composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Setup backend environment
+        run: |
+          cd backend
+          cp .env.example .env
+          php artisan key:generate
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_DATABASE=dixis_test" >> .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+
+      - name: Setup database
+        run: cd backend && php artisan migrate:fresh --seed
+
+      - name: Start backend server
+        run: cd backend && php artisan serve --host=127.0.0.1 --port=8001 &
+
+      - name: Build and start frontend
+        run: |
+          cd frontend
+          npm run build
+          npm run start -- --port 3001 &
+
+      - name: Install wait-on utility
+        run: npm install -g wait-on
+
+      - name: Wait for services
+        run: |
+          wait-on http://127.0.0.1:8001/api/health --timeout 90000
+          wait-on http://127.0.0.1:3001 --timeout 90000
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI (Blocking)
+        run: |
+          cd frontend
+          # Use nightly config with stricter budgets
+          lhci autorun --config=nightly.lighthouserc.json --upload.target=temporary-public-storage --collect.url=http://127.0.0.1:3001
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create reports directory
+        run: |
+          mkdir -p docs/reports/$(date +%Y-%m-%d)
+
+      - name: Generate nightly quality report
+        if: always()
+        run: |
+          cd frontend
+          if [ -d ".lighthouseci" ]; then
+            echo "# 🌙 Nightly Quality Report - $(date +%Y-%m-%d)" > ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "## 📊 Lighthouse Metrics (Production Standards)" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "*Strict production-ready budgets applied*" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "- **Performance**: ≥ 80% required" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "- **Accessibility**: ≥ 90% required" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "- **Best Practices**: ≥ 85% required" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "- **SEO**: ≥ 90% required" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+            echo "Generated on: $(date)" >> ../docs/reports/$(date +%Y-%m-%d)/NIGHTLY-QUALITY.md
+          fi
+
+      - name: Upload nightly report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-quality-report
+          path: |
+            docs/reports/*/NIGHTLY-QUALITY.md
+            frontend/.lighthouseci/
+          retention-days: 30

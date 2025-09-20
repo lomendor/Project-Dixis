@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,7 +14,7 @@ return new class extends Migration
     {
         // Database-agnostic FK constraint handling
         $driver = DB::connection()->getDriverName();
-        
+
         // Add FKs to cart_items table
         Schema::table('cart_items', function (Blueprint $table) use ($driver) {
             // Drop constraints if exist (database-agnostic)
@@ -34,7 +34,7 @@ return new class extends Migration
                     // Constraint doesn't exist, continue
                 }
             }
-            
+
             // Add FK constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
@@ -48,7 +48,7 @@ return new class extends Migration
     {
         // Database-agnostic FK constraint handling
         $driver = DB::connection()->getDriverName();
-        
+
         // Drop FK constraints from cart_items table
         if ($driver === 'pgsql') {
             DB::statement('ALTER TABLE cart_items DROP CONSTRAINT IF EXISTS cart_items_user_id_foreign');

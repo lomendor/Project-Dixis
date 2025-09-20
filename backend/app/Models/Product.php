@@ -11,6 +11,7 @@ class Product extends Model
 
     protected $fillable = [
         'name',
+        'title',
         'slug',
         'description',
         'price',
@@ -36,6 +37,25 @@ class Product extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Model-level title backfill for NOT NULL constraint compliance
+     * Automatically sets title from name during product creation/update
+     */
+    protected static function booted()
+    {
+        static::creating(function (Product $product) {
+            if (empty($product->title) && !empty($product->name)) {
+                $product->title = $product->name;
+            }
+        });
+
+        static::updating(function (Product $product) {
+            if (empty($product->title) && !empty($product->name)) {
+                $product->title = $product->name;
+            }
+        });
+    }
 
     /**
      * Get the producer that owns the product.
@@ -67,5 +87,13 @@ class Product extends Model
     public function primaryImage()
     {
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
+
+    /**
+     * Get the order items for the product.
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

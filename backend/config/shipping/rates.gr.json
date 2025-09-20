@@ -1,0 +1,96 @@
+{
+  "version": "2025-09-17",
+  "carriers": ["INTERNAL_STANDARD"],
+  "zones": ["GR_ATTICA", "GR_THESSALONIKI", "GR_MAINLAND", "GR_CRETE", "GR_ISLANDS_LARGE", "GR_ISLANDS_SMALL", "GR_REMOTE"],
+  "tables": {
+    "INTERNAL_STANDARD": {
+      "GR_ATTICA": {
+        "base_until_2kg": 2.90,
+        "step_kg_2_5": 0.90,
+        "step_kg_over_5": 0.70,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.00,
+        "estimated_delivery_days": 1,
+        "max_weight_kg": 30
+      },
+      "GR_THESSALONIKI": {
+        "base_until_2kg": 3.50,
+        "step_kg_2_5": 1.20,
+        "step_kg_over_5": 0.95,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.00,
+        "estimated_delivery_days": 2,
+        "max_weight_kg": 30
+      },
+      "GR_MAINLAND": {
+        "base_until_2kg": 4.80,
+        "step_kg_2_5": 1.50,
+        "step_kg_over_5": 1.20,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.00,
+        "estimated_delivery_days": 3,
+        "max_weight_kg": 30
+      },
+      "GR_CRETE": {
+        "base_until_2kg": 6.20,
+        "step_kg_2_5": 1.80,
+        "step_kg_over_5": 1.50,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.15,
+        "estimated_delivery_days": 4,
+        "max_weight_kg": 25
+      },
+      "GR_ISLANDS_LARGE": {
+        "base_until_2kg": 7.50,
+        "step_kg_2_5": 2.20,
+        "step_kg_over_5": 1.80,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.20,
+        "estimated_delivery_days": 5,
+        "max_weight_kg": 20
+      },
+      "GR_ISLANDS_SMALL": {
+        "base_until_2kg": 9.80,
+        "step_kg_2_5": 2.80,
+        "step_kg_over_5": 2.20,
+        "remote_surcharge": 0,
+        "island_multiplier": 1.30,
+        "estimated_delivery_days": 7,
+        "max_weight_kg": 15
+      },
+      "GR_REMOTE": {
+        "base_until_2kg": 8.50,
+        "step_kg_2_5": 2.50,
+        "step_kg_over_5": 2.00,
+        "remote_surcharge": 3.00,
+        "island_multiplier": 1.25,
+        "estimated_delivery_days": 6,
+        "max_weight_kg": 20
+      }
+    }
+  },
+  "volumetric_divisor": 5000,
+  "free_shipping_threshold_eur": null,
+  "postal_code_mapping": {
+    "GR_ATTICA": ["10*", "11*", "12*", "13*", "14*", "15*", "16*", "17*", "18*", "19*"],
+    "GR_THESSALONIKI": ["53*", "54*", "55*", "56*", "57*"],
+    "GR_MAINLAND": [
+      "20*", "21*", "22*", "23*", "24*", "25*", "26*", "27*", "28*", "29*",
+      "30*", "31*", "32*", "33*", "34*", "35*", "36*", "37*", "38*", "39*",
+      "40*", "41*", "42*", "43*", "44*", "45*", "46*", "47*", "48*", "50*",
+      "51*", "52*", "58*", "59*", "60*", "61*", "62*", "63*", "64*", "65*",
+      "66*", "67*", "68*", "69*"
+    ],
+    "GR_CRETE": ["70*", "71*", "72*", "73*", "74*"],
+    "GR_ISLANDS_LARGE": ["49*", "80*", "81*", "82*", "83*", "84*", "85*"],
+    "GR_ISLANDS_SMALL": ["86*", "87*", "88*", "89*", "90*", "91*"]
+  },
+  "metadata": {
+    "last_updated": "2025-09-17",
+    "source": "Internal rate analysis",
+    "calibration_notes": "Conservative starting rates - requires periodic recalibration based on actual order data",
+    "currency": "EUR",
+    "weight_unit": "kg",
+    "dimension_unit": "cm"
+  }
+}
