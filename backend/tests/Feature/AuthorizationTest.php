@@ -84,7 +84,7 @@ class AuthorizationTest extends TestCase
     {
         $producerUser = User::factory()->producer()->create();
         Producer::factory()->create(['user_id' => $producerUser->id]);
-        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true]);
+        $product = Product::factory()->create(['price' => 10.00, 'stock' => 100, 'is_active' => true]);
 
         $orderData = [
             'items' => [
@@ -122,7 +122,7 @@ class AuthorizationTest extends TestCase
         $response->assertStatus(201);
 
         // Admin can create orders
-        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true]);
+        $product = Product::factory()->create(['price' => 10.00, 'stock' => 100, 'is_active' => true]);
         $orderData = [
             'items' => [
                 [
