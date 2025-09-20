@@ -64,11 +64,15 @@ jobs:
           echo "DB_PASSWORD=postgres" >> .env
       - name: Migrate & Seed (fresh)
         run: php artisan migrate:fresh --seed --env=testing
+      - name: Prepare DB (migrate + seed)
+        run: |
+          php artisan migrate:fresh --force
+          php artisan db:seed --force || true
       - name: Run tests
         run: |
           echo "🧪 Running shipping integration tests..."
           php artisan test tests/Feature/Api/ShippingIntegrationTest.php --env=testing --testdox
-          
+
           if php artisan test --testsuite=Feature --group mvp --env=testing --testdox 2>/dev/null; then
             echo "✅ MVP feature tests passed"
           else
