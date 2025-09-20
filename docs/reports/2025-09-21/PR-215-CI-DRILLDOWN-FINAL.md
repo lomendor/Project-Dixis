@@ -194,3 +194,11 @@ e2e-tests	Wait for frontend server	2025-09-20T21:29:25.2846639Z                 
 ### Frontend-tests micro-fix applied at 2025-09-21T00:58:56+03:00
 Kind: eslint-any-fix
 
+
+### Backend micro-fix applied at 2025-09-21T01:02:00+03:00
+**Issue**: Tests\Feature\AuthorizationTest > admin has full access
+**Error**: Expected response status code [201] but received 422
+**Root Cause**: "Insufficient stock for product. Available: 0, requested: 1"
+**Fix**: Added 'stock' => 100 to Product::factory()->create() calls in AuthorizationTest.php
+**Result**: ✅ All 5 AuthorizationTest tests now passing locally
+
