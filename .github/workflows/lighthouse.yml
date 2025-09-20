@@ -48,13 +48,14 @@ jobs:
           echo "Testing direct curl to mock API health endpoint..."
           curl -v http://localhost:3200/api/v1/health || echo "Curl failed"
           echo "Starting Next.js..."
-          npm run start:ci &
+          PORT=4010 npm run start:ci &
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:3200
+          PORT: 4010
       - name: Wait for services
         run: |
           npx wait-on --timeout 90000 http://localhost:3200/api/v1/health
-          npx wait-on --timeout 90000 http://localhost:3100
+          npx wait-on --timeout 90000 http://localhost:4010
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
@@ -68,7 +69,7 @@ jobs:
           CI: true
         run: |
           npx @lhci/cli autorun \
-            --collect.url=http://localhost:3100 \
+            --collect.url=http://localhost:4010 \
             --collect.startServerCommand="echo already started" \
             --assert.preset=lighthouse:recommended \
             --upload.target=filesystem \
