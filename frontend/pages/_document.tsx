@@ -9,7 +9,6 @@ export default class MyDocument extends Document<{ nonce?: string }> {
   }
 
   render() {
-    // @ts-expect-error - nonce is not part of standard Document props
     const nonce = (this.props as { nonce?: string }).nonce
     return (
       <Html>
