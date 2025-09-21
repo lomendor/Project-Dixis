@@ -23,12 +23,12 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - name: Install minimal deps
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
       - name: Type check only (dependabot)
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm run type-check
 
   lighthouse:
@@ -43,10 +43,10 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Install contracts dependencies
@@ -57,7 +57,7 @@ jobs:
             echo "No contracts directory found"
           fi
       - name: Build frontend (bind mock API)
-        working-directory: backend/frontend
+        working-directory: frontend
         env:
           NEXT_PUBLIC_API_BASE: "http://localhost:4010"
         run: npm run build
@@ -80,7 +80,7 @@ jobs:
           npx wait-on http://localhost:4010/health
 
       - name: Start Next server (3010)
-        working-directory: backend/frontend
+        working-directory: frontend
         run: |
           (npm run start -- -p 3010 &) && npx wait-on http://localhost:3010
         env:
@@ -101,7 +101,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouseci
-          path: backend/frontend/.lighthouseci
+          path: frontend/.lighthouseci
 
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
@@ -109,7 +109,7 @@ jobs:
         with:
           name: lighthouse-report
           path: |
-            backend/frontend/.lighthouseci/
+            frontend/.lighthouseci/
           retention-days: 7
 
       - name: Create reports directory
@@ -119,7 +119,7 @@ jobs:
       - name: Generate Lighthouse summary
         if: always()
         run: |
-          cd backend/frontend
+          cd frontend
           if [ -d ".lighthouseci" ]; then
             echo "# 🏍️ Lighthouse CI Summary - $(date +%Y-%m-%d)" > ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
