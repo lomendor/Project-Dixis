@@ -23,7 +23,10 @@ export default [
       '.eslintrc.cjs',
       '**/*-[A-Z0-9]*.js',
       '**/trace/**',
-      '**/assets/**/*.js'
+      '**/assets/**/*.js',
+      '**/*-evidence/**',
+      '**/*.chromium-*',
+      '**/report*/**/*.js'
     ]
   },
   ...compat.extends(
