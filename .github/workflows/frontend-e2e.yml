@@ -172,11 +172,11 @@ jobs:
         run: npm run build || echo "no build step"
       
       - name: Start frontend server
-        run: nohup npm run start -- -p 3001 > ../frontend.log 2>&1 &
+        run: nohup npm run start -- -p 3000 > ../frontend.log 2>&1 &
       
       - name: Wait for frontend server
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3001; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
       
       # Run E2E tests
       - name: Run E2E
