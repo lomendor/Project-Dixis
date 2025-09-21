@@ -275,7 +275,8 @@ test.describe('Producer Analytics Dashboard', () => {
     await page.getByTestId('monthly-button').click();
 
     // Wait for the chart to update
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Verify monthly period is now selected
     await expect(page.getByTestId('monthly-button')).toHaveClass(/bg-green-600/);
@@ -288,7 +289,8 @@ test.describe('Producer Analytics Dashboard', () => {
 
     // Switch back to daily view
     await page.getByTestId('daily-button').click();
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Verify daily period is selected again
     await expect(page.getByTestId('daily-button')).toHaveClass(/bg-green-600/);
@@ -364,7 +366,8 @@ test.describe('Producer Analytics Dashboard', () => {
   test('loading state displays skeleton UI', async ({ page }) => {
     // Delay API responses to test loading state
     await page.route('**/api/v1/producer/analytics/**', async route => {
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await route.continue();
     });
 

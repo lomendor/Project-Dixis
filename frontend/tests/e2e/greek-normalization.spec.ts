@@ -15,7 +15,8 @@ test.describe('Greek Text Normalization Search', () => {
     await searchInput.fill('Πορτοκάλια');
     
     // Wait for search to process
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should find "Πορτοκάλια Κρήτης"
     await expect(page.locator('text=Πορτοκάλια Κρήτης')).toBeVisible();
@@ -30,7 +31,8 @@ test.describe('Greek Text Normalization Search', () => {
     await searchInput.fill('πορτοκαλια');
     
     // Wait for search to process
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should still find "Πορτοκάλια Κρήτης"
     const productCards = page.locator('[data-testid="product-card"]');
@@ -44,7 +46,8 @@ test.describe('Greek Text Normalization Search', () => {
     await searchInput.fill('portokalia');
     
     // Wait for search to process
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should find "Πορτοκάλια Κρήτης"
     await expect(page.locator('text=Πορτοκάλια Κρήτης')).toBeVisible();
@@ -59,7 +62,8 @@ test.describe('Greek Text Normalization Search', () => {
     await searchInput.fill('ΠΟΡΤΟΚΑΛΙΑ');
     
     // Wait for search to process
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should find "Πορτοκάλια Κρήτης"
     await expect(page.locator('text=Πορτοκάλια Κρήτης')).toBeVisible();
@@ -71,7 +75,8 @@ test.describe('Greek Text Normalization Search', () => {
     await searchInput.fill('πορτοκάλια');
     
     // Wait for search to process
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should show search variants
     await expect(page.locator('text=Searching for:')).toBeVisible();
@@ -92,7 +97,8 @@ test.describe('Greek Text Normalization Search', () => {
       await searchInput.fill(searchTerm);
       
       // Wait for search to process
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Should find "Ελαιόλαδο Καλαμάτας"
       await expect(page.locator('text=Ελαιόλαδο Καλαμάτας')).toBeVisible();
@@ -115,7 +121,8 @@ test.describe('Greek Text Normalization Search', () => {
       await searchInput.fill(searchTerm);
       
       // Wait for search to process
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Should find "Ντομάτες Σαντορίνης"
       await expect(page.locator('text=Ντομάτες Σαντορίνης')).toBeVisible();
@@ -140,7 +147,8 @@ test.describe('Greek Text Normalization Search', () => {
       await searchInput.fill(searchTerm);
       
       // Wait for search to process
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Should find "Μέλι Θυμαρίσιο" 
       await expect(page.locator('text=Μέλι Θυμαρίσιο')).toBeVisible();
@@ -153,7 +161,8 @@ test.describe('Greek Text Normalization Search', () => {
     // Test Greek text indicator
     const searchInput = page.locator('input[placeholder*="Αναζήτηση"]');
     await searchInput.fill('πορτοκάλια');
-    await page.waitForTimeout(300);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should show Greek indicator
     await expect(page.locator('span[title="Greek text detected"]')).toBeVisible();
@@ -161,7 +170,8 @@ test.describe('Greek Text Normalization Search', () => {
     // Test Latin text indicator  
     await searchInput.clear();
     await searchInput.fill('portokalia');
-    await page.waitForTimeout(300);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should show Latin indicator
     await expect(page.locator('span[title="Latin text detected (will be transliterated)"]')).toBeVisible();
@@ -175,14 +185,16 @@ test.describe('Greek Text Normalization Search', () => {
     
     // Enter search term
     await searchInput.fill('πορτοκάλια');
-    await page.waitForTimeout(300);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify search indicators are visible
     await expect(page.locator('text=ΕΛ')).toBeVisible();
     
     // Clear search
     await searchInput.clear();
-    await page.waitForTimeout(300);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Indicators should be hidden
     await expect(page.locator('text=ΕΛ')).not.toBeVisible();
@@ -194,7 +206,8 @@ test.describe('Greek Text Normalization Search', () => {
     
     // Search for "κρήτης πορτοκάλια" (mixed order)
     await searchInput.fill('κρήτης πορτοκάλια');
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should find "Πορτοκάλια Κρήτης"
     await expect(page.locator('text=Πορτοκάλια Κρήτης')).toBeVisible();

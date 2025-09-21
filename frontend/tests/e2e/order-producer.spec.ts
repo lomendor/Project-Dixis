@@ -134,7 +134,8 @@ test.describe('Order Management - Producer Workflow', () => {
       await expect(page.getByText('Ενημέρωση...')).toBeVisible({ timeout: 2000 });
 
       // Wait for the update to complete
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
       // The button should disappear or change after successful shipping
       await expect(shipButton).not.toBeVisible({ timeout: 5000 });

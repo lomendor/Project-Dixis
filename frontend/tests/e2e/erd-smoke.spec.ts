@@ -93,7 +93,8 @@ test.describe('ERD MVP Smoke Tests', () => {
         console.log('✅ Clicked add to cart button');
 
         // Wait for success indication
-        await page.waitForTimeout(2000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
         // Look for success toast or cart update
         const successToast = page.getByTestId('toast-success');
@@ -110,7 +111,8 @@ test.describe('ERD MVP Smoke Tests', () => {
       } else {
         // Navigate to product detail page first
         await productCard.click();
-        await page.waitForTimeout(2000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
         // Look for add to cart button on product detail page
         const detailAddToCart = page.locator('[data-testid="add-to-cart"]').first();
@@ -143,7 +145,8 @@ test.describe('ERD MVP Smoke Tests', () => {
       const emptyCartMessage = page.getByTestId('empty-cart-message');
       const cartItems = page.locator('[data-testid="cart-item"]');
 
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
       if (await emptyCartMessage.isVisible()) {
         console.log('✅ Empty cart state displayed correctly');
@@ -198,7 +201,8 @@ test.describe('ERD MVP Smoke Tests', () => {
       await firstProduct.click();
 
       // Wait for product detail page to load
-      await page.waitForTimeout(3000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
       // Verify we're on a product detail page
       const currentUrl = page.url();

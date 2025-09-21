@@ -23,7 +23,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
     
     // Navigate directly to cart page
     await page.goto('http://127.0.0.1:3001/cart');
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take initial screenshot
     await page.screenshot({ 
@@ -41,7 +42,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
       // Test 1: Short postal code
       await postalCodeInput.fill('123');
       await cityInput.fill('Αθήνα');
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/02-invalid-postal-short.png`,
         fullPage: true 
@@ -49,7 +51,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
       
       // Test 2: Invalid postal code
       await postalCodeInput.fill('99999');
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/03-invalid-postal-nonexistent.png`,
         fullPage: true 
@@ -58,7 +61,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
       // Test 3: City mismatch
       await postalCodeInput.fill('11527');
       await cityInput.fill('Θεσσαλονίκη');
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/04-city-mismatch.png`,
         fullPage: true 
@@ -67,7 +71,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
       // Test 4: Valid combination
       await postalCodeInput.fill('11527');
       await cityInput.fill('Αθήνα');
-      await page.waitForTimeout(2000); // Wait for shipping calculation
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for shipping calculation
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/05-valid-combination.png`,
         fullPage: true 
@@ -136,7 +141,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
     if (await checkoutBtn.isVisible() && await checkoutBtn.isEnabled()) {
       console.log('🛒 Attempting checkout...');
       await checkoutBtn.click();
-      await page.waitForTimeout(3000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/06-checkout-attempt.png`,
@@ -162,7 +168,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
     console.log('🌐 Testing network failure scenarios...');
     
     await page.goto('http://127.0.0.1:3001/cart');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Simulate shipping API failure
     await page.route('**/api/v1/shipping/quote', route => {
@@ -180,7 +187,8 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
     if (await postalCodeInput.isVisible()) {
       await postalCodeInput.fill('11527');
       await cityInput.fill('Αθήνα');
-      await page.waitForTimeout(3000); // Wait for failed request and fallback
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for failed request and fallback
       
       await page.screenshot({ 
         path: `${EVIDENCE_DIR}/screenshots/network-failure-fallback.png`,

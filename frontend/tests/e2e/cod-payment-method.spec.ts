@@ -178,7 +178,8 @@ test.describe('COD Payment Method Selection', () => {
     await helper.selectPaymentMethod('COD');
 
     // Wait for shipping quote to be recalculated with COD
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Step 4: Verify COD payment method selection
     await helper.verifyOrderSummary('COD');
@@ -187,7 +188,8 @@ test.describe('COD Payment Method Selection', () => {
     console.log('🔍 Verifying COD fee in shipping quotes...');
 
     // Find the most recent quote request with COD payment method
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     const codQuotes = quoteRequests.filter(req => req.body?.payment_method === 'COD');
 
     if (codQuotes.length > 0) {
@@ -229,7 +231,8 @@ test.describe('COD Payment Method Selection', () => {
     // Test CARD payment method first (default)
     console.log('💳 Testing CARD payment method...');
     await helper.selectPaymentMethod('CARD');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const cardQuoteCount = quoteRequests.length;
     console.log(`📊 CARD quotes captured: ${cardQuoteCount}`);
@@ -237,7 +240,8 @@ test.describe('COD Payment Method Selection', () => {
     // Switch to COD payment method
     console.log('💰 Switching to COD payment method...');
     await helper.selectPaymentMethod('COD');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const totalQuoteCount = quoteRequests.length;
     const codQuoteCount = totalQuoteCount - cardQuoteCount;
@@ -274,7 +278,8 @@ test.describe('COD Payment Method Selection', () => {
     await helper.selectPaymentMethod('COD');
 
     // Wait for final quote calculation
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Proceed to checkout
     console.log('🛒 Proceeding to checkout with COD...');

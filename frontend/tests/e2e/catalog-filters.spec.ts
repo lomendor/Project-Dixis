@@ -11,7 +11,8 @@ test.describe('Catalog Filters & Search', () => {
     
     // Test basic search functionality
     await page.fill('input[placeholder="Search products..."]', 'apple');
-    await page.waitForTimeout(1000); // Wait for search to complete
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for search to complete
     
     // Should show search results
     const searchResults = await page.locator('[data-testid="product-card"]').count();
@@ -19,7 +20,8 @@ test.describe('Catalog Filters & Search', () => {
     
     // Clear search
     await page.fill('input[placeholder="Search products..."]', '');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Test filter panel
     await page.click('button:has-text("Filters")');
@@ -28,16 +30,19 @@ test.describe('Catalog Filters & Search', () => {
     // Test category filter
     const categorySelect = page.locator('select').first();
     await categorySelect.selectOption({ index: 1 }); // Select first category
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Test price filter
     await page.fill('input[placeholder="Min"]', '5');
     await page.fill('input[placeholder="Max"]', '20');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Test organic filter
     await page.locator('select').last().selectOption('true'); // Select organic only
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Test sort options - wait for sort select to be visible and have options
     const sortSelect = page.locator('select').last(); // Use last select (sort direction)
@@ -47,7 +52,8 @@ test.describe('Catalog Filters & Search', () => {
     const hasOption = await sortSelect.locator('option[value="desc"]').isVisible().catch(() => false);
     if (hasOption) {
       await sortSelect.selectOption('desc');
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
     
     // Verify that filters are active
@@ -55,7 +61,8 @@ test.describe('Catalog Filters & Search', () => {
     
     // Clear all filters
     await page.click('button:has-text("Clear All")');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify products are shown again - just check visibility directly
     await expect(page.getByTestId('product-card').first()).toBeVisible({ timeout: 15000 });
@@ -69,13 +76,15 @@ test.describe('Catalog Filters & Search', () => {
     
     // Apply search filter
     await page.fill('input[placeholder="Search products..."]', 'fresh');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Open filters and apply category filter
     await page.click('button:has-text("Filters")');
     const categorySelect = page.locator('label:has-text("Category")').locator('..').locator('select');
     await categorySelect.selectOption({ index: 1 });
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify filter badge shows active filters
     const filterButton = page.locator('button:has-text("Filters")');
@@ -90,7 +99,8 @@ test.describe('Catalog Filters & Search', () => {
     
     // Apply filters that return no results
     await page.fill('input[placeholder="Search products..."]', 'nonexistentproduct12345');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should show empty state
     await expect(page.locator('text=No products found')).toBeVisible();
@@ -98,7 +108,8 @@ test.describe('Catalog Filters & Search', () => {
     
     // Clear filters using empty state button
     await page.click('button:has-text("Clear Filters")');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should show products again  
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();

@@ -171,7 +171,8 @@ test.describe('Performance & Accessibility Improvements', () => {
       await expect(addButton).toContainText('Adding...');
       
       // Wait for operation to complete
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Verify only one success toast appears
       const toasts = page.getByTestId('toast-success');

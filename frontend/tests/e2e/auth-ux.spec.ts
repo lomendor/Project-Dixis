@@ -71,7 +71,8 @@ test.describe('Auth UX Improvements', () => {
     await page.goto('/login');
     
     // Should be redirected away or see authenticated state
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     const currentUrl = page.url();
     
     if (!currentUrl.includes('/login')) {

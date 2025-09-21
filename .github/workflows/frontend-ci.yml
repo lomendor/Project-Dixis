@@ -2,12 +2,15 @@ name: frontend-ci
 
 on:
   push:
-    paths:
-      - 'backend/frontend/**'
-      - '.github/workflows/frontend-ci.yml'
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
   pull_request:
-    paths:
-      - 'backend/frontend/**'
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
   workflow_dispatch:
 
 concurrency:
@@ -15,11 +18,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  type-check:
+  dependabot-smoke:
     runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' }}
     defaults:
       run:
-        working-directory: backend/frontend
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -28,17 +32,41 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check only (dependabot)
+        run: npm run type-check
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+
+  type-check:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
-            npm ci || echo "Contracts install failed"
-            cd ../../backend/frontend
+            npm ci
+            npm run build
+            cd ../../frontend
           else
             echo "No contracts directory found"
           fi
@@ -50,10 +78,11 @@ jobs:
 
   frontend-tests:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     needs: type-check
     defaults:
       run:
-        working-directory: backend/frontend
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -62,17 +91,18 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
-            npm ci || echo "Contracts install failed"
-            cd ../../backend/frontend
+            npm ci
+            npm run build
+            cd ../../frontend
           else
             echo "No contracts directory found"
           fi
@@ -91,11 +121,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build-failure
-          path: backend/frontend/.next/
+          path: frontend/.next/
           retention-days: 3
 
   e2e-tests:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     needs: frontend-tests
     
     services:
@@ -168,26 +199,27 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "packages/contracts" ]; then
             cd packages/contracts
             npm ci
+            npm run build
           else
             echo "No contracts directory found"
           fi
       - name: Install Playwright Browsers
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npx playwright install --with-deps chromium
 
       - name: Start Next.js server (production build for E2E)
-        working-directory: backend/frontend
+        working-directory: frontend
         env:
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
           NEXT_TELEMETRY_DISABLED: 1
@@ -212,7 +244,7 @@ jobs:
           echo "✅ Shipping API verified"
       
       - name: Run shipping integration E2E tests
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npx playwright test shipping-checkout-e2e.spec.ts --project=chromium
         env:
           CI: true
@@ -221,7 +253,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
           
       - name: Run all E2E tests
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npx playwright test --project=chromium
         env:
           CI: true
@@ -234,7 +266,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-results-failure
-          path: backend/frontend/playwright-report/
+          path: frontend/playwright-report/
           retention-days: 3
       
       - name: Upload E2E videos and screenshots (on failure only)
@@ -243,9 +275,9 @@ jobs:
         with:
           name: e2e-videos-screenshots-failure
           path: |
-            backend/frontend/test-results/**/*.webm
-            backend/frontend/test-results/**/*.png
-            backend/frontend/playwright-report/**/*.png
+            frontend/test-results/**/*.webm
+            frontend/test-results/**/*.png
+            frontend/playwright-report/**/*.png
           retention-days: 5
       
       - name: Upload E2E traces (on failure only)
@@ -253,5 +285,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-traces-failure
-          path: backend/frontend/test-results/**/*.zip
+          path: frontend/test-results/**/*.zip
           retention-days: 3

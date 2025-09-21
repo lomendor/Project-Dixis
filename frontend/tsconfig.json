@@ -28,7 +28,8 @@
       "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"],
       "@tests/*": ["./tests/*"],
-      "@dixis/contracts/*": ["../packages/contracts/src/*"]
+      "@dixis/contracts": ["../packages/contracts/dist/index.d.ts"],
+      "@dixis/contracts/*": ["../packages/contracts/dist/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
@@ -44,7 +45,7 @@
     // ρητά legacy directories
     "../GitHub-Dixis-Project-1/**",
     "../Dixis-Project-1/**",
-    // Exclude packages directory from type checking
-    "../packages/**/*"
+    // Exclude packages source from type checking (use built dist instead)
+    "../packages/*/src/**/*"
   ]
 }

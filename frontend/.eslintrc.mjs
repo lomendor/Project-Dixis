@@ -1,10 +1,34 @@
-const { FlatCompat } = require('@eslint/eslintrc');
+import { FlatCompat } from '@eslint/eslintrc';
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-module.exports = [
+export default [
+  {
+    ignores: [
+      'playwright-report/**',
+      'playwright-report-evidence/**',
+      '.next/**',
+      'coverage/**',
+      'dist/**',
+      'test-results/**',
+      'out/**',
+      'node_modules/**',
+      'src/generated/**',
+      'src/lib/contracts/**',
+      'src/__generated__/**',
+      '**/*.config.js',
+      '**/*.config.cjs',
+      '.eslintrc.cjs',
+      '**/*-[A-Z0-9]*.js',
+      '**/trace/**',
+      '**/assets/**/*.js',
+      '**/*-evidence/**',
+      '**/*.chromium-*',
+      '**/report*/**/*.js'
+    ]
+  },
   ...compat.extends(
     'next/core-web-vitals',
     'next/typescript',
@@ -86,6 +110,13 @@ module.exports = [
         }
       ]
     },
+  },
+  {
+    files: ['**/*.cjs'],
+    rules: {
+      // Allow CommonJS require in .cjs files
+      '@typescript-eslint/no-require-imports': 'off'
+    }
   },
   {
     files: ['tests/**/*.ts', 'tests/**/*.tsx', '**/*.spec.ts', '**/*.test.ts'],

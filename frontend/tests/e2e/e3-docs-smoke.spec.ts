@@ -142,7 +142,8 @@ test.describe('PP03-E3 Documentation & Performance Smoke Tests', () => {
       }
     });
     
-    await page.waitForTimeout(100); // Brief wait for any errors
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Brief wait for any errors
     
     // Allow minor errors but not critical failures
     const criticalErrors = errors.filter(error => 
