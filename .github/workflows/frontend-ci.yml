@@ -46,6 +46,7 @@ jobs:
 
   type-check:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     defaults:
       run:
         working-directory: backend/frontend
