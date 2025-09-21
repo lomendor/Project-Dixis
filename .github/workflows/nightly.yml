@@ -47,6 +47,16 @@ jobs:
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+            npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Setup backend environment
         run: |
           cd backend
