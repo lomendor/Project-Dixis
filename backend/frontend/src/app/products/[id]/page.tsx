@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,13 +19,7 @@ export default function ProductDetail() {
 
   const productId = parseInt(params.id as string);
 
-  useEffect(() => {
-    if (productId) {
-      loadProduct();
-    }
-  }, [productId]);
-
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     try {
       setLoading(true);
       const productData = await apiClient.getProduct(productId);
@@ -35,7 +30,13 @@ export default function ProductDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      loadProduct();
+    }
+  }, [productId, loadProduct]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -88,12 +89,13 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
+              <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
                 {product.images.length > 0 ? (
-                  <img
-                    src={product.images.find(img => img.is_primary)?.url || product.images.find(img => img.is_primary)?.image_path || product.images[0].url || product.images[0].image_path}
+                  <Image
+                    src={product.images.find(img => img.is_primary)?.url || product.images.find(img => img.is_primary)?.image_path || product.images[0].url || product.images[0].image_path || '/placeholder.png'}
                     alt={product.images.find(img => img.is_primary)?.alt_text || product.name}
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                 ) : (
                   <span className="text-gray-400">No Image Available</span>
@@ -104,11 +106,12 @@ export default function ProductDetail() {
               {product.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
                   {product.images.slice(0, 4).map((image, index) => (
-                    <div key={image.id} className="aspect-square bg-gray-200 rounded flex items-center justify-center">
-                      <img
-                        src={image.url || image.image_path}
+                    <div key={image.id} className="aspect-square bg-gray-200 rounded flex items-center justify-center relative overflow-hidden">
+                      <Image
+                        src={image.url || image.image_path || '/placeholder.png'}
                         alt={image.alt_text || `${product.name} ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
+                        fill
+                        className="object-cover rounded"
                       />
                     </div>
                   ))}

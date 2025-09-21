@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { apiClient, CartItem } from '@/lib/api';
 import Navigation from '@/components/Navigation';
@@ -188,12 +189,14 @@ export default function Cart() {
                     {cartItems.map((item) => (
                       <div key={item.id} data-testid="cart-item" className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                         {/* Product Image */}
-                        <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
                           {item.product.images.length > 0 ? (
-                            <img
-                              src={item.product.images[0].url || item.product.images[0].image_path}
+                            <Image
+                              src={item.product.images[0].url || item.product.images[0].image_path || '/placeholder.png'}
                               alt={item.product.images[0].alt_text || item.product.name}
-                              className="w-full h-full object-cover rounded-lg"
+                              width={80}
+                              height={80}
+                              className="object-cover rounded-lg"
                             />
                           ) : (
                             <span className="text-gray-400 text-xs">No Image</span>

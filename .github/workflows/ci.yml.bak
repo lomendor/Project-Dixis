@@ -74,20 +74,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
-
+          cache-dependency-path: frontend/package-lock.json
+          
       - name: Install dependencies
-        run: cd backend/frontend && npm ci
+        run: cd frontend && npm ci
 
       - name: Install contracts dependencies
-        run: |
-          if [ -d "packages/contracts" ]; then
-            cd packages/contracts && npm ci
-          else
-            echo "No contracts directory found"
-          fi
+        run: cd packages/contracts && npm ci
 
       - name: Type check
         run: cd frontend && npm run type-check
@@ -131,15 +126,15 @@ jobs:
       - name: Setup Node.js  
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
-
+          cache-dependency-path: frontend/package-lock.json
+          
       - name: Install backend dependencies
         run: cd backend && composer install --no-progress --prefer-dist --optimize-autoloader
-
+        
       - name: Install frontend dependencies
-        run: cd backend/frontend && npm ci
+        run: cd frontend && npm ci
 
       - name: Install contracts dependencies
         run: cd packages/contracts && npm ci

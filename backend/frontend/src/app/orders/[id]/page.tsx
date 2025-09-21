@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient, Order } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,18 +18,7 @@ export default function OrderDetails() {
 
   const orderId = parseInt(params.id as string);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
-
-    if (orderId) {
-      loadOrder();
-    }
-  }, [orderId, isAuthenticated, router]);
-
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       const orderData = await apiClient.getOrder(orderId);
@@ -39,7 +29,18 @@ export default function OrderDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (orderId) {
+      loadOrder();
+    }
+  }, [orderId, isAuthenticated, router, loadOrder]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -137,12 +138,14 @@ export default function OrderDetails() {
                       {order.items.map((item) => (
                         <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
                           {/* Product Image */}
-                          <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
                             {item.product.images.length > 0 ? (
-                              <img
-                                src={item.product.images[0].image_path}
+                              <Image
+                                src={item.product.images[0].image_path || '/placeholder.png'}
                                 alt={item.product.images[0].alt_text || item.product.name}
-                                className="w-full h-full object-cover rounded-lg"
+                                width={80}
+                                height={80}
+                                className="object-cover rounded-lg"
                               />
                             ) : (
                               <span className="text-gray-400 text-xs">No Image</span>
