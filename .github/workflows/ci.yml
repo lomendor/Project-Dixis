@@ -127,6 +127,14 @@ jobs:
             echo "No contracts directory found"
           fi
 
+      - name: Build contracts package
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts && npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Type check
         run: cd frontend && npm run type-check
         
