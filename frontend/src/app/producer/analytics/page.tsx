@@ -7,7 +7,7 @@ import ProducerAnalyticsDashboard from '@/components/producer/ProducerAnalyticsD
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProducerAnalytics() {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
