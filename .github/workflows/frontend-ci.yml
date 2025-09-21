@@ -2,16 +2,11 @@ name: frontend-ci
 
 on:
   push:
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-ci.yml'
     paths-ignore:
       - 'docs/**'
       - 'backend/docs/**'
       - '**/*.md'
   pull_request:
-    paths:
-      - 'frontend/**'
     paths-ignore:
       - 'docs/**'
       - 'backend/docs/**'
