@@ -15,7 +15,7 @@ Project-Dixis is a production-ready Laravel 11 backend API that facilitates conn
 - **Database**: PostgreSQL 15 (production), SQLite (local testing)
 - **Authentication**: Laravel Sanctum
 - **Testing**: PHPUnit with Feature tests
-- **CI/CD**: GitHub Actions
+- **CI/CD**: GitHub Actions with intelligent noise reduction
 - **Documentation**: OpenAPI 3.0
 
 ### ✨ Features
