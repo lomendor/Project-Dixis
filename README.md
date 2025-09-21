@@ -290,4 +290,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-**🏆 Production-ready Laravel 11 template with PostgreSQL CI/CD**
+**🏆 Production-ready Laravel 11 template with PostgreSQL CI/CD**- Docs-only validation 2025-09-21T12:00:57+03:00
