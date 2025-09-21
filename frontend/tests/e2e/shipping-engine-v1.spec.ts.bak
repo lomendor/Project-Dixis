@@ -137,7 +137,7 @@ class ShippingEngineHelper {
     }
 
     // Extract delivery days
-    const deliveryText = await this.page.getByText(/\d+\s*day/).first().textContent() || '';
+    const deliveryText = await this.page.locator('text=/\\d+\\s*(working|day)/).first().textContent() || '';
     const daysMatch = deliveryText.match(/(\d+)/);
     const deliveryDays = daysMatch ? parseInt(daysMatch[1]) : 0;
 

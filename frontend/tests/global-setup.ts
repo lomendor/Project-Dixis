@@ -105,7 +105,7 @@ async function globalSetup(config: FullConfig) {
     
     // Inject E2E role flag before app loads
     await consumerPage.addInitScript((role) => {
-      // @ts-ignore
+      // @ts-expect-error - E2E role injection
       window.__E2E_ROLE__ = role; 
     }, process.env.E2E_AUTH_ROLE ?? 'guest');
     
@@ -137,7 +137,7 @@ async function globalSetup(config: FullConfig) {
     
     // Inject E2E role flag before app loads
     await producerPage.addInitScript((role) => {
-      // @ts-ignore
+      // @ts-expect-error - E2E role injection
       window.__E2E_ROLE__ = role; 
     }, process.env.E2E_AUTH_ROLE ?? 'guest');
     
