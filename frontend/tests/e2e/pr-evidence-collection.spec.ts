@@ -409,7 +409,8 @@ test.describe('PR Evidence Collection - Shipping Integration', () => {
       await cityField.fill(testCase.city);
       
       // Wait for API response
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Verify expected carrier appears
       await expect(page.locator(`text=${testCase.expected}`)).toBeVisible({ timeout: 10000 });

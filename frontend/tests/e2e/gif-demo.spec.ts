@@ -22,7 +22,8 @@ test.describe('GIF Demo: Greek Normalization', () => {
       await searchInput.type(query, { delay: 100 });
       
       // Wait for results
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Verify the orange product is found
       const productCards = page.locator('[data-testid="product-card"]');
@@ -35,7 +36,8 @@ test.describe('GIF Demo: Greek Normalization', () => {
       }
       
       // Show the result for a bit longer for GIF
-      await page.waitForTimeout(1500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
     
     console.log('🎉 GIF Demo completed - all variants find the same product!');

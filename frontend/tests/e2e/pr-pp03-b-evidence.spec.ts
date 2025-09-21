@@ -29,7 +29,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
       // Clear and search
       await searchInput.clear();
       await searchInput.fill(scenario.query);
-      await page.waitForTimeout(800); // Wait for debounce
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for debounce
       
       // Take screenshot for evidence
       await page.screenshot({ 
@@ -50,7 +51,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
       }
       
       // Brief pause for demo effect
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
     
     // Verify all results are identical
@@ -80,7 +82,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
     
     await searchInput.clear();
     await searchInput.fill(nonsenseQuery);
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take screenshot of empty state
     await page.screenshot({ 
@@ -94,7 +97,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
     
     // Clear search and verify products return
     await searchInput.clear();
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await page.screenshot({ 
       path: `test-results/pp03b-after-clear.png`,
@@ -119,7 +123,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
     
     // Ensure clean start
     await searchInput.clear();
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Initial state
     await page.screenshot({ 
@@ -143,11 +148,13 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
       
       // Clear with visual pause
       await searchInput.clear();
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Type slowly for demo effect
       await searchInput.type(step.query, { delay: step.delay });
-      await page.waitForTimeout(1200); // Wait for results
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for results
       
       // Count results
       const count = await page.locator('[data-testid="product-card"]').count();
@@ -162,7 +169,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
       console.log(`   📊 Results: ${count} products`);
       
       // Dramatic pause for effect
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
     
     // Verify all identical
@@ -177,7 +185,8 @@ test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
     console.log('\n🎬 Final frame: Empty state demo');
     await searchInput.clear();
     await searchInput.type('nonexistentproduct999', { delay: 100 });
-    await page.waitForTimeout(1500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await page.screenshot({ 
       path: `test-results/pp03b-gif-final-empty.png`,

@@ -89,7 +89,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
       await helper.fillShippingInfo(combo.zip, combo.city);
       
       // Wait for validation
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Should not show validation errors
       await expect(page.locator('text=Η πόλη δεν αντιστοιχεί στον ταχυδρομικό κώδικα')).not.toBeVisible();
@@ -117,7 +118,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
       await helper.fillShippingInfo(combo.zip, combo.city);
       
       // Wait for validation
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Should show appropriate error
       await expect(page.locator(`text=${combo.error}`)).toBeVisible();
@@ -152,7 +154,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
 
     // Fill valid shipping info
     await helper.fillShippingInfo('11527', 'Αθήνα');
-    await page.waitForTimeout(2000); // Wait for shipping quote
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for shipping quote
     
     // Attempt checkout
     const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
@@ -180,7 +183,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     });
 
     await helper.fillShippingInfo('11527', 'Αθήνα');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
     await checkoutBtn.click();
@@ -208,7 +212,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
       });
 
       await helper.fillShippingInfo('11527', 'Αθήνα');
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
       await checkoutBtn.click();
@@ -232,7 +237,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     });
 
     await helper.fillShippingInfo('11527', 'Αθήνα');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
     await checkoutBtn.click();
@@ -315,7 +321,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     await helper.fillShippingInfo('invalid', '');
     
     // Attempt checkout to trigger validation
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
     
     // Button should be disabled due to validation errors
@@ -324,7 +331,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     
     // Fill valid data to trigger successful validation
     await helper.fillShippingInfo('11527', 'Αθήνα');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Mock successful checkout to capture payload validation
     let capturedPayload: any = null;
@@ -407,7 +415,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     await expect(page.locator('text=Πολλές αιτήσεις')).toBeVisible();
     
     // Wait and retry (success)
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await checkoutBtn.click();
     
     // Should redirect to success page
@@ -421,7 +430,8 @@ test.describe('PP03-D: Checkout Edge Cases & Robust Validation', () => {
     
     // Fill form data
     await helper.fillShippingInfo('11527', 'Αθήνα');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Mock checkout error
     await page.route('**/api/v1/orders/checkout', async route => {

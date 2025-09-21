@@ -51,7 +51,8 @@ test.describe('Smoke Tests - Lightweight Stubs', () => {
     await mobileMenuButton.click();
 
     // Wait for potential state update
-    await page.waitForTimeout(300);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Check if menu opened (it may not due to hydration issues)
     const mobileMenuExists = await page.getByTestId('mobile-menu').count() > 0;

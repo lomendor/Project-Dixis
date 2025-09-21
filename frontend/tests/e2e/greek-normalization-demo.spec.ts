@@ -26,7 +26,8 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
       // Clear and enter search query
       await searchInput.clear();
       await searchInput.fill(scenario.query);
-      await page.waitForTimeout(800);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Check results
       const productCards = page.locator('[data-testid="product-card"]');
@@ -62,7 +63,8 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
     for (const test of otherTests) {
       await searchInput.clear();
       await searchInput.fill(test.query);
-      await page.waitForTimeout(800);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       const productCards = page.locator('[data-testid="product-card"]');
       const count = await productCards.count();
@@ -78,7 +80,8 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
     // Final verification - ensure we can find Greek products
     await searchInput.clear();
     await searchInput.fill('Πορτοκάλια');
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const finalCards = page.locator('[data-testid="product-card"]');
     expect(await finalCards.count()).toBeGreaterThan(0);

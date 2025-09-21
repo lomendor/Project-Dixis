@@ -54,7 +54,8 @@ test.describe('Producer Onboarding Flow', () => {
       }
 
       // Check for pending status banner (may appear immediately or after refresh)
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
       const statusBanner = page.getByTestId('status-banner');
       if (await statusBanner.isVisible()) {
@@ -109,7 +110,8 @@ test.describe('Producer Onboarding Flow', () => {
             await approveBtn.click();
 
             // Wait for success feedback
-            await page.waitForTimeout(2000);
+            // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
             // Check for success message
             const successMessage = page.getByTestId('success-message');
@@ -207,7 +209,8 @@ test.describe('Producer Onboarding Flow', () => {
     await page.goto('/producer/products');
 
     // Wait for page to load and check what happens
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     try {
       // Check if we were redirected or see a blocking notice

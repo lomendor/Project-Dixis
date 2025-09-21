@@ -25,7 +25,8 @@ test.describe('Filters and Search', () => {
       await searchInput.fill('Πορτοκάλια');
       
       // Wait for search results (with debounce)
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.waitForLoadState('networkidle');
       
       // Check if results were filtered
@@ -53,7 +54,8 @@ test.describe('Filters and Search', () => {
       await searchInput.clear();
       await searchInput.fill('πορτοκαλια'); // no accent
       
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.waitForLoadState('networkidle');
       
       const normalizedResults = await page.locator('[data-testid="product-card"]').count();
@@ -64,7 +66,8 @@ test.describe('Filters and Search', () => {
       
       // Clear search filter
       await searchInput.clear();
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.waitForLoadState('networkidle');
       
       // Verify all products are restored
@@ -104,7 +107,8 @@ test('filters and search - category filter', async ({ page }) => {
         await categoryFilter.selectOption(firstOption);
         
         // Wait for results to update
-        await page.waitForTimeout(1000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         await page.waitForLoadState('networkidle');
         
         // Verify filter was applied
@@ -113,7 +117,8 @@ test('filters and search - category filter', async ({ page }) => {
         
         // Reset filter
         await categoryFilter.selectOption('');
-        await page.waitForTimeout(1000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         await page.waitForLoadState('networkidle');
         
         const restoredProductCount = await page.locator('[data-testid="product-card"]').count();
@@ -126,7 +131,8 @@ test('filters and search - category filter', async ({ page }) => {
     await firstButton.click();
     
     // Wait for results to update
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.waitForLoadState('networkidle');
     
     // Verify filter was applied
@@ -136,7 +142,8 @@ test('filters and search - category filter', async ({ page }) => {
     const allButton = page.locator('[data-testid="category-button"]:has-text("All"), .category-btn:has-text("All"), .filter-btn:has-text("All")').first();
     if (await allButton.isVisible()) {
       await allButton.click();
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       await page.waitForLoadState('networkidle');
     }
   } else if (await categoryLinks.first().isVisible({ timeout: 3000 })) {
@@ -182,7 +189,8 @@ test('filters and search - sort functionality', async ({ page }) => {
         await sortDropdown.selectOption(priceOption);
         
         // Wait for results to update
-        await page.waitForTimeout(1000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         await page.waitForLoadState('networkidle');
         
         // Get sorted prices
@@ -193,7 +201,8 @@ test('filters and search - sort functionality', async ({ page }) => {
         
         // Reset to default sorting if possible
         await sortDropdown.selectOption('');
-        await page.waitForTimeout(1000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         await page.waitForLoadState('networkidle');
       }
     }

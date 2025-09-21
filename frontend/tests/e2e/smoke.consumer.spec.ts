@@ -22,7 +22,8 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     await page.getByTestId('page-root').waitFor({ timeout: 30000 });
     
     // Wait for page stability then inject authentication
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Inject consumer authentication after hydration
     await page.evaluate(() => {
@@ -38,7 +39,8 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     });
     
     // Wait for AuthContext to process the change and re-render
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Look for mobile menu button
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
@@ -72,7 +74,8 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     await page.getByTestId('page-root').waitFor({ timeout: 30000 });
     
     // Wait for page stability then inject authentication
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Inject consumer authentication after hydration
     await page.evaluate(() => {
@@ -88,7 +91,8 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     });
     
     // Wait for auth context to process
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Check for authenticated consumer interface elements
     // Either user menu (desktop) or nav cart should be visible for authenticated users
@@ -139,7 +143,8 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     });
     
     // Wait for auth processing and page stability
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Authenticated users should see either cart items or empty cart message
     // (depending on MSW mock data)

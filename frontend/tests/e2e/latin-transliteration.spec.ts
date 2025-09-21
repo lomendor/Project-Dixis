@@ -13,7 +13,8 @@ test.describe('Latin Transliteration Test', () => {
     // Search for "portokalia" (Latin transliteration)
     const searchInput = page.locator('input[type="text"]').first();
     await searchInput.fill('portokalia');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Check results
     const searchCards = page.locator('[data-testid="product-card"]');

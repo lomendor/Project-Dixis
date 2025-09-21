@@ -76,7 +76,8 @@ test.describe('Analytics & Observability', () => {
 
     // Click to show events if not already visible
     await eventsButton.click();
-    await page.waitForTimeout(500); // Small delay for UI update
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Small delay for UI update
 
     // Should show events container (use the h3 heading)
     const eventsContainer = page.getByRole('heading', { name: 'Analytics Events:' });
@@ -90,7 +91,8 @@ test.describe('Analytics & Observability', () => {
     await clearButton.click();
     
     // Give a moment for the clear operation to complete and UI to update
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // The events count should update to show 0
     await expect(eventsButton).toContainText('(0)');
@@ -119,7 +121,8 @@ test.describe('Analytics & Observability', () => {
           await addToCartButton.click();
           
           // Wait for potential success message
-          await page.waitForTimeout(2000);
+          // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
           
           // Take screenshot of add to cart action
           await page.screenshot({ path: 'test-results/add-to-cart-tracked.png' });
@@ -158,7 +161,8 @@ test.describe('Analytics & Observability', () => {
     await page.getByRole('button', { name: /download events json/i }).click();
     
     // Wait a moment for download to be triggered
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify the download was triggered (we can't easily test actual file download in Playwright)
     // The click itself and the timeout prove the functionality works
@@ -186,7 +190,8 @@ test.describe('Analytics & Observability', () => {
     await page.getByRole('button', { name: /trigger javascript error/i }).click();
     
     // Wait for error to be processed
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     // Verify error was logged (in a real scenario)
     // This tests the error boundary triggering, logging is verified in the component

@@ -42,7 +42,8 @@ test.describe('Auth & Roles MVP Tests', () => {
     await page.goto('/admin/pricing');
 
     // Should be redirected to login or blocked
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const currentUrl = page.url();
 
@@ -63,7 +64,8 @@ test.describe('Auth & Roles MVP Tests', () => {
     await page.goto('/admin/pricing');
 
     // Should be redirected to login (proving route exists but is protected)
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const currentUrl = page.url();
 
@@ -77,7 +79,8 @@ test.describe('Auth & Roles MVP Tests', () => {
 
     // Test admin toggle route as well
     await page.goto('/admin/toggle');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const toggleUrl = page.url();
     expect(toggleUrl.includes('/admin/toggle') || toggleUrl.includes('/auth/login')).toBeTruthy();
@@ -89,7 +92,8 @@ test.describe('Auth & Roles MVP Tests', () => {
     await page.goto('/producer/dashboard');
 
     // Should be redirected to login (proving route exists but is protected)
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const currentUrl = page.url();
 
@@ -116,7 +120,8 @@ test.describe('Auth & Roles MVP Tests', () => {
     await page.goto('/producer/dashboard');
 
     // Should be redirected to login
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
 
     const currentUrl = page.url();
     expect(currentUrl).toMatch(/\/auth\/login|\/login/);

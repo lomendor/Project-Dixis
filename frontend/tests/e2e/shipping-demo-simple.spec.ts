@@ -63,7 +63,8 @@ test.describe('Shipping Demo - Simple', () => {
         }
         
         // Wait for potential AJAX updates
-        await page.waitForTimeout(3000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         
         // Take screenshot after entering data
         await page.screenshot({ 

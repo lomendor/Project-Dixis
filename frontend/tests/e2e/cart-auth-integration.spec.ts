@@ -13,7 +13,8 @@ test.describe('Cart Auth Integration - Testid Verification', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     
     // Allow page to hydrate
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Look for navigation element (like in smoke tests)
     try {
@@ -46,7 +47,8 @@ test.describe('Cart Auth Integration - Testid Verification', () => {
     // (The functionality was already implemented, we just added nav-cart testids)
     
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const pageTitle = await page.title();
     expect(pageTitle).toContain('Dixis');

@@ -130,7 +130,8 @@ test.describe('PR-PP03-A: PDP Robustness Evidence', () => {
       fullPage: true 
     });
     
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: 'test-results/pr-pp03-a-07-flow-02-loading.png',
       fullPage: true 
@@ -273,7 +274,8 @@ test.describe('PR-PP03-A: PDP Robustness Evidence', () => {
     await addToCartButton.click();
     
     // Should show some feedback (loading state, success message, etc.)
-    await page.waitForTimeout(1000); // Allow for any animations/feedback
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Allow for any animations/feedback
     
     await page.screenshot({ 
       path: 'test-results/pr-pp03-a-13-add-to-cart-interaction.png',

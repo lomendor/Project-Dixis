@@ -49,13 +49,15 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       
       // Clear previous search
       await searchInput.clear();
-      await page.waitForTimeout(300);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Enter search query with slow typing for better demo effect
       await searchInput.type(testCase.query, { delay: 100 });
       
       // Wait for debounce and results
-      await page.waitForTimeout(800);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Take screenshot during search
       await page.screenshot({ 
@@ -95,7 +97,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       }
       
       // Brief pause for visual effect in recordings
-      await page.waitForTimeout(1500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
 
     // Verify all variants return identical results
@@ -132,7 +135,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
     
     await searchInput.clear();
     await searchInput.fill(nonsenseQuery);
-    await page.waitForTimeout(800);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take screenshot of empty state
     await page.screenshot({ 
@@ -177,7 +181,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
         
         // Click the clear button
         await clearButton.click();
-        await page.waitForTimeout(1000);
+        // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
         
         // Take screenshot after clearing
         await page.screenshot({ 
@@ -199,7 +204,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
     if (!clearButtonFound) {
       console.log('🔧 Clear button not found, manually clearing search input');
       await searchInput.clear();
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       const productCards = page.locator('[data-testid="product-card"]');
       const restoredCount = await productCards.count();
@@ -248,7 +254,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       // Test original with accents
       await searchInput.clear();
       await searchInput.fill(test.query);
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       const originalCount = await page.locator('[data-testid="product-card"]').count();
       console.log(`   📊 "${test.query}" (with accents): ${originalCount} results`);
@@ -256,7 +263,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       // Test normalized without accents
       await searchInput.clear();
       await searchInput.fill(test.normalized);
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       const normalizedCount = await page.locator('[data-testid="product-card"]').count();
       console.log(`   📊 "${test.normalized}" (no accents): ${normalizedCount} results`);
@@ -288,7 +296,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
     
     await searchInput.clear();
     await searchInput.fill(searchTerm);
-    await page.waitForTimeout(800);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Look for various highlighting implementations
     const highlightSelectors = [
@@ -358,7 +367,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       }
     }
     
-    await page.waitForTimeout(1000); // Complete the search
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Complete the search
     
     console.log(`\n📋 Visual Feedback Evidence:`);
     console.log(`   ✨ Search highlighting: ${highlightsFound ? 'IMPLEMENTED' : 'NOT DETECTED'}`);
@@ -376,7 +386,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
 
     // Ensure we start with all products visible
     await searchInput.clear();
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const initialCount = await page.locator('[data-testid="product-card"]').count();
     console.log(`🎯 Starting with ${initialCount} products visible`);
@@ -419,13 +430,15 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       
       // Clear with visual effect
       await searchInput.clear();
-      await page.waitForTimeout(500);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Type slowly for demo effect
       await searchInput.type(step.query, { delay: step.delay });
       
       // Wait for results with visual feedback
-      await page.waitForTimeout(1000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
       
       // Count results
       const resultCount = await page.locator('[data-testid="product-card"]').count();
@@ -440,7 +453,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
       console.log(`   📊 Results: ${resultCount} products`);
       
       // Brief pause for demo effect
-      await page.waitForTimeout(2000);
+      // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     }
 
     // Verify all results are identical
@@ -457,7 +471,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
     console.log(`\n🔍 Demonstrating empty state...`);
     await searchInput.clear();
     await searchInput.type('nonexistentproduct12345', { delay: 100 });
-    await page.waitForTimeout(1500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const emptyStateCount = await page.locator('[data-testid="product-card"]').count();
     console.log(`📭 Empty state: ${emptyStateCount} products (should be 0)`);
@@ -470,7 +485,8 @@ test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
     
     // Clear to restore products
     await searchInput.clear();
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     const restoredCount = await page.locator('[data-testid="product-card"]').count();
     console.log(`🔄 Restored: ${restoredCount} products`);

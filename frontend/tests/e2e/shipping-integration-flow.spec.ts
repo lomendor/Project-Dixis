@@ -107,7 +107,8 @@ test.describe('Shipping Integration Flow', () => {
     await helper.fillShippingInfo('11527', 'Athens');
     
     // Wait for shipping API response
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify Athens Express appears
     await expect(page.locator(':text("Athens Express")')).toBeVisible({ timeout: 10000 });
@@ -120,7 +121,8 @@ test.describe('Shipping Integration Flow', () => {
     // Phase 3: Test Thessaloniki Zone (54623)  
     console.log('🏛️ Testing Thessaloniki zone...');
     await helper.fillShippingInfo('54623', 'Thessaloniki');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await expect(page.locator(':text("Northern Courier")')).toBeVisible({ timeout: 10000 });
     await expect(page.locator(':text("2 day")')).toBeVisible();
@@ -131,7 +133,8 @@ test.describe('Shipping Integration Flow', () => {
     // Phase 4: Test Islands Zone (84600)
     console.log('🏝️ Testing Islands zone...');
     await helper.fillShippingInfo('84600', 'Mykonos');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await expect(page.locator(':text("Island Logistics")')).toBeVisible({ timeout: 10000 });
     await expect(page.locator(':text("4 day")')).toBeVisible();
@@ -166,7 +169,8 @@ test.describe('Shipping Integration Flow', () => {
     // Test valid postal code enables checkout
     console.log('✅ Testing valid postal code...');
     await helper.fillShippingInfo('11527', 'Athens');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await expect(checkoutBtn).toBeEnabled();
     
@@ -200,7 +204,8 @@ test.describe('Shipping Integration Flow', () => {
     
     // Trigger shipping calculation
     await helper.fillShippingInfo('11527', 'Athens');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Verify API was called
     expect(apiCalls.length).toBeGreaterThan(0);

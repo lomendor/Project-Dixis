@@ -75,7 +75,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Test 2: Invalid postal code (non-existent)
     await page.fill('[data-testid="postal-code-input"]', '99999');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
-    await page.waitForTimeout(600); // Wait for validation
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for validation
     await captureGifFrame(page, '03-invalid-postal-code-nonexistent');
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/03-invalid-postal-code-nonexistent.png`,
@@ -85,7 +86,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Test 3: City doesn't match postal code
     await page.fill('[data-testid="postal-code-input"]', '11527');
     await page.fill('[data-testid="city-input"]', 'Θεσσαλονίκη');
-    await page.waitForTimeout(600); // Wait for validation
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for validation
     await captureGifFrame(page, '04-city-postal-code-mismatch');
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/04-city-postal-code-mismatch.png`,
@@ -100,7 +102,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Test 4: Valid postal code - trigger shipping calculation
     await page.fill('[data-testid="postal-code-input"]', '11527');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
-    await page.waitForTimeout(1000); // Wait for shipping calculation
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for shipping calculation
     await captureGifFrame(page, '05-valid-postal-code-shipping-calculation');
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/05-valid-postal-code-shipping-calculation.png`,
@@ -108,7 +111,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     });
     
     // Wait for shipping quote to load or fallback
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await captureGifFrame(page, '06-shipping-quote-loaded');
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/06-shipping-quote-loaded.png`,
@@ -144,7 +148,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     await captureGifFrame(page, '08-checkout-processing');
     
     // Wait for order creation or error
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Check if we got redirected to order confirmation
     const currentUrl = page.url();
@@ -212,7 +217,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     await page.fill('[data-testid="postal-code-input"]', '');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
     await page.locator('[data-testid="checkout-btn"]').click();
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/greek-error-empty-postal-code.png`,
       fullPage: true 
@@ -222,7 +228,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     await page.fill('[data-testid="postal-code-input"]', '11527');
     await page.fill('[data-testid="city-input"]', '');
     await page.locator('[data-testid="checkout-btn"]').click();
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/greek-error-empty-city.png`,
       fullPage: true 
@@ -233,7 +240,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Test invalid postal code format
     await page.fill('[data-testid="postal-code-input"]', 'ABCDE');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/greek-error-invalid-postal-format.png`,
       fullPage: true 
@@ -241,7 +249,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     // Test short postal code
     await page.fill('[data-testid="postal-code-input"]', '123');
-    await page.waitForTimeout(500);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/greek-error-short-postal-code.png`,
       fullPage: true 
@@ -250,7 +259,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Test city-postal mismatch
     await page.fill('[data-testid="postal-code-input"]', '54622');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/greek-error-city-postal-mismatch.png`,
       fullPage: true 
@@ -319,13 +329,15 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
       fullPage: true 
     });
     
-    await page.waitForTimeout(2000); // Wait for first retry
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for first retry
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/network-failure-attempt-2.png`,
       fullPage: true 
     });
     
-    await page.waitForTimeout(3000); // Wait for second retry
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for second retry
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/network-failure-final-fallback.png`,
       fullPage: true 
@@ -358,7 +370,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     // Try checkout - should fail first time
     await page.locator('[data-testid="checkout-btn"]').click();
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/checkout-network-failure.png`,
@@ -370,7 +383,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     // Try again - should succeed
     await page.locator('[data-testid="checkout-btn"]').click();
-    await page.waitForTimeout(3000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/checkout-retry-success.png`,
@@ -409,7 +423,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     await page.locator('[data-testid="clear-cart-button"]').click();
     await page.locator('text=Are you sure').click(); // Confirm dialog
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     await page.screenshot({ 
       path: `${EVIDENCE_DIR}/edge-case-cart-cleared.png`,
@@ -420,7 +435,8 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     // Test unauthenticated access
     await page.goto('http://127.0.0.1:3001/cart');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Should redirect to login
     expect(page.url()).toContain('/auth/login');
@@ -482,11 +498,13 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     // Fill in complete checkout information
     await page.fill('[data-testid="postal-code-input"]', '11527');
     await page.fill('[data-testid="city-input"]', 'Αθήνα');
-    await page.waitForTimeout(2000); // Wait for shipping calculation
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for shipping calculation
     
     // Complete checkout
     await page.locator('[data-testid="checkout-btn"]').click();
-    await page.waitForTimeout(5000); // Wait for all API calls
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle"); // Wait for all API calls
     
     // Save all API logs
     await fs.writeFile(
@@ -534,7 +552,8 @@ async function authenticateUser(page: Page) {
   
   // Wait for login to complete
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(1000);
+  // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
   
   console.log('✅ User authenticated successfully');
 }
@@ -548,7 +567,8 @@ async function addItemsToCart(page: Page) {
   // Add first available product to cart
   const addToCartButton = page.locator('[data-testid="add-to-cart-btn"]').first();
   await addToCartButton.click();
-  await page.waitForTimeout(1000);
+  // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
   
   console.log('✅ Items added to cart');
 }

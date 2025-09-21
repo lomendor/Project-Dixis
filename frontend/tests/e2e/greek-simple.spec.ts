@@ -7,7 +7,8 @@ test.describe('Basic Greek Search Test', () => {
     
     // Wait for page to load
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take a screenshot for debugging
     await page.screenshot({ path: 'homepage-debug.png', fullPage: true });
@@ -36,7 +37,8 @@ test.describe('Basic Greek Search Test', () => {
     
     // Search for oranges in Greek
     await searchInput.fill('Πορτοκάλια');
-    await page.waitForTimeout(1000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take screenshot after search
     await page.screenshot({ path: 'search-debug.png', fullPage: true });

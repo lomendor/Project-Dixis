@@ -24,7 +24,8 @@ test.describe('Debug Search Functionality', () => {
     await searchInput.fill('Πορτοκάλια');
     
     // Wait for search to process
-    await page.waitForTimeout(2000);
+    // await page.waitForTimeout(...); // replaced
+await page.waitForLoadState("networkidle");
     
     // Take screenshot after search
     await page.screenshot({ path: 'debug-2-after-search.png', fullPage: true });
