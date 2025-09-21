@@ -200,6 +200,48 @@ Error: Timed out waiting for: http://127.0.0.1:3001  ← Waiting for 3001
 
 ---
 
-**Next Action**: Apply systematic package manager corrections across all workflow files
+---
 
-**Expected Outcome**: All 6 failing checks become GREEN with npm/working directory fixes
+## ✅ Fix Results (Updated: 2025-09-21 02:05)
+
+### Applied Fixes
+1. **Package Manager**: ✅ Changed pnpm → npm across all workflows
+2. **Working Directories**: ✅ Updated frontend → backend/frontend
+3. **Cache Paths**: ✅ Fixed cache-dependency-path references
+4. **Port Configurations**: ✅ Aligned frontend start/wait ports
+5. **Artifact Paths**: ✅ Updated to backend/frontend structure
+
+### Workflow Status After Fixes
+
+#### ✅ **frontend-ci** - SUCCESS (Run 17885747577)
+- ✅ **type-check** in 20s - pnpm lockfile error RESOLVED
+- ✅ **frontend-tests** in 48s - npm ci working correctly
+- ✅ **e2e-tests** in 2m18s - build and test execution successful
+
+**Evidence**: Package manager fix successful - no more `ERR_PNPM_NO_LOCKFILE` errors
+
+#### 🔄 **Other Workflows** - Pending Verification
+- **lighthouse**: Expected to resolve with npm + working directory fixes
+- **Quality Assurance**: Dependent on frontend-ci success ✅
+- **Smoke Tests**: Dependent on frontend build success ✅
+- **PR Hygiene**: Dependent on QA pipeline ✅
+
+### Verification Commands Used
+```bash
+# Applied fixes to 7 workflow files
+git commit -m "fix(ci): stabilize PR #212 (Node20, zod, Danger)"
+git push
+
+# Triggered new CI run
+git commit --allow-empty -m "trigger: re-run CI after fixing pnpm → npm issues"
+git push
+
+# Verified results
+gh run view 17885747577  # ✅ ALL JOBS SUCCESS
+```
+
+---
+
+**Status**: ✅ **PRIMARY ISSUE RESOLVED** - Package manager mismatch fixed
+**Evidence**: frontend-ci workflow now passing all jobs (type-check, frontend-tests, e2e-tests)
+**Next**: Monitor lighthouse and other dependent workflows for complete stabilization
