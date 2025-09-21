@@ -1,10 +1,10 @@
-const { FlatCompat } = require('@eslint/eslintrc');
+import { FlatCompat } from '@eslint/eslintrc';
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-module.exports = [
+export default [
   {
     ignores: [
       'playwright-report/**',
@@ -19,7 +19,8 @@ module.exports = [
       'src/lib/contracts/**',
       'src/__generated__/**',
       '**/*.config.js',
-      '**/*.config.cjs'
+      '**/*.config.cjs',
+      '.eslintrc.cjs'
     ]
   },
   ...compat.extends(
@@ -103,6 +104,13 @@ module.exports = [
         }
       ]
     },
+  },
+  {
+    files: ['**/*.cjs'],
+    rules: {
+      // Allow CommonJS require in .cjs files
+      '@typescript-eslint/no-require-imports': 'off'
+    }
   },
   {
     files: ['tests/**/*.ts', 'tests/**/*.tsx', '**/*.spec.ts', '**/*.test.ts'],
