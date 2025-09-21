@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,25 @@ export default function ProducerDashboard() {
   const { isAuthenticated, isProducer, user } = useAuth();
   const router = useRouter();
 
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const [statsData, productsData] = await Promise.all([
+        apiClient.getProducerStats(),
+        apiClient.getProducerTopProducts()
+      ]);
+
+      setStats(statsData);
+      setTopProducts(productsData.data || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
@@ -35,26 +55,7 @@ export default function ProducerDashboard() {
     }
 
     loadDashboardData();
-  }, [isAuthenticated, isProducer, router]);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      const [statsData, productsData] = await Promise.all([
-        apiClient.getProducerStats(),
-        apiClient.getProducerTopProducts()
-      ]);
-      
-      setStats(statsData);
-      setTopProducts(productsData.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, isProducer, router, loadDashboardData]);
 
   if (!isAuthenticated || !isProducer) {
     return null; // Will redirect in useEffect
@@ -211,12 +212,14 @@ export default function ProducerDashboard() {
                           <tr key={product.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
+                                <div className="flex-shrink-0 h-10 w-10 relative overflow-hidden">
                                   {product.images.length > 0 ? (
-                                    <img
+                                    <Image
                                       className="h-10 w-10 rounded-lg object-cover"
-                                      src={product.images[0].image_path}
+                                      src={product.images[0].image_path || '/placeholder.png'}
                                       alt={product.images[0].alt_text || product.name}
+                                      width={40}
+                                      height={40}
                                     />
                                   ) : (
                                     <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">

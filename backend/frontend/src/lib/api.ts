@@ -137,11 +137,7 @@ function trimSlashes(s: string): string {
   return s.replace(/\/+$/,'').replace(/^\/+/,'');
 }
 
-function legacyApiUrl(baseURL: string, path: string): string {
-  const base = trimSlashes(baseURL);
-  const p = trimSlashes(path);
-  return `${base}/${p}`;
-}
+// NOTE: legacyApiUrl removed to maintain zero-warning ESLint policy
 
 class ApiClient {
   private baseURL: string;

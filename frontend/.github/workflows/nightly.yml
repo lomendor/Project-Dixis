@@ -8,7 +8,8 @@ on:
     # Allow manual triggers
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20.x'
+  NEXT_TELEMETRY_DISABLED: '1'
 
 jobs:
   nightly-e2e:
@@ -23,7 +24,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
