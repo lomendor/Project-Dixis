@@ -53,7 +53,7 @@ export const greekToLatin = (text: string): string => {
   const normalized = removeGreekAccents(text.toLowerCase());
   
   // Handle multi-character combinations first (th, ch, ps)
-  let result = normalized
+  const result = normalized
     .replace(/θ/g, 'th')
     .replace(/χ/g, 'ch') 
     .replace(/ψ/g, 'ps')
@@ -78,7 +78,7 @@ export const latinToGreek = (text: string): string => {
   const lowercase = text.toLowerCase();
   
   // Handle multi-character combinations first (order matters - longer first)
-  let result = lowercase
+  const result = lowercase
     .replace(/th/g, 'θ')
     .replace(/ch/g, 'χ')
     .replace(/ps/g, 'ψ')

@@ -63,7 +63,7 @@ export default function HomeClient() {
 
   useEffect(() => {
     loadProducts();
-  }, [filters]);
+  }, [filters, loadProducts]);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -212,7 +212,7 @@ export default function HomeClient() {
         offers: {
           '@type': 'Offer',
           price: product?.price || 0,
-          priceCurrency: (product as any)?.currency || 'EUR',
+          priceCurrency: (product as { currency?: string })?.currency || 'EUR',
           availability: (product?.stock ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           seller: {
             '@type': 'Organization',
@@ -221,9 +221,9 @@ export default function HomeClient() {
         },
         brand: {
           '@type': 'Brand',
-          name: (product as any)?.brand || product?.producer?.name || 'Dixis',
+          name: (product as { brand?: string })?.brand || product?.producer?.name || 'Dixis',
         },
-        category: product?.categories?.[0]?.name || (product as any)?.category?.name || 'Fresh Produce',
+        category: product?.categories?.[0]?.name || (product as { category?: { name?: string } })?.category?.name || 'Fresh Produce',
       })),
     };
   };

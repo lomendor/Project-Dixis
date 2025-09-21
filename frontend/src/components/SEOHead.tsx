@@ -109,7 +109,7 @@ export default function SEOHead({
     
     // Add JSON-LD structured data
     if (jsonLd) {
-      let existingScript = document.querySelector('script[data-seo-jsonld]');
+      const existingScript = document.querySelector('script[data-seo-jsonld]');
       if (existingScript) {
         existingScript.remove();
       }
