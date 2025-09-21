@@ -5,6 +5,23 @@ const compat = new FlatCompat({
 });
 
 module.exports = [
+  {
+    ignores: [
+      'playwright-report/**',
+      'playwright-report-evidence/**',
+      '.next/**',
+      'coverage/**',
+      'dist/**',
+      'test-results/**',
+      'out/**',
+      'node_modules/**',
+      'src/generated/**',
+      'src/lib/contracts/**',
+      'src/__generated__/**',
+      '**/*.config.js',
+      '**/*.config.cjs'
+    ]
+  },
   ...compat.extends(
     'next/core-web-vitals',
     'next/typescript',
