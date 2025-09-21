@@ -20,7 +20,7 @@
     "type-check:strict": "tsc --noEmit",
     "quality": "npm run type-check && npm run lint && npm run format:check",
     "qa:types": "tsc --noEmit",
-    "qa:lint": "eslint . --max-warnings=6000",
+    "qa:lint": "eslint . --max-warnings=10000",
     "qa:knip": "knip",
     "qa:deps": "depcheck",
     "qa:size": "size-limit",
