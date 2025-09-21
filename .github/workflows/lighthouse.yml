@@ -56,6 +56,15 @@ jobs:
           else
             echo "No contracts directory found"
           fi
+
+      - name: Build contracts package
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts && npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Build frontend (bind mock API)
         working-directory: frontend
         env:

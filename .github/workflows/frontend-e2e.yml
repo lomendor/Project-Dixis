@@ -150,7 +150,18 @@ jobs:
       # Frontend setup
       - name: Install frontend dependencies
         run: npm ci
-      
+
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "../packages/contracts" ]; then
+            cd ../packages/contracts
+            npm ci
+            npm run build
+            cd ../../frontend
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Set API base URL
         run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
       
