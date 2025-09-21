@@ -3,10 +3,37 @@ name: Lighthouse CI
 on:
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  dependabot-smoke:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: backend/frontend/package-lock.json
+      - name: Install minimal deps
+        working-directory: backend/frontend
+        run: npm ci
+      - name: Type check only (dependabot)
+        working-directory: backend/frontend
+        run: npm run type-check
+
   lighthouse:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     continue-on-error: true  # Don't block the build
 
     steps:

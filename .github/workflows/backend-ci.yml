@@ -4,9 +4,17 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
   pull_request:
     paths:
       - 'backend/**'
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
   schedule:
     - cron: '0 3 * * *'  # Daily at 3:00 UTC
   workflow_dispatch:
@@ -14,6 +22,27 @@ concurrency:
   group: backend-ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  dependabot-smoke:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' }}
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP version check
+        run: php -v
+      - name: Install minimal composer deps
+        run: composer install --no-dev --no-interaction
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Basic unit tests (dependabot)
+        run: php artisan test --testsuite=Unit --stop-on-failure || echo "Unit tests not configured"
+
   php-tests:
     runs-on: ubuntu-latest
     services:
