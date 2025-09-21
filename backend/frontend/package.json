@@ -9,7 +9,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "qa:types": "tsc --noEmit",
-    "qa:lint": "next lint --max-warnings=6",
+    "qa:lint": "next lint --max-warnings=0",
     "qa:knip": "echo 'knip not configured in backend/frontend'",
     "qa:deps": "echo 'depcheck not configured in backend/frontend'",
     "qa:size": "echo 'size-limit not configured in backend/frontend'",
