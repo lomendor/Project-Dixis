@@ -29,16 +29,16 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
       - name: Install frontend deps
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
       - name: Type check (dependabot)
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm run type-check
       - name: PHP version check
         run: php -v
@@ -114,10 +114,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: cd backend/frontend && npm ci
+        run: cd frontend && npm ci
 
       - name: Install contracts dependencies
         run: |
@@ -172,13 +172,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install backend dependencies
         run: cd backend && composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Install frontend dependencies
-        run: cd backend/frontend && npm ci
+        run: cd frontend && npm ci
 
       - name: Install contracts dependencies
         run: cd packages/contracts && npm ci

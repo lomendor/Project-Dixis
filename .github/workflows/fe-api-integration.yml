@@ -3,13 +3,13 @@ name: FE-API Integration
 on:
   push:
     paths:
-      - 'backend/frontend/**'
+      - 'frontend/**'
       - 'backend/app/**'
       - 'backend/routes/**'
       - '.github/workflows/fe-api-integration.yml'
   pull_request:
     paths:
-      - 'backend/frontend/**'
+      - 'frontend/**'
       - 'backend/app/**'
       - 'backend/routes/**'
   workflow_dispatch:
@@ -103,33 +103,33 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('backend/frontend/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: ${{ runner.os }}-playwright-
       
       - name: Install frontend dependencies
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
       
       - name: Set frontend API base URL
-        working-directory: backend/frontend
+        working-directory: frontend
         run: echo "NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1" > .env.local
       
       - name: Install Playwright browsers with dependencies
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npx playwright install --with-deps
       
       - name: Build frontend
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm run build
       
       - name: Start frontend server (3001)
-        working-directory: backend/frontend
+        working-directory: frontend
         run: nohup npm run start -- -p 3001 > ../frontend.log 2>&1 &
       
       - name: Wait for frontend server
@@ -138,7 +138,7 @@ jobs:
       
       # Run Integration E2E tests
       - name: Run integration tests
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npx playwright test --grep="integration"
       
       # Artifacts ΜΟΝΟ σε αποτυχία
@@ -147,7 +147,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-playwright-report
-          path: backend/frontend/playwright-report
+          path: frontend/playwright-report
           retention-days: 3
       
       - name: Upload test artifacts (on failure)
@@ -156,6 +156,6 @@ jobs:
         with:
           name: integration-artifacts
           path: |
-            backend/frontend/test-results
-            backend/frontend/playwright/.cache
+            frontend/test-results
+            frontend/playwright/.cache
           retention-days: 3
