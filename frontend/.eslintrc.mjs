@@ -20,7 +20,10 @@ export default [
       'src/__generated__/**',
       '**/*.config.js',
       '**/*.config.cjs',
-      '.eslintrc.cjs'
+      '.eslintrc.cjs',
+      '**/*-[A-Z0-9]*.js',
+      '**/trace/**',
+      '**/assets/**/*.js'
     ]
   },
   ...compat.extends(
