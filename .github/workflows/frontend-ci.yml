@@ -60,11 +60,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
-            npm ci || echo "Contracts install failed"
+            npm ci
+            npm run build
             cd ../../frontend
           else
             echo "No contracts directory found"
@@ -95,11 +96,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
-            npm ci || echo "Contracts install failed"
+            npm ci
+            npm run build
             cd ../../frontend
           else
             echo "No contracts directory found"
@@ -203,11 +205,12 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Install contracts dependencies
+      - name: Install and build contracts dependencies
         run: |
           if [ -d "packages/contracts" ]; then
             cd packages/contracts
             npm ci
+            npm run build
           else
             echo "No contracts directory found"
           fi
