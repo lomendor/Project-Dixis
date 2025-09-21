@@ -20,7 +20,7 @@ export default function ProductToggle({ products, loading, onToggleStatus }: Pro
       setUpdatingIds(prev => new Set([...prev, productId]));
       await onToggleStatus(productId, !currentStatus);
       showToast('success', `Το προϊόν ${!currentStatus ? 'ενεργοποιήθηκε' : 'απενεργοποιήθηκε'} επιτυχώς`);
-    } catch (error) {
+    } catch {
       showToast('error', 'Απέτυχε η ενημέρωση του προϊόντος');
     } finally {
       setUpdatingIds(prev => {

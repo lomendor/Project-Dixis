@@ -20,7 +20,7 @@ export default function AdminPricingPage() {
       setLoading(true);
       const data = await pricingApi.getProducts();
       setProducts(data);
-    } catch (error) {
+    } catch {
       showToast('error', 'Απέτυχε η φόρτωση των προϊόντων');
     } finally {
       setLoading(false);

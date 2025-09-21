@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/AuthGuard';
 import ProductToggle from '../components/ProductToggle';
 import { adminApi, ProductWithProducer } from '@/lib/admin/adminApi';
@@ -21,7 +20,7 @@ export default function AdminTogglePage() {
       setLoading(true);
       const data = await adminApi.getProducts();
       setProducts(data);
-    } catch (error) {
+    } catch {
       showToast('error', 'Απέτυχε η φόρτωση των προϊόντων');
     } finally {
       setLoading(false);
