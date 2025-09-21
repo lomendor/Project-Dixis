@@ -63,7 +63,7 @@ export default function HomeClient() {
 
   useEffect(() => {
     loadProducts();
-  }, [filters, loadProducts]);
+  }, [filters]);
 
   const loadProducts = useCallback(async () => {
     try {
