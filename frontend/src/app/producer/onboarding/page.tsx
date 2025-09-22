@@ -68,7 +68,7 @@ function ProducerOnboardingContent() {
           });
         }
       }
-    } catch (err) {
+    } catch {
       console.error('Failed to load producer status:', err);
     }
   };
@@ -111,7 +111,7 @@ function ProducerOnboardingContent() {
       } else {
         setError(data.error || 'Παρουσιάστηκε σφάλμα κατά την υποβολή');
       }
-    } catch (err) {
+    } catch {
       setError('Παρουσιάστηκε σφάλμα δικτύου');
     } finally {
       setLoading(false);
