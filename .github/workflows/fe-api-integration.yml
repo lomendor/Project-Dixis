@@ -83,6 +83,8 @@ jobs:
             echo "DB_DATABASE=project_dixis_test"
             echo "DB_USERNAME=postgres"
             echo "DB_PASSWORD=postgres"
+            echo "ALLOW_TEST_LOGIN=true"
+            echo "CI=true"
           } >> .env
       
       - name: Run backend migrations and seed
@@ -149,6 +151,12 @@ jobs:
       # Run Integration E2E tests
       - name: Run integration tests
         working-directory: frontend
+        env:
+          CI: true
+          NEXT_PUBLIC_E2E: "true"
+          ADMIN_UI_AVAILABLE: false
+          BACKEND_PORT: 8001
+          FRONTEND_PORT: 3000
         run: ./scripts/safe-playwright-grep.sh "integration"
       
       # Artifacts ΜΟΝΟ σε αποτυχία

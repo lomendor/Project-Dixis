@@ -175,6 +175,8 @@ jobs:
           echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
+          echo "ALLOW_TEST_LOGIN=true" >> .env
+          echo "CI=true" >> .env
       
       - name: Run migrations and seed
         run: |
@@ -251,6 +253,7 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          NEXT_PUBLIC_E2E: "true"
           NEXT_TELEMETRY_DISABLED: 1
           
       - name: Run all E2E tests
@@ -260,6 +263,7 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          NEXT_PUBLIC_E2E: "true"
           NEXT_TELEMETRY_DISABLED: 1
       
       - name: Upload E2E test results (on failure only)

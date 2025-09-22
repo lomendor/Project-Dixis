@@ -1,4 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
+import { loginAsConsumer } from './helpers/test-auth';
+
+// Use test auth when in E2E mode
+const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 
 // Helper class for shipping integration tests
 class ShippingIntegrationHelper {
@@ -10,22 +14,27 @@ class ShippingIntegrationHelper {
   }
 
   async loginUser(email: string, password: string) {
-    // Navigate to Login via top-nav link
-    await this.page.getByRole('link', { name: /login/i }).first().click();
-    await expect(this.page).toHaveURL(/\/auth\/login/);
-    await this.page.waitForLoadState('networkidle');
-    
-    await this.page.fill('[name="email"]', email);
-    await this.page.fill('[name="password"]', password);
-    
-    // Wait for login completion
-    await Promise.all([
-      this.page.waitForURL('/', { timeout: 10000 }),
-      this.page.click('button[type="submit"]')
-    ]);
-    
-    // Verify login success
-    await expect(this.page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+    // Use test auth if available
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(this.page);
+    } else {
+      // Navigate to Login via top-nav link
+      await this.page.getByRole('link', { name: /login/i }).first().click();
+      await expect(this.page).toHaveURL(/\/auth\/login/);
+      await this.page.waitForLoadState('networkidle');
+
+      await this.page.fill('[name="email"]', email);
+      await this.page.fill('[name="password"]', password);
+
+      // Wait for login completion
+      await Promise.all([
+        this.page.waitForURL('/', { timeout: 10000 }),
+        this.page.click('button[type="submit"]')
+      ]);
+
+      // Verify login success
+      await expect(this.page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+    }
   }
 
   async addProductToCart() {
