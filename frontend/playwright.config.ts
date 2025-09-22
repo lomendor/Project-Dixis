@@ -33,11 +33,11 @@ export default defineConfig({
   },
 
   projects: isCI ? [
-    // CI: Single project with no auth for basic smoke tests
-    { 
+    // CI: Single project with no auth for smoke and shipping tests
+    {
       name: 'smoke',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
+      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts']
     }
   ] : [
     // Local: Multiple auth states and browsers
