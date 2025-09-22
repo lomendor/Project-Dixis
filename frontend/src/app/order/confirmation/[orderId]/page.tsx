@@ -101,7 +101,7 @@ export default function OrderConfirmationPage() {
       };
 
       setOrder(mockOrder);
-    } catch (err) {
+    } catch {
       setError('Σφάλμα κατά τη φόρτωση της παραγγελίας');
     } finally {
       setLoading(false);
