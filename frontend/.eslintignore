@@ -1,9 +1,0 @@
-.next/
-out/
-dist/
-coverage/
-playwright-report/
-test-results/
-**/*.snap
-**/__generated__/**
-**/generated/**

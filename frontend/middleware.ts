@@ -8,7 +8,7 @@ function makeNonce() {
   return Buffer.from(bytes).toString('base64');
 }
 
-export function middleware(req: NextRequest) {
+export function middleware(_req: NextRequest) {
   const res = NextResponse.next();
   const nonce = makeNonce();
   const reportOnly = process.env.NEXT_ENABLE_CSP_REPORT_ONLY === 'true';
