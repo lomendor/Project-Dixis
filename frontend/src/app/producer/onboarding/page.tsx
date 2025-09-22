@@ -68,7 +68,7 @@ function ProducerOnboardingContent() {
           });
         }
       }
-    } catch {
+    } catch (err) {
       console.error('Failed to load producer status:', err);
     }
   };
