@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,11 +47,11 @@ export default function AdminAnalytics() {
         <nav className="flex mb-8" data-testid="breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li>
-              <a href="/" className="hover:text-green-600">Home</a>
+              <Link href="/" className="hover:text-green-600">Home</Link>
             </li>
             <li>/</li>
             <li>
-              <a href="/admin" className="hover:text-green-600">Admin</a>
+              <Link href="/admin" className="hover:text-green-600">Admin</Link>
             </li>
             <li>/</li>
             <li className="text-gray-900">Analytics</li>

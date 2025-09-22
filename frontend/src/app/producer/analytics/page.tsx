@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import ProducerAnalyticsDashboard from '@/components/producer/ProducerAnalyticsDashboard';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,11 +47,11 @@ export default function ProducerAnalytics() {
         <nav className="flex mb-8" data-testid="breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li>
-              <a href="/" className="hover:text-green-600">Home</a>
+              <Link href="/" className="hover:text-green-600">Home</Link>
             </li>
             <li>/</li>
             <li>
-              <a href="/producer/dashboard" className="hover:text-green-600">Producer Dashboard</a>
+              <Link href="/producer/dashboard" className="hover:text-green-600">Producer Dashboard</Link>
             </li>
             <li>/</li>
             <li className="text-gray-900">Analytics</li>
@@ -63,7 +64,7 @@ export default function ProducerAnalytics() {
             Producer Analytics
           </h1>
           <p className="text-gray-600">
-            Monitor your products' performance and sales analytics
+            Monitor your products&apos; performance and sales analytics
           </p>
         </div>
 

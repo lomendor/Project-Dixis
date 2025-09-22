@@ -4,7 +4,7 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-export default [
+const eslintConfig = [
   {
     ignores: [
       'playwright-report/**',
@@ -130,3 +130,5 @@ export default [
     }
   }
 ];
+
+export default eslintConfig;

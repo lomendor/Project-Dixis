@@ -71,7 +71,7 @@ function ProducerProductsContent() {
       } else {
         setError('Αποτυχία ελέγχου κατάστασης παραγωγού');
       }
-    } catch (err) {
+    } catch {
       setError('Σφάλμα δικτύου');
     } finally {
       setLoading(false);
@@ -87,7 +87,7 @@ function ProducerProductsContent() {
       } else {
         setError('Αποτυχία φόρτωσης προϊόντων');
       }
-    } catch (err) {
+    } catch {
       setError('Σφάλμα φόρτωσης προϊόντων');
     }
   };
