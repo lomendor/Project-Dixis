@@ -149,7 +149,7 @@ jobs:
       # Run Integration E2E tests
       - name: Run integration tests
         working-directory: frontend
-        run: npx playwright test --grep="integration"
+        run: ./scripts/safe-playwright-grep.sh "integration"
       
       # Artifacts ΜΟΝΟ σε αποτυχία
       - name: Upload Playwright report (on failure)
