@@ -26,7 +26,9 @@ export default [
       '**/assets/**/*.js',
       '**/*-evidence/**',
       '**/*.chromium-*',
-      '**/report*/**/*.js'
+      '**/report*/**/*.js',
+      '**/codeMirrorModule-*.js',
+      '**/trace/assets/**'
     ]
   },
   ...compat.extends(
