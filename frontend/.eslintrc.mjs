@@ -29,10 +29,7 @@ const eslintConfig = [
       '**/report*/**/*.js',
       '**/codeMirrorModule-*.js',
       '**/trace/assets/**',
-      'run-*.js',
-      'global-setup-*.ts',
-      '**/run-*.js',
-      '**/global-setup-*.ts'
+      'scripts/**'
     ]
   },
   ...compat.extends(
