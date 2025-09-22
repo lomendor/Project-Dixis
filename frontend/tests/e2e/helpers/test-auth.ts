@@ -52,17 +52,28 @@ export class TestAuthHelper {
       localStorage.setItem('test_auth_user', JSON.stringify(user));
     }, { token, user });
 
+    // Force page reload to ensure auth state is recognized by components
+    await this.page.reload();
+    await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
+
     // Navigate to home page after login
     await this.page.goto('/');
 
-    // Wait for authenticated navigation to appear
-    await this.page.waitForSelector('[data-testid="user-menu"], [data-testid="nav-user"]', {
-      timeout: 10000,
-      state: 'visible'
-    }).catch(() => {
-      // Fallback: just ensure we're not on login page
-      return this.page.waitForURL(url => !url.href.includes('/auth/login'), { timeout: 5000 });
-    });
+    // Wait for authenticated navigation to appear with improved fallback
+    try {
+      await this.page.waitForSelector('[data-testid="user-menu"], [data-testid="nav-user"]', {
+        timeout: 5000,
+        state: 'visible'
+      });
+    } catch {
+      // Fallback: check if auth worked by looking for any logout/profile elements
+      try {
+        await this.page.waitForSelector('text=Logout, text=Sign Out, text=Profile', { timeout: 5000 });
+      } catch {
+        // Final fallback: just ensure we're not on login page
+        await this.page.waitForURL(url => !url.href.includes('/auth/login'), { timeout: 5000 });
+      }
+    }
 
     return { token, user };
   }
