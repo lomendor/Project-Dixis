@@ -207,12 +207,13 @@ jobs:
 
       - name: Install and build contracts dependencies
         run: |
-          if [ -d "packages/contracts" ]; then
-            cd packages/contracts
+          if [ -d "../packages/contracts" ]; then
+            cd ../packages/contracts
             npm ci
             npm run build
+            echo "✅ Contracts built successfully"
           else
-            echo "No contracts directory found"
+            echo "No contracts directory found (expected at ../packages/contracts)"
           fi
       - name: Install Playwright Browsers
         working-directory: frontend
