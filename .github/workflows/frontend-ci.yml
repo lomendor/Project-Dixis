@@ -246,7 +246,7 @@ jobs:
       
       - name: Run shipping integration E2E tests
         working-directory: frontend
-        run: npx playwright test shipping-checkout-e2e.spec.ts --project=chromium
+        run: npx playwright test shipping-checkout-e2e.spec.ts --project=smoke
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3030
@@ -255,7 +255,7 @@ jobs:
           
       - name: Run all E2E tests
         working-directory: frontend
-        run: npx playwright test --project=chromium
+        run: npx playwright test --project=smoke
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3030
