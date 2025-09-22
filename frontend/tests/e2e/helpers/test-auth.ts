@@ -61,7 +61,7 @@ export class TestAuthHelper {
       state: 'visible'
     }).catch(() => {
       // Fallback: just ensure we're not on login page
-      return this.page.waitForURL(url => !url.includes('/auth/login'), { timeout: 5000 });
+      return this.page.waitForURL(url => !url.href.includes('/auth/login'), { timeout: 5000 });
     });
 
     return { token, user };
