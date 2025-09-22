@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   },
 
   // Webpack configuration to handle module resolution
-  webpack: (config, { dev }) => {
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@dixis/contracts': path.resolve(__dirname, '../packages/contracts/src'),
