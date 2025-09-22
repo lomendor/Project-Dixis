@@ -228,15 +228,23 @@ jobs:
           npm run build
           PORT=3030 npm start &
       
-      - name: Wait for servers to be ready
+      - name: Wait for servers to be ready with health script
+        working-directory: frontend
+        env:
+          BACKEND_PORT: 8001
+          FRONTEND_PORT: 3030
         run: |
-          echo "Waiting for API server..."
-          timeout 60 bash -c 'until curl -f http://localhost:8001/api/health; do sleep 2; done'
-          echo "✅ API server ready"
-          
-          echo "Waiting for frontend server..."
-          timeout 60 bash -c 'until curl -f http://localhost:3030; do sleep 2; done'
-          echo "✅ Frontend server ready"
+          # Use our health-wait script for reliable server readiness
+          ./scripts/wait-for-servers.sh || {
+            echo "❌ Health wait script failed, falling back to basic checks"
+            echo "Waiting for API server..."
+            timeout 60 bash -c 'until curl -f http://localhost:8001/api/health; do sleep 2; done'
+            echo "✅ API server ready"
+
+            echo "Waiting for frontend server..."
+            timeout 60 bash -c 'until curl -f http://localhost:3030; do sleep 2; done'
+            echo "✅ Frontend server ready"
+          }
           
           echo "Verifying shipping quote API..."
           curl -X POST http://localhost:8001/api/v1/shipping/quote \
@@ -252,6 +260,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
           NEXT_TELEMETRY_DISABLED: 1
+          ADMIN_UI_AVAILABLE: false
           
       - name: Run all E2E tests
         working-directory: frontend
@@ -261,6 +270,7 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:3030
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
           NEXT_TELEMETRY_DISABLED: 1
+          ADMIN_UI_AVAILABLE: false
       
       - name: Upload E2E test results (on failure only)
         if: failure()

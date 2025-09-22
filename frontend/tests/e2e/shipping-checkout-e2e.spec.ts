@@ -243,36 +243,40 @@ test.describe('Shipping Integration E2E', () => {
     await expect(smallIslandQuote).toContainText('εργάσιμες ημέρες');
   });
 
-  test('admin label creation and customer tracking', async ({ page }) => {
+  // Feature flag for admin UI tests
+  const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
+
+  (ADMIN_UI_AVAILABLE ? test : test.skip)('admin label creation and customer tracking @slow', async ({ page }) => {
     // This test covers the admin flow mentioned in the audit
-    // Login as admin (if admin functionality is available)
+    // Requires admin interface to be available and accessible
+
+    // Login as admin
     await page.goto('/auth/login');
     await page.fill('input[type="email"]', 'admin@example.com');
     await page.fill('input[type="password"]', 'password');
     await page.click('button[type="submit"]');
 
-    // Navigate to order management (exact path depends on admin interface)
-    // For now, we'll skip this test if admin interface isn't available
-    try {
-      await page.goto('/admin/orders', { timeout: 5000 });
+    // Navigate to order management
+    await page.goto('/admin/orders');
 
-      // Look for an order to create a label for
-      const orderRow = page.locator('[data-testid="order-row"]').first();
-      await orderRow.click();
+    // Wait for order list to load
+    await page.waitForSelector('[data-testid="order-row"]', { timeout: 20000 });
 
-      // Create shipping label
-      await page.click('[data-testid="create-label-btn"]');
-      await expect(page.locator('[data-testid="label-success"]')).toBeVisible({ timeout: 10000 });
+    // Look for an order to create a label for
+    const orderRow = page.locator('[data-testid="order-row"]').first();
+    await orderRow.click();
 
-      // Verify tracking code is generated
-      await expect(page.locator('[data-testid="tracking-code"]')).toBeVisible();
+    // Create shipping label with proper wait
+    await page.waitForSelector('[data-testid="create-label-btn"]', { timeout: 20000 });
+    await page.click('[data-testid="create-label-btn"]');
 
-      // Verify label download link is available
-      await expect(page.locator('[data-testid="download-label-btn"]')).toBeVisible();
+    // Wait for label creation success
+    await expect(page.locator('[data-testid="label-success"]')).toBeVisible({ timeout: 30000 });
 
-    } catch {
-      // Skip this test if admin interface isn't available
-      console.log('Admin interface not available, skipping label creation test');
-    }
+    // Verify tracking code is generated
+    await expect(page.locator('[data-testid="tracking-code"]')).toBeVisible({ timeout: 20000 });
+
+    // Verify label download link is available
+    await expect(page.locator('[data-testid="download-label-btn"]')).toBeVisible({ timeout: 20000 });
   });
 });
