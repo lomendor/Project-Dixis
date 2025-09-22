@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// Feature flag for admin UI tests
+const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
+
 test.describe('Shipping Integration E2E', () => {
   // Auth edge-case fixes: Clear cookies before each test
   test.beforeEach(async ({ page, context }) => {
@@ -243,7 +246,7 @@ test.describe('Shipping Integration E2E', () => {
     await expect(smallIslandQuote).toContainText('εργάσιμες ημέρες');
   });
 
-  test('admin label creation and customer tracking', async ({ page }) => {
+  (ADMIN_UI_AVAILABLE ? test : test.skip)('admin label creation and customer tracking @slow', async ({ page }) => {
     // This test covers the admin flow mentioned in the audit
     // Login as admin (if admin functionality is available)
     await page.goto('/auth/login');

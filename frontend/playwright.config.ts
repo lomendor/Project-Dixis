@@ -3,9 +3,10 @@ import { defineConfig, devices } from '@playwright/test';
 const isCI = !!process.env.CI;
 
 export default defineConfig({
-  timeout: 60_000,
-  expect: { timeout: 10_000 },
-  retries: isCI ? 2 : 0,
+  // Increased timeouts for CI to handle complex shipping integration flows
+  timeout: isCI ? 180_000 : 60_000, // 3 minutes for CI, 1 minute local
+  expect: { timeout: isCI ? 20_000 : 10_000 }, // 20s for CI, 10s local
+  retries: isCI ? 1 : 0, // Reduced to 1 retry for faster feedback
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: isCI,

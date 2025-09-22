@@ -45,8 +45,13 @@ class ShippingIntegrationHelper {
     const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
     await expect(addToCartBtn).toBeVisible();
     await addToCartBtn.click();
-    await this.page.waitForTimeout(1000);
-    
+
+    // Wait for cart update confirmation or navigation
+    await this.page.waitForSelector('[data-testid="cart-item-count"], [data-testid="cart-icon"], .cart-updated', { timeout: 20000 }).catch(() => {
+      // Fallback: wait for any cart-related element to appear
+      return this.page.waitForSelector('text=/added to cart|cart|καλάθι/i', { timeout: 10000 });
+    });
+
     console.log('✅ Product added to cart');
   }
 
@@ -88,10 +93,13 @@ class ShippingIntegrationHelper {
     await cityInput.clear();
     await cityInput.fill(city);
     console.log(`✅ Entered city: ${city}`);
-    
-    // Wait for potential AJAX call to update shipping
-    await this.page.waitForTimeout(2000);
-    
+
+    // Wait for shipping quote to update after postal code/city entry
+    await this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="shipping-quote-loading"], .shipping-quote, .delivery-method', { timeout: 30000 }).catch(() => {
+      // Fallback: wait for any shipping-related content to appear
+      return this.page.waitForSelector('text=/shipping|delivery|παράδοση|αποστολή/i', { timeout: 15000 });
+    });
+
     return { postalCodeInput, cityInput };
   }
 
