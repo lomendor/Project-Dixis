@@ -8,6 +8,7 @@ function makeNonce() {
   return Buffer.from(bytes).toString('base64');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function middleware(_req: NextRequest) {
   const res = NextResponse.next();
   const nonce = makeNonce();
