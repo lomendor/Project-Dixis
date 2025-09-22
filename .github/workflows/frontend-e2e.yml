@@ -134,6 +134,7 @@ jobs:
           echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
+          echo "ALLOW_TEST_LOGIN=true" >> .env
       
       - name: Run migrations and seed
         working-directory: backend
