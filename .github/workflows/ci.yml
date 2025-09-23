@@ -105,6 +105,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     needs: backend
+
+    env:
+      FRONTEND_PORT: 3000
     
     steps:
       - uses: actions/checkout@v4
@@ -140,18 +143,26 @@ jobs:
         
       - name: Build
         run: cd frontend && npm run build
-        
+
       - name: Start frontend server
-        run: cd frontend && npm run start &
+        run: |
+          cd frontend
+          echo "Starting frontend on port $FRONTEND_PORT"
+          PORT=$FRONTEND_PORT npm run start &
         
       - name: Wait for frontend
-        run: npx wait-on http://127.0.0.1:3001 --timeout 60000
+        run: |
+          echo "Waiting for http://127.0.0.1:$FRONTEND_PORT"
+          npx wait-on http://127.0.0.1:$FRONTEND_PORT --timeout 60000
 
   e2e:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     needs: [backend, frontend]
-    
+
+    env:
+      FRONTEND_PORT: 3000
+
     services:
       postgres:
         image: postgres:15
@@ -214,14 +225,19 @@ jobs:
         
       - name: Build frontend
         run: cd frontend && npm run build
-        
+
       - name: Start frontend server
-        run: cd frontend && npm run start &
+        run: |
+          cd frontend
+          echo "Starting frontend on port $FRONTEND_PORT"
+          PORT=$FRONTEND_PORT npm run start &
         
       - name: Wait for services
         run: |
+          echo "Waiting for backend API..."
           npx wait-on http://127.0.0.1:8001/api/health --timeout 60000
-          npx wait-on http://127.0.0.1:3001 --timeout 60000
+          echo "Waiting for frontend on http://127.0.0.1:$FRONTEND_PORT"
+          npx wait-on http://127.0.0.1:$FRONTEND_PORT --timeout 60000
         
       - name: Run E2E tests
         run: cd frontend && npm run e2e
