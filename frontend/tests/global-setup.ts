@@ -111,20 +111,20 @@ async function globalSetup(config: FullConfig) {
     
     await consumerPage.goto('/auth/login', { waitUntil: 'networkidle' });
     
-    // Debug: Check page content and user agent
-    const pageContent = await consumerPage.content();
-    const userAgent = await consumerPage.evaluate(() => navigator.userAgent);
-    console.log('📋 Login page loaded. Title:', await consumerPage.title());
-    console.log('🔍 User Agent:', userAgent);
-    console.log('🔍 Page contains form:', pageContent.includes('<form'));
-    console.log('🔍 Page contains loading text:', pageContent.includes('Φόρτωση...'));
-    console.log('🔍 Page content snippet:', pageContent.substring(0, 500));
+    // Perform actual login with E2E credentials
+    await consumerPage.fill('[name="email"]', TEST_USERS.consumer.email);
+    await consumerPage.fill('[name="password"]', TEST_USERS.consumer.password);
+    await consumerPage.click('button[type="submit"]');
     
-    // Just wait for basic page load (skip title validation for E2E isolation)
-    await consumerPage.waitForLoadState('domcontentloaded');
-    await consumerPage.waitForTimeout(1000); // Brief settling time
-    
-    console.log('✅ Page loaded, creating auth state...');
+    // Wait for successful login and redirect (deterministic)
+    try {
+      await consumerPage.waitForURL('**/');
+      console.log('✅ Consumer authenticated and redirected to home');
+    } catch {
+      // Fallback: wait for any page load after submit
+      await consumerPage.waitForLoadState('networkidle');
+      console.log('✅ Consumer authentication completed');
+    }
     
     // Save consumer storageState 
     await consumerContext.storageState({ path: path.join(authDir, 'consumer.json') });
@@ -143,11 +143,20 @@ async function globalSetup(config: FullConfig) {
     
     await producerPage.goto('/auth/login', { waitUntil: 'networkidle' });
     
-    // Just wait for basic page load (skip title validation for E2E isolation)
-    await producerPage.waitForLoadState('domcontentloaded');
-    await producerPage.waitForTimeout(1000); // Brief settling time
+    // Perform actual login with E2E producer credentials
+    await producerPage.fill('[name="email"]', TEST_USERS.producer.email);
+    await producerPage.fill('[name="password"]', TEST_USERS.producer.password);
+    await producerPage.click('button[type="submit"]');
     
-    console.log('✅ Producer page loaded, creating auth state...');
+    // Wait for successful login and redirect (deterministic)
+    try {
+      await producerPage.waitForURL('**/');
+      console.log('✅ Producer authenticated and redirected to home');
+    } catch {
+      // Fallback: wait for any page load after submit
+      await producerPage.waitForLoadState('networkidle');
+      console.log('✅ Producer authentication completed');
+    }
     
     // Save producer storageState
     await producerContext.storageState({ path: path.join(authDir, 'producer.json') });
