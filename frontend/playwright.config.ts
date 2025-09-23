@@ -27,7 +27,8 @@ export default defineConfig({
   ],
   
   use: {
-    baseURL: 'http://127.0.0.1:3001',
+    // Allow CI to override via PLAYWRIGHT_BASE_URL; default to Next dev port (3001)
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3001',
     trace: 'on',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
