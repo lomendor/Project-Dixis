@@ -121,10 +121,10 @@ php artisan key:generate
 php artisan migrate:fresh --seed
 
 # Start server
-php artisan serve --host=127.0.0.1 --port=8000
+php artisan serve --host=127.0.0.1 --port=8001
 
 # Health check
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```
 
 ### Available Commands (Makefile)

@@ -124,7 +124,7 @@ git pull origin main
 git checkout -b fix/toast-ux-tests  # or relevant task name
 
 # Start development server
-cd backend && php artisan serve --port=8000 &
+cd backend && php artisan serve --port=8001 &
 cd ../frontend && npm run dev &
 
 # Run E2E tests
