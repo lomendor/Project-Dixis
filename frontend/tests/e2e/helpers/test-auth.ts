@@ -5,6 +5,8 @@ import { Page } from '@playwright/test';
  * Uses special test login endpoint that's only available in test environments
  */
 export class TestAuthHelper {
+  private token: string | null = null;
+
   constructor(private page: Page) {}
 
   /**
@@ -32,6 +34,7 @@ export class TestAuthHelper {
 
     const result = await response.json();
     const { token, user } = result;
+    this.token = token; // keep token for API fallback
 
     // Store token in context for API calls
     await this.page.context().addCookies([
@@ -46,18 +49,22 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Also store in localStorage for client-side API calls
+    // Navigate to home page first to establish proper domain context
+    await this.page.goto('/');
+    await this.page.waitForLoadState('networkidle');
+
+    // Store auth data in localStorage (now that we're on the correct domain)
     await this.page.evaluate(({ token, user }) => {
       localStorage.setItem('test_auth_token', token);
+      // mirror to common keys some apps use:
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('token', token);
       localStorage.setItem('test_auth_user', JSON.stringify(user));
     }, { token, user });
 
     // Force page reload to ensure auth state is recognized by components
     await this.page.reload();
     await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
-
-    // Navigate to home page after login
-    await this.page.goto('/');
 
     // Wait for authenticated navigation to appear with improved fallback
     try {
@@ -78,13 +85,32 @@ export class TestAuthHelper {
     return { token, user };
   }
 
+  getAuthHeader() {
+    if (!this.token) throw new Error('No test auth token available; call testLogin() first');
+    return { Authorization: `Bearer ${this.token}` };
+  }
+
+  /**
+   * Ensure ALL UI requests send Authorization automatically.
+   * Call right after testLogin().
+   */
+  async applyAuthToContext() {
+    if (!this.token) throw new Error('No token set; call testLogin() first');
+    await this.page.context().setExtraHTTPHeaders({
+      Authorization: `Bearer ${this.token}`,
+    });
+  }
+
   /**
    * Clear test auth data
    */
   async clearAuth() {
+    this.token = null;
     await this.page.context().clearCookies();
     await this.page.evaluate(() => {
       localStorage.removeItem('test_auth_token');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token');
       localStorage.removeItem('test_auth_user');
     });
   }

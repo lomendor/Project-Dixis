@@ -191,6 +191,7 @@ const handleCheckout = async () => {
                     value={form.shipping?.postalCode || ''}
                     onChange={(e) => updateShippingInfo({ postalCode: e.target.value })}
                     placeholder="12345"
+                    data-testid="postal-code"
                   />
                   {formErrors['shipping.postalCode'] && (
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.postalCode']}</p>
@@ -204,6 +205,7 @@ const handleCheckout = async () => {
                     value={form.shipping?.city || ''}
                     onChange={(e) => updateShippingInfo({ city: e.target.value })}
                     placeholder="Αθήνα"
+                    data-testid="city"
                   />
                   {formErrors['shipping.city'] && (
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.city']}</p>

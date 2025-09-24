@@ -25,10 +25,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Test-only login endpoint (E2E testing)
+// Test-only endpoints (E2E testing)
 if (env('ALLOW_TEST_LOGIN', false) && (app()->environment('testing', 'local') || env('CI', false))) {
     Route::post('v1/test/login', [App\Http\Controllers\Api\TestLoginController::class, 'login'])
         ->middleware('throttle:30,1');
+
+    // Test seed endpoints for self-seeding E2E tests
+    Route::post('v1/test/seed/shipping', [App\Http\Controllers\Api\TestSeedController::class, 'seedShipping'])
+        ->middleware('throttle:10,1');
+    Route::post('v1/test/seed/reset', [App\Http\Controllers\Api\TestSeedController::class, 'resetSeed'])
+        ->middleware('throttle:10,1');
+    Route::get('v1/test/seed/status', [App\Http\Controllers\Api\TestSeedController::class, 'status'])
+        ->middleware('throttle:10,1');
 }
 
 // Authentication routes
