@@ -5,6 +5,8 @@ import { Page } from '@playwright/test';
  * Uses special test login endpoint that's only available in test environments
  */
 export class TestAuthHelper {
+  private token: string | null = null;
+
   constructor(private page: Page) {}
 
   /**
@@ -32,8 +34,9 @@ export class TestAuthHelper {
 
     const result = await response.json();
     const { token, user } = result;
+    this.token = token; // keep token for API fallback
 
-    // Store token in context for API calls
+    // Cookie (non-HttpOnly) for parity with bridge
     await this.page.context().addCookies([
       {
         name: 'test_auth_token',
@@ -46,18 +49,24 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Also store in localStorage for client-side API calls
-    await this.page.evaluate(({ token, user }) => {
-      localStorage.setItem('test_auth_token', token);
-      localStorage.setItem('test_auth_user', JSON.stringify(user));
+    // CRITICAL: Ensure localStorage is populated BEFORE any document loads.
+    await this.page.addInitScript(({ token, user }) => {
+      try {
+        window.localStorage.setItem('test_auth_token', token);
+        window.localStorage.setItem('auth_token', token);
+        window.localStorage.setItem('token', token);
+        window.localStorage.setItem('test_auth_user', JSON.stringify(user));
+        (window as any).__E2E__ = true;
+        // small debug
+        console.log('[e2e] initScript set test_auth_token');
+      } catch (e) {
+        console.log('[e2e] initScript error', String(e));
+      }
     }, { token, user });
-
-    // Force page reload to ensure auth state is recognized by components
-    await this.page.reload();
-    await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
 
     // Navigate to home page after login
     await this.page.goto('/');
+    await this.page.waitForLoadState('networkidle');
 
     // Wait for authenticated navigation to appear with improved fallback
     try {
@@ -78,13 +87,32 @@ export class TestAuthHelper {
     return { token, user };
   }
 
+  getAuthHeader() {
+    if (!this.token) throw new Error('No test auth token available; call testLogin() first');
+    return { Authorization: `Bearer ${this.token}` };
+  }
+
+  /**
+   * Ensure ALL UI requests send Authorization automatically.
+   * Call right after testLogin().
+   */
+  async applyAuthToContext() {
+    if (!this.token) throw new Error('No token set; call testLogin() first');
+    await this.page.context().setExtraHTTPHeaders({
+      Authorization: `Bearer ${this.token}`,
+    });
+  }
+
   /**
    * Clear test auth data
    */
   async clearAuth() {
+    this.token = null;
     await this.page.context().clearCookies();
     await this.page.evaluate(() => {
       localStorage.removeItem('test_auth_token');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token');
       localStorage.removeItem('test_auth_user');
     });
   }

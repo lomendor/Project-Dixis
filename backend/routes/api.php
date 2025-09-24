@@ -25,10 +25,50 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Test-only login endpoint (E2E testing)
+// Test-only endpoints (E2E testing)
 if (env('ALLOW_TEST_LOGIN', false) && (app()->environment('testing', 'local') || env('CI', false))) {
     Route::post('v1/test/login', [App\Http\Controllers\Api\TestLoginController::class, 'login'])
         ->middleware('throttle:30,1');
+
+    // Test seed endpoints for self-seeding E2E tests
+    Route::post('v1/test/seed/shipping', [App\Http\Controllers\Api\TestSeedController::class, 'seedShipping'])
+        ->middleware('throttle:10,1');
+    Route::post('v1/test/seed/reset', [App\Http\Controllers\Api\TestSeedController::class, 'resetSeed'])
+        ->middleware('throttle:10,1');
+    Route::get('v1/test/seed/status', [App\Http\Controllers\Api\TestSeedController::class, 'status'])
+        ->middleware('throttle:10,1');
+
+    // Minimal seed for E2E stability
+    Route::post('v1/test/seed/minimal', function () {
+        if (!app()->environment(['testing', 'local']) && !env('CI', false)) {
+            return response()->json(['error' => 'forbidden'], 403);
+        }
+
+        // Ensure at least 1 active product exists with stock
+        $product = \App\Models\Product::where('is_active', true)->where('stock', '>', 0)->first();
+
+        if (!$product) {
+            // Create a minimal test product if none exists
+            $producer = \App\Models\Producer::first() ?? \App\Models\Producer::factory()->create();
+            $product = \App\Models\Product::factory()->create([
+                'name' => 'E2E Test Product',
+                'price' => '9.99',
+                'is_active' => true,
+                'stock' => 10,
+                'producer_id' => $producer->id
+            ]);
+        } else {
+            // Ensure existing product has stock
+            $product->update(['stock' => max(10, $product->stock)]);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'stock' => $product->stock
+        ]);
+    })->middleware('throttle:10,1');
 }
 
 // Authentication routes

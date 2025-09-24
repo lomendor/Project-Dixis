@@ -16,6 +16,9 @@ import CartSummary from '@/components/cart/CartSummary';
 import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
 import { DeliveryMethodSelector } from '@/components/shipping';
 import type { PaymentMethod } from '@dixis/contracts/shipping';
+import dynamic from 'next/dynamic';
+
+const CartClient = dynamic(() => import('@/components/cart/CartClient'), { ssr: false });
 
 export default function Cart() {
 const {
@@ -163,7 +166,7 @@ const handleCheckout = async () => {
           <div className="md:col-span-2">
             <div className="space-y-4">
               {cart.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4 flex items-center justify-between">
+                <div key={item.id} data-testid="cart-item" className="border rounded-lg p-4 flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold" data-testid="product-title">{item.name}</h3>
                     <p className="text-sm text-gray-600">Παραγωγός: {item.producer_name}</p>
@@ -191,6 +194,7 @@ const handleCheckout = async () => {
                     value={form.shipping?.postalCode || ''}
                     onChange={(e) => updateShippingInfo({ postalCode: e.target.value })}
                     placeholder="12345"
+                    data-testid="postal-code"
                   />
                   {formErrors['shipping.postalCode'] && (
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.postalCode']}</p>
@@ -204,6 +208,7 @@ const handleCheckout = async () => {
                     value={form.shipping?.city || ''}
                     onChange={(e) => updateShippingInfo({ city: e.target.value })}
                     placeholder="Αθήνα"
+                    data-testid="city"
                   />
                   {formErrors['shipping.city'] && (
                     <p className="text-red-500 text-sm mt-1">{formErrors['shipping.city']}</p>
@@ -329,6 +334,7 @@ const handleCheckout = async () => {
             )}
           </div>
         </div>
+        <CartClient />
       </main>
     </>
   );

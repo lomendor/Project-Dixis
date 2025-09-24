@@ -15,6 +15,7 @@ import { usePageAnalytics } from '@/hooks/usePageAnalytics';
 import { useAnalytics } from '@/lib/analytics';
 import { formatCurrency } from '@/env';
 import { validateProductData, classifyApiError } from '@/utils/productValidation';
+import { TESTIDS } from '@/testing/testids';
 
 export default function ProductDetail() {
   const params = useParams();
@@ -283,6 +284,7 @@ export default function ProductDetail() {
                       value={quantity}
                       onChange={(e) => setQuantity(parseInt(e.target.value))}
                       className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      data-testid={TESTIDS.PDP.QUANTITY_SELECT}
                     >
                       {Array.from({ length: Math.min(maxQuantity, 10) }, (_, i) => i + 1).map((num) => (
                         <option key={num} value={num}>
@@ -296,7 +298,7 @@ export default function ProductDetail() {
                     onClick={handleAddToCart}
                     disabled={product.stock === 0 || addingToCart}
                     className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                    data-testid="add-to-cart-button"
+                    data-testid={TESTIDS.PDP.ADD_TO_CART}
                     aria-label={`Add ${product.name} to cart`}
                   >
                     {addingToCart ? 'Προσθήκη στο Καλάθι...' : 
