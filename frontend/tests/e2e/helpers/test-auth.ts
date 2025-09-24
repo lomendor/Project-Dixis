@@ -56,6 +56,9 @@ export class TestAuthHelper {
     // Store auth data in localStorage (now that we're on the correct domain)
     await this.page.evaluate(({ token, user }) => {
       localStorage.setItem('test_auth_token', token);
+      // mirror to common keys some apps use:
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('token', token);
       localStorage.setItem('test_auth_user', JSON.stringify(user));
     }, { token, user });
 
@@ -88,6 +91,17 @@ export class TestAuthHelper {
   }
 
   /**
+   * Ensure ALL UI requests send Authorization automatically.
+   * Call right after testLogin().
+   */
+  async applyAuthToContext() {
+    if (!this.token) throw new Error('No token set; call testLogin() first');
+    await this.page.context().setExtraHTTPHeaders({
+      Authorization: `Bearer ${this.token}`,
+    });
+  }
+
+  /**
    * Clear test auth data
    */
   async clearAuth() {
@@ -95,6 +109,8 @@ export class TestAuthHelper {
     await this.page.context().clearCookies();
     await this.page.evaluate(() => {
       localStorage.removeItem('test_auth_token');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token');
       localStorage.removeItem('test_auth_user');
     });
   }

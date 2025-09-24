@@ -34,6 +34,17 @@ class ShippingIntegrationHelper {
     if (USE_TEST_AUTH) {
       this.authHelper = new TestAuthHelper(this.page);
       await this.authHelper.testLogin('consumer');
+      await this.authHelper.applyAuthToContext();
+
+      // As an extra guard, inject Authorization on any missing API requests
+      await this.page.route('**/api/v1/**', async (route) => {
+        const headers = { ...route.request().headers() };
+        if (!headers['authorization'] && !headers['Authorization']) {
+          const { Authorization } = this.authHelper!.getAuthHeader();
+          headers['authorization'] = Authorization;
+        }
+        await route.continue({ headers });
+      });
     } else {
       // Navigate to Login via top-nav link
       await this.page.getByRole('link', { name: /login/i }).first().click();
@@ -75,7 +86,7 @@ class ShippingIntegrationHelper {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
         try {
           const authHeaders = this.authHelper?.getAuthHeader() ?? {};
-          await this.page.request.post(`${apiBaseUrl}/cart/items`, {
+          const addResp = await this.page.request.post(`${apiBaseUrl}/cart/items`, {
             data: {
               product_id: testSeedData.productId,
               quantity: 1
@@ -83,6 +94,16 @@ class ShippingIntegrationHelper {
             headers: { 'Content-Type': 'application/json', ...authHeaders }
           });
           console.log('✅ Added to cart via API fallback');
+
+          // DIAGNOSTIC: confirm the backend cart has items before visiting UI
+          const diagCart = await this.page.request.get(`${apiBaseUrl}/cart`, { headers: authHeaders });
+          console.log('🩺 Cart GET status:', diagCart.status());
+          try {
+            const cartJson = await diagCart.json();
+            console.log('🩺 Cart GET body:', JSON.stringify(cartJson));
+          } catch (e) {
+            console.log('🩺 Cart GET text:', await diagCart.text());
+          }
           // Navigate to cart since we skipped UI interaction
           await this.page.goto('/cart');
           await this.page.waitForLoadState('networkidle');
@@ -124,7 +145,7 @@ class ShippingIntegrationHelper {
         console.log('⚠️ Fallback PDP button not found, using API fallback');
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
         const authHeaders = this.authHelper?.getAuthHeader() ?? {};
-        await this.page.request.post(`${apiBaseUrl}/cart/items`, {
+        const addResp = await this.page.request.post(`${apiBaseUrl}/cart/items`, {
           data: {
             product_id: Number(fallbackProductId),
             quantity: 1
@@ -132,6 +153,16 @@ class ShippingIntegrationHelper {
           headers: { 'Content-Type': 'application/json', ...authHeaders }
         });
         console.log('✅ Added to cart via API fallback (no seeded data)');
+
+        // DIAGNOSTIC: confirm backend cart has items
+        const diagCart = await this.page.request.get(`${apiBaseUrl}/cart`, { headers: authHeaders });
+        console.log('🩺 Cart GET status:', diagCart.status());
+        try {
+          const cartJson = await diagCart.json();
+          console.log('🩺 Cart GET body:', JSON.stringify(cartJson));
+        } catch (e) {
+          console.log('🩺 Cart GET text:', await diagCart.text());
+        }
         // Navigate to cart since we skipped UI interaction
         await this.page.goto('/cart');
         await this.page.waitForLoadState('networkidle');
