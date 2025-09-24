@@ -163,7 +163,7 @@ const handleCheckout = async () => {
           <div className="md:col-span-2">
             <div className="space-y-4">
               {cart.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4 flex items-center justify-between">
+                <div key={item.id} data-testid="cart-item" className="border rounded-lg p-4 flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold" data-testid="product-title">{item.name}</h3>
                     <p className="text-sm text-gray-600">Παραγωγός: {item.producer_name}</p>

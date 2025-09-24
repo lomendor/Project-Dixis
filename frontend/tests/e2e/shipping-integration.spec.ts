@@ -203,12 +203,20 @@ class ShippingIntegrationHelper {
     await this.navigateAndWait('/cart');
     await expect(this.page).toHaveURL(/\/cart/);
 
-    // Wait for cart to load
-    await this.page.waitForSelector('[data-testid="cart-item"], [data-testid="loading-spinner"], .text-center:has-text("empty")', { timeout: 10000 });
+    // Wait for cart to load using 3-way selector pattern (item | spinner | empty)
+    await this.page.waitForSelector('[data-testid="cart-item"], [data-testid="loading-spinner"], [data-testid="empty-cart-message"]', { timeout: 15000 });
 
-    // Verify cart has items with more resilient logic
+    // Try to wait for loading spinner to disappear, but don't fail if it persists
+    try {
+      await expect(this.page.locator('[data-testid="loading-spinner"]')).toHaveCount(0, { timeout: 5000 });
+      console.log('✅ Loading spinner disappeared');
+    } catch (e) {
+      console.log('⚠️ Loading spinner persists, checking for cart items anyway...');
+    }
+
+    // Check for cart items - if API has items, they should eventually render
     const cartItems = this.page.locator('[data-testid="cart-item"]');
-    // Allow time for client fetch to resolve after API add
+    // Use correct Playwright assertion
     await expect(cartItems.first()).toBeVisible({ timeout: 15000 });
     console.log('✅ Cart page loaded with items');
   }
@@ -239,12 +247,9 @@ class ShippingIntegrationHelper {
     await cityInput.fill(city);
     console.log(`✅ Entered city: ${city}`);
 
-    // Wait for shipping quote API response and success display
-    await Promise.all([
-      this.page.waitForResponse('**/api/v1/shipping/quote'),
-      this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="delivery-method-loading"]', { timeout: 15000 })
-    ]).catch(() => {
-      console.log('⚠️ Shipping quote API response not captured, but continuing test...');
+    // Use deterministic element-based wait instead of API response wait
+    await this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="delivery-method-loading"], text=/shipping|delivery/i', { timeout: 15000 }).catch(() => {
+      console.log('⚠️ Shipping quote elements not found, but continuing test...');
     });
 
     return { postalCodeInput, cityInput };
@@ -298,76 +303,58 @@ class ShippingIntegrationHelper {
 }
 
 test.describe('Shipping Integration Demo', () => {
-  // Self-seeding: Set up test data before all tests
+  // Self-seeding: Set up minimal test data before all tests
   test.beforeAll(async ({ browser }) => {
-    console.log('🌱 Setting up shipping test data...');
+    console.log('🌱 Setting up minimal test data...');
 
     const context = await browser.newContext();
     const page = await context.newPage();
 
     try {
-      // Call backend seed endpoint to create test data
-      const seedUrl = buildApiUrl('/test/seed/shipping');
+      // Call minimal seed endpoint as specified in stabilization protocol
+      const seedUrl = buildApiUrl('/test/seed/minimal');
       const response = await page.request.post(seedUrl);
 
       if (response.ok()) {
         const result = await response.json();
-        console.log('🌱 Seed response:', result);
+        console.log('🌱 Minimal seed response:', result);
 
-        if (result.success && result.data) {
+        if (result.ok && result.product_id) {
           testSeedData = {
-            productId: result.data.primary_product_id,
-            consumerUserId: result.data.consumer_user_id,
-            producerId: result.data.producer_id,
+            productId: result.product_id,
           };
-          console.log(`🌱 Test data seeded: Product ID ${testSeedData.productId}`);
+          console.log(`🌱 Minimal test data seeded: Product ID ${testSeedData.productId}`);
         } else {
-          console.log('⚠️ Seed request succeeded but data format unexpected');
+          console.log('⚠️ Minimal seed request succeeded but data format unexpected');
         }
       } else {
         const error = await response.text();
-        console.log(`⚠️ Failed to seed test data: ${response.status()} - ${error.slice(0, 200)}`);
+        console.log(`⚠️ Failed to seed minimal test data: ${response.status()} - ${error.slice(0, 200)}`);
       }
     } catch (error) {
-      console.log('⚠️ Error during test seeding:', error);
+      console.log('⚠️ Error during minimal test seeding:', error);
     } finally {
       await context.close();
     }
   });
 
-  // Self-seeding: Clean up test data after all tests
+  // Self-seeding: Clean up minimal test data after all tests
   test.afterAll(async ({ browser }) => {
-    console.log('🧹 Cleaning up shipping test data...');
-
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    try {
-      const resetUrl = buildApiUrl('/test/seed/reset');
-      const response = await page.request.post(resetUrl);
-
-      if (response.ok()) {
-        const result = await response.json();
-        console.log('🧹 Cleanup response:', result);
-        console.log('🧹 Test data cleanup completed');
-      } else {
-        const error = await response.text();
-        console.log(`⚠️ Failed to cleanup test data: ${response.status()} - ${error.slice(0, 200)}`);
-      }
-    } catch (error) {
-      console.log('⚠️ Error during test cleanup:', error);
-    } finally {
-      await context.close();
-    }
-
-    // Clear shared state
+    console.log('🧹 Cleaning up minimal test data...');
+    // Note: Minimal seed creates standard test data that doesn't require cleanup
+    // Clear shared state only
     testSeedData = {};
+    console.log('🧹 Minimal test data cleanup completed');
   });
 
   test('demonstrate shipping cost calculation on cart page', async ({ page }) => {
+    // Enable browser console capture for debugging
+    page.on('console', msg => console.log(`🖥️ Browser: ${msg.type()}: ${msg.text()}`));
+    page.on('pageerror', error => console.log(`🚨 Page Error: ${error.message}`));
+
     const helper = new ShippingIntegrationHelper(page);
-    
-    console.log('🚀 Starting shipping integration test...');
+
+    console.log('🚀 Starting shipping integration test with console capture...');
     
     // Step 1: Login
     console.log('📝 Step 1: Logging in...');

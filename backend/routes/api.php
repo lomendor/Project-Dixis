@@ -37,6 +37,38 @@ if (env('ALLOW_TEST_LOGIN', false) && (app()->environment('testing', 'local') ||
         ->middleware('throttle:10,1');
     Route::get('v1/test/seed/status', [App\Http\Controllers\Api\TestSeedController::class, 'status'])
         ->middleware('throttle:10,1');
+
+    // Minimal seed for E2E stability
+    Route::post('v1/test/seed/minimal', function () {
+        if (!app()->environment(['testing', 'local']) && !env('CI', false)) {
+            return response()->json(['error' => 'forbidden'], 403);
+        }
+
+        // Ensure at least 1 active product exists with stock
+        $product = \App\Models\Product::where('is_active', true)->where('stock', '>', 0)->first();
+
+        if (!$product) {
+            // Create a minimal test product if none exists
+            $producer = \App\Models\Producer::first() ?? \App\Models\Producer::factory()->create();
+            $product = \App\Models\Product::factory()->create([
+                'name' => 'E2E Test Product',
+                'price' => '9.99',
+                'is_active' => true,
+                'stock' => 10,
+                'producer_id' => $producer->id
+            ]);
+        } else {
+            // Ensure existing product has stock
+            $product->update(['stock' => max(10, $product->stock)]);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'stock' => $product->stock
+        ]);
+    })->middleware('throttle:10,1');
 }
 
 // Authentication routes

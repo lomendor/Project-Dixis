@@ -210,7 +210,8 @@ class ApiClient {
 
   private loadTokenFromStorage(): void {
     if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('auth_token');
+      // Check for E2E test auth token first, then regular auth token
+      this.token = localStorage.getItem('test_auth_token') || localStorage.getItem('auth_token');
     }
   }
 

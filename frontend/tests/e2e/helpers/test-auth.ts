@@ -36,7 +36,7 @@ export class TestAuthHelper {
     const { token, user } = result;
     this.token = token; // keep token for API fallback
 
-    // Store token in context for API calls
+    // Cookie (non-HttpOnly) for parity with bridge
     await this.page.context().addCookies([
       {
         name: 'test_auth_token',
@@ -49,22 +49,23 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Navigate to home page first to establish proper domain context
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
-
-    // Store auth data in localStorage (now that we're on the correct domain)
-    await this.page.evaluate(({ token, user }) => {
-      localStorage.setItem('test_auth_token', token);
-      // mirror to common keys some apps use:
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('token', token);
-      localStorage.setItem('test_auth_user', JSON.stringify(user));
+    // CRITICAL: Ensure localStorage is populated BEFORE any document loads.
+    await this.page.addInitScript(({ token, user }) => {
+      try {
+        window.localStorage.setItem('test_auth_token', token);
+        window.localStorage.setItem('auth_token', token);
+        window.localStorage.setItem('token', token);
+        window.localStorage.setItem('test_auth_user', JSON.stringify(user));
+        // small debug
+        console.log('[e2e] initScript set test_auth_token');
+      } catch (e) {
+        console.log('[e2e] initScript error', String(e));
+      }
     }, { token, user });
 
-    // Force page reload to ensure auth state is recognized by components
-    await this.page.reload();
-    await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
+    // Navigate to home page after login
+    await this.page.goto('/');
+    await this.page.waitForLoadState('networkidle');
 
     // Wait for authenticated navigation to appear with improved fallback
     try {

@@ -34,6 +34,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
+      // In E2E mode, wait one microtask to allow initScript/localStorage to be visible
+      if (process.env.NEXT_PUBLIC_E2E) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        console.log('🧪 E2E microtask delay complete, checking localStorage...');
+
+        try {
+          const token = typeof window !== 'undefined' ? localStorage.getItem('test_auth_token') : null;
+          const userStr = typeof window !== 'undefined' ? localStorage.getItem('test_auth_user') : null;
+          if (token && userStr) {
+            console.log('🧪 E2E Auth Bridge: Tokens found in localStorage, hydrating auth state');
+            const user = JSON.parse(userStr);
+            setUser(user);
+            setLoading(false);
+            console.log('🧪 E2E Auth Bridge: Auth state hydrated successfully');
+            return;
+          } else {
+            console.log('🧪 E2E Auth Bridge: No tokens found in localStorage');
+          }
+        } catch (error) {
+          console.error('🧪 E2E auth bridge error:', error);
+        }
+      }
+
       // MSW Bridge: Short-circuit authentication in MSW mode for smoke tests
       if (typeof window !== 'undefined' && localStorage.getItem('auth_token') === 'mock_token') {
         try {
@@ -53,9 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // E2E Test Bridge: Support E2E test authentication
+      // Legacy E2E Test Bridge: Support E2E test authentication (fallback)
       if (typeof window !== 'undefined' && localStorage.getItem('test_auth_token')) {
-        console.log('🧪 E2E Auth Bridge: test_auth_token found, setting authenticated state');
+        console.log('🧪 E2E Auth Bridge (legacy): test_auth_token found, setting authenticated state');
         try {
           setUser({
             id: 1,
@@ -66,10 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             updated_at: new Date().toISOString()
           });
           setLoading(false);
-          console.log('🧪 E2E Auth Bridge: User set, authentication complete');
+          console.log('🧪 E2E Auth Bridge (legacy): User set, authentication complete');
           return; // Skip real /auth/me API call
         } catch (error) {
-          console.error('🧪 E2E auth bridge error:', error);
+          console.error('🧪 E2E auth bridge (legacy) error:', error);
         }
       }
 
