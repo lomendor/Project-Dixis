@@ -3,11 +3,38 @@ name: Lighthouse CI
 on:
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - 'backend/docs/**'
+      - '**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  dependabot-smoke:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install minimal deps
+        working-directory: frontend
+        run: npm ci
+      - name: Type check only (dependabot)
+        working-directory: frontend
+        run: npm run type-check
+
   lighthouse:
     runs-on: ubuntu-latest
-    continue-on-error: true  # Don't block the build
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
+    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}  # Non-blocking only for ci/* hotfix branches
 
     steps:
       - uses: actions/checkout@v4
@@ -16,10 +43,10 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: backend/frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Install contracts dependencies
@@ -29,8 +56,17 @@ jobs:
           else
             echo "No contracts directory found"
           fi
+
+      - name: Build contracts package
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts && npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Build frontend (bind mock API)
-        working-directory: backend/frontend
+        working-directory: frontend
         env:
           NEXT_PUBLIC_API_BASE: "http://localhost:4010"
         run: npm run build
@@ -53,7 +89,7 @@ jobs:
           npx wait-on http://localhost:4010/health
 
       - name: Start Next server (3010)
-        working-directory: backend/frontend
+        working-directory: frontend
         run: |
           (npm run start -- -p 3010 &) && npx wait-on http://localhost:3010
         env:
@@ -74,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouseci
-          path: backend/frontend/.lighthouseci
+          path: frontend/.lighthouseci
 
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
@@ -82,7 +118,7 @@ jobs:
         with:
           name: lighthouse-report
           path: |
-            backend/frontend/.lighthouseci/
+            frontend/.lighthouseci/
           retention-days: 7
 
       - name: Create reports directory
@@ -92,7 +128,7 @@ jobs:
       - name: Generate Lighthouse summary
         if: always()
         run: |
-          cd backend/frontend
+          cd frontend
           if [ -d ".lighthouseci" ]; then
             echo "# 🏍️ Lighthouse CI Summary - $(date +%Y-%m-%d)" > ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md

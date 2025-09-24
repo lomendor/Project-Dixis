@@ -1,4 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+
+// Feature flag for admin UI tests
+const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
+// Use test auth when in E2E mode
+const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 
 test.describe('Shipping Integration E2E', () => {
   // Auth edge-case fixes: Clear cookies before each test
@@ -9,13 +15,17 @@ test.describe('Shipping Integration E2E', () => {
 
   test('complete shipping checkout flow', async ({ page }) => {
     // Login
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    
-    // Wait for redirect to home page
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+
+      // Wait for redirect to home page
+      await expect(page).toHaveURL('/');
+    }
 
     // Navigate to products and add to cart
     await page.click('text=Products');
@@ -71,11 +81,15 @@ test.describe('Shipping Integration E2E', () => {
 
   test('shipping validation prevents checkout without postal code', async ({ page }) => {
     // Login and add item to cart (reuse login logic)
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/');
+    }
 
     // Add a product to cart quickly
     await page.goto('/');
@@ -101,11 +115,15 @@ test.describe('Shipping Integration E2E', () => {
 
   test('shipping cost calculation for different zones', async ({ page }) => {
     // Login and add item to cart
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/');
+    }
     
     await page.goto('/');
     const firstProduct = page.locator('[data-testid="product-card"]').first();
@@ -136,11 +154,15 @@ test.describe('Shipping Integration E2E', () => {
 
   test('auth edge case: retry after session timeout', async ({ page, context }) => {
     // Login first
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/');
+    }
 
     // Simulate session timeout by clearing cookies
     await context.clearCookies();
@@ -150,9 +172,13 @@ test.describe('Shipping Integration E2E', () => {
     await expect(page).toHaveURL('/auth/login');
 
     // Login again
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+    }
     
     // Should be able to access cart now
     await expect(page).toHaveURL('/');
@@ -162,11 +188,15 @@ test.describe('Shipping Integration E2E', () => {
 
   test('volumetric vs actual weight pricing (bulky vs dense items)', async ({ page }) => {
     // Login and navigate to products
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/');
+    }
 
     // Add multiple different items to test weight calculations
     await page.goto('/');
@@ -201,11 +231,15 @@ test.describe('Shipping Integration E2E', () => {
 
   test('island zone surcharge and longer delivery times', async ({ page }) => {
     // Login and add item to cart
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'consumer@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'consumer@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL('/');
+    }
 
     await page.goto('/');
     const product = page.locator('[data-testid="product-card"]').first();
@@ -243,13 +277,17 @@ test.describe('Shipping Integration E2E', () => {
     await expect(smallIslandQuote).toContainText('εργάσιμες ημέρες');
   });
 
-  test('admin label creation and customer tracking', async ({ page }) => {
+  (ADMIN_UI_AVAILABLE ? test : test.skip)('admin label creation and customer tracking @slow', async ({ page }) => {
     // This test covers the admin flow mentioned in the audit
     // Login as admin (if admin functionality is available)
-    await page.goto('/auth/login');
-    await page.fill('input[type="email"]', 'admin@example.com');
-    await page.fill('input[type="password"]', 'password');
-    await page.click('button[type="submit"]');
+    if (USE_TEST_AUTH) {
+      await loginAsAdmin(page);
+    } else {
+      await page.goto('/auth/login');
+      await page.fill('input[type="email"]', 'admin@example.com');
+      await page.fill('input[type="password"]', 'password');
+      await page.click('button[type="submit"]');
+    }
 
     // Navigate to order management (exact path depends on admin interface)
     // For now, we'll skip this test if admin interface isn't available

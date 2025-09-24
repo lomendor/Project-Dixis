@@ -53,16 +53,14 @@ class InventoryService
         // Create in-app notification
         $notification = Notification::create([
             'user_id' => $user->id,
-            'title' => 'Low Stock Alert',
-            'message' => "Your product '{$product->name}' is running low on stock. Only {$product->stock} units remaining.",
             'type' => 'low_stock',
-            'data' => [
+            'payload' => [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
-                'current_stock' => $product->stock,
+                'stock' => $product->stock,
                 'threshold' => self::LOW_STOCK_THRESHOLD,
+                'context' => 'order_stock_deduction',
             ],
-            'is_read' => false,
         ]);
 
         // Send email notification

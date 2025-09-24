@@ -6,6 +6,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const body = req.body || {}
     // Μικρό, ασφαλές log (χωρίς ευαίσθητα δεδομένα)
     console.log('[CSP-REPORT]', JSON.stringify(body).slice(0, 2000))
-  } catch (_) {}
+  } catch {}
   return res.status(204).end()
 }

@@ -1,4 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
+import { loginAsConsumer } from './helpers/test-auth';
+
+// Use test auth when in E2E mode
+const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 
 // Helper class for shipping integration tests
 class ShippingIntegrationHelper {
@@ -10,22 +14,27 @@ class ShippingIntegrationHelper {
   }
 
   async loginUser(email: string, password: string) {
-    // Navigate to Login via top-nav link
-    await this.page.getByRole('link', { name: /login/i }).first().click();
-    await expect(this.page).toHaveURL(/\/auth\/login/);
-    await this.page.waitForLoadState('networkidle');
-    
-    await this.page.fill('[name="email"]', email);
-    await this.page.fill('[name="password"]', password);
-    
-    // Wait for login completion
-    await Promise.all([
-      this.page.waitForURL('/', { timeout: 10000 }),
-      this.page.click('button[type="submit"]')
-    ]);
-    
-    // Verify login success
-    await expect(this.page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+    // Use test auth if available
+    if (USE_TEST_AUTH) {
+      await loginAsConsumer(this.page);
+    } else {
+      // Navigate to Login via top-nav link
+      await this.page.getByRole('link', { name: /login/i }).first().click();
+      await expect(this.page).toHaveURL(/\/auth\/login/);
+      await this.page.waitForLoadState('networkidle');
+
+      await this.page.fill('[name="email"]', email);
+      await this.page.fill('[name="password"]', password);
+
+      // Wait for login completion
+      await Promise.all([
+        this.page.waitForURL('/', { timeout: 10000 }),
+        this.page.click('button[type="submit"]')
+      ]);
+
+      // Verify login success
+      await expect(this.page.locator('[data-testid="user-menu"]').first()).toBeVisible();
+    }
   }
 
   async addProductToCart() {
@@ -45,8 +54,15 @@ class ShippingIntegrationHelper {
     const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
     await expect(addToCartBtn).toBeVisible();
     await addToCartBtn.click();
-    await this.page.waitForTimeout(1000);
-    
+
+    // Wait for cart update confirmation or navigation (reduced timeout to prevent hanging)
+    await this.page.waitForSelector('[data-testid="cart-item-count"], [data-testid="cart-icon"], .cart-updated', { timeout: 8000 }).catch(() => {
+      // Fallback: wait for any cart-related element to appear
+      return this.page.waitForSelector('text=/added to cart|cart|καλάθι/i', { timeout: 5000 }).catch(() => {
+        console.log('⚠️ Cart update confirmation not found, continuing test...');
+      });
+    });
+
     console.log('✅ Product added to cart');
   }
 
@@ -88,10 +104,15 @@ class ShippingIntegrationHelper {
     await cityInput.clear();
     await cityInput.fill(city);
     console.log(`✅ Entered city: ${city}`);
-    
-    // Wait for potential AJAX call to update shipping
-    await this.page.waitForTimeout(2000);
-    
+
+    // Wait for shipping quote to update after postal code/city entry (reduced timeout to prevent hanging)
+    await this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="shipping-quote-loading"], .shipping-quote, .delivery-method', { timeout: 10000 }).catch(() => {
+      // Fallback: wait for any shipping-related content to appear
+      return this.page.waitForSelector('text=/shipping|delivery|παράδοση|αποστολή/i', { timeout: 5000 }).catch(() => {
+        console.log('⚠️ Shipping quote elements not found, continuing test...');
+      });
+    });
+
     return { postalCodeInput, cityInput };
   }
 

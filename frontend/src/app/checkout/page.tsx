@@ -30,7 +30,7 @@ type CheckoutStep = 'shipping' | 'review' | 'payment';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [step, setStep] = useState<CheckoutStep>('shipping');
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -91,7 +91,7 @@ export default function CheckoutPage() {
       const quote = await getShippingQuote(totalWeight, shippingAddress.postalCode);
       setShippingQuote(quote);
       setStep('review');
-    } catch (err) {
+    } catch {
       setError('Σφάλμα κατά τον υπολογισμό των εξόδων αποστολής');
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ export default function CheckoutPage() {
       // Process payment with FakePaymentProvider
       const orderId = await processPayment();
       router.push(`/order/confirmation/${orderId}`);
-    } catch (err) {
+    } catch {
       setError('Σφάλμα κατά την επεξεργασία της πληρωμής');
       setLoading(false);
     }

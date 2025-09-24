@@ -44,7 +44,7 @@ function AdminProducersContent() {
       } else {
         setError('Αποτυχία φόρτωσης αιτήσεων παραγωγών');
       }
-    } catch (err) {
+    } catch {
       setError('Σφάλμα δικτύου κατά τη φόρτωση');
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ function AdminProducersContent() {
       } else {
         setError(data.error || 'Παρουσιάστηκε σφάλμα');
       }
-    } catch (err) {
+    } catch {
       setError('Σφάλμα δικτύου');
     } finally {
       setActionLoading(null);

@@ -111,7 +111,7 @@ function ProducerOnboardingContent() {
       } else {
         setError(data.error || 'Παρουσιάστηκε σφάλμα κατά την υποβολή');
       }
-    } catch (err) {
+    } catch {
       setError('Παρουσιάστηκε σφάλμα δικτύου');
     } finally {
       setLoading(false);

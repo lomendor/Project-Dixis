@@ -1,0 +1,5 @@
+PR #216 — ESLint/Hygiene stabilization done.
+- Updated: frontend/.eslintignore, frontend/.eslintrc.json (not modified - already had ignores)
+- Reports: docs/reports/2025-09-22
+- Auto-merge armed if checks green.
+- Current time: Δευ 22 Σεπ 2025 09:35:38 EEST

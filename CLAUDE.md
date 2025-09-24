@@ -122,13 +122,13 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
-php artisan serve --port=8000
+php artisan serve --port=8001
 
 # Frontend setup (separate terminal)
 cd ../frontend  
 npm install
 npm run build
-npm run dev  # Runs on http://localhost:3000
+npm run dev  # Runs on http://localhost:3001
 
 # Run E2E tests (optional)
 cd frontend
@@ -147,7 +147,7 @@ cd frontend && npm run build
 cd frontend && npx playwright test --reporter=line
 
 # API health check
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```
 
 ## 🧠 PRODUCTION ARCHITECTURE PATTERNS
@@ -266,7 +266,7 @@ setIntendedDestination?.(pathname)
 **Solution**: Centralized API client with environment-based configuration
 ```typescript
 const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
   withAuth: (token: string) => ({ Authorization: `Bearer ${token}` })
 }
 ```
