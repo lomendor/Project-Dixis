@@ -27,8 +27,8 @@ export default defineConfig({
   ],
   
   use: {
-    // Allow CI to override via PLAYWRIGHT_BASE_URL; default to Next dev port (3001)
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3001',
+    // Allow CI to override via PLAYWRIGHT_BASE_URL; default to Next dev port (3000)
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
     trace: 'on',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -68,11 +68,15 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev -- --port 3001',
-    url: 'http://127.0.0.1:3001',
+    command: 'NEXT_PUBLIC_E2E=true npm run dev -- --port 3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: true,
     timeout: 90_000,
     stdout: 'ignore',
     stderr: 'pipe',
+    env: {
+      NEXT_PUBLIC_E2E: 'true',
+      NEXT_PUBLIC_API_BASE_URL: 'http://127.0.0.1:8001/api/v1'
+    }
   },
 });

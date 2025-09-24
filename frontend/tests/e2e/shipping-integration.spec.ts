@@ -87,90 +87,78 @@ class ShippingIntegrationHelper {
   }
 
   async enterShippingDetails(postalCode: string, city: string) {
-    // Look for postal code input field
-    const postalCodeInput = this.page.locator('input[name="postal_code"], input[placeholder*="postal"], input[placeholder*="ΤΚ"], input[id*="postal"], input[data-testid="postal-code"]');
+    // Use stable data-testid selectors
+    const postalCodeInput = this.page.getByTestId('postal-code');
     await expect(postalCodeInput).toBeVisible({ timeout: 10000 });
-    
-    // Look for city input field
-    const cityInput = this.page.locator('input[name="city"], input[placeholder*="city"], input[placeholder*="πόλη"], input[id*="city"], input[data-testid="city"]');
+
+    const cityInput = this.page.getByTestId('city');
     await expect(cityInput).toBeVisible({ timeout: 10000 });
-    
+
     // Clear and enter postal code
     await postalCodeInput.clear();
     await postalCodeInput.fill(postalCode);
     console.log(`✅ Entered postal code: ${postalCode}`);
-    
+
     // Clear and enter city
     await cityInput.clear();
     await cityInput.fill(city);
     console.log(`✅ Entered city: ${city}`);
 
-    // Wait for shipping quote to update after postal code/city entry (reduced timeout to prevent hanging)
-    await this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="shipping-quote-loading"], .shipping-quote, .delivery-method', { timeout: 10000 }).catch(() => {
-      // Fallback: wait for any shipping-related content to appear
-      return this.page.waitForSelector('text=/shipping|delivery|παράδοση|αποστολή/i', { timeout: 5000 }).catch(() => {
-        console.log('⚠️ Shipping quote elements not found, continuing test...');
-      });
+    // Wait for shipping quote API response and success display
+    await Promise.all([
+      this.page.waitForResponse('**/api/v1/shipping/quote'),
+      this.page.waitForSelector('[data-testid="shipping-quote-success"], [data-testid="delivery-method-loading"]', { timeout: 15000 })
+    ]).catch(() => {
+      console.log('⚠️ Shipping quote API response not captured, but continuing test...');
     });
 
     return { postalCodeInput, cityInput };
   }
 
   async verifyShippingCalculation() {
-    // Look for shipping cost display
-    const shippingElements = [
-      this.page.locator('text=/Athens Express/'),
-      this.page.locator('text=/€4.20/'),
-      this.page.locator('text=/1 day/'),
-      this.page.locator('[data-testid="shipping-cost"]'),
-      this.page.locator('[data-testid="shipping-method"]'),
-      this.page.locator('.shipping-info, .shipping-cost, .shipping-method')
-    ];
+    // Use stable data-testid selectors for shipping information
+    try {
+      // Wait for shipping quote success indicator
+      await this.page.getByTestId('shipping-quote-success').waitFor({ timeout: 10000 });
+      console.log('✅ Shipping quote success container found');
 
-    let foundShippingInfo = false;
-    
-    for (const element of shippingElements) {
-      try {
-        await element.waitFor({ timeout: 5000 });
-        if (await element.isVisible()) {
-          foundShippingInfo = true;
-          const text = await element.textContent();
-          console.log(`✅ Found shipping element: "${text}"`);
-        }
-      } catch (e) {
-        // Element not found, continue searching
-      }
+      // Verify shipping cost is displayed
+      const shippingCost = this.page.getByTestId('shipping-cost');
+      await expect(shippingCost).toBeVisible({ timeout: 5000 });
+      const costText = await shippingCost.textContent();
+      console.log(`✅ Found shipping cost: "${costText}"`);
+
+      // Verify shipping method is displayed
+      const shippingMethod = this.page.getByTestId('shipping-method');
+      await expect(shippingMethod).toBeVisible({ timeout: 5000 });
+      const methodText = await shippingMethod.textContent();
+      console.log(`✅ Found shipping method: "${methodText}"`);
+
+      return true;
+    } catch (e) {
+      console.log(`⚠️ Shipping verification failed: ${e}`);
+      return false;
     }
-
-    return foundShippingInfo;
   }
 
   async verifyTotalCalculation() {
-    // Look for total amount elements
-    const totalElements = [
-      this.page.locator('[data-testid="total-amount"]'),
-      this.page.locator('[data-testid="cart-total"]'),
-      this.page.locator('.total, .cart-total'),
-      this.page.locator('text=/Total.*€/'),
-      this.page.locator('text=/Σύνολο.*€/')
-    ];
+    // Use stable data-testid selector for total amount
+    try {
+      // Wait for cart summary to be visible
+      await this.page.getByTestId('cart-summary').waitFor({ timeout: 10000 });
+      console.log('✅ Cart summary container found');
 
-    let foundTotal = false;
-    
-    for (const element of totalElements) {
-      try {
-        await element.waitFor({ timeout: 5000 });
-        if (await element.isVisible()) {
-          foundTotal = true;
-          const text = await element.textContent();
-          console.log(`✅ Found total element: "${text}"`);
-        }
-      } catch (e) {
-        // Element not found, continue searching
-      }
+      // Verify total amount is displayed
+      const totalAmount = this.page.getByTestId('cart-total-amount');
+      await expect(totalAmount).toBeVisible({ timeout: 5000 });
+      const totalText = await totalAmount.textContent();
+      console.log(`✅ Found total amount: "${totalText}"`);
+
+      return true;
+    } catch (e) {
+      console.log(`⚠️ Total verification failed: ${e}`);
+      return false;
     }
-
-    return foundTotal;
   }
 }
 
@@ -256,18 +244,18 @@ test.describe('Shipping Integration Demo', () => {
     await helper.addProductToCart();
     await helper.navigateToCart();
     
-    // Test that shipping input fields exist and are functional
-    const postalCodeField = page.locator('input[name="postal_code"], input[placeholder*="postal"], input[placeholder*="ΤΚ"], input[id*="postal"], input[data-testid="postal-code"]');
-    const cityField = page.locator('input[name="city"], input[placeholder*="city"], input[placeholder*="πόλη"], input[id*="city"], input[data-testid="city"]');
-    
+    // Test that shipping input fields exist and are functional using stable selectors
+    const postalCodeField = page.getByTestId('postal-code');
+    const cityField = page.getByTestId('city');
+
     // Verify fields are visible
     await expect(postalCodeField).toBeVisible({ timeout: 10000 });
     await expect(cityField).toBeVisible({ timeout: 10000 });
-    
+
     // Test field interactions
     await postalCodeField.fill('11527');
     await cityField.fill('Athens');
-    
+
     // Verify values are set
     await expect(postalCodeField).toHaveValue('11527');
     await expect(cityField).toHaveValue('Athens');

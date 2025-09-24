@@ -300,7 +300,7 @@ export default function DeliveryMethodSelector({
 
       {/* Quote Summary */}
       {displayQuote && (
-        <div className="mt-6 bg-gray-50 border border-gray-200 rounded-md p-4">
+        <div className="mt-6 bg-gray-50 border border-gray-200 rounded-md p-4" data-testid="shipping-quote-success">
           <div className="flex items-start">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
@@ -314,13 +314,13 @@ export default function DeliveryMethodSelector({
               <div className="mt-2 text-sm text-gray-700">
                 <div className="flex justify-between items-center mb-1">
                   <span>Μέθοδος:</span>
-                  <span className="font-semibold">
+                  <span className="font-semibold" data-testid="shipping-method">
                     {selectedMethod === 'HOME' ? 'Παράδοση στο σπίτι' : 'Παράδοση σε locker'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mb-1">
                   <span>Κόστος:</span>
-                  <span className="font-semibold">{formatCurrency(displayQuote.cost_cents / 100)}</span>
+                  <span className="font-semibold" data-testid="shipping-cost">{formatCurrency(displayQuote.cost_cents / 100)}</span>
                 </div>
                 {hasDiscount && selectedMethod === 'LOCKER' && (
                   <div className="flex justify-between items-center mb-1 text-green-600">

@@ -46,7 +46,11 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Also store in localStorage for client-side API calls
+    // Navigate to home page first to establish proper domain context
+    await this.page.goto('/');
+    await this.page.waitForLoadState('networkidle');
+
+    // Store auth data in localStorage (now that we're on the correct domain)
     await this.page.evaluate(({ token, user }) => {
       localStorage.setItem('test_auth_token', token);
       localStorage.setItem('test_auth_user', JSON.stringify(user));
@@ -55,9 +59,6 @@ export class TestAuthHelper {
     // Force page reload to ensure auth state is recognized by components
     await this.page.reload();
     await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
-
-    // Navigate to home page after login
-    await this.page.goto('/');
 
     // Wait for authenticated navigation to appear with improved fallback
     try {
