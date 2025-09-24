@@ -52,18 +52,24 @@ export const useCheckout = (): UseCheckoutReturn => {
     setIsLoading(true);
     setError(null);
     try {
+      console.log('🛒 Loading cart...');
       const result = await checkoutApi.getValidatedCart();
+      console.log('🛒 Cart result:', { success: result.success, itemCount: result.data?.length, errors: result.errors });
       if (result.success && result.data) {
         setCart(result.data);
+        console.log('🛒 Cart set with', result.data.length, 'items');
       } else {
         // Check if the error indicates a network/connection issue
         const hasNetworkError = result.errors.some(err => err.message.includes('σύνδεσης') || err.code === 'RETRYABLE_ERROR');
         setError(hasNetworkError ? 'Σφάλμα σύνδεσης καλαθιού' : 'Αποτυχία φόρτωσης καλαθιού');
+        console.log('🛒 Cart error:', result.errors);
       }
-    } catch {
+    } catch (err) {
+      console.log('🛒 Cart exception:', err);
       setError('Σφάλμα σύνδεσης καλαθιού');
     } finally {
       setIsLoading(false);
+      console.log('🛒 Loading set to false');
     }
   }, []);
 

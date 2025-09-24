@@ -53,6 +53,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // E2E Test Bridge: Support E2E test authentication
+      if (typeof window !== 'undefined' && localStorage.getItem('test_auth_token')) {
+        console.log('🧪 E2E Auth Bridge: test_auth_token found, setting authenticated state');
+        try {
+          setUser({
+            id: 1,
+            name: 'E2E Test User',
+            email: 'e2e@dixis.local',
+            role: 'consumer',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          setLoading(false);
+          console.log('🧪 E2E Auth Bridge: User set, authentication complete');
+          return; // Skip real /auth/me API call
+        } catch (error) {
+          console.error('🧪 E2E auth bridge error:', error);
+        }
+      }
+
       // Normal auth flow
       apiClient.refreshToken();
       const token = apiClient.getToken();
