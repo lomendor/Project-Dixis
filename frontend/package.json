@@ -40,6 +40,7 @@
     "e2e:ci": "npm run e2e:ci:setup && playwright test",
     "e2e:ci:setup": "rm -rf frontend/.next && NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8001/api/v1 npm run build && npm start -- --port 3000 & npx wait-on tcp:127.0.0.1:3000 && sleep 2",
     "test:e2e": "playwright test",
+    "test:e2e:local": "NEXT_PUBLIC_E2E=true E2E_BASE_URL=http://localhost:3000 npx playwright test -c playwright.local.ts --project=consumer",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:analytics": "PLAYWRIGHT_BASE_URL=http://localhost:3000 playwright test tests/e2e/analytics-observability.spec.ts",
     "test:e2e:performance-a11y": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/performance-accessibility-core.spec.ts --reporter=line",
