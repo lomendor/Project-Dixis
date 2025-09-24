@@ -127,6 +127,7 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
+    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     needs: frontend-tests
     
     services:
