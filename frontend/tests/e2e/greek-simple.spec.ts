@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Basic Greek Search Test', () => {
   test('should load homepage and show Greek products', async ({ page }) => {
     // Navigate to homepage
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
     
     // Wait for page to load
     await page.waitForLoadState('networkidle');
@@ -27,7 +27,7 @@ test.describe('Basic Greek Search Test', () => {
   });
 
   test('should perform basic search', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     
     // Find search input
