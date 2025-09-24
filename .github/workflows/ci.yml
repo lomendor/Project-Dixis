@@ -244,7 +244,7 @@ jobs:
           npx wait-on http://127.0.0.1:$FRONTEND_PORT --timeout 60000
 
       - name: Set E2E quarantine (branch-scoped)
-        if: contains(github.ref, 'ci/auth-e2e-hotfix')
+        if: startsWith(github.head_ref, 'ci/')
         run: |
           echo "QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow" >> $GITHUB_ENV
 
