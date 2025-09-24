@@ -96,13 +96,23 @@ class ShippingIntegrationHelper {
           console.log('✅ Added to cart via API fallback');
 
           // DIAGNOSTIC: confirm the backend cart has items before visiting UI
-          const diagCart = await this.page.request.get(`${apiBaseUrl}/cart`, { headers: authHeaders });
+          const diagCart = await this.page.request.get(`${apiBaseUrl}/cart/items`, { headers: authHeaders });
           console.log('🩺 Cart GET status:', diagCart.status());
           try {
             const cartJson = await diagCart.json();
             console.log('🩺 Cart GET body:', JSON.stringify(cartJson));
+            if (cartJson.cart_items) {
+              console.log('🩺 Cart items count:', cartJson.cart_items.length);
+              // Assert we have at least 1 item before proceeding to UI
+              if (cartJson.cart_items.length === 0) {
+                throw new Error('Cart is empty after add-to-cart API call');
+              }
+              console.log('🩺 First item ID:', cartJson.cart_items[0].id);
+              console.log('✅ Backend cart has items - proceeding to UI validation');
+            }
           } catch (e) {
             console.log('🩺 Cart GET text:', await diagCart.text());
+            throw new Error(`Cart diagnostic failed: ${e}`);
           }
           // Navigate to cart since we skipped UI interaction
           await this.page.goto('/cart');
@@ -155,13 +165,23 @@ class ShippingIntegrationHelper {
         console.log('✅ Added to cart via API fallback (no seeded data)');
 
         // DIAGNOSTIC: confirm backend cart has items
-        const diagCart = await this.page.request.get(`${apiBaseUrl}/cart`, { headers: authHeaders });
+        const diagCart = await this.page.request.get(`${apiBaseUrl}/cart/items`, { headers: authHeaders });
         console.log('🩺 Cart GET status:', diagCart.status());
         try {
           const cartJson = await diagCart.json();
           console.log('🩺 Cart GET body:', JSON.stringify(cartJson));
+          if (cartJson.cart_items) {
+            console.log('🩺 Cart items count:', cartJson.cart_items.length);
+            // Assert we have at least 1 item before proceeding to UI
+            if (cartJson.cart_items.length === 0) {
+              throw new Error('Cart is empty after add-to-cart API call');
+            }
+            console.log('🩺 First item ID:', cartJson.cart_items[0].id);
+            console.log('✅ Backend cart has items - proceeding to UI validation');
+          }
         } catch (e) {
           console.log('🩺 Cart GET text:', await diagCart.text());
+          throw new Error(`Cart diagnostic failed: ${e}`);
         }
         // Navigate to cart since we skipped UI interaction
         await this.page.goto('/cart');
