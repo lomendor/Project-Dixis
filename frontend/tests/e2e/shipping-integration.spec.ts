@@ -4,6 +4,20 @@ import { loginAsConsumer } from './helpers/test-auth';
 // Use test auth when in E2E mode
 const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 
+// API URL builder (consistent with test-auth helper)
+function buildApiUrl(path: string): string {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+  const b = base.endsWith('/') ? base : base + '/';
+  return new URL(path.replace(/^\//, ''), b).toString();
+}
+
+// Shared test data state
+let testSeedData: {
+  productId?: number;
+  consumerUserId?: number;
+  producerId?: number;
+} = {};
+
 // Helper class for shipping integration tests
 class ShippingIntegrationHelper {
   constructor(private page: Page) {}
@@ -38,32 +52,53 @@ class ShippingIntegrationHelper {
   }
 
   async addProductToCart() {
-    // Navigate to catalog
-    await this.navigateAndWait('/');
-    
-    // Find and click on first product
-    const productCard = this.page.locator('[data-testid="product-card"]').first();
-    await expect(productCard).toBeVisible({ timeout: 15000 });
-    
-    const productLink = productCard.locator('a').first();
-    await productLink.click();
-    await expect(this.page).toHaveURL(/\/products\/\d+/, { timeout: 15000 });
-    await this.page.waitForLoadState('networkidle');
-    
-    // Add to cart
-    const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
-    await expect(addToCartBtn).toBeVisible();
-    await addToCartBtn.click();
+    // Use seeded product directly instead of searching catalog
+    if (testSeedData.productId) {
+      console.log(`🌱 Using seeded product ID: ${testSeedData.productId}`);
 
-    // Wait for cart update confirmation or navigation (reduced timeout to prevent hanging)
-    await this.page.waitForSelector('[data-testid="cart-item-count"], [data-testid="cart-icon"], .cart-updated', { timeout: 8000 }).catch(() => {
-      // Fallback: wait for any cart-related element to appear
-      return this.page.waitForSelector('text=/added to cart|cart|καλάθι/i', { timeout: 5000 }).catch(() => {
-        console.log('⚠️ Cart update confirmation not found, continuing test...');
+      // Navigate directly to the seeded product page
+      await this.navigateAndWait(`/products/${testSeedData.productId}`);
+      await expect(this.page).toHaveURL(new RegExp(`/products/${testSeedData.productId}`));
+
+      // Add to cart using seeded product
+      const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
+      await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
+      await addToCartBtn.click();
+
+      // Wait for cart update confirmation
+      await this.page.waitForSelector('[data-testid="cart-item-count"], [data-testid="cart-icon"], .cart-updated', { timeout: 8000 }).catch(() => {
+        return this.page.waitForSelector('text=/added to cart|cart|καλάθι/i', { timeout: 5000 }).catch(() => {
+          console.log('⚠️ Cart update confirmation not found, continuing test...');
+        });
       });
-    });
 
-    console.log('✅ Product added to cart');
+      console.log('✅ Seeded product added to cart');
+
+    } else {
+      // Fallback to original catalog search (if seeding fails)
+      console.log('⚠️ No seeded product available, falling back to catalog search...');
+
+      await this.navigateAndWait('/');
+      const productCard = this.page.locator('[data-testid="product-card"]').first();
+      await expect(productCard).toBeVisible({ timeout: 15000 });
+
+      const productLink = productCard.locator('a').first();
+      await productLink.click();
+      await expect(this.page).toHaveURL(/\/products\/\d+/, { timeout: 15000 });
+      await this.page.waitForLoadState('networkidle');
+
+      const addToCartBtn = this.page.locator('[data-testid="add-to-cart"], button:has-text("Add to Cart")');
+      await expect(addToCartBtn).toBeVisible();
+      await addToCartBtn.click();
+
+      await this.page.waitForSelector('[data-testid="cart-item-count"], [data-testid="cart-icon"], .cart-updated', { timeout: 8000 }).catch(() => {
+        return this.page.waitForSelector('text=/added to cart|cart|καλάθι/i', { timeout: 5000 }).catch(() => {
+          console.log('⚠️ Cart update confirmation not found, continuing test...');
+        });
+      });
+
+      console.log('✅ Fallback product added to cart');
+    }
   }
 
   async navigateToCart() {
@@ -163,6 +198,72 @@ class ShippingIntegrationHelper {
 }
 
 test.describe('Shipping Integration Demo', () => {
+  // Self-seeding: Set up test data before all tests
+  test.beforeAll(async ({ browser }) => {
+    console.log('🌱 Setting up shipping test data...');
+
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+      // Call backend seed endpoint to create test data
+      const seedUrl = buildApiUrl('/test/seed/shipping');
+      const response = await page.request.post(seedUrl);
+
+      if (response.ok()) {
+        const result = await response.json();
+        console.log('🌱 Seed response:', result);
+
+        if (result.success && result.data) {
+          testSeedData = {
+            productId: result.data.primary_product_id,
+            consumerUserId: result.data.consumer_user_id,
+            producerId: result.data.producer_id,
+          };
+          console.log(`🌱 Test data seeded: Product ID ${testSeedData.productId}`);
+        } else {
+          console.log('⚠️ Seed request succeeded but data format unexpected');
+        }
+      } else {
+        const error = await response.text();
+        console.log(`⚠️ Failed to seed test data: ${response.status()} - ${error.slice(0, 200)}`);
+      }
+    } catch (error) {
+      console.log('⚠️ Error during test seeding:', error);
+    } finally {
+      await context.close();
+    }
+  });
+
+  // Self-seeding: Clean up test data after all tests
+  test.afterAll(async ({ browser }) => {
+    console.log('🧹 Cleaning up shipping test data...');
+
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+      const resetUrl = buildApiUrl('/test/seed/reset');
+      const response = await page.request.post(resetUrl);
+
+      if (response.ok()) {
+        const result = await response.json();
+        console.log('🧹 Cleanup response:', result);
+        console.log('🧹 Test data cleanup completed');
+      } else {
+        const error = await response.text();
+        console.log(`⚠️ Failed to cleanup test data: ${response.status()} - ${error.slice(0, 200)}`);
+      }
+    } catch (error) {
+      console.log('⚠️ Error during test cleanup:', error);
+    } finally {
+      await context.close();
+    }
+
+    // Clear shared state
+    testSeedData = {};
+  });
+
   test('demonstrate shipping cost calculation on cart page', async ({ page }) => {
     const helper = new ShippingIntegrationHelper(page);
     
