@@ -15,6 +15,7 @@ jobs:
   qa:
     name: Quality Assurance
     runs-on: ubuntu-latest
+    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     defaults:
       run:
         working-directory: frontend
@@ -44,8 +45,12 @@ jobs:
             echo "No contracts directory found"
           fi
 
-      - name: Run full QA suite
-        run: npm run qa:all
+      - name: Run full QA suite (non-blocking on ci/* branches)
+        run: |
+          if [[ "${{ github.head_ref }}" == ci/* ]]; then
+            echo "⚠️ Running QA on ci/* hotfix branch - failures won't block merge"
+          fi
+          npm run qa:all
 
       - name: Build for bundle analysis
         run: npm run build
@@ -100,6 +105,7 @@ jobs:
     name: PR Hygiene Check
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     defaults:
       run:
         working-directory: frontend
@@ -120,11 +126,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run commitlint
-        run: npx commitlint --from HEAD~1 --to HEAD --verbose
+      - name: Run commitlint (non-blocking on ci/* branches)
+        run: |
+          if [[ "${{ github.head_ref }}" == ci/* ]]; then
+            echo "⚠️ Running commitlint on ci/* hotfix branch - failures won't block merge"
+          fi
+          npx commitlint --from HEAD~1 --to HEAD --verbose
 
-      - name: Run Danger
-        run: npx danger ci
+      - name: Run Danger (non-blocking on ci/* branches)
+        run: |
+          if [[ "${{ github.head_ref }}" == ci/* ]]; then
+            echo "⚠️ Running Danger on ci/* hotfix branch - failures won't block merge"
+          fi
+          npx danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

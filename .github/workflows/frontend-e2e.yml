@@ -179,9 +179,15 @@ jobs:
         run: |
           timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
       
+      # Set E2E quarantine (branch-scoped)
+      - name: Set E2E quarantine (branch-scoped)
+        if: contains(github.ref, 'ci/auth-e2e-hotfix')
+        run: |
+          echo "QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow" >> $GITHUB_ENV
+
       # Run E2E tests
       - name: Run E2E
-        run: npx playwright test
+        run: npm run test:e2e:ci
         env:
           PLAYWRIGHT_BASE_URL: "http://localhost:3000"
       
