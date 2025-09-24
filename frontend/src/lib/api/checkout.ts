@@ -161,8 +161,10 @@ export class CheckoutApiClient {
   // Validate and transform cart items from API response
   async getValidatedCart(): Promise<ValidatedApiResponse<CartLine[]>> {
     try {
-      // Refresh token for E2E auth compatibility
-      this.baseClient.refreshToken();
+      // Ensure fresh E2E auth for cart requests
+      if (process.env.NEXT_PUBLIC_E2E) {
+        this.baseClient.refreshToken();
+      }
       const cartResponse = await this.baseClient.getCart();
       const validatedItems: CartLine[] = [];
       const errors: Array<{ field: string; message: string; code: string }> = [];

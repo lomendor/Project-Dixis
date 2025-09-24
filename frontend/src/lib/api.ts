@@ -219,6 +219,32 @@ class ApiClient {
     this.loadTokenFromStorage();
   }
 
+  // E2E auth headers helper - ensures fresh token from localStorage
+  getE2EAuthHeaders(): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    // Force refresh token from localStorage for E2E tests
+    if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_E2E) {
+      const testToken = localStorage.getItem('test_auth_token');
+      const authToken = localStorage.getItem('auth_token');
+      const activeToken = testToken || authToken;
+
+      if (activeToken) {
+        headers['Authorization'] = `Bearer ${activeToken}`;
+      }
+    } else {
+      // Use standard token for non-E2E
+      if (this.token) {
+        headers['Authorization'] = `Bearer ${this.token}`;
+      }
+    }
+
+    return headers;
+  }
+
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -358,7 +384,21 @@ class ApiClient {
 
   // Cart methods
   async getCart(): Promise<CartResponse> {
-    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('cart/items');
+    // Use E2E auth headers for E2E tests, standard headers otherwise
+    const headers = process.env.NEXT_PUBLIC_E2E ? this.getE2EAuthHeaders() : this.getHeaders();
+
+    const url = apiUrl('cart/items');
+    const fetchResponse = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!fetchResponse.ok) {
+      const errorData = await fetchResponse.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP ${fetchResponse.status}: ${fetchResponse.statusText}`);
+    }
+
+    const response = await fetchResponse.json();
     return {
       items: response.cart_items || [],
       total_items: response.total_items,
