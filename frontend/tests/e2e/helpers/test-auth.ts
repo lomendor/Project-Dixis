@@ -5,6 +5,8 @@ import { Page } from '@playwright/test';
  * Uses special test login endpoint that's only available in test environments
  */
 export class TestAuthHelper {
+  private token: string | null = null;
+
   constructor(private page: Page) {}
 
   /**
@@ -32,6 +34,7 @@ export class TestAuthHelper {
 
     const result = await response.json();
     const { token, user } = result;
+    this.token = token; // keep token for API fallback
 
     // Store token in context for API calls
     await this.page.context().addCookies([
@@ -79,10 +82,16 @@ export class TestAuthHelper {
     return { token, user };
   }
 
+  getAuthHeader() {
+    if (!this.token) throw new Error('No test auth token available; call testLogin() first');
+    return { Authorization: `Bearer ${this.token}` };
+  }
+
   /**
    * Clear test auth data
    */
   async clearAuth() {
+    this.token = null;
     await this.page.context().clearCookies();
     await this.page.evaluate(() => {
       localStorage.removeItem('test_auth_token');
