@@ -16,6 +16,9 @@ import CartSummary from '@/components/cart/CartSummary';
 import { PAYMENT_METHODS, calculatePaymentFees } from '@/lib/payment/paymentMethods';
 import { DeliveryMethodSelector } from '@/components/shipping';
 import type { PaymentMethod } from '@dixis/contracts/shipping';
+import dynamic from 'next/dynamic';
+
+const CartClient = dynamic(() => import('@/components/cart/CartClient'), { ssr: false });
 
 export default function Cart() {
 const {
@@ -331,6 +334,7 @@ const handleCheckout = async () => {
             )}
           </div>
         </div>
+        <CartClient />
       </main>
     </>
   );

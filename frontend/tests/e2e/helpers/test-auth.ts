@@ -56,6 +56,7 @@ export class TestAuthHelper {
         window.localStorage.setItem('auth_token', token);
         window.localStorage.setItem('token', token);
         window.localStorage.setItem('test_auth_user', JSON.stringify(user));
+        (window as any).__E2E__ = true;
         // small debug
         console.log('[e2e] initScript set test_auth_token');
       } catch (e) {
