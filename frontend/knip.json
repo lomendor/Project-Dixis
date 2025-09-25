@@ -32,6 +32,6 @@
       ]
     }
   },
-  "include": ["files", "dependencies", "unlisted"],
-  "exclude": ["devDependencies"]
+  "include": ["dependencies", "unlisted"],
+  "exclude": ["devDependencies", "files"]
 }
