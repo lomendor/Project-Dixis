@@ -1,15 +1,143 @@
-# Default owner for all files
-* @lomendor
+# Project-Dixis Code Ownership
+# Derived from CODE-MAP domain analysis and 60-day commit history
+# See docs/architecture/CODE-MAP.md for detailed domain structure
 
-# Backend Laravel code
-backend/ @lomendor
+# =============================================================================
+# Global fallback ownership
+# =============================================================================
+* @panagiotiskourkoutis @lomendor
 
-# Frontend Next.js code  
-backend/frontend/ @lomendor
+# =============================================================================
+# Frontend Domains
+# =============================================================================
 
-# CI/CD workflows
-.github/workflows/ @lomendor
+# Authentication Domain (Core Team - high dependency)
+/frontend/src/contexts/AuthContext.tsx                @panagiotiskourkoutis
+/frontend/src/hooks/useAuth.ts                        @panagiotiskourkoutis
+/frontend/src/hooks/useProducerAuth.ts                @panagiotiskourkoutis
+/frontend/src/components/AuthGuard.tsx                @panagiotiskourkoutis
+/frontend/src/app/auth/**                             @panagiotiskourkoutis
+/frontend/src/lib/auth/**                             @panagiotiskourkoutis
 
-# Documentation
-docs/ @lomendor
-*.md @lomendor
+# Product Catalog Domain (Frontend Team)
+/frontend/src/app/products/**                         @lomendor
+/frontend/src/components/product/**                   @lomendor
+/frontend/src/lib/validation/productValidation.ts    @lomendor
+/frontend/src/utils/productValidation.ts             @lomendor
+
+# Cart & Checkout Domain (Core Team - high churn)
+/frontend/src/app/cart/**                             @panagiotiskourkoutis
+/frontend/src/app/checkout/**                         @panagiotiskourkoutis
+/frontend/src/components/cart/**                      @panagiotiskourkoutis
+/frontend/src/hooks/useCheckout.ts                    @panagiotiskourkoutis
+/frontend/src/lib/api/checkout.ts                     @panagiotiskourkoutis
+/frontend/src/lib/validation/checkout.ts             @panagiotiskourkoutis
+
+# Producer Dashboard Domain (Product Team)
+/frontend/src/app/producer/**                         @lomendor
+/frontend/src/components/producer/**                  @lomendor
+
+# Admin Dashboard Domain (TBD - temporary assignment)
+/frontend/src/app/admin/**                            @panagiotiskourkoutis @lomendor
+/frontend/src/lib/admin/**                            @panagiotiskourkoutis @lomendor
+
+# Analytics Domain (TBD - temporary assignment)
+/frontend/src/components/analytics/**                 @panagiotiskourkoutis @lomendor
+/frontend/src/lib/analytics.ts                        @panagiotiskourkoutis @lomendor
+/frontend/src/hooks/useAnalytics.ts                   @panagiotiskourkoutis @lomendor
+
+# Shipping Domain (Backend Team)
+/frontend/src/components/shipping/**                  @lomendor
+/frontend/src/lib/shipping-estimator.ts              @lomendor
+
+# Payment Domain (Backend Team - security critical)
+/frontend/src/components/payment/**                   @lomendor
+/frontend/src/lib/payment/**                          @lomendor
+/frontend/src/lib/api/payment.ts                      @lomendor
+/frontend/src/app/checkout/payment/**                 @lomendor
+
+# =============================================================================
+# Backend Domains
+# =============================================================================
+
+# Backend Core (Backend Team)
+/backend/**                                           @lomendor @panagiotiskourkoutis
+
+# Authentication Services
+/backend/app/Http/Controllers/*Auth*                  @panagiotiskourkoutis
+/backend/app/Http/Controllers/TestLoginController.php @panagiotiskourkoutis
+
+# Product Services
+/backend/app/Http/Controllers/*Product*               @lomendor
+/backend/app/Models/Product.php                       @lomendor
+
+# Order Services
+/backend/app/Http/Controllers/*Order*                 @panagiotiskourkoutis
+/backend/app/Models/Order.php                         @panagiotiskourkoutis
+
+# Producer Services
+/backend/app/Http/Controllers/*Producer*              @lomendor
+/backend/app/Models/Producer.php                      @lomendor
+
+# Shipping Services (Backend Team)
+/backend/app/Shipping/**                              @lomendor
+/backend/app/Services/Courier/**                      @lomendor
+/backend/app/Http/Controllers/*Shipping*              @lomendor
+/backend/app/Http/Controllers/*Locker*                @lomendor
+
+# Payment Services (Backend Team - security critical)
+/backend/app/Services/Payment/**                      @lomendor
+/backend/app/Http/Controllers/*Payment*               @lomendor
+/backend/app/Http/Controllers/*Refund*                @lomendor
+
+# Analytics Services (TBD - temporary assignment)
+/backend/app/Services/*Analytics*                     @panagiotiskourkoutis @lomendor
+/backend/app/Http/Controllers/Admin/Analytics*       @panagiotiskourkoutis @lomendor
+
+# Database & Migrations
+/backend/database/**                                  @lomendor
+/backend/routes/**                                    @lomendor
+
+# =============================================================================
+# Shared Infrastructure & Config
+# =============================================================================
+
+# E2E Testing (QA Team - high churn area)
+/frontend/tests/**                                    @panagiotiskourkoutis
+/frontend/playwright*.ts                              @panagiotiskourkoutis
+
+# CI/CD (DevOps - high churn area)
+/.github/workflows/**                                 @panagiotiskourkoutis @lomendor
+
+# Documentation & Architecture
+/docs/**                                              @panagiotiskourkoutis
+/README.md                                            @panagiotiskourkoutis
+/CLAUDE.md                                            @panagiotiskourkoutis
+
+# Configuration Files
+/frontend/package.json                                @panagiotiskourkoutis @lomendor
+/frontend/package-lock.json                           @panagiotiskourkoutis @lomendor
+/backend/composer.json                                @lomendor
+/backend/composer.lock                                @lomendor
+
+# Environment & Config
+/.env*                                                @panagiotiskourkoutis @lomendor
+/frontend/.env*                                       @panagiotiskourkoutis @lomendor
+/backend/.env*                                        @lomendor
+
+# =============================================================================
+# Build & Deployment
+# =============================================================================
+/frontend/next.config.js                              @panagiotiskourkoutis @lomendor
+/frontend/tailwind.config.ts                          @lomendor
+/frontend/tsconfig.json                                @panagiotiskourkoutis @lomendor
+/backend/bootstrap/**                                  @lomendor
+
+# =============================================================================
+# Notes:
+# - Auth domain requires @panagiotiskourkoutis due to high cross-domain dependency
+# - Cart/Checkout requires @panagiotiskourkoutis due to active development (15 changes/60d)
+# - Admin & Analytics domains marked TBD - need dedicated owners assigned
+# - Security-critical payment paths require @lomendor (backend specialist)
+# - High-churn files (package.json, api routes) require both owners for stability
+# =============================================================================
