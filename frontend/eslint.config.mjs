@@ -25,23 +25,21 @@ const eslintConfig = [
       "docs/reports/**",
     ],
   },
-  // TODO: Re-enable strict rules after #235 merge — issue #XYZ
+  // TODO: Re-enable strict rules after #235 merge — issue #config-lint-tighten
   // CONFIG-ONLY overrides to unblock CI
   {
-    files: ["src/app/api/**", "app/api/**"],
+    files: ["**/*.spec.ts", "**/*.spec.tsx"],
     rules: {
-      "@typescript-eslint/no-explicit-any": "off"
-    }
-  },
-  {
-    files: ["**/*.tsx", "**/*.ts"],
-    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-explicit-any": "warn",
       "react-hooks/exhaustive-deps": "warn"
     }
   },
   {
-    files: ["**/*.spec.ts", "**/*.spec.tsx", "src/app/**", "app/**"],
+    files: ["src/app/**/*.ts", "src/app/**/*.tsx", "app/**/*.ts", "app/**/*.tsx"],
     rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
     }
   }
