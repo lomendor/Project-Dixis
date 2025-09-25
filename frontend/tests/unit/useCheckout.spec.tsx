@@ -18,8 +18,11 @@ beforeEach(() => {
 afterEach(() => { server.resetHandlers(); server.close(); });
 
 // Mock data
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockCart = { cart_items: [{ id: 1, product: { id: 1, name: 'Greek Oil', price: '15.50', producer: { name: 'Producer' } }, quantity: 2, subtotal: '31.00' }] };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockShipping = { data: [{ id: 'home', name: 'Home Delivery', price: 5.50, estimated_days: 2 }] };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockOrder = { order: { id: 'order_123', total: 34.50, status: 'pending', created_at: new Date().toISOString() } };
 
 describe('useCheckout Hook', () => {
