@@ -18,6 +18,9 @@ beforeEach(() => {
 afterEach(() => { server.resetHandlers(); server.close(); });
 
 // Mock data (removed unused mock objects)
+const mockShipping = [
+  { id: 'home', name: 'Home Delivery', price: 5.50, estimated_days: 2 }
+];
 
 describe('useCheckout Hook', () => {
   it('loads cart and handles errors', async () => {
