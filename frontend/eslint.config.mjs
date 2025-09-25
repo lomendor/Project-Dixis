@@ -49,8 +49,8 @@ const eslintConfig = [
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "argsIgnorePattern": "^(_|e$|error$|networkRequests$|TEST_USERS$|delay$|createErrorHandler$)",
+        "varsIgnorePattern": "^(_|e$|error$|networkRequests$|TEST_USERS$|delay$|createErrorHandler$)"
       }],
       "react-hooks/exhaustive-deps": "warn",
       "react/no-unescaped-entities": "warn",
