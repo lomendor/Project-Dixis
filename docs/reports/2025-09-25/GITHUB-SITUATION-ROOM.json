@@ -1,0 +1,128 @@
+{
+  "date": "2025-09-25",
+  "prs": [
+    {
+      "number": 232,
+      "title": "test(e2e): normalize baseURL usage, add data-testids, and cart-ready harness for cart/checkout",
+      "branch": "chore/e2e-baseurl-and-testids",
+      "head": "ed6c7a999dfa7e114488d2bca3c934701cab4f47",
+      "state": "OPEN",
+      "mergeable": "MERGEABLE",
+      "labels": [],
+      "checks_summary": "failing (frontend-ci)",
+      "last_runs": [
+        { "workflow": "frontend-ci", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996100834" },
+        { "workflow": "DangerJS Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996100861" },
+        { "workflow": "Danger PR Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996100820" }
+      ],
+      "blockers": ["frontend/e2e instability"],
+      "action": "Rebase after #235; rerun; merge when green",
+      "url": "https://github.com/lomendor/Project-Dixis/pull/232"
+    },
+    {
+      "number": 233,
+      "title": "docs(architecture): add CODE-MAP with domains, dependencies, owners, churn analysis",
+      "branch": "chore/code-map-architecture",
+      "head": "57378c1b3cbede8b4947f1ffc215d0f0a613e1af",
+      "state": "OPEN",
+      "mergeable": "MERGEABLE",
+      "labels": [],
+      "checks_summary": "failing (CI Pipeline, QA)",
+      "last_runs": [
+        { "workflow": "frontend-ci", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996586193" },
+        { "workflow": "Pull Request Quality Gates", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996586195" },
+        { "workflow": "CI Pipeline", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/17996586196" }
+      ],
+      "blockers": ["docs-only but global checks failing"],
+      "action": "Queue after E2E stabilization or admin-merge",
+      "url": "https://github.com/lomendor/Project-Dixis/pull/233"
+    },
+    {
+      "number": 234,
+      "title": "chore(repo): add CODEOWNERS, ownership governance, and review guardrails",
+      "branch": "chore/repo-ownership-and-pr-guards",
+      "head": "79d54fab2988186be0f7ade9fa8ea5527e42530d",
+      "state": "OPEN",
+      "mergeable": "MERGEABLE",
+      "labels": [],
+      "checks_summary": "failing (CI/FE)",
+      "last_runs": [
+        { "workflow": "CI Pipeline", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18001992075" },
+        { "workflow": "frontend-ci", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18001992062" },
+        { "workflow": "Danger PR Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18001992054" }
+      ],
+      "blockers": ["docs/governance only"],
+      "action": "Queue after E2E; admin-merge acceptable",
+      "url": "https://github.com/lomendor/Project-Dixis/pull/234"
+    },
+    {
+      "number": 235,
+      "title": "feat(e2e): comprehensive E2E environment hardening",
+      "branch": "chore/e2e-env-hardening-auth-i18n",
+      "head": "ab35cdb5347b2a64ae4e8be0a351e4bbad72a026",
+      "state": "OPEN",
+      "mergeable": "MERGEABLE",
+      "labels": [],
+      "checks_summary": "failing (CI/FE)",
+      "last_runs": [
+        { "workflow": "CI Pipeline", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18009083173" },
+        { "workflow": "frontend-ci", "status": "completed", "conclusion": "failure", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18009083212" },
+        { "workflow": "Danger PR Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18009083182" }
+      ],
+      "blockers": ["touches package.json/playwright"],
+      "action": "Rebase first; resolve conflicts; rerun",
+      "url": "https://github.com/lomendor/Project-Dixis/pull/235"
+    },
+    {
+      "number": 236,
+      "title": "fix(next): correct legacy pages/api handlers to use NextApiResponse (no plain object return)",
+      "branch": "fix/legacy-pages-api-return-object",
+      "head": "be24461bae7df877c169d116fcc298d863933b86",
+      "state": "OPEN",
+      "mergeable": "MERGEABLE",
+      "labels": [],
+      "checks_summary": "PR Hygiene failure; FE tests success; others in progress",
+      "last_runs": [
+        { "workflow": "DangerJS Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18010222212" },
+        { "workflow": "Danger PR Gatekeeper", "status": "completed", "conclusion": "success", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18010222252" },
+        { "workflow": "Lighthouse CI", "status": "in_progress", "conclusion": "", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18010222221" }
+      ],
+      "blockers": ["PR Hygiene Check failing"],
+      "action": "Re-run hygiene or override; merge early (low risk)",
+      "url": "https://github.com/lomendor/Project-Dixis/pull/236"
+    }
+  ],
+  "local_branches": [
+    { "branch": "chore/e2e-baseurl-and-testids", "ahead": 3, "behind": 0, "rebase_risk": "low" },
+    { "branch": "chore/code-map-architecture", "ahead": 4, "behind": 0, "rebase_risk": "low" },
+    { "branch": "chore/repo-ownership-and-pr-guards", "ahead": 1, "behind": 0, "rebase_risk": "low" },
+    { "branch": "chore/e2e-env-hardening-auth-i18n", "ahead": 1, "behind": 0, "rebase_risk": "high" },
+    { "branch": "fix/legacy-pages-api-return-object", "ahead": 2, "behind": 0, "rebase_risk": "low" }
+  ],
+  "flakiness": [
+    { "pattern": "Checkout CTA timeout (i18n)", "quick_fix": "Use role-based query with i18n fallback; add checkout-submit-btn testid" },
+    { "pattern": "localStorage SecurityError", "quick_fix": "Use storageState; ensure same-origin; addInitScript after navigation" },
+    { "pattern": "Dev 500s during tests", "quick_fix": "Prefer build+start for e2e; add health checks" },
+    { "pattern": "Selector drift product-card/cart-item", "quick_fix": "Enforce data-testids; avoid nth-of-type" },
+    { "pattern": "Network idle waits unreliable", "quick_fix": "Replace with explicit selector/response waits and retries" }
+  ],
+  "merge_plan": [
+    "Merge #236 (low risk) — re-run/override PR Hygiene if needed",
+    "Rebase #235 onto main; resolve package.json/playwright.local.ts; rerun CI; merge when green",
+    "Rebase #232 onto updated main; rerun CI; merge when green",
+    "Queue #233 (docs) — merge after E2E or admin-override",
+    "Queue #234 (governance docs) — merge last"
+  ],
+  "working_tree": {
+    "dirty": true,
+    "unstaged": [
+      "docs/reports/2025-09-22/PR-216-CHECKS.json"
+    ]
+  },
+  "immediate_next_commands": [
+    "git stash push -u -m 'situation-room-2025-09-25'",
+    "git fetch origin --prune",
+    "gh pr checkout 235 && git rebase origin/main"
+  ]
+}
+
