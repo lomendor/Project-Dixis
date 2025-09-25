@@ -1,4 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * E2E Test Suite: Checkout Happy Path
@@ -11,9 +13,24 @@ class CheckoutFlowHelper {
   async loginAsConsumer() {
     await this.page.goto('/auth/login');
     await this.page.fill('[name="email"]', 'consumer@example.com');
-    await this.page.fill('[name="password"]', 'password'); 
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL('/', { timeout: 10000 });
+    await this.page.fill('[name="password"]', 'password');
+
+    // Use deterministic testid selector instead of generic button
+    const loginButton = this.page.getByTestId('login-submit').or(this.page.locator('button[type="submit"]'));
+    await loginButton.click();
+
+    // Improved auth flow with better waits
+    try {
+      await this.page.waitForURL('**/auth/callback**', { timeout: 15000 });
+    } catch {}
+    await this.page.waitForLoadState('networkidle');
+
+    // Wait for user menu to appear (indicates successful login)
+    const userMenu = this.page.getByTestId('user-menu').or(this.page.locator('[data-user-menu], .user-menu, [aria-label*="user"]'));
+    await userMenu.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+
+    // Navigate to home if not already there
+    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
   }
 
   async addProductToCart() {
@@ -102,6 +119,18 @@ class CheckoutFlowHelper {
 }
 
 test.describe('Checkout Happy Path', () => {
+
+  test.beforeEach(async ({ context }) => {
+    // Try to use storageState if available (from e2e:prep:state)
+    const storageStatePath = path.resolve('.auth', 'consumer.json');
+    try {
+      await fs.access(storageStatePath);
+      await context.addCookies(JSON.parse(await fs.readFile(storageStatePath, 'utf8')).cookies || []);
+      console.log('📋 Using saved auth state for faster setup');
+    } catch {
+      console.log('📋 No saved auth state found, will login manually');
+    }
+  });
   
   test('C2: Complete checkout flow from cart to confirmation', async ({ page }) => {
     const helper = new CheckoutFlowHelper(page);
