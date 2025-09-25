@@ -1,0 +1,31 @@
+{
+  "date": "2025-09-24",
+  "context": "STEP 2 E2E normalization smoke tests",
+  "results": [
+    {
+      "spec": "shipping-integration.spec.ts",
+      "status": "fail",
+      "duration": "≈60s",
+      "error": "SecurityError: localStorage access denied"
+    },
+    {
+      "spec": "checkout.spec.ts",
+      "status": "fail",
+      "duration": "≈60s",
+      "error": "Timeout: missing text 'Ολοκλήρωση Παραγγελίας'"
+    },
+    {
+      "spec": "auth-cart-flow.spec.ts",
+      "status": "fail",
+      "duration": "≈60s",
+      "error": "Missing data-testid elements"
+    }
+  ],
+  "summary": {
+    "baseURL_normalization": true,
+    "all_specs_connected": true,
+    "root_cause": "environment/auth/localization issues unrelated to baseURL",
+    "next_step": "Proceed with STEP 4 CODE-MAP"
+  }
+}
+

@@ -5,7 +5,7 @@ test.describe('Shipping Demo - Simple', () => {
     console.log('🚀 Starting simple shipping demo...');
     
     // Navigate directly to cart page (if it allows without login)
-    await page.goto('http://localhost:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     // Take initial screenshot
@@ -122,7 +122,7 @@ test.describe('Shipping Demo - Simple', () => {
   test('verify page elements and structure', async ({ page }) => {
     console.log('🔍 Analyzing page structure...');
     
-    await page.goto('http://localhost:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     // Check for common cart elements
