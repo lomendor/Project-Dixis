@@ -30,7 +30,7 @@ test.describe('Checkout Flow', () => {
     await page.goto('/checkout');
 
     // Wait for checkout page to load
-    await expect(page.getByText('Ολοκλήρωση Παραγγελίας')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
     console.log('✅ Checkout page loaded');
 
     // Verify we're on the shipping step
@@ -102,7 +102,7 @@ test.describe('Checkout Flow', () => {
     await page.goto('/checkout');
 
     // Wait for checkout page
-    await expect(page.getByText('Ολοκλήρωση Παραγγελίας')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
     console.log('✅ Authenticated checkout page loaded');
 
     // Quick fill and submit shipping form
@@ -139,7 +139,7 @@ test.describe('Checkout Flow', () => {
     await page.goto('/checkout');
 
     // Wait for checkout page
-    await expect(page.getByText('Ολοκλήρωση Παραγγελίας')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
 
     // Check initial order summary
     const orderSummary = page.locator('.bg-white.rounded-lg.shadow-sm.p-6.sticky.top-8');
@@ -188,7 +188,7 @@ test.describe('Checkout Flow', () => {
     await page.goto('/checkout');
 
     // Wait for checkout page
-    await expect(page.getByText('Ολοκλήρωση Παραγγελίας')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
 
     // Try to submit empty form
     await page.getByTestId('continue-to-review-btn').click();

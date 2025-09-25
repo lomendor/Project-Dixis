@@ -121,7 +121,7 @@ export default function CheckoutPage() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ολοκλήρωση Παραγγελίας</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="checkout-cta">Ολοκλήρωση Παραγγελίας</h1>
 
           {/* Step Indicator */}
           <div className="flex items-center space-x-4 mt-6">

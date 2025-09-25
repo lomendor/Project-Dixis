@@ -99,7 +99,7 @@ export default function CartMiniPanel({
 
       <div className="space-y-2">
         <Link href="/cart" onClick={onViewCart} className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors" data-testid="cart-view-link">Προβολή καλαθιού</Link>
-        <Link href="/checkout" className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors" data-testid="checkout-cta-btn">Ολοκλήρωση παραγγελίας</Link>
+        <Link href="/checkout" className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-md hover:bg-green-700 transition-colors" data-testid="checkout-cta">Ολοκλήρωση παραγγελίας</Link>
       </div>
     </div>
   );
