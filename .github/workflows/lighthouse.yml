@@ -36,6 +36,10 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}  # Non-blocking only for ci/* hotfix branches
 
+    env:
+      FRONTEND_PORT: 3030
+      LHCI_BASE_URL: "http://localhost:3030"
+
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -74,10 +78,10 @@ jobs:
       - name: Install wait-on utility
         run: npm install -g wait-on
 
-      - name: Ensure ports free (3010, 4010)
+      - name: Ensure ports free (${{ env.FRONTEND_PORT }}, 4010)
         run: |
-          if lsof -i :3010 -t >/dev/null 2>&1; then
-            kill -9 $(lsof -i :3010 -t) || true
+          if lsof -i :${{ env.FRONTEND_PORT }} -t >/dev/null 2>&1; then
+            kill -9 $(lsof -i :${{ env.FRONTEND_PORT }} -t) || true
           fi
           if lsof -i :4010 -t >/dev/null 2>&1; then
             kill -9 $(lsof -i :4010 -t) || true
@@ -88,10 +92,10 @@ jobs:
           node scripts/lhci-mock-api.js &
           npx wait-on http://localhost:4010/health
 
-      - name: Start Next server (3010)
+      - name: Start Next server (${{ env.FRONTEND_PORT }})
         working-directory: frontend
         run: |
-          (npm run start -- -p 3010 &) && npx wait-on http://localhost:3010
+          (npm run start -- -p ${{ env.FRONTEND_PORT }} &) && npx wait-on ${{ env.LHCI_BASE_URL }}
         env:
           NODE_ENV: production
           NEXT_TELEMETRY_DISABLED: '1'
@@ -100,10 +104,8 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli
       - name: Run LHCI
-        env:
-          TEST_BASE_URL: http://localhost:3010
         run: |
-          npx @lhci/cli autorun --collect.url=http://localhost:3010 --assert.preset=lighthouse:recommended
+          npx @lhci/cli autorun --collect.url=${{ env.LHCI_BASE_URL }} --assert.preset=lighthouse:recommended
 
       - name: Upload Lighthouse artifacts
         if: always()
@@ -136,7 +138,7 @@ jobs:
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "*Analysis using mock API (ports 3010/4010) - no database dependencies*" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "- Next.js: http://localhost:3010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
+            echo "- Next.js: ${{ env.LHCI_BASE_URL }}" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "- Mock API: http://localhost:4010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
             echo "Generated on: $(date)" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
@@ -156,4 +158,4 @@ jobs:
           echo "Stopping background processes..."
           # Kill any processes on the ports
           lsof -ti:4010 | xargs -r kill 2>/dev/null || true
-          lsof -ti:3010 | xargs -r kill 2>/dev/null || true
+          lsof -ti:${{ env.FRONTEND_PORT }} | xargs -r kill 2>/dev/null || true
