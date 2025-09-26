@@ -34,7 +34,6 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
-    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}  # Non-blocking only for ci/* hotfix branches
 
     steps:
       - uses: actions/checkout@v4

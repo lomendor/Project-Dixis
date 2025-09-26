@@ -20,7 +20,7 @@ const TEST_USERS = {
 async function globalSetup(config: FullConfig) {
   console.log('🔐 Setting up authenticated storageState files...');
   
-  const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3001';
+  const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3030';
   const authDir = path.join(__dirname, '../.auth');
   
   console.log(`🔗 Using baseURL: ${baseURL}`);
@@ -96,59 +96,33 @@ async function globalSetup(config: FullConfig) {
   
   // Regular integration test setup (requires live server)
   const browser = await chromium.launch();
-  
+
   try {
+    // Import TestAuthHelper for proper auth flow
+    const { TestAuthHelper } = await import('./e2e/helpers/test-auth');
+
     // Setup Consumer Auth
-    console.log('🔐 Creating consumer storageState...');
+    console.log('🔐 Creating consumer storageState using TestAuthHelper...');
     const consumerContext = await browser.newContext({ baseURL });
     const consumerPage = await consumerContext.newPage();
-    
-    // Inject E2E role flag before app loads
-    await consumerPage.addInitScript((role) => {
-      // @ts-expect-error - E2E role injection
-      window.__E2E_ROLE__ = role; 
-    }, process.env.E2E_AUTH_ROLE ?? 'guest');
-    
-    await consumerPage.goto('/auth/login', { waitUntil: 'networkidle' });
-    
-    // Debug: Check page content and user agent
-    const pageContent = await consumerPage.content();
-    const userAgent = await consumerPage.evaluate(() => navigator.userAgent);
-    console.log('📋 Login page loaded. Title:', await consumerPage.title());
-    console.log('🔍 User Agent:', userAgent);
-    console.log('🔍 Page contains form:', pageContent.includes('<form'));
-    console.log('🔍 Page contains loading text:', pageContent.includes('Φόρτωση...'));
-    console.log('🔍 Page content snippet:', pageContent.substring(0, 500));
-    
-    // Just wait for basic page load (skip title validation for E2E isolation)
-    await consumerPage.waitForLoadState('domcontentloaded');
-    await consumerPage.waitForTimeout(1000); // Brief settling time
-    
-    console.log('✅ Page loaded, creating auth state...');
-    
-    // Save consumer storageState 
+
+    const consumerHelper = new TestAuthHelper(consumerPage);
+    await consumerHelper.testLogin('consumer');
+    console.log('✅ Consumer authenticated successfully');
+
+    // Save consumer storageState
     await consumerContext.storageState({ path: path.join(authDir, 'consumer.json') });
     await consumerContext.close();
-    
-    // Setup Producer Auth 
-    console.log('🔐 Creating producer storageState...');
+
+    // Setup Producer Auth
+    console.log('🔐 Creating producer storageState using TestAuthHelper...');
     const producerContext = await browser.newContext({ baseURL });
     const producerPage = await producerContext.newPage();
-    
-    // Inject E2E role flag before app loads
-    await producerPage.addInitScript((role) => {
-      // @ts-expect-error - E2E role injection
-      window.__E2E_ROLE__ = role; 
-    }, process.env.E2E_AUTH_ROLE ?? 'guest');
-    
-    await producerPage.goto('/auth/login', { waitUntil: 'networkidle' });
-    
-    // Just wait for basic page load (skip title validation for E2E isolation)
-    await producerPage.waitForLoadState('domcontentloaded');
-    await producerPage.waitForTimeout(1000); // Brief settling time
-    
-    console.log('✅ Producer page loaded, creating auth state...');
-    
+
+    const producerHelper = new TestAuthHelper(producerPage);
+    await producerHelper.testLogin('producer');
+    console.log('✅ Producer authenticated successfully');
+
     // Save producer storageState
     await producerContext.storageState({ path: path.join(authDir, 'producer.json') });
     await producerContext.close();

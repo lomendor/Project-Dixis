@@ -46,7 +46,12 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Also store in localStorage for client-side API calls
+    // Navigate to baseURL first to ensure proper context for localStorage
+    const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3030';
+    await this.page.goto(baseURL);
+    await this.page.waitForLoadState('networkidle');
+
+    // Now safely store in localStorage for client-side API calls
     await this.page.evaluate(({ token, user }) => {
       localStorage.setItem('test_auth_token', token);
       localStorage.setItem('test_auth_user', JSON.stringify(user));
@@ -56,22 +61,27 @@ export class TestAuthHelper {
     await this.page.reload();
     await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
 
-    // Navigate to home page after login
-    await this.page.goto('/');
-
-    // Wait for authenticated navigation to appear with improved fallback
+    // Wait for authenticated UI state instead of URL navigation
     try {
-      await this.page.waitForSelector('[data-testid="user-menu"], [data-testid="nav-user"]', {
-        timeout: 5000,
+      // Primary: Look for user menu or navigation elements that appear post-login
+      await this.page.waitForSelector('[data-testid="user-menu"], [data-testid="nav-user"], [data-testid="nav-account"]', {
+        timeout: 15000,
         state: 'visible'
       });
     } catch {
       // Fallback: check if auth worked by looking for any logout/profile elements
       try {
-        await this.page.waitForSelector('text=Logout, text=Sign Out, text=Profile', { timeout: 5000 });
+        await this.page.waitForSelector('text=Logout, text=Sign Out, text=Profile, text=Dashboard', { timeout: 10000 });
       } catch {
-        // Final fallback: just ensure we're not on login page
-        await this.page.waitForURL(url => !url.href.includes('/auth/login'), { timeout: 5000 });
+        // Final fallback: ensure we're not stuck on login page and can see main content
+        await this.page.waitForFunction(
+          () => {
+            return !window.location.href.includes('/auth/login') &&
+                   document.readyState === 'complete' &&
+                   document.body.innerText.length > 100; // Ensure page has content
+          },
+          { timeout: 15000 }
+        );
       }
     }
 

@@ -27,8 +27,8 @@ export default defineConfig({
   ],
   
   use: {
-    // Allow CI to override via PLAYWRIGHT_BASE_URL; default to Next dev port (3001)
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3001',
+    // NOTE: Use 127.0.0.1 to avoid cross-origin quirks vs 'localhost' in CI
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3030',
     trace: 'on',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -68,8 +68,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev -- --port 3001',
-    url: 'http://127.0.0.1:3001',
+    command: 'npm run dev -- --port 3030',
+    url: 'http://127.0.0.1:3030',
     reuseExistingServer: true,
     timeout: 90_000,
     stdout: 'ignore',
