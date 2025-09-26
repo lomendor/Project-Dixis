@@ -45,12 +45,9 @@ jobs:
             echo "No contracts directory found"
           fi
 
-      - name: Run full QA suite (non-blocking on ci/* branches)
-        run: |
-          if [[ "${{ github.head_ref }}" == ci/* ]]; then
-            echo "⚠️ Running QA on ci/* hotfix branch - failures won't block merge"
-          fi
-          npm run qa:all
+      - name: Run full QA suite
+        # knip/depcheck/size wired via npm scripts (guard removed after #235/#232 merge)
+        run: npm run qa:all
 
       - name: Build for bundle analysis
         run: npm run build
