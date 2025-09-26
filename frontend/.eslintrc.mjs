@@ -9,6 +9,7 @@ const eslintConfig = [
     ignores: [
       'playwright-report/**',
       'playwright-report-evidence/**',
+      'frontend/playwright-report/**',
       '.next/**',
       'coverage/**',
       'dist/**',
