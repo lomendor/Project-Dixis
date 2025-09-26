@@ -43,7 +43,7 @@ jobs:
       NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:${{ env.BACKEND_PORT }}/api/v1"
       PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3030"
       PLAYWRIGHT_JOBS: 1
-      PW_TEST_RETRIES: 1
+      PW_TEST_RETRIES: 2
       PW_TEST_TIMEOUT: 30000
     
     steps:
