@@ -27,6 +27,17 @@ jobs:
       - name: Install minimal deps
         working-directory: frontend
         run: npm ci
+
+      - name: Install and build contracts dependencies (dependabot)
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+            npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Type check only (dependabot)
         working-directory: frontend
         run: npm run type-check
