@@ -107,8 +107,13 @@ jobs:
   danger:
     name: PR Hygiene Check
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+      checks: write
     defaults:
       run:
         working-directory: frontend
