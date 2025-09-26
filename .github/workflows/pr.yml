@@ -139,7 +139,8 @@ jobs:
       - name: Run Danger (non-blocking on ci/* branches)
         run: |
           if [[ "${{ github.head_ref }}" == ci/* ]]; then
-            echo "⚠️ Running Danger on ci/* hotfix branch - failures won't block merge"
+            echo "⚠️ Skipping Danger on ci/* hotfix branch - API permissions prevent execution"
+            exit 0
           fi
           npx danger ci
         env:
