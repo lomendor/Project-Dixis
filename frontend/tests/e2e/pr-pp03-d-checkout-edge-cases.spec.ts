@@ -15,10 +15,11 @@ const GIF_FRAMES: string[] = [];
 let gifFrameCounter = 0;
 
 // Network intercept patterns for API testing
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
 const API_ENDPOINTS = {
-  orders: 'http://127.0.0.1:8001/api/v1/orders',
-  shipping: 'http://127.0.0.1:8001/api/v1/shipping/quote',
-  cart: 'http://127.0.0.1:8001/api/v1/cart'
+  orders: `${API_BASE}/orders`,
+  shipping: `${API_BASE}/shipping/quote`,
+  cart: `${API_BASE}/cart`
 };
 
 // Test user credentials
@@ -44,14 +45,14 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     console.log('🎬 Starting complete checkout flow evidence generation...');
     
     // Navigate to application and authenticate
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto('/');
     await authenticateUser(page);
     
     // Add items to cart first
     await addItemsToCart(page);
     
     // Navigate to cart page
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     // Capture initial state
@@ -200,10 +201,10 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
   test('2. Greek Error Messages Comprehensive Capture', async ({ page }) => {
     console.log('🇬🇷 Starting Greek error messages capture...');
     
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto('/');
     await authenticateUser(page);
     await addItemsToCart(page);
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     console.log('📝 Testing empty field validation...');
@@ -282,10 +283,10 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
   test('3. Network Failures and Retry Mechanisms', async ({ page }) => {
     console.log('🌐 Starting network failure testing...');
     
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto('/');
     await authenticateUser(page);
     await addItemsToCart(page);
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     console.log('📡 Testing shipping API failure and retry...');
@@ -385,13 +386,13 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
   test('4. Edge Cases: Empty Cart and Invalid States', async ({ page }) => {
     console.log('🚫 Starting edge cases testing...');
     
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto('/');
     await authenticateUser(page);
     
     console.log('🛒 Testing empty cart scenario...');
     
     // Navigate to cart without adding items
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     await page.screenshot({ 
@@ -404,7 +405,7 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     
     // Add items then clear cart
     await addItemsToCart(page);
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     await page.locator('[data-testid="clear-cart-button"]').click();
@@ -419,7 +420,7 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
     console.log('⚠️ Testing invalid user states...');
     
     // Test unauthenticated access
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForTimeout(2000);
     
     // Should redirect to login
@@ -437,10 +438,10 @@ test.describe('PR-PP03-D: Checkout Edge Cases Comprehensive Evidence', () => {
   test('5. Complete POST Payload Documentation', async ({ page }) => {
     console.log('📄 Starting comprehensive payload capture...');
     
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto('/');
     await authenticateUser(page);
     await addItemsToCart(page);
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto('/cart');
     await page.waitForLoadState('networkidle');
     
     // Set up comprehensive request/response logging
@@ -522,7 +523,7 @@ async function authenticateUser(page: Page) {
   
   // Check if already on login page
   if (!page.url().includes('/auth/login')) {
-    await page.goto('http://127.0.0.1:3001/auth/login');
+    await page.goto('/auth/login');
   }
   
   await page.waitForLoadState('networkidle');
@@ -542,7 +543,7 @@ async function authenticateUser(page: Page) {
 async function addItemsToCart(page: Page) {
   console.log('🛒 Adding items to cart...');
   
-  await page.goto('http://127.0.0.1:3001/products');
+  await page.goto('/products');
   await page.waitForLoadState('networkidle');
   
   // Add first available product to cart
