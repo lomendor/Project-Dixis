@@ -1,10 +1,10 @@
-import { Page } from '@playwright/test';
+const { Page } = require('@playwright/test');
 
 /**
  * Test-only authentication helper for E2E tests
  * Uses special test login endpoint that's only available in test environments
  */
-export class TestAuthHelper {
+class TestAuthHelper {
   constructor(private page: Page) {}
 
   /**
@@ -103,17 +103,25 @@ export class TestAuthHelper {
 /**
  * Quick helper function for tests
  */
-export async function loginAsConsumer(page: Page) {
+async function loginAsConsumer(page) {
   const helper = new TestAuthHelper(page);
   return helper.testLogin('consumer');
 }
 
-export async function loginAsProducer(page: Page) {
+async function loginAsProducer(page) {
   const helper = new TestAuthHelper(page);
   return helper.testLogin('producer');
 }
 
-export async function loginAsAdmin(page: Page) {
+async function loginAsAdmin(page) {
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
 }
+
+// CommonJS exports
+module.exports = {
+  TestAuthHelper,
+  loginAsConsumer,
+  loginAsProducer,
+  loginAsAdmin
+};
