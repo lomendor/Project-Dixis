@@ -15,7 +15,6 @@ jobs:
   qa:
     name: Quality Assurance
     runs-on: ubuntu-latest
-    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     defaults:
       run:
         working-directory: frontend
@@ -108,7 +107,6 @@ jobs:
     name: PR Hygiene Check
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     defaults:
       run:
         working-directory: frontend

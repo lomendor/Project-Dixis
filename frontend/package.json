@@ -47,6 +47,7 @@
     "test:e2e:performance-a11y": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/performance-accessibility-core.spec.ts --reporter=line",
     "test:e2e:seo": "PLAYWRIGHT_SKIP_WEBSERVER=true playwright test tests/e2e/seo-basics.spec.ts --reporter=line",
     "e2e:prep:state": "node tests/e2e/setup/save-storage-state.ts",
+    "e2e:state": "playwright test tests/e2e/scripts/create-storage-state.ts --project=chromium",
     "e2e:local": "playwright test --config=playwright.local.ts",
     "e2e:local:ui": "playwright test --config=playwright.local.ts --ui",
     "e2e:checkout": "playwright test --config=playwright.local.ts --project=checkout-flow",

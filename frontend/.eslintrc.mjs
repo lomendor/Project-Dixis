@@ -29,7 +29,10 @@ const eslintConfig = [
       '**/report*/**/*.js',
       '**/codeMirrorModule-*.js',
       '**/trace/assets/**',
-      'scripts/**'
+      'scripts/**',
+      '**/global-setup.cjs',
+      'tests/global-setup.cjs',
+      './tests/global-setup.cjs'
     ]
   },
   ...compat.extends(
@@ -115,10 +118,12 @@ const eslintConfig = [
     },
   },
   {
-    files: ['**/*.cjs'],
+    files: ['**/*.cjs', 'tests/**/*.cjs', 'tests/global-setup.cjs'],
     rules: {
       // Allow CommonJS require in .cjs files
-      '@typescript-eslint/no-require-imports': 'off'
+      '@typescript-eslint/no-require-imports': 'off',
+      'import/no-commonjs': 'off',
+      '@typescript-eslint/no-unused-vars': 'off'
     }
   },
   {

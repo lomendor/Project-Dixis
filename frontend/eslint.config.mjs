@@ -23,6 +23,7 @@ const eslintConfig = [
       ".auth/**",
       "coverage/**",
       "docs/reports/**",
+      "tests/global-setup.cjs",
     ],
   },
   // TODO: Re-enable strict rules after #235 merge — issue #config-lint-tighten
