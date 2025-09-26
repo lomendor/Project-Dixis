@@ -32,7 +32,7 @@ test.describe('Cart Summary & Mini Panel Tests', () => {
             <span data-testid="cart-total-amount">€52.79</span>
           </div>
         </div>
-        <button data-testid="checkout-btn" style="width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; margin-top: 16px;">
+        <button data-testid="checkout-cta" style="width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; margin-top: 16px;">
           Ολοκλήρωση Παραγγελίας
         </button>
         <a href="/cart" data-testid="cart-view-link" style="display: block; text-align: center; margin-top: 12px; color: #2563eb;">
@@ -60,8 +60,8 @@ test.describe('Cart Summary & Mini Panel Tests', () => {
     await expect(viewLink).toHaveAttribute('href', '/cart');
 
     // Verify checkout button is present
-    await expect(page.getByTestId('checkout-btn')).toBeVisible();
-    await expect(page.getByTestId('checkout-btn')).toBeEnabled();
+    await expect(page.getByTestId('checkout-cta')).toBeVisible();
+    await expect(page.getByTestId('checkout-cta')).toBeEnabled();
   });
 
   test('CartMiniPanel shows consistent testids and navigation', async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe('Cart Summary & Mini Panel Tests', () => {
         <span data-testid="cart-items-count">3 προϊόντα</span>
         <span data-testid="cart-total-amount">€39.75</span>
         <a href="/cart" data-testid="cart-view-link">Προβολή καλαθιού</a>
-        <a href="/checkout" data-testid="checkout-cta-btn">Ολοκλήρωση</a>
+        <a href="/checkout" data-testid="checkout-cta">Ολοκλήρωση</a>
       </div>
     `);
 
@@ -80,7 +80,7 @@ test.describe('Cart Summary & Mini Panel Tests', () => {
     await expect(page.getByTestId('cart-items-count')).toContainText('3 προϊόντα');
     await expect(page.getByTestId('cart-total-amount')).toContainText('€39.75');
     await expect(page.getByTestId('cart-view-link')).toHaveAttribute('href', '/cart');
-    await expect(page.getByTestId('checkout-cta-btn')).toHaveAttribute('href', '/checkout');
+    await expect(page.getByTestId('checkout-cta')).toHaveAttribute('href', '/checkout');
   });
 
   test('Empty cart state displays correctly', async ({ page }) => {

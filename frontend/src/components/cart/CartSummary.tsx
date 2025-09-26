@@ -95,7 +95,7 @@ export default function CartSummary({
         onClick={onCheckout}
         disabled={disabled || isLoading}
         className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        data-testid="checkout-btn"
+        data-testid="checkout-cta"
       >
         {isLoading ? 'Επεξεργασία...' : checkoutButtonText}
       </button>

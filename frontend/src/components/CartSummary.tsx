@@ -88,7 +88,7 @@ export default function CartSummary({
       </div>
 
       <button
-        data-testid="checkout-btn"
+        data-testid="checkout-cta"
         onClick={onCheckout}
         disabled={!canCheckout}
         className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
