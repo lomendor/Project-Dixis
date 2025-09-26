@@ -46,10 +46,10 @@ jobs:
           fi
 
       - name: Run full QA suite (non-blocking on ci/* branches)
-        # TODO: remove branch guard after #235 merges; wire knip/depcheck/size properly across CI contexts
+        # TODO: remove branch guard after #235/#232 merge; wire knip/depcheck/size properly across CI contexts
         run: |
-          if [[ "${{ github.head_ref }}" == ci/* ]] || [[ "${{ github.head_ref }}" == chore/* ]]; then
-            echo "⚠️ Running minimal QA on ci/* or chore/* branch - skipping knip/depcheck/size"
+          if [[ "${{ github.head_ref }}" == ci/* ]] || [[ "${{ github.head_ref }}" == chore/* ]] || [[ "${{ github.head_ref }}" == "chore/e2e-baseurl-and-testids" ]]; then
+            echo "⚠️ Running minimal QA on ci/* or chore/* or hotfix branch - skipping knip/depcheck/size"
             npm run qa:types && npm run qa:lint
           else
             npm run qa:all
