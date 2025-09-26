@@ -103,6 +103,7 @@ jobs:
         env:
           TEST_BASE_URL: http://localhost:3010
         run: |
+          curl -sf "http://localhost:3010/" || true
           npx @lhci/cli autorun --collect.url=http://localhost:3010 --assert.preset=lighthouse:recommended
 
       - name: Upload Lighthouse artifacts
