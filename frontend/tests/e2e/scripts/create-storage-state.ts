@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-const { TestAuthHelper } = require('../helpers/test-auth');
+import { TestAuthHelper } from '../helpers/test-auth';
 import path from 'path';
 
 /**

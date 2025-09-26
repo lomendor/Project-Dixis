@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-const { loginAsConsumer } = require('./helpers/test-auth');
+import { loginAsConsumer } from './helpers/test-auth';
 
 // Use test auth when in E2E mode
 const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';

@@ -118,8 +118,8 @@ async function loginAsAdmin(page) {
   return helper.testLogin('admin');
 }
 
-// CommonJS exports
-module.exports = {
+// ES module exports
+export {
   TestAuthHelper,
   loginAsConsumer,
   loginAsProducer,

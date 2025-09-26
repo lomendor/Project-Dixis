@@ -13,7 +13,7 @@ export default defineConfig({
   workers: isCI ? 2 : undefined,
   
   // Global setup for storageState creation  
-  globalSetup: './tests/global-setup.ts',
+  globalSetup: './tests/global-setup.cjs',
   
   // Artifacts configuration - align with CI expectations
   outputDir: 'test-results',
