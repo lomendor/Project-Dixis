@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "clean": "rimraf .next && rimraf node_modules/.cache || true",
+    "dev:clean": "npm run clean && npm run dev",
     "build": "next build",
     "start": "next start",
     "start:ci": "next start -p 3000",
@@ -63,7 +65,11 @@
     "qa:smoke": "npm run type-check && npm run build && npm run e2e:smoke",
     "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v",
     "start:ci": "next start -p 3000",
-    "mock:api": "node ../scripts/mock-api/lhci-mock.cjs"
+    "mock:api": "node ../scripts/mock-api/lhci-mock.cjs",
+    "clean:next": "rm -rf .next",
+    "clean:cache": "rm -rf node_modules/.cache .next",
+    "clean:all": "rm -rf node_modules/.cache .next test-results playwright-report",
+    "dev:clean": "npm run clean:cache && npm run dev"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.1.0",
