@@ -129,20 +129,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run commitlint (non-blocking on ci/* branches)
+      - name: Run commitlint
         run: |
-          if [[ "${{ github.head_ref }}" == ci/* ]]; then
-            echo "⚠️ Skipping commitlint on ci/* hotfix branch - API permissions prevent execution"
-            exit 0
-          fi
+          # cleanup: temporary guards removed post-#243; QA tools remain via npm scripts
           npx commitlint --from HEAD~1 --to HEAD --verbose
 
-      - name: Run Danger (non-blocking on ci/* branches)
+      - name: Run Danger
         run: |
-          if [[ "${{ github.head_ref }}" == ci/* ]]; then
-            echo "⚠️ Skipping Danger on ci/* hotfix branch - API permissions prevent execution"
-            exit 0
-          fi
+          # cleanup: temporary guards removed post-#243; QA tools remain via npm scripts
           npx danger ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
