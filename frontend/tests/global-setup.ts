@@ -99,7 +99,7 @@ async function globalSetup(config: FullConfig) {
 
   try {
     // Import TestAuthHelper for proper auth flow
-    const { TestAuthHelper } = await import('./e2e/helpers/test-auth');
+    const { TestAuthHelper } = require('./e2e/helpers/test-auth');
 
     // Setup Consumer Auth
     console.log('🔐 Creating consumer storageState using TestAuthHelper...');

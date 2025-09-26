@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+const { loginAsConsumer, loginAsAdmin } = require('./helpers/test-auth');
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
