@@ -1,0 +1,81 @@
+{
+  "date": "2025-09-25",
+  "executive_summary": [
+    "Config drift across ports (3000/3001/3030) and env naming (NEXT_PUBLIC_APP_URL vs NEXT_PUBLIC_SITE_URL).",
+    "E2E docs mention NEXT_PUBLIC_E2E but code doesn’t consume it; decide implement/remove.
+    ",
+    "High‑churn hotspots: checkout/cart/shipping, backend routes/migrations, CI workflows.",
+    "CI is comprehensive but inconsistent on frontend ports; standardize and guard.",
+    "Secrets posture OK; add token scanner to CI."
+  ],
+  "risk_map": [
+    {"area":"Config/Ports","risk":"Drift 3000/3001/3030","likelihood":"High","impact":"Med-High","mitigation":"Standardize + CI guard","owner":"Dev Infra"},
+    {"area":"Env Vars","risk":"NEXT_PUBLIC_APP_URL vs NEXT_PUBLIC_SITE_URL","likelihood":"High","impact":"Medium","mitigation":"Canonicalize SITE_URL","owner":"Frontend Lead"},
+    {"area":"E2E Flags","risk":"NEXT_PUBLIC_E2E unused","likelihood":"Med","impact":"Medium","mitigation":"Implement or remove","owner":"QA Lead"},
+    {"area":"Checkout","risk":"High churn; fragile errors","likelihood":"Med","impact":"High","mitigation":"Add integration tests","owner":"Checkout Owner"},
+    {"area":"Backend Flags","risk":"Inconsistent docs","likelihood":"Med","impact":"Medium","mitigation":"Flag registry","owner":"Backend Lead"},
+    {"area":"CI Stability","risk":"Mixed ports/timeouts","likelihood":"Med","impact":"Medium","mitigation":"Normalize + wait-on","owner":"Dev Infra"},
+    {"area":"Secrets","risk":"Accidental tokens","likelihood":"Low","impact":"High","mitigation":"gitleaks/secretlint","owner":"Security"},
+    {"area":"Docs","risk":"Docs/code drift","likelihood":"Med","impact":"Medium","mitigation":"Registry + guard","owner":"Eng Mgr"},
+    {"area":"Contracts","risk":"FE/BE drift hits E2E","likelihood":"Med","impact":"Medium","mitigation":"Contract tests","owner":"QA Lead"},
+    {"area":"Performance","risk":"LHCI gaps","likelihood":"Low","impact":"Medium","mitigation":"Scheduled LHCI","owner":"Dev Infra"}
+  ],
+  "hotspots": [
+    "frontend/package.json",
+    "backend/routes/api.php",
+    "backend/database/seeders/DatabaseSeeder.php",
+    "backend/database/migrations/*update_order_status_enums*.php",
+    "frontend/tests/e2e/smoke.spec.ts",
+    "frontend/playwright.config.ts",
+    "frontend/src/app/cart/page.tsx",
+    "frontend/tests/global-setup.ts",
+    ".github/workflows/frontend-ci.yml",
+    ".github/workflows/frontend-e2e.yml"
+  ],
+  "flags": {
+    "frontend": ["NEXT_PUBLIC_API_BASE_URL", "NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_E2E (docs-only)"] ,
+    "backend": [
+      "SHIPPING_ENABLE_LOCKERS","LOCKER_DISCOUNT_EUR","SHIPPING_ENABLE_COD",
+      "PAYMENT_PROVIDER","STRIPE_*","VIVA_*",
+      "COURIER_PROVIDER","COURIER_*",
+      "APP_LOCALE","APP_FALLBACK_LOCALE"
+    ]
+  },
+  "coverage_gaps": [
+    {"domain":"checkout","gaps":["5xx fallback","timeout retry path"]},
+    {"domain":"shipping","gaps":["flag off/on matrix","locker-disabled path"]},
+    {"domain":"cart","gaps":["totals and quantity edge cases"]},
+    {"domain":"auth","gaps":["session expiry","unauthorized redirects"]}
+  ],
+  "plan_10d": [
+    {"day":1,"tasks":["Create flag registry doc","Draft CI config guard","Decide canonical FE CI port"]},
+    {"day":2,"tasks":["Update PR template with registry","Normalize docs to SITE_URL","Decide NEXT_PUBLIC_E2E policy"]},
+    {"day":3,"tasks":["Implement CI guard job","Add secret scanning to CI"]},
+    {"day":4,"tasks":["Add E2E tests: checkout 5xx/timeout","Add E2E tests: shipping flag off/on"]},
+    {"day":5,"tasks":["Stabilize PLAYWRIGHT_BASE_URL vs port in workflows","Document shipping quote contract"]},
+    {"day":6,"tasks":["Add CI wait-on utility standardization","Add minimal contract/schema snapshot tests"]},
+    {"day":7,"tasks":["Danger rule for unknown envs/flags","Confirm LHCI schedule/baseline"]},
+    {"day":8,"tasks":["Update any remaining deprecated env refs","Add README runbook for ports & flags"]},
+    {"day":9,"tasks":["Integration tests for cart totals/quantity","Unauthorized redirect tests"]},
+    {"day":10,"tasks":["Rollup PR to adopt canonical ports (post-Claude merges)","Post-merge verification and update scan"]}
+  ],
+  "stop_doing": [
+    "Refactors in checkout/cart before tests land",
+    "Env renames without updating registry & guard",
+    "Changing CI ports during Claude’s rebase/merge/smoke",
+    "Adding flags without registry + tests"
+  ],
+  "top5_actions": [
+    "Pick and enforce canonical FE port for CI; guard it",
+    "Canonicalize NEXT_PUBLIC_SITE_URL across docs/templates",
+    "Decide/implement policy for NEXT_PUBLIC_E2E",
+    "Add CI config guard (ports/env/flags)",
+    "Add secret scanning to CI"
+  ],
+  "biggest_risks": [
+    {"risk":"Config drift (ports/env names)","mitigation":"CI guard + single source of truth doc; adopt canonical ports"},
+    {"risk":"E2E flag inconsistency","mitigation":"Implement or remove NEXT_PUBLIC_E2E and enforce via danger"},
+    {"risk":"Checkout/shipping fragility","mitigation":"Add targeted integration tests and freeze non-essential changes"}
+  ]
+}
+

@@ -101,8 +101,10 @@ export class AuthHelper {
     
     // Now safe to clear storage since we're on valid origin
     await this.page.evaluate(() => {
-      try { localStorage.clear(); } catch (e) { /* ignore */ }
-      try { sessionStorage.clear(); } catch (e) { /* ignore */ }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      try { localStorage.clear(); } catch (_e) { /* ignore */ }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      try { sessionStorage.clear(); } catch (_e) { /* ignore */ }
     });
   }
 
