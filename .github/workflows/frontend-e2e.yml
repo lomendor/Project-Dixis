@@ -60,9 +60,11 @@ jobs:
         working-directory: frontend
     
     env:
+      FRONTEND_PORT: 3030
+      PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3030"
       NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
       PLAYWRIGHT_JOBS: 1
-      PW_TEST_RETRIES: 2
+      PW_TEST_RETRIES: 1
       PW_TEST_TIMEOUT: 30000
     
     services:
@@ -173,11 +175,11 @@ jobs:
         run: npm run build || echo "no build step"
       
       - name: Start frontend server
-        run: nohup npm run start -- -p 3000 > ../frontend.log 2>&1 &
-      
+        run: nohup npm run start -- -p ${{ env.FRONTEND_PORT }} > ../frontend.log 2>&1 &
+
       - name: Wait for frontend server
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://127.0.0.1:${{ env.FRONTEND_PORT }}; do sleep 2; done'
       
       # Set E2E quarantine (branch-scoped)
       - name: Set E2E quarantine (branch-scoped)
@@ -188,8 +190,6 @@ jobs:
       # Run E2E tests
       - name: Run E2E
         run: npm run test:e2e:ci
-        env:
-          PLAYWRIGHT_BASE_URL: "http://localhost:3000"
       
       # Artifacts ΜΟΝΟ σε αποτυχία
       - name: Upload Playwright report (on failure)
