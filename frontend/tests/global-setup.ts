@@ -84,13 +84,20 @@ async function globalSetup(config: FullConfig) {
     );
     
     await fs.writeFile(
-      path.join(authDir, 'producer.json'), 
+      path.join(authDir, 'producer.json'),
       JSON.stringify(mockProducerState, null, 2)
     );
-    
+
+    // Create smoke.json specifically for CI smoke tests
+    await fs.writeFile(
+      path.join(authDir, 'smoke.json'),
+      JSON.stringify(mockConsumerState, null, 2)
+    );
+
     console.log('✅ Mock storage states created successfully!');
     console.log(`   Consumer: ${path.join(authDir, 'consumer.json')}`);
     console.log(`   Producer: ${path.join(authDir, 'producer.json')}`);
+    console.log(`   Smoke: ${path.join(authDir, 'smoke.json')}`);
     return;
   }
   
