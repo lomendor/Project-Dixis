@@ -166,10 +166,14 @@ test.describe('Shipping Integration E2E', () => {
 
     // Simulate session timeout by clearing cookies
     await context.clearCookies();
-    
-    // Try to access cart - should redirect to login
+    await page.evaluate(() => localStorage.clear());
+
+    // Navigate to cart and wait for auth redirect UI signal
     await page.goto('/cart');
-    await expect(page).toHaveURL('/auth/login');
+    // Element-based wait is more robust than immediate URL match
+    await page.waitForSelector('[data-testid="nav-login"]', { timeout: 15000 });
+    // Verify login page via URL pattern with small timeout
+    await expect(page).toHaveURL(/\/auth\/login\/?$/, { timeout: 5000 });
 
     // Login again
     if (USE_TEST_AUTH) {

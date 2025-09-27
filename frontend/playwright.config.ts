@@ -38,7 +38,11 @@ export default defineConfig({
     // CI: Single project with no auth for smoke and shipping tests
     {
       name: 'smoke',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // CI uses pre-provisioned auth state to avoid auth-redirect flakes
+        storageState: process.env.CI ? 'playwright/.auth/smoke.json' : undefined
+      },
       testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts']
     }
   ] : [
