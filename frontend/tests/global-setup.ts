@@ -20,7 +20,7 @@ const TEST_USERS = {
 async function globalSetup(config: FullConfig) {
   console.log('🔐 Setting up authenticated storageState files...');
   
-  const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3001';
+  const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3030';
   const authDir = path.join(__dirname, '../.auth');
   
   console.log(`🔗 Using baseURL: ${baseURL}`);
