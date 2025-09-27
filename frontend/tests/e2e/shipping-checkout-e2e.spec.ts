@@ -168,12 +168,17 @@ test.describe('Shipping Integration E2E', () => {
     await context.clearCookies();
     await page.evaluate(() => localStorage.clear());
 
-    // Navigate to cart and wait for auth redirect UI signal
+    // Navigate to cart and assert we land on the login page
     await page.goto('/cart');
-    // Element-based wait is more robust than immediate URL match
-    await page.waitForSelector('[data-testid="nav-login"]', { timeout: 15000 });
-    // Verify login page via URL pattern with small timeout
-    await expect(page).toHaveURL(/\/auth\/login\/?$/, { timeout: 5000 });
+    // 1) URL-based assertion (tolerant to query/locale)
+    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
+    // 2) Form field visibility assertions (locale-agnostic)
+    const emailInput = page.locator('input[type="email"], input[name="email"]');
+    const passwordInput = page.locator('input[type="password"], input[name="password"]');
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
+    await expect(passwordInput).toBeVisible({ timeout: 15000 });
+    // 3) Optional heading (EL/EN) — best-effort (non-blocker)
+    await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
 
     // Login again
     if (USE_TEST_AUTH) {
