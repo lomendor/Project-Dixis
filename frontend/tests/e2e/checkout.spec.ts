@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { seedCartWithProduct, gotoCheckoutSafely, waitForQuoteUpdate } from './utils/checkout';
 
 /**
  * Checkout E2E Tests
  * Tests the complete checkout flow with shipping, payment, and confirmation
- * STABILIZED: Uses test-only utilities for cart seeding and async waits
  */
 
 test.describe('Checkout Flow', () => {
@@ -28,12 +26,11 @@ test.describe('Checkout Flow', () => {
       localStorage.setItem('user_id', '100');
     });
 
-    // FIXED: Seed cart with product before checkout
-    await seedCartWithProduct(page);
-    console.log('✅ Cart seeded with product');
+    // Navigate to checkout page directly (simulating cart with items)
+    await page.goto('/checkout');
 
-    // Navigate to checkout page safely
-    await gotoCheckoutSafely(page);
+    // Wait for checkout page to load
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
     console.log('✅ Checkout page loaded');
 
     // Verify we're on the shipping step
@@ -101,9 +98,11 @@ test.describe('Checkout Flow', () => {
       localStorage.setItem('user_id', '101');
     });
 
-    // FIXED: Seed cart first, then navigate
-    await seedCartWithProduct(page);
-    await gotoCheckoutSafely(page);
+    // Navigate to checkout
+    await page.goto('/checkout');
+
+    // Wait for checkout page
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
     console.log('✅ Authenticated checkout page loaded');
 
     // Quick fill and submit shipping form
@@ -136,16 +135,17 @@ test.describe('Checkout Flow', () => {
       localStorage.setItem('user_id', '100');
     });
 
-    // FIXED: Seed cart first
-    await seedCartWithProduct(page);
-    await gotoCheckoutSafely(page);
+    // Navigate to checkout
+    await page.goto('/checkout');
+
+    // Wait for checkout page
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
 
     // Check initial order summary
     const orderSummary = page.locator('.bg-white.rounded-lg.shadow-sm.p-6.sticky.top-8');
     await expect(orderSummary).toBeVisible();
 
-    // FIXED: Wait for initial total to stabilize
-    await page.getByTestId('order-total').waitFor({ timeout: 10000 });
+    // Look for initial total
     const initialTotal = await page.getByTestId('order-total').textContent();
     console.log(`✅ Initial order total: ${initialTotal}`);
 
@@ -160,8 +160,8 @@ test.describe('Checkout Flow', () => {
     // Wait for review step with shipping quote
     await expect(page.getByText('Επιβεβαίωση')).toBeVisible({ timeout: 10000 });
 
-    // FIXED: Wait for quote update using poll
-    const finalTotal = await waitForQuoteUpdate(page, initialTotal || '');
+    // Check that shipping cost is now included
+    const finalTotal = await page.getByTestId('order-total').textContent();
     console.log(`✅ Final order total with shipping: ${finalTotal}`);
 
     // Verify that shipping information is displayed
@@ -184,23 +184,20 @@ test.describe('Checkout Flow', () => {
       localStorage.setItem('user_id', '100');
     });
 
-    // FIXED: Seed cart first
-    await seedCartWithProduct(page);
-    await gotoCheckoutSafely(page);
+    // Navigate to checkout
+    await page.goto('/checkout');
 
-    // FIXED: Wait for form elements first
-    const nameInput = page.getByTestId('shipping-name-input');
-    const addressInput = page.getByTestId('shipping-address-input');
-    const cityInput = page.getByTestId('shipping-city-input');
-    const postalCodeInput = page.getByTestId('shipping-postal-code-input');
-
-    await nameInput.waitFor({ timeout: 10000 });
+    // Wait for checkout page
+    await expect(page.getByTestId('checkout-cta')).toBeVisible({ timeout: 15000 });
 
     // Try to submit empty form
     await page.getByTestId('continue-to-review-btn').click();
 
-    // Give form a moment to process validation
-    await page.waitForTimeout(1000);
+    // Check for HTML5 validation (required fields)
+    const nameInput = page.getByTestId('shipping-name-input');
+    const addressInput = page.getByTestId('shipping-address-input');
+    const cityInput = page.getByTestId('shipping-city-input');
+    const postalCodeInput = page.getByTestId('shipping-postal-code-input');
 
     // Verify required fields prevent submission
     await expect(nameInput).toHaveAttribute('required', '');
@@ -237,14 +234,10 @@ test.describe('Checkout Flow', () => {
     // No authentication setup - simulating unauthenticated user
 
     // Try to navigate to checkout
-    const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3030';
-    await page.goto(new URL('/checkout', baseURL).toString());
+    await page.goto('/checkout');
 
-    // FIXED: Wait for redirect with timeout
-    await page.waitForURL(url => url.pathname.includes('/auth/login'), { timeout: 10000 });
-
-    // Verify redirect occurred
-    expect(page.url()).toContain('/auth/login');
+    // Should redirect to login page
+    await expect(page.url()).toContain('/auth/login');
     console.log('✅ Unauthenticated user redirected to login');
 
     // Alternatively, if the page loads but shows a login prompt/message
