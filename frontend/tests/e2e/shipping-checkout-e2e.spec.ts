@@ -166,7 +166,10 @@ test.describe('Shipping Integration E2E', () => {
 
     // Simulate session timeout by clearing cookies
     await context.clearCookies();
-    await page.evaluate(() => localStorage.clear());
+    await page.evaluate(() => {
+      localStorage.clear();
+      document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
 
     // Try to access the protected checkout; guests must get redirected to login
     // Prefer UI path if CTA υπάρχει, αλλιώς direct navigation στο /checkout

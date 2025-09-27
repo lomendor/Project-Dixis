@@ -211,6 +211,12 @@ class ApiClient {
   private loadTokenFromStorage(): void {
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token');
+      // TEST-ONLY probe to help middleware detect "logged-in" during E2E runs.
+      // Never used in production auth; real auth should rely on secure server cookies or headers.
+      const isE2E = process.env.NEXT_PUBLIC_E2E === 'true';
+      if (isE2E && this.token) {
+        document.cookie = `e2e_auth_probe=1; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+      }
     }
   }
 
@@ -238,6 +244,17 @@ class ApiClient {
         localStorage.setItem('auth_token', token);
       } else {
         localStorage.removeItem('auth_token');
+      }
+
+      // TEST-ONLY probe to help middleware detect "logged-in" during E2E runs.
+      // Never used in production auth; real auth should rely on secure server cookies or headers.
+      const isE2E = process.env.NEXT_PUBLIC_E2E === 'true';
+      if (isE2E) {
+        if (token) {
+          document.cookie = `e2e_auth_probe=1; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
+        } else {
+          document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        }
       }
     }
   }
