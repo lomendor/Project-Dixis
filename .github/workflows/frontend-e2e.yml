@@ -209,3 +209,20 @@ jobs:
             frontend/test-results
             frontend/playwright/.cache
           retention-days: 3
+
+      # Always upload artifacts for analysis
+      - name: Upload Playwright report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-playwright-report-always
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload test results (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-always
+          path: frontend/test-results/
+          retention-days: 7
