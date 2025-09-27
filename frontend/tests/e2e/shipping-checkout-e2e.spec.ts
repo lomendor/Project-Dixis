@@ -168,8 +168,14 @@ test.describe('Shipping Integration E2E', () => {
     await context.clearCookies();
     await page.evaluate(() => localStorage.clear());
 
-    // Navigate to cart and assert we land on the login page
-    await page.goto('/cart');
+    // Try to access the protected checkout; guests must get redirected to login
+    // Prefer UI path if CTA υπάρχει, αλλιώς direct navigation στο /checkout
+    const checkoutCta = page.getByRole('button', { name: /checkout|πληρωμή|ταμείο/i }).first();
+    if (await checkoutCta.isVisible().catch(() => false)) {
+      await checkoutCta.click();
+    } else {
+      await page.goto('/checkout');
+    }
     // 1) URL-based assertion (tolerant to query/locale)
     await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
     // 2) Form field visibility assertions (locale-agnostic)
