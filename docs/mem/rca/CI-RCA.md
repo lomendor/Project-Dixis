@@ -46,16 +46,7 @@ await gotoCheckoutSafely(page);
 **Pattern**: `getByTestId('checkout-cta') resolved to 0 elements`
 
 **Root Cause**: Tests navigated to `/checkout` without cart preparation
-**Fix Applied**: Created `seedCartWithProduct()` utility
-```typescript
-export async function seedCartWithProduct(page: Page): Promise<void> {
-  await page.goto(new URL('/products', baseURL).toString());
-  await page.waitForLoadState('domcontentloaded');
-  const addToCartBtn = page.getByTestId('add-to-cart').first();
-  await addToCartBtn.waitFor({ timeout: 10000 });
-  await addToCartBtn.click();
-}
-```
+**Fix Applied**: Created `seedCartWithProduct()` utility with proper waits
 
 **Prevention**: Mandatory cart seeding in all checkout test scenarios
 
@@ -67,18 +58,7 @@ Final total: €15.00 (should include shipping)
 ```
 
 **Root Cause**: Async shipping calculations not properly awaited
-**Fix Applied**: Polling-based quote update waiting
-```typescript
-export async function waitForQuoteUpdate(page: Page, previousValue: string): Promise<string> {
-  return await expect.poll(async () => {
-    const currentValue = await page.getByTestId('order-total').textContent();
-    return currentValue;
-  }, {
-    timeout: 10000,
-    intervals: [1000]
-  });
-}
-```
+**Fix Applied**: Polling-based `waitForQuoteUpdate()` with 10s timeout
 
 **Prevention**: Use polling instead of immediate value capture
 
@@ -86,16 +66,7 @@ export async function waitForQuoteUpdate(page: Page, previousValue: string): Pro
 **Pattern**: Inconsistent form validation behavior
 
 **Root Cause**: Browser HTML5 validation vs React state timing mismatch
-**Fix Applied**: Validation settling time + element readiness checks
-```typescript
-// BEFORE: Immediate validation check
-await page.getByTestId('continue-to-review-btn').click();
-
-// AFTER: Wait for form readiness
-await nameInput.waitFor({ timeout: 10000 });
-await page.getByTestId('continue-to-review-btn').click();
-await page.waitForTimeout(1000); // Validation settling
-```
+**Fix Applied**: Element readiness checks + validation settling (1s timeout)
 
 **Prevention**: Always wait for form elements before interaction
 
@@ -204,50 +175,20 @@ grep -i "waitFor.*failed" e2e-logs.txt
 
 ### **Quick Recovery Commands**
 ```bash
-# Service restart
+# Service restart + auth regeneration
 killall node php 2>/dev/null || true
 cd backend && php artisan serve --host=127.0.0.1 --port=8001 &
-cd frontend && PORT=3030 npm run dev &
-
-# Auth state regeneration
-cd frontend
-rm -rf .auth/
-npx playwright test auth.setup.ts
-
-# Clean retry
-npx playwright test --retries=0 checkout.spec.ts
+cd frontend && PORT=3030 npm run dev && rm -rf .auth/ && npx playwright test auth.setup.ts
 ```
 
 ## 📊 INCIDENT TRACKING
 
-### **Recent Major Incidents**
-1. **2025-09-27**: PR #250 checkout E2E failures → Stabilization patches applied
-2. **2025-09-26**: Post-merge verification failures → Auth flow fixes
-3. **Previous**: Port conflicts → Standardization enforcement
+**Recent Incidents**: PR #250 checkout failures → Auth flow fixes → Port standardization
 
-### **Lessons Learned**
-- **Element-based waits** are more reliable than API response timing
-- **Cart seeding** is mandatory for checkout flow testing
-- **Port consistency** prevents service binding conflicts
-- **Auth storage states** require proper CI environment setup
+**Lessons Learned**: Element waits > API timing, Cart seeding mandatory, Port consistency critical
 
 ## 🔗 RELATED RESOURCES
 
-### **Diagnostic Commands**
-```bash
-# Full health check
-curl http://127.0.0.1:8001/api/health
-curl http://127.0.0.1:3030/
-
-# Test execution with traces
-npx playwright test --trace=on
-npx playwright show-report
-
-# Debug specific test
-npx playwright test --debug checkout.spec.ts
-```
-
-### **Reference Documents**
 - **E2E Procedures**: [[E2E]] - Complete testing runbook
 - **Test Selectors**: [[TESTIDS]] - Critical element identifiers
 - **Environment Flags**: [[REGISTRY]] - Configuration management

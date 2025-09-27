@@ -81,42 +81,10 @@
 
 ## 🔧 INTEGRATION PATTERNS
 
-### **API Client Pattern**
-```typescript
-// Frontend API abstraction
-const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
-  withAuth: (token: string) => ({ Authorization: `Bearer ${token}` }),
-  endpoints: {
-    products: '/public/products',
-    orders: '/orders',
-    auth: '/auth'
-  }
-}
-```
-
-### **Laravel Resource Pattern**
-```php
-// Backend API response standardization
-class ProductResource extends JsonResource {
-    public function toArray($request): array {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'price' => number_format($this->price, 2),
-            'categories' => CategoryResource::collection($this->categories)
-        ];
-    }
-}
-```
-
-### **Authentication Guard Pattern**
-```typescript
-// Frontend route protection
-<AuthGuard requireAuth={true} requireRole="producer">
-  <ProducerDashboard />
-</AuthGuard>
-```
+### **Integration Patterns**
+- **API Client**: Frontend abstraction with baseURL, auth tokens, endpoint mapping
+- **Laravel Resources**: Backend response standardization (ProductResource, CategoryResource)
+- **Auth Guards**: Frontend route protection with role-based access
 
 ## 🧪 TESTING ARCHITECTURE
 
@@ -142,12 +110,9 @@ class ProductResource extends JsonResource {
 ## 🚀 DEPLOYMENT ARCHITECTURE
 
 ### **Development Environment**
-```bash
-# Local development stack
-Backend:  php artisan serve --host=127.0.0.1 --port=8001
-Frontend: npm run dev (Next.js development server on 3030)
-Database: PostgreSQL local instance
-```
+- **Backend**: php artisan serve (port 8001)
+- **Frontend**: npm run dev (port 3030)
+- **Database**: PostgreSQL local instance
 
 ### **CI/CD Pipeline**
 ```yaml
@@ -201,8 +166,7 @@ Database: PostgreSQL local instance
 ### **Planned Integrations** [[PRD]]
 - **Payment Gateway**: Viva Wallet integration
 - **Shipping APIs**: Greek postal service integration
-- **Analytics**: User behavior tracking
-- **Email Service**: Transactional email provider
+- **Analytics**: User behavior tracking, transactional email
 
 ## 📁 FILE STRUCTURE MAPPING
 

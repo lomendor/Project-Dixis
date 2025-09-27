@@ -189,13 +189,20 @@ frontend/tests/e2e/shipping-integration-flow.spec.ts
 1. **Use descriptive names**: `action-target` pattern
 2. **Follow namespace conventions**: `section-element-type`
 3. **Update this glossary**: Document purpose and location
-4. **Test stability**: Verify selectors work across browsers
 
 ### **Selector Naming Patterns**
 - **Actions**: `*-btn`, `*-cta`, `*-link`
 - **Inputs**: `*-input`, `*-field`, `*-selector`
 - **Display**: `*-title`, `*-total`, `*-cost`
 - **Containers**: `*-menu`, `*-card`, `*-item`
+
+## 🚨 MISSING IN CODE
+
+**4 Test IDs documented but not implemented**:
+- `continue-to-review-btn` - Checkout flow button (missing in shipping form)
+- `process-payment-btn` - Payment processing trigger (missing in payment form)
+- `order-success` - Success page indicator (missing in confirmation)
+- `user-menu` - Navigation menu (missing in header component)
 
 ---
 
