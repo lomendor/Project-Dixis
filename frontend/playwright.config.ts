@@ -40,7 +40,7 @@ export default defineConfig({
       name: 'smoke',
       use: {
         ...devices['Desktop Chrome'],
-        // Use mock auth state in CI to avoid auth redirect flakes
+        // CI uses pre-provisioned auth state to avoid auth-redirect flakes
         storageState: process.env.CI ? 'playwright/.auth/smoke.json' : undefined
       },
       testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts']
