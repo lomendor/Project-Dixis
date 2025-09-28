@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { setE2EProbeCookie, clearE2EProbeCookie } from './cookies';
 
 // Ensure page is on our base origin before any storage reads/writes or URL assertions
 async function ensureSameOrigin(page: Page) {
@@ -121,17 +122,32 @@ export class TestAuthHelper {
 export async function loginAsConsumer(page: Page) {
   await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('consumer');
+  const result = await helper.testLogin('consumer');
+  await setE2EProbeCookie(page.context());
+  return result;
 }
 
 export async function loginAsProducer(page: Page) {
   await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('producer');
+  const result = await helper.testLogin('producer');
+  await setE2EProbeCookie(page.context());
+  return result;
 }
 
 export async function loginAsAdmin(page: Page) {
   await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('admin');
+  const result = await helper.testLogin('admin');
+  await setE2EProbeCookie(page.context());
+  return result;
+}
+
+export async function logoutAll(page: Page) {
+  await ensureSameOrigin(page);
+  await page.evaluate(() => {
+    try { localStorage.clear(); } catch {}
+    try { sessionStorage.clear(); } catch {}
+  });
+  await clearE2EProbeCookie(page.context());
 }
