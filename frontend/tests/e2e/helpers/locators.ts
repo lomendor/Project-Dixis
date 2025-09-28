@@ -49,9 +49,8 @@ export async function robustGoto(page: Page, path: string) {
 export async function clearGuestState(page: Page) {
   await page.context().clearCookies();
   await page.evaluate(() => {
-    localStorage.clear();
-    sessionStorage.clear();
-    document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    try { localStorage.clear(); } catch {}
+    try { sessionStorage.clear(); } catch {}
   });
 }
 
