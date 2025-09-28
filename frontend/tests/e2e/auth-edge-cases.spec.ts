@@ -1,3 +1,4 @@
+import { loginStable } from "./helpers/loginStable";
 import { test, expect, Page, BrowserContext } from '@playwright/test';
 
 /**

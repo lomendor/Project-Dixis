@@ -1,9 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { waitForProductCards } from './helpers/waitForProductCards';
 
 test.describe('Greek Normalization Demo - PP03-B', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3001');
     await page.waitForLoadState('networkidle');
+
+    // Wait for initial products to load
+    await waitForProductCards(page);
   });
 
   test('Demo: Greek search normalization scenarios', async ({ page }) => {
@@ -28,14 +32,16 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
       await searchInput.fill(scenario.query);
       await page.waitForTimeout(800);
       
-      // Check results
+      // Check results (wait for any results to appear)
       const productCards = page.locator('[data-testid="product-card"]');
       const count = await productCards.count();
-      
+
       if (count > 0) {
+        // Wait for first result to be visible
+        await expect(productCards.first()).toBeVisible({ timeout: 5000 });
         const productTitle = await productCards.first().locator('[data-testid="product-title"]').textContent();
         console.log(`   ✅ Found: "${productTitle}" (${count} results)`);
-        
+
         // Verify it's the orange product
         expect(productTitle).toContain('Πορτοκάλια');
       } else {
@@ -66,8 +72,10 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
       
       const productCards = page.locator('[data-testid="product-card"]');
       const count = await productCards.count();
-      
+
       if (count > 0) {
+        // Wait for first result to be visible
+        await expect(productCards.first()).toBeVisible({ timeout: 5000 });
         const productTitle = await productCards.first().locator('[data-testid="product-title"]').textContent();
         console.log(`   ✅ "${test.query}" → "${productTitle}"`);
       }
@@ -79,8 +87,10 @@ test.describe('Greek Normalization Demo - PP03-B', () => {
     await searchInput.clear();
     await searchInput.fill('Πορτοκάλια');
     await page.waitForTimeout(500);
-    
+
     const finalCards = page.locator('[data-testid="product-card"]');
+    // Wait for at least one result to be visible
+    await expect(finalCards.first()).toBeVisible({ timeout: 5000 });
     expect(await finalCards.count()).toBeGreaterThan(0);
   });
 });

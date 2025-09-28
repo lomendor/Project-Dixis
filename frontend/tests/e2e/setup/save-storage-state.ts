@@ -7,7 +7,7 @@ import * as fs from 'fs';
  * This creates a mock auth session for E2E testing
  */
 async function saveStorageState() {
-  const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000';
+  const baseURL = process.env.E2E_BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3001';
   const storageStatePath = path.join(__dirname, '../.artifacts/storage-state.json');
 
   // Ensure artifacts directory exists
