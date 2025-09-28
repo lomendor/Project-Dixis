@@ -12,8 +12,8 @@ test.describe('Shipping Integration E2E', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
     await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
+      try { localStorage.clear(); } catch {}
+      try { sessionStorage.clear(); } catch {}
       document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     });
     await robustGoto(page, '/');
@@ -24,7 +24,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -90,7 +91,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -124,7 +126,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -163,7 +166,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -173,8 +177,8 @@ test.describe('Shipping Integration E2E', () => {
     // Simulate session timeout by clearing cookies
     await page.context().clearCookies();
     await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
+      try { localStorage.clear(); } catch {}
+      try { sessionStorage.clear(); } catch {}
       document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     });
 
@@ -213,7 +217,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -257,7 +262,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -306,7 +312,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsAdmin(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'admin@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -315,7 +322,8 @@ test.describe('Shipping Integration E2E', () => {
     // Navigate to order management (exact path depends on admin interface)
     // For now, we'll skip this test if admin interface isn't available
     try {
-      await page.goto('/admin/orders', { timeout: 5000 });
+      await page.goto('/admin/orders', { waitUntil: 'domcontentloaded', timeout: 5000 });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       // Look for an order to create a label for
       const orderRow = page.locator('[data-testid="order-row"]').first();
