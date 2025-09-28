@@ -72,7 +72,7 @@ jobs:
           fi
 
       - name: Port guard (validate canonical ports)
-        run: bash scripts/guard-ports.sh
+        run: bash ../scripts/guard-ports.sh
 
       - name: Run TypeScript type check (strict)
         run: npm run type-check
