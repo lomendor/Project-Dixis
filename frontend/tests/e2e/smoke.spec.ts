@@ -1,3 +1,4 @@
+import { loginStable } from "./helpers/loginStable";
 import { test, expect } from '@playwright/test';
 import './support/msw-stubs';
 import { registerSmokeStubs } from './helpers/api-mocks';
