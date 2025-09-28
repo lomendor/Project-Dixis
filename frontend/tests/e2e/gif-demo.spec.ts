@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('GIF Demo: Greek Normalization', () => {
   test('Create demo for GIF - "Πορτοκάλια/πορτοκαλια/portokalia" → same results', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     
     const searchInput = page.locator('input[type="text"]').first();

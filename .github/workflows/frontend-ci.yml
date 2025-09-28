@@ -71,6 +71,9 @@ jobs:
             echo "No contracts directory found"
           fi
 
+      - name: Port guard (validate canonical ports)
+        run: bash scripts/guard-ports.sh
+
       - name: Run TypeScript type check (strict)
         run: npm run type-check
         env:
