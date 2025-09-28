@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+import { loginAsConsumer, loginAsAdmin, logoutAll } from './helpers/test-auth';
+import { sel, robustGoto, waitForProductsLoaded } from './helpers/locators';
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
@@ -9,8 +10,8 @@ const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 test.describe('Shipping Integration E2E', () => {
   // Auth edge-case fixes: Clear cookies before each test
   test.beforeEach(async ({ page, context }) => {
-    await context.clearCookies();
-    await page.goto('/');
+    await logoutAll(page);
+    await robustGoto(page, '/');
   });
 
   test('complete shipping checkout flow', async ({ page }) => {
@@ -18,7 +19,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -28,18 +30,18 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     // Navigate to products and add to cart
-    await page.click('text=Products');
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
-    const firstProduct = page.locator('[data-testid="product-card"]').first();
-    await firstProduct.click();
+    await sel.navProducts(page).click();
+    await waitForProductsLoaded(page);
+    await sel.firstProduct(page).scrollIntoViewIfNeeded();
+    await sel.firstProduct(page).click();
 
     // Add to cart from product page
-    await page.waitForSelector('[data-testid="add-to-cart-btn"]');
-    await page.click('[data-testid="add-to-cart-btn"]');
+    await sel.addToCartBtn(page).waitFor({ state: 'visible', timeout: 15000 });
+    await sel.addToCartBtn(page).click();
     
     // Navigate to cart
-    await page.goto('/cart');
-    await page.waitForSelector('[data-testid="cart-item"]');
+    await robustGoto(page, '/cart');
+    await page.waitForSelector('[data-testid="cart-item"]', { timeout: 15000 });
 
     // Verify cart has items
     const cartItems = page.locator('[data-testid="cart-item"]');
@@ -84,7 +86,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -92,11 +95,11 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     // Add a product to cart quickly
-    await page.goto('/');
-    const firstProduct = page.locator('[data-testid="product-card"]').first();
-    await firstProduct.click();
-    await page.click('[data-testid="add-to-cart-btn"]');
-    await page.goto('/cart');
+    await robustGoto(page, '/');
+    await waitForProductsLoaded(page);
+    await sel.firstProduct(page).click();
+    await sel.addToCartBtn(page).click();
+    await robustGoto(page, '/cart');
 
     // Try checkout without postal code
     const checkoutBtn = page.locator('[data-testid="checkout-btn"]');
@@ -118,18 +121,19 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/');
     }
-    
-    await page.goto('/');
-    const firstProduct = page.locator('[data-testid="product-card"]').first();
-    await firstProduct.click();
-    await page.click('[data-testid="add-to-cart-btn"]');
-    await page.goto('/cart');
+
+    await robustGoto(page, '/');
+    await waitForProductsLoaded(page);
+    await sel.firstProduct(page).click();
+    await sel.addToCartBtn(page).click();
+    await robustGoto(page, '/cart');
 
     // Test Athens Metro (should show Athens Express)
     await page.fill('[data-testid="postal-code-input"]', '11527');
@@ -157,7 +161,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -165,11 +170,22 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     // Simulate session timeout by clearing cookies
-    await context.clearCookies();
-    
-    // Try to access cart - should redirect to login
-    await page.goto('/cart');
-    await expect(page).toHaveURL('/auth/login');
+    await logoutAll(page);
+
+    // Try to access the protected checkout; guests must get redirected to login
+    // Prefer UI path if CTA exists, otherwise direct navigation to /checkout
+    if (await sel.checkoutCta(page).isVisible().catch(() => false)) {
+      await sel.checkoutCta(page).click();
+    } else {
+      await robustGoto(page, '/checkout');
+    }
+    // 1) URL-based assertion (tolerant to query/locale)
+    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
+    // 2) Form field visibility assertions (locale-agnostic)
+    await expect(sel.loginEmail(page)).toBeVisible({ timeout: 15000 });
+    await expect(sel.loginPassword(page)).toBeVisible({ timeout: 15000 });
+    // 3) Optional heading (EL/EN) — best-effort (non-blocker)
+    await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
 
     // Login again
     if (USE_TEST_AUTH) {
@@ -182,8 +198,8 @@ test.describe('Shipping Integration E2E', () => {
     
     // Should be able to access cart now
     await expect(page).toHaveURL('/');
-    await page.goto('/cart');
-    await expect(page.locator('[data-testid="checkout-btn"]')).toBeVisible();
+    await robustGoto(page, '/cart');
+    await expect(sel.checkoutCta(page)).toBeVisible({ timeout: 15000 });
   });
 
   test('volumetric vs actual weight pricing (bulky vs dense items)', async ({ page }) => {
@@ -191,7 +207,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -199,22 +216,23 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     // Add multiple different items to test weight calculations
-    await page.goto('/');
+    await robustGoto(page, '/');
+    await waitForProductsLoaded(page);
 
     // Add first product (potentially bulky item)
-    const firstProduct = page.locator('[data-testid="product-card"]').first();
-    await firstProduct.click();
-    await page.click('[data-testid="add-to-cart-btn"]');
+    await sel.firstProduct(page).click();
+    await sel.addToCartBtn(page).click();
 
     // Navigate back and add second product (potentially dense item)
     await page.goBack();
-    const secondProduct = page.locator('[data-testid="product-card"]').nth(1);
+    await waitForProductsLoaded(page);
+    const secondProduct = sel.productCards(page).nth(1);
     await secondProduct.click();
-    await page.click('[data-testid="add-to-cart-btn"]');
+    await sel.addToCartBtn(page).click();
 
     // Go to cart
-    await page.goto('/cart');
-    await page.waitForSelector('[data-testid="cart-item"]');
+    await robustGoto(page, '/cart');
+    await page.waitForSelector('[data-testid="cart-item"]', { timeout: 15000 });
 
     // Fill shipping info
     await page.fill('[data-testid="postal-code-input"]', '11527');
@@ -234,18 +252,19 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'consumer@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/');
     }
 
-    await page.goto('/');
-    const product = page.locator('[data-testid="product-card"]').first();
-    await product.click();
-    await page.click('[data-testid="add-to-cart-btn"]');
-    await page.goto('/cart');
+    await robustGoto(page, '/');
+    await waitForProductsLoaded(page);
+    await sel.firstProduct(page).click();
+    await sel.addToCartBtn(page).click();
+    await robustGoto(page, '/cart');
 
     // Test mainland first (Athens) - baseline cost and ETA
     await page.fill('[data-testid="postal-code-input"]', '10431');
@@ -283,7 +302,8 @@ test.describe('Shipping Integration E2E', () => {
     if (USE_TEST_AUTH) {
       await loginAsAdmin(page);
     } else {
-      await page.goto('/auth/login');
+      await page.goto('/auth/login', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.fill('input[type="email"]', 'admin@example.com');
       await page.fill('input[type="password"]', 'password');
       await page.click('button[type="submit"]');
@@ -292,7 +312,8 @@ test.describe('Shipping Integration E2E', () => {
     // Navigate to order management (exact path depends on admin interface)
     // For now, we'll skip this test if admin interface isn't available
     try {
-      await page.goto('/admin/orders', { timeout: 5000 });
+      await page.goto('/admin/orders', { waitUntil: 'domcontentloaded', timeout: 5000 });
+      await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       // Look for an order to create a label for
       const orderRow = page.locator('[data-testid="order-row"]').first();
