@@ -1,3 +1,4 @@
+import { waitForProductCards } from "./helpers/waitForProductCards";
 import { test, expect, Page } from '@playwright/test';
 import { loginAsConsumer } from './helpers/test-auth';
 
@@ -10,6 +11,7 @@ class ShippingIntegrationHelper {
 
   async navigateAndWait(path: string) {
     await this.page.goto(path);
+    await waitForProductCards(page);
     await this.page.waitForLoadState('networkidle');
   }
 
