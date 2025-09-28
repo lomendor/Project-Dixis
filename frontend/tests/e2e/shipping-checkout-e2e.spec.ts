@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
-import { sel, robustGoto, clearGuestState, waitForProductsLoaded } from './helpers/locators';
+import { sel, robustGoto, waitForProductsLoaded } from './helpers/locators';
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
@@ -10,7 +10,12 @@ const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 test.describe('Shipping Integration E2E', () => {
   // Auth edge-case fixes: Clear cookies before each test
   test.beforeEach(async ({ page, context }) => {
-    await clearGuestState(page);
+    await context.clearCookies();
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
     await robustGoto(page, '/');
   });
 
@@ -166,7 +171,12 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     // Simulate session timeout by clearing cookies
-    await clearGuestState(page);
+    await page.context().clearCookies();
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie = 'e2e_auth_probe=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
 
     // Try to access the protected checkout; guests must get redirected to login
     // Prefer UI path if CTA exists, otherwise direct navigation to /checkout
