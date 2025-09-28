@@ -15,17 +15,11 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('complete shipping checkout flow', async ({ page }) => {
-    // Login
+    // Login using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-
-      // Wait for redirect to home page
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
 
     // Navigate to products and add to cart
@@ -81,15 +75,11 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('shipping validation prevents checkout without postal code', async ({ page }) => {
-    // Login and add item to cart (reuse login logic)
+    // Login and add item to cart using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
 
     // Add a product to cart quickly
@@ -115,15 +105,11 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('shipping cost calculation for different zones', async ({ page }) => {
-    // Login and add item to cart
+    // Login and add item to cart using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
     
     await page.goto('/');
@@ -183,15 +169,11 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('volumetric vs actual weight pricing (bulky vs dense items)', async ({ page }) => {
-    // Login and navigate to products
+    // Login and navigate to products using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
 
     // Add multiple different items to test weight calculations
@@ -226,15 +208,11 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('island zone surcharge and longer delivery times', async ({ page }) => {
-    // Login and add item to cart
+    // Login and add item to cart using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
 
     await page.goto('/');
