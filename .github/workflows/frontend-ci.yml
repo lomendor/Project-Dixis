@@ -248,7 +248,7 @@ jobs:
           echo "✅ Shipping API verified"
 
       - name: Debug products API (E2E RCA)
-        run: bash scripts/ci/debug-products.sh
+        run: bash ../scripts/ci/debug-products.sh
         env:
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
 
