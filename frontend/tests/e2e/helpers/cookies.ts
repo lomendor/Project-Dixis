@@ -10,7 +10,6 @@ export async function setE2EProbeCookie(ctx: BrowserContext) {
     name: 'e2e_auth_probe',
     value: '1',
     url: url.origin + '/',
-    path: '/',
     httpOnly: false,
     secure: false,
     sameSite: 'Lax',
