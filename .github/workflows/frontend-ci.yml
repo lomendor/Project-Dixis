@@ -247,6 +247,11 @@ jobs:
             -d '{"zip":"11527","city":"Athens","weight":2.0,"volume":0.01}' || exit 1
           echo "✅ Shipping API verified"
 
+      - name: Debug products API (E2E RCA)
+        run: bash scripts/ci/debug-products.sh
+        env:
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+
       - name: Set E2E quarantine (branch-scoped)
         if: startsWith(github.head_ref, 'ci/')
         run: |
