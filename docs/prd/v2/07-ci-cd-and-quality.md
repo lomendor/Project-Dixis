@@ -1,15 +1,19 @@
 ---
 title: PRD v2 — CI/CD & Ποιότητα
-last_updated: 2025-09-25
-source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
+last_updated: 2025-09-29
+source: "PRD/PRD Dixis Τελικό .docx.md"
 ---
 
 # CI/CD και Ποιότητα
 
-Έλεγχοι:
+## Έλεγχοι
 - Type-check, Lint, Unit, E2E (Playwright), Lighthouse.
-- Configuration Guard (ports/env/flags) — docs/prd/ops/CONFIG-GUARD-PLAN.md.
+- Configuration Guard (ports/env/flags) — δείτε docs/prd/ops/CONFIG-GUARD-PLAN.md.
 
-Ποιότητα:
-- Flakiness μείωση (selectors/i18n/localStorage/health checks).
-- Artifacts/αναφορές στο `docs/reports/*`.
+## Ασφάλεια & Audits
+- Regular security audits, penetration tests.
+- Ημερήσια backups.
+
+## Observability / Analytics (σύνοψη από §4)
+- Βασικά metrics: επισκεψιμότητα, conversion rate, AOV, revenue, retention.
+- BI: πωλήσεις ανά παραγωγό/προϊόν, απόθεμα, συμπεριφορά πελάτη, marketing ROI.

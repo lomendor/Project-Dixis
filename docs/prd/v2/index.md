@@ -1,16 +1,14 @@
 ---
 title: PRD v2 — Δείκτης
-last_updated: 2025-09-25
-source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
+last_updated: 2025-09-29
+source: "PRD/PRD Dixis Τελικό .docx.md"
 ---
 
 # PRD v2 — Επισκόπηση και Πίνακας Περιεχομένων
 
 Το παρόν αποτελεί την αποσπασματική (sharded) έκδοση του Product Requirements Document (PRD) σε Markdown, με στόχο ευκολότερη συντήρηση, review και διασύνδεση με τον κώδικα. 
 
-Σημείωση πηγής: Δεν εντοπίστηκε διαθέσιμο PRD στον φάκελο `prd/` (ούτε `.md` ούτε `.docx`) στο repository. Ως εκ τούτου, δημιουργήθηκε δομή v2 και αρχικά αρχεία με σαφή headings/anchors, ώστε να μεταφερθεί σταδιακά το περιεχόμενο όταν προστεθεί το πηγαίο αρχείο στον φάκελο `prd/`.
-
-Δείτε επίσης: [IMPORT-NOTES](./IMPORT-NOTES.md) για οδηγίες εισαγωγής από `.md`/`.docx` (pandoc) και χαρτογράφηση σε shards.
+Πηγή περιεχομένου: Εισαγωγή από το `PRD/PRD Dixis Τελικό .docx.md` (markdown εξαγωγή). Για διαδικασία εισαγωγής/συντήρησης δείτε [IMPORT-NOTES](./IMPORT-NOTES.md).
 
 ## Πίνακας Περιεχομένων
 
