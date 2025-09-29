@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Μη Λειτουργικές Απαιτήσεις
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Μη Λειτουργικές Απαιτήσεις
@@ -14,4 +15,3 @@ last_updated: 2025-09-25
 
 Προσβασιμότητα:
 - Ετικέτες ARIA, contrast, keyboard navigation, i18n ελληνικά.
-

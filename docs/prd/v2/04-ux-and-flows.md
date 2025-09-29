@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — UX & Ροές
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # UX και Ροές
@@ -12,4 +13,3 @@ last_updated: 2025-09-25
 Αρχές UX:
 - Σταθερά `data-testid` για αυτοματοποιημένα tests.
 - Κείμενα/μεταφράσεις: ελληνικές ετικέτες (π.χ. «Ολοκλήρωση Παραγγελίας»).
-

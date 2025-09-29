@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Επισκόπηση
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Επισκόπηση
@@ -11,4 +12,3 @@ last_updated: 2025-09-25
 - Frontend: καταναλωτής, καλάθι, checkout, παραγωγός (dashboard).
 - Backend: routes, authentication, seeders, integration APIs.
 - Ποιότητα: CI/CD, E2E, επιδόσεις και προσβασιμότητα.
-

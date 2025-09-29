@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Λειτουργικές Απαιτήσεις
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Λειτουργικές Απαιτήσεις
@@ -14,4 +15,3 @@ last_updated: 2025-09-25
 Σενάρια σφαλμάτων:
 - Αποτυχία API (timeouts, 5xx) → ενημέρωση χρήστη και retry.
 - Έλλειψη δικαιωμάτων localStorage → graceful degradation.
-
