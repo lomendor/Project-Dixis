@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Παραρτήματα
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Παραρτήματα
@@ -9,4 +10,3 @@ last_updated: 2025-09-25
 - Σύνδεσμοι σε αναφορές CI (`docs/reports/*`).
 - Πίνακες i18n, λεξιλόγιο ελληνικών όρων UI.
 - Σημειώσεις ασφαλείας (CSP, secrets, storage policies).
-

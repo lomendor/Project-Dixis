@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Personas & Χρήσεις
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Personas και Use Cases
@@ -14,4 +15,3 @@ last_updated: 2025-09-25
 - Προσθήκη προϊόντος στο καλάθι και ολοκλήρωση παραγγελίας.
 - Υπολογισμός κόστους αποστολής με ζώνες/βάρη.
 - Αυθεντικοποίηση και διατήρηση κατάστασης (localStorage, cookies).
-

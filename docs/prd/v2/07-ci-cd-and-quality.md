@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — CI/CD & Ποιότητα
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # CI/CD και Ποιότητα
@@ -12,4 +13,3 @@ last_updated: 2025-09-25
 Ποιότητα:
 - Flakiness μείωση (selectors/i18n/localStorage/health checks).
 - Artifacts/αναφορές στο `docs/reports/*`.
-

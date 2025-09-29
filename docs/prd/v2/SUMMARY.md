@@ -1,6 +1,7 @@
 ---
 title: PRD v2 — Summary
 last_updated: 2025-09-25
+source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
 ---
 
 # Summary
@@ -16,4 +17,3 @@ last_updated: 2025-09-25
 - [07 — CI/CD & Ποιότητα](./07-ci-cd-and-quality.md)
 - [08 — Κριτήρια Αποδοχής](./08-acceptance-criteria.md)
 - [09 — Παραρτήματα](./09-appendices.md)
-
