@@ -1,12 +1,18 @@
 ---
 title: PRD v2 — Κριτήρια Αποδοχής
-last_updated: 2025-09-25
-source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
+last_updated: 2025-09-29
+source: "PRD/PRD Dixis Τελικό .docx.md"
 ---
 
 # Κριτήρια Αποδοχής
 
-Παραδείγματα:
-- Checkout happy path με ελληνικά strings και επιτυχή επιβεβαίωση.
-- Υπολογισμός αποστολής για ζώνες (Attiki/Thessaloniki/Islands).
-- Εμφάνιση/απόκρυψη CTA ανά valid/invalid input.
+## Checkout
+- Ολοκλήρωση ροής από καλάθι έως επιβεβαίωση με ελληνικά strings.
+- Σωστή εμφάνιση/απόκρυψη CTA ανά εγκυρότητα input.
+
+## Shipping
+- Υπολογισμός μεταφορικών ανά ζώνη/κλίμακα βάρους/όριο δωρεάν μεταφορικών.
+
+## Πληρωμές
+- Επιτυχής πληρωμή μέσω Stripe/PayPal.
+- Έκδοση παραστατικών και αποστολή email.

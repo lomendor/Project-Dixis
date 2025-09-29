@@ -1,17 +1,22 @@
 ---
 title: PRD v2 — Μη Λειτουργικές Απαιτήσεις
-last_updated: 2025-09-25
-source: "prd/PRD-Dixis-Τελικό.md (not found in repo)"
+last_updated: 2025-09-29
+source: "PRD/PRD Dixis Τελικό .docx.md"
 ---
 
 # Μη Λειτουργικές Απαιτήσεις
 
-Επιδόσεις:
-- Χρόνος πρώτης απόκρισης < 300ms (API κρίσιμες διαδρομές).
-- Σελίδες: budgets (home/products/cart ≤ καθορισμένα KB).
+## Απόδοση
+- Χρόνος φόρτωσης < 3s σε δίκτυα 4G.
+- Uptime 99.9%.
+- SSR για βελτιωμένο TTFB και SEO.
 
-Ασφάλεια:
-- CSP reporting (204), secret scanning, ελάχιστα δικαιώματα.
+## Ασφάλεια
+- HTTPS παντού.
+- GDPR: δικαιώματα διαγραφής/φορητότητας δεδομένων.
+- Token-based auth (Sanctum), περιοδικοί audits.
+- Ημερήσιο backup DB.
 
-Προσβασιμότητα:
-- Ετικέτες ARIA, contrast, keyboard navigation, i18n ελληνικά.
+## Προσβασιμότητα (A11y)
+- WCAG αρχές, ARIA labels, keyboard navigation.
+- Ελληνικά κείμενα/μεταφράσεις.
