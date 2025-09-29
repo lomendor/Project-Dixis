@@ -1,4 +1,19 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import { setE2EProbeCookie, clearE2EProbeCookie } from './cookies';
+
+// Ensure page is on our base origin before any storage reads/writes or URL assertions
+async function ensureSameOrigin(page: Page) {
+  // On CI Playwright often starts at about:blank; force landing to baseURL ('/')
+  try {
+    const u = page.url();
+    if (!u || u === 'about:blank' || /^data:/.test(u)) {
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+    }
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+  } catch (e) {
+    // Best-effort; let callers handle assertions next
+  }
+}
 
 /**
  * Test-only authentication helper for E2E tests
@@ -46,10 +61,15 @@ export class TestAuthHelper {
       }
     ]);
 
-    // Also store in localStorage for client-side API calls
+    // Also store in localStorage for client-side API calls (ensure same-origin)
+    await ensureSameOrigin(this.page);
     await this.page.evaluate(({ token, user }) => {
-      localStorage.setItem('test_auth_token', token);
-      localStorage.setItem('test_auth_user', JSON.stringify(user));
+      try {
+        localStorage.setItem('test_auth_token', token);
+        localStorage.setItem('test_auth_user', JSON.stringify(user));
+      } catch (e) {
+        // Ignore localStorage SecurityError; cookies are sufficient
+      }
     }, { token, user });
 
     // Force page reload to ensure auth state is recognized by components
@@ -57,7 +77,8 @@ export class TestAuthHelper {
     await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
 
     // Navigate to home page after login
-    await this.page.goto('/');
+    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
 
     // Wait for authenticated navigation to appear with improved fallback
     try {
@@ -83,9 +104,14 @@ export class TestAuthHelper {
    */
   async clearAuth() {
     await this.page.context().clearCookies();
+    await ensureSameOrigin(this.page);
     await this.page.evaluate(() => {
-      localStorage.removeItem('test_auth_token');
-      localStorage.removeItem('test_auth_user');
+      try {
+        localStorage.removeItem('test_auth_token');
+        localStorage.removeItem('test_auth_user');
+      } catch (e) {
+        // Ignore localStorage SecurityError
+      }
     });
   }
 }
@@ -94,16 +120,34 @@ export class TestAuthHelper {
  * Quick helper function for tests
  */
 export async function loginAsConsumer(page: Page) {
+  await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('consumer');
+  const result = await helper.testLogin('consumer');
+  await setE2EProbeCookie(page.context());
+  return result;
 }
 
 export async function loginAsProducer(page: Page) {
+  await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('producer');
+  const result = await helper.testLogin('producer');
+  await setE2EProbeCookie(page.context());
+  return result;
 }
 
 export async function loginAsAdmin(page: Page) {
+  await ensureSameOrigin(page);
   const helper = new TestAuthHelper(page);
-  return helper.testLogin('admin');
+  const result = await helper.testLogin('admin');
+  await setE2EProbeCookie(page.context());
+  return result;
+}
+
+export async function logoutAll(page: Page) {
+  await ensureSameOrigin(page);
+  await page.evaluate(() => {
+    try { localStorage.clear(); } catch {}
+    try { sessionStorage.clear(); } catch {}
+  });
+  await clearE2EProbeCookie(page.context());
 }

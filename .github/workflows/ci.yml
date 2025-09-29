@@ -107,7 +107,7 @@ jobs:
     needs: backend
 
     env:
-      FRONTEND_PORT: 3000
+      FRONTEND_PORT: 3030
     
     steps:
       - uses: actions/checkout@v4
@@ -162,7 +162,7 @@ jobs:
     needs: [backend, frontend]
 
     env:
-      FRONTEND_PORT: 3000
+      FRONTEND_PORT: 3030
 
     services:
       postgres:
