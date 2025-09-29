@@ -1,0 +1,34 @@
+{
+  "branch": "ci/nightly-port-guard-3030",
+  "sha": "ff96cdec75967876e8c03af885e758bbdcd0584a", 
+  "at": "",
+  "requiredChecks": {
+    "failing": [
+      {"name": "PR Hygiene Check", "conclusion": "FAILURE", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18109207465/job/51531247891"},
+      {"name": "e2e", "conclusion": "FAILURE", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18109207441/job/51534246789"},
+      {"name": "e2e-tests", "conclusion": "FAILURE", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18109207468/job/51531415826"},
+      {"name": "e2e-tests", "conclusion": "FAILURE", "url": "https://github.com/lomendor/Project-Dixis/actions/runs/18109206797/job/51534180187"}
+    ]
+  },
+  "keyRuns": ["18109207441", "18109207468", "18109206797", "18109207465"],
+  "excerpts": "
+=== Extracting excerpts from RUN 18109207441 ===
+1639:frontend	Build	2025-09-29T20:41:34.3135314Z ├ ○ /auth/login                           3.87 kB         109 kB
+2750:e2e	Build frontend	2025-09-29T20:43:51.1162566Z ├ ○ /auth/login                           3.87 kB         109 kB
+2816:e2e	Set E2E quarantine (branch-scoped)	﻿2025-09-29T20:43:59.9175006Z ##[group]Run echo \"QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow\" >> $GITHUB_ENV
+2817:e2e	Set E2E quarantine (branch-scoped)	2025-09-29T20:43:59.9177277Z [36;1mecho \"QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow\" >> $GITHUB_ENV[0m
+2833:e2e	Run E2E tests	2025-09-29T20:43:59.9327127Z   QUARANTINE_REGEX: Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow
+2876:e2e	Run E2E tests	2025-09-29T20:49:07.1393846Z ❌ Demo failed: page.waitForURL: Timeout 10000ms exceeded.
+2879:e2e	Run E2E tests	2025-09-29T20:49:07.1406782Z   navigated to \"http://127.0.0.1:3030/auth/login?email=consumer%40example.com&***\"
+2886:e2e	Run E2E tests	2025-09-29T20:49:20.1059267Z ❌ Demo failed: page.waitForURL: Timeout 10000ms exceeded.
+2889:e2e	Run E2E tests	2025-09-29T20:49:20.1077418Z   navigated to \"http://127.0.0.1:3030/auth/login?email=consumer%40example.com&***\"
+2906:e2e	Run E2E tests	2025-09-29T21:01:48.9899382Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+2910:e2e	Run E2E tests	2025-09-29T21:01:48.9902556Z     Timeout: 20000ms
+2913:e2e	Run E2E tests	2025-09-29T21:01:48.9903542Z     [2m  - Expect \"toHaveURL\" with timeout 20000ms[22m
+2914:e2e	Run E2E tests	2025-09-29T21:01:48.9905003Z     [2m    24 × unexpected value \"http://127.0.0.1:3030/auth/login?email=consumer%40example.com&***\"[22m
+2919:e2e	Run E2E tests	2025-09-29T21:01:48.9906792Z     > 28 |       await expect(page).toHaveURL('/');
+2930:e2e	Run E2E tests	2025-09-29T21:01:48.9915249Z     Error Context: test-results/shipping-checkout-e2e-Ship-67485-lete-shipping-checkout-flow-smoke/error-context.md
+2942:e2e	Run E2E tests	2025-09-29T21:01:48.9924315Z     Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+2946:e2e	Run E2E tests	2025-09-29T21:01:48.9927680Z     Timeout: 20000ms
+2949:e2e	Run E2E tests	2025-09-29T21:01:48.9928620Z     [2m  - Expect \"toHaveURL\" with timeout 20000ms[22m"
+}
