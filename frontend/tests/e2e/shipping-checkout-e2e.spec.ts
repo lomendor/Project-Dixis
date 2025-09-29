@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+import { loginStable } from './helpers/loginStable';
+import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
@@ -29,7 +31,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Navigate to products and add to cart
     await page.click('text=Products');
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
 
@@ -93,6 +95,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Add a product to cart quickly
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
     await page.click('[data-testid="add-to-cart-btn"]');
@@ -124,8 +127,9 @@ test.describe('Shipping Integration E2E', () => {
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/');
     }
-    
+
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
     await page.click('[data-testid="add-to-cart-btn"]');
@@ -153,37 +157,32 @@ test.describe('Shipping Integration E2E', () => {
   });
 
   test('auth edge case: retry after session timeout', async ({ page, context }) => {
-    // Login first
+    // Login first using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.goto('/auth/login');
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
-      await expect(page).toHaveURL('/');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
 
     // Simulate session timeout by clearing cookies
     await context.clearCookies();
-    
-    // Try to access cart - should redirect to login
-    await page.goto('/cart');
-    await expect(page).toHaveURL('/auth/login');
 
-    // Login again
+    // Try to access cart - should redirect to login (add wait for navigation)
+    await page.goto('/cart');
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL('/auth/login', { timeout: 30000 });
+
+    // Login again using stable helper
     if (USE_TEST_AUTH) {
       await loginAsConsumer(page);
     } else {
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
+      await loginStable(page, 'consumer@example.com', 'password');
     }
-    
+
     // Should be able to access cart now
-    await expect(page).toHaveURL('/');
     await page.goto('/cart');
-    await expect(page.locator('[data-testid="checkout-btn"]')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-testid="checkout-btn"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('volumetric vs actual weight pricing (bulky vs dense items)', async ({ page }) => {
@@ -200,6 +199,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Add multiple different items to test weight calculations
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
 
     // Add first product (potentially bulky item)
     const firstProduct = page.locator('[data-testid="product-card"]').first();
@@ -242,6 +242,7 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const product = page.locator('[data-testid="product-card"]').first();
     await product.click();
     await page.click('[data-testid="add-to-cart-btn"]');

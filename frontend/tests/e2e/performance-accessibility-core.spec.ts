@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 test.describe('Performance & Accessibility Core Features', () => {
   test('page loads with proper accessibility structure', async ({ page }) => {
@@ -51,9 +52,9 @@ test.describe('Performance & Accessibility Core Features', () => {
 
   test('images have proper optimization attributes', async ({ page }) => {
     await page.goto('/');
-    
+
     // Wait for products to load
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
+    await waitForProductsApiAndCards(page);
     
     const productImages = page.getByTestId('product-image');
     const imageCount = await productImages.count();
@@ -144,7 +145,7 @@ test.describe('Performance & Accessibility Core Features', () => {
     const hasLoading = await page.locator('text=Loading fresh products...').count() > 0;
     
     // Verify products eventually load
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 });
+    await waitForProductsApiAndCards(page);
     const products = page.getByTestId('product-card');
     await expect(products.first()).toBeVisible();
   });
