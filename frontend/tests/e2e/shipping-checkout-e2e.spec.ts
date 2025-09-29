@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
@@ -29,7 +30,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Navigate to products and add to cart
     await page.click('text=Products');
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
 
@@ -93,6 +94,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Add a product to cart quickly
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
     await page.click('[data-testid="add-to-cart-btn"]');
@@ -124,8 +126,9 @@ test.describe('Shipping Integration E2E', () => {
       await page.click('button[type="submit"]');
       await expect(page).toHaveURL('/');
     }
-    
+
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
     await page.click('[data-testid="add-to-cart-btn"]');
@@ -215,6 +218,7 @@ test.describe('Shipping Integration E2E', () => {
 
     // Add multiple different items to test weight calculations
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
 
     // Add first product (potentially bulky item)
     const firstProduct = page.locator('[data-testid="product-card"]').first();
@@ -257,6 +261,7 @@ test.describe('Shipping Integration E2E', () => {
     }
 
     await page.goto('/');
+    await waitForProductsApiAndCards(page);
     const product = page.locator('[data-testid="product-card"]').first();
     await product.click();
     await page.click('[data-testid="add-to-cart-btn"]');
