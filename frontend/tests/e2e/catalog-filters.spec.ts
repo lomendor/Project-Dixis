@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 test.describe('Catalog Filters & Search', () => {
   test('enhanced filter functionality works end-to-end', async ({ page }) => {
     // Navigate to home page
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
+
     // Wait for products to load
-    await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
+    await waitForProductsApiAndCards(page);
     
     // Test basic search functionality
     await page.fill('input[placeholder="Search products..."]', 'apple');
