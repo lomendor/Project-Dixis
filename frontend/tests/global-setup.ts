@@ -19,11 +19,27 @@ const TEST_USERS = {
 
 async function globalSetup(config: FullConfig) {
   console.log('🔐 Setting up authenticated storageState files...');
-  
+
   const baseURL = config.projects[0]?.use?.baseURL || 'http://127.0.0.1:3030';
   const authDir = path.join(__dirname, '../.auth');
-  
+
   console.log(`🔗 Using baseURL: ${baseURL}`);
+
+  // -- CI safety net: ensure smoke storageState exists when CI=true --
+  const ci = process.env.CI === 'true' || process.env.CI === '1';
+  const smokeStatePath = path.resolve(process.cwd(), 'playwright/.auth/smoke.json');
+  if (ci) {
+    const fs = await import('fs/promises');
+    const dir = path.dirname(smokeStatePath);
+    await fs.mkdir(dir, { recursive: true });
+    try {
+      await fs.access(smokeStatePath);
+    } catch {
+      const emptyState = { cookies: [], origins: [] };
+      await fs.writeFile(smokeStatePath, JSON.stringify(emptyState, null, 2));
+      console.log(`✅ Ensured CI smoke storageState at ${smokeStatePath}`);
+    }
+  }
   
   // Check if we're running smoke tests (without server dependency)
   const isSmoke = process.env.PLAYWRIGHT_SKIP_WEBSERVER === 'true' || 
@@ -84,13 +100,20 @@ async function globalSetup(config: FullConfig) {
     );
     
     await fs.writeFile(
-      path.join(authDir, 'producer.json'), 
+      path.join(authDir, 'producer.json'),
       JSON.stringify(mockProducerState, null, 2)
     );
-    
+
+    // Create smoke.json specifically for CI smoke tests
+    await fs.writeFile(
+      path.join(authDir, 'smoke.json'),
+      JSON.stringify(mockConsumerState, null, 2)
+    );
+
     console.log('✅ Mock storage states created successfully!');
     console.log(`   Consumer: ${path.join(authDir, 'consumer.json')}`);
     console.log(`   Producer: ${path.join(authDir, 'producer.json')}`);
+    console.log(`   Smoke: ${path.join(authDir, 'smoke.json')}`);
     return;
   }
   
