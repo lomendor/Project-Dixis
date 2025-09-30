@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsConsumer, loginAsAdmin, gotoLoginStable } from './helpers/test-auth';
+import { loginAsConsumer, loginAsAdmin, gotoLoginStable, loginWithForm } from './helpers/test-auth';
 import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 // Feature flag for admin UI tests
