@@ -18,6 +18,7 @@ export default function AdminPricingPage() {
       setProducts(data);
     } catch (error) {
       console.error('Error loading products:', error);
+      showToast('error', 'Απέτυχε η φόρτωση των προϊόντων');
     } finally {
       setLoading(false);
     }
