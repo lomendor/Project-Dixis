@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+import { firstVisible, waitUrlNotLogin } from './locator-utils';
 
 /**
  * Test-only authentication helper for E2E tests
@@ -106,4 +107,39 @@ export async function loginAsProducer(page: Page) {
 export async function loginAsAdmin(page: Page) {
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
+}
+
+/**
+ * P0: Stabilize auth bootstrap — avoid pre-navigation localStorage reads
+ * Phase-3b: Fixed CSS selector syntax and added robust fallback
+ */
+export async function gotoLoginStable(page: Page, baseURL = '/') {
+  const url = (baseURL?.replace(/\/$/, '') || '') + '/auth/login';
+  await page.goto(url, { waitUntil: 'load' });
+
+  // Use separate locators with proper syntax (no mixed CSS+role)
+  const locators = [
+    page.getByTestId('auth-login-form'),
+    page.locator('form[aria-label="login"]'),
+    page.getByRole('heading', { name: /Login|Σύνδεση/i }).locator('..').locator('form').first()
+  ];
+
+  const form = await firstVisible(page, locators, 45000);
+  return form;
+}
+
+/**
+ * Phase-3b: Robust login with form handling
+ */
+export async function loginWithForm(page: Page, email: string, password: string) {
+  const form = await gotoLoginStable(page, '/');
+  await form.locator('input[name="email"], input[type="email"]').first().fill(email);
+  await form.locator('input[name="password"], input[type="password"]').first().fill(password);
+
+  await Promise.all([
+    page.waitForLoadState('load'),
+    form.locator('button[type="submit"]').click()
+  ]);
+
+  await waitUrlNotLogin(page, 60000);
 }

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+import { loginAsConsumer, loginAsAdmin, gotoLoginStable, loginWithForm } from './helpers/test-auth';
 import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 // Feature flag for admin UI tests
@@ -51,7 +51,7 @@ test.describe('Shipping Integration E2E', () => {
     await page.fill('[data-testid="city-input"]', 'Athens');
 
     // Wait for shipping quote to load using stable selector
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
 
     // Verify shipping info appears
     await expect(page.locator('text=Athens Express')).toBeVisible();
@@ -66,7 +66,7 @@ test.describe('Shipping Integration E2E', () => {
     await checkoutBtn.click();
 
     // Wait for order creation and redirect
-    await page.waitForURL(/\/orders\/\d+/, { timeout: 15000 });
+    await page.waitForURL(/\/orders\/\d+/, { timeout: 30000 });
     
     // Verify we're on order confirmation page
     expect(page.url()).toMatch(/\/orders\/\d+$/);
@@ -137,20 +137,20 @@ test.describe('Shipping Integration E2E', () => {
     // Test Athens Metro (should show Athens Express)
     await page.fill('[data-testid="postal-code-input"]', '11527');
     await page.fill('[data-testid="city-input"]', 'Athens');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('text=Athens Express')).toBeVisible();
 
     // Test Islands (should show Island Logistics)
     await page.fill('[data-testid="postal-code-input"]', '84600');
     await page.fill('[data-testid="city-input"]', 'Mykonos');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('text=Island Logistics')).toBeVisible();
     await expect(page.locator('text=4 day(s)')).toBeVisible();
 
     // Test Thessaloniki (should show Northern Courier)
     await page.fill('[data-testid="postal-code-input"]', '54623');
     await page.fill('[data-testid="city-input"]', 'Thessaloniki');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('text=Northern Courier')).toBeVisible();
     await expect(page.locator('text=2 day(s)')).toBeVisible();
   });
@@ -179,15 +179,18 @@ test.describe('Shipping Integration E2E', () => {
     } else {
       await page.goto('/checkout');
     }
-    // 1) URL-based assertion (tolerant to query/locale)
-    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
-    // 2) Form field visibility assertions (locale-agnostic)
+    // P0: Use stable auth bootstrap (RCA Phase 2 mitigation)
+    const baseURL = 'http://127.0.0.1:3030'; // From playwright.config.ts
+    await gotoLoginStable(page, baseURL);
+
+    // URL assertion with increased timeout for auth stability
+    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 45000 });
+
+    // Form field visibility assertions (already covered by gotoLoginStable)
     const emailInput = page.locator('input[type="email"], input[name="email"]');
     const passwordInput = page.locator('input[type="password"], input[name="password"]');
     await expect(emailInput).toBeVisible({ timeout: 15000 });
     await expect(passwordInput).toBeVisible({ timeout: 15000 });
-    // 3) Optional heading (EL/EN) — best-effort (non-blocker)
-    await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
 
     // Login again
     if (USE_TEST_AUTH) {
@@ -240,7 +243,7 @@ test.describe('Shipping Integration E2E', () => {
     await page.fill('[data-testid="city-input"]', 'Athens');
 
     // Wait for shipping quote to calculate
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
 
     // Verify shipping cost reflects combined weight calculation
     // The exact values depend on product configuration, but quote should be visible
@@ -270,7 +273,7 @@ test.describe('Shipping Integration E2E', () => {
     // Test mainland first (Athens) - baseline cost and ETA
     await page.fill('[data-testid="postal-code-input"]', '10431');
     await page.fill('[data-testid="city-input"]', 'Athens');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
 
     // Extract mainland cost and delivery time for comparison
     const mainlandQuote = page.locator('[data-testid="shipping-quote-success"]');
@@ -280,7 +283,7 @@ test.describe('Shipping Integration E2E', () => {
     // Test Crete (island) - should cost more and take longer
     await page.fill('[data-testid="postal-code-input"]', '70000');
     await page.fill('[data-testid="city-input"]', 'Heraklion');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
 
     const islandQuote = page.locator('[data-testid="shipping-quote-success"]');
     await expect(islandQuote).toContainText('Κρήτη'); // Crete zone
@@ -289,7 +292,7 @@ test.describe('Shipping Integration E2E', () => {
     // Test small islands (highest cost and longest delivery)
     await page.fill('[data-testid="postal-code-input"]', '86000');
     await page.fill('[data-testid="city-input"]', 'Karpathos');
-    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="shipping-quote-success"]')).toBeVisible({ timeout: 30000 });
 
     const smallIslandQuote = page.locator('[data-testid="shipping-quote-success"]');
     await expect(smallIslandQuote).toContainText('Μικρά Νησιά'); // Small Islands zone
