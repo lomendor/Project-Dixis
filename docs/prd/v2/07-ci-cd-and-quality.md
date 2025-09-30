@@ -8,7 +8,7 @@ source: "PRD/PRD Dixis Τελικό .docx.md"
 
 ## Έλεγχοι
 - Type-check, Lint, Unit, E2E (Playwright), Lighthouse.
-- Configuration Guard (ports/env/flags) — δείτε docs/prd/ops/CONFIG-GUARD-PLAN.md.
+- Configuration Guard (ports/env/flags) — δείτε [CONFIG-GUARD-PLAN](../ops/CONFIG-GUARD-PLAN.md).
 
 ## Ασφάλεια & Audits
 - Regular security audits, penetration tests.
