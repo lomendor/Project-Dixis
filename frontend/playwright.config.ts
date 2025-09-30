@@ -28,7 +28,7 @@ function normalizeHosts() {
   return { baseURL, apiBaseURL, feHost, apiHost };
 }
 
-const { baseURL, apiBaseURL } = normalizeHosts();
+const { baseURL } = normalizeHosts();
 
 export default defineConfig({
   // Increased timeouts for CI to handle complex shipping integration flows
