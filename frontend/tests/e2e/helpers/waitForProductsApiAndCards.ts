@@ -2,7 +2,8 @@ import { Page, expect } from '@playwright/test';
 
 /**
  * Waits for products API response and visible product cards
- * Addresses product-card timeout failures in CI environment
+ * Phase 3: Increased timeout thresholds for CI stability
+ * Addresses: TimeoutError: locator.waitFor: Timeout 20000ms exceeded
  */
 export async function waitForProductsApiAndCards(page: Page) {
   // Wait for DOM to be ready
@@ -15,13 +16,13 @@ export async function waitForProductsApiAndCards(page: Page) {
     // API might already be loaded, continue to element checks
   }
 
-  // Wait for first product card to be visible
+  // Wait for first product card to be visible (Phase 3: increased timeout)
   const first = page.getByTestId(/^product-card(|-|_)/).first();
-  await first.waitFor({ state: 'visible', timeout: 20000 });
+  await first.waitFor({ state: 'visible', timeout: 45000 });
 
-  // Additional stability wait (graceful fallback)
+  // Additional stability wait (Phase 3: extended networkidle)
   try {
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
   } catch {
     // Network might still be active, proceed if elements are visible
   }

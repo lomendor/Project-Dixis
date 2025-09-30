@@ -107,3 +107,21 @@ export async function loginAsAdmin(page: Page) {
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
 }
+
+/**
+ * P0: Stabilize auth bootstrap — avoid pre-navigation localStorage reads
+ * Phase 2 RCA mitigation: robust navigation to login with DOM waits
+ */
+export async function gotoLoginStable(page: Page, baseURL: string) {
+  const url = (baseURL?.replace(/\/$/, '') || '') + '/auth/login';
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+  // Prefer robust selector if exists; fallback to role
+  const loginForm = page.locator([
+    '[data-testid="auth-login-form"]',
+    'form[aria-label="login"]',
+    'role=heading[name=/Login|Σύνδεση/i]'
+  ].join(', '));
+
+  await loginForm.first().waitFor({ timeout: 45000 });
+}
