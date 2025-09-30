@@ -1,5 +1,18 @@
-import { Page, expect } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
 import { firstVisible, waitUrlNotLogin } from './locator-utils';
+
+/**
+ * Phase-3c: Check if using storageState authentication
+ */
+function isUsingStorageState(): boolean {
+  try {
+    const projectName = test.info().project.name;
+    const storageState = test.info().project.use?.storageState;
+    return !!(storageState && projectName?.includes('consumer'));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Test-only authentication helper for E2E tests
@@ -95,16 +108,34 @@ export class TestAuthHelper {
  * Quick helper function for tests
  */
 export async function loginAsConsumer(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for consumer - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'consumer' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('consumer');
 }
 
 export async function loginAsProducer(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for producer - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'producer' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('producer');
 }
 
 export async function loginAsAdmin(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for admin - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'admin' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
 }

@@ -1,6 +1,12 @@
 import { test, expect, Page } from '@playwright/test';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { loginAsConsumer } from './helpers/test-auth';
+import {
+  waitForProductListStable,
+  selectFirstProductStable,
+  addToCartStable
+} from './helpers/product-list';
 
 /**
  * E2E Test Suite: Checkout Happy Path
@@ -11,40 +17,16 @@ class CheckoutFlowHelper {
   constructor(private page: Page) {}
 
   async loginAsConsumer() {
-    await this.page.goto('/auth/login');
-    await this.page.fill('[name="email"]', 'consumer@example.com');
-    await this.page.fill('[name="password"]', 'password');
-
-    // Use deterministic testid selector instead of generic button
-    const loginButton = this.page.getByTestId('login-submit').or(this.page.locator('button[type="submit"]'));
-    await loginButton.click();
-
-    // Improved auth flow with better waits
-    try {
-      await this.page.waitForURL('**/auth/callback**', { timeout: 15000 });
-    } catch {}
-    await this.page.waitForLoadState('networkidle');
-
-    // Wait for user menu to appear (indicates successful login)
-    const userMenu = this.page.getByTestId('user-menu').or(this.page.locator('[data-user-menu], .user-menu, [aria-label*="user"]'));
-    await userMenu.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
-
-    // Navigate to home if not already there
-    await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    // Phase-3c: Use storageState-aware login helper
+    return await loginAsConsumer(this.page);
   }
 
   async addProductToCart() {
+    // Phase-3c: Use stable product loading helpers
     await this.page.goto('/');
-    await this.page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
-    
-    const firstProduct = this.page.locator('[data-testid="product-card"]').first();
-    await firstProduct.locator('a').first().click();
-    await this.page.waitForURL(/\/products\/\d+/);
-    
-    const addToCartBtn = this.page.locator('[data-testid="add-to-cart"]');
-    await expect(addToCartBtn).toBeVisible();
-    await addToCartBtn.click();
-    await this.page.waitForTimeout(2000);
+    await waitForProductListStable(this.page);
+    await selectFirstProductStable(this.page);
+    await addToCartStable(this.page);
   }
 
   async completeCartShipping() {
