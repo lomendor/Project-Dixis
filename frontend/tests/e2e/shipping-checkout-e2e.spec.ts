@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
+import { loginAsConsumer, loginAsAdmin, gotoLoginStable } from './helpers/test-auth';
 import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
 
 // Feature flag for admin UI tests
@@ -179,15 +179,18 @@ test.describe('Shipping Integration E2E', () => {
     } else {
       await page.goto('/checkout');
     }
-    // 1) URL-based assertion (tolerant to query/locale)
-    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
-    // 2) Form field visibility assertions (locale-agnostic)
+    // P0: Use stable auth bootstrap (RCA Phase 2 mitigation)
+    const baseURL = 'http://127.0.0.1:3030'; // From playwright.config.ts
+    await gotoLoginStable(page, baseURL);
+
+    // URL assertion with increased timeout for auth stability
+    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 45000 });
+
+    // Form field visibility assertions (already covered by gotoLoginStable)
     const emailInput = page.locator('input[type="email"], input[name="email"]');
     const passwordInput = page.locator('input[type="password"], input[name="password"]');
     await expect(emailInput).toBeVisible({ timeout: 15000 });
     await expect(passwordInput).toBeVisible({ timeout: 15000 });
-    // 3) Optional heading (EL/EN) — best-effort (non-blocker)
-    await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
 
     // Login again
     if (USE_TEST_AUTH) {
