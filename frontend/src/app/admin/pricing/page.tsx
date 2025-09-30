@@ -11,21 +11,22 @@ export default function AdminPricingPage() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
   const loadProducts = async () => {
     try {
       setLoading(true);
       const data = await pricingApi.getProducts();
       setProducts(data);
-    } catch {
-      showToast('error', 'Απέτυχε η φόρτωση των προϊόντων');
+    } catch (error) {
+      console.error('Error loading products:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
 
   const handleUpdateProduct = async (productId: number, updates: ProductUpdateData) => {
     await pricingApi.updateProduct(productId, updates);

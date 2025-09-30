@@ -11,10 +11,6 @@ export default function AdminTogglePage() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -26,6 +22,10 @@ export default function AdminTogglePage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const handleToggleStatus = async (productId: number, isActive: boolean) => {
     await adminApi.toggleProductStatus(productId, isActive);

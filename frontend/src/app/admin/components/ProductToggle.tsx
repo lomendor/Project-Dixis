@@ -7,7 +7,7 @@ import { useToast } from '@/contexts/ToastContext';
 interface ProductToggleProps {
   products: ProductWithProducer[];
   loading: boolean;
-  onToggleStatus: (productId: number, isActive: boolean) => Promise<void>;
+  onToggleStatus: (_productId: number, _isActive: boolean) => Promise<void>;
 }
 
 export default function ProductToggle({ products, loading, onToggleStatus }: ProductToggleProps) {
