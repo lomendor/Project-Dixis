@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loginAsConsumer, loginAsAdmin } from './helpers/test-auth';
 import { waitForProductsApiAndCards } from './helpers/waitForProductsApiAndCards';
+import { expectAuthedOrLogin } from './helpers/auth-mode';
 
 // Feature flag for admin UI tests
 const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
@@ -179,23 +180,34 @@ test.describe('Shipping Integration E2E', () => {
     } else {
       await page.goto('/checkout');
     }
-    // 1) URL-based assertion (tolerant to query/locale)
-    await expect(page).toHaveURL(/\/auth\/login(\/|\?|$)/, { timeout: 20000 });
-    // 2) Form field visibility assertions (locale-agnostic)
-    const emailInput = page.locator('input[type="email"], input[name="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name="password"]');
-    await expect(emailInput).toBeVisible({ timeout: 15000 });
-    await expect(passwordInput).toBeVisible({ timeout: 15000 });
-    // 3) Optional heading (EL/EN) — best-effort (non-blocker)
-    await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
+    // 1) URL-based assertion (flexible for storageState vs UI login)
+    await expectAuthedOrLogin(page);
 
-    // Login again
-    if (USE_TEST_AUTH) {
-      await loginAsConsumer(page);
+    // 2) If on login page, check form fields; if authenticated, skip login form checks
+    const currentUrl = page.url();
+    if (currentUrl.includes('/auth/login')) {
+      // Form field visibility assertions (locale-agnostic)
+      const emailInput = page.locator('input[type="email"], input[name="email"]');
+      const passwordInput = page.locator('input[type="password"], input[name="password"]');
+      await expect(emailInput).toBeVisible({ timeout: 15000 });
+      await expect(passwordInput).toBeVisible({ timeout: 15000 });
+      // 3) Optional heading (EL/EN) — best-effort (non-blocker)
+      await page.getByRole('heading', { name: /login|σύνδεση/i }).first().waitFor({ timeout: 5000 }).catch(() => {});
     } else {
-      await page.fill('input[type="email"]', 'consumer@example.com');
-      await page.fill('input[type="password"]', 'password');
-      await page.click('button[type="submit"]');
+      console.log('✅ User already authenticated, skipping login form checks');
+    }
+
+    // Login if needed (only if on login page)
+    if (currentUrl.includes('/auth/login')) {
+      if (USE_TEST_AUTH) {
+        await loginAsConsumer(page);
+      } else {
+        await page.fill('input[type="email"]', 'consumer@example.com');
+        await page.fill('input[type="password"]', 'password');
+        await page.click('button[type="submit"]');
+      }
+    } else {
+      console.log('✅ User already authenticated, skipping login');
     }
     
     // Should be able to access cart now

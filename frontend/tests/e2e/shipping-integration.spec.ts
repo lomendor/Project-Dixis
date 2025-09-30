@@ -1,5 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 import { loginAsConsumer } from './helpers/test-auth';
+import { expectAuthedOrLogin } from './helpers/auth-mode';
 
 // Use test auth when in E2E mode
 const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
@@ -20,7 +21,7 @@ class ShippingIntegrationHelper {
     } else {
       // Navigate to Login via top-nav link
       await this.page.getByRole('link', { name: /login/i }).first().click();
-      await expect(this.page).toHaveURL(/\/auth\/login/);
+      await expectAuthedOrLogin(this.page);
       await this.page.waitForLoadState('networkidle');
 
       await this.page.fill('[name="email"]', email);

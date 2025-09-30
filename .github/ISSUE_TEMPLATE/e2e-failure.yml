@@ -1,0 +1,53 @@
+name: "E2E Failure — auth/bootstrap/redirect"
+description: "Triage template για E2E θέματα σχετιζόμενα με auth, storageState, redirects"
+title: "E2E Failure — auth/bootstrap/redirect"
+labels: ["e2e", "bug"]
+assignees: []
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: Branch / Commit
+      description: π.χ. feature/x, SHA
+      placeholder: docs/e2e-auth-bootstrap @ abcdef1
+  - type: input
+    id: hosts
+    attributes:
+      label: FE_HOST / API_HOST
+      description: Αναφέρετε hosts (π.χ. 127.0.0.1:3030, 127.0.0.1:8001)
+  - type: input
+    id: baseurl
+    attributes:
+      label: PLAYWRIGHT_BASE_URL
+      placeholder: http://127.0.0.1:3030
+  - type: checkboxes
+    id: cookies
+    attributes:
+      label: Cookies found
+      options:
+        - label: XSRF-TOKEN
+        - label: laravel_session
+        - label: άλλο (γράψτε στα notes)
+  - type: dropdown
+    id: redirect
+    attributes:
+      label: Redirect to /auth/login seen?
+      options:
+        - yes
+        - no
+  - type: input
+    id: artifacts
+    attributes:
+      label: Artifacts links
+      placeholder: URLs (playwright-report, test-results)
+  - type: textarea
+    id: excerpts
+    attributes:
+      label: Excerpts (πρώτες 50 γραμμές)
+      description: κολλήστε σχετικά αποσπάσματα logs
+  - type: input
+    id: regression
+    attributes:
+      label: Regression since
+      placeholder: PR/commit range
+
