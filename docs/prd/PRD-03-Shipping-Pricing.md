@@ -1,10 +1,12 @@
 # PRD-03 — Shipping & Pricing (GR)
 **Owner:** Ops/Logistics · **Status:** Draft
-## Πρόβλημα
+## Πρόβλημα {#problem}
 Υψηλό κόστος/πολυπλοκότητα (νησιά, volumetric, αντικαταβολή, lockers).
-## Απαιτήσεις
+
+## Απαιτήσεις {#requirements}
 - Ζώνες Ελλάδας, remote/rural surcharges
 - Volumetric weight & caps
 - Locker incentives & free-thresholds
-## KPIs
+
+## KPIs {#kpis}
 - Avg Shipping Cost/Order · Conversion ↑ με lockers
