@@ -1,0 +1,2 @@
+Run: https://github.com/lomendor/Project-Dixis/actions/runs/18124162712
+Conclusion: failure
