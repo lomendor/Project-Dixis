@@ -12,8 +12,8 @@ export default defineConfig({
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,
   
-  // Global setup for storageState creation  
-  globalSetup: './tests/global-setup.ts',
+  // Global setup for storageState creation (Phase-3c)
+  globalSetup: './tests/e2e/setup/global-setup.ts',
   
   // Artifacts configuration - align with CI expectations
   outputDir: 'test-results',
@@ -35,23 +35,24 @@ export default defineConfig({
   },
 
   projects: isCI ? [
-    // CI: Single project with no auth for smoke and shipping tests
+    // CI: Single project with consumer storageState for shipping tests (Phase-3c)
     {
-      name: 'smoke',
+      name: 'consumer-ci',
       use: {
         ...devices['Desktop Chrome'],
-        // CI uses pre-provisioned auth state to avoid auth-redirect flakes
-        storageState: process.env.CI ? 'playwright/.auth/smoke.json' : undefined
+        // Phase-3c: Use our consumer storageState for authenticated flows
+        storageState: 'tests/e2e/.auth/consumer.json'
       },
-      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts']
+      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts', '**/checkout*.spec.ts']
     }
   ] : [
     // Local: Multiple auth states and browsers
-    { 
+    {
       name: 'consumer',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        storageState: '.auth/consumer.json'
+        // Phase-3c: Use our consumer storageState for local tests
+        storageState: 'tests/e2e/.auth/consumer.json'
       },
       testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
     },

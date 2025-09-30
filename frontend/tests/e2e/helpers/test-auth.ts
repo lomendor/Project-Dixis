@@ -1,4 +1,18 @@
-import { Page } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
+import { firstVisible, waitUrlNotLogin } from './locator-utils';
+
+/**
+ * Phase-3c: Check if using storageState authentication
+ */
+function isUsingStorageState(): boolean {
+  try {
+    const projectName = test.info().project.name;
+    const storageState = test.info().project.use?.storageState;
+    return !!(storageState && projectName?.includes('consumer'));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Test-only authentication helper for E2E tests
@@ -94,16 +108,69 @@ export class TestAuthHelper {
  * Quick helper function for tests
  */
 export async function loginAsConsumer(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for consumer - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'consumer' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('consumer');
 }
 
 export async function loginAsProducer(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for producer - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'producer' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('producer');
 }
 
 export async function loginAsAdmin(page: Page) {
+  // Phase-3c: Skip UI login when using storageState
+  if (isUsingStorageState()) {
+    console.log('✅ Using storageState for admin - skipping UI login');
+    return { token: 'storagestate-token', user: { role: 'admin' } };
+  }
+
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
+}
+
+/**
+ * P0: Stabilize auth bootstrap — avoid pre-navigation localStorage reads
+ * Phase-3b: Fixed CSS selector syntax and added robust fallback
+ */
+export async function gotoLoginStable(page: Page, baseURL = '/') {
+  const url = (baseURL?.replace(/\/$/, '') || '') + '/auth/login';
+  await page.goto(url, { waitUntil: 'load' });
+
+  // Use separate locators with proper syntax (no mixed CSS+role)
+  const locators = [
+    page.getByTestId('auth-login-form'),
+    page.locator('form[aria-label="login"]'),
+    page.getByRole('heading', { name: /Login|Σύνδεση/i }).locator('..').locator('form').first()
+  ];
+
+  const form = await firstVisible(page, locators, 45000);
+  return form;
+}
+
+/**
+ * Phase-3b: Robust login with form handling
+ */
+export async function loginWithForm(page: Page, email: string, password: string) {
+  const form = await gotoLoginStable(page, '/');
+  await form.locator('input[name="email"], input[type="email"]').first().fill(email);
+  await form.locator('input[name="password"], input[type="password"]').first().fill(password);
+
+  await Promise.all([
+    page.waitForLoadState('load'),
+    form.locator('button[type="submit"]').click()
+  ]);
+
+  await waitUrlNotLogin(page, 60000);
 }

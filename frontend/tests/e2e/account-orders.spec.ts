@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupMockAuthForConsumer, setupMockAuthForProducer } from './helpers/auth-helpers';
+import { loginAsConsumer, loginAsProducer } from './helpers/test-auth';
 
 test.describe('Customer Orders', () => {
   test.beforeEach(async ({ page }) => {
