@@ -1,0 +1,221 @@
+EP (tests):
+tests/e2e/account-orders.spec.ts:/api/v1/orders', async (route) => {
+tests/e2e/account-orders.spec.ts:/api/v1/orders/123', async (route) => {
+tests/e2e/account-orders.spec.ts:/api/v1/orders/999', async (route) => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/**', async route => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/**');
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/dashboard**', async route => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/orders**', async route => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/producers**', async route => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/products**', async route => {
+tests/e2e/analytics-dashboard.spec.ts:/api/v1/admin/analytics/sales**', async route => {
+tests/e2e/checkout-edge-cases-robust.spec.ts:/api/v1/orders/checkout', async route => {
+tests/e2e/checkout-edge-cases-robust.spec.ts:/api/v1/orders/checkout');
+tests/e2e/checkout-edge-cases-robust.spec.ts:/api/v1/shipping/quote', async route => {
+tests/e2e/checkout-happy-path.spec.ts:/api/v1/orders') && request.method() === 'POST') {
+tests/e2e/checkout-happy-path.spec.ts:/api/v1/orders') && response.request().method() === 'POST') {
+tests/e2e/cod-payment-method.spec.ts:/api/v1/shipping/quote') && request.method() === 'POST') {
+tests/e2e/cod-payment-method.spec.ts:/api/v1/shipping/quote') && response.request().method() === 'POST') {
+tests/e2e/delivery-options.spec.ts:/api/v1/shipping/lockers/search**', async (route) => {
+tests/e2e/delivery-options.spec.ts:/api/v1/shipping/quote', async (route) => {
+tests/e2e/helpers/api-mocks.ts:/api/v1/auth/me', r => r.fulfill(ok({
+tests/e2e/helpers/api-mocks.ts:/api/v1/cart**', r => r.fulfill(ok({
+tests/e2e/helpers/api-mocks.ts:/api/v1/categories**', r => r.fulfill(ok({
+tests/e2e/helpers/api-mocks.ts:/api/v1/producers**', r => r.fulfill(ok([])));
+tests/e2e/helpers/api-mocks.ts:/api/v1/public/products**', r => r.fulfill(ok({
+tests/e2e/helpers/api-mocks.ts:/api/v1/search**', r => r.fulfill(ok([])));
+tests/e2e/helpers/test-auth.ts:/api/v1', '/api/v1/test/login');
+tests/e2e/helpers/test-auth.ts:/api/v1';
+tests/e2e/integration-smoke.spec.ts:/api/v1/auth/login`, {
+tests/e2e/integration-smoke.spec.ts:/api/v1/auth/profile`, {
+tests/e2e/integration-smoke.spec.ts:/api/v1/orders`, {
+tests/e2e/integration-smoke.spec.ts:/api/v1/orders`);
+tests/e2e/integration-smoke.spec.ts:/api/v1/public/products?category=${category}`);
+tests/e2e/integration-smoke.spec.ts:/api/v1/public/products?per_page=2`);
+tests/e2e/integration-smoke.spec.ts:/api/v1/public/products?search=tomato`);
+tests/e2e/integration-smoke.spec.ts:/api/v1/public/products`);
+tests/e2e/order-admin.spec.ts:/api/admin/orders/*/update-status', route => {
+tests/e2e/order-admin.spec.ts:/api/v1/auth/me', route => route.fulfill({
+tests/e2e/order-admin.spec.ts:/api/v1/orders', route => route.fulfill({
+tests/e2e/order-producer.spec.ts:/api/producer/orders/*/ship', route => {
+tests/e2e/order-producer.spec.ts:/api/v1/auth/me', route => route.fulfill({
+tests/e2e/order-producer.spec.ts:/api/v1/orders', route => route.fulfill({
+tests/e2e/order-validation.spec.ts:/api/v1/auth/me', route => route.fulfill({
+tests/e2e/order-validation.spec.ts:/api/v1/orders', route => route.fulfill({
+tests/e2e/pdp-happy.spec.ts:/api/v1/public/products');
+tests/e2e/pdp-happy.spec.ts:/api/v1/public/products/${PRODUCT_ID}`, async (route) => {
+tests/e2e/pdp-robustness-simple.spec.ts:/api/v1/public/products/${PRODUCT_ID}`, async (route) => {
+tests/e2e/performance-accessibility-core.spec.ts:/api/v1/public/products*', route => 
+tests/e2e/performance-accessibility.spec.ts:/api/v1/public/products*', route =>
+tests/e2e/performance-accessibility.spec.ts:/api/v1/public/products*', route => 
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/orders') && log.method === 'POST'
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/orders') && response.request().method() === 'POST') {
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/orders)
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/orders`);
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/shipping/quote')
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/shipping/quote')) {
+tests/e2e/pr-evidence-collection.spec.ts:/api/v1/shipping/quote`);
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/orders') && log.method === 'POST'
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/orders') && request.method() === 'POST') {
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/orders') && response.request().method() === 'POST') {
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/orders`);
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/shipping/quote')
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/shipping/quote')) {
+tests/e2e/pr-evidence-manual.spec.ts:/api/v1/shipping/quote`);
+tests/e2e/pr-pp03-a-evidence.spec.ts:/api/v1/public/products/${VALID_PRODUCT_ID}`, async (route) => {
+tests/e2e/pr-pp03-a-evidence.spec.ts:/api/v1/public/products/${VALID_PRODUCT_ID}`, route => {
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1';
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1/')) {
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1/orders', (route) => {
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1/orders') && request.method() === 'POST') {
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1/orders') && response.status() === 201) {
+tests/e2e/pr-pp03-d-checkout-edge-cases.spec.ts:/api/v1/shipping/quote', (route) => {
+tests/e2e/pr-pp03-d-quick-evidence.spec.ts:/api/v1/')) {
+tests/e2e/pr-pp03-d-quick-evidence.spec.ts:/api/v1/orders')) {
+tests/e2e/pr-pp03-d-quick-evidence.spec.ts:/api/v1/shipping/quote', route => {
+tests/e2e/producer-analytics.spec.ts:/api/v1/auth/me', async route => {
+tests/e2e/producer-analytics.spec.ts:/api/v1/producer/analytics/**', async route => {
+tests/e2e/producer-analytics.spec.ts:/api/v1/producer/analytics/**');
+tests/e2e/producer-analytics.spec.ts:/api/v1/producer/analytics/orders**', async route => {
+tests/e2e/producer-analytics.spec.ts:/api/v1/producer/analytics/products**', async route => {
+tests/e2e/producer-analytics.spec.ts:/api/v1/producer/analytics/sales**', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/auth/profile', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/orders', {
+tests/e2e/producer-inventory.spec.ts:/api/v1/orders', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/producer/dashboard/top-products', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/producer/kpi', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/producer/products**', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/producer/products/1/stock', async route => {
+tests/e2e/producer-inventory.spec.ts:/api/v1/public/products**', async route => {
+tests/e2e/setup.mocks.ts:/api/**', async (route) => {
+tests/e2e/setup/global-setup.ts:/api/v1 suffix if present)
+tests/e2e/setup/global-setup.ts:/api/v1';
+tests/e2e/setup/global-setup.ts:/api/v1/auth/login', {
+tests/e2e/setup/global-setup.ts:/api/v1/auth/login)
+tests/e2e/setup/global-setup.ts:/api/v1/login
+tests/e2e/setup/global-setup.ts:/api/v1/login response: ${apiV1LoginResponse.status()} ${apiV1LoginResponse.statusText()}`);
+tests/e2e/setup/global-setup.ts:/api/v1/login successful');
+tests/e2e/setup/global-setup.ts:/api/v1/login...');
+tests/e2e/setup/global-setup.ts:/api/v1/login', {
+tests/e2e/shipping-integration-flow.spec.ts:/api/v1/shipping/quote')) {
+tests/e2e/support/msw-stubs.ts:/api/**', async (route) => {
+tests/mocks/handlers.generated.ts:/api/admin/orders/:orderId/update-status', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/admin/producers', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/admin/producers/:producerId/:action', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/checkout/pay', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/checkout/quote', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/health', () => HttpResponse.json({ 
+tests/mocks/handlers.generated.ts:/api/producer/onboarding', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/producer/orders', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/producer/orders/:orderId/ship', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/producer/products', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/producer/status', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/admin/analytics/dashboard', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/admin/analytics/orders', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/admin/analytics/producers', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/admin/analytics/products', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/admin/analytics/sales', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/lockers/search', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/notifications', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/notifications/:id/read', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/notifications/latest', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/notifications/read-all', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/notifications/unread-count', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/payment', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/products', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/public/products', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/refunds/orders', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/refunds/orders/:orderId', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/shipping/labels/:orderId', () => HttpResponse.json({
+tests/mocks/handlers.generated.ts:/api/v1/shipping/quote', () => HttpResponse.json({
+tests/mocks/handlers.pruned.pass5.ts:/api/cart/validate', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/checkout', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/dsr/delete', async () => new HttpResponse(null, { status: 202 })),
+tests/mocks/handlers.pruned.pass5.ts:/api/dsr/export', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/payment_intent', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/producer/status', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/shipping/rates and /api/v1/shipping/quote
+tests/mocks/handlers.pruned.pass5.ts:/api/shipping/rates', async () =>
+tests/mocks/handlers.pruned.pass5.ts:/api/v1';
+tests/mocks/handlers.pruned.ts:/api/cart', async () =>
+tests/mocks/handlers.pruned.ts:/api/checkout', async () =>
+tests/mocks/handlers.pruned.ts:/api/dsr/delete', async () => {
+tests/mocks/handlers.pruned.ts:/api/dsr/export', async () => {
+tests/mocks/handlers.pruned.ts:/api/payment_intent', async () =>
+tests/mocks/handlers.pruned.ts:/api/producer/status', () =>
+tests/mocks/handlers.pruned.ts:/api/shipping/rates', async () =>
+tests/mocks/handlers.pruned.ts:/api/v1';
+tests/msw/checkout.handlers.ts:/api/v1'
+tests/msw/handlers.ts:/api/v1'
+tests/unit/checkout-api-extended.spec.ts:/api/checkout'
+tests/unit/checkout-api-extended.spec.ts:/api/v1'
+tests/unit/checkout-api-performance.spec.ts:/api/checkout-monitor'
+tests/unit/checkout-api-performance.spec.ts:/api/checkout'
+tests/unit/checkout-api-performance.spec.ts:/api/v1'
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/cart/items', () => {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/cart/items', {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/cart/items', async () => {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/orders/checkout', () => {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/orders/checkout', {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/shipping/quote', () => {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/shipping/quote', {
+tests/unit/checkout-error-handling.spec.tsx:/api/v1/shipping/quote', async () => {
+tests/unit/checkout-shipping-updates.spec.tsx:/api/v1/shipping/quote', () => {
+tests/unit/checkout-shipping-updates.spec.tsx:/api/v1/shipping/quote', {
+tests/unit/checkout.api.extended.spec.ts:/api/checkout';
+tests/unit/checkout.api.resilience.spec.ts:/api/checkout';
+
+EP (code):
+src/app/admin/orders/page.tsx:/api/admin/orders/${orderId}/update-status`, {
+src/app/admin/producers/page.tsx:/api/admin/producers');
+src/app/admin/producers/page.tsx:/api/admin/producers/${producerId}/${endpoint}`, {
+src/app/api/admin/producers/[id]/approve/route.ts:/api/admin/producers/[id]/approve
+src/app/api/admin/producers/[id]/reject/route.ts:/api/admin/producers/[id]/reject
+src/app/api/admin/producers/route.ts:/api/admin/producers
+src/app/api/checkout/address/route.ts:/api/checkout/address
+src/app/api/checkout/pay/route.ts:/api/checkout/pay
+src/app/api/checkout/quote/route.ts:/api/checkout/quote
+src/app/api/csp-report/route.ts:/api/csp-report
+src/app/api/producer/onboarding/route.ts:/api/producer/onboarding
+src/app/api/producer/products/route.ts:/api/producer/products
+src/app/api/producer/status/route.ts:/api/producer/status
+src/app/api/v1/lockers/search/route.ts:/api/v1'}/lockers/search?postal_code=${encodeURIComponent(postalCode)}`;
+src/app/api/v1/shipping/quote/route.ts:/api/v1'}/shipping/quote`, {
+src/app/checkout/page.tsx:/api/checkout/pay', {
+src/app/checkout/page.tsx:/api/checkout/quote', {
+src/app/checkout/payment/[orderId]/page.tsx:/api/payment';
+src/app/dev-check/page.tsx:/api/health
+src/app/dev-check/page.tsx:/api/health`, {
+src/app/dev-check/page.tsx:/api/v1',
+src/app/producer/onboarding/page.tsx:/api/producer/onboarding', {
+src/app/producer/onboarding/page.tsx:/api/producer/status');
+src/app/producer/orders/page.tsx:/api/producer/orders/${orderId}/ship`, {
+src/app/producer/products/page.tsx:/api/producer/products');
+src/app/producer/products/page.tsx:/api/producer/status');
+src/components/analytics/AnalyticsDashboard.tsx:/api/analytics';
+src/components/producer/ProducerAnalyticsDashboard.tsx:/api/producer-analytics';
+src/components/shipping/DeliveryMethodSelector.tsx:/api/v1/shipping/quote', {
+src/components/shipping/LockerSearch.tsx:/api/v1/lockers/search?postal_code=${encodeURIComponent(searchPostalCode)}`, {
+src/components/shipping/ShipmentTracking.tsx:/api/v1/orders/${orderId}/shipment`;
+src/components/shipping/ShipmentTracking.tsx:/api/v1/shipping/tracking/${codeToUse}`;
+src/components/shipping/ShippingLabelManager.tsx:/api/v1/shipping/labels/${orderId}`, {
+src/components/shipping/ShippingQuote.tsx:/api/v1/shipping/quote', {
+src/env.ts:/api/v1'
+src/hooks/useCheckout.ts:/api/checkout';
+src/hooks/useProducerAuth.ts:/api/producer/status', {
+src/lib/admin/adminApi.ts:/api/v1/products?with=producer');
+src/lib/admin/adminApi.ts:/api/v1/products/${productId}`, {
+src/lib/admin/pricingApi.ts:/api/v1/products?with=producer');
+src/lib/admin/pricingApi.ts:/api/v1/products/${productId}`, {
+src/lib/api.ts:/api/v1';
+src/lib/api/analytics.ts:/api/v1';
+src/lib/api/notifications.ts:/api/v1';
+src/lib/api/payment.ts:/api/v1';
+src/lib/api/producer-analytics.ts:/api/v1';
+src/lib/api/refunds.ts:/api/v1';
+src/lib/csp.ts:/api/csp-report`,
+src/lib/gdpr-dsr.ts:/api/v1';
+src/lib/types/checkout-hook.ts:/api/checkout';
+src/mocks/e2e-auth.ts:/api/auth/login': {
+src/mocks/e2e-auth.ts:/api/auth/logout': {
+src/mocks/e2e-auth.ts:/api/auth/me': {

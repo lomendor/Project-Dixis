@@ -51,3 +51,8 @@ global.ResizeObserver = class ResizeObserver {
     return null;
   }
 };// MSW server setup imported in handlers
+
+// Pass 7: Contract-accurate MSW handlers
+import { handlersPass7 } from '../mocks/handlers.pass7';
+import { server } from '../mocks/server';
+server.use(...handlersPass7);
