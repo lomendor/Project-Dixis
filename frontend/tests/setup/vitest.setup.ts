@@ -50,4 +50,4 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {
     return null;
   }
-};
+};// MSW server setup imported in handlers

@@ -2,6 +2,7 @@
  * useCheckout Hook Tests - Core Coverage Only
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';

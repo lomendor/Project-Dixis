@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['tests/setup/polyfills.ts', 'tests/setup/vitest.setup.ts'],
+    setupFiles: ['tests/setup/polyfills.ts', 'tests/setup/mock-hooks.ts', 'tests/setup/vitest.setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
