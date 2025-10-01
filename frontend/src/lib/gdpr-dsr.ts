@@ -259,26 +259,29 @@ export class GDPRDataSubjectService {
         }
         break;
 
-      case `/gdpr/dsr-requests/${requestId.split('_')[1]}`:
-        return {
-          id: requestId,
-          type: DSRRequestType.ACCESS,
-          status: DSRRequestStatus.COMPLETED,
-          user_id: 'user_123',
-          email: 'user@example.com',
-          submitted_at: now,
-          completed_at: now,
-          expires_at: expiresAt,
-          details: {
-            verification_method: 'email',
-            verification_completed: true
-          }
-        };
-
-      case `/gdpr/data-export/${requestId.split('_')[1]}`:
-        return this.generateMockDataExport();
-
       default:
+        // Handle dynamic request IDs in path
+        if (endpoint.startsWith('/gdpr/dsr-requests/') && !endpoint.includes('verify')) {
+          return {
+            id: requestId,
+            type: DSRRequestType.ACCESS,
+            status: DSRRequestStatus.COMPLETED,
+            user_id: 'user_123',
+            email: 'user@example.com',
+            submitted_at: now,
+            completed_at: now,
+            expires_at: expiresAt,
+            details: {
+              verification_method: 'email',
+              verification_completed: true
+            }
+          };
+        }
+
+        if (endpoint.startsWith('/gdpr/data-export/')) {
+          return this.generateMockDataExport();
+        }
+
         if (endpoint.includes('verify')) {
           return { verified: true };
         }
