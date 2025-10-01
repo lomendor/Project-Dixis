@@ -24,7 +24,13 @@ jobs:
           cd frontend 2>/dev/null || true
           node - <<'NODE'
 const fs=require('fs');
-let s={failed:99,skipped:99}; try{ s=(JSON.parse(fs.readFileSync('vitest.json','utf8')).summary)||s; }catch{}
-const ok=(s.failed===0)&&(s.skipped<=Number(process.env.SKIP_LIMIT||10));
-console.log({ok, failed:s.failed, skipped:s.skipped}); process.exit(ok?0:1);
+let failed=99,skipped=99;
+try{
+  const d=JSON.parse(fs.readFileSync('vitest.json','utf8'));
+  failed=d.numFailedTests||0;
+  skipped=d.numPendingTests||0;
+}catch(e){console.error('Parse error:',e.message);}
+const ok=(failed===0)&&(skipped<=Number(process.env.SKIP_LIMIT||10));
+console.log({ok, failed, skipped, limit:process.env.SKIP_LIMIT});
+process.exit(ok?0:1);
 NODE
