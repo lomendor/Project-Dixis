@@ -152,3 +152,9 @@ calibrate:
 	@echo "📊 Running shipping calibration..."
 	cd $(BACKEND) && php artisan shipping:calibrate docs/samples/orders-20.template.csv
 	@echo "✅ Calibration complete!"
+
+prd-map:
+	@mkdir -p docs/_mem/logs
+	@echo "Running PRD mapper…"
+	@./scripts/map_prd_links.sh | tee docs/_mem/logs/$$(date +%Y%m%d-%H%M)-prd-mapping.log
+	@echo "Done. Logs in docs/_mem/logs"
