@@ -56,3 +56,8 @@ global.ResizeObserver = class ResizeObserver {
 import { handlersPass7 } from '../mocks/handlers.pass7';
 import { server } from '../mocks/server';
 server.use(...handlersPass7);
+
+// Pass 8.1: Exact MSW routes for /api and /api/v1
+import { handlersPass81 } from '../mocks/handlers.pass81';
+import { server } from '../mocks/server';
+server.use(...handlersPass81);
