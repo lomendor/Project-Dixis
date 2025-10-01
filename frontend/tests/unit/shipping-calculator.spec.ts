@@ -38,6 +38,8 @@ interface ShippingQuote {
 
 // Mock shipping calculator implementation
 class GreekShippingCalculator {
+  private static lockCounter = 0; // Static counter for unique lock IDs
+
   private readonly GREEK_POSTAL_ZONES = {
     'athens_metro': ['10*', '11*', '12*', '13*', '14*', '15*', '16*', '17*', '18*', '19*'],
     'thessaloniki': ['54*', '55*', '56*'],
@@ -189,7 +191,8 @@ class GreekShippingCalculator {
   // SH-LOCK-002: Zone locking for bulk orders
   lockShippingRates(postalCode: string, durationHours: number = 24): Promise<{ lock_id: string; expires_at: string }> {
     return new Promise((resolve) => {
-      const lockId = `SHIP_${postalCode}_${Date.now()}`;
+      // Use counter + timestamp for uniqueness in concurrent scenarios
+      const lockId = `SHIP_${postalCode}_${Date.now()}_${++GreekShippingCalculator.lockCounter}`;
       const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000);
 
       setTimeout(() => {
@@ -353,7 +356,7 @@ describe('SH-LOCK-002: Shipping Rate Locking', () => {
   it('creates shipping rate locks for bulk orders', async () => {
     const lock = await calculator.lockShippingRates('10671', 24);
 
-    expect(lock.lock_id).toMatch(/^SHIP_10671_\d+$/);
+    expect(lock.lock_id).toMatch(/^SHIP_10671_\d+_\d+$/); // Updated regex to include counter
     expect(new Date(lock.expires_at)).toBeInstanceOf(Date);
 
     const expiryTime = new Date(lock.expires_at).getTime();
