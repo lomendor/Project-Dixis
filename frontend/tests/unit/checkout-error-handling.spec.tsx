@@ -3,6 +3,7 @@
  * Tests API error scenarios, network failures, and resilience patterns
  */
 
+import React, { useState } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse, delay } from 'msw';
@@ -31,14 +32,19 @@ const useCheckout = (): CheckoutState => {
   const loadCart = async () => {
     setLoading(true);
     setError(null);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch('/api/v1/cart/items');
+      const response = await fetch('/api/v1/cart/items', {
+        signal: controller.signal
+      });
       if (!response.ok) throw new Error('Cart load failed');
       const data = await response.json();
       setCart(data.cart_items || []);
     } catch (err) {
       setError('Σφάλμα σύνδεσης καλαθιού');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -46,11 +52,14 @@ const useCheckout = (): CheckoutState => {
   const getShippingQuote = async (destination: { postal_code: string }) => {
     setLoading(true);
     setError(null);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
       const response = await fetch('/api/v1/shipping/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destination })
+        body: JSON.stringify({ destination }),
+        signal: controller.signal
       });
       if (!response.ok) throw new Error('Shipping quote failed');
       const data = await response.json();
@@ -58,6 +67,7 @@ const useCheckout = (): CheckoutState => {
     } catch (err) {
       setError('Σφάλμα στον υπολογισμό αποστολής');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -96,27 +106,10 @@ const useCheckout = (): CheckoutState => {
   };
 };
 
-// Mock React hooks
-const { useState } = vi.hoisted(() => ({
-  useState: vi.fn()
-}));
-
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
-  return {
-    ...actual,
-    useState: vi.fn()
-  };
-});
-
+// MSW server setup
 const server = setupServer();
 
 beforeEach(() => {
-  vi.mocked(useState).mockImplementation((initial) => {
-    const [state, setState] = (React as any).useState(initial);
-    return [state, setState];
-  });
-
   server.listen({ onUnhandledRequest: 'error' });
 });
 

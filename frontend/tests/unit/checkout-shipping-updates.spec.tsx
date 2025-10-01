@@ -3,6 +3,7 @@
  * Tests shipping method selection, postal code validation, and UI state updates
  */
 
+import React, { useState } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
@@ -83,27 +84,10 @@ const CheckoutShipping = ({ onShippingUpdate }: { onShippingUpdate: (method: any
   );
 };
 
-// Mock React hooks
-const { useState } = vi.hoisted(() => ({
-  useState: vi.fn()
-}));
-
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
-  return {
-    ...actual,
-    useState: vi.fn()
-  };
-});
-
+// MSW server setup
 const server = setupServer();
 
 beforeEach(() => {
-  vi.mocked(useState).mockImplementation((initial) => {
-    const [state, setState] = (React as any).useState(initial);
-    return [state, setState];
-  });
-
   server.listen({ onUnhandledRequest: 'error' });
   server.use(...greekPostalHandlers);
 });

@@ -25,7 +25,8 @@ export const handlersPruned = [
             street: 'Ακαδημίας 42',
             city: 'Αθήνα',
             postal_code: '10671',
-            country: 'GR'
+            region: 'Αττική',
+            country: 'Ελλάδα'
           }
         ],
         orders: [
@@ -33,9 +34,23 @@ export const handlersPruned = [
             id: 'order_1',
             total: 45.90,
             status: 'completed',
-            created_at: '2024-01-15T10:30:00Z'
+            created_at: '2024-01-15T10:30:00Z',
+            items: []
           }
         ],
+        preferences: {
+          language: 'el',
+          marketing_consent: false
+        },
+        behavioral_data: {
+          page_views: 42,
+          last_login: '2024-01-20T15:30:00Z'
+        },
+        export_metadata: {
+          generated_at: new Date().toISOString(),
+          format_version: '1.0',
+          legal_basis: ['GDPR Article 15', 'GDPR Article 20']
+        },
         messages: []
       }
     });
