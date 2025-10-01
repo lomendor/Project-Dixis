@@ -294,5 +294,69 @@ describe('Checkout API Extended Tests', () => {
       expect(result.success).toBe(true);
       expect(result.data?.id).toBe('greek_order_456');
     });
+
+    it('documents that accented Greek is currently rejected by schema (ADR-0001)', async () => {
+      // Current behavior per ADR-0001: Schema regex does not allow Greek diacritics
+      // This test documents expected validation failure with accented characters
+      const accentedGreekForm = {
+        customer: {
+          firstName: 'Γιάννης',  // WITH accent (ά)
+          lastName: 'Παπαδόπουλος',  // WITH accent (ό)
+          email: 'giannis@example.gr',
+          phone: '2101234567'
+        },
+        shipping: {
+          address: 'Ερμού 123',
+          city: 'Αθήνα',  // WITH accent (ή)
+          postalCode: '10563'
+        },
+        order: {
+          items: [{
+            id: 1,
+            product_id: 1,
+            name: 'Ελληνικό Μέλι',  // WITH accent (ό)
+            price: 15.50,
+            quantity: 2,
+            subtotal: 31.00,
+            producer_name: 'Μελισσοκομία Κρήτης'  // WITH accents (ί, ή)
+          }],
+          subtotal: 31.00,
+          shipping_cost: 5.50,
+          payment_fees: 0.50,
+          tax_amount: 7.44,
+          total_amount: 44.44,
+          shipping_method: {
+            id: 'courier',
+            name: 'Courier Παράδοση',  // WITH accent (ά)
+            description: 'Γρήγορη παράδοση',  // WITH accents
+            price: 5.50,
+            estimated_days: 2
+          },
+          payment_method: {
+            id: 'card',
+            type: 'card' as const,
+            name: 'Πιστωτική Κάρτα'  // WITH accents (ί, ά)
+          }
+        },
+        session_id: 'test_accented',
+        terms_accepted: true
+      };
+
+      const result = await checkoutApi.processValidatedCheckout(accentedGreekForm);
+
+      // Expect validation to fail due to accented characters
+      expect(result.success).toBe(false);
+      expect(result.errors).toBeDefined();
+      expect(result.errors.length).toBeGreaterThan(0);
+
+      // Verify specific fields are flagged (names, city, etc.)
+      const errorFields = result.errors.map(e => e.field);
+      expect(errorFields).toContain('customer.firstName');
+      expect(errorFields).toContain('customer.lastName');
+      expect(errorFields).toContain('shipping.city');
+
+      // Document for future: these errors indicate schema restricts diacritics
+      // See ADR-0001 for product decision on allowing accented Greek input
+    });
   });
 });

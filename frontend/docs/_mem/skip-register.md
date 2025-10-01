@@ -200,3 +200,43 @@
 **Branch**: docs/prd-upgrade
 **Total Skipped**: 20 tests
 **Target**: 0 tests (via phased roadmap)
+
+---
+
+## Pass 11 Update — 2025-10-02
+
+### Attempted Unskip (BLOCKED)
+
+**Target Files**:
+- `tests/unit/useCheckout.spec.tsx` (4 tests)
+- `tests/unit/checkout-shipping-updates.spec.tsx` (5 tests)
+
+**Result**: **FAILED** - 8 test failures due to production code mismatches
+
+**Failures**:
+1. useCheckout hook missing methods (`setTermsAccepted`, `shippingMethods` undefined)
+2. Cart loading returns empty array (expected: 1 item)
+3. CheckoutShipping component doesn't render expected DOM structure
+4. MSW handlers insufficient for component-level testing
+5. GDPR timing calculation off by 1 day (31 vs 30)
+
+**Decision**: Re-skipped both files to maintain green state (0 failures)
+
+**Root Cause**: Cannot reduce skipped tests to ≤10 without:
+- Implementing missing hook methods
+- Building out CheckoutShipping component
+- Modifying production code (violates Code-as-Canon protocol)
+
+**Artifacts Created**:
+- `tests/mocks/handlers.pass11.ts` - Additional MSW handlers (insufficient alone)
+- `tests/mocks/server.ts` - Updated handler priority
+- `docs/_mem/logs/20251002-0034-pass11/` - Failure analysis logs
+
+**Recommendation**: 
+- Keep SKIP_LIMIT=20 temporarily
+- Create issue for Phase 1 implementation (useCheckout + CheckoutShipping)
+- Target: 2-4 hours implementation + test alignment
+- Expected outcome: 20 → ~7 skipped tests after Phase 1
+
+**Status**: GREEN maintained (97 passed, 0 failed, 20 skipped)
+
