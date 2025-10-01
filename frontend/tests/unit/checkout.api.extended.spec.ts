@@ -254,6 +254,7 @@ describe('Checkout API Extended Tests', () => {
           shipping_method: {
             id: 'courier',
             name: 'Courier Παράδοση',
+            description: 'Γρήγορη παράδοση με courier',
             price: 5.50,
             estimated_days: 2
           },
@@ -270,10 +271,12 @@ describe('Checkout API Extended Tests', () => {
       server.use(
         http.post(apiUrl('orders/checkout'), () => {
           return HttpResponse.json({
-            id: 'greek_order_456',
-            total: 44.44,
-            status: 'pending' as const,
-            created_at: new Date().toISOString()
+            order: {  // API wraps in {order: ...}
+              id: 'greek_order_456',
+              total: 44.44,
+              status: 'pending' as const,
+              created_at: new Date().toISOString()
+            }
           });
         })
       );

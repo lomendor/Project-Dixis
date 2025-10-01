@@ -65,9 +65,14 @@ describe('CheckoutApiClient Resilience', () => {
         items: [{ product_id: 1, quantity: 2 }],
         destination: { postal_code: '10671', city: 'Athens' }
       });
-      
+
       expect(result.success).toBe(true);
-      expect(result.data).toHaveLength(2);
+      expect(result.data).toHaveLength(1);  // Implementation returns 1 zone-based method
+      expect(result.data![0]).toMatchObject({
+        id: 'standard',
+        name: 'Κανονική Παράδοση',
+        estimated_days: 1  // Athens metro zone
+      });
     });
   });
 
@@ -130,7 +135,9 @@ describe('CheckoutApiClient Resilience', () => {
   describe('Validation Errors', () => {
     it('handles cart validation errors', async () => {
       const invalidCartResponse = {
-        items: [{ id: 1, product: { id: 'invalid', name: '', price: 'invalid', producer: { name: '' } }, quantity: -1, subtotal: 'invalid' }]
+        cart_items: [{ id: 1, product: { id: 'invalid', name: '', price: 'invalid', producer: { name: '' } }, quantity: -1, subtotal: 'invalid' }],
+        total_items: 1,
+        total_amount: '0.00'
       };
 
       server.use(createSuccessHandler('cart/items', invalidCartResponse));
