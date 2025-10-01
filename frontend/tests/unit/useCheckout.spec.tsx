@@ -6,7 +6,12 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
-import { beforeEach, afterEach, describe, it, expect } from 'vitest';
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
+
+// Phase 1: Unmock useCheckout to test real implementation
+vi.unmock('@/hooks/useCheckout');
+vi.unmock('../../src/hooks/useCheckout');
+
 import { useCheckout } from '../../src/hooks/useCheckout';
 import { apiUrl } from '../../src/lib/api';
 import { checkoutHandlers } from '../msw/checkout.handlers';
@@ -23,7 +28,7 @@ const mockShipping = [
   { id: 'home', name: 'Home Delivery', price: 5.50, estimated_days: 2 }
 ];
 
-describe.skip('useCheckout Hook', () => {
+describe('useCheckout Hook', () => {
   it('loads cart and handles errors', async () => {
     const { result } = renderHook(() => useCheckout());
 

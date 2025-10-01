@@ -10,6 +10,22 @@ export const checkoutHandlers = [
       cart_items: [{
         id: 1,
         product: { id: 1, name: 'Test Product', price: '15.50', producer: { name: 'Test Producer' } },
+        product_id: 1,
+        quantity: 2,
+        subtotal: '31.00'
+      }],
+      total_items: 2,
+      total_amount: '31.00'
+    })
+  }),
+
+  // Also handle non-v1 path
+  http.get('http://127.0.0.1:8001/api/cart/items', () => {
+    return HttpResponse.json({
+      cart_items: [{
+        id: 1,
+        product: { id: 1, name: 'Test Product', price: '15.50', producer: { name: 'Test Producer' } },
+        product_id: 1,
         quantity: 2,
         subtotal: '31.00'
       }],

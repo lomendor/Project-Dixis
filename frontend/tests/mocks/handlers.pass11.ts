@@ -58,6 +58,28 @@ const mockShippingRates = {
       currency: 'EUR',
       estimated_days: 1
     }
+  ],
+  shipping_methods: [
+    {
+      id: 'standard',
+      name: 'Κανονική Παράδοση',
+      label: 'Κανονική Παράδοση',
+      description: 'Παράδοση σε 2-3 εργάσιμες ημέρες',
+      total: 4.90,
+      price: 4.90,
+      currency: 'EUR',
+      estimated_days: 2
+    },
+    {
+      id: 'express',
+      name: 'Ταχεία Παράδοση',
+      label: 'Ταχεία Παράδοση',
+      description: 'Παράδοση την επόμενη ημέρα',
+      total: 8.90,
+      price: 8.90,
+      currency: 'EUR',
+      estimated_days: 1
+    }
   ]
 };
 
