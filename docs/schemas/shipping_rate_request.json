@@ -1,0 +1,15 @@
+{
+"$schema": "http://json-schema.org/draft-07/schema#",
+"title": "ShippingRateRequest",
+"type": "object",
+"required": ["items", "destination"],
+"properties": {
+"items": {"type": "array", "items": {"type": "object", "required": ["sku","qty","weight_g","dims_cm"], "properties": {
+"sku":{"type":"string"}, "qty":{"type":"integer","minimum":1},
+"weight_g":{"type":"number","minimum":0},
+"dims_cm":{"type":"object","required":["l","w","h"],"properties":{"l":{"type":"number"},"w":{"type":"number"},"h":{"type":"number"}}}
+}}},
+"destination": {"type":"object","required":["country","zip"],"properties":{"country":{"type":"string"},"zip":{"type":"string"}}},
+"cod":{"type":"boolean"}, "locker":{"type":"boolean"}
+}
+}

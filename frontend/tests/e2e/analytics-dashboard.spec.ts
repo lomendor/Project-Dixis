@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectAuthedOrLogin } from './helpers/auth-mode';
 
 test.describe('Analytics Dashboard', () => {
   test.beforeEach(async ({ page }) => {
@@ -275,7 +276,7 @@ test.describe('Analytics Dashboard', () => {
     await page.goto('/admin/analytics');
 
     // Should be redirected to login page
-    await expect(page).toHaveURL('/auth/login');
+    await expectAuthedOrLogin(page);
 
     // Verify login form is visible
     await expect(page.getByTestId('email-input')).toBeVisible();

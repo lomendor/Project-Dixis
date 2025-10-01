@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import ProductToggle from '../components/ProductToggle';
 import { adminApi, ProductWithProducer } from '@/lib/admin/adminApi';
@@ -11,11 +11,7 @@ export default function AdminTogglePage() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await adminApi.getProducts();
@@ -25,7 +21,11 @@ export default function AdminTogglePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const handleToggleStatus = async (productId: number, isActive: boolean) => {
     await adminApi.toggleProductStatus(productId, isActive);

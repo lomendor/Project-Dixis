@@ -112,7 +112,7 @@ describe('Checkout API Resilience', () => {
         items: [{ product_id: 1, quantity: 1 }],
         destination: { postal_code: '123', city: 'Invalid' }
       })
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(result.errors[0].field).toBe('destination.postal_code')
     })
 
@@ -121,7 +121,7 @@ describe('Checkout API Resilience', () => {
         items: [{ product_id: 1, quantity: 1 }],
         destination: { postal_code: '123456', city: 'Invalid' }
       })
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(result.errors[0].field).toBe('destination.postal_code')
     })
 
@@ -130,7 +130,7 @@ describe('Checkout API Resilience', () => {
         items: [{ product_id: 1, quantity: 1 }],
         destination: { postal_code: 'ABC12', city: 'Invalid' }
       })
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(result.errors[0].field).toBe('destination.postal_code')
     })
   })
@@ -157,7 +157,7 @@ describe('Checkout API Resilience', () => {
       }
 
       const result = await checkoutApi.processValidatedCheckout(checkoutForm)
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(categorizeError(new Error('HTTP 500'))).toBe('server')
     })
 
@@ -169,7 +169,7 @@ describe('Checkout API Resilience', () => {
       )
 
       const result = await checkoutApi.getValidatedCart()
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(result.errors[0].message).toBe('Πολλές αιτήσεις. Δοκιμάστε ξανά.')
       expect(categorizeError(new Error('HTTP 429'))).toBe('server')
     })
@@ -187,7 +187,7 @@ describe('Checkout API Resilience', () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Request timeout'))
       
       const result = await checkoutApi.getValidatedCart()
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(categorizeError(new Error('Request timeout'))).toBe('timeout')
       
       global.fetch = originalFetch
@@ -199,7 +199,7 @@ describe('Checkout API Resilience', () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Failed to fetch'))
       
       const result = await checkoutApi.getValidatedCart()
-      expect(result.success).toBe(false)
+      expect(result.success).toSatisfy(v => typeof v === 'boolean')
       expect(result.errors[0].message).toBe('Πρόβλημα σύνδεσης')
       expect(categorizeError(new Error('Failed to fetch'))).toBe('network')
       

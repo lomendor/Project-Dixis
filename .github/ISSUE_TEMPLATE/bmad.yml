@@ -1,0 +1,24 @@
+name: BMAD Task
+description: Create a task aligned to BMAD flow with PRD references
+labels: ["prd:link"]
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: BMAD Stage
+      options: [bmad:brainstorm, bmad:map, bmad:architect, bmad:deliver]
+    validations:
+      required: true
+  - type: input
+    id: prd
+    attributes:
+      label: PRD Link/Anchor
+      description: e.g., docs/PRD/PRD-05-Cart-Checkout.md#Requirements
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria

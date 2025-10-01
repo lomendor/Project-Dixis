@@ -1,0 +1,1651 @@
+ Vitest  "deps.inline" is deprecated. If you rely on vite-node directly, use "server.deps.inline" instead. Otherwise, consider using "deps.optimizer.web.include"
+
+ RUN  v3.2.4 /Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend
+
+stderr | tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles server errors
+🚨 API Error in processValidatedCheckout: Error: HTTP 500: Internal Server Error
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+    at ApiClient.checkout [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:417:22[90m)[39m
+    at CheckoutApiClient.processValidatedCheckout [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:281:21[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-extended.spec.ts:159:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles rate limiting (HTTP 429)
+🚨 API Error in getValidatedCart: Error: HTTP 429: Too Many Requests
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-extended.spec.ts:171:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > processes checkout successfully on first attempt
+🚨 API Error in processValidatedCheckout: TypeError: Cannot read properties of undefined (reading 'id')
+    at CheckoutApiClient.processValidatedCheckout [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:287:41[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:57:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > AbortSignal & Cancellation > handles AbortSignal during cart loading
+🚨 API Error in getValidatedCart: Error: AbortError
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:63:15
+    at mockCall [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:96:15[90m)[39m
+    at spy [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4mtinyspy[24m/dist/index.js:47:103[90m)[39m
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:256:28[90m)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:33[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:50[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:66:40
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > categorizes network timeout vs server timeout differently
+🚨 API Error in getValidatedCart: Error: network timeout
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:110:48
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > handles key HTTP status code ranges
+🚨 API Error in getValidatedCart: Error: HTTP 401: Unauthorized
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:139:24
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > handles key HTTP status code ranges
+🚨 API Error in getValidatedCart: Error: HTTP 429: Too Many Requests
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:139:24
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > respects exponential backoff timing
+🚨 API Error in getValidatedCart: Error: HTTP 500: Internal Server Error
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:157:7
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles intermittent network failures correctly
+🚨 API Error in getValidatedCart: Error: Network error
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:179:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > stops retrying on non-retryable errors immediately
+🚨 API Error in getValidatedCart: Error: HTTP 400: Bad Request
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:195:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles mixed error types in retry sequence
+🚨 API Error in getValidatedCart: Error: Network error
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.extended.spec.ts:218:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > AbortSignal & Cancellation > handles AbortSignal during cart loading 11ms
+   → expected 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστ…' to contain 'Πρόβλημα σύνδεσης'
+ ✓ tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Greek Zone Validation Edge Cases > validates major Greek cities and islands 1ms
+ ✓ tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Greek Zone Validation Edge Cases > handles Greek diacritics in city names 0ms
+ ✓ tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Greek Zone Validation Edge Cases > validates postal code format 0ms
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > categorizes network timeout vs server timeout differently 2ms
+   → expected 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστ…' to be 'Timeout - δοκιμάστε ξανά' // Object.is equality
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > handles key HTTP status code ranges 11ms
+   → expected 'Πολλές αιτήσεις. Δοκιμάστε ξανά.' to be 'Πολλές αιτήσεις - περιμένετε' // Object.is equality
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > respects exponential backoff timing 3ms
+   → expected 1 to be 3 // Object.is equality
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles intermittent network failures correctly 4ms
+   → expected false to be true // Object.is equality
+ ✓ tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > stops retrying on non-retryable errors immediately 4ms
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles mixed error types in retry sequence 2ms
+   → expected false to be true // Object.is equality
+ × tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Checkout Form Greek Business Rules > validates complete Greek checkout flow with edge cases 2ms
+   → expected false to be true // Object.is equality
+stderr | tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles network timeout
+🚨 API Error in getValidatedCart: Error: Request timeout
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-extended.spec.ts:187:48
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles network connection failure
+🚨 API Error in getValidatedCart: Error: Failed to fetch
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-extended.spec.ts:199:48
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Postal Code Validation > validates correct Greek postal codes 2ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Postal Code Validation > rejects invalid postal codes 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Zone Identification > correctly identifies Athens metro area 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Zone Identification > correctly identifies Thessaloniki 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Zone Identification > correctly identifies Greek islands 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Rate Calculation for Different Zones > calculates correct rates for Athens (no surcharge) 1ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Rate Calculation for Different Zones > calculates correct rates for Thessaloniki (small surcharge) 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Rate Calculation for Different Zones > calculates correct rates for Crete (island surcharge) 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Rate Calculation for Different Zones > calculates correct rates for remote islands (multiple surcharges) 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Weight-based Pricing > calculates correct rates for heavy packages 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Weight-based Pricing > enforces minimum 1kg for calculation 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-RATE-001: Greek Shipping Rate Calculation > Delivery Time Estimation > adds correct delivery delays for islands 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Error Categorization > categorizes errors correctly 2ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Retry Logic > succeeds on first attempt 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Retry Logic > retries then succeeds 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Retry Logic > respects abort signal 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > handles Athens metro rates 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > handles Thessaloniki rates 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > handles Crete rates (remote islands) 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > handles islands rates 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > validates postal format - too short 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > validates postal format - too long 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Greek Postal Codes > validates postal format - non-numeric 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles server errors 14ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles rate limiting (HTTP 429) 4ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles network timeout 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > handles network connection failure 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Network Scenarios > validates responses 4ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Checkout Resilience Wrapper > wraps operations with enhanced error handling 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Checkout Resilience Wrapper > provides Greek error messages based on category 1ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Checkout Resilience Wrapper > handles timeout scenarios with Greek messaging 0ms
+ ✓ tests/unit/checkout-api-extended.spec.ts > Checkout API Resilience > Performance > handles concurrent operations 5ms
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries network errors and eventually succeeds
+🚨 API Error in getValidatedCart: TypeError: Failed to fetch
+    at createNetworkError [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:28:24[90m)[39m
+    at Object.onRequestError [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:255:34[90m)[39m
+    at handleResponse [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-A7Q4RTDJ.mjs:138:15[90m)[39m
+    at handleRequest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-A7Q4RTDJ.mjs:236:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at globalThis.fetch [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:210:32[90m)[39m
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:256:22[90m)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:87:22 {
+  cause: Response {
+    status: [33m0[39m,
+    statusText: [32m''[39m,
+    headers: Headers {},
+    body: [1mnull[22m,
+    bodyUsed: [33mfalse[39m,
+    ok: [33mfalse[39m,
+    redirected: [33mfalse[39m,
+    type: [32m'error'[39m,
+    url: [32m''[39m
+  }
+}
+
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries server errors with exponential backoff
+🚨 API Error in processValidatedCheckout: Error: HTTP 500: Internal Server Error
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.checkout [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:417:22[90m)[39m
+    at CheckoutApiClient.processValidatedCheckout [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:281:21[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:107:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > handles rate limiting with proper delay
+🚨 API Error in getValidatedCart: Error: HTTP 429: Too Many Requests
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:122:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Network & Error Handling > handles timeout errors properly
+🚨 API Error in getValidatedCart: Error: timeout
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:159:48
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Network & Error Handling > stops retrying non-retryable errors
+🚨 API Error in getValidatedCart: Error: HTTP 400: Bad Request
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:266:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout.api.resilience.spec.ts:174:22
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > validates cart successfully on first attempt 14ms
+   → expected [] to have a length of 1 but got +0
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > processes checkout successfully on first attempt 6ms
+   → expected false to be true // Object.is equality
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > calculates shipping quote successfully 1ms
+   → expected [ { id: 'standard', …(4) } ] to have a length of 2 but got 1
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries network errors and eventually succeeds 2ms
+   → expected false to be true // Object.is equality
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries server errors with exponential backoff 2ms
+   → expected false to be true // Object.is equality
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > handles rate limiting with proper delay 2ms
+   → expected 'Πολλές αιτήσεις. Δοκιμάστε ξανά.' to be 'Πολλές αιτήσεις - περιμένετε' // Object.is equality
+ × tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Validation Errors > handles cart validation errors 1ms
+   → expected true to be false // Object.is equality
+ ✓ tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Validation Errors > validates checkout form structure 1ms
+ ✓ tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Validation Errors > validates shipping quote request format 1ms
+ ✓ tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Network & Error Handling > handles timeout errors properly 1ms
+ ✓ tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Network & Error Handling > stops retrying non-retryable errors 1ms
+ ✓ tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Business Logic Validation > validates Greek postal code and city matching 0ms
+stderr | tests/unit/useCheckout.spec.tsx > useCheckout Hook > loads cart and handles errors
+🚨 API Error in getValidatedCart: TypeError: Failed to fetch
+    at createNetworkError [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:28:24[90m)[39m
+    at Object.onRequestError [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:255:34[90m)[39m
+    at handleResponse [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-A7Q4RTDJ.mjs:138:15[90m)[39m
+    at handleRequest [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-A7Q4RTDJ.mjs:236:12[90m)[39m
+    at globalThis.fetch [90m(file:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@mswjs[24m/interceptors/lib/node/chunk-WI4WZWP4.mjs:210:32[90m)[39m
+    at ApiClient.request [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:256:22[90m)[39m
+    at ApiClient.getCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api.ts:360:22[90m)[39m
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:164:28[90m)[39m
+    at Object.loadCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/hooks/useCheckout.ts:55:22[90m)[39m
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/useCheckout.spec.tsx:35:27 {
+  cause: Response {
+    status: [33m0[39m,
+    statusText: [32m''[39m,
+    headers: Headers {},
+    body: [1mnull[22m,
+    bodyUsed: [33mfalse[39m,
+    ok: [33mfalse[39m,
+    redirected: [33mfalse[39m,
+    type: [32m'error'[39m,
+    url: [32m''[39m
+  }
+}
+
+ ✓ tests/unit/useCheckout.spec.tsx > useCheckout Hook > loads cart and handles errors 25ms
+ ✓ tests/unit/useCheckout.spec.tsx > useCheckout Hook > gets shipping quotes with Greek postal validation 7ms
+ ✓ tests/unit/useCheckout.spec.tsx > useCheckout Hook > validates form and processes complete checkout with Greek VAT 6ms
+ ✓ tests/unit/useCheckout.spec.tsx > useCheckout Hook > resets state correctly 1ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Concurrent Operations > handles 10 concurrent cart operations 29ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Concurrent Operations > handles concurrent checkouts with progressive delay 36ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-LOCK-002: Shipping Rate Locking > creates shipping rate locks for bulk orders 100ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-LOCK-002: Shipping Rate Locking > supports custom lock duration 101ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-LOCK-002: Shipping Rate Locking > generates unique lock IDs for concurrent requests 102ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-SURC-003: Dynamic Surcharge Calculation > calculates seasonal surcharges correctly 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-SURC-003: Dynamic Surcharge Calculation > calculates insurance surcharges for high-value orders 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-SURC-003: Dynamic Surcharge Calculation > calculates remote area handling surcharges 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-SURC-003: Dynamic Surcharge Calculation > caps remote surcharge at maximum amount 0ms
+ ✓ tests/unit/shipping-calculator.spec.ts > SH-SURC-003: Dynamic Surcharge Calculation > combines all surcharge types correctly 0ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Timeout Scenarios > handles slow responses 102ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Timeout Scenarios > handles request timeouts 1ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Circuit Breaker > opens after failure threshold 1ms
+stderr | tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > validates Greek postal codes correctly
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • POST /api/v1/shipping/quote
+
+  • Request body: {"destination":{"postal_code":"10671"}}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Circuit Breaker > resets after timeout 151ms
+stderr | tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Resource Management > handles many operations
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 0)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 1)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 2)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 3)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 4)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 5)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 6)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 7)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 8)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 9)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 10)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 11)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 12)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 13)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 14)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 15)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 16)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 17)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 18)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 19)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 20)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 21)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 22)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 23)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 24)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 25)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 26)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 27)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 28)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 29)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 30)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 31)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 32)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 33)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 34)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 35)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 36)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 37)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 38)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 39)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 40)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 41)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 42)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 43)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 44)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 45)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 46)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 47)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 48)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+🚨 API Error in getValidatedCart: TypeError: Cannot read properties of undefined (reading 'id')
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:171:36
+    at Array.forEach (<anonymous>)
+    at CheckoutApiClient.getValidatedCart [90m(/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39msrc/lib/api/checkout.ts:168:26[90m)[39m
+    at async Promise.allSettled (index 49)
+    at [90m/Users/panagiotiskourkoutis/Dixis Project 2/Project-Dixis/frontend/[39mtests/unit/checkout-api-performance.spec.ts:82:23
+    at [90mfile:///Users/panagiotiskourkoutis/Dixis%20Project%202/Project-Dixis/frontend/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Circuit Breaker > tracks response times 51ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Resource Management > handles many operations 26ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Greek Postal Edge Cases > handles remote islands 0ms
+ ✓ tests/unit/checkout-api-performance.spec.ts > Checkout API Performance > Greek Postal Edge Cases > validates postal codes 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Submission > submits access request successfully 859ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Submission > submits erasure request with specific data categories 335ms
+stderr | tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > displays loading state during shipping quote calculation
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • POST /api/v1/shipping/quote
+
+  • Request body: {"destination":{"postal_code":"10671"}}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > handles remote island shipping with higher costs
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • POST /api/v1/shipping/quote
+
+  • Request body: {"destination":{"postal_code":"19010"}}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ × tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > validates Greek postal codes correctly 1093ms
+   → Unable to find an element by: [data-testid="shipping-methods"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"10671"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"10671"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ × tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > displays loading state during shipping quote calculation 47ms
+   → [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+Expected element to have text content:
+[32m  Αναζήτηση...[39m
+Received:
+[31m  Υπολογισμός Αποστολής[39m
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Submission > submits portability request 791ms
+stderr | tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > allows shipping method selection and triggers callback
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • POST /api/v1/shipping/quote
+
+  • Request body: {"destination":{"postal_code":"10671"}}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ × tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > handles remote island shipping with higher costs 1037ms
+   → Unable to find an element by: [data-testid="shipping-method-island"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"19010"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"19010"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Submission > normalizes email addresses 628ms
+ × tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Status Tracking > retrieves request status 772ms
+   → expected [] to have property "id"
+ × tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > allows shipping method selection and triggers callback 1042ms
+   → Unable to find an element by: [data-testid="shipping-method-standard"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"10671"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"10671"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ✓ tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > handles API errors gracefully 41ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Status Tracking > lists user DSR requests 907ms
+ × tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Export for Portability > generates comprehensive data export 492ms
+   → expected [] to have property "user_info"
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Network Timeout Scenarios > handles cart loading timeout gracefully 5021ms
+ × tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Export for Portability > includes Greek-specific data in export 485ms
+   → Cannot read properties of undefined (reading 'length')
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Identity Verification > verifies identity with correct code 733ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Identity Verification > handles verification failure gracefully 664ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Retention Policy > provides comprehensive retention policy 4ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Retention Policy > includes correct legal basis for different data types 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Utilities > validates request expiration correctly 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Utilities > provides Greek labels for request types 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Utilities > provides Greek labels for request status 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Utilities > calculates days until expiration correctly 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Utilities > validates email addresses 1ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > GDPR Article Compliance > supports all required DSR request types 1ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > GDPR Article Compliance > enforces 30-day response timeline 886ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > GDPR Article Compliance > covers all relevant legal bases 1ms
+ × tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Greek Market Specific Requirements > handles Greek personal data correctly 933ms
+   → Cannot read properties of undefined (reading 'name')
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Greek Market Specific Requirements > provides DPO contact in Greece 1ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Greek Market Specific Requirements > handles VAT/tax retention requirements 0ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Error Handling and Edge Cases > handles network timeouts gracefully 425ms
+ ✓ tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Error Handling and Edge Cases > validates required fields 329ms
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Server Error Responses > handles 500 server errors during checkout
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • POST /api/v1/orders/checkout
+
+  • Request body: {"items":[],"total":100}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Network Partition Scenarios > handles partial service failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+[MSW] Error: intercepted a request without a matching request handler:
+
+  • GET /api/v1/cart/items
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Network Timeout Scenarios > handles shipping quote timeout 5007ms
+ × tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Server Error Responses > handles 500 server errors during checkout 14ms
+   → expected '[MSW] Cannot bypass a request when us…' to contain 'Internal server error'
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Server Error Responses > handles validation errors with field details 7ms
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Rate Limiting Scenarios > handles rate limiting gracefully 9ms
+ × tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Network Partition Scenarios > handles partial service failures 3ms
+   → expected [] to have a length of 1 but got +0
+ × tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures 6ms
+   → expected 0 to be greater than 0
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Error Recovery > allows error clearing and recovery 3ms
+ ✓ tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Greek-specific Error Messages > provides localized error messages 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 25 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Server Error Responses > handles 500 server errors during checkout
+AssertionError: expected '[MSW] Cannot bypass a request when us…' to contain 'Internal server error'
+
+Expected: [32m"Internal server error"[39m
+Received: [31m"[MSW] Cannot bypass a request when using the "error" strategy for the "onUnhandledRequest" option."[39m
+
+ ❯ tests/unit/checkout-error-handling.spec.tsx:170:36
+    168|       });
+    169| 
+    170|       expect(result.current.error).toContain('Internal server error');
+       |                                    ^
+    171|       expect(result.current.loading).toBe(false);
+    172|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/25]⎯
+
+ FAIL  tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Network Partition Scenarios > handles partial service failures
+AssertionError: expected [] to have a length of 1 but got +0
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+ ❯ tests/unit/checkout-error-handling.spec.tsx:224:35
+    222|       });
+    223| 
+    224|       expect(result.current.cart).toHaveLength(1);
+       |                                   ^
+    225|       expect(result.current.error).toBeNull();
+    226| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/25]⎯
+
+ FAIL  tests/unit/checkout-error-handling.spec.tsx > CO-ERR-003: MSW Integration Error Handling > Circuit Breaker Pattern > handles intermittent failures
+AssertionError: expected 0 to be greater than 0
+ ❯ tests/unit/checkout-error-handling.spec.tsx:264:28
+    262|       // Expect some failures due to 30% failure rate
+    263|       expect(errorCount).toBeGreaterThan(0);
+    264|       expect(successCount).toBeGreaterThan(0);
+       |                            ^
+    265|     });
+    266|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/25]⎯
+
+ FAIL  tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > validates Greek postal codes correctly
+TestingLibraryElementError: Unable to find an element by: [data-testid="shipping-methods"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"10671"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"10671"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ tests/unit/checkout-shipping-updates.spec.tsx:122:11
+    120|     await user.click(submitButton);
+    121| 
+    122|     await waitFor(() => {
+       |           ^
+    123|       expect(screen.getByTestId('shipping-methods')).toBeInTheDocument…
+    124|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/25]⎯
+
+ FAIL  tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > displays loading state during shipping quote calculation
+Error: [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+Expected element to have text content:
+[32m  Αναζήτηση...[39m
+Received:
+[31m  Υπολογισμός Αποστολής[39m
+ ❯ tests/unit/checkout-shipping-updates.spec.tsx:139:26
+    137|     await user.click(submitButton);
+    138| 
+    139|     expect(submitButton).toHaveTextContent('Αναζήτηση...');
+       |                          ^
+    140|     expect(submitButton).toBeDisabled();
+    141|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/25]⎯
+
+ FAIL  tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > handles remote island shipping with higher costs
+TestingLibraryElementError: Unable to find an element by: [data-testid="shipping-method-island"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"19010"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"19010"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ tests/unit/checkout-shipping-updates.spec.tsx:156:11
+    154|     await user.click(submitButton);
+    155| 
+    156|     await waitFor(() => {
+       |           ^
+    157|       const shippingMethod = screen.getByTestId('shipping-method-islan…
+    158|       expect(shippingMethod).toHaveTextContent('Island Express - €12.5…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/25]⎯
+
+ FAIL  tests/unit/checkout-shipping-updates.spec.tsx > CO-UI-002: Checkout Shipping Updates > allows shipping method selection and triggers callback
+TestingLibraryElementError: Unable to find an element by: [data-testid="shipping-method-standard"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"checkout-shipping"[39m
+    [36m>[39m
+      [36m<input[39m
+        [33mdata-testid[39m=[32m"postal-code-input"[39m
+        [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+        [33mvalue[39m=[32m"10671"[39m
+      [36m/>[39m
+      [36m<button[39m
+        [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+      [36m>[39m
+        [0mΥπολογισμός Αποστολής[0m
+      [36m</button>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"shipping-error"[39m
+        [33mrole[39m=[32m"alert"[39m
+      [36m>[39m
+        [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mdata-testid[39m=[32m"checkout-shipping"[39m
+      [36m>[39m
+        [36m<input[39m
+          [33mdata-testid[39m=[32m"postal-code-input"[39m
+          [33mplaceholder[39m=[32m"Ταχυδρομικός Κώδικας"[39m
+          [33mvalue[39m=[32m"10671"[39m
+        [36m/>[39m
+        [36m<button[39m
+          [33mdata-testid[39m=[32m"get-shipping-quote"[39m
+        [36m>[39m
+          [0mΥπολογισμός Αποστολής[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"shipping-error"[39m
+          [33mrole[39m=[32m"alert"[39m
+        [36m>[39m
+          [0mΣφάλμα στην εύρεση μεθόδων αποστολής[0m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ tests/unit/checkout-shipping-updates.spec.tsx:174:11
+    172|     await user.click(submitButton);
+    173| 
+    174|     await waitFor(() => {
+       |           ^
+    175|       const shippingMethod = screen.getByTestId('shipping-method-stand…
+    176|       expect(shippingMethod).toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > AbortSignal & Cancellation > handles AbortSignal during cart loading
+AssertionError: expected 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστ…' to contain 'Πρόβλημα σύνδεσης'
+
+Expected: [32m"Πρ[7mόβλημα σύνδεσης[27m"[39m
+Received: [31m"Πρ[7mοσωρινό πρόβλημα. Παρακαλώ δοκιμάστε ξανά.[27m"[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:69:40
+     67|       
+     68|       expect(result.success).toBe(false);
+     69|       expect(result.errors[0].message).toContain('Πρόβλημα σύνδεσης');
+       |                                        ^
+     70|       
+     71|       global.fetch = originalFetch;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > categorizes network timeout vs server timeout differently
+AssertionError: expected 'Προσωρινό πρόβλημα. Παρακαλώ δοκιμάστ…' to be 'Timeout - δοκιμάστε ξανά' // Object.is equality
+
+Expected: [32m"[7mTimeout -[27m δοκιμάστε ξανά"[39m
+Received: [31m"[7mΠροσωρινό πρόβλημα. Παρακαλώ[27m δοκιμάστε ξανά[7m.[27m"[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:114:47
+    112|       const networkResult = await checkoutApi.getValidatedCart();
+    113|       expect(networkResult.success).toBe(false);
+    114|       expect(networkResult.errors[0].message).toBe('Timeout - δοκιμάστ…
+       |                                               ^
+    115| 
+    116|       // Server timeout (HTTP 408)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Error Categorization Edge Cases > handles key HTTP status code ranges
+AssertionError: expected 'Πολλές αιτήσεις. Δοκιμάστε ξανά.' to be 'Πολλές αιτήσεις - περιμένετε' // Object.is equality
+
+Expected: [32m"Πολλές αιτήσεις[7m - περιμένετε[27m"[39m
+Received: [31m"Πολλές αιτήσεις[7m. Δοκιμάστε ξανά.[27m"[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:141:42
+    139|         const result = await checkoutApi.getValidatedCart();
+    140|         expect(result.success).toBe(false);
+    141|         expect(result.errors[0].message).toBe(message);
+       |                                          ^
+    142|       }
+    143|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > respects exponential backoff timing
+AssertionError: expected 1 to be 3 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 3[39m
+[31m+ 1[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:160:28
+    158|       const duration = Date.now() - startTime;
+    159| 
+    160|       expect(attemptCount).toBe(3);
+       |                            ^
+    161|       expect(duration).toBeGreaterThan(3000); // Should include backof…
+    162|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles intermittent network failures correctly
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:181:30
+    179|       const result = await checkoutApi.getValidatedCart();
+    180|       
+    181|       expect(result.success).toBe(true);
+       |                              ^
+    182|       expect(attemptCount).toBe(3);
+    183|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > RetryWithBackoff Advanced Scenarios > handles mixed error types in retry sequence
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:220:30
+    218|       const result = await checkoutApi.getValidatedCart();
+    219|       
+    220|       expect(result.success).toBe(true);
+       |                              ^
+    221|       expect(attemptCount).toBe(3);
+    222|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/25]⎯
+
+ FAIL  tests/unit/checkout.api.extended.spec.ts > Checkout API Extended Tests > Checkout Form Greek Business Rules > validates complete Greek checkout flow with edge cases
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.extended.spec.ts:283:30
+    281|       const result = await checkoutApi.processValidatedCheckout(greekC…
+    282|       
+    283|       expect(result.success).toBe(true);
+       |                              ^
+    284|       expect(result.data?.id).toBe('greek_order_456');
+    285|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > validates cart successfully on first attempt
+AssertionError: expected [] to have a length of 1 but got +0
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:40:27
+     38|       
+     39|       expect(result.success).toBe(true);
+     40|       expect(result.data).toHaveLength(1);
+       |                           ^
+     41|       expect(result.data![0]).toMatchObject({
+     42|         product_id: 1,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > processes checkout successfully on first attempt
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:59:30
+     57|       const result = await checkoutApi.processValidatedCheckout(mockCh…
+     58|       
+     59|       expect(result.success).toBe(true);
+       |                              ^
+     60|       expect(result.data?.id).toBe('order_123');
+     61|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Success Scenarios > calculates shipping quote successfully
+AssertionError: expected [ { id: 'standard', …(4) } ] to have a length of 2 but got 1
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 2[39m
+[31m+ 1[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:70:27
+     68|       
+     69|       expect(result.success).toBe(true);
+     70|       expect(result.data).toHaveLength(2);
+       |                           ^
+     71|     });
+     72|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries network errors and eventually succeeds
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:89:30
+     87|       const result = await checkoutApi.getValidatedCart();
+     88|       
+     89|       expect(result.success).toBe(true);
+       |                              ^
+     90|       expect(attemptCount).toBe(3);
+     91|       expect(console.warn).toHaveBeenCalledTimes(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > retries server errors with exponential backoff
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:110:30
+    108|       const duration = Date.now() - startTime;
+    109|       
+    110|       expect(result.success).toBe(true);
+       |                              ^
+    111|       expect(attemptCount).toBe(2);
+    112|       expect(duration).toBeGreaterThan(1000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Retry Logic > handles rate limiting with proper delay
+AssertionError: expected 'Πολλές αιτήσεις. Δοκιμάστε ξανά.' to be 'Πολλές αιτήσεις - περιμένετε' // Object.is equality
+
+Expected: [32m"Πολλές αιτήσεις[7m - περιμένετε[27m"[39m
+Received: [31m"Πολλές αιτήσεις[7m. Δοκιμάστε ξανά.[27m"[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:125:40
+    123|       
+    124|       expect(result.success).toBe(false);
+    125|       expect(result.errors[0].message).toBe('Πολλές αιτήσεις - περιμέν…
+       |                                        ^
+    126|       expect(result.errors[0].code).toBe('RETRYABLE_ERROR');
+    127|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/25]⎯
+
+ FAIL  tests/unit/checkout.api.resilience.spec.ts > CheckoutApiClient Resilience > Validation Errors > handles cart validation errors
+AssertionError: expected true to be false // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- false[39m
+[31m+ true[39m
+
+ ❯ tests/unit/checkout.api.resilience.spec.ts:139:30
+    137| 
+    138|       const result = await checkoutApi.getValidatedCart();
+    139|       expect(result.success).toBe(false);
+       |                              ^
+    140|       expect(result.errors.length).toBeGreaterThan(0);
+    141|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/25]⎯
+
+ FAIL  tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > DSR Request Status Tracking > retrieves request status
+AssertionError: expected [] to have property "id"
+ ❯ tests/unit/gdpr-dsr.spec.ts:95:22
+     93|       const status = await service.getDSRRequestStatus('test_request_i…
+     94| 
+     95|       expect(status).toHaveProperty('id');
+       |                      ^
+     96|       expect(status).toHaveProperty('status');
+     97|       expect(Object.values(DSRRequestStatus)).toContain(status.status);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/25]⎯
+
+ FAIL  tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Export for Portability > generates comprehensive data export
+AssertionError: expected [] to have property "user_info"
+ ❯ tests/unit/gdpr-dsr.spec.ts:112:26
+    110| 
+    111|       // Verify required sections
+    112|       expect(dataExport).toHaveProperty('user_info');
+       |                          ^
+    113|       expect(dataExport).toHaveProperty('addresses');
+    114|       expect(dataExport).toHaveProperty('orders');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/25]⎯
+
+ FAIL  tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Data Export for Portability > includes Greek-specific data in export
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ tests/unit/gdpr-dsr.spec.ts:155:32
+    153| 
+    154|       // Check for Greek postal code format
+    155|       if (dataExport.addresses.length > 0) {
+       |                                ^
+    156|         const greekAddress = dataExport.addresses.find(addr => addr.co…
+    157|         if (greekAddress) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/25]⎯
+
+ FAIL  tests/unit/gdpr-dsr.spec.ts > SEC-DSR-001: GDPR Data Subject Rights > Greek Market Specific Requirements > handles Greek personal data correctly
+TypeError: Cannot read properties of undefined (reading 'name')
+ ❯ tests/unit/gdpr-dsr.spec.ts:342:35
+    340| 
+    341|       // Should handle Greek characters in names
+    342|       expect(dataExport.user_info.name).toMatch(/[Α-Ωα-ωάέήίόύώ]/);
+       |                                   ^
+    343| 
+    344|       // Should use Greek address format
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/25]⎯
+
+
+ Test Files  5 failed | 4 passed (9)
+      Tests  25 failed | 91 passed (116)
+   Start at  13:32:24
+   Duration  10.85s (transform 346ms, setup 540ms, collect 1.23s, tests 23.44s, environment 3.39s, prepare 707ms)
+

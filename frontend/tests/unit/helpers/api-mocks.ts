@@ -8,26 +8,28 @@ import { apiUrl } from '../../../src/lib/api';
 export const server = setupServer();
 
 export const mockCartResponse = {
-  items: [{
+  cart_items: [{  // API uses cart_items, not items
     id: 1,
     product: {
       id: 1,
       name: 'Test Product',
-      price: '12.50',
+      price: '12.50',  // API returns strings
       producer: { name: 'Test Producer' }
     },
     quantity: 2,
-    subtotal: '25.00'
+    subtotal: '25.00'  // API returns strings
   }],
   total_items: 1,
   total_amount: '25.00'
 };
 
 export const mockOrderResponse = {
-  id: 'order_123',
-  total: 25.00,
-  status: 'pending' as const,
-  created_at: '2024-01-01T10:00:00Z'
+  order: {  // API wraps order in {order: ...}
+    id: 'order_123',
+    total: 25.00,
+    status: 'pending' as const,
+    created_at: '2024-01-01T10:00:00Z'
+  }
 };
 
 export const mockCheckoutForm = {
@@ -61,6 +63,7 @@ export const mockCheckoutForm = {
     shipping_method: {
       id: 'standard',
       name: 'Standard Shipping',
+      description: 'Standard delivery in 2-3 business days',
       price: 5.00,
       estimated_days: 3
     },
