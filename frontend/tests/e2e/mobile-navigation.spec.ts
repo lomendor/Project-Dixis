@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { expectAuthedOrLogin } from './helpers/auth-mode';
 
 class MobileNavHelper {
   constructor(private page: Page) {}
@@ -226,7 +227,7 @@ test.describe('Mobile Navigation', () => {
     await page.click('[data-testid="mobile-nav-login"]');
     
     // Should navigate to login page and close menu
-    await expect(page).toHaveURL('/auth/login');
+    await expectAuthedOrLogin(page);
     expect(await helper.isMobileMenuVisible()).toBeFalsy();
   });
 

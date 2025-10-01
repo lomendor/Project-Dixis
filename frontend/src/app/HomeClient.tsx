@@ -61,10 +61,6 @@ export default function HomeClient() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
 
-  useEffect(() => {
-    loadProducts();
-  }, [filters]);
-
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -127,6 +123,10 @@ export default function HomeClient() {
       setLoading(false);
     }
   }, [filters]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [filters, loadProducts]);
 
   const updateFilter = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
