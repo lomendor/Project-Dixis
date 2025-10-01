@@ -25,12 +25,7 @@ export default defineConfig({
     // Increased timeout for MSW integration tests
     testTimeout: 10000,
     // Include patterns for execution issue tests
-    include: [
-      'tests/unit/**/*.{test,spec}.{js,ts,tsx}',
-      'tests/unit/**/checkout-*.spec.tsx',
-      'tests/unit/**/shipping-*.spec.ts',
-      'tests/unit/**/gdpr-*.spec.ts'
-    ],
+    include: ['tests/unit/**/*.{test,spec}.{js,ts,tsx}','tests/component/**/*.{test,spec}.{js,ts,tsx}','tests/integration/**/*.{test,spec}.{js,ts,tsx}'],
     // Mock configuration for browser APIs
     deps: {
       inline: ['@testing-library/user-event']
