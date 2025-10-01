@@ -20,22 +20,27 @@ has_related_comment() { # $1=issue|pr $2=num
   fi
 }
 
-pick_prd() { # stdin: lowercased text
-  local text; text="$(cat)"
-  if   grep -Eq "(cart|checkout)" <<<"$text"; then
+pick_prd() {
+  local text; text="20 20 12 61 79 80 81 33 98 100 204 250 395 398 399 400 701cat)"
+  if   grep -Eq "(cart|checkout)" <<<""; then
     echo "docs/PRD/PRD-05-Cart-Checkout.md#requirements"
-  elif grep -Eq "(shipping|locker|volumetric|acs|elta|speedex)" <<<"$text"; then
+  elif grep -Eq "(shipping|locker|volumetric|acs|elta|speedex)" <<<""; then
     echo "docs/PRD/PRD-03-Shipping-Pricing.md#requirements"
-  elif grep -Eq "(producer|onboard|registration)" <<<"$text"; then
+  elif grep -Eq "(producer|onboard|registration)" <<<""; then
     echo "docs/PRD/PRD-02-Producer-Onboarding.md#requirements"
-  elif grep -Eq "(message|chat|bypass|circumvent|contact)" <<<"$text"; then
+  elif grep -Eq "(message|chat|bypass|circumvent|contact)" <<<""; then
     echo "docs/PRD/PRD-06-Messaging-NonCircumvention.md#requirements"
-  elif grep -Eq "(payment|stripe|refund|vat)" <<<"$text"; then
-    echo "docs/PRD/PRD-07-Payments-Compliance.md#requirements"
+  elif grep -Eq "(privacy|gdpr|consent|dsr|rbac|security)" <<<""; then
+    echo "docs/PRD/PRD-11-Security-Privacy.md#requirements"
+  elif grep -Eq "(slo|latency|uptime|metrics|observability|trace)" <<<""; then
+    echo "docs/PRD/PRD-10-Observability-SLOs.md#slos"
+  elif grep -Eq "(adr|architecture|event|errors+handling|versioning)" <<<""; then
+    echo "docs/PRD/PRD-09-Architecture-ADRs.md#requirements"
   else
     echo "docs/PRD/PRD-00-Overview.md#principles"
   fi
 }
+
 
 process_issue() { # $1=base64(json)
   local j num title body text prd
