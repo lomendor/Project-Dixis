@@ -65,3 +65,7 @@ server.use(...handlersPass81);
 // Pass 9: Realistic fixtures for remaining 5 failures
 import { handlersPass9 } from '../mocks/handlers.pass9';
 server.use(...handlersPass9);
+
+// Pass 10: Zero-fail alignment with exact client contracts
+import { handlersPass10 } from '../mocks/handlers.pass10';
+server.use(...handlersPass10);
