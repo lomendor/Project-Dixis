@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
-import { greekPostalHandlers } from '../msw/checkout.handlers';
+import { shippingQuoteHandlers } from '../msw/shipping.quote.handlers';
 
 // Mock CheckoutShipping component (assuming it exists)
 const CheckoutShipping = ({ onShippingUpdate }: { onShippingUpdate: (method: any) => void }) => {
@@ -90,7 +90,7 @@ const server = setupServer();
 
 beforeEach(() => {
   server.listen({ onUnhandledRequest: 'error' });
-  server.use(...greekPostalHandlers);
+  server.use(...shippingQuoteHandlers);
 });
 
 afterEach(() => {
@@ -99,46 +99,66 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe.skip('CO-UI-002: Checkout Shipping Updates', () => {
+describe('CO-UI-002: Checkout Shipping Updates', () => {
   it('validates Greek postal codes correctly', async () => {
     const user = userEvent.setup();
     const mockOnShippingUpdate = vi.fn();
 
     renderWithProviders(<CheckoutShipping onShippingUpdate={mockOnShippingUpdate} />);
 
-    const postalInput = screen.getByTestId('postal-code-input');
-    const submitButton = screen.getByTestId('get-shipping-quote');
+    const postalInput = await screen.findByTestId('postal-code-input');
+    const submitButton = await screen.findByTestId('get-shipping-quote');
 
     // Test invalid postal code (too short)
     await user.type(postalInput, '123');
     await user.click(submitButton);
 
-    expect(screen.getByTestId('shipping-error')).toHaveTextContent('Μη έγκυρος ΤΚ (5 ψηφία)');
+    expect(await screen.findByTestId('shipping-error')).toHaveTextContent('Μη έγκυρος ΤΚ (5 ψηφία)');
 
     // Test valid postal code
     await user.clear(postalInput);
     await user.type(postalInput, '10671');
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('shipping-methods')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await screen.findByTestId('shipping-methods')).toBeInTheDocument();
     });
   });
 
   it('displays loading state during shipping quote calculation', async () => {
+    // Override with delayed response to catch loading state
+    server.use(
+      http.post('/api/v1/shipping/quote', async () => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return HttpResponse.json({
+          ok: true,
+          shipping_methods: [
+            { id: 'standard', name: 'Standard', price: 3.50, estimated_days: 2 }
+          ]
+        });
+      })
+    );
+
     const user = userEvent.setup();
     const mockOnShippingUpdate = vi.fn();
 
     renderWithProviders(<CheckoutShipping onShippingUpdate={mockOnShippingUpdate} />);
 
-    const postalInput = screen.getByTestId('postal-code-input');
-    const submitButton = screen.getByTestId('get-shipping-quote');
+    const postalInput = await screen.findByTestId('postal-code-input');
+    const submitButton = await screen.findByTestId('get-shipping-quote');
 
     await user.type(postalInput, '10671');
-    await user.click(submitButton);
 
-    expect(submitButton).toHaveTextContent('Αναζήτηση...');
-    expect(submitButton).toBeDisabled();
+    // Click and immediately check loading state
+    const clickPromise = user.click(submitButton);
+
+    // Wait for loading state to appear
+    await waitFor(() => {
+      expect(submitButton).toHaveTextContent('Αναζήτηση...');
+      expect(submitButton).toBeDisabled();
+    });
+
+    await clickPromise;
   });
 
   it('handles remote island shipping with higher costs', async () => {
@@ -147,15 +167,15 @@ describe.skip('CO-UI-002: Checkout Shipping Updates', () => {
 
     renderWithProviders(<CheckoutShipping onShippingUpdate={mockOnShippingUpdate} />);
 
-    const postalInput = screen.getByTestId('postal-code-input');
-    const submitButton = screen.getByTestId('get-shipping-quote');
+    const postalInput = await screen.findByTestId('postal-code-input');
+    const submitButton = await screen.findByTestId('get-shipping-quote');
 
     // Test remote island postal code
     await user.type(postalInput, '19010'); // Remote island
     await user.click(submitButton);
 
-    await waitFor(() => {
-      const shippingMethod = screen.getByTestId('shipping-method-island');
+    await waitFor(async () => {
+      const shippingMethod = await screen.findByTestId('shipping-method-island');
       expect(shippingMethod).toHaveTextContent('Island Express - €12.5 (5 ημέρες)');
     });
   });
@@ -166,26 +186,28 @@ describe.skip('CO-UI-002: Checkout Shipping Updates', () => {
 
     renderWithProviders(<CheckoutShipping onShippingUpdate={mockOnShippingUpdate} />);
 
-    const postalInput = screen.getByTestId('postal-code-input');
-    const submitButton = screen.getByTestId('get-shipping-quote');
+    const postalInput = await screen.findByTestId('postal-code-input');
+    const submitButton = await screen.findByTestId('get-shipping-quote');
 
     await user.type(postalInput, '10671');
     await user.click(submitButton);
 
-    await waitFor(() => {
-      const shippingMethod = screen.getByTestId('shipping-method-standard');
+    await waitFor(async () => {
+      const shippingMethod = await screen.findByTestId('shipping-method-standard');
       expect(shippingMethod).toBeInTheDocument();
     });
 
     const radioButton = screen.getByDisplayValue('standard');
     await user.click(radioButton);
 
-    expect(mockOnShippingUpdate).toHaveBeenCalledWith({
-      id: 'standard',
-      name: 'Standard',
-      price: 3.50,
-      estimated_days: 2
-    });
+    expect(mockOnShippingUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'standard',
+        name: 'Standard',
+        price: 3.50,
+        estimated_days: 2
+      })
+    );
   });
 
   it('handles API errors gracefully', async () => {
@@ -201,14 +223,14 @@ describe.skip('CO-UI-002: Checkout Shipping Updates', () => {
 
     renderWithProviders(<CheckoutShipping onShippingUpdate={mockOnShippingUpdate} />);
 
-    const postalInput = screen.getByTestId('postal-code-input');
-    const submitButton = screen.getByTestId('get-shipping-quote');
+    const postalInput = await screen.findByTestId('postal-code-input');
+    const submitButton = await screen.findByTestId('get-shipping-quote');
 
     await user.type(postalInput, '10671');
     await user.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('shipping-error')).toHaveTextContent('Σφάλμα στην εύρεση μεθόδων αποστολής');
+    await waitFor(async () => {
+      expect(await screen.findByTestId('shipping-error')).toHaveTextContent('Σφάλμα στην εύρεση μεθόδων αποστολής');
     });
   });
 });
