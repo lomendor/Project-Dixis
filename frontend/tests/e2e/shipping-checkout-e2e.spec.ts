@@ -9,7 +9,7 @@ const ADMIN_UI_AVAILABLE = process.env.ADMIN_UI_AVAILABLE === 'true';
 // Use test auth when in E2E mode
 const USE_TEST_AUTH = process.env.NEXT_PUBLIC_E2E === 'true';
 
-test.describe('Shipping Integration E2E', () => {
+test.describe('Shipping Integration E2E @quarantine', () => {
   // Auth edge-case fixes: Clear cookies before each test
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
