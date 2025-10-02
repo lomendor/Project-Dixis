@@ -70,7 +70,10 @@
     "oom:node": "cross-env NODE_OPTIONS=--max-old-space-size=4096 node -v",
     "clean:next": "rm -rf .next",
     "clean:cache": "rm -rf node_modules/.cache .next",
-    "clean:all": "rm -rf node_modules/.cache .next test-results playwright-report"
+    "clean:all": "rm -rf node_modules/.cache .next test-results playwright-report",
+    "lint:ci": "eslint . -c .eslintrc.ci.mjs",
+    "qa:lint:ci": "npm run lint:ci",
+    "qa:all:ci": "npm run qa:types && npm run lint:ci && ((git branch --show-current 2>/dev/null || echo \"${GITHUB_HEAD_REF:-unknown}\") | grep -qE '^(ci|chore)/' && echo 'ℹ️ Skipping knip/deps/size on hotfix branch' || (npm run qa:knip && npm run qa:deps && npm run qa:size))"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.1.0",
