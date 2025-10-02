@@ -1,5 +1,5 @@
 # ADR-0002: CI Lint Policy — temporary relaxation for `no-explicit-any`
-**Status:** Proposed (CI-only), to be reverted in Phase 2
+**Status:** Accepted (CI-only), to be reverted in Phase 2
 
 ## Context
 The QA job fails due to ~300 ESLint warnings, mostly `@typescript-eslint/no-explicit-any`. Converting all `any` to safe types requires a broader refactor (out of scope for Phase 1).
