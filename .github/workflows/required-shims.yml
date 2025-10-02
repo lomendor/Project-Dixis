@@ -24,6 +24,15 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+            npm run build
+          else
+            echo "No contracts directory found"
+          fi
       - name: TypeScript check
         working-directory: frontend
         run: npm run type-check
@@ -42,6 +51,15 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+            npm run build
+          else
+            echo "No contracts directory found"
+          fi
       - name: Run unit tests
         working-directory: frontend
         run: npm run test:unit:ci || npx vitest run --passWithNoTests
