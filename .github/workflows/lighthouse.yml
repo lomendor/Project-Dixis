@@ -7,6 +7,9 @@ on:
       - 'docs/**'
       - 'backend/docs/**'
       - '**/*.md'
+      - '.github/**'
+      - 'frontend/tests/**'
+      - 'frontend/docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
