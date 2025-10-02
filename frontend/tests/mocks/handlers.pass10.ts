@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
 
 // Helper to create dual-shape responses (flat + data.*)
-function dualShape<T extends Record<string, any>>(flat: T) {
+function _dualShape<T extends Record<string, any>>(flat: T) {
   return { ...flat, data: flat };
 }
 

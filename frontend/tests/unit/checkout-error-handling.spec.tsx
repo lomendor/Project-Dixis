@@ -3,11 +3,10 @@
  * Tests API error scenarios, network failures, and resilience patterns
  */
 
-import React, { useState } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse, delay } from 'msw';
-import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
 import { checkoutErrorHandlers, rateLimitHandlers, networkPartitionHandlers, circuitBreakerTestHandlers } from '../msw/checkout.handlers';
 
 // Mock useCheckout hook interface
