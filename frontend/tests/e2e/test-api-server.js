@@ -11,6 +11,14 @@ function handle(req, res){
   // Health
   if (path === '/health' && method === 'GET') return json(res, 200, {ok:true, ts:Date.now()});
 
+  // Test login endpoint (Pass 35: needed by test-auth.ts helper)
+  if (path.match(/^\/api\/test-login$/) && method === 'POST') {
+    return json(res, 200, {
+      token: 'test_token_' + Date.now(),
+      user: { id: 1, email: 'test@example.com', role: 'consumer' }
+    });
+  }
+
   // Auth/role
   if (path.match(/^\/api\/producer\/status$/) && method === 'GET')
     return json(res, 200, { authenticated: true, role: 'producer' });
