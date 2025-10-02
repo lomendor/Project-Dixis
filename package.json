@@ -6,7 +6,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "danger": "danger ci"
+    "danger": "danger ci",
+    "lint:ci": "eslint . -c .eslintrc.ci.json --max-warnings=0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",

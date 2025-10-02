@@ -52,7 +52,7 @@ jobs:
             npm run qa:types || echo "Types check failed but continuing on ci/ branch"
             exit 0
           else
-            npm run qa:all
+            npm run qa:all:ci
           fi
 
       - name: Build for bundle analysis
