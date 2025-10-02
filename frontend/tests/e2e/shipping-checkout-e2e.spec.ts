@@ -30,8 +30,32 @@ test.describe('Shipping Integration E2E', () => {
       await expect(page).toHaveURL('/');
     }
 
-    // Navigate to products and add to cart
-    await page.click('text=Products');
+    // Navigate to products and add to cart (Pass 40: robust locator with fallbacks)
+    const productsLocators = [
+      page.getByText(/^Products$/i),
+      page.getByText(/Προϊόντα/i),
+      page.getByRole('link', { name: /Products|Προϊόντα|Shop|Κατάστημα/i }),
+      page.getByRole('heading', { name: /Products|Προϊόντα/i })
+    ];
+
+    let foundProducts = false;
+    for (const locator of productsLocators) {
+      try {
+        await locator.waitFor({ state: 'visible', timeout: 5000 });
+        await locator.click();
+        foundProducts = true;
+        console.log('[shipping-e2e] Successfully clicked Products link');
+        break;
+      } catch (e) {
+        // Try next locator
+        continue;
+      }
+    }
+
+    if (!foundProducts) {
+      console.log('[shipping-e2e] ERROR: Could not find Products link with any locator');
+      throw new Error('Products link not found - check auth state or navigation elements');
+    }
     await waitForProductsApiAndCards(page);
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.click();
