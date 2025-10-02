@@ -26,7 +26,7 @@ export default function ProducerOnboardingPage() {
 }
 
 function ProducerOnboardingContent() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [formData, setFormData] = useState<OnboardingFormData>({

@@ -23,7 +23,7 @@ export default async function DevCheckPage() {
       healthStatus = data.status || 'error';
       healthTimestamp = data.ts ? new Date(data.ts).toISOString() : 'N/A';
     }
-  } catch (error) {
+  } catch (_error) {
     healthStatus = 'error';
   }
 

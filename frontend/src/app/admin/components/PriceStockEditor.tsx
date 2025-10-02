@@ -8,7 +8,8 @@ import { useToast } from '@/contexts/ToastContext';
 interface PriceStockEditorProps {
   products: ProductWithProducer[];
   loading: boolean;
-  onUpdateProduct: (_productId: number, _updates: ProductUpdateData) => Promise<void>;
+  // eslint-disable-next-line no-unused-vars
+  onUpdateProduct: (productId: number, updates: ProductUpdateData) => Promise<void>;
 }
 
 export default function PriceStockEditor({ products, loading, onUpdateProduct }: PriceStockEditorProps) {

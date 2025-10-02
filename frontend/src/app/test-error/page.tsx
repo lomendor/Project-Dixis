@@ -7,7 +7,6 @@ import { useAnalytics } from '@/lib/analytics';
 import { usePageAnalytics } from '@/hooks/usePageAnalytics';
 
 export default function TestErrorPage() {
-  const { triggerError } = useErrorBoundaryTest();
   const { getEvents, clearEvents, exportEvents } = useAnalytics();
   const [events, setEvents] = useState<any[]>([]);
   const [showEvents, setShowEvents] = useState(false);

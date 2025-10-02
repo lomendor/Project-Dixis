@@ -7,7 +7,8 @@ import { useToast } from '@/contexts/ToastContext';
 interface ProductToggleProps {
   products: ProductWithProducer[];
   loading: boolean;
-  onToggleStatus: (_productId: number, _isActive: boolean) => Promise<void>;
+  // eslint-disable-next-line no-unused-vars
+  onToggleStatus: (productId: number, isActive: boolean) => Promise<void>;
 }
 
 export default function ProductToggle({ products, loading, onToggleStatus }: ProductToggleProps) {

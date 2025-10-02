@@ -28,11 +28,11 @@ const {
     form,
     formErrors,
     loadCart,
-    getShippingQuote,
+    getShippingQuote: _getShippingQuote,
     selectShippingMethod,
     selectPaymentMethod,
     updateShippingInfo,
-    validateForm,
+    validateForm: _validateForm,
     calculateOrderSummary,
     processCheckout,
     clearErrors
