@@ -3,6 +3,7 @@
  * Tests API error scenarios, network failures, and resilience patterns
  */
 
+import React, { useState } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse, delay } from 'msw';

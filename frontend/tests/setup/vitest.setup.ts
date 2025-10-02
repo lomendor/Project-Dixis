@@ -5,9 +5,22 @@
 
 import { expect } from 'vitest';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import * as React from 'react';
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
+
+// Provide React globals for test environment (CI compatibility)
+// This ensures useState and other hooks are available even if tests don't import them
+if (!(globalThis as any).React) {
+  (globalThis as any).React = React;
+}
+if (!(globalThis as any).useState) {
+  (globalThis as any).useState = React.useState;
+}
+if (!(globalThis as any).useEffect) {
+  (globalThis as any).useEffect = React.useEffect;
+}
 
 // Mock matchMedia for components that use responsive design
 Object.defineProperty(window, 'matchMedia', {
