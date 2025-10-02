@@ -18,8 +18,9 @@ export class TestAuthHelper {
       throw new Error('Test login requires NEXT_PUBLIC_E2E=true');
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
-    const testLoginUrl = baseUrl.replace('/api/v1', '/api/v1/test/login');
+    // Pass 37: NEXT_PUBLIC_API_BASE_URL is 'http://127.0.0.1:8001' (no /api/v1 suffix)
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001';
+    const testLoginUrl = `${baseUrl}/api/v1/test/login`;
 
     // Call test login endpoint
     const response = await this.page.request.post(testLoginUrl, {
