@@ -1,0 +1,76 @@
+name: os-state-capsule
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [ feat/phase1-checkout-impl, main ]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  state:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      - name: Snapshot vitest (best-effort)
+        run: |
+          if [ -d frontend ]; then
+            cd frontend
+            npm ci || true
+            npx --yes vitest run --reporter=json > docs/_mem/ci-vitest.json 2>&1 || true
+          fi
+
+      - name: Update STATE.md with current status
+        run: |
+          PRNUM="${{ github.event.number || 'n/a' }}"
+          CHECKS="$(gh pr checks $PRNUM 2>/dev/null || echo 'No PR checks available')"
+
+          cat > docs/OS/STATE.md <<EOF
+          # OS / STATE
+          - Branch: ${{ github.head_ref || github.ref_name }}
+          - PR: #${PRNUM} (Auto-updated by state-capsule workflow)
+          - Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## CI Checks (PR #${PRNUM})
+          \`\`\`
+          ${CHECKS}
+          \`\`\`
+
+          ## Workflow Trigger
+          - Event: ${{ github.event_name }}
+          - Actor: ${{ github.actor }}
+          EOF
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit STATE snapshot if changed
+        run: |
+          git config user.name "dixis-bot"
+          git config user.email "bot@dixis.local"
+          git add frontend/docs/_mem/ci-vitest.json docs/OS/STATE.md || true
+          git diff --cached --quiet || git commit -m "ci(os): refresh STATE snapshot [skip ci]" || echo "no changes"
+          git push || true
+
+      - name: PR sticky comment
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR=${{ github.event.number }}
+          CHECKS="$(gh pr checks $PR 2>/dev/null || echo 'Checks loading...')"
+          BODY="**🧭 OS State Capsule**
+          - Repo: ${{ github.repository }}
+          - Head: ${{ github.head_ref }}
+          - See: \`docs/OS/STATE.md\` for current snapshot
+
+          \`\`\`
+          ${CHECKS}
+          \`\`\`
+
+          _Auto-updated by state-capsule workflow_"
+
+          # Post comment (creates new comment each time for visibility)
+          gh pr comment $PR -b "$BODY" || echo "Failed to post comment"
