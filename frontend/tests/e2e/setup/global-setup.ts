@@ -32,15 +32,11 @@ function parseEnvFile(filePath: string): Record<string, string> {
 async function globalSetup() {
   // Skip backend-dependent setup in CI (use test-level route stubs instead)
   if (process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true') {
-    console.log('⏭️  CI detected: Skipping global API auth (tests will use route stubs)');
+    console.log('⏭️  CI detected: Skipping global API auth AND storageState creation (Pass 34)');
+    console.log('   Tests will handle auth via UI login or route stubs');
 
-    // Create empty storageState for CI
-    const storageStatePath = path.join(__dirname, '../../../test-results/storageState.json');
-    const testResultsDir = path.dirname(storageStatePath);
-    if (!fs.existsSync(testResultsDir)) {
-      fs.mkdirSync(testResultsDir, { recursive: true });
-    }
-    fs.writeFileSync(storageStatePath, JSON.stringify({ cookies: [], origins: [] }));
+    // Pass 34: Do NOT create storageState in CI to avoid cookie validation errors
+    // Projects are configured without storageState in playwright.config.ts
     return;
   }
 

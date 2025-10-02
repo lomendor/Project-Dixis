@@ -63,12 +63,12 @@ export default defineConfig({
   },
 
   projects: isCI ? [
-    // CI: Primary project with API-first storageState for consumer auth (Phase-4)
+    // CI: Primary project - NO storageState to avoid cookie validation errors (Pass 34)
     {
       name: 'consumer-ci',
       use: {
-        ...devices['Desktop Chrome'],
-        storageState: 'test-results/storageState.json'
+        ...devices['Desktop Chrome']
+        // storageState disabled in CI - tests handle auth via UI or route stubs
       },
       testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts', '**/checkout*.spec.ts'],
       testIgnore: ['**/*@no-auth*.spec.ts']
