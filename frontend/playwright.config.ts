@@ -4,7 +4,7 @@ const isCI = !!process.env.CI;
 
 // Phase-4: Host alignment - normalize FE & API to same host (127.0.0.1)
 function normalizeHosts() {
-  let baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3030';
+  let baseURL = process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000';
   const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
 
   // Force localhost to 127.0.0.1 for cookie compatibility

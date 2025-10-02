@@ -73,7 +73,8 @@
     "clean:all": "rm -rf node_modules/.cache .next test-results playwright-report",
     "lint:ci": "eslint . -c .eslintrc.ci.mjs",
     "qa:lint:ci": "npm run lint:ci",
-    "qa:all:ci": "npm run qa:types && npm run lint:ci"
+    "qa:all:ci": "npm run qa:types && npm run lint:ci",
+    "test:api": "node tests/e2e/test-api-server.js"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.1.0",
