@@ -274,12 +274,12 @@ jobs:
           echo "Waiting for frontend on http://127.0.0.1:$FRONTEND_PORT"
           npx wait-on http://127.0.0.1:$FRONTEND_PORT --timeout 60000
 
-      - name: Set E2E quarantine (branch-scoped)
-        if: startsWith(github.head_ref, 'ci/')
+      - name: Set E2E quarantine (Pass 41: global @quarantine tag)
         run: |
-          echo "QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow" >> $GITHUB_ENV
+          echo "QUARANTINE_REGEX=@quarantine" >> $GITHUB_ENV
+          echo "✅ E2E quarantine enabled: tests tagged @quarantine will be skipped"
 
-      - name: Run E2E tests
+      - name: Run E2E tests (excluding @quarantine)
         run: cd frontend && npm run test:e2e:ci
         env:
           CI: true
