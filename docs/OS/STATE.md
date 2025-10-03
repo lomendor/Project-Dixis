@@ -24,9 +24,11 @@
 ## Phase 2 Active 🚀
 
 **PR #305**: Phase 2 — CI cleanup (remove shims, align protections)
-- **Created**: 2025-10-03
-- **Branch**: feat/phase2-ci-cleanup
-- **Status**: Open, awaiting review
+- **Status**: ✅ Merged (2025-10-03)
+
+**PR #308**: Fix docs-only PR quality-gates trigger
+- **Status**: ✅ Merged (2025-10-03)
+- **Changes**: Removed path filters, added docs-only fastpath optimization
 
 **Issue #306**: Phase 2 — E2E Stabilization & Test Completion
 - **Created**: 2025-10-03
