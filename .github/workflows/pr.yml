@@ -307,9 +307,9 @@ jobs:
             echo "DOCS_ONLY=false" >> $GITHUB_ENV
           fi
 
-      - name: Docs-only fastpath: mark success
+      - name: "Docs-only fastpath: mark success"
         if: env.DOCS_ONLY == 'true'
-        run: echo "✅ Docs-only PR: skipping dependent job checks; quality-gates success via fastpath."
+        run: echo "✅ Docs-only PR - skipping dependent job checks, quality-gates success via fastpath."
 
       - name: Check all gates passed
         if: env.DOCS_ONLY != 'true'
