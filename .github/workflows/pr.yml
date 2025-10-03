@@ -2,10 +2,8 @@ name: Pull Request Quality Gates
 
 on:
   pull_request:
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/**'
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 concurrency:
   group: pr-${{ github.event.number }}
@@ -24,8 +22,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect docs-only changes
+        id: docs
+        shell: bash
+        working-directory: .
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1 || true
+          files=$(git diff --name-only "origin/${{ github.base_ref }}"..."${{ github.sha }}" || echo "")
+          non_docs=$(echo "$files" | grep -Ev '^(docs/|README\.md$|CHANGELOG\.md$|CONTRIBUTING\.md$|.*\.md$|.*\.txt$)' || true)
+          if [ -z "$non_docs" ]; then
+            echo "DOCS_ONLY=true" >> $GITHUB_ENV
+            echo "✅ Docs-only: skipping QA heavy steps"
+          else
+            echo "DOCS_ONLY=false" >> $GITHUB_ENV
+          fi
 
       - name: Setup Node.js
+        if: env.DOCS_ONLY != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -33,9 +49,11 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
+        if: env.DOCS_ONLY != 'true'
         run: npm ci
 
       - name: Install and build contracts dependencies
+        if: env.DOCS_ONLY != 'true'
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
@@ -47,6 +65,7 @@ jobs:
           fi
 
       - name: Run full QA suite
+        if: env.DOCS_ONLY != 'true'
         run: |
           if [[ "${{ github.head_ref }}" == ci/* ]]; then
             echo "⚠️ Skipping QA suite on ci/* hotfix branch - allowing minimal quality checks"
@@ -57,6 +76,7 @@ jobs:
           fi
 
       - name: Build for bundle analysis
+        if: env.DOCS_ONLY != 'true'
         run: npm run build
 
   test-smoke:
@@ -267,7 +287,32 @@ jobs:
     needs: [qa, test-smoke, danger]
     if: always()
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files (docs-only fastpath)
+        id: diff
+        shell: bash
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1 || true
+          files=$(git diff --name-only "origin/${{ github.base_ref }}"..."${{ github.sha }}" || echo "")
+          echo "Changed files:"; echo "$files"
+          if [ -z "$files" ]; then echo "DOCS_ONLY=false" >> $GITHUB_ENV; exit 0; fi
+          non_docs=$(echo "$files" | grep -Ev '^(docs/|README\.md$|CHANGELOG\.md$|CONTRIBUTING\.md$|.*\.md$|.*\.txt$)' || true)
+          if [ -z "$non_docs" ]; then
+            echo "DOCS_ONLY=true" >> $GITHUB_ENV
+            echo "✅ Docs-only PR detected - using fastpath"
+          else
+            echo "DOCS_ONLY=false" >> $GITHUB_ENV
+          fi
+
+      - name: Docs-only fastpath: mark success
+        if: env.DOCS_ONLY == 'true'
+        run: echo "✅ Docs-only PR: skipping dependent job checks; quality-gates success via fastpath."
+
       - name: Check all gates passed
+        if: env.DOCS_ONLY != 'true'
         run: |
           if [[ "${{ needs.qa.result }}" != "success" ]]; then
             echo "❌ Quality Assurance failed"
