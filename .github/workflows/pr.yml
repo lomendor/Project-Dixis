@@ -136,7 +136,7 @@ jobs:
           npx --yes wait-on http://127.0.0.1:3000 --timeout 120000
           echo "✅ Next.js app ready on port 3000"
 
-      - name: Run smoke tests (auth-probe only, skip @quarantine)
+      - name: Run smoke tests (auth-probe only)
         continue-on-error: true  # Pass 45: Make smoke advisory until fully stable
         run: npx playwright test tests/e2e/auth-probe.spec.ts --reporter=list
         env:

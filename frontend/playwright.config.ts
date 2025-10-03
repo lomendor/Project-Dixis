@@ -57,7 +57,7 @@ export default defineConfig({
   use: {
     // Phase-4: Use normalized baseURL for cookie compatibility
     baseURL,
-    trace: 'on',
+    trace: 'on-first-retry',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
