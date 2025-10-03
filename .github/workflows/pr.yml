@@ -260,3 +260,20 @@ jobs:
   #         name: lighthouse-reports
   #         path: frontend/.lighthouseci/
   #         retention-days: 7
+
+  quality-gates:
+    name: quality-gates
+    runs-on: ubuntu-latest
+    needs: [qa, test-smoke, danger]
+    if: always()
+    steps:
+      - name: Check all gates passed
+        run: |
+          if [[ "${{ needs.qa.result }}" != "success" ]]; then
+            echo "❌ Quality Assurance failed"
+            exit 1
+          fi
+          # Smoke Tests and PR Hygiene are advisory (continue-on-error)
+          # So we accept success, failure, or skipped
+          echo "✅ All quality gates evaluated (advisory gates may have warnings)"
+          exit 0
