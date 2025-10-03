@@ -15,6 +15,7 @@ jobs:
   qa:
     name: Quality Assurance
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     defaults:
       run:
@@ -61,6 +62,7 @@ jobs:
   test-smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: frontend
@@ -98,7 +100,7 @@ jobs:
           TEST_API_PORT: 8001
         run: |
           nohup npm run test:api > /tmp/test-api.log 2>&1 &
-          npx --yes wait-on http://127.0.0.1:8001/health --timeout 60000
+          npx --yes wait-on http://127.0.0.1:8001/health --timeout 120000
           echo "✅ Test API server ready on port 8001"
 
       - name: Build and start Next.js app
@@ -110,7 +112,7 @@ jobs:
         run: |
           npm run build
           nohup npm run start -- -p 3000 > /tmp/app.log 2>&1 &
-          npx --yes wait-on http://127.0.0.1:3000 --timeout 60000
+          npx --yes wait-on http://127.0.0.1:3000 --timeout 120000
           echo "✅ Next.js app ready on port 3000"
 
       - name: Run smoke tests (auth-probe only, skip @quarantine)
@@ -149,9 +151,20 @@ jobs:
           path: frontend/test-results/
           retention-days: 7
 
+      - name: Cleanup CI processes
+        if: always()
+        working-directory: frontend
+        run: |
+          pkill -f "npm run test:api|npm run start|node.*test-api" || true
+          echo "---- /tmp/test-api.log (tail) ----"
+          tail -n 120 /tmp/test-api.log 2>/dev/null || echo "No test-api.log"
+          echo "---- /tmp/app.log (tail) ----"
+          tail -n 120 /tmp/app.log 2>/dev/null || echo "No app.log"
+
   danger:
     name: PR Hygiene Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     continue-on-error: true  # Pass 43: Make commitlint advisory until Phase 2
     permissions:
