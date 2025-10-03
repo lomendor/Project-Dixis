@@ -1,0 +1,107 @@
+name: E2E Full Suite
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * *'  # Daily at 03:30 UTC
+  pull_request:
+    types: [labeled, synchronize]
+
+concurrency:
+  group: e2e-full-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-full:
+    name: E2E Full Test Suite
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-full')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "../packages/contracts" ]; then
+            cd ../packages/contracts
+            npm ci
+            npm run build
+            cd ../../frontend
+          else
+            echo "No contracts directory found"
+          fi
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Test API server
+        env:
+          TEST_API_PORT: 8001
+        run: |
+          nohup npm run test:api > /tmp/test-api.log 2>&1 &
+          npx --yes wait-on http://127.0.0.1:8001/health --timeout 120000
+          echo "✅ Test API server ready on port 8001"
+
+      - name: Build and start Next.js app
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
+          API_BASE_URL: "http://127.0.0.1:8001"
+          NEXT_TELEMETRY_DISABLED: 1
+        run: |
+          npm run build
+          nohup npm run start -- -p 3000 > /tmp/app.log 2>&1 &
+          npx --yes wait-on http://127.0.0.1:3000 --timeout 120000
+          echo "✅ Next.js app ready on port 3000"
+
+      - name: Run all E2E tests (retries=1)
+        run: npx playwright test --retries=1 --reporter=line
+        env:
+          CI: true
+          BASE_URL: http://127.0.0.1:3000
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+          API_BASE_URL: http://127.0.0.1:8001
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8001
+          NEXT_PUBLIC_E2E: "true"
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Upload Playwright report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-full-playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload test results (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-full-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+      - name: Cleanup CI processes
+        if: always()
+        working-directory: frontend
+        run: |
+          pkill -f "npm run test:api|npm run start|node.*test-api" || true
+          echo "---- /tmp/test-api.log (tail) ----"
+          tail -n 120 /tmp/test-api.log 2>/dev/null || echo "No test-api.log"
+          echo "---- /tmp/app.log (tail) ----"
+          tail -n 120 /tmp/app.log 2>/dev/null || echo "No app.log"
