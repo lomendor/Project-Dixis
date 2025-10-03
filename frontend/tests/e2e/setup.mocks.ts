@@ -7,7 +7,8 @@ import { test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   // Unified API route mocking for E2E tests
-  await page.route('**/api/**', async (route) => {
+  // Match both relative /api/ and absolute http://*/api/ URLs
+  await page.route(/\/(api|v1)\//, async (route) => {
     const url = route.request().url();
     const method = route.request().method();
     const authHeader = route.request().headers()['authorization'];

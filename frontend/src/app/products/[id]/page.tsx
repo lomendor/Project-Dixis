@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, Product } from '@/lib/api';
 import Navigation from '@/components/Navigation';
-import LoadingSpinner from '@/components/LoadingSpinner';
 import ProductDetailSkeleton from '@/components/ProductDetailSkeleton';
 import ErrorFallback from '@/components/ErrorFallback';
 import ProductImageFallback from '@/components/ProductImageFallback';

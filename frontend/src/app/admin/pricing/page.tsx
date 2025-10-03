@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import PriceStockEditor from '../components/PriceStockEditor';
 import { pricingApi, ProductWithProducer, ProductUpdateData } from '@/lib/admin/pricingApi';
@@ -11,21 +11,23 @@ export default function AdminPricingPage() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await pricingApi.getProducts();
       setProducts(data);
-    } catch {
+    } catch (error) {
+      console.error('Error loading products:', error);
       showToast('error', 'Απέτυχε η φόρτωση των προϊόντων');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
 
   const handleUpdateProduct = async (productId: number, updates: ProductUpdateData) => {
     await pricingApi.updateProduct(productId, updates);

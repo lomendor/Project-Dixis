@@ -1,0 +1,7 @@
+tests/unit/checkout-shipping-updates.spec.tsx:17:  const [postalCode, setPostalCode] = useState('');
+tests/unit/checkout-shipping-updates.spec.tsx:18:  const [shippingMethods, setShippingMethods] = useState([]);
+tests/unit/checkout-shipping-updates.spec.tsx:19:  const [loading, setLoading] = useState(false);
+tests/unit/checkout-shipping-updates.spec.tsx:20:  const [error, setError] = useState('');
+tests/unit/checkout-error-handling.spec.tsx:26:  const [cart, setCart] = useState([]);
+tests/unit/checkout-error-handling.spec.tsx:28:  const [loading, setLoading] = useState(false);
+tests/unit/checkout-error-handling.spec.tsx:29:  const [shippingMethods, setShippingMethods] = useState([]);

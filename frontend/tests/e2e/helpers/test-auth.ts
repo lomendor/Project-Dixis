@@ -1,8 +1,9 @@
 import { Page } from '@playwright/test';
+import { hasPreauth, waitForAuthState } from './auth-mode';
 
 /**
  * Test-only authentication helper for E2E tests
- * Uses special test login endpoint that's only available in test environments
+ * Phase-4.1: Supports both storageState pre-auth and UI login flows
  */
 export class TestAuthHelper {
   constructor(private page: Page) {}
@@ -17,8 +18,9 @@ export class TestAuthHelper {
       throw new Error('Test login requires NEXT_PUBLIC_E2E=true');
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
-    const testLoginUrl = baseUrl.replace('/api/v1', '/api/v1/test/login');
+    // Pass 37: NEXT_PUBLIC_API_BASE_URL is 'http://127.0.0.1:8001' (no /api/v1 suffix)
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001';
+    const testLoginUrl = `${baseUrl}/api/v1/test/login`;
 
     // Call test login endpoint
     const response = await this.page.request.post(testLoginUrl, {
@@ -92,18 +94,46 @@ export class TestAuthHelper {
 
 /**
  * Quick helper function for tests
+ * Phase-4.1: Handles storageState pre-authentication
  */
 export async function loginAsConsumer(page: Page) {
+  // Check if already pre-authenticated via storageState
+  if (await hasPreauth(page.context())) {
+    console.log('✅ Consumer already pre-authenticated via storageState');
+    await page.goto('/');
+    await waitForAuthState(page);
+    return { token: 'storagestate-token', user: { role: 'consumer' } };
+  }
+
+  // Use UI login flow
   const helper = new TestAuthHelper(page);
   return helper.testLogin('consumer');
 }
 
 export async function loginAsProducer(page: Page) {
+  // Check if already pre-authenticated via storageState
+  if (await hasPreauth(page.context())) {
+    console.log('✅ Producer already pre-authenticated via storageState');
+    await page.goto('/');
+    await waitForAuthState(page);
+    return { token: 'storagestate-token', user: { role: 'producer' } };
+  }
+
+  // Use UI login flow
   const helper = new TestAuthHelper(page);
   return helper.testLogin('producer');
 }
 
 export async function loginAsAdmin(page: Page) {
+  // Check if already pre-authenticated via storageState
+  if (await hasPreauth(page.context())) {
+    console.log('✅ Admin already pre-authenticated via storageState');
+    await page.goto('/');
+    await waitForAuthState(page);
+    return { token: 'storagestate-token', user: { role: 'admin' } };
+  }
+
+  // Use UI login flow
   const helper = new TestAuthHelper(page);
   return helper.testLogin('admin');
 }

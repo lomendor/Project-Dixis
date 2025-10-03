@@ -8,6 +8,7 @@ import { useToast } from '@/contexts/ToastContext';
 interface PriceStockEditorProps {
   products: ProductWithProducer[];
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
   onUpdateProduct: (productId: number, updates: ProductUpdateData) => Promise<void>;
 }
 
@@ -46,10 +47,10 @@ export default function PriceStockEditor({ products, loading, onUpdateProduct }:
       showToast('success', 'Το προϊόν ενημερώθηκε επιτυχώς');
       setEditingId(null);
       setErrors({});
-    } catch (error: any) {
-      if (error.errors) {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'errors' in error) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err: any) => {
+        (error as { errors: { path: string[]; message: string }[] }).errors.forEach((err: { path: string[]; message: string }) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);

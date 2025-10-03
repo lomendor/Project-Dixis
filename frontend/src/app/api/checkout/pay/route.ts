@@ -8,7 +8,7 @@ import { paymentManager } from '@/lib/payment-providers';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { paymentMethod, paymentToken } = body;
+    const { paymentMethod: _paymentMethod, paymentToken } = body;
 
     // Mock authentication
     const userToken = request.headers.get('authorization');
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Initialize payment
-      const paymentInit = await paymentManager.initPayment(orderId, totalAmountCents, 'EUR');
+      const _paymentInit = await paymentManager.initPayment(orderId, totalAmountCents, 'EUR');
 
       // Confirm payment
       const paymentResult = await paymentManager.confirmPayment(orderId, paymentToken);

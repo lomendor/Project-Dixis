@@ -242,7 +242,9 @@ function ShippingAddressForm({
   loading,
 }: {
   address: ShippingAddress;
+  // eslint-disable-next-line no-unused-vars
   onChange: (address: ShippingAddress) => void;
+  // eslint-disable-next-line no-unused-vars
   onSubmit: (e: React.FormEvent) => void;
   loading: boolean;
 }) {

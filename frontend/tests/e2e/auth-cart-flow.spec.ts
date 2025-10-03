@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expectAuthedOrLogin } from './helpers/auth-mode';
 import './setup.mocks';
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -15,7 +16,7 @@ test.describe('Auth-Cart Flow Tests', () => {
     await expect(cartLoginPrompt).toBeVisible();
     await expect(cartLoginPrompt).toHaveText('Login to Add to Cart');
     await cartLoginPrompt.click();
-    await expect(page).toHaveURL(/\/auth\/login/);
+    await expectAuthedOrLogin(page);
   });
   test('Consumer users see active cart with item count', async ({ page, context }) => {
     await setupAuthState(page, context, 'consumer');

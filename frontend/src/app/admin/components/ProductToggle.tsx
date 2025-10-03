@@ -7,6 +7,7 @@ import { useToast } from '@/contexts/ToastContext';
 interface ProductToggleProps {
   products: ProductWithProducer[];
   loading: boolean;
+  // eslint-disable-next-line no-unused-vars
   onToggleStatus: (productId: number, isActive: boolean) => Promise<void>;
 }
 

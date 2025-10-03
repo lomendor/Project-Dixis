@@ -14,7 +14,7 @@ const { pr, git } = danger
 // Null safety guards for undefined PR context
 if (!pr || !git) {
   console.log('⚠️ DangerJS context incomplete - skipping quality gates')
-  return
+  process.exit(0)
 }
 
 // 🎯 Rule 1: Quality Gate - Large PR Block (LOC > 600)

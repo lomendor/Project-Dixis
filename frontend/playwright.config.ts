@@ -2,6 +2,34 @@ import { defineConfig, devices } from '@playwright/test';
 
 const isCI = !!process.env.CI;
 
+// Phase-4: Host alignment - normalize FE & API to same host (127.0.0.1)
+function normalizeHosts() {
+  let baseURL = process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000';
+  const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+
+  // Force localhost to 127.0.0.1 for cookie compatibility
+  if (baseURL.includes('localhost')) {
+    baseURL = baseURL.replace('localhost', '127.0.0.1');
+  }
+
+  // Extract hosts for comparison
+  const feHost = new URL(baseURL).hostname;
+  const apiHost = new URL(apiBaseURL).hostname;
+
+  // If hosts differ, force FE to 127.0.0.1 to match API
+  if (feHost !== apiHost) {
+    console.log(`⚠️ Host mismatch detected: FE=${feHost}, API=${apiHost}`);
+    const fePort = new URL(baseURL).port || '3030';
+    baseURL = `http://127.0.0.1:${fePort}`;
+    console.log(`✅ Normalized FE baseURL to: ${baseURL}`);
+  }
+
+  console.log(`🔗 Phase-4 Host Alignment: FE_HOST=${feHost}, API_HOST=${apiHost}`);
+  return { baseURL, apiBaseURL, feHost, apiHost };
+}
+
+const { baseURL } = normalizeHosts();
+
 export default defineConfig({
   // Increased timeouts for CI to handle complex shipping integration flows
   timeout: isCI ? 180_000 : 60_000, // 3 minutes for CI, 1 minute local
@@ -12,8 +40,8 @@ export default defineConfig({
   forbidOnly: isCI,
   workers: isCI ? 2 : undefined,
   
-  // Global setup for storageState creation  
-  globalSetup: './tests/global-setup.ts',
+  // Global setup for storageState creation (Phase-4: API-first auth)
+  globalSetup: './tests/e2e/setup/global-setup.ts',
   
   // Artifacts configuration - align with CI expectations
   outputDir: 'test-results',
@@ -27,33 +55,51 @@ export default defineConfig({
   ],
   
   use: {
-    // Allow CI to override via PLAYWRIGHT_BASE_URL; default to Next dev port (3030)
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3030',
+    // Phase-4: Use normalized baseURL for cookie compatibility
+    baseURL,
     trace: 'on',
     video: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
 
   projects: isCI ? [
-    // CI: Single project with no auth for smoke and shipping tests
+    // CI: Primary project - NO storageState to avoid cookie validation errors (Pass 34)
     {
-      name: 'smoke',
+      name: 'consumer-ci',
       use: {
-        ...devices['Desktop Chrome'],
-        // CI uses pre-provisioned auth state to avoid auth-redirect flakes
-        storageState: process.env.CI ? 'playwright/.auth/smoke.json' : undefined
+        ...devices['Desktop Chrome']
+        // storageState disabled in CI - tests handle auth via UI or route stubs
       },
-      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts']
+      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/shipping-*.spec.ts', '**/checkout*.spec.ts'],
+      testIgnore: ['**/*@no-auth*.spec.ts']
+    },
+    // CI: Pure UI login tests (no storageState) - Phase-4.1
+    {
+      name: 'auth-ui',
+      use: {
+        ...devices['Desktop Chrome']
+        // No storageState - forces UI login flow
+      },
+      testMatch: ['**/*@no-auth*.spec.ts', '**/auth-edge-cases.spec.ts']
     }
   ] : [
-    // Local: Multiple auth states and browsers
-    { 
+    // Local: Consumer project with API-first storageState (Phase-4)
+    {
       name: 'consumer',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        storageState: '.auth/consumer.json'
+        storageState: 'test-results/storageState.json'
       },
-      testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts']
+      testIgnore: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/*@no-auth*.spec.ts']
+    },
+    // Local: Pure UI login tests (no storageState) - Phase-4.1
+    {
+      name: 'auth-ui',
+      use: {
+        ...devices['Desktop Chrome']
+        // No storageState - forces UI login flow
+      },
+      testMatch: ['**/*@no-auth*.spec.ts', '**/auth-edge-cases.spec.ts']
     },
     { 
       name: 'producer',
@@ -73,7 +119,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npm run dev -- --port 3030',
-    url: 'http://127.0.0.1:3030',
+    url: baseURL, // Phase-4: Use normalized URL
     reuseExistingServer: true,
     timeout: 90_000,
     stdout: 'ignore',

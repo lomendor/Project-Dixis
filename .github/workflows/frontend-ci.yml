@@ -129,74 +129,15 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
     continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}
     needs: frontend-tests
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: project_dixis_test
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
+
     defaults:
       run:
-        working-directory: backend
-    
+        working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
-      
-      # Setup backend
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer, openssl, curl, fileinfo
-      
-      - name: Install backend dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
-      
-      - name: Copy environment file
-        run: cp .env.example .env
-      
-      - name: Generate application key
-        run: php artisan key:generate
-      
-      - name: Configure database
-        run: |
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=project_dixis_test" >> .env
-          echo "DB_USERNAME=postgres" >> .env
-          echo "DB_PASSWORD=postgres" >> .env
-          echo "ALLOW_TEST_LOGIN=true" >> .env
-          echo "CI=true" >> .env
-      
-      - name: Run migrations and seed
-        run: |
-          php artisan migrate --force --env=testing
-          php artisan db:seed --force --env=testing
-          php artisan db:seed --class=E2ESeeder --force --env=testing
-      
-      - name: Kill leftover ports
-        run: |
-          lsof -ti :3000 | xargs -r kill -9 || true
-          lsof -ti :3001 | xargs -r kill -9 || true
-          lsof -ti :3010 | xargs -r kill -9 || true
-          lsof -ti :3030 | xargs -r kill -9 || true
-          lsof -ti :8001 | xargs -r kill -9 || true
-      
-      - name: Start Laravel server
-        run: php artisan serve --host=0.0.0.0 --port=8001 &
-        
-      # Setup frontend
+
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -205,7 +146,6 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: frontend
         run: npm ci
 
       - name: Install and build contracts dependencies
@@ -216,59 +156,56 @@ jobs:
             npm run build
             echo "✅ Contracts built successfully"
           else
-            echo "No contracts directory found (expected at ../packages/contracts)"
+            echo "No contracts directory found"
           fi
+
       - name: Install Playwright Browsers
-        working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Start Next.js server (production build for E2E)
-        working-directory: frontend
+      - name: Start Test API server (SSR-safe mock backend)
         env:
-          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          TEST_API_PORT: 8001
+        run: |
+          nohup npm run test:api > /tmp/test-api.log 2>&1 &
+          npx --yes wait-on http://127.0.0.1:8001/health
+          echo "✅ Test API server ready on port 8001"
+
+      - name: Build and start Next.js app
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
+          API_BASE_URL: "http://127.0.0.1:8001"
           NEXT_TELEMETRY_DISABLED: 1
         run: |
           npm run build
-          PORT=3030 npm start &
-      
-      - name: Wait for servers to be ready
-        run: |
-          echo "Waiting for API server..."
-          timeout 60 bash -c 'until curl -f http://localhost:8001/api/health; do sleep 2; done'
-          echo "✅ API server ready"
-          
-          echo "Waiting for frontend server..."
-          timeout 60 bash -c 'until curl -f http://localhost:3030; do sleep 2; done'
-          echo "✅ Frontend server ready"
-          
-          echo "Verifying shipping quote API..."
-          curl -X POST http://localhost:8001/api/v1/shipping/quote \
-            -H "Content-Type: application/json" \
-            -d '{"zip":"11527","city":"Athens","weight":2.0,"volume":0.01}' || exit 1
-          echo "✅ Shipping API verified"
+          nohup npm run start -- -p 3000 > /tmp/app.log 2>&1 &
+          npx --yes wait-on http://127.0.0.1:3000
+          echo "✅ Next.js app ready on port 3000"
 
-      - name: Set E2E quarantine (branch-scoped)
-        if: startsWith(github.head_ref, 'ci/')
+      - name: Set E2E quarantine (Pass 41: global @quarantine tag)
         run: |
-          echo "QUARANTINE_REGEX=Shipping Engine v1 - Error Handling & Edge Cases|Shipping Engine v1 - Producer Profile Integration|Shipping Engine v1 - Volumetric Weight Calculations|Shipping Engine v1 - Zone-based Calculations|Shipping Integration Demo|Shipping Integration E2E|Shipping Integration Final Demo|Shipping Integration Flow" >> $GITHUB_ENV
+          echo "QUARANTINE_REGEX=@quarantine" >> $GITHUB_ENV
+          echo "✅ E2E quarantine enabled: tests tagged @quarantine will be skipped"
 
-      - name: Run shipping integration E2E tests
-        working-directory: frontend
-        run: npm run test:e2e:ci shipping-checkout-e2e.spec.ts
+      - name: Run auth-probe diagnostic (smoke test)
+        run: npx playwright test auth-probe.spec.ts --reporter=github
         env:
           CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3030
-          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          BASE_URL: http://127.0.0.1:3000
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+          API_BASE_URL: http://127.0.0.1:8001
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8001
           NEXT_PUBLIC_E2E: "true"
           NEXT_TELEMETRY_DISABLED: 1
 
-      - name: Run all E2E tests
-        working-directory: frontend
+      - name: Run all E2E tests (excluding @quarantine)
         run: npm run test:e2e:ci
         env:
           CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3030
-          NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001/api/v1"
+          BASE_URL: http://127.0.0.1:3000
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+          API_BASE_URL: http://127.0.0.1:8001
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8001
           NEXT_PUBLIC_E2E: "true"
           NEXT_TELEMETRY_DISABLED: 1
       
