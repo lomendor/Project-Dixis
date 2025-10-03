@@ -28,6 +28,9 @@ export default function Navigation() {
 
   // Handle escape key to close mobile menu
   useEffect(() => {
+    // SSR guard: document only available in browser
+    if (typeof window === 'undefined') return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && mobileMenuOpen) {
         setMobileMenuOpen(false);
@@ -51,6 +54,9 @@ export default function Navigation() {
 
   // Handle click outside to close mobile menu
   useEffect(() => {
+    // SSR guard: document only available in browser
+    if (typeof window === 'undefined') return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         mobileMenuOpen &&

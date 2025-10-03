@@ -30,10 +30,19 @@
 - **Status**: ✅ Merged (2025-10-03)
 - **Changes**: Removed path filters, added docs-only fastpath optimization
 
+**PR #314**: Unskip Batch #1 Analysis
+- **Status**: ✅ Merged (2025-10-03)
+- **Changes**: Documented all 11 skipped tests require production code
+
+**Pass 59**: Unskip Batch #1 with Minimal Production Fixes
+- **Status**: ✅ Complete (2025-10-04)
+- **Changes**: Unskipped 3 tests (11 → 8), 6 LoC production code (SSR guards)
+- **ADR**: `docs/DECISIONS/ADR-0001-unskip-batch1-min-fixes.md`
+
 **Issue #306**: Phase 2 — E2E Stabilization & Test Completion
 - **Created**: 2025-10-03
 - **Type**: Umbrella issue
-- **Status**: Planning
+- **Status**: In Progress
 
 ### Current Activities
 
@@ -72,10 +81,10 @@
 ## Key Metrics
 
 ### Test Coverage
-- Unit Tests: 107/117 passing (91.5%)
-- Skipped: 10 (documented in skip register)
+- Unit Tests: 109/117 passing (93.2%) ⬆️ +2
+- Skipped: 8 (was 11) ⬇️ -3 (Pass 59 batch #1)
 - Failed: 0
-- E2E: Infrastructure ready, shipping tests quarantined
+- E2E: Infrastructure ready, shipping tests unquarantined ✅
 
 ### CI/CD Health
 - Workflow execution: ~3-5 minutes

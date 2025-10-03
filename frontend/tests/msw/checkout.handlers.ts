@@ -49,22 +49,49 @@ export const checkoutHandlers = [
 
 // Enhanced error scenarios for resilience testing
 export const checkoutErrorHandlers = [
+  // Cart loads successfully (match both absolute and relative paths)
+  http.get(`${API_BASE}/cart/items`, () => {
+    return HttpResponse.json({
+      cart_items: [{
+        id: 1,
+        product: { id: 1, name: 'Test Product', price: '15.50', producer: { name: 'Test Producer' } },
+        product_id: 1,
+        quantity: 2,
+        subtotal: '31.00'
+      }],
+      total_items: 2,
+      total_amount: '31.00'
+    })
+  }),
+  http.get('/api/v1/cart/items', () => {
+    return HttpResponse.json({
+      cart_items: [{
+        id: 1,
+        product: { id: 1, name: 'Test Product', price: '15.50', producer: { name: 'Test Producer' } },
+        product_id: 1,
+        quantity: 2,
+        subtotal: '31.00'
+      }],
+      total_items: 2,
+      total_amount: '31.00'
+    })
+  }),
+
+  // Server error on checkout (match both absolute and relative paths)
+  http.post(`${API_BASE}/orders/checkout`, () => {
+    return HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }),
+  http.post('/api/v1/orders/checkout', () => {
+    return HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
+  })
+]
+
+// Timeout-specific handlers (separate array to avoid conflicts)
+export const timeoutErrorHandlers = [
   // Network timeout simulation
   http.get(`${API_BASE}/cart/items`, async () => {
     await delay(5000) // Longer than typical timeout
     return HttpResponse.json({ cart_items: [] })
-  }),
-
-  // Server error
-  http.post(`${API_BASE}/orders/checkout`, () => {
-    return HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }),
-
-  // Validation error
-  http.post(`${API_BASE}/orders/checkout`, () => {
-    return HttpResponse.json({ 
-      errors: [{ field: 'email', message: 'Invalid email format' }] 
-    }, { status: 400 })
   })
 ]
 
@@ -82,11 +109,37 @@ export const rateLimitHandlers = [
 
 // Network partition scenarios
 export const networkPartitionHandlers = [
-  // Cart loads but checkout fails (partial failure)
+  // Cart loads but checkout fails (partial failure) - match both absolute and relative paths
   http.get(`${API_BASE}/cart/items`, () => {
-    return HttpResponse.json({ cart_items: [{ id: 1, product: { id: 1, name: 'Product', price: '10.00' }, quantity: 1, subtotal: '10.00' }], total_items: 1, total_amount: '10.00' })
+    return HttpResponse.json({
+      cart_items: [{
+        id: 1,
+        product: { id: 1, name: 'Product', price: '10.00', producer: { name: 'Test Producer' } },
+        product_id: 1,
+        quantity: 1,
+        subtotal: '10.00'
+      }],
+      total_items: 1,
+      total_amount: '10.00'
+    })
+  }),
+  http.get('/api/v1/cart/items', () => {
+    return HttpResponse.json({
+      cart_items: [{
+        id: 1,
+        product: { id: 1, name: 'Product', price: '10.00', producer: { name: 'Test Producer' } },
+        product_id: 1,
+        quantity: 1,
+        subtotal: '10.00'
+      }],
+      total_items: 1,
+      total_amount: '10.00'
+    })
   }),
   http.post(`${API_BASE}/orders/checkout`, () => {
+    return HttpResponse.json({ error: 'Network partition' }, { status: 503 })
+  }),
+  http.post('/api/v1/orders/checkout', () => {
     return HttpResponse.json({ error: 'Network partition' }, { status: 503 })
   })
 ]
