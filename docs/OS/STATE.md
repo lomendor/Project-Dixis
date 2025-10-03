@@ -93,3 +93,9 @@
 - Phase 2 PR: #305
 - Phase 2 Issue: #306
 - Previous STATE: Managed by os-state-capsule workflow (now main-only)
+
+## Branch Protection Validation
+- Timestamp: 2025-10-03T18:36:52Z
+- Purpose: Verify single quality-gates required check works
+- Expected: PR should require only quality-gates context
+
