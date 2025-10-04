@@ -274,3 +274,26 @@
   - 🚨 Fix LCP: Implement SSR/SSG or skeleton UI
   - ⚠️ Fix WCAG: Ensure title in initial HTML
   - ⚠️ Investigate Best Practices regression
+
+**Pass 71**: Fixed document <title> (initial HTML) & LCP anchor ✅
+- **Status**: ✅ Complete (2025-10-04T19:30Z)
+- **Objective**: Fix WCAG document-title violation + stabilize LCP
+- **Changes**:
+  - Added `export const dynamic = 'force-static'` to homepage
+  - Added `export const revalidate = 3600` for ISR
+  - Homepage now statically generated (○ Static in build output)
+  - Created tests: title-in-initial-html.spec.ts, lcp-anchor.spec.ts
+- **Test Results**:
+  - ✅ Title in initial HTML: PASSED
+  - ✅ LCP anchor (H1): PASSED
+  - ⚠️ LCP measurement: Still NO_LCP (requires data fetching refactor)
+- **WCAG Fix**:
+  - Title now server-rendered in initial HTML (WCAG 2.1 Level A compliant)
+  - H1 visible immediately (LCP candidate present)
+- **Known Limitation**:
+  - LCP measurement still fails due to client-side data fetching
+  - Requires SSR/ISR data strategy (deferred to Pass 72)
+- **Artifacts**:
+  - `docs/QA/lh-pass71-desktop.json`
+  - `frontend/tests/perf/title-in-initial-html.spec.ts`
+  - `frontend/tests/perf/lcp-anchor.spec.ts`
