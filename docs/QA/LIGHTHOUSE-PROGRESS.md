@@ -105,3 +105,53 @@ PR #335 (script) → PR #331 (CI workflows) → LHCI can run
 
 - **Script Dependencies**: Workflow changes must include all referenced scripts in same PR or ensure dependencies exist in base branch
 - **Testing Order**: Helper scripts should be merged before workflows that use them
+
+## Pass 79 — Path Fix & Workflow Debugging ⚙️
+
+**Date**: 2025-10-04T21:15Z
+**Status**: In Progress
+
+### Root Cause Identified
+
+**Script Path Issue**: Workflows run from `frontend/` working directory but script is at repo root
+- Line 51 in pr.yml: `run: bash scripts/ci/install-deps.sh` (looked for `frontend/scripts/ci/install-deps.sh`)
+- Line 99 in pr.yml: `run: bash scripts/ci/install-deps.sh .` (same issue)
+- ci.yml had similar issues
+
+### Actions Taken
+
+1. **✅ Script Exists**: Verified `scripts/ci/install-deps.sh` is in PR #331 (commit 3751a2a)
+2. **✅ Path Fix Applied**: Changed all workflow paths to `../scripts/ci/install-deps.sh`
+   - pr.yml: 2 occurrences fixed
+   - ci.yml: 3 occurrences fixed
+3. **✅ Tests Passing**: After path fix:
+   - Quality Assurance: PASS ✅
+   - PR Hygiene Check: PASS ✅
+   - Smoke Tests: PASS ✅
+   - quality-gates: PASS ✅
+4. **✅ Background Cleanup**: All servers terminated
+
+### Current Blocker
+
+**Branch Updates**: PR #331 keeps falling BEHIND main, requiring branch updates that trigger new CI runs
+- Each update resets the merge queue
+- Auto-merge configured but waiting for stable checks
+- Lighthouse (advisory) still running
+
+### PR Status
+
+- **PR #331**: OPEN, quality-gates PASS, waiting for Lighthouse to complete
+- **PR #334**: OPEN, waiting for #331 to merge first
+- **PR #335**: OPEN, no longer needed (script now in #331)
+
+### Next Steps
+
+1. Wait for PR #331 Lighthouse to complete and auto-merge
+2. PR #334 will merge after #331
+3. Close PR #335 as superseded
+4. Trigger LHCI workflow on main
+5. Document results
+
+### Key Finding
+
+**Working Directory Context Matters**: When `working-directory: frontend` is set at job level, all script paths are relative to that directory. Scripts at repo root need `../` prefix.
