@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import HomeClient from './HomeClient';
+import Home from './Home';
 
-// Force static generation to ensure title in initial HTML
-export const dynamic = 'force-static';
+// Use ISR (Incremental Static Regeneration) for data fetching
 export const revalidate = 3600; // Revalidate every hour
 
 // SEO metadata for homepage
@@ -42,5 +41,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <HomeClient />;
+  return <Home />;
 }
