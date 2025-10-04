@@ -23,18 +23,29 @@
 
 ## Next Week (Days 8-14)
 
-### 4. Begin Unskip Phase 1 ✅
-- ✅ Implemented minimal production fixes (Pass 59)
-- ✅ SSR guards in Navigation.tsx (mobile menu hydration)
-- ✅ Enhanced MSW handlers for error scenarios
-- ✅ Result: Reduced 11 skips → 8 skips (27% improvement)
+### 4. Unskip Progress ✅
+- ✅ **Pass 59 (Batch #1)**: Reduced 11 → 8 skips (SSR guards, MSW handlers)
+- ✅ **Pass 61 (Batch #2)**: Reduced 8 → 5 skips (error handling, abort signals)
+- ✅ **Pass 62**: Restored strict commit discipline (commitlint required)
+- **Result**: 112/117 passing (95.7% coverage), 5 skips remaining
 
-### 5. CI Performance Monitoring
+### 5. Retry Logic Sprint (Remaining 5 Skips)
+- Design retry-with-backoff infrastructure for CheckoutApiClient
+- Implement exponential backoff with jitter
+- Unskip remaining 4 tests in checkout.api.resilience.spec.ts
+- Target: 116/117 passing (99.1% coverage)
+
+### 6. CI Performance Monitoring
 - Track quality-gates runtime daily
 - Optimize slow steps if approaching 12-minute budget
 - Document baseline metrics
 
-### 6. Documentation Updates
+### 7. Nightly E2E Full Monitoring
+- Monitor nightly e2e-full runs for flakes
+- Triage any new failures with retries=1
+- Update skip inventory if new issues found
+
+### 8. Documentation Updates
 - Update PRD index with current features
 - Document architectural decisions
 - Create runbook for common issues
