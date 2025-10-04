@@ -366,3 +366,49 @@
 - Consider FCP/TTI as primary metrics (LCP unreliable for this app structure)
 - Test on deployed preview URL (not localhost) for alternative validation
 
+
+## Pass 76 — LHCI Integration + Artifacts Cleanup ✅
+
+**Date**: 2025-10-04T22:20Z  
+**Status**: Complete
+
+### PRs Finalized
+- **PR #331**: CI Helper Integration (OPEN, auto-merge armed)
+- **PR #333**: Lighthouse Docs + Artifacts ✅ MERGED
+
+### Background Processes Cleanup
+- ✅ Terminated all background servers (`next start`, etc.)
+- ✅ Cleaned up stray processes
+
+### Artifacts Policy Established
+**Added to .gitignore**:
+- `docs/QA/*.report.html`
+- `docs/QA/*-assets/**`
+- `docs/QA/*-devtoolslog.json`
+- `docs/QA/*-trace.json`
+- `frontend/test-results/**`
+- `.lighthouseci/**`
+
+**Policy**: Keep only summary JSON files in repo, upload heavy artifacts to GitHub Actions
+
+### LHCI Workflow Created
+**New Workflow**: `.github/workflows/lhci.yml`
+- ✅ Uses `--throttling-method=devtools` for reliable LCP measurement
+- ✅ Uploads artifacts instead of committing heavy files
+- ✅ Triggered by:
+  - Manual `workflow_dispatch`
+  - PR with `run-lhci` label
+  - Changes to `frontend/**` or workflow itself
+- ✅ Generates `LH-SUMMARY.json` for tracking
+
+### Benefits
+1. **Reliable LCP**: Devtools throttling should measure LCP correctly
+2. **Clean Repo**: Heavy artifacts not committed (just summaries)
+3. **On-Demand**: Run LHCI when needed via label or manual trigger
+4. **CI Artifacts**: Full reports available as GitHub Actions artifacts
+
+### Next Steps
+- Test LHCI workflow with `run-lhci` label on a PR
+- Validate devtools throttling fixes NO_LCP issue
+- Clean up old heavy artifacts from repo history (optional)
+

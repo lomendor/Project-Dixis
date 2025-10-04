@@ -1,0 +1,70 @@
+name: Lighthouse CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/lhci.yml'
+
+jobs:
+  lhci:
+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-lhci') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (root)
+        run: bash scripts/ci/install-deps.sh .
+
+      - name: Install deps (frontend)
+        run: bash scripts/ci/install-deps.sh frontend
+
+      - name: Build frontend (prod)
+        working-directory: frontend
+        run: npx --yes next build
+
+      - name: Start prod server
+        working-directory: frontend
+        run: |
+          nohup npx --yes next start -p 3000 >/tmp/next-prod.log 2>&1 &
+          npx --yes wait-on http://127.0.0.1:3000 --timeout 120000
+
+      - name: Run Lighthouse (desktop, devtools)
+        run: npx --yes lighthouse http://127.0.0.1:3000 --preset=desktop --throttling-method=devtools --save-assets --output=json --output-path=docs/QA/lh-desktop.json
+
+      - name: Run Lighthouse (mobile, devtools)
+        run: npx --yes lighthouse http://127.0.0.1:3000 --screenEmulation.mobile --throttling-method=devtools --save-assets --output=json --output-path=docs/QA/lh-mobile.json
+
+      - name: Summarize
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          function load(p){ try{return JSON.parse(fs.readFileSync(p,'utf8'));}catch{return null;}}
+          const d=load('docs/QA/lh-desktop.json'), m=load('docs/QA/lh-mobile.json');
+          function lcp(x){ return x?.audits?.['largest-contentful-paint']?.numericValue ?? null }
+          const out = {
+            desktop:{ lcp:lcp(d), perf:Math.round((d?.categories?.performance?.score??0)*100) },
+            mobile :{ lcp:lcp(m), perf:Math.round((m?.categories?.performance?.score??0)*100) }
+          };
+          fs.mkdirSync('docs/QA', { recursive:true });
+          fs.writeFileSync('docs/QA/LH-SUMMARY.json', JSON.stringify(out,null,2));
+          console.log('LHCI summary:', out);
+          NODE
+
+      - name: Upload Lighthouse artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-artifacts
+          path: |
+            docs/QA/lh-desktop.json
+            docs/QA/lh-mobile.json
+            docs/QA/LH-SUMMARY.json
