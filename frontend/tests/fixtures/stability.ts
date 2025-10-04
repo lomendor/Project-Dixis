@@ -21,6 +21,7 @@ export const test = base.extend({
         { retries: 1, delay: 250 }
       );
     }
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture, not React Hook
     await use(clickStable);
   },
 
@@ -34,6 +35,7 @@ export const test = base.extend({
         { retries: 1, delay: 250 }
       );
     }
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture, not React Hook
     await use(fillStable);
   },
 
@@ -44,6 +46,7 @@ export const test = base.extend({
     async function waitForNetworkIdle(timeout = 5000) {
       await page.waitForLoadState('networkidle', { timeout });
     }
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture, not React Hook
     await use(waitForNetworkIdle);
   }
 });
