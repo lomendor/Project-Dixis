@@ -8,11 +8,15 @@ on:
       - 'frontend/**'
       - '.github/workflows/lhci.yml'
 
+concurrency:
+  group: lhci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lhci:
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-lhci') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 18
 
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +24,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
       - name: Install deps (root)
         run: bash scripts/ci/install-deps.sh .
@@ -48,10 +57,10 @@ jobs:
           npx --yes wait-on http://127.0.0.1:3000 --timeout 120000
 
       - name: Run Lighthouse (desktop, devtools)
-        run: npx --yes lighthouse http://127.0.0.1:3000 --preset=desktop --throttling-method=devtools --save-assets --output=json --output-path=docs/QA/lh-desktop.json
+        run: npx --yes lighthouse http://127.0.0.1:3000 --preset=desktop --throttling-method=devtools --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --save-assets --output=json --output-path=docs/QA/lh-desktop.json
 
       - name: Run Lighthouse (mobile, devtools)
-        run: npx --yes lighthouse http://127.0.0.1:3000 --screenEmulation.mobile --throttling-method=devtools --save-assets --output=json --output-path=docs/QA/lh-mobile.json
+        run: npx --yes lighthouse http://127.0.0.1:3000 --screenEmulation.mobile --throttling-method=devtools --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --save-assets --output=json --output-path=docs/QA/lh-mobile.json
 
       - name: Summarize
         run: |

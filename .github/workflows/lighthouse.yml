@@ -1,15 +1,7 @@
-name: Lighthouse CI
+name: Lighthouse Manual
 
 on:
-  pull_request:
-    branches: [ main, develop ]
-    paths-ignore:
-      - 'docs/**'
-      - 'backend/docs/**'
-      - '**/*.md'
-      - '.github/**'
-      - 'frontend/tests/**'
-      - 'frontend/docs/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
