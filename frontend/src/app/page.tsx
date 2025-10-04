@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
-import HomeClient from './HomeClient';
+import Home from './Home';
+
+// Use ISR (Incremental Static Regeneration) for data fetching
+export const revalidate = 3600; // Revalidate every hour
 
 // SEO metadata for homepage
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
@@ -38,5 +41,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <HomeClient />;
+  return <Home />;
 }

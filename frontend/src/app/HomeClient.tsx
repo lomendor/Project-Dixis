@@ -33,13 +33,18 @@ interface SearchState {
   isLatin: boolean;
 }
 
-export default function HomeClient() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface HomeClientProps {
+  initialProducts: Product[];
+}
+
+export default function HomeClient({ initialProducts }: HomeClientProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [producers, setProducers] = useState<{id: number, name: string}[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [addingToCart, setAddingToCart] = useState<Set<number>>(new Set());
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -125,8 +130,27 @@ export default function HomeClient() {
   }, [filters]);
 
   useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      // Extract categories and producers from initial data
+      const uniqueCategories = Array.from(new Set(
+        initialProducts.flatMap(p => p.categories.map(c => c.name))
+      )).sort();
+      setCategories(uniqueCategories);
+
+      const uniqueProducers = Array.from(
+        new Map(
+          initialProducts.map(p => [
+            p.producer.id,
+            { id: p.producer.id, name: p.producer.name || p.producer.business_name }
+          ])
+        ).values()
+      ).sort((a, b) => a.name.localeCompare(b.name));
+      setProducers(uniqueProducers);
+      return;
+    }
     loadProducts();
-  }, [filters, loadProducts]);
+  }, [filters, loadProducts, isInitialLoad, initialProducts]);
 
   const updateFilter = useCallback((key: keyof Filters, value: Filters[keyof Filters]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
