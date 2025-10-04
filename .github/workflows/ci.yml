@@ -33,7 +33,7 @@ jobs:
         with:
           php-version: '8.2'
       - name: Install frontend deps
-        run: bash scripts/ci/install-deps.sh frontend
+        run: bash ../scripts/ci/install-deps.sh frontend
       - name: Type check (dependabot)
         working-directory: frontend
         run: npm run type-check
@@ -115,7 +115,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: bash scripts/ci/install-deps.sh frontend
+        run: bash ../scripts/ci/install-deps.sh frontend
 
       - name: Install contracts dependencies
         run: |
@@ -164,7 +164,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: bash scripts/ci/install-deps.sh frontend
+        run: bash ../scripts/ci/install-deps.sh frontend
 
       - name: Run execution issue tests
         run: cd frontend && npm run test:execution-issues
