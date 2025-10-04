@@ -124,3 +124,17 @@
 - **Quality Gates**: All checks passing with unified gate
 - **Coverage**: 112/117 tests passing (95.7%), 5 skips remaining
 
+
+**Pass 65**: PR #320 Merged + Retry Skip Analysis
+- **Status**: ✅ Complete (2025-10-04T10:26:48Z)
+- **PR #320**: ✅ MERGED via auto-merge (ESLint fix successful)
+  - ESLint disable comments for Playwright `use()` fixtures worked
+  - Retry scaffold (retry.ts + stability.ts) now in main
+- **Skip Analysis**: All 5 remaining skips require **same production change**:
+  - `checkout.api.resilience.spec.ts`: 2 skips
+  - `checkout.api.extended.spec.ts`: 3 skips
+  - **Root cause**: "retry not implemented at CheckoutApiClient level"
+  - **Required**: Add retry-with-backoff to `src/lib/api/checkout.ts`
+- **Conclusion**: Cannot remove skips with tests-only changes
+- **Next**: Pass 66 will implement CheckoutApiClient retry logic (src/** allowed)
+

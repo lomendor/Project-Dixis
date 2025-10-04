@@ -30,10 +30,13 @@
 - **Result**: 112/117 passing (95.7% coverage), 5 skips remaining
 
 ### 5. Retry Logic Sprint (Remaining 5 Skips) ✅
-- ✅ Scaffold added (Pass 64): tests/utils/retry.ts, tests/fixtures/stability.ts
-- **Next**: Adopt helpers in 2 flaky specs → reduce skips 5→4
-- Then: Design retry-with-backoff for CheckoutApiClient (remaining 3 skips)
-- Target: 116/117 passing (99.1% coverage)
+- ✅ Pass 64: Scaffold added (tests/utils/retry.ts, tests/fixtures/stability.ts)
+- ✅ Pass 65: PR #320 merged, skip analysis complete
+- **Finding**: All 5 skips require **same production change**
+  - Root cause: CheckoutApiClient lacks retry-with-backoff
+  - Cannot unskip with tests-only changes
+- **Next (Pass 66)**: Implement retry logic in src/lib/api/checkout.ts
+  - Target: Unskip 4 tests → 116/117 passing (99.1%)
 
 ### 6. CI Performance Monitoring
 - Track quality-gates runtime daily
