@@ -53,3 +53,55 @@
 ---
 
 **Conclusion**: Devtools throttling is superior to simulate for this application. Mobile LCP measurement is a major milestone for performance tracking.
+
+## Pass 78 — CI Conflict Resolution & Script Dependency Fix ⚠️
+
+**Date**: 2025-10-04T20:40Z
+**Status**: Partially Complete (PRs pending merge)
+
+### Issues Discovered
+
+**Missing Script Dependency**: `scripts/ci/install-deps.sh`
+- PR #331 workflows reference this script but it was never committed
+- Caused all CI checks to fail with "No such file or directory"
+
+### Actions Taken
+
+1. **✅ Resolved Conflicts**:
+   - PR #331: Rebased successfully, conflicts resolved (docs/OS/STATE.md, frontend/playwright.a11y.config.ts, frontend/src/app/page.tsx)
+   - PR #334: Rebased successfully, no additional conflicts
+
+2. **✅ Created Missing Script**:
+   - Created PR #335 with `scripts/ci/install-deps.sh`
+   - Auto-merge enabled
+   - Quality gates: PASS
+   - Status: Waiting for Lighthouse check to complete
+
+3. **✅ Background Cleanup**:
+   - All background processes terminated (next start, pnpm, lighthouse, chrome)
+
+### PR Status Summary
+
+- **PR #335** (install-deps.sh): OPEN, auto-merge armed, quality-gates PASS, waiting for Lighthouse
+- **PR #331** (CI helper integration): OPEN, auto-merge armed, BLOCKED (missing script dependency - will unblock after #335 merges)
+- **PR #334** (LHCI workflow): OPEN, auto-merge armed, BLOCKED (waiting for #335)
+
+### Dependency Chain
+
+```
+PR #335 (script) → PR #331 (CI workflows) → LHCI can run
+                  → PR #334 (LHCI workflow) → LHCI available in CI
+```
+
+### Next Steps (Manual Intervention Required)
+
+1. Wait for PR #335 Lighthouse check to complete and auto-merge
+2. PR #331 will automatically re-run checks and merge once script is in main
+3. PR #334 will merge after #331
+4. Once all merged, trigger LHCI workflow manually via `gh workflow run "Lighthouse CI"`
+5. Download artifacts and document results
+
+### Lessons Learned
+
+- **Script Dependencies**: Workflow changes must include all referenced scripts in same PR or ensure dependencies exist in base branch
+- **Testing Order**: Helper scripts should be merged before workflows that use them
