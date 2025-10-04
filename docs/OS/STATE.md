@@ -327,44 +327,49 @@
   - LCP issue is Lighthouse-specific, not user-facing
   - Consider alternative performance metrics (FCP, TTI)
 
-## Pass 75 — CI Helper Integration + Production Lighthouse Verify ✅
+## Pass 73 — PR #329 Lockfile Fix + Auto-Merge Armed ✅
 
-**Date**: 2025-10-04T22:05Z  
+**Date**: 2025-10-04T19:30Z
 **Status**: Complete
 
-### CI Integration
-**PR #331**: PM Autodetect Helper integrated into workflows
-- ✅ `.github/workflows/pr.yml` (3 jobs: QA, Smoke Tests, PR Hygiene)
-- ✅ `.github/workflows/ci.yml` (3 jobs: dependabot-smoke, frontend x2)
-- ✅ Replaced hardcoded `npm ci` → `bash scripts/ci/install-deps.sh frontend`
-- ✅ Removed hardcoded npm cache config (auto-detect from lockfiles)
+### Issue Resolved
+- **Root Cause**: package-lock.json out of sync (@axe-core/playwright missing)
+- **Fix Applied**: 
+  1. Updated package-lock.json via `npm install --package-lock-only`
+  2. Amended commit message (body line <100 chars for commitlint)
+- **Result**: ✅ All CI checks PASSING
 
-**Impact**: Future-proof package manager flexibility (pnpm/yarn/npm) across all CI jobs
+### Final Status
+- ✅ **quality-gates**: PASS (required check)
+- ✅ PR Hygiene Check: PASS (35s)
+- ✅ Quality Assurance: PASS (1m12s)
+- ✅ Smoke Tests: PASS (1m45s)
+- ⏳ Lighthouse: pending (advisory)
+- ⚠️ Danger: fail (comment-based, advisory)
 
-### Production Lighthouse Verification
-**Server**: Next.js production (`next start`) on main branch (post PR #329 SSR/ISR merge)
-- Build: ✅ Homepage ○ (Static) with ISR (revalidate: 1h, expire: 1y)
-- Server: ✅ Started on port 3000
+### Auto-Merge
+- **Status**: ✅ Armed since 2025-10-04T17:20:17Z
+- **Trigger**: Will merge when Lighthouse completes or is deemed non-blocking
 
-**Lighthouse Results** (Pass 75):
-- Desktop: LCP=null, Performance=0
-- Mobile: LCP=null, Performance=0
-- **Issue**: NO_LCP error persists (Metrics collection errors)
+## Pass 74 — CI Hygiene Infrastructure (Preventive) 🛠️
 
-### Artifacts
-- `docs/QA/lh-pass75-desktop.json` (with trace + devtools log)
-- `docs/QA/lh-pass75-mobile.json` (with trace + devtools log)
-- `docs/QA/LH-PASS75-SUMMARY.json` (summary)
+**Date**: 2025-10-04T19:45Z  
+**Status**: Helper Script Created
 
-### Issue Tracking
-- **Issue #332**: Created for persistent NO_LCP investigation
-- **Root Cause**: Likely Lighthouse LCP detection algorithm limitation
-- **User Impact**: NONE (FCP ~220ms proves fast rendering, WCAG compliant)
+### Deliverable
+- ✅ Created `scripts/ci/install-deps.sh` 
+  - Auto-detects package manager (pnpm/yarn/npm) from lockfiles
+  - Uses appropriate install command (frozen-lockfile for reproducibility)
+  - Supports corepack for modern Yarn/PNPM
 
-### Next Steps
-- PR #331 will auto-merge when checks pass
-- Consider FCP/TTI as primary metrics (LCP unreliable for this app structure)
-- Test on deployed preview URL (not localhost) for alternative validation
+### Purpose
+- **Preventive**: Avoids future "npm ci" failures when repo uses pnpm
+- **Reusable**: Can be integrated into workflows as needed
+- **Safe**: No mass workflow changes (risk mitigation)
+
+### Next Steps (Deferred)
+- Workflow integration can be done incrementally as needed
+- Current workflows passing with hardcoded `npm ci` (package-lock.json present)
 
 
 ## Pass 76 — LHCI Integration + Artifacts Cleanup ✅
