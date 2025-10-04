@@ -384,8 +384,14 @@ export class CheckoutApiClient {
       errorMessage = 'Μη εξουσιοδοτημένος';
     } else if (status === 429) {
       errorMessage = 'Πολλές αιτήσεις. Δοκιμάστε ξανά.';
+    } else if (status === 408) {
+      errorMessage = 'Μη έγκυρα δεδομένα'; // Server timeout treated as validation error
     } else if (status >= 400 && status < 500) {
       errorMessage = 'Μη έγκυρα δεδομένα';
+    } else if (error instanceof Error && (error.message.toLowerCase().includes('timeout') || error.message.toLowerCase().includes('timed out'))) {
+      errorMessage = 'Timeout: Η αίτηση δεν ολοκληρώθηκε εγκαίρως'; // Network timeout with "Timeout" keyword
+    } else if (error instanceof Error && (error.message.includes('AbortError') || error.message.includes('abort'))) {
+      errorMessage = 'Πρόβλημα σύνδεσης'; // Treat abort as network issue
     } else if (error instanceof Error && (error.message.includes('Failed to fetch') || error.message.includes('Network'))) {
       errorMessage = 'Πρόβλημα σύνδεσης';
     } else {

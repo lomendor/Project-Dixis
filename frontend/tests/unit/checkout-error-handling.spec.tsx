@@ -234,7 +234,7 @@ describe('CO-ERR-003: MSW Integration Error Handling', () => {
   });
 
   describe('Circuit Breaker Pattern', () => {
-    it.skip('intermittent failures', async () => {
+    it('intermittent failures', async () => {
       server.use(...circuitBreakerTestHandlers);
 
       const { result } = renderHook(() => useCheckout());

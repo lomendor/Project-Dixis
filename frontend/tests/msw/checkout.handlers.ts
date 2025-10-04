@@ -172,8 +172,15 @@ export const greekPostalHandlers = [
 
 // Circuit breaker test handlers
 export const circuitBreakerTestHandlers = [
-  // Alternating success/failure for circuit breaker testing
+  // Alternating success/failure for circuit breaker testing (match both absolute and relative paths)
   http.get(`${API_BASE}/cart/items`, () => {
+    const shouldFail = Math.random() > 0.7 // 30% failure rate
+    if (shouldFail) {
+      return HttpResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })
+    }
+    return HttpResponse.json({ cart_items: [], total_items: 0, total_amount: '0.00' })
+  }),
+  http.get('/api/v1/cart/items', () => {
     const shouldFail = Math.random() > 0.7 // 30% failure rate
     if (shouldFail) {
       return HttpResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })

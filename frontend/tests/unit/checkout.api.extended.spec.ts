@@ -35,7 +35,7 @@ const greekZones = {
 
 describe('Checkout API Extended Tests', () => {
   describe('AbortSignal & Cancellation', () => {
-    it.skip('handles AbortSignal during cart loading', async () => {
+    it('handles AbortSignal during cart loading', async () => {
       server.use(
         http.get(apiUrl('cart/items'), async () => {
           await delay(2000); // Simulate slow response
@@ -104,7 +104,7 @@ describe('Checkout API Extended Tests', () => {
   });
 
   describe('Error Categorization Edge Cases', () => {
-    it.skip('categorizes network timeout vs server timeout differently', async () => {
+    it('categorizes network timeout vs server timeout differently', async () => {
       // Network timeout (client-side)
       const originalFetch = global.fetch;
       global.fetch = vi.fn().mockRejectedValue(new Error('network timeout'));
