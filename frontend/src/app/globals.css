@@ -33,3 +33,30 @@ body {
 .text-gray-500 {
   color: #6b7280 !important; /* Darker than default gray-500 (#9ca3af) */
 }
+
+/* pass84-lcp: Desktop LCP anchor hero section */
+.hero {
+  min-height: 60vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 24px 16px;
+  margin: 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.lcp-hero-title {
+  font-size: clamp(32px, 6vw, 56px);
+  line-height: 1.15;
+  margin: 16px 0 0 0;
+  font-weight: 700;
+  color: #111827;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1280px) {
+  .hero {
+    min-height: 50vh;
+  }
+}
