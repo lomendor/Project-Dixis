@@ -456,3 +456,57 @@
 - Investigate desktop LCP measurement (Issue #338)
 - Consider targeted perf optimizations based on budget warnings
 
+
+## Pass 84 — Desktop LCP anchor ensured; LHCI in progress ✅
+
+**Date**: 2025-10-04T22:05Z
+**Status**: Complete (LHCI verification pending)
+
+### Achievements
+
+1. **✅ Server-Rendered Hero Section Added**:
+   - H1 with `data-lcp-anchor="hero"` in Home.tsx (App Router RSC)
+   - Text: "Fresh Products from Local Greek Producers"
+   - Renders in initial HTML (no client-side delay)
+
+2. **✅ Minimal CSS for Above-the-Fold Visibility**:
+   - `.hero`: 60vh min-height, gradient background
+   - `.lcp-hero-title`: Responsive font (clamp 32px-56px)
+   - Desktop optimization: 50vh at >1280px breakpoint
+   - Total: ~27 lines of CSS
+
+3. **✅ Playwright Test Coverage**:
+   - `frontend/tests/perf/desktop-lcp-anchor.spec.ts`
+   - Desktop viewport: 1350x940 (Lighthouse dimensions)
+   - Validates anchor visible above fold (y <900px)
+   - Confirms sufficient size (area >12000px²)
+
+4. **✅ PR #340 Merged**:
+   - Auto-merge successful
+   - All CI checks passed
+   - Now live on main branch
+
+### Changes Made
+
+- `frontend/src/app/Home.tsx`: Added server-rendered hero section
+- `frontend/src/app/globals.css`: Added pass84-lcp CSS rules
+- `frontend/tests/perf/desktop-lcp-anchor.spec.ts`: Created perf test
+- Issue #338: Updated with deployment status
+
+### LHCI Verification
+
+⏳ **Lighthouse CI Running**: https://github.com/lomendor/Project-Dixis/actions/runs/18250044879
+
+**Expected Outcome**:
+- Desktop LCP should now be measurable (previously null)
+- Target: Desktop LCP <2000ms (budget threshold)
+- Issue #338 will be closed if successful
+
+### Next Steps
+
+1. ⏳ Wait for Lighthouse CI to complete
+2. ⏳ Download artifacts and extract LH-SUMMARY.json
+3. ⏳ Verify desktop LCP is measurable
+4. ⏳ Close Issue #338 if desktop LCP <2000ms
+5. ⏳ Document final results in LIGHTHOUSE-PROGRESS.md
+
