@@ -27,6 +27,16 @@ jobs:
       - name: Install deps (frontend)
         run: bash scripts/ci/install-deps.sh frontend
 
+      - name: Install and build contracts dependencies
+        run: |
+          if [ -d "packages/contracts" ]; then
+            cd packages/contracts
+            npm ci
+            npm run build
+          else
+            echo "No contracts directory found"
+          fi
+
       - name: Build frontend (prod)
         working-directory: frontend
         run: npx --yes next build
