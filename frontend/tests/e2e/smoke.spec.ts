@@ -53,22 +53,13 @@ test.describe('Smoke Tests - Lightweight Stubs', () => {
     // Wait for potential state update
     await page.waitForTimeout(300);
 
-    // Check if menu opened (it may not due to hydration issues)
-    const mobileMenuExists = await page.getByTestId('mobile-menu').count() > 0;
+    // Menu should render now with SSR guards in place
+    const mobileMenu = page.getByTestId('mobile-menu');
+    await expect(mobileMenu).toBeVisible({ timeout: 5000 });
 
-    if (mobileMenuExists) {
-      // Menu rendered - verify cart link is visible for consumer
-      const mobileMenu = page.getByTestId('mobile-menu');
-      await expect(mobileMenu).toBeVisible({ timeout: 5000 });
-
-      // Look for cart link inside the menu
-      const cartLink = page.getByTestId('mobile-nav-cart');
-      await expect(cartLink).toBeVisible({ timeout: 5000 });
-    } else {
-      // Menu didn't open - this is a known issue with client-side hydration
-      // Mark as skipped rather than failed
-      test.skip(true, 'Mobile menu not rendering - hydration issue');
-    }
+    // Look for cart link inside the menu
+    const cartLink = page.getByTestId('mobile-nav-cart');
+    await expect(cartLink).toBeVisible({ timeout: 5000 });
   });
 
   test('Checkout happy path: from cart to confirmation', async ({ page }) => {
