@@ -30,6 +30,7 @@ export interface UseCheckoutReturn {
   processCheckout: () => Promise<Order | null>;
   reset: () => void;
   clearErrors: () => void;
+  clearError: () => void; // Alias for clearErrors (used by some tests)
 }
 
 // Main hook with simplified useState
@@ -171,6 +172,7 @@ export const useCheckout = (): UseCheckoutReturn => {
     calculateOrderSummary,
     processCheckout,
     reset,
-    clearErrors
+    clearErrors,
+    clearError: clearErrors // Alias for backwards compatibility
   };
 };

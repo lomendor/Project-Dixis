@@ -1,3 +1,4 @@
+tests/unit/checkout-error-handling.spec.tsx:237:    it.skip('intermittent failures', async () => {
 tests/unit/checkout.api.resilience.spec.ts:80:    it.skip('retries network errors and eventually succeeds', async () => { // SKIP: retry not implemented at CheckoutApiClient level
 tests/unit/checkout.api.resilience.spec.ts:99:    it.skip('retries server errors with exponential backoff', async () => { // SKIP: retry not implemented at CheckoutApiClient level
 tests/unit/checkout.api.extended.spec.ts:38:    it.skip('handles AbortSignal during cart loading', async () => {
@@ -5,8 +6,4 @@ tests/unit/checkout.api.extended.spec.ts:107:    it.skip('categorizes network ti
 tests/unit/checkout.api.extended.spec.ts:154:    it.skip('respects exponential backoff timing', async () => { // SKIP: retry not implemented at CheckoutApiClient level
 tests/unit/checkout.api.extended.spec.ts:171:    it.skip('handles intermittent network failures correctly', async () => { // SKIP: retry not implemented at CheckoutApiClient level
 tests/unit/checkout.api.extended.spec.ts:210:    it.skip('handles mixed error types in retry sequence', async () => { // SKIP: retry not implemented at CheckoutApiClient level
-tests/unit/checkout-error-handling.spec.tsx:161:    it.skip('handles 500 server errors during checkout', async () => {
-tests/unit/checkout-error-handling.spec.tsx:214:    it.skip('partial service failures', async () => {
-tests/unit/checkout-error-handling.spec.tsx:237:    it.skip('intermittent failures', async () => {
-tests/e2e/smoke.spec.ts:70:      test.skip(true, 'Mobile menu not rendering - hydration issue');
 tests/e2e/shipping-checkout-e2e.spec.ts:337:  (ADMIN_UI_AVAILABLE ? test : test.skip)('admin label creation and customer tracking @slow', async ({ page }) => {
