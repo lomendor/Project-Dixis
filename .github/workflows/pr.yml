@@ -77,6 +77,53 @@ jobs:
         if: env.DOCS_ONLY != 'true'
         run: npm run build
 
+      - name: Perf Budgets (advisory)
+        if: env.DOCS_ONLY != 'true'
+        continue-on-error: true
+        working-directory: .
+        run: |
+          SUMMARY=docs/QA/LH-SUMMARY.latest.json
+          if [ ! -f "$SUMMARY" ]; then
+            echo "ℹ️ (perf) No LH summary found at $SUMMARY; skipping advisory budgets check"
+            exit 0
+          fi
+          node - <<'NODE'
+          const fs = require('fs');
+          const summary = JSON.parse(fs.readFileSync('docs/QA/LH-SUMMARY.latest.json', 'utf8'));
+          const budgets = {
+            mobile: { lcp: 2500, perf: 80 },
+            desktop: { lcp: 2000, perf: 90 }
+          };
+
+          function checkSide(side) {
+            const lcp = summary[side]?.lcp ?? null;
+            const perf = summary[side]?.perf ?? null;
+            const warnings = [];
+
+            if (lcp === null) {
+              warnings.push(`${side}: LCP=null (unmeasurable)`);
+            } else if (lcp > budgets[side].lcp) {
+              warnings.push(`${side}: LCP ${lcp.toFixed(0)}ms > ${budgets[side].lcp}ms`);
+            }
+
+            if (typeof perf === 'number' && perf < budgets[side].perf) {
+              warnings.push(`${side}: perf ${perf} < ${budgets[side].perf}`);
+            }
+
+            return warnings;
+          }
+
+          const warnings = [...checkSide('mobile'), ...checkSide('desktop')];
+
+          if (warnings.length) {
+            console.log('⚠️ Performance budgets (advisory):');
+            warnings.forEach(w => console.log('  - ' + w));
+            console.log('\nℹ️ These are advisory warnings and do not block the PR.');
+          } else {
+            console.log('✅ Performance budgets OK');
+          }
+          NODE
+
   test-smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest

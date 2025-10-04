@@ -417,3 +417,42 @@
 - Validate devtools throttling fixes NO_LCP issue
 - Clean up old heavy artifacts from repo history (optional)
 
+
+
+## Pass 83 — LHCI confirmed; advisory perf budgets wired ✅
+
+**Date**: 2025-10-04T21:47Z
+**Status**: Complete
+
+### Achievements
+
+1. **✅ LH-SUMMARY Recorded**:
+   - Created timestamped summary: `LH-SUMMARY-20251004T214742Z.json`
+   - Symlink created: `LH-SUMMARY.latest.json`
+   - Mobile LCP: 1544ms (from Pass 77 devtools audit)
+   - Desktop LCP: null (requires investigation)
+
+2. **✅ Advisory Perf Budgets Added**:
+   - Updated `.github/workflows/pr.yml` with non-blocking perf check
+   - Budgets: Mobile LCP <2500ms (80 perf), Desktop LCP <2000ms (90 perf)
+   - Warnings displayed but don't block PRs
+
+3. **✅ Desktop LCP Issue Opened**:
+   - Issue #338: Desktop LCP unmeasurable
+   - Tracked for future investigation
+   - Mobile LCP confirmed working
+
+### Changes Made
+
+- `docs/QA/LH-SUMMARY.json`: Base summary file
+- `docs/QA/LH-SUMMARY-20251004T214742Z.json`: Timestamped snapshot
+- `docs/QA/LH-SUMMARY.latest.json`: Symlink to latest
+- `.github/workflows/pr.yml`: Added "Perf Budgets (advisory)" step
+- Issue #338: Desktop LCP investigation tracking
+
+### Next Steps
+
+- Monitor advisory perf budgets in upcoming PRs
+- Investigate desktop LCP measurement (Issue #338)
+- Consider targeted perf optimizations based on budget warnings
+
