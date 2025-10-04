@@ -44,14 +44,14 @@ describe('Checkout API Resilience', () => {
 
     it('retries then succeeds', async () => {
       const mockFn = vi.fn()
-        .mockRejectedValueOnce(new Error('Fail'))
+        .mockRejectedValueOnce(new TypeError('Network error')) // Use retryable error type
         .mockResolvedValue('success')
-      
+
       const promise = retryWithBackoff(mockFn, { retries: 2, baseMs: 100, jitter: false })
-      
+
       // Advance timers to trigger the retry after first failure
       await vi.advanceTimersByTimeAsync(100)
-      
+
       const result = await promise
       expect(result).toBe('success')
       expect(mockFn).toHaveBeenCalledTimes(2)

@@ -75,6 +75,7 @@ export async function retryWithBackoff<T>(
           (status >= 500 && status < 600 && method.toUpperCase() === 'GET');
 
         if (shouldRetry && attempt < maxRetries) {
+          console.warn(`Retrying request (attempt ${attempt + 1}/${maxRetries}): HTTP ${status}`);
           const delay = baseMs * Math.pow(2, attempt);
           const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
           await new Promise(resolve => setTimeout(resolve, finalDelay));
@@ -84,14 +85,24 @@ export async function retryWithBackoff<T>(
 
       return result;
     } catch (error: any) {
-      // Retry only on network errors (TypeError, connection errors, timeouts)
+      // Retry logic for errors
       const msg = String(error?.message || '');
+
+      // Check for retryable HTTP status codes in error message
+      const http502_504 = /HTTP (502|503|504):/i.test(msg);
+      const http5xx = /HTTP (5\d\d):/i.test(msg);
+      const isRetryableHttpError = http502_504 || (http5xx && method.toUpperCase() === 'GET');
+
+      // Check for network errors (TypeError, connection errors, timeouts)
       const isNetworkError =
         error?.name === 'TypeError' ||
         /ECONN|ETIMEDOUT|network|fetch failed|AbortError/i.test(msg);
 
-      if (!isNetworkError || attempt >= maxRetries) throw error;
+      const shouldRetry = (isRetryableHttpError || isNetworkError) && attempt < maxRetries;
 
+      if (!shouldRetry) throw error;
+
+      console.warn(`Retrying request (attempt ${attempt + 1}/${maxRetries}): ${error.name || 'Error'}`);
       const delay = baseMs * Math.pow(2, attempt);
       const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
       await new Promise(resolve => setTimeout(resolve, finalDelay));
@@ -189,7 +200,10 @@ export class CheckoutApiClient {
   // Validate and transform cart items from API response
   async getValidatedCart(): Promise<ValidatedApiResponse<CartLine[]>> {
     try {
-      const cartResponse = await this.baseClient.getCart();
+      const cartResponse = await retryWithBackoff(
+        () => this.baseClient.getCart(),
+        { method: 'GET' }
+      );
       const validatedItems: CartLine[] = [];
       const errors: Array<{ field: string; message: string; code: string }> = [];
 
@@ -306,7 +320,10 @@ export class CheckoutApiClient {
 
       // Step 3: Transform to API format and call checkout
       const apiCheckoutData = this.transformToApiFormat(validatedForm);
-      const order = await this.baseClient.checkout(apiCheckoutData);
+      const order = await retryWithBackoff(
+        () => this.baseClient.checkout(apiCheckoutData),
+        { method: 'POST' }
+      );
 
       return {
         success: true,
