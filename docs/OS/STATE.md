@@ -157,8 +157,8 @@
 - **ADR**: docs/DECISIONS/ADR-0002-checkout-retry.md
 
 **Pass 67**: HOTFIX - Integrate retryWithBackoff into CheckoutApiClient
-- **Status**: ✅ Complete (2025-10-04T13:08Z → 13:15Z)
-- **PR #323**: hotfix/checkout-retry-integration (auto-merge enabled)
+- **Status**: ✅ MERGED (2025-10-04T13:08Z → 13:18:59Z)
+- **PR #323**: ✅ Merged to main (b7a1811)
 - **Root Cause**: retryWithBackoff() utility created but NOT integrated into API methods
 - **Fix Applied**:
   - Wrapped getValidatedCart() → retryWithBackoff(method: 'GET')
