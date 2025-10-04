@@ -1,57 +1,60 @@
 # NEXT-7D — Immediate Priorities
 
-**Updated:** 2025-10-03
-**Context:** Phase 2 E2E Stabilization
+**Updated:** 2025-10-04
+**Context:** Phase 3 - UI Polish & Release Candidate Prep
 
-## This Week (Days 1-7)
+## Phase 2 Complete ✅ (2025-10-04)
 
-### 1. Strict Smoke Test ✅
-- ✅ Create `frontend/tests/e2e/auth-probe.spec.ts`
-- ✅ Remove `continue-on-error` from smoke step in pr.yml
-- ✅ Ensure auth-probe is strict required check
+### Final Status
+- ✅ **116/117 tests passing (99.1%)**
+- ✅ **Retry-with-backoff integrated**
+- ✅ **CI/CD gates all GREEN**
+- ✅ **Issue #311 closed**
 
-### 2. Nightly E2E Full ✅
-- ✅ Add `.github/workflows/e2e-full.yml`
-- ✅ Trigger: Nightly (03:30 UTC) + manual + label `run-e2e-full`
-- ✅ Runs all E2E tests with retries=1 and full artifacts
+## Phase 3 - This Week (Days 1-7)
 
-### 3. Skip Inventory & Umbrella Issue ✅
-- ✅ Generate skip inventory from test files
-- ✅ Create umbrella issue for unskip backlog
-- ✅ Map each skip → required production change
-- ✅ Prioritize by risk/value
+### 1. UI/UX Polish & Accessibility Audit
+- Accessibility compliance review (WCAG 2.1 AA)
+- Color contrast verification
+- Keyboard navigation testing
+- Screen reader compatibility
+- Mobile responsiveness refinement
+
+### 2. Performance Optimization
+- Lighthouse CI baseline (target: 90+ scores)
+- Bundle size analysis and optimization
+- Image optimization and lazy loading
+- Database query performance review
+- API response time monitoring
+
+### 3. Nightly E2E Full Suite Monitoring (7-day stability window)
+- Monitor nightly runs for flakiness
+- Track success rate metrics
+- Document any intermittent failures
+- Validate retry-with-backoff effectiveness
 
 ## Next Week (Days 8-14)
 
-### 4. Unskip Progress ✅
-- ✅ **Pass 59 (Batch #1)**: Reduced 11 → 8 skips (SSR guards, MSW handlers)
-- ✅ **Pass 61 (Batch #2)**: Reduced 8 → 5 skips (error handling, abort signals)
-- ✅ **Pass 62**: Restored strict commit discipline (commitlint required)
-- **Result**: 112/117 passing (95.7% coverage), 5 skips remaining
+### 4. Release Candidate Preparation
+- Feature freeze enforcement (no new API changes)
+- Code review and security audit
+- Documentation completeness check
+- Deployment runbook creation
+- Rollback procedure testing
 
-### 5. Retry Logic Sprint (Remaining 5 Skips) ✅
-- ✅ Pass 64: Scaffold added (tests/utils/retry.ts, tests/fixtures/stability.ts)
-- ✅ Pass 65: PR #320 merged, skip analysis complete
-- **Finding**: All 5 skips require **same production change**
-  - Root cause: CheckoutApiClient lacks retry-with-backoff
-  - Cannot unskip with tests-only changes
-- **Next (Pass 66)**: Implement retry logic in src/lib/api/checkout.ts
-  - Target: Unskip 4 tests → 116/117 passing (99.1%)
+### 5. User Acceptance Testing (UAT) Prep
+- Test data preparation
+- UAT environment setup
+- Test scenarios documentation
+- User feedback collection process
+- Bug triage workflow
 
-### 6. CI Performance Monitoring
-- Track quality-gates runtime daily
-- Optimize slow steps if approaching 12-minute budget
-- Document baseline metrics
-
-### 7. Nightly E2E Full Monitoring
-- Monitor nightly e2e-full runs for flakes
-- Triage any new failures with retries=1
-- Update skip inventory if new issues found
-
-### 8. Documentation Updates
-- Update PRD index with current features
-- Document architectural decisions
-- Create runbook for common issues
+### 6. Production Readiness Review
+- Infrastructure scalability check
+- Monitoring and alerting setup
+- Backup and disaster recovery validation
+- Performance benchmarks verification
+- Security compliance review
 
 ## Blocked / Deferred
 
