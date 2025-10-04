@@ -510,3 +510,67 @@
 4. ⏳ Close Issue #338 if desktop LCP <2000ms
 5. ⏳ Document final results in LIGHTHOUSE-PROGRESS.md
 
+## Pass 86 — LHCI stabilization; workflow deduplication ✅
+
+**Date**: 2025-10-04T23:03Z
+**Status**: Complete (Desktop LCP still null - investigation ongoing)
+
+### Achievements
+
+1. **✅ Workflow Deduplication**:
+   - Renamed `lighthouse.yml` to "Lighthouse Manual" (workflow_dispatch only)
+   - Kept `lhci.yml` as canonical "Lighthouse CI"
+   - Resolved "could not resolve to a unique workflow" error
+
+2. **✅ Chrome Setup Stabilization**:
+   - Added `browser-actions/setup-chrome@v1` for faster Chrome installation
+   - Added Chrome headless flags: `--headless --no-sandbox --disable-dev-shm-usage`
+   - Improved CI stability and performance
+
+3. **✅ Workflow Optimizations**:
+   - Added concurrency control: `cancel-in-progress: true`
+   - Reduced timeout from 20 to 18 minutes
+   - Run completed in ~4 minutes (faster than previous >10min runs)
+
+4. **✅ PR #342 Merged**:
+   - Auto-merge successful
+   - All quality-gates passed
+   - Workflow stabilization complete
+
+### LHCI Results (Run 18250620576)
+
+```json
+{
+  "desktop": {
+    "lcp": null,
+    "perf": 0
+  },
+  "mobile": {
+    "lcp": 1535.351,
+    "perf": 0
+  }
+}
+```
+
+**Analysis**:
+- **Mobile LCP**: ✅ Measurable at 1535ms (1.5s) - within budget (<2500ms)
+- **Desktop LCP**: ❌ Still null despite hero section fix (PR #340)
+  - Error: `NO_LCP` - "The page did not display content that qualifies as a Largest Contentful Paint"
+  - Hero section exists in HTML but not qualifying as LCP element
+  - Possible causes: gradient background, text rendering timing, viewport dimensions
+
+### Changes Made
+
+- `.github/workflows/lighthouse.yml`: Renamed to "Lighthouse Manual", workflow_dispatch only
+- `.github/workflows/lhci.yml`: Added setup-chrome, headless flags, concurrency
+- `docs/QA/LH-SUMMARY-20251004T230306Z.json`: Created timestamped summary
+- `docs/QA/LH-SUMMARY.latest.json`: Updated symlink
+- Issue #338: Updated with results, kept open for desktop LCP investigation
+
+### Next Steps
+
+1. ⏳ Investigate desktop LCP detection issue (trace.json analysis)
+2. ⏳ Consider alternative LCP candidates (images, visible text)
+3. ⏳ Test with different desktop viewport sizes
+4. ⏳ Close Issue #338 when desktop LCP <2000ms
+
