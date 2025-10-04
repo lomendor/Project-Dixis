@@ -77,7 +77,7 @@ describe('CheckoutApiClient Resilience', () => {
   });
 
   describe('Retry Logic', () => {
-    it.skip('retries network errors and eventually succeeds', async () => { // SKIP: retry not implemented at CheckoutApiClient level
+    it('retries network errors and eventually succeeds', async () => { // SKIP: retry not implemented at CheckoutApiClient level
       let attemptCount = 0;
       server.use(
         http.get(apiUrl('cart/items'), () => {
@@ -96,7 +96,7 @@ describe('CheckoutApiClient Resilience', () => {
       expect(console.warn).toHaveBeenCalledTimes(2);
     });
 
-    it.skip('retries server errors with exponential backoff', async () => { // SKIP: retry not implemented at CheckoutApiClient level
+    it('retries server errors with exponential backoff', async () => { // SKIP: retry not implemented at CheckoutApiClient level
       let attemptCount = 0;
       server.use(
         http.post(apiUrl('orders/checkout'), () => {
