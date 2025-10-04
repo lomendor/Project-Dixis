@@ -102,7 +102,7 @@ describe('CheckoutApiClient Resilience', () => {
         http.post(apiUrl('orders/checkout'), () => {
           attemptCount++;
           if (attemptCount < 2) {
-            return new HttpResponse(null, { status: 500 });
+            return new HttpResponse(null, { status: 503 }); // 503 is retryable on POST
           }
           return HttpResponse.json(mockOrderResponse);
         })
@@ -111,10 +111,10 @@ describe('CheckoutApiClient Resilience', () => {
       const startTime = Date.now();
       const result = await checkoutApi.processValidatedCheckout(mockCheckoutForm);
       const duration = Date.now() - startTime;
-      
+
       expect(result.success).toBe(true);
       expect(attemptCount).toBe(2);
-      expect(duration).toBeGreaterThan(1000);
+      expect(duration).toBeGreaterThan(150); // baseMs=200, one retry with exponential backoff
     });
 
     it('handles rate limiting with proper delay', async () => {
