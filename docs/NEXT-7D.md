@@ -29,10 +29,10 @@
 - ✅ **Pass 62**: Restored strict commit discipline (commitlint required)
 - **Result**: 112/117 passing (95.7% coverage), 5 skips remaining
 
-### 5. Retry Logic Sprint (Remaining 5 Skips)
-- Design retry-with-backoff infrastructure for CheckoutApiClient
-- Implement exponential backoff with jitter
-- Unskip remaining 4 tests in checkout.api.resilience.spec.ts
+### 5. Retry Logic Sprint (Remaining 5 Skips) ✅
+- ✅ Scaffold added (Pass 64): tests/utils/retry.ts, tests/fixtures/stability.ts
+- **Next**: Adopt helpers in 2 flaky specs → reduce skips 5→4
+- Then: Design retry-with-backoff for CheckoutApiClient (remaining 3 skips)
 - Target: 116/117 passing (99.1% coverage)
 
 ### 6. CI Performance Monitoring
