@@ -154,4 +154,3 @@
   - checkout.api.extended.spec.ts: 2 tests
 - **Result**: 116/117 passing (99.1% coverage) 🎯
 - **ADR**: docs/DECISIONS/ADR-0002-checkout-retry.md
-
