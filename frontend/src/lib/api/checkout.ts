@@ -42,7 +42,7 @@ interface ValidatedApiResponse<T = unknown> {
   validationProof?: string;
 }
 
-// Retry utility with exponential backoff
+// Retry utility with exponential backoff and smart retry logic (Pass 66)
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   options: {
@@ -50,22 +50,50 @@ export async function retryWithBackoff<T>(
     baseMs?: number;
     jitter?: boolean;
     abortSignal?: AbortSignal;
+    method?: string; // HTTP method for smart retry decisions
   } = {}
 ): Promise<T> {
-  const { retries = 2, baseMs = 300, jitter = true, abortSignal } = options;
-  
-  for (let attempt = 0; attempt <= retries; attempt++) {
+  const { retries = 2, baseMs = 200, jitter = true, abortSignal, method = 'GET' } = options;
+  const maxRetries = Number(process.env.CHECKOUT_API_RETRIES ?? retries);
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     if (abortSignal?.aborted) {
       throw new Error('Request aborted');
     }
-    
+
     try {
-      return await fn();
-    } catch (error) {
-      if (attempt === retries) throw error;
-      
+      const result = await fn();
+
+      // If result is a Response, check if we should retry based on status
+      if (result && typeof result === 'object' && 'status' in result) {
+        const res = result as any;
+        const status = res.status;
+
+        // Retry policy: 502/503/504 always; other 5xx only on GET
+        const shouldRetry =
+          status === 502 || status === 503 || status === 504 ||
+          (status >= 500 && status < 600 && method.toUpperCase() === 'GET');
+
+        if (shouldRetry && attempt < maxRetries) {
+          const delay = baseMs * Math.pow(2, attempt);
+          const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
+          await new Promise(resolve => setTimeout(resolve, finalDelay));
+          continue;
+        }
+      }
+
+      return result;
+    } catch (error: any) {
+      // Retry only on network errors (TypeError, connection errors, timeouts)
+      const msg = String(error?.message || '');
+      const isNetworkError =
+        error?.name === 'TypeError' ||
+        /ECONN|ETIMEDOUT|network|fetch failed|AbortError/i.test(msg);
+
+      if (!isNetworkError || attempt >= maxRetries) throw error;
+
       const delay = baseMs * Math.pow(2, attempt);
-      const finalDelay = jitter ? delay + Math.random() * delay * 0.1 : delay;
+      const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
       await new Promise(resolve => setTimeout(resolve, finalDelay));
     }
   }

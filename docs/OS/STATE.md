@@ -138,3 +138,19 @@
 - **Conclusion**: Cannot remove skips with tests-only changes
 - **Next**: Pass 66 will implement CheckoutApiClient retry logic (src/** allowed)
 
+
+**Pass 66**: CheckoutApiClient Retry-with-Backoff
+- **Status**: ✅ Complete (2025-10-04T12:55Z)
+- **PR #322**: feat/phase2-checkout-retry (auto-merge enabled)
+- **Enhancement**: Smart retry logic in retryWithBackoff()
+  - Retry 502/503/504 always (transient server errors)
+  - Retry other 5xx only on GET (safe, idempotent)
+  - Retry network errors (TypeError, ECONNRESET, ETIMEDOUT)
+  - Never retry 4xx (client errors)
+- **Configuration**: maxRetries=2, baseMs=200, jitter=0.5x
+- **Tests**: 15 new unit tests for retry behavior
+- **Unskipped**: 4 tests (5→1 skips remaining)
+  - checkout.api.resilience.spec.ts: 2 tests
+  - checkout.api.extended.spec.ts: 2 tests
+- **Result**: 116/117 passing (99.1% coverage) 🎯
+- **ADR**: docs/DECISIONS/ADR-0002-checkout-retry.md

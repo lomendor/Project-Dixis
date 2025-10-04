@@ -168,7 +168,7 @@ describe('Checkout API Extended Tests', () => {
       expect(duration).toBeGreaterThan(0); // Adjusted for actual behavior
     });
 
-    it.skip('handles intermittent network failures correctly', async () => { // SKIP: retry not implemented at CheckoutApiClient level
+    it('handles intermittent network failures correctly', async () => { // SKIP: retry not implemented at CheckoutApiClient level
       let attemptCount = 0;
       server.use(
         http.get(apiUrl('cart/items'), () => {
@@ -207,7 +207,7 @@ describe('Checkout API Extended Tests', () => {
       expect(duration).toBeLessThan(1000); // Fast failure
     });
 
-    it.skip('handles mixed error types in retry sequence', async () => { // SKIP: retry not implemented at CheckoutApiClient level
+    it('handles mixed error types in retry sequence', async () => { // SKIP: retry not implemented at CheckoutApiClient level
       let attemptCount = 0;
       const errors = [
         () => { throw new Error('Network error'); },         // Retry
