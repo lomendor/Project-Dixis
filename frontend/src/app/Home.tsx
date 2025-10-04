@@ -26,5 +26,15 @@ async function getInitialProducts(): Promise<Product[]> {
 export default async function Home() {
   const initialProducts = await getInitialProducts();
 
-  return <HomeClient initialProducts={initialProducts} />;
+  return (
+    <>
+      {/* LCP Anchor: Server-rendered hero for desktop viewport */}
+      <header className="hero" data-lcp-anchor="hero">
+        <h1 className="lcp-hero-title">
+          Fresh Products from Local Greek Producers
+        </h1>
+      </header>
+      <HomeClient initialProducts={initialProducts} />
+    </>
+  );
 }
