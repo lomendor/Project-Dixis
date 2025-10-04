@@ -4,10 +4,6 @@ import Home from './Home';
 // Use ISR (Incremental Static Regeneration) for data fetching
 export const revalidate = 3600; // Revalidate every hour
 
-// Force static generation to ensure title in initial HTML
-export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
-
 // SEO metadata for homepage
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
 
