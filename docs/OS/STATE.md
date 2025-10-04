@@ -39,6 +39,16 @@
 - **Changes**: Unskipped 3 tests (11 → 8), 6 LoC production code (SSR guards)
 - **ADR**: `docs/DECISIONS/ADR-0001-unskip-batch1-min-fixes.md`
 
+**PR #316 / Pass 61**: Unskip Batch #2 via Minimal Error Handling
+- **Status**: ✅ Merged (2025-10-04T04:07:26Z)
+- **Changes**: Unskipped 3 tests (8 → 5), 8 LoC production code (error handling)
+- **Result**: 112/117 passing (95.7% coverage)
+
+**PR #317 / Pass 62**: Restore Strict Commit Discipline
+- **Status**: ⏳ In Progress (auto-merge armed)
+- **Changes**: Commitlint strict, ESLint via qa:all:ci, docs-fastpath retained
+- **E2E Full**: Manual run triggered (2025-10-04T07:31:51Z)
+
 **Issue #306**: Phase 2 — E2E Stabilization & Test Completion
 - **Created**: 2025-10-03
 - **Type**: Umbrella issue
