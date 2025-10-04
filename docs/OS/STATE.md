@@ -242,3 +242,35 @@
 - `docs/QA/lighthouse-desktop.json`
 - `docs/QA/lighthouse-mobile.json`
 - `docs/QA/ACCESSIBILITY.md`
+
+**Pass 70**: LCP Investigation + axe-core Audit ⚠️
+- **Status**: ✅ Complete (2025-10-04T19:00Z)
+- **Objective**: Fix LCP measurement + WCAG 2.1 A/AA audit
+- **Results**:
+  - 🚨 **LCP Still Broken**: NO_LCP error persists even with production server
+  - ✅ **SEO Improved**: Desktop 70→82 (+12), Mobile 58→82 (+24)
+  - ⚠️ **Best Practices Regression**: Desktop 93→89 (-4), Mobile 93→86 (-7)
+  - ⚠️ **WCAG Violation**: All pages missing/empty `<title>` during initial load (serious)
+  - ✅ **Mobile SEO**: Viewport + meta tags present and valid
+- **Actions Taken**:
+  - Built frontend with pnpm build
+  - Started Next.js production server on port 3000
+  - Ran Lighthouse audits (desktop + mobile) with artifacts
+  - Created axe-core test suite (tests/a11y/axe-scan.spec.ts)
+  - Executed WCAG 2.1 A/AA compliance scan on 4 pages
+  - Validated mobile SEO meta tags
+- **Critical Findings**:
+  - LCP issue is NOT server-related (tried dev + prod servers)
+  - Root cause: Likely client-side rendering delays or loading spinner confusing LCP detection
+  - All pages have document-title violation (WCAG 2.1 Level A)
+- **Artifacts**:
+  - `docs/QA/lighthouse-pass70-desktop.json` (311KB)
+  - `docs/QA/lighthouse-pass70-mobile.json`
+  - `docs/QA/AXE-REPORT.json` (axe violations)
+  - `docs/QA/PASS-70-REPORT.md` (comprehensive analysis)
+  - `frontend/tests/a11y/axe-scan.spec.ts` (test suite)
+  - `frontend/playwright.a11y.config.ts` (config)
+- **Next (Pass 71)**:
+  - 🚨 Fix LCP: Implement SSR/SSG or skeleton UI
+  - ⚠️ Fix WCAG: Ensure title in initial HTML
+  - ⚠️ Investigate Best Practices regression
