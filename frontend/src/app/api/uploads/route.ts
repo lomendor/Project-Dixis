@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
+import { getStorage } from '@/lib/storage/driver';
 
 export const runtime = 'nodejs';
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
@@ -26,16 +24,14 @@ export async function POST(req: Request) {
     }
 
     const buf = Buffer.from(await file.arrayBuffer());
-    const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
-    const name = randomUUID() + '.' + ext;
-    const root = process.cwd();
-    const dir = path.join(root, 'public', 'uploads');
-    await mkdir(dir, { recursive: true });
-    await writeFile(path.join(dir, name), buf);
-    const url = '/uploads/' + name;
+    const storage = getStorage();
+    const result = await storage.putObject({ contentType: file.type, body: buf });
 
-    return NextResponse.json({ url });
-  } catch (error) {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || 'upload failed' },
+      { status: 500 }
+    );
   }
 }

@@ -82,6 +82,7 @@
     "test:api": "node tests/e2e/test-api-server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.901.0",
     "@prisma/client": "^6.16.3",
     "@stripe/react-stripe-js": "^3.1.0",
     "@stripe/stripe-js": "^4.8.0",
