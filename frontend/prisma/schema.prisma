@@ -67,3 +67,41 @@ model Product {
   @@index([producerId])
   @@index([title, category])
 }
+
+enum OrderStatus {
+  PLACED
+  CANCELLED
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  buyerPhone     String
+  status         OrderStatus @default(PLACED)
+  currency       String      @default("EUR")
+  total          Decimal     @db.Decimal(12,2)
+  shippingName   String
+  shippingLine1  String
+  shippingCity   String
+  shippingPostal String
+  contactEmail   String?
+  createdAt      DateTime    @default(now())
+  items          OrderItem[]
+
+  @@index([buyerPhone, createdAt])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  producerId String
+  titleSnap  String
+  unitSnap   String?  // kg/lt/τεμ (snapshot)
+  priceSnap  Decimal  @db.Decimal(10,2)
+  qty        Int
+  subtotal   Decimal  @db.Decimal(12,2)
+  createdAt  DateTime @default(now())
+
+  @@index([producerId])
+}

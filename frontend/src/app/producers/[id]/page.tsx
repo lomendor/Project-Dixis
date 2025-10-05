@@ -83,6 +83,19 @@ export default function ProducerPage({ params }:{ params:{ id:string } }){
                   {typeof prod.price==='number' ? ` · ${Number(prod.price).toFixed(2)}${prod.unit? ' / '+prod.unit:''}` : ''}
                 </div>
                 {prod.stock > 0 && <div style={{fontSize:12,color:'#059669',marginTop:4}}>Διαθέσιμο: {prod.stock}</div>}
+                <div style={{display:'flex',gap:8,marginTop:8,alignItems:'center'}}>
+                  <input type="number" min={1} defaultValue={1} style={{width:72}} id={'qty-'+prod.id}/>
+                  <button className="btn btn-primary" onClick={()=>{
+                    const el = document.getElementById('qty-'+prod.id) as HTMLInputElement|null;
+                    const qty = Math.max(1, Number(el?.value||1));
+                    const cart = JSON.parse(localStorage.getItem('dixis_cart')||'[]');
+                    const idx = cart.findIndex((x:any)=>x.productId===prod.id);
+                    if(idx>=0) cart[idx].qty += qty; else cart.push({ productId: prod.id, qty });
+                    localStorage.setItem('dixis_cart', JSON.stringify(cart));
+                    alert('Προστέθηκε στο καλάθι');
+                  }}>Στο καλάθι</button>
+                  <Link className="btn" href="/cart-simple">Προβολή καλαθιού</Link>
+                </div>
               </li>
             ))}
           </ul>
