@@ -13,3 +13,6 @@
 
 ## Pass 105 — Products (producer-owned)
 - Prisma model + public read + /my/products UI + tests.
+
+## Pass 106 — Orders (cart+checkout)
+- Checkout API; buyer orders & producer sales; stock decrement; EL UI; tests.
