@@ -77,6 +77,7 @@
     "test:api": "node tests/e2e/test-api-server.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.3",
     "@stripe/react-stripe-js": "^3.1.0",
     "@stripe/stripe-js": "^4.8.0",
     "chart.js": "^4.5.0",
@@ -118,6 +119,7 @@
     "lint-staged": "^16.1.5",
     "msw": "^2.11.3",
     "prettier": "^3.6.2",
+    "prisma": "^6.16.3",
     "size-limit": "^11.1.4",
     "tailwindcss": "^4",
     "ts-prune": "^0.10.3",

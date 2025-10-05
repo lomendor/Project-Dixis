@@ -51,3 +51,5 @@ docs/QA/*-devtoolslog.json
 docs/QA/*-trace.json
 frontend/docs/QA/**
 frontend/.lighthouseci/**
+
+/generated/prisma
