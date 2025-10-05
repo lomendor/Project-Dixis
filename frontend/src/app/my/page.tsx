@@ -9,6 +9,10 @@ export default function My(){
   return (<main style={{padding:16}}>
     <h1>Ο λογαριασμός μου</h1>
     <p>Συνδεδεμένος ως <strong>{me.phone}</strong></p>
-    <button className="btn" onClick={logout}>Αποσύνδεση</button>
+    <div style={{marginTop:16,display:'flex',gap:8,flexWrap:'wrap'}}>
+      <a className="btn" href="/my/orders">Οι παραγγελίες μου</a>
+      <a className="btn" href="/my/products">Τα προϊόντα μου</a>
+    </div>
+    <button className="btn" onClick={logout} style={{marginTop:16}}>Αποσύνδεση</button>
   </main>);
 }
