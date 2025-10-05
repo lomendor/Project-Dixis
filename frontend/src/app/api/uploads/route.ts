@@ -8,14 +8,7 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX = 2 * 1024 * 1024; // 2MB
 
 export async function POST(req: Request) {
-  // Basic Auth protection
-  const BA = process.env.BASIC_AUTH || '';
-  const hdr = req.headers.get('authorization') || '';
-  const expected = BA ? 'Basic ' + Buffer.from(BA).toString('base64') : '';
-  if (!BA || hdr !== expected) {
-    return new NextResponse('Auth required', { status: 401 });
-  }
-
+  // Auth is handled by middleware - this route is already protected
   try {
     const form = await req.formData();
     const file = form.get('file') as File | null;
