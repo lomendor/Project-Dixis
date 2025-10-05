@@ -795,3 +795,86 @@ Public Pages → /api/producers → Prisma Client → SQLite (dev.db)
 - 🎯 Admin UI for CRUD operations (create/edit/delete producers)
 - 🎯 Form validation with zod
 - 🎯 Producer image upload
+
+## Pass 97 — Admin CRUD shipped ✅
+
+**Date**: 2025-10-05T09:15Z
+**Status**: Complete
+
+### PR #353 - Producers Admin CRUD
+- **Branch**: `feat/pass97-producers-admin-crud`
+- **Status**: ✅ Created with auto-merge enabled
+- **URL**: https://github.com/lomendor/Project-Dixis/pull/353
+
+### Validators (zod)
+- ✅ ProducerCreate schema (required: slug, name, region, category)
+- ✅ ProducerUpdate schema (partial for PATCH operations)
+- ✅ QueryParams schema (pagination + filters)
+
+### API Routes (Write Operations)
+- ✅ POST `/api/producers` - Create producer with validation
+  - Validates payload with ProducerCreate schema
+  - Returns 201 with created producer
+  - Returns 400 on validation error
+- ✅ PATCH `/api/producers/[id]` - Update producer (partial)
+  - Validates with ProducerUpdate (all fields optional)
+  - Returns updated producer
+- ✅ DELETE `/api/producers/[id]` - Soft delete
+  - Sets isActive=false instead of DB deletion
+  - Preserves data for audit trail
+- ✅ GET `/api/producers` - Enhanced with validation
+  - QueryParams schema for type-safe pagination
+
+### Admin UI
+- ✅ `/admin/producers` page (Greek-first)
+  - Create form: slug, name, region, category, phone, email, products
+  - List with real-time search filter
+  - Quick actions: View, +1 product, Delete
+  - Soft delete with confirmation dialog
+- ✅ Client-side state management (useState/useEffect)
+- ✅ Inline styles for rapid prototyping
+
+### Middleware
+- ✅ Basic Auth for `/admin/*` routes
+  - Optional via BASIC_AUTH environment variable
+  - WWW-Authenticate header for browser prompt
+  - Protects admin panel from unauthorized access
+
+### Greek Translations
+- ✅ `admin.title`: "Διαχείριση Παραγωγών"
+- ✅ `admin.create`: "Νέος παραγωγός"
+- ✅ `admin.save`: "Αποθήκευση"
+- ✅ `admin.delete`: "Διαγραφή"
+- ✅ `admin.search`: "Αναζήτηση"
+
+### Tests
+- ✅ CRUD smoke test: `tests/api/producers-crud.spec.ts`
+  - Create → Update → Delete workflow
+  - Validates API responses
+  - Confirms soft delete (isActive=false)
+
+### Build Results
+- ✅ Build successful: 37 pages
+- ✅ `/admin/producers` optimized: 4.84kB → 1.57kB (replaced auth guard with simple client component)
+- ✅ TypeScript strict mode: zero errors
+- ✅ All routes compile successfully
+
+### Technical Stack
+```
+Admin UI → API Routes (POST/PATCH/DELETE) → Zod Validation → Prisma → SQLite
+```
+
+### Files Changed (7 files)
+- `frontend/src/lib/validators/producer.ts` - Zod schemas
+- `frontend/src/app/api/producers/route.ts` - Added POST + validation
+- `frontend/src/app/api/producers/[id]/route.ts` - Added PATCH + DELETE
+- `frontend/src/app/admin/producers/page.tsx` - Admin CRUD UI (EL-first)
+- `frontend/src/middleware.ts` - Basic Auth for admin routes
+- `frontend/messages/el.json` - Admin translations
+- `frontend/tests/api/producers-crud.spec.ts` - CRUD tests
+
+### Next Steps (Future)
+- 🎯 Producer image upload
+- 🎯 Advanced filtering UI (by region/category dropdowns)
+- 🎯 Pagination controls in admin UI
+- 🎯 Edit modal instead of inline +1 action
