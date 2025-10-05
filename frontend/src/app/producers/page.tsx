@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import ProducersClient from './ProducersClient';
 
+export const dynamic = 'force-dynamic';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
 
 interface Producer {
