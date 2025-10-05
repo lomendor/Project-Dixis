@@ -10,6 +10,7 @@ interface ProducerApplication {
   displayName: string;
   taxId?: string;
   phone?: string;
+  imageUrl?: string;
   status: 'pending' | 'active' | 'inactive';
   submittedAt: string;
   updatedAt: string;
@@ -163,6 +164,9 @@ function AdminProducersContent() {
                     ΑΦΜ
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Εικόνα
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Κατάσταση
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -194,6 +198,13 @@ function AdminProducersContent() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`tax-id-${producer.id}`}>
                         {producer.taxId || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`image-url-${producer.id}`}>
+                        {producer.imageUrl ? (
+                          <img src={producer.imageUrl} alt={producer.displayName} className="h-12 w-12 object-cover rounded" />
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap" data-testid={`status-${producer.id}`}>
                         {getStatusBadge(producer.status)}
