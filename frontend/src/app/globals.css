@@ -34,29 +34,41 @@ body {
   color: #6b7280 !important; /* Darker than default gray-500 (#9ca3af) */
 }
 
-/* pass84-lcp: Desktop LCP anchor hero section */
+/* pass88-lcp: Desktop LCP via raw PNG + overlay prevention */
 .hero {
-  min-height: 60vh;
+  min-height: 55vh;
   display: flex;
-  align-items: flex-end;
-  padding: 24px 16px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px;
   margin: 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
 .lcp-hero-title {
-  font-size: clamp(32px, 6vw, 56px);
+  font-size: clamp(28px, 5vw, 52px);
   line-height: 1.15;
-  margin: 16px 0 0 0;
+  margin: 12px 0 0;
   font-weight: 700;
   color: #111827;
   max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  text-align: center;
 }
 
-@media (min-width: 1280px) {
-  .hero {
-    min-height: 50vh;
-  }
+/* Prevent overlays/skeletons from hiding LCP */
+#overlay,
+.overlay,
+.loading,
+.splash,
+.skeleton,
+[data-overlay] {
+  display: none !important;
+}
+
+/* Ensure hero visibility for LCP */
+.hero,
+.lcp-hero-title {
+  content-visibility: visible !important;
+  contain-intrinsic-size: auto 480px;
 }
