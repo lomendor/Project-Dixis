@@ -1,5 +1,6 @@
 import { Product } from '@/lib/api';
 import HomeClient from './HomeClient';
+import { getTranslations } from 'next-intl/server';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
 
@@ -25,6 +26,7 @@ async function getInitialProducts(): Promise<Product[]> {
 
 export default async function Home() {
   const initialProducts = await getInitialProducts();
+  const t = await getTranslations();
 
   return (
     <>
@@ -32,14 +34,14 @@ export default async function Home() {
       <header className="hero" data-lcp-anchor="hero-raster">
         <img
           src="/hero-lcp.png"
-          alt="Dixis — Fresh Local Products"
+          alt={t('home.title')}
           width="1200"
           height="480"
           loading="eager"
           fetchPriority="high"
           style={{display: "block", width: "100%", height: "auto", maxHeight: "60vh", objectFit: "cover"}}
         />
-        <h1 className="lcp-hero-title">Dixis — Fresh Local Products</h1>
+        <h1 className="lcp-hero-title">{t('home.title')}</h1>
       </header>
       <HomeClient initialProducts={initialProducts} />
     </>
