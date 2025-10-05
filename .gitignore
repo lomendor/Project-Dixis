@@ -170,3 +170,5 @@ docs/QA/*-devtoolslog.json
 docs/QA/*-trace.json
 frontend/test-results/**
 .lighthouseci/**
+frontend/docs/QA/**
+frontend/.lighthouseci/**
