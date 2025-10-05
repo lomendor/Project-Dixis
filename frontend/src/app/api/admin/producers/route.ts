@@ -1,87 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/client';
+import { requireRole } from '@/lib/auth/session';
+
+export const runtime = 'nodejs';
 
 /**
  * GET /api/admin/producers
- * Returns list of all producer applications for admin review
+ * Admin-only: όλοι οι παραγωγοί
  */
-export async function GET(request: NextRequest) {
-  try {
-    // Mock authentication and admin role check
-    const userToken = request.headers.get('authorization');
-    const user = getCurrentUser(userToken);
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Mock producer applications from database
-    const producers = await getAllProducerApplications();
-
-    return NextResponse.json({
-      producers,
-      total: producers.length,
-    });
-
-  } catch (error) {
-    console.error('Admin producers list error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+export async function GET(){
+  try{
+    await requireRole(['admin']);
+    const all = await prisma.producer.findMany({ orderBy:{ createdAt: 'desc' }});
+    return NextResponse.json({ items: all, total: all.length });
+  }catch(e:any){
+    return NextResponse.json({error: e?.message || 'Unauthorized'},{status:403});
   }
 }
 
-// Mock helper functions
-function getCurrentUser(token: string | null) {
-  if (!token) return null;
-
-  // Mock admin user for testing
-  return {
-    id: 99,
-    name: 'Admin User',
-    email: 'admin@dixis.test',
-    role: 'admin' as const,
-  };
-}
-
-async function getAllProducerApplications() {
-  // Mock producer applications
-  // In real app: SELECT from producers table with user JOIN
-  const mockApplications = [
-    {
-      id: 1,
-      userId: 1,
-      userEmail: 'dimitris@producer.test',
-      displayName: 'Δημήτρης Παπαδόπουλος',
-      taxId: '123456789',
-      phone: '+30 210 1234567',
-      status: 'pending' as const,
-      submittedAt: '2025-09-15T20:00:00.000Z',
-      updatedAt: '2025-09-15T20:00:00.000Z',
-    },
-    {
-      id: 2,
-      userId: 2,
-      userEmail: 'maria@producer.test',
-      displayName: 'Μαρία Γιαννοπούλου',
-      taxId: '987654321',
-      phone: '+30 210 9876543',
-      status: 'active' as const,
-      submittedAt: '2025-09-14T15:30:00.000Z',
-      updatedAt: '2025-09-15T10:15:00.000Z',
-    },
-    {
-      id: 3,
-      userId: 3,
-      userEmail: 'kostas@producer.test',
-      displayName: 'Κώστας Αντωνίου',
-      taxId: '',
-      phone: '',
-      status: 'inactive' as const,
-      submittedAt: '2025-09-13T09:45:00.000Z',
-      updatedAt: '2025-09-14T14:20:00.000Z',
-    },
-  ];
-
-  return mockApplications;
+/**
+ * DELETE /api/admin/producers?id=xxx
+ * Admin-only: διαγραφή παραγωγού
+ */
+export async function DELETE(req: Request){
+  try{
+    await requireRole(['admin']);
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if(!id) return NextResponse.json({error:'Missing id'},{status:400});
+    await prisma.producer.delete({ where:{ id }});
+    return NextResponse.json({ ok:true });
+  }catch(e:any){
+    return NextResponse.json({error: e?.message || 'Unauthorized'},{status:403});
+  }
 }

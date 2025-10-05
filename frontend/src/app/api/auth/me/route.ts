@@ -8,5 +8,5 @@ export async function GET(){
   if(!c) return NextResponse.json({ authenticated:false });
   const s = await prisma.session.findUnique({ where:{ id: c }});
   if(!s || s.expiresAt < new Date()) return NextResponse.json({ authenticated:false });
-  return NextResponse.json({ authenticated:true, phone: s.phone });
+  return NextResponse.json({ authenticated:true, phone: s.phone, role: s.role });
 }

@@ -55,6 +55,13 @@ export async function POST(req: Request){
       ownerPhone: phone
     }
   });
+  // Αυτόματη αναβάθμιση σε producer role
+  const { cookies } = await import('next/headers');
+  const c = await cookies();
+  const sessId = c.get('dixis_session')?.value;
+  if(sessId){
+    await prisma.session.update({ where:{ id: sessId }, data:{ role: 'producer' }}).catch(():null=>null);
+  }
   return NextResponse.json({ item: created }, {status:201});
 }
 

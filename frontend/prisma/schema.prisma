@@ -41,6 +41,7 @@ model OtpRequest {
 model Session {
   id        String   @id @default(cuid())
   phone     String
+  role      String   @default("consumer") // consumer | producer | admin
   expiresAt DateTime
   createdAt DateTime @default(now())
   @@index([phone])
