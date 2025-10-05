@@ -16,3 +16,6 @@
 
 ## Pass 106 — Orders (cart+checkout)
 - Checkout API; buyer orders & producer sales; stock decrement; EL UI; tests.
+
+## Pass 106b — Orders CI finalized
+- Checkout test already in frontend/tests; CI runs full suite via e2e-full workflow.
