@@ -45,3 +45,9 @@ playwright-report/
 test-results/
 traces/
 *.zip
+docs/QA/*.report.html
+docs/QA/*-assets/**
+docs/QA/*-devtoolslog.json
+docs/QA/*-trace.json
+frontend/docs/QA/**
+frontend/.lighthouseci/**

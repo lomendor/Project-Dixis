@@ -36,7 +36,7 @@ export default async function Home() {
           width="1200"
           height="480"
           loading="eager"
-          fetchpriority="high"
+          fetchPriority="high"
           style={{display: "block", width: "100%", height: "auto", maxHeight: "60vh", objectFit: "cover"}}
         />
         <h1 className="lcp-hero-title">Dixis — Fresh Local Products</h1>
