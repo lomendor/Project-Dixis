@@ -828,3 +828,118 @@ pnpm db:reset
 - ⏳ Monitor PR #354 CI checks
 - ⏳ Auto-merge to main when checks pass
 - 🎯 Next: Pass 99 (Producers CRUD API endpoints)
+
+
+## Pass 99c — CI Finalized for Media
+
+**Date**: 2025-10-05T13:30Z
+**Status**: ✅ Complete
+**PR**: #356 — ✅ **MERGED**
+
+### Verification Complete
+
+1. **✅ PR #356 Status**: Successfully merged to main
+   - All quality gates passed
+   - Smoke tests completed
+   - Danger checks satisfied
+
+2. **✅ .gitignore**: Verified `frontend/public/uploads/` excluded
+   - Line 177: `frontend/public/uploads/`
+   - Prevents committing uploaded images to git
+   - Dev-only local storage properly isolated
+
+3. **✅ Playwright Tests**: Upload auth tests created
+   - `frontend/tests/uploads/upload-auth.spec.ts`
+   - Test 401 without auth (WWW-Authenticate challenge)
+   - Test 200 with proper Basic auth
+   - WebP file validation
+
+### Pass 99 Series Complete
+
+**Pass 99 (Original)**: Image upload infrastructure
+- imageUrl field in Prisma schema
+- /api/uploads endpoint (filesystem dev stub)
+- Admin UI image display column
+- Migration: 20251005120000_add_producer_image
+
+**Pass 99b (Security)**: Middleware protection
+- Created src/middleware.ts
+- Protected /admin, /api/producers, /api/uploads
+- Removed client-side BASIC_AUTH exposure
+- Admin images management page (/admin/producers/images)
+- Upload auth tests
+
+**Pass 99c (CI Finisher)**: Verification and documentation
+- Confirmed PR #356 merged
+- Verified .gitignore configuration
+- Confirmed Playwright test coverage
+- Documentation complete
+
+### Files Changed (Total across Pass 99 series)
+
+**Pass 99** (5 files):
+- `frontend/prisma/schema.prisma`: Added imageUrl field
+- `frontend/prisma/migrations/20251005120000_add_producer_image/migration.sql`
+- `frontend/src/app/api/uploads/route.ts`: Upload endpoint
+- `frontend/src/app/admin/producers/page.tsx`: Image display
+- `.gitignore`: Excluded uploads directory
+
+**Pass 99b** (4 files):
+- `frontend/src/middleware.ts`: Auth protection
+- `frontend/src/app/api/uploads/route.ts`: Simplified (auth removal)
+- `frontend/src/app/admin/producers/images/page.tsx`: Images admin
+- `frontend/tests/uploads/upload-auth.spec.ts`: Tests
+
+### Architecture Summary
+
+**Security Model**:
+```
+Browser → /admin/producers/images
+         ↓
+    Middleware (BASIC_AUTH check)
+         ↓
+    Upload file → /api/uploads
+         ↓
+    Save to public/uploads/{uuid}.{ext}
+         ↓
+    Return {url: "/uploads/{uuid}.ext"}
+         ↓
+    PATCH /api/producers/:id {imageUrl: url}
+```
+
+**Dev vs Production**:
+- **Dev**: Filesystem storage (`public/uploads/`)
+- **Production** (Pass 100): S3/R2 cloud storage
+- **Migration path**: Drop-in replacement of upload endpoint
+
+### Build Status
+- ✅ 38 pages built successfully
+- ✅ New routes:
+  - `/api/uploads` (protected by middleware)
+  - `/admin/producers/images` (1.08 kB)
+- ✅ TypeScript: Zero errors
+- ✅ Tests: All passing
+
+### Next Steps
+1. **Pass 100**: S3/R2 cloud storage provider
+   - Replace filesystem with cloud storage
+   - Environment variable configuration
+   - Same API contract (/api/uploads)
+2. **Pass 101**: Image optimization
+   - Resize/compress on upload
+   - WebP conversion
+   - Responsive image variants
+3. **Pass 102**: Public display
+   - Show images on /producers page (when created)
+   - fetchpriority="high" for LCP optimization
+   - Lazy loading for below-fold images
+
+### Technical Notes
+- **Middleware matcher**: Protects multiple routes efficiently
+- **Credentials: include**: Browser auto-sends auth after initial challenge
+- **WWW-Authenticate**: Proper Basic auth challenge on 401
+- **Test coverage**: Both success and failure paths
+- **File validation**: Type (jpeg/png/webp) and size (2MB max)
+- **UUID filenames**: Prevents collisions and path traversal
+
+**Ready for Pass 100 (S3/R2 provider) when approved!** 🚀
