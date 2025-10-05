@@ -26,3 +26,21 @@ model Producer {
   @@index([region, category])
   @@index([name])
 }
+
+model OtpRequest {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  @@index([phone])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  phone     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([phone])
+}
