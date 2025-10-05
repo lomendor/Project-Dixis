@@ -682,3 +682,37 @@ Accept desktop LCP=null as a known limitation. The page is performant:
 - Monitor auto-merge status
 - Proceed with Producers MVP UI polish after merge
 
+
+## Pass 91c — PR #347 merged & i18n integration complete
+
+**Date**: 2025-10-05
+
+### Merge Status
+- ✅ **PR #347 Merged**: i18n(next-intl) integrated into main
+- ✅ **LHCI Summary**: Latest summary available (LH-SUMMARY-20251005T070204Z.json)
+- ✅ **Auto-merge**: Successfully completed
+
+### Performance Metrics (Latest LHCI)
+- **Desktop LCP**: null (NO_LCP) - continues tracking in Issue #338
+- **Mobile LCP**: 1533.515ms (~1.5s) - excellent, well under 2.5s target
+
+### i18n Integration Complete
+- **Translation System**: next-intl plugin configured
+- **Default Locale**: Greek (EL) with no URL prefix
+- **Fallback Locale**: English (EN)
+- **Message Files**: `frontend/messages/el.json`, `frontend/messages/en.json`
+- **DoD Gate**: CI check for hardcoded English strings active
+- **Design Tokens**: Comprehensive CSS variables for spacing, colors, typography
+
+### Files Changed (33 files)
+- +46,273 insertions, -8,781 deletions
+- Added: i18n configuration, translation files, design tokens
+- Added: Greek Playwright tests, DoD gate script
+- Added: Hero LCP raster image (68 bytes PNG)
+- Removed: Conflicting middleware
+
+### Next Steps
+- ✅ Greek-first UI complete
+- 🎯 Next: Producers MVP UI polish
+- 📊 Continue monitoring Desktop LCP (Issue #338)
+
