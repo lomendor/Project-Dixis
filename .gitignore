@@ -172,3 +172,6 @@ frontend/test-results/**
 .lighthouseci/**
 frontend/docs/QA/**
 frontend/.lighthouseci/**
+
+# Uploaded images (dev only)
+frontend/public/uploads/
