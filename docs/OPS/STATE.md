@@ -7,3 +7,6 @@
 
 ## Pass 103 — Producer onboarding (session-based)
 - /api/me/* endpoints; /onboarding wizard (EL); tests green.
+
+## Pass 104 — RBAC (Admin vs Producer)
+- Session role field; requireRole() helper; admin endpoints; auto-upgrade.
