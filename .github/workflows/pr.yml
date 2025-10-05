@@ -138,6 +138,21 @@ jobs:
       run:
         working-directory: frontend
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dixis
+          POSTGRES_PASSWORD: dixis_dev_pass
+          POSTGRES_DB: dixis_dev
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -164,6 +179,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+          npx tsx prisma/seed.ts
+
       - name: Start Test API server
         env:
           TEST_API_PORT: 8001
@@ -175,6 +198,7 @@ jobs:
       - name: Build and start Next.js app
         env:
           NODE_ENV: production
+          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
           API_BASE_URL: "http://127.0.0.1:8001"
           NEXT_TELEMETRY_DISABLED: 1
@@ -188,6 +212,7 @@ jobs:
         run: npx playwright test tests/e2e/auth-probe.spec.ts --reporter=list
         env:
           CI: true
+          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
           BASE_URL: http://127.0.0.1:3000
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
           API_BASE_URL: http://127.0.0.1:8001
