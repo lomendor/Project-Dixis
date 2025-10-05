@@ -10,3 +10,6 @@
 
 ## Pass 104 — RBAC (Admin vs Producer)
 - Session role field; requireRole() helper; admin endpoints; auto-upgrade.
+
+## Pass 105 — Products (producer-owned)
+- Prisma model + public read + /my/products UI + tests.
