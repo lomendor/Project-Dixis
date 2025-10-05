@@ -13,5 +13,14 @@
   "common.loading": "Φόρτωση...",
   "common.error": "Σφάλμα",
   "common.submit": "Υποβολή",
-  "common.cancel": "Ακύρωση"
+  "common.cancel": "Ακύρωση",
+  "producers.profile.title": "Παραγωγός",
+  "producers.profile.back": "← Πίσω στη λίστα",
+  "producers.profile.call": "Κλήση",
+  "producers.profile.share": "Κοινοποίηση",
+  "producers.profile.region": "Περιοχή",
+  "producers.profile.category": "Κατηγορία",
+  "producers.profile.products": "Προϊόντα",
+  "producers.profile.rating": "Αξιολόγηση",
+  "producers.profile.updated": "Ενημερώθηκε"
 }
