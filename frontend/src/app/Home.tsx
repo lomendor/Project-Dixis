@@ -1,4 +1,5 @@
 import { Product } from '@/lib/api';
+import Image from 'next/image';
 import HomeClient from './HomeClient';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:8001/api/v1';
@@ -28,11 +29,16 @@ export default async function Home() {
 
   return (
     <>
-      {/* LCP Anchor: Server-rendered hero for desktop viewport */}
+      {/* LCP Anchor: Server-rendered hero with priority image for desktop viewport */}
       <header className="hero" data-lcp-anchor="hero">
-        <h1 className="lcp-hero-title">
-          Fresh Products from Local Greek Producers
-        </h1>
+        <Image
+          src="/hero-lcp.svg"
+          alt="Fresh Products from Local Greek Producers"
+          width={1200}
+          height={480}
+          priority
+          style={{ width: '100%', height: 'auto', maxWidth: '1200px' }}
+        />
       </header>
       <HomeClient initialProducts={initialProducts} />
     </>
