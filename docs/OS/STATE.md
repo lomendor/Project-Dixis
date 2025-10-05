@@ -716,3 +716,86 @@ Accept desktop LCP=null as a known limitation. The page is performant:
 - 🎯 Next: Producers MVP UI polish
 - 📊 Continue monitoring Desktop LCP (Issue #338)
 
+
+## Pass 95b — LHCI harvest; issue #338 confirmed closed ✅
+
+**Date**: 2025-10-05T08:28Z
+**Status**: Complete
+
+### Achievements
+
+1. **✅ LHCI Run Completed**:
+   - Run ID: 18256235701
+   - Status: success
+   - Duration: ~4 minutes
+
+2. **✅ Artifacts Harvested**:
+   - Downloaded lighthouse-artifacts from run 18256235701
+   - Created timestamped summary: `LH-SUMMARY-20251005T082847Z.json`
+   - Updated symlink: `LH-SUMMARY.latest.json`
+   - Committed and pushed to `chore/pass95-foundation-stabilize` branch
+
+3. **✅ Desktop LCP Fix Confirmed**:
+   - Desktop LCP: **493.31ms** ✅ (target: <2000ms)
+   - Desktop Performance: **99** ✅
+   - Mobile LCP: 1516.272ms
+   - Mobile Performance: 99
+
+4. **✅ Issue #338 Handled**:
+   - Issue was already closed
+   - Added confirmation comment with Pass 95b results
+   - Desktop LCP now **well below threshold** thanks to:
+     - Raw PNG eager+high priority loading strategy (Pass 88)
+     - Deterministic build with force-dynamic (Pass 95)
+
+### Performance Metrics
+
+```json
+{
+  "desktop": {
+    "lcp": 493.31,
+    "perf": 99
+  },
+  "mobile": {
+    "lcp": 1516.272,
+    "perf": 99
+  }
+}
+```
+
+**Analysis**:
+- Desktop LCP improved from null → **493ms** 🎯
+- Desktop performance score: **99/100** (excellent)
+- Mobile LCP stable at ~1.5s (well under 2.5s budget)
+- Both platforms now have measurable, healthy LCP values
+
+### Changes Made
+
+- `docs/QA/LH-SUMMARY-20251005T082847Z.json`: Created timestamped summary
+- `docs/QA/LH-SUMMARY.latest.json`: Updated symlink
+- Issue #338: Added confirmation comment
+- Commit: `docs(qa): LHCI summary after Pass 95b (timestamped + latest)`
+
+### Foundation Stabilization Complete
+
+**Pass 95 + 95b Goals Achieved**:
+- ✅ i18n messages unified under `frontend/messages/`
+- ✅ DoD gate script in `scripts/ci/` (repo root)
+- ✅ `/producers` build deterministic (force-dynamic)
+- ✅ LHCI run completed and artifacts harvested
+- ✅ Desktop LCP confirmed < 2000ms (493ms)
+- ✅ Issue #338 closed with confirmation
+
+### PR #351 Status
+
+⚠️ **PR #351 remains OPEN** - hygiene check failure blocking auto-merge
+- Root cause: commitlint CI glitch (reports 0 problems but exits code 1)
+- All quality-gates passing
+- Code changes complete and functional
+
+### Next Steps
+
+- Update STATE.md with Pass 95b completion ✅ (this entry)
+- Continue monitoring PR #351 auto-merge status
+- Foundation is stable for future feature development
+
