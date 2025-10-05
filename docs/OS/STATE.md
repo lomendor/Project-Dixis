@@ -656,3 +656,29 @@ Accept desktop LCP=null as a known limitation. The page is performant:
 - Monitor future Lighthouse updates for compatibility improvements
 - Focus on mobile LCP optimization (currently excellent at 1.5s)
 
+
+## Pass 91b — i18n verified: EL tests, DoD gate, PR #347 rebased
+
+**Date**: 2025-10-05
+
+### Completed
+- ✅ **i18n Configuration**: next-intl properly configured with plugin + request.ts
+- ✅ **Translation Files**: Greek (EL) and English (EN) messages created
+- ✅ **Missing Keys Check**: No missing i18n keys detected
+- ✅ **DoD Gate**: No hardcoded English UI strings (passed check)
+- ✅ **Design Tokens**: Comprehensive design tokens added to globals.css
+- ✅ **Merge Conflicts Resolved**: Rebased onto main, resolved fetchpriority conflict
+- ✅ **PR #347 Updated**: Force-pushed rebased branch
+
+### Technical Details
+- **Translations**: `frontend/messages/el.json`, `frontend/messages/en.json`
+- **i18n Config**: `frontend/i18n/request.ts` (default Greek locale)
+- **Middleware**: Removed (using localePrefix: 'never' strategy)
+- **Tests**: Greek i18n Playwright tests created
+- **DoD Script**: `scripts/ci/check-hardcoded-english.sh`
+
+### Next Steps
+- Wait for PR #347 CI checks to pass
+- Monitor auto-merge status
+- Proceed with Producers MVP UI polish after merge
+
