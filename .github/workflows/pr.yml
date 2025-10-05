@@ -134,10 +134,13 @@ jobs:
           NODE
 
   test-smoke:
-    name: Smoke Tests
+    name: Smoke Tests (${{ matrix.storage }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
     continue-on-error: true  # Pass 45: Advisory until E2E fully stabilized in Phase 2
+    strategy:
+      matrix:
+        storage: [fs, s3]
     defaults:
       run:
         working-directory: frontend
@@ -156,6 +159,20 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+
+      minio:
+        image: minio/minio:RELEASE.2024-09-22T00-00-00Z
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd='curl -f http://localhost:9000/minio/health/live || exit 1'
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=25
+        command: server /data
 
     steps:
       - name: Checkout
@@ -199,6 +216,18 @@ jobs:
           npx --yes wait-on http://127.0.0.1:8001/health --timeout 120000
           echo "✅ Test API server ready on port 8001"
 
+      - name: Setup MinIO bucket (s3 mode only)
+        if: matrix.storage == 's3'
+        run: |
+          # Wait for MinIO
+          for i in {1..60}; do nc -z 127.0.0.1 9000 && break; sleep 2; done
+          # Install AWS CLI and create bucket
+          pip install --user awscli
+          export AWS_ACCESS_KEY_ID=minioadmin
+          export AWS_SECRET_ACCESS_KEY=minioadmin
+          aws --endpoint-url http://localhost:9000 s3api create-bucket --bucket dixis-media --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1 || true
+          echo "✅ MinIO bucket created"
+
       - name: Build and start Next.js app
         env:
           NODE_ENV: production
@@ -207,6 +236,14 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
           API_BASE_URL: "http://127.0.0.1:8001"
           NEXT_TELEMETRY_DISABLED: 1
+          STORAGE_DRIVER: ${{ matrix.storage }}
+          S3_ENDPOINT: "http://localhost:9000"
+          S3_BUCKET: "dixis-media"
+          S3_REGION: "us-east-1"
+          S3_FORCE_PATH_STYLE: "true"
+          S3_PUBLIC_URL_BASE: "http://localhost:9000/dixis-media"
+          S3_ACCESS_KEY_ID: "minioadmin"
+          S3_SECRET_ACCESS_KEY: "minioadmin"
         run: |
           npm run build
           nohup npm run start -- -p 3000 > /tmp/app.log 2>&1 &
@@ -225,12 +262,20 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8001
           NEXT_PUBLIC_E2E: "true"
           NEXT_TELEMETRY_DISABLED: 1
+          STORAGE_DRIVER: ${{ matrix.storage }}
+          S3_ENDPOINT: "http://localhost:9000"
+          S3_BUCKET: "dixis-media"
+          S3_REGION: "us-east-1"
+          S3_FORCE_PATH_STYLE: "true"
+          S3_PUBLIC_URL_BASE: "http://localhost:9000/dixis-media"
+          S3_ACCESS_KEY_ID: "minioadmin"
+          S3_SECRET_ACCESS_KEY: "minioadmin"
 
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-test-results
+          name: smoke-test-results-${{ matrix.storage }}
           path: frontend/test-results/
           retention-days: 3
 
@@ -239,7 +284,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-playwright-report-always
+          name: smoke-playwright-report-${{ matrix.storage }}
           path: frontend/playwright-report/
           retention-days: 7
 
@@ -247,7 +292,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-test-results-always
+          name: smoke-test-results-${{ matrix.storage }}
           path: frontend/test-results/
           retention-days: 7
 
