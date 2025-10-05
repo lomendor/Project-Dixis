@@ -77,6 +77,11 @@ jobs:
         if: env.DOCS_ONLY != 'true'
         run: npm run build
 
+
+      - name: DoD Gate - No hardcoded English UI strings
+        if: env.DOCS_ONLY != 'true'
+        working-directory: .
+        run: bash scripts/ci/check-hardcoded-english.sh
       - name: Perf Budgets (advisory)
         if: env.DOCS_ONLY != 'true'
         continue-on-error: true

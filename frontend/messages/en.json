@@ -1,0 +1,17 @@
+{
+  "nav.home": "Home",
+  "nav.producers": "Producers",
+  "home.title": "Dixis — Fresh local products",
+  "home.subtitle": "Discover the best local producers in your area",
+  "home.cta": "Discover producers near you",
+  "producers.title": "Producers",
+  "producers.search": "Search producer",
+  "producers.region": "Region",
+  "producers.category": "Category",
+  "producers.filter": "Filters",
+  "producers.total": "Total: {count}",
+  "common.loading": "Loading...",
+  "common.error": "Error",
+  "common.submit": "Submit",
+  "common.cancel": "Cancel"
+}
