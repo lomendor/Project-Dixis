@@ -28,11 +28,18 @@ export default async function Home() {
 
   return (
     <>
-      {/* LCP Anchor: Server-rendered hero for desktop viewport */}
-      <header className="hero" data-lcp-anchor="hero">
-        <h1 className="lcp-hero-title">
-          Fresh Products from Local Greek Producers
-        </h1>
+      {/* LCP Anchor: Raw IMG with eager loading + high priority */}
+      <header className="hero" data-lcp-anchor="hero-raster">
+        <img
+          src="/hero-lcp.png"
+          alt="Dixis — Fresh Local Products"
+          width="1200"
+          height="480"
+          loading="eager"
+          fetchpriority="high"
+          style={{display: "block", width: "100%", height: "auto", maxHeight: "60vh", objectFit: "cover"}}
+        />
+        <h1 className="lcp-hero-title">Dixis — Fresh Local Products</h1>
       </header>
       <HomeClient initialProducts={initialProducts} />
     </>
