@@ -8,21 +8,22 @@ datasource db {
 }
 
 model Producer {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   name        String
   region      String
   category    String
   description String?
   phone       String?
   email       String?
-  products    Int      @default(0)
-  rating      Float?   @default(0)
+  products    Int       @default(0)
+  rating      Float?    @default(0)
   imageUrl    String?
-  ownerPhone  String?  @unique
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  ownerPhone  String?   @unique
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Product     Product[]
 
   @@index([region, category])
   @@index([name])
@@ -45,4 +46,24 @@ model Session {
   expiresAt DateTime
   createdAt DateTime @default(now())
   @@index([phone])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  producerId  String
+  producer    Producer @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  title       String
+  slug        String   @unique
+  category    String
+  price       Decimal? @db.Decimal(10,2)
+  unit        String?  // π.χ. kg, lt, τεμ
+  stock       Int      @default(0)
+  imageUrl    String?
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([producerId])
+  @@index([title, category])
 }

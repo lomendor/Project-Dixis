@@ -7,13 +7,23 @@ export const dynamic = 'force-dynamic';
 
 export default function ProducerPage({ params }:{ params:{ id:string } }){
   const [p, setP] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load(){
       const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3000';
       const r = await fetch(`${base}/api/producers/${params.id}`, { cache:'no-store' });
-      if(r.ok) setP(await r.json());
+      if(r.ok){
+        const producer = await r.json();
+        setP(producer);
+        // Φόρτωση προϊόντων του παραγωγού
+        const pr = await fetch(`${base}/api/products?producerId=${params.id}`, { cache:'no-store' });
+        if(pr.ok){
+          const pj = await pr.json();
+          setProducts(pj.items || []);
+        }
+      }
       setLoading(false);
     }
     load();
@@ -50,6 +60,34 @@ export default function ProducerPage({ params }:{ params:{ id:string } }){
       </header>
 
       {p.description && <section style={{marginTop:16, lineHeight:1.6}}><p>{p.description}</p></section>}
+
+      <section style={{marginTop:24}}>
+        <h2>Προϊόντα ({products.length})</h2>
+        {products.length === 0 ? (
+          <p style={{color:'#6b7280'}}>Δεν υπάρχουν προϊόντα προς το παρόν.</p>
+        ) : (
+          <ul style={{
+            listStyle:'none',
+            padding:0,
+            display:'grid',
+            gap:16,
+            gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',
+            marginTop:12
+          }}>
+            {products.map((prod:any)=>(
+              <li key={prod.id} className="card" style={{padding:12}}>
+                {prod.imageUrl && <img src={prod.imageUrl} alt={prod.title} style={{width:'100%',height:120,objectFit:'cover',borderRadius:8}}/>}
+                <strong>{prod.title}</strong>
+                <div style={{color:'#6b7280',fontSize:14}}>
+                  {prod.category}
+                  {typeof prod.price==='number' ? ` · ${Number(prod.price).toFixed(2)}${prod.unit? ' / '+prod.unit:''}` : ''}
+                </div>
+                {prod.stock > 0 && <div style={{fontSize:12,color:'#059669',marginTop:4}}>Διαθέσιμο: {prod.stock}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
