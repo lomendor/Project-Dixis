@@ -147,6 +147,19 @@
 - **Quality Gates**: All checks passing with unified gate
 - **Coverage**: 112/117 tests passing (95.7%), 5 skips remaining
 
+**Pass 110.1**: Product Image UX Finisher (PR #377)
+- **Status**: ⏳ Auto-merge armed (2025-10-06)
+- **Changes**:
+  - ✅ API: Moved `/api/producer/products` → `/api/me/products` (canonical)
+  - ✅ API: Created thin re-export wrappers at `/api/producer/products` for compatibility
+  - ✅ UI: Moved `/producer/products` pages → `/my/products` (canonical)
+  - ✅ UI: Created redirect stubs at `/producer/products` → `/my/products`
+  - ✅ Updated all API fetch calls to use `/api/me/products`
+  - ✅ Tests: Already in `frontend/tests/` (no move needed)
+  - ✅ Build: ✅ Passed (46 pages, TypeScript strict mode)
+- **LOC**: +1129/-1121 (10 files)
+- **Architecture**: Unified endpoints (producer→me) with backward-compatible redirects
+
 
 **Pass 65**: PR #320 Merged + Retry Skip Analysis
 - **Status**: ✅ Complete (2025-10-04T10:26:48Z)
