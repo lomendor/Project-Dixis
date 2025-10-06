@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Cart UX Flow', () => {
   test('empty cart blocks checkout', async ({ page }) => {
-    await page.goto('/cart-simple');
+    await page.goto('/cart');
 
     // Verify empty cart state
     await expect(page.locator('text=Το καλάθι είναι άδειο')).toBeVisible();
@@ -22,7 +22,7 @@ test.describe('Cart UX Flow', () => {
       ]));
     });
 
-    await page.goto('/cart-simple');
+    await page.goto('/cart');
 
     // Wait for product enrichment
     await page.waitForTimeout(2000);
@@ -44,7 +44,7 @@ test.describe('Cart UX Flow', () => {
       ]));
     });
 
-    await page.goto('/cart-simple');
+    await page.goto('/cart');
 
     // Wait for product enrichment
     await page.waitForTimeout(2000);
@@ -84,7 +84,7 @@ test.describe('Cart UX Flow', () => {
       ]));
     });
 
-    await page.goto('/cart-simple');
+    await page.goto('/cart');
 
     // Wait for product enrichment
     await page.waitForTimeout(2000);
@@ -112,8 +112,8 @@ test.describe('Cart UX Flow', () => {
     await checkoutBtn.click();
 
     // Verify redirect to order confirmation
-    await page.waitForURL(/\/orders-simple\/test-order-123/);
-    expect(page.url()).toContain('/orders-simple/test-order-123');
+    await page.waitForURL(/\/orders\/test-order-123/);
+    expect(page.url()).toContain('/orders/test-order-123');
   });
 
   test('quantity is clamped to available stock', async ({ page, context }) => {
@@ -139,7 +139,7 @@ test.describe('Cart UX Flow', () => {
       });
     });
 
-    await page.goto('/cart-simple');
+    await page.goto('/cart');
 
     // Wait for product enrichment
     await page.waitForTimeout(2000);
@@ -179,7 +179,7 @@ test.describe('Cart UX Flow', () => {
       });
     });
 
-    await page.goto('/orders-simple/ORDER-123');
+    await page.goto('/orders/ORDER-123');
 
     // Wait for order to load
     await page.waitForSelector('text=Η παραγγελία σας');
@@ -213,7 +213,7 @@ test.describe('Cart UX Flow', () => {
       });
     });
 
-    await page.goto('/orders-simple/ORDER-123');
+    await page.goto('/orders/ORDER-123');
 
     // Wait for order to load
     await page.waitForSelector('text=Η παραγγελία σας');

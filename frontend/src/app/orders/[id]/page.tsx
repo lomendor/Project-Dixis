@@ -70,6 +70,28 @@ export default function OrderDetails() {
     });
   };
 
+  const copyOrderCode = async () => {
+    try {
+      await navigator.clipboard.writeText(order?.id.toString() || '');
+      alert('Ο κωδικός αντιγράφηκε.');
+    } catch {
+      // Fallback for older browsers
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = order?.id.toString() || '';
+        ta.style.position = 'fixed';
+        ta.style.left = '-10000px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert(ok ? 'Ο κωδικός αντιγράφηκε.' : 'Αποτυχία αντιγραφής.');
+      } catch {
+        alert('Αποτυχία αντιγραφής.');
+      }
+    }
+  };
+
   if (!isAuthenticated) {
     return null; // Will redirect in useEffect
   }
@@ -121,6 +143,20 @@ export default function OrderDetails() {
                     {order.status.replace('_', ' ')}
                   </span>
                 </div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={copyOrderCode}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
+                >
+                  Αντιγραφή κωδικού
+                </button>
+                <Link
+                  href="/my/orders"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Οι παραγγελίες μου
+                </Link>
               </div>
             </div>
 
