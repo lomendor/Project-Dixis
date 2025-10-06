@@ -184,7 +184,7 @@ export default function OrderDetails() {
                 >
                   Οι παραγγελίες μου
                 </Link>
-                {order.status === 'PLACED' && (
+                {order.status === 'PLACED' && order.items.every((item: any) => (item.status === 'PLACED' || !item.status)) && (
                   <button
                     onClick={cancelOrder}
                     className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium"

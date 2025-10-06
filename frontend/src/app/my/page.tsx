@@ -12,6 +12,7 @@ export default function My(){
     <div style={{marginTop:16,display:'flex',gap:8,flexWrap:'wrap'}}>
       <a className="btn" href="/my/orders">Οι παραγγελίες μου</a>
       <a className="btn" href="/my/products">Τα προϊόντα μου</a>
+      <a className="btn" href="/my/sales">Οι πωλήσεις μου</a>
     </div>
     <button className="btn" onClick={logout} style={{marginTop:16}}>Αποσύνδεση</button>
   </main>);
