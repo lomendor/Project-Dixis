@@ -5,6 +5,41 @@ All notable changes to Project Dixis will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-10-06
+
+### Highlights
+- **Orders MVP**: Atomic checkout guard, producer orders inbox with status flow (PENDING→ACCEPTED→FULFILLED)
+- **Public Catalog**: /products list with search/filters, /product/[id] detail pages  
+- **/my/products CRUD**: Full producer product management (EL-first, server actions, Zod validation)
+- **CI Hardening**: Artifacts preservation, lint/typecheck workflows, PostgreSQL adoption
+- **Database**: PostgreSQL with Prisma, atomic stock guards, oversell protection (409)
+
+### Added
+- Producer orders inbox at /my/orders with status tabs (PENDING/ACCEPTED/REJECTED/FULFILLED)
+- Server actions for order status transitions with validation
+- Public product catalog at /products with search, category, and region filters
+- Product detail pages at /product/[id] with add-to-cart functionality
+- Product snapshots (titleSnap, priceSnap) in OrderItem for historical tracking
+- Atomic stock decrement with updateMany guard to prevent oversell race conditions
+- 409 Conflict response for oversell scenarios with Greek error messages
+- PostgreSQL database with comprehensive migrations
+- Prisma schema enhancements for Orders, OrderItems, and Products
+- Playwright E2E tests for orders flow and public catalog
+- Producer path redirects (/producer/orders → /my/orders, /producer/products → /my/products)
+
+### Changed
+- OrderItem status normalized to uppercase 'PENDING' for UI consistency
+- Tests moved to canonical location under frontend/tests/
+- CI workflows enhanced with artifact preservation
+- Database provider switched from SQLite to PostgreSQL
+
+### Technical
+- **Pass 110.x**: CI/CD infrastructure, Playwright config, docs enforcement
+- **Pass 111.x**: PostgreSQL setup with migrations and seeding
+- **Pass 112.x**: Database hardening with atomic stock guards, oversell protection
+- **Pass 113.x**: Products CRUD with Zod validation, public catalog implementation  
+- **Pass 114.x**: Orders MVP, status flow, release preparation
+
 ## [Unreleased]
 
 ## [0.1.3] - 2025-08-26
@@ -48,40 +83,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All staging validation checks
 
 ### Fixed
-- Production deployment issues
-- VPS configuration optimizations
-
-## [0.1.0] - 2025-08-26
-
-### Added
-- **Complete Next.js 15 Frontend** with TypeScript and Tailwind CSS
-- **Laravel 11 Backend API** with Sanctum authentication
-- **Product Catalog** with search, filtering, and categories
-- **Shopping Cart** with quantity management and persistence
-- **User Authentication** with consumer/producer role separation
-- **Producer Dashboard** with product and order management
-- **Order Management** with status tracking and payment processing
-- **GitHub Actions CI/CD** with PostgreSQL integration
-- **Comprehensive Testing** with PHPUnit backend tests
-
-### Features
-- **Product Management**: Full CRUD operations with image support
-- **Cart System**: Add, update, remove items with real-time totals
-- **Authentication**: Secure login/register with Bearer token API
-- **Producer Tools**: Dashboard for managing products and viewing orders
-- **Order Processing**: Complete checkout flow with cash-on-delivery
-- **Responsive Design**: Mobile-first design with Tailwind CSS
-- **API Integration**: RESTful API with proper TypeScript interfaces
-
-### Technical
-- **Backend**: Laravel 11, PHP 8.2, PostgreSQL 15
-- **Frontend**: Next.js 15, React 19, TypeScript 5
-- **Authentication**: Laravel Sanctum with Bearer tokens
-- **Testing**: PHPUnit with GitHub Actions CI
-- **Deployment**: Docker-ready with environment configuration
-
-### Infrastructure
-- **CI/CD**: Automated testing and deployment pipeline
-- **Database**: PostgreSQL with migrations and seeders  
-- **Security**: CORS configuration, rate limiting, input validation
-- **Performance**: Optimized API responses and database queries
+- Production environment variables
+- Database connection handling
