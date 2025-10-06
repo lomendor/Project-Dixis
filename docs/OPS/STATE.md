@@ -30,3 +30,15 @@
 - Canonical docs folder: `docs/OPS/` (αφαίρεση `docs/ops`/duplicates)
 - Επιβεβαίωση ότι το PR workflow καλεί `scripts/ci/run-playwright.sh`
 - Προστέθηκαν links σε `/my` → «Οι παραγγελίες μου» & «Τα προϊόντα μου»
+
+## Pass 107a — UX hotfix
+- Μετατροπή header παραγωγού σε client component
+- Αξιόπιστο share/copy (navigator.share + clipboard fallback)
+- Βελτίωση CSV download (πρόσθετο attr)
+
+## Pass 107b — Cart/Checkout UX polish
+- `/cart-simple`: Stock validation, qty clamping, overstock warnings
+- 401 redirect σε `/join?next=/cart-simple`
+- Loading spinner «Προετοιμασία…» κατά το submit
+- `/orders-simple/[id]`: Copy button + «Οι παραγγελίες μου» link
+- Playwright tests: empty cart, overstock, 401, checkout flow (7 scenarios)
