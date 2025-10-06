@@ -1304,3 +1304,16 @@ Finalize docs canonicalization and ensure uploads are ignored.
 - Postgres healthcheck: wait-on tcp ensures port 5432 is accessible before migrations
 - No duplicate STATE.md files (frontend/docs/ was already clean)
 - Env example strategy: Root points to frontend for clarity
+
+## Pass 112.1 — Prisma config + client reuse ✅
+- **Prisma Config Created**: Added `frontend/prisma.config.ts` using Prisma 7 config API
+- **Deprecated Config Removed**: Removed `package.json#prisma` (deprecated warning eliminated)
+- **Shared Client Reuse**: Updated `/api/checkout` to use `@/lib/db/client` instead of `new PrismaClient()`
+- **Build Verification**: ✅ Prisma now loads config from `prisma.config.ts` (confirmed in build output)
+
+### Technical Notes
+- Config uses `defineConfig` from `prisma/config` package
+- Schema path: `prisma/schema.prisma` (relative to config file)
+- Migrations path: `prisma/migrations` (relative to config file)
+- Single Prisma client instance prevents connection pool exhaustion
+- Build output confirms: "Loaded Prisma config from prisma.config.ts"

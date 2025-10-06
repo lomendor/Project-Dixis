@@ -144,8 +144,5 @@
       "prettier --write"
     ]
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "ciKey": "2025-09-19a"
 }
