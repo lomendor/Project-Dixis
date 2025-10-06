@@ -42,3 +42,10 @@
 - Loading spinner «Προετοιμασία…» κατά το submit
 - `/orders-simple/[id]`: Copy button + «Οι παραγγελίες μου» link
 - Playwright tests: empty cart, overstock, 401, checkout flow (7 scenarios)
+
+## Pass 107b.1 — Port to main routes + tests consolidation
+- Ported improvements από -simple → main routes (`/cart`, `/orders/[id]`)
+- `/cart`: submitting state, 401 handling, enhanced error handling
+- `/orders/[id]`: copy button, nav link, button group layout
+- Tests moved to `frontend/tests/cart/`, paths updated to main routes
+- Αφαίρεση -simple pages (single implementation, no duplication)
