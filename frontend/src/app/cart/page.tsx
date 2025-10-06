@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
@@ -43,6 +43,9 @@ const {
   const { trackCheckoutStart, trackOrderComplete } = useAnalytics();
   const router = useRouter();
 
+  const [oversellError, setOversellError] = useState<string | null>(null);
+  const [isCheckoutBusy, setIsCheckoutBusy] = useState(false);
+
   useEffect(() => {
     if (authLoading) return;
 
@@ -67,6 +70,9 @@ const handleCheckout = async () => {
       return;
     }
 
+    setIsCheckoutBusy(true);
+    setOversellError(null);
+
     if (orderSummary && cart) {
       const totalWithPaymentFees = orderSummary.subtotal + orderSummary.shipping_cost + orderSummary.tax_amount + calculatePaymentFees(selectedPaymentMethod, orderSummary.subtotal);
       trackCheckoutStart(totalWithPaymentFees, cart.length, user?.id?.toString());
@@ -74,25 +80,52 @@ const handleCheckout = async () => {
 
     // For cash on delivery, proceed with the existing flow
     if (selectedPaymentMethod.type === 'cash_on_delivery') {
-      const order = await processCheckout();
-      if (order && orderSummary && cart) {
-        trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
-        showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
-        router.push(`/orders/${order.id}`);
+      try {
+        const order = await processCheckout();
+        if (order && orderSummary && cart) {
+          trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
+          showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
+          router.push(`/orders/${order.id}`);
+        }
+      } catch (err: any) {
+        // Check for 409 oversell error
+        if (err?.status === 409 || err?.message?.includes('Ανεπαρκές απόθεμα')) {
+          setOversellError('Κάποια προϊόντα εξαντλήθηκαν. Ενημερώσαμε τις διαθέσιμες ποσότητες.');
+          // Reload cart to get current stock levels
+          await loadCart();
+        } else {
+          showToast('error', 'Σφάλμα ολοκλήρωσης παραγγελίας');
+        }
+      } finally {
+        setIsCheckoutBusy(false);
       }
       return;
     }
 
     // For card payments, redirect to payment page
     if (selectedPaymentMethod.type === 'card') {
-      // Create order first, then redirect to payment page
-      const order = await processCheckout();
-      if (order) {
-        router.push(`/checkout/payment/${order.id}`);
+      try {
+        // Create order first, then redirect to payment page
+        const order = await processCheckout();
+        if (order) {
+          router.push(`/checkout/payment/${order.id}`);
+        }
+      } catch (err: any) {
+        // Check for 409 oversell error
+        if (err?.status === 409 || err?.message?.includes('Ανεπαρκές απόθεμα')) {
+          setOversellError('Κάποια προϊόντα εξαντλήθηκαν. Ενημερώσαμε τις διαθέσιμες ποσότητες.');
+          // Reload cart to get current stock levels
+          await loadCart();
+        } else {
+          showToast('error', 'Σφάλμα ολοκλήρωσης παραγγελίας');
+        }
+      } finally {
+        setIsCheckoutBusy(false);
       }
       return;
     }
 
+    setIsCheckoutBusy(false);
     showToast('error', 'Μέθοδος πληρωμής δεν υποστηρίζεται');
   };
 
@@ -138,7 +171,7 @@ const handleCheckout = async () => {
       <>
         <Navigation />
         <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
-          <EmptyState 
+          <EmptyState
             title="Το καλάθι σας είναι κενό"
             description="Προσθέστε προϊόντα για να συνεχίσετε με την αγορά."
             data-testid="empty-cart-message"
@@ -157,7 +190,31 @@ const handleCheckout = async () => {
     <>
       <Navigation />
       <main id="main-content" data-testid="main-content" className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>        
+        <h1 className="text-3xl font-bold mb-6" data-testid="page-title">Καλάθι Αγορών</h1>
+
+        {/* Oversell Error Banner */}
+        {oversellError && (
+          <div
+            className="mb-6 p-4 border border-red-300 rounded-lg bg-red-50 text-red-800"
+            data-testid="oversell-error-banner"
+          >
+            <div className="flex items-start">
+              <svg className="w-5 h-5 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-medium">{oversellError}</p>
+                <button
+                  onClick={() => setOversellError(null)}
+                  className="mt-2 text-sm text-red-700 hover:text-red-900 underline"
+                >
+                  Κλείσιμο
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Cart Items */}
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -167,7 +224,9 @@ const handleCheckout = async () => {
                   <div className="flex-1">
                     <h3 className="font-semibold" data-testid="product-title">{item.name}</h3>
                     <p className="text-sm text-gray-600">Παραγωγός: {item.producer_name}</p>
-                    <p className="font-medium">{formatCurrency(item.price)} x {item.quantity}</p>
+                    <p className="font-medium" data-testid="cart-item-qty">
+                      {formatCurrency(item.price)} x {item.quantity}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-lg">{formatCurrency(item.subtotal)}</p>
@@ -306,8 +365,8 @@ const handleCheckout = async () => {
                 }}
                 itemsCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 onCheckout={handleCheckout}
-                isLoading={isLoading}
-                disabled={!orderSummary || !selectedPaymentMethod}
+                isLoading={isLoading || isCheckoutBusy}
+                disabled={!orderSummary || !selectedPaymentMethod || isCheckoutBusy}
               />
             )}
 
