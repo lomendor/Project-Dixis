@@ -204,3 +204,65 @@ OrderItem: id, orderId, productId, producerId, qty, price, status, createdAt, up
 - Consider adding order-level status aggregation (all items fulfilled → order fulfilled)
 - Implement buyer-side order history (/account/orders)
 - Add email notifications for status changes
+
+## Pass 114.1 — Orders finisher ✅
+
+**Date**: 2025-10-06
+**PR**: #393
+**Branch**: chore/pass1141-orders-fixups
+
+### Completed
+- ✅ **Status Normalization**: Changed OrderItem status to uppercase 'PENDING'
+- ✅ **Producer Redirects**: Added /producer/orders → /my/orders
+- ✅ **Tests Path**: Moved orders E2E to canonical location
+
+### Status Normalization
+
+**Issue**: OrderItem created with lowercase 'pending', but UI tabs compare uppercase
+**Fix** (frontend/src/app/api/checkout/route.ts):
+- Changed `status: 'pending'` → `status: 'PENDING'`
+- **Impact**: /my/orders?tab=PENDING now correctly shows new orders
+- Matches server actions validation which expects uppercase
+
+**Why uppercase**:
+- UI tab filtering uses uppercase constants (PENDING/ACCEPTED/REJECTED/FULFILLED)
+- Server actions ALLOWED map uses uppercase keys
+- Consistency across checkout → display → actions flow
+
+### Producer Path Redirects
+
+**Created** (frontend/src/app/producer/orders/page.tsx):
+```tsx
+import { redirect } from 'next/navigation';
+export default function Page() { redirect('/my/orders'); }
+```
+
+**Verified** (frontend/src/app/producer/products/page.tsx):
+- Already redirects to /my/products
+- Both producer paths now consolidated under /my/*
+
+**Why redirects**:
+- Backward compatibility with old URLs
+- Canonical paths: /my/products, /my/orders (producer-owned resources)
+- Cleaner URL structure for authenticated users
+
+### Tests Path Canonicalization
+
+**Moved**: 
+- FROM: `tests/orders/orders-mvp.spec.ts` (repo root)
+- TO: `frontend/tests/orders/orders-mvp.spec.ts` (canonical)
+
+**Why canonical path**:
+- Consistency with other E2E tests (tests/catalog/, tests/admin/)
+- Frontend-specific tests live under frontend/
+- Easier to run subset: `cd frontend && npx playwright test tests/orders`
+
+### Files Changed
+- frontend/src/app/api/checkout/route.ts (modified, status: 'PENDING')
+- frontend/src/app/producer/orders/page.tsx (created, redirect)
+- tests/orders/orders-mvp.spec.ts → frontend/tests/orders/orders-mvp.spec.ts (moved)
+
+### Next Steps
+- Monitor PR #393 CI status
+- Verify /my/orders?tab=PENDING shows orders after checkout
+- Consider adding /producer/* legacy notice (deprecation warning)
