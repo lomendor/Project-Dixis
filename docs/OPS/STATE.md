@@ -1458,3 +1458,94 @@ try {
 - ⏳ PR #395 CI checks (auto-merge armed)
 - 🎯 Begin Pass 115 (next feature work)
 - 📊 Monitor v0.2.0 release stability
+
+## Pass 115 — Events & Notifications stubs ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #396 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Add event log and notification outbox (DB-based) without external providers. Emit events from checkout and order status changes, create notification records with Greek templates, and provide dev visibility.
+
+### Achievements
+
+1. **✅ Event Log Model**:
+   - Created `Event` model with type, payload (JSON), createdAt
+   - Indexed by [type, createdAt] for efficient querying
+   - Event types: `order.created`, `orderItem.status.changed`
+
+2. **✅ Notification Outbox Model**:
+   - Created `Notification` model with channel, to, template, payload, status
+   - Channels: SMS, EMAIL (extensible)
+   - Status: QUEUED, SENT, FAILED
+   - Indexed by [channel, status, createdAt]
+
+3. **✅ Event Bus Implementation**:
+   - Created `lib/events/bus.ts` with `emitEvent()` function
+   - Automatic event → notification mapping
+   - order.created → SMS notification with order details
+   - orderItem.status.changed → SMS notification with status update
+
+4. **✅ Greek SMS Templates**:
+   - Created `lib/notify/templates.ts` with `renderSMS()`
+   - order_created: "Dixis: Η παραγγελία #ID καταχωρήθηκε. Τεμάχια: N. Ευχαριστούμε!"
+   - order_status_changed: "Dixis: Η παραγγελία #ID ενημερώθηκε: TITLE → STATUS."
+
+5. **✅ Checkout Wiring**:
+   - Updated `/api/checkout` to emit order.created after successful order
+   - Includes orderId, items, shipping info in payload
+   - Creates SMS notification to buyer phone
+
+6. **✅ Order Status Wiring**:
+   - Updated `/my/orders/actions` to emit orderItem.status.changed
+   - Includes orderId, itemId, titleSnap, status in payload
+   - Creates SMS notification (buyerPhone placeholder for now)
+
+7. **✅ Dev Outbox Page**:
+   - Created `/dev/notifications` page with force-dynamic
+   - Shows last 100 notifications in table format
+   - Columns: Πότε, Κανάλι, Προς, Template, Προεπισκόπηση
+   - SMS preview using renderSMS() function
+   - Empty state message in Greek
+
+8. **✅ E2E Test Coverage**:
+   - Created `tests/notifications/notifications.spec.ts`
+   - Test 1: Checkout emits order.created → Notification QUEUED
+   - Test 2: Status change emits orderItem.status.changed → Notification QUEUED
+   - Validates dev page accessibility
+
+9. **✅ Database Migration**:
+   - Migration: `20251007000412_events_notifications_outbox`
+   - Creates Event and Notification tables with indexes
+   - PostgreSQL JSONB for payload storage
+
+### Technical Notes
+- **Outbox Pattern**: All notifications stored as DB records, no external IO
+- **No Secrets**: Pure database approach, external providers in future passes
+- **Greek-First**: All SMS templates in Greek language
+- **Extensible**: Easy to add EMAIL templates, new event types
+- **Dev Only**: /dev/notifications is for development visibility only
+
+### Files Changed (8 files, +180/-2)
+- `prisma/schema.prisma`: Event & Notification models (+24 lines)
+- `prisma/migrations/20251007000412_events_notifications_outbox/migration.sql`: New (+29 lines)
+- `lib/events/bus.ts`: Event emission logic (+22 lines)
+- `lib/notify/templates.ts`: Greek SMS templates (+9 lines)
+- `app/api/checkout/route.ts`: Emit order.created (+6 lines)
+- `app/my/orders/actions/actions.ts`: Emit orderItem.status.changed (+10 lines)
+- `app/dev/notifications/page.tsx`: Dev outbox UI (+34 lines)
+- `tests/notifications/notifications.spec.ts`: E2E tests (+36 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 47 pages successfully
+- ✅ New route: `/dev/notifications` (force-dynamic, 209 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new models
+
+### Next Steps
+- ⏳ PR #396 CI checks (auto-merge armed)
+- 🎯 Pass 116: External notification providers (SMS/Email services)
+- 🎯 Pass 117: Notification worker to process QUEUED → SENT
+- 📊 Monitor event log growth and consider archival strategy
