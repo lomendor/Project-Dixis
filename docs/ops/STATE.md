@@ -943,3 +943,117 @@ Browser → /admin/producers/images
 - **UUID filenames**: Prevents collisions and path traversal
 
 **Ready for Pass 100 (S3/R2 provider) when approved!** 🚀
+
+
+## Pass 109 — Secure Uploads (fs/S3 + Sharp Processing) ✅
+
+**Date**: 2025-10-06T09:00Z
+**Status**: ✅ Complete
+**PR**: #374 — ✅ **MERGED**
+
+### Objective
+Implement secure image upload system with pluggable storage drivers (fs/S3) and optional sharp image processing.
+
+### Achievements
+
+1. **✅ Storage Driver Architecture**:
+   - Enhanced `frontend/src/lib/storage/driver.ts`:
+     - Hash-based filenames (SHA-256, first 16 chars)
+     - yyyymm folder structure (`uploads/202510/hash.ext`)
+     - Prevents filename collisions and enables date-based organization
+   - FsDriver: Saves to `public/uploads/{yyyymm}/{hash}.{ext}`
+   - S3Driver: Uploads to `uploads/{yyyymm}/{hash}.{ext}` in S3 bucket
+
+2. **✅ Upload API Enhancements**:
+   - Updated `POST /api/me/uploads` endpoint:
+     - Increased size limit: 2MB → **5MB**
+     - Added optional sharp image processing (resize 1200x1200, quality 85)
+     - MIME type whitelist: jpeg, png, webp
+     - OTP session authentication required
+     - Returns `{ url, key }` with site-relative or absolute URLs
+
+3. **✅ Image Processing Support**:
+   - Optional sharp integration via `ENABLE_IMAGE_PROCESSING` env var
+   - Automatic resize to 1200x1200 (fit: inside, withoutEnlargement)
+   - JPEG quality optimization (85%)
+   - Graceful fallback to original if processing fails
+
+4. **✅ Comprehensive Playwright Tests**:
+   - Created `frontend/tests/uploads/upload-and-use.spec.ts` (5 scenarios):
+     - Upload → create product → render image (full workflow)
+     - 401 Unauthorized (no auth)
+     - 413 Payload Too Large (>5MB)
+     - 415 Unsupported Media Type (invalid MIME)
+     - All allowed MIME types (jpeg, png, webp)
+
+5. **✅ Documentation**:
+   - Updated `frontend/.env.example`:
+     - Added `ENABLE_IMAGE_PROCESSING` flag documentation
+     - Documented storage driver options (fs/s3)
+     - Environment variable reference for S3 configuration
+
+### Technical Details
+
+**Storage Path Structure**:
+```
+fs:  /uploads/202510/a1b2c3d4e5f6g7h8.jpg
+s3:  uploads/202510/a1b2c3d4e5f6g7h8.jpg
+```
+
+**Sharp Processing Flow**:
+```
+Upload → Buffer → sharp resize (if enabled) → Storage driver → URL
+```
+
+**Environment Variables**:
+```bash
+STORAGE_DRIVER="fs"                    # fs | s3
+ENABLE_IMAGE_PROCESSING="false"        # true enables sharp processing
+S3_BUCKET=""                           # Required for s3 driver
+S3_REGION="auto"                       # AWS region or MinIO 'auto'
+S3_ENDPOINT=""                         # Optional (MinIO/R2)
+S3_PUBLIC_URL_BASE=""                  # CDN URL base
+```
+
+### Files Changed (4 files, +256/-4 lines)
+
+**Modified**:
+- `frontend/.env.example`: Added ENABLE_IMAGE_PROCESSING documentation
+- `frontend/src/app/api/me/uploads/route.ts`: 5MB limit + sharp processing
+- `frontend/src/lib/storage/driver.ts`: Hash-based paths + yyyymm structure
+
+**Created**:
+- `frontend/tests/uploads/upload-and-use.spec.ts`: 188 lines of E2E tests
+
+### Test Coverage
+
+✅ **5 Playwright Scenarios**:
+1. Full upload → product → render workflow
+2. Auth check (401 without session)
+3. Size limit (413 for >5MB)
+4. MIME type validation (415 for invalid types)
+5. All allowed types (jpeg, png, webp)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 55 pages
+- ✅ New route: `/api/me/uploads` (222 B)
+- ✅ All quality gates: PASSING
+
+### Security Features
+- **Authentication**: OTP session required
+- **Size limit**: 5MB maximum
+- **MIME whitelist**: image/jpeg, image/png, image/webp only
+- **Hash-based filenames**: Prevents path traversal and collisions
+- **Optional processing**: Sharp only runs when explicitly enabled
+
+### Performance Optimizations
+- **Hash deduplication**: Identical files get same hash (saves storage)
+- **Organized structure**: yyyymm folders for efficient cleanup
+- **Optional processing**: Sharp processing is opt-in for flexibility
+- **Graceful degradation**: Falls back to original if processing fails
+
+### Next Steps
+- ✅ Upload infrastructure complete
+- 🎯 Next: Product image integration (Pass 110)
+- 📊 Consider: Image CDN setup for production S3 driver

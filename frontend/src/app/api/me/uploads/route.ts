@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStorage } from '@/lib/storage/driver';
+import { putObject } from '@/lib/media/storage';
 import { getSessionPhone } from '@/lib/auth/session';
 
 export const runtime = 'nodejs';
@@ -19,26 +19,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'type not allowed' }, { status: 415 });
   if (file.size > MAX) return NextResponse.json({ error: 'too large' }, { status: 413 });
 
-  let buf = Buffer.from(await file.arrayBuffer());
-
-  // Optional: Image processing with sharp
-  if (process.env.ENABLE_IMAGE_PROCESSING === 'true') {
-    try {
-      const sharp = (await import('sharp')).default;
-      const processedBuffer = await sharp(buf)
-        .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 85 })
-        .toBuffer();
-      buf = Buffer.from(processedBuffer);
-    } catch (err) {
-      console.error('Image processing failed, using original:', err);
-    }
-  }
-
-  const storage = getStorage();
-  const result = await storage
-    .putObject({ contentType: file.type, body: buf })
-    .catch((e: any): { error: string } => ({ error: e?.message || 'upload failed' }));
+  const buf = Buffer.from(await file.arrayBuffer());
+  const result = await putObject(buf, file.type).catch((e: any): { error: string } => ({
+    error: e?.message || 'upload failed'
+  }));
   if ((result as any).error) return NextResponse.json(result, { status: 500 });
   return NextResponse.json(result);
 }
