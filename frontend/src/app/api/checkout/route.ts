@@ -41,14 +41,14 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Calculate total
+      // Calculate total and fetch product snapshots
       let total = 0;
       const productsMap = new Map();
 
       for (const item of items) {
         const product = await tx.product.findUnique({
           where: { id: item.productId },
-          select: { price: true, producerId: true }
+          select: { price: true, producerId: true, title: true }
         });
         productsMap.set(item.productId, product);
         total += product!.price * item.qty;
@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
             producerId: product!.producerId,
             qty: item.qty,
             price: product!.price,
+            titleSnap: product!.title,
+            priceSnap: product!.price,
             status: 'pending'
           }
         });
