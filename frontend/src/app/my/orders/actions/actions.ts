@@ -34,9 +34,19 @@ export async function setOrderItemStatus(
     }
 
     // Update status
-    await prisma.orderItem.update({
+    const updated = await prisma.orderItem.update({
       where: { id },
-      data: { status: next.toLowerCase() }
+      data: { status: next.toLowerCase() },
+      select: { id: true, orderId: true, titleSnap: true, order: { select: { buyerPhone: true } } }
+    });
+
+    // Emit event + notification
+    await (await import('@/lib/events/bus')).emitEvent('orderItem.status.changed', {
+      orderId: updated.orderId,
+      itemId: updated.id,
+      titleSnap: updated.titleSnap,
+      status: next,
+      buyerPhone: updated.order?.buyerPhone || ''
     });
 
     revalidatePath('/my/orders');

@@ -1458,3 +1458,446 @@ try {
 - ⏳ PR #395 CI checks (auto-merge armed)
 - 🎯 Begin Pass 115 (next feature work)
 - 📊 Monitor v0.2.0 release stability
+
+## Pass 115 — Events & Notifications stubs ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #396 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Add event log and notification outbox (DB-based) without external providers. Emit events from checkout and order status changes, create notification records with Greek templates, and provide dev visibility.
+
+### Achievements
+
+1. **✅ Event Log Model**:
+   - Created `Event` model with type, payload (JSON), createdAt
+   - Indexed by [type, createdAt] for efficient querying
+   - Event types: `order.created`, `orderItem.status.changed`
+
+2. **✅ Notification Outbox Model**:
+   - Created `Notification` model with channel, to, template, payload, status
+   - Channels: SMS, EMAIL (extensible)
+   - Status: QUEUED, SENT, FAILED
+   - Indexed by [channel, status, createdAt]
+
+3. **✅ Event Bus Implementation**:
+   - Created `lib/events/bus.ts` with `emitEvent()` function
+   - Automatic event → notification mapping
+   - order.created → SMS notification with order details
+   - orderItem.status.changed → SMS notification with status update
+
+4. **✅ Greek SMS Templates**:
+   - Created `lib/notify/templates.ts` with `renderSMS()`
+   - order_created: "Dixis: Η παραγγελία #ID καταχωρήθηκε. Τεμάχια: N. Ευχαριστούμε!"
+   - order_status_changed: "Dixis: Η παραγγελία #ID ενημερώθηκε: TITLE → STATUS."
+
+5. **✅ Checkout Wiring**:
+   - Updated `/api/checkout` to emit order.created after successful order
+   - Includes orderId, items, shipping info in payload
+   - Creates SMS notification to buyer phone
+
+6. **✅ Order Status Wiring**:
+   - Updated `/my/orders/actions` to emit orderItem.status.changed
+   - Includes orderId, itemId, titleSnap, status in payload
+   - Creates SMS notification (buyerPhone placeholder for now)
+
+7. **✅ Dev Outbox Page**:
+   - Created `/dev/notifications` page with force-dynamic
+   - Shows last 100 notifications in table format
+   - Columns: Πότε, Κανάλι, Προς, Template, Προεπισκόπηση
+   - SMS preview using renderSMS() function
+   - Empty state message in Greek
+
+8. **✅ E2E Test Coverage**:
+   - Created `tests/notifications/notifications.spec.ts`
+   - Test 1: Checkout emits order.created → Notification QUEUED
+   - Test 2: Status change emits orderItem.status.changed → Notification QUEUED
+   - Validates dev page accessibility
+
+9. **✅ Database Migration**:
+   - Migration: `20251007000412_events_notifications_outbox`
+   - Creates Event and Notification tables with indexes
+   - PostgreSQL JSONB for payload storage
+
+### Technical Notes
+- **Outbox Pattern**: All notifications stored as DB records, no external IO
+- **No Secrets**: Pure database approach, external providers in future passes
+- **Greek-First**: All SMS templates in Greek language
+- **Extensible**: Easy to add EMAIL templates, new event types
+- **Dev Only**: /dev/notifications is for development visibility only
+
+### Files Changed (8 files, +180/-2)
+- `prisma/schema.prisma`: Event & Notification models (+24 lines)
+- `prisma/migrations/20251007000412_events_notifications_outbox/migration.sql`: New (+29 lines)
+- `lib/events/bus.ts`: Event emission logic (+22 lines)
+- `lib/notify/templates.ts`: Greek SMS templates (+9 lines)
+- `app/api/checkout/route.ts`: Emit order.created (+6 lines)
+- `app/my/orders/actions/actions.ts`: Emit orderItem.status.changed (+10 lines)
+- `app/dev/notifications/page.tsx`: Dev outbox UI (+34 lines)
+- `tests/notifications/notifications.spec.ts`: E2E tests (+36 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 47 pages successfully
+- ✅ New route: `/dev/notifications` (force-dynamic, 209 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new models
+
+### Next Steps
+- ⏳ PR #396 CI checks (auto-merge armed)
+- 🎯 Pass 116: External notification providers (SMS/Email services)
+- 🎯 Pass 117: Notification worker to process QUEUED → SENT
+- 📊 Monitor event log growth and consider archival strategy
+
+## Pass 115.1 — Notifications polish ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #397 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Polish notifications system with security, privacy, and type safety improvements.
+
+### Achievements
+
+1. **✅ Real buyerPhone Fix**:
+   - Updated `/my/orders/actions` to fetch buyerPhone from Order relation
+   - Changed select to include `order: { select: { buyerPhone: true } }`
+   - Replaced hardcoded 'N/A' with `updated.order?.buyerPhone || ''`
+   - Status change notifications now have real buyer contact info
+
+2. **✅ Dev Guard for /dev/notifications**:
+   - Added production environment check
+   - Blocks access when `NODE_ENV === 'production' && DIXIS_DEV !== '1'`
+   - Returns 404 page in production unless explicit dev flag
+   - Prevents PII exposure in production deployments
+
+3. **✅ PII Masking**:
+   - Created `maskPhone()` function in notifications page
+   - Masks all but last 3 digits: `+30******123`
+   - Applied to 'to' column in notification table
+   - Empty values show as `***`
+   - Protects sensitive contact information in dev UI
+
+4. **✅ Type-Safe Queue Helper**:
+   - Created `lib/notify/queue.ts` with type safety
+   - `CHANNELS` constant: `['SMS', 'EMAIL']` with union type
+   - `STATUSES` constant: `['QUEUED', 'SENT', 'FAILED']` with union type
+   - `queueNotification()` function with runtime validation
+   - Throws errors for invalid channel or status values
+   - Prevents DB corruption from invalid enum values
+
+5. **✅ Bus.ts Integration**:
+   - Updated `lib/events/bus.ts` to use type-safe helper
+   - Replaced direct `prisma.notification.create()` calls
+   - Now uses `queueNotification('SMS', phone, template, payload)`
+   - Both order.created and orderItem.status.changed use helper
+
+6. **✅ E2E Test Coverage**:
+   - Created `tests/notifications/notifications-polish.spec.ts`
+   - Test 1: Validates real buyerPhone + PII masking
+     - Creates order with specific phone number
+     - Triggers status change via UI button click
+     - Verifies dev page shows masked phone (`***`)
+   - Test 2: Production guard smoke test
+     - Tests /dev/notifications accessibility
+     - Expects 200 or 404 based on environment
+
+### Technical Notes
+- **Security**: Production guard prevents accidental PII exposure
+- **Privacy**: Phone masking protects user data even in dev environment
+- **Type Safety**: Union types prevent runtime errors from invalid values
+- **Maintainability**: Centralized notification creation logic
+- **Testing**: Comprehensive E2E coverage for all polish features
+
+### Files Changed (5 files, +76/-9)
+- `app/my/orders/actions/actions.ts`: buyerPhone from Order (+2 lines)
+- `app/dev/notifications/page.tsx`: Guard + maskPhone() (+16 lines)
+- `lib/events/bus.ts`: Use queueNotification() (-6/+4 lines)
+- `lib/notify/queue.ts`: Type-safe helper (new, +17 lines)
+- `tests/notifications/notifications-polish.spec.ts`: E2E tests (new, +37 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 47 pages successfully
+- ✅ All routes functional
+- ✅ Type safety enforced throughout notification system
+
+### Next Steps
+- ⏳ PR #397 CI checks (auto-merge armed)
+- 🎯 Pass 116: External notification providers (Twilio SMS, SendGrid Email)
+- 🎯 Pass 117: Background worker to process QUEUED → SENT
+- 📊 Consider notification archival strategy (SENT → archived after N days)
+
+## Pass 116 — External Notifiers (Twilio/SendGrid) ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #398 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Add Twilio SMS and SendGrid Email adapters with environment-based safety toggles for CI/dev environments.
+
+### Achievements
+
+1. **✅ Prisma Schema Extension**:
+   - Added `sentAt DateTime?` field to track successful delivery timestamp
+   - Added `error String?` field to capture delivery failures
+   - Migration: `20251007003019_notifications_sentAt_error`
+   - Enables delivery auditing and debugging
+
+2. **✅ Twilio SMS Provider**:
+   - Created `lib/notify/providers/twilio.ts`
+   - Environment variables: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
+   - Disable toggle: `DIXIS_SMS_DISABLE=1` for CI/dev
+   - Uses Basic auth with Buffer encoding
+   - Returns `{ ok: true, simulated: true }` when disabled
+   - Real API call only if secrets present and not disabled
+
+3. **✅ SendGrid Email Provider**:
+   - Created `lib/notify/providers/sendgrid.ts`
+   - Environment variables: SENDGRID_API_KEY, SENDGRID_FROM
+   - Disable toggle: `DIXIS_EMAIL_DISABLE=1` for CI/dev
+   - Uses Bearer token authentication
+   - Returns `{ ok: true, simulated: true }` when disabled
+   - Real API call only if secrets present and not disabled
+
+4. **✅ Email Templates**:
+   - Created `lib/notify/emailTemplates.ts` with `renderEmail()`
+   - order_created: "Η παραγγελία #ID καταχωρήθηκε" with HTML body
+   - order_status_changed: "Ενημέρωση παραγγελίας #ID" with HTML body
+   - Returns `{ subject, html }` objects for SendGrid
+
+5. **✅ Delivery Helpers**:
+   - Created `lib/notify/deliver.ts` with two functions:
+   - `deliverOne(id)`: Delivers single notification by ID
+     - Fetches from DB, validates status === 'QUEUED'
+     - Dispatches to SMS/EMAIL provider
+     - Updates status to 'SENT' or 'FAILED'
+     - Records sentAt timestamp and error message
+     - Returns `{ ok, simulated }` result
+   - `deliverQueued(limit=10)`: Processes multiple QUEUED notifications
+     - Fetches oldest QUEUED notifications
+     - Calls deliverOne() for each
+     - Returns array of results
+
+6. **✅ Dev-Only API Endpoint**:
+   - Created `POST /api/dev/notifications/deliver`
+   - Protected by production guard (NODE_ENV + DIXIS_DEV check)
+   - Calls `deliverQueued(20)` to process batch
+   - Returns `{ delivered: [...results] }` JSON
+   - Enables manual delivery testing in dev environment
+
+7. **✅ Environment Documentation**:
+   - Updated `.env.example` with comprehensive provider configuration
+   - Documented all Twilio and SendGrid variables
+   - Added safety toggles: DIXIS_SMS_DISABLE, DIXIS_EMAIL_DISABLE
+   - Included DIXIS_DEV flag for production dev-only routes
+
+8. **✅ Package Scripts**:
+   - Added `prisma:gen`: Explicit Prisma generate with --schema path
+   - Added `notify:deliver`: curl helper to trigger dev API endpoint
+   - Ensures consistent Prisma client generation across environments
+
+9. **✅ CI Guards**:
+   - Updated `.github/workflows/pr.yml`:
+   - Added `DIXIS_SMS_DISABLE=1` to qa job Prisma generation
+   - Added `DIXIS_EMAIL_DISABLE=1` to qa job Prisma generation
+   - Added both disable flags to smoke-tests job environment
+   - Uses `npm run prisma:gen` script for consistency
+   - Prevents external API calls during CI runs
+
+10. **✅ E2E Smoke Tests**:
+    - Created `tests/notifications/deliver-stub.spec.ts`
+    - Test 1: API simulates delivery when DIXIS_SMS_DISABLE=1
+      - Validates 200 response with { delivered } array
+      - Confirms all items have simulated: true
+    - Test 2: Dev page shows notifications outbox
+      - Verifies /dev/notifications accessibility
+      - Confirms table structure visible
+
+### Technical Notes
+- **Safety First**: All external calls disabled by default in CI/dev
+- **Real Delivery**: Only happens if secrets present AND not disabled
+- **Atomic Updates**: sentAt and error fields updated in same transaction
+- **Error Handling**: Try/catch around provider calls, status → FAILED on exception
+- **Graceful Simulation**: Returns success with simulated flag when disabled
+- **Production Ready**: Drop-in configuration change enables real delivery
+
+### Files Changed (11 files, +175/-6)
+- `prisma/schema.prisma`: sentAt + error fields (+2 lines)
+- `prisma/migrations/20251007003019_notifications_sentAt_error/migration.sql`: New (+2 lines)
+- `lib/notify/providers/twilio.ts`: Twilio adapter (new, +17 lines)
+- `lib/notify/providers/sendgrid.ts`: SendGrid adapter (new, +16 lines)
+- `lib/notify/emailTemplates.ts`: Email templates (new, +14 lines)
+- `lib/notify/deliver.ts`: Delivery helpers (new, +38 lines)
+- `app/api/dev/notifications/deliver/route.ts`: Dev API (new, +11 lines)
+- `.env.example`: Provider configuration (+15 lines)
+- `package.json`: prisma:gen + notify:deliver scripts (+2 lines)
+- `.github/workflows/pr.yml`: CI guards (+4 lines)
+- `tests/notifications/deliver-stub.spec.ts`: E2E tests (new, +34 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 47 pages successfully
+- ✅ New route: `/api/dev/notifications/deliver` (212 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new fields
+
+### Environment Variables Summary
+```bash
+# Twilio SMS
+TWILIO_ACCOUNT_SID=""
+TWILIO_AUTH_TOKEN=""
+TWILIO_FROM_NUMBER=""
+
+# SendGrid Email
+SENDGRID_API_KEY=""
+SENDGRID_FROM=""
+
+# Safety Toggles (CI/Dev)
+DIXIS_SMS_DISABLE="1"
+DIXIS_EMAIL_DISABLE="1"
+
+# Dev-only Routes (Production)
+DIXIS_DEV="0"
+```
+
+### Next Steps
+- ⏳ PR #398 CI checks (auto-merge armed)
+- 🎯 Pass 117: Background worker to process QUEUED → SENT automatically
+- 🎯 Pass 118: Rate limiting for delivery API endpoints
+- 📊 Monitor delivery success/failure rates via sentAt/error fields
+
+## Pass 117 — Notification Worker (Retries/Backoff/Idempotency) ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #399 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Implement background worker for processing QUEUED notifications with exponential backoff retries, idempotency, and secure cron endpoint for scheduled execution.
+
+### Achievements
+
+1. **✅ Prisma Schema Extension**:
+   - Added `attempts Int @default(0)` - tracks retry count
+   - Added `nextAttemptAt DateTime?` - schedules next retry with backoff
+   - Added `dedupId String? @db.VarChar(64)` - fingerprint for idempotency
+   - Migration: `20251007003457_notifications_attempts_backoff_dedup`
+   - Indexes: `[status, nextAttemptAt]` for worker queries, `[dedupId]` for dedup lookups
+
+2. **✅ Fingerprint-Based Idempotency**:
+   - Created `lib/notify/fingerprint.ts` with SHA-256 hashing
+   - Fingerprint = hash(channel|to|template|payload)
+   - Updated `queueNotification()` to check for duplicates within 10-minute window
+   - Returns existing notification if duplicate found
+   - Prevents double-sending from race conditions or retries
+
+3. **✅ Worker Logic with Exponential Backoff**:
+   - Created `lib/notify/worker.ts` with `deliverDue()` function
+   - Backoff schedule with jitter:
+     - Attempt 1: 1 minute + random(0-60s)
+     - Attempt 2: 5 minutes + random(0-5m)
+     - Attempt 3: 15 minutes + random(0-15m)
+     - Attempt 4: 1 hour + random(0-1h)
+     - Attempt 5: 3 hours + random(0-3h)
+     - Attempt 6: 12 hours + random(0-12h) — final attempt
+   - MAX_ATTEMPTS = 6, after which status → FAILED
+   - Queries: `status='QUEUED' AND (attempts=0 OR nextAttemptAt <= NOW())`
+   - Updates: increments attempts, sets nextAttemptAt, preserves sentAt/error
+
+4. **✅ Secure Cron Endpoint**:
+   - Created `POST /api/jobs/notifications/run`
+   - Requires `X-CRON-KEY` header matching `DIXIS_CRON_KEY` env var
+   - Returns 404 if key missing or mismatched (security by obscurity)
+   - Calls `deliverDue(20)` to process batch
+   - Returns `{ processed, results }` JSON with delivery status
+
+5. **✅ GitHub Actions Scheduled Workflow**:
+   - Created `.github/workflows/cron-notifications.yml`
+   - Schedule: every 5 minutes (`*/5 * * * *`)
+   - Manual trigger: `workflow_dispatch`
+   - Requires GitHub Secrets:
+     - `CRON_URL`: Production endpoint (e.g. https://app.dixis.gr/api/jobs/notifications/run)
+     - `CRON_KEY`: Matches `DIXIS_CRON_KEY` in production
+   - Graceful skip if secrets not configured (development repos)
+
+6. **✅ Environment Documentation**:
+   - Updated `.env.example` with `DIXIS_CRON_KEY` documentation
+   - Documented strong key requirement for production security
+   - Explained scheduled workflow integration
+
+7. **✅ E2E Test Coverage**:
+   - Created `tests/notifications/worker.spec.ts` (3 scenarios):
+     - Dedup: Same notification not duplicated within window
+     - Auth: Cron endpoint rejects requests without valid key
+     - Processing: Authenticated cron call processes notifications
+   - Tests handle both dev (200) and production guard (404) responses
+
+### Technical Notes
+- **Idempotency**: Prevents duplicate notifications from concurrent requests or retries
+- **Backoff Strategy**: Exponential with jitter prevents thundering herd
+- **Max Attempts**: 6 attempts span ~16.25 hours total retry window
+- **Query Optimization**: Indexes on `[status, nextAttemptAt]` enable efficient worker queries
+- **Security**: Cron key authentication prevents unauthorized worker execution
+- **Safety Preserved**: `DIXIS_SMS_DISABLE` and `DIXIS_EMAIL_DISABLE` remain active in CI/dev
+
+### Files Changed (9 files, +191/-12)
+- `prisma/schema.prisma`: attempts/nextAttemptAt/dedupId fields (+5 lines)
+- `prisma/migrations/20251007003457_notifications_attempts_backoff_dedup/migration.sql`: New (+10 lines)
+- `lib/notify/fingerprint.ts`: SHA-256 fingerprint helper (new, +5 lines)
+- `lib/notify/queue.ts`: Idempotency check (+11 lines)
+- `lib/notify/worker.ts`: Background worker logic (new, +50 lines)
+- `app/api/jobs/notifications/run/route.ts`: Secure cron endpoint (new, +10 lines)
+- `.github/workflows/cron-notifications.yml`: Scheduled workflow (new, +15 lines)
+- `.env.example`: DIXIS_CRON_KEY documentation (+3 lines)
+- `tests/notifications/worker.spec.ts`: E2E tests (new, +56 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 48 pages successfully
+- ✅ New route: `/api/jobs/notifications/run` (215 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new fields
+
+### Backoff Schedule Example
+```
+Notification created at 12:00:00
+- Attempt 1 fails → retry at 12:01:30 (1m + jitter)
+- Attempt 2 fails → retry at 12:07:15 (5m + jitter)
+- Attempt 3 fails → retry at 12:23:45 (15m + jitter)
+- Attempt 4 fails → retry at 13:45:20 (1h + jitter)
+- Attempt 5 fails → retry at 17:12:08 (3h + jitter)
+- Attempt 6 fails → status = FAILED (12h + jitter)
+Total retry window: ~16.25 hours
+```
+
+### Idempotency Example
+```typescript
+// First call: creates notification
+await queueNotification('SMS', '+30123', 'order_created', { orderId: 1 });
+// dedupId = sha256('SMS|+30123|order_created|{"orderId":1}')
+
+// Second call within 10 minutes: returns existing notification
+await queueNotification('SMS', '+30123', 'order_created', { orderId: 1 });
+// Same dedupId → finds existing QUEUED record → returns it (no duplicate)
+```
+
+### Cron Workflow Configuration
+```yaml
+# GitHub Repository Secrets required:
+CRON_URL: https://app.dixis.gr/api/jobs/notifications/run
+CRON_KEY: <strong-random-key-matching-production-DIXIS_CRON_KEY>
+
+# Production .env:
+DIXIS_CRON_KEY=<strong-random-key>
+```
+
+### Next Steps
+- ⏳ PR #399 CI checks (auto-merge armed)
+- 🎯 Pass 118: Rate limiting for cron endpoint (prevent abuse)
+- 🎯 Pass 119: Notification delivery metrics dashboard
+- 📊 Monitor worker performance: attempts distribution, backoff effectiveness
+- 📊 Track dedup hit rate: % of notifications deduplicated
