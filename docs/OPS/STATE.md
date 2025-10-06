@@ -1277,3 +1277,87 @@ Finalize docs canonicalization and ensure uploads are ignored.
 3. Deleted corrupted 35GB backup file
 4. Recreated docs/OPS/ with canonical uppercase path
 5. Created unified CI script for consistent test execution
+
+## Pass 110.2d — CI artifacts & config refinement ✅
+- **Playwright Config**: Existing `frontend/playwright.config.ts` already configured with HTML reports and failure-only artifacts (screenshot/video/trace)
+- **CI Script Updated**: `scripts/ci/run-playwright.sh` now uses `--config=playwright.config.ts` instead of direct path
+- **HTML Report Env**: Added `PW_TEST_HTML_REPORT=1` to CI script
+- **Workflow Artifacts**: Already configured to upload playwright-report and test-results (retention: 7 days)
+- **.gitignore Updated**: Added `frontend/playwright-report/` and `frontend/test-results/` to prevent accidental commits
+
+### Technical Notes
+- Workflow already has comprehensive artifact upload (both on-failure and always)
+- Config uses `retain-on-failure` for video/trace (optimized for CI storage)
+- HTML reporter set to `open: 'never'` for CI compatibility
+- CI timeout: 180s per test, 20s expect timeout (enhanced for shipping flows)
+
+## Pass 111.1 — Postgres finisher ✅
+- **STATE Path Fixed**: No frontend/docs needed (already clean), verified docs/OPS/ as canonical location
+- **CI Postgres Wait**: Added `npx wait-on tcp:127.0.0.1:5432` before Prisma migrate deploy
+- **Env Example Canonicalized**: 
+  - Root `.env.example` → pointer to `frontend/.env.example`
+  - Frontend `.env.example` → canonical with DATABASE_URL already present
+  - CI DATABASE_URL set at workflow job level
+- **Build Verified**: ✅ Frontend builds successfully (43 routes, 0 errors)
+
+### Technical Notes
+- Postgres healthcheck: wait-on tcp ensures port 5432 is accessible before migrations
+- No duplicate STATE.md files (frontend/docs/ was already clean)
+- Env example strategy: Root points to frontend for clarity
+
+## Pass 112.1 — Prisma config + client reuse ✅
+- **Prisma Config Created**: Added `frontend/prisma.config.ts` using Prisma 7 config API
+- **Deprecated Config Removed**: Removed `package.json#prisma` (deprecated warning eliminated)
+- **Shared Client Reuse**: Updated `/api/checkout` to use `@/lib/db/client` instead of `new PrismaClient()`
+- **Build Verification**: ✅ Prisma now loads config from `prisma.config.ts` (confirmed in build output)
+
+### Technical Notes
+- Config uses `defineConfig` from `prisma/config` package
+- Schema path: `prisma/schema.prisma` (relative to config file)
+- Migrations path: `prisma/migrations` (relative to config file)
+- Single Prisma client instance prevents connection pool exhaustion
+- Build output confirms: "Loaded Prisma config from prisma.config.ts"
+
+## Pass 112.2 — Atomic stock guard + race protection ✅
+- **Atomic Decrement**: Replace `product.update` with `updateMany` + `stock >= qty` WHERE clause
+- **Race Condition Guard**: Database-level atomicity prevents concurrent oversell scenarios
+- **Count Validation**: If `updateMany` returns `count !== 1`, throw OVERSALE (409 Conflict)
+- **Test Coverage**: Existing concurrency test validates protection (`tests/orders/checkout-stock.spec.ts`)
+- **CI/CD**: Lint + typecheck already in workflow via `qa:all:ci` script
+
+### Technical Implementation
+**Before** (Pass 112.1):
+```typescript
+await tx.product.update({
+  where: { id: item.productId },
+  data: { stock: { decrement: item.qty } }
+});
+```
+
+**After** (Pass 112.2):
+```typescript
+const res = await tx.product.updateMany({
+  where: {
+    id: item.productId,
+    stock: { gte: item.qty }
+  },
+  data: { stock: { decrement: item.qty } }
+});
+
+if (res.count !== 1) {
+  throw new Error('OVERSALE');
+}
+```
+
+### Race Protection Strategy
+- **Database-Level Atomicity**: `WHERE stock >= qty` ensures validation happens in same query
+- **Transaction Isolation**: Combined with `$transaction`, prevents phantom reads
+- **Concurrent Safety**: Two orders for last item → one succeeds (count=1), one fails (count=0)
+- **Error Response**: 409 Conflict with Greek message "Ανεπαρκές απόθεμα"
+
+### Validation
+- ✅ TypeScript compilation passes
+- ✅ Build completes successfully
+- ✅ Concurrency test exists and validates race protection
+- ✅ PrismaClient instances scanned (only shared client + seed script)
+- ✅ PR #385 created with full evidence and AC links

@@ -146,9 +146,9 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: dixis
-          POSTGRES_PASSWORD: dixis_dev_pass
-          POSTGRES_DB: dixis_dev
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dixis
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -156,6 +156,9 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public
 
     steps:
       - name: Checkout

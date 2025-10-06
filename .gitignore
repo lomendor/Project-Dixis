@@ -175,3 +175,5 @@ frontend/.lighthouseci/**
 
 # Uploaded images (dev only)
 frontend/public/uploads/
+frontend/playwright-report/
+frontend/test-results/
