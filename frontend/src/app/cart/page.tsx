@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
@@ -42,6 +42,7 @@ const {
   const { showToast } = useToast();
   const { trackCheckoutStart, trackOrderComplete } = useAnalytics();
   const router = useRouter();
+  const [submitting, setSubmitting] = React.useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -72,28 +73,39 @@ const handleCheckout = async () => {
       trackCheckoutStart(totalWithPaymentFees, cart.length, user?.id?.toString());
     }
 
-    // For cash on delivery, proceed with the existing flow
-    if (selectedPaymentMethod.type === 'cash_on_delivery') {
-      const order = await processCheckout();
-      if (order && orderSummary && cart) {
-        trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
-        showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
-        router.push(`/orders/${order.id}`);
+    setSubmitting(true);
+    try {
+      // For cash on delivery, proceed with the existing flow
+      if (selectedPaymentMethod.type === 'cash_on_delivery') {
+        const order = await processCheckout();
+        if (order && orderSummary && cart) {
+          trackOrderComplete(order.id.toString(), orderSummary.total_amount, cart.length, 'cod', user?.id?.toString());
+          showToast('success', `Παραγγελία ${order.id} ολοκληρώθηκε!`);
+          router.push(`/orders/${order.id}`);
+        }
+        return;
       }
-      return;
-    }
 
-    // For card payments, redirect to payment page
-    if (selectedPaymentMethod.type === 'card') {
-      // Create order first, then redirect to payment page
-      const order = await processCheckout();
-      if (order) {
-        router.push(`/checkout/payment/${order.id}`);
+      // For card payments, redirect to payment page
+      if (selectedPaymentMethod.type === 'card') {
+        // Create order first, then redirect to payment page
+        const order = await processCheckout();
+        if (order) {
+          router.push(`/checkout/payment/${order.id}`);
+        }
+        return;
       }
-      return;
-    }
 
-    showToast('error', 'Μέθοδος πληρωμής δεν υποστηρίζεται');
+      showToast('error', 'Μέθοδος πληρωμής δεν υποστηρίζεται');
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.status === 401) {
+        router.push('/join?next=' + encodeURIComponent('/cart'));
+        return;
+      }
+      showToast('error', 'Σφάλμα παραγγελίας');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const orderSummary = calculateOrderSummary();
@@ -306,8 +318,8 @@ const handleCheckout = async () => {
                 }}
                 itemsCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 onCheckout={handleCheckout}
-                isLoading={isLoading}
-                disabled={!orderSummary || !selectedPaymentMethod}
+                isLoading={isLoading || submitting}
+                disabled={!orderSummary || !selectedPaymentMethod || submitting}
               />
             )}
 
