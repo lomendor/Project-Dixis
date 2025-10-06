@@ -58,3 +58,9 @@
 - UI: `/my/sales` (producer actions), `/orders/[id]` (status badges + cancel button)
 - Dev notifications (JSON files → .tmp/mails/)
 - Playwright tests: ACCEPT/REJECT/FULFILL, buyer cancel, stock returns (7 scenarios)
+
+## Pass 108.1 — Lifecycle UX polish
+- Cancel button reactive: checks ALL items PLACED (not just order status)
+- Link από `/my` → `/my/sales` (Οι πωλήσεις μου)
+- Tests ήδη στο σωστό path (`frontend/tests/orders/`)
+- No inline scripts, fully reactive components
