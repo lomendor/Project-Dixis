@@ -266,3 +266,54 @@ export default function Page() { redirect('/my/orders'); }
 - Monitor PR #393 CI status
 - Verify /my/orders?tab=PENDING shows orders after checkout
 - Consider adding /producer/* legacy notice (deprecation warning)
+
+## Pass 114.1 → Unified into Orders MVP ✅
+
+**Date**: 2025-10-06
+**Action**: Cherry-picked Pass 114.1 into feat/pass114-orders-mvp (PR #392)
+
+### Completed
+- ✅ **Cherry-pick**: Unified fixup commits into PR #392
+- ✅ **PR #393 Closed**: Marked as superseded by #392
+- ✅ **Status normalized**: OrderItem uses 'PENDING' (uppercase)
+- ✅ **Redirects in place**: /producer/orders → /my/orders
+- ✅ **Tests path canonical**: frontend/tests/orders/
+
+### Unification Process
+
+**Cherry-picked commits**:
+1. `d1e6cae` - chore(orders): normalize status to PENDING; add producer→my redirects; move orders e2e
+2. `8d56a14` - docs(ops): record Pass 114.1 completion
+
+**Result**: PR #392 now contains complete Orders MVP with all fixups integrated.
+
+### Final State
+
+**PR #392** (feat/pass114-orders-mvp):
+- Orders MVP implementation with snapshots
+- Status normalization (PENDING uppercase)
+- Producer path redirects (/producer/* → /my/*)
+- Tests in canonical location (frontend/tests/orders/)
+- Armed for auto-merge
+
+**PR #393** (chore/pass1141-orders-fixups):
+- Closed as superseded
+- All changes integrated into #392
+
+### Technical Details
+
+**Status values**:
+- OrderItem.status: 'PENDING' (uppercase, matches UI tabs)
+- Order.status: 'pending' (lowercase, legacy field)
+- UI filtering uses OrderItem.status exclusively
+
+**Paths consolidated**:
+- /my/orders: Producer orders inbox (canonical)
+- /my/products: Producer products CRUD (canonical)
+- /producer/orders: Redirect to /my/orders
+- /producer/products: Redirect to /my/products
+
+### Next Steps
+- Monitor PR #392 CI completion
+- Verify auto-merge triggers after CI passes
+- Confirm /my/orders?tab=PENDING shows new orders
