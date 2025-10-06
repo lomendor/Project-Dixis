@@ -1769,3 +1769,135 @@ DIXIS_DEV="0"
 - 🎯 Pass 117: Background worker to process QUEUED → SENT automatically
 - 🎯 Pass 118: Rate limiting for delivery API endpoints
 - 📊 Monitor delivery success/failure rates via sentAt/error fields
+
+## Pass 117 — Notification Worker (Retries/Backoff/Idempotency) ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #399 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Implement background worker for processing QUEUED notifications with exponential backoff retries, idempotency, and secure cron endpoint for scheduled execution.
+
+### Achievements
+
+1. **✅ Prisma Schema Extension**:
+   - Added `attempts Int @default(0)` - tracks retry count
+   - Added `nextAttemptAt DateTime?` - schedules next retry with backoff
+   - Added `dedupId String? @db.VarChar(64)` - fingerprint for idempotency
+   - Migration: `20251007003457_notifications_attempts_backoff_dedup`
+   - Indexes: `[status, nextAttemptAt]` for worker queries, `[dedupId]` for dedup lookups
+
+2. **✅ Fingerprint-Based Idempotency**:
+   - Created `lib/notify/fingerprint.ts` with SHA-256 hashing
+   - Fingerprint = hash(channel|to|template|payload)
+   - Updated `queueNotification()` to check for duplicates within 10-minute window
+   - Returns existing notification if duplicate found
+   - Prevents double-sending from race conditions or retries
+
+3. **✅ Worker Logic with Exponential Backoff**:
+   - Created `lib/notify/worker.ts` with `deliverDue()` function
+   - Backoff schedule with jitter:
+     - Attempt 1: 1 minute + random(0-60s)
+     - Attempt 2: 5 minutes + random(0-5m)
+     - Attempt 3: 15 minutes + random(0-15m)
+     - Attempt 4: 1 hour + random(0-1h)
+     - Attempt 5: 3 hours + random(0-3h)
+     - Attempt 6: 12 hours + random(0-12h) — final attempt
+   - MAX_ATTEMPTS = 6, after which status → FAILED
+   - Queries: `status='QUEUED' AND (attempts=0 OR nextAttemptAt <= NOW())`
+   - Updates: increments attempts, sets nextAttemptAt, preserves sentAt/error
+
+4. **✅ Secure Cron Endpoint**:
+   - Created `POST /api/jobs/notifications/run`
+   - Requires `X-CRON-KEY` header matching `DIXIS_CRON_KEY` env var
+   - Returns 404 if key missing or mismatched (security by obscurity)
+   - Calls `deliverDue(20)` to process batch
+   - Returns `{ processed, results }` JSON with delivery status
+
+5. **✅ GitHub Actions Scheduled Workflow**:
+   - Created `.github/workflows/cron-notifications.yml`
+   - Schedule: every 5 minutes (`*/5 * * * *`)
+   - Manual trigger: `workflow_dispatch`
+   - Requires GitHub Secrets:
+     - `CRON_URL`: Production endpoint (e.g. https://app.dixis.gr/api/jobs/notifications/run)
+     - `CRON_KEY`: Matches `DIXIS_CRON_KEY` in production
+   - Graceful skip if secrets not configured (development repos)
+
+6. **✅ Environment Documentation**:
+   - Updated `.env.example` with `DIXIS_CRON_KEY` documentation
+   - Documented strong key requirement for production security
+   - Explained scheduled workflow integration
+
+7. **✅ E2E Test Coverage**:
+   - Created `tests/notifications/worker.spec.ts` (3 scenarios):
+     - Dedup: Same notification not duplicated within window
+     - Auth: Cron endpoint rejects requests without valid key
+     - Processing: Authenticated cron call processes notifications
+   - Tests handle both dev (200) and production guard (404) responses
+
+### Technical Notes
+- **Idempotency**: Prevents duplicate notifications from concurrent requests or retries
+- **Backoff Strategy**: Exponential with jitter prevents thundering herd
+- **Max Attempts**: 6 attempts span ~16.25 hours total retry window
+- **Query Optimization**: Indexes on `[status, nextAttemptAt]` enable efficient worker queries
+- **Security**: Cron key authentication prevents unauthorized worker execution
+- **Safety Preserved**: `DIXIS_SMS_DISABLE` and `DIXIS_EMAIL_DISABLE` remain active in CI/dev
+
+### Files Changed (9 files, +191/-12)
+- `prisma/schema.prisma`: attempts/nextAttemptAt/dedupId fields (+5 lines)
+- `prisma/migrations/20251007003457_notifications_attempts_backoff_dedup/migration.sql`: New (+10 lines)
+- `lib/notify/fingerprint.ts`: SHA-256 fingerprint helper (new, +5 lines)
+- `lib/notify/queue.ts`: Idempotency check (+11 lines)
+- `lib/notify/worker.ts`: Background worker logic (new, +50 lines)
+- `app/api/jobs/notifications/run/route.ts`: Secure cron endpoint (new, +10 lines)
+- `.github/workflows/cron-notifications.yml`: Scheduled workflow (new, +15 lines)
+- `.env.example`: DIXIS_CRON_KEY documentation (+3 lines)
+- `tests/notifications/worker.spec.ts`: E2E tests (new, +56 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 48 pages successfully
+- ✅ New route: `/api/jobs/notifications/run` (215 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new fields
+
+### Backoff Schedule Example
+```
+Notification created at 12:00:00
+- Attempt 1 fails → retry at 12:01:30 (1m + jitter)
+- Attempt 2 fails → retry at 12:07:15 (5m + jitter)
+- Attempt 3 fails → retry at 12:23:45 (15m + jitter)
+- Attempt 4 fails → retry at 13:45:20 (1h + jitter)
+- Attempt 5 fails → retry at 17:12:08 (3h + jitter)
+- Attempt 6 fails → status = FAILED (12h + jitter)
+Total retry window: ~16.25 hours
+```
+
+### Idempotency Example
+```typescript
+// First call: creates notification
+await queueNotification('SMS', '+30123', 'order_created', { orderId: 1 });
+// dedupId = sha256('SMS|+30123|order_created|{"orderId":1}')
+
+// Second call within 10 minutes: returns existing notification
+await queueNotification('SMS', '+30123', 'order_created', { orderId: 1 });
+// Same dedupId → finds existing QUEUED record → returns it (no duplicate)
+```
+
+### Cron Workflow Configuration
+```yaml
+# GitHub Repository Secrets required:
+CRON_URL: https://app.dixis.gr/api/jobs/notifications/run
+CRON_KEY: <strong-random-key-matching-production-DIXIS_CRON_KEY>
+
+# Production .env:
+DIXIS_CRON_KEY=<strong-random-key>
+```
+
+### Next Steps
+- ⏳ PR #399 CI checks (auto-merge armed)
+- 🎯 Pass 118: Rate limiting for cron endpoint (prevent abuse)
+- 🎯 Pass 119: Notification delivery metrics dashboard
+- 📊 Monitor worker performance: attempts distribution, backoff effectiveness
+- 📊 Track dedup hit rate: % of notifications deduplicated
