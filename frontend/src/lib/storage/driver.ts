@@ -26,11 +26,17 @@ class FsDriver implements StorageDriver {
   }): Promise<UploadResult> {
     const { mkdir, writeFile } = await import('fs/promises');
     const path = (await import('path')).default;
-    const name = randomUUID() + '.' + (ext || safeExt(contentType));
-    const dir = path.join(process.cwd(), 'public', 'uploads');
+    const crypto = await import('crypto');
+
+    // Generate hash-based filename and yyyymm folder structure
+    const hash = crypto.createHash('sha256').update(body).digest('hex').slice(0, 16);
+    const yyyymm = new Date().toISOString().slice(0, 7).replace('-', '');
+    const name = hash + '.' + (ext || safeExt(contentType));
+    const dir = path.join(process.cwd(), 'public', 'uploads', yyyymm);
+
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, name), body);
-    return { url: '/uploads/' + name, key: name };
+    return { url: `/uploads/${yyyymm}/${name}`, key: `${yyyymm}/${name}` };
   }
 }
 
@@ -73,7 +79,13 @@ class S3Driver implements StorageDriver {
     body: Buffer;
     ext?: string;
   }): Promise<UploadResult> {
-    const key = randomUUID() + '.' + (ext || safeExt(contentType));
+    const crypto = await import('crypto');
+
+    // Generate hash-based filename and yyyymm folder structure
+    const hash = crypto.createHash('sha256').update(body).digest('hex').slice(0, 16);
+    const yyyymm = new Date().toISOString().slice(0, 7).replace('-', '');
+    const key = `uploads/${yyyymm}/${hash}.${ext || safeExt(contentType)}`;
+
     await this.put({
       Bucket: this.bucket,
       Key: key,
