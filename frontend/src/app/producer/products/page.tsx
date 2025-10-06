@@ -264,6 +264,9 @@ function ProducerProductsContent() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Εικόνα
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Προϊόν
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -283,6 +286,20 @@ function ProducerProductsContent() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {products.map((product) => (
                       <tr key={product.id} data-testid={`product-row-${product.id}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {(product as any).image_url ? (
+                            <img
+                              src={(product as any).image_url}
+                              alt={product.title || product.name}
+                              className="w-12 h-12 object-cover rounded"
+                              data-testid={`product-thumbnail-${product.id}`}
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center" data-testid={`product-placeholder-${product.id}`}>
+                              <span className="text-gray-400 text-xs">📦</span>
+                            </div>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
                             <div className="text-sm font-medium text-gray-900" data-testid={`product-name-${product.id}`}>
