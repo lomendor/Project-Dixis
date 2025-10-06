@@ -1164,3 +1164,43 @@ s3:  uploads/202510/a1b2c3d4e5f6g7h8.jpg (Key in S3 bucket)
 - ✅ Storage unified
 - 🎯 Next: Product image integration (Pass 110)
 - 📊 Consider: Rate limiting for upload endpoints
+
+## Pass 109b.2 — Docs Path Finalization ✅
+
+**Date**: 2025-10-06T11:15Z
+**Status**: ✅ Complete
+
+### Objective
+Finalize docs canonicalization and ensure uploads are ignored.
+
+### Achievements
+
+1. **✅ Docs Path Verified**:
+   - Confirmed `docs/OPS/STATE.md` is canonical (case-insensitive filesystem handled)
+   - Created `docs/README.md` with canonical path documentation
+   - Restored STATE.md from corruption (was 34GB due to awk duplication bug)
+
+2. **✅ Gitignore Updated**:
+   - Verified `frontend/public/uploads/` in .gitignore
+   - Prevents committing user-uploaded images to repository
+   - Dev-only local storage properly isolated
+
+3. **✅ Build Verification**:
+   - TypeScript strict mode: Zero errors
+   - Next.js build: 45 pages successfully
+   - All routes functional
+
+### Technical Notes
+- macOS filesystem is case-insensitive: `docs/ops` and `docs/OPS` are the same directory
+- Restored STATE.md from commit 60f8e95 (41KB healthy size)
+- All previous Pass 109b changes retained
+
+### Files Changed
+- `docs/README.md`: Minor wording update
+- `docs/OPS/STATE.md`: Restored + Pass 109b.2 entry
+- `.gitignore`: Already contains uploads path (verified)
+
+### Next Steps
+- ✅ Documentation canonicalized
+- ✅ Uploads properly ignored
+- 🎯 Next: Product image integration (Pass 110)
