@@ -317,3 +317,67 @@ export default function Page() { redirect('/my/orders'); }
 - Monitor PR #392 CI completion
 - Verify auto-merge triggers after CI passes
 - Confirm /my/orders?tab=PENDING shows new orders
+
+## Pass 114.2 — Orders PR Finalizer ✅
+
+**Date**: 2025-10-06
+**Action**: Rebase feat/pass114-orders-mvp onto main, resolve conflicts, retrigger CI
+
+### Completed
+- ✅ **Rebase onto main**: Clean rebase, duplicate commits auto-dropped
+- ✅ **Conflict Resolution**: All Dixis rules enforced
+- ✅ **CI Retriggered**: Empty commit to trigger workflow
+- ✅ **Auto-merge Armed**: PR #392 ready for merge
+- ✅ **Mergeable Status**: MERGEABLE (was CONFLICTING)
+
+### Rebase Process
+
+**Rebased commits**:
+- Dropped 2 duplicate commits from PR #391 (already in main)
+- Preserved 5 commits:
+  1. `c8bcd3b` - feat(orders): Orders MVP implementation
+  2. `bb2c529` - docs(ops): record Pass 114
+  3. `0f9171a` - chore(orders): status normalization + redirects
+  4. `1bf49c8` - docs(ops): record Pass 114.1
+  5. `f07d024` - docs(ops): unified 114.1 into PR #392
+
+**Conflict Resolution**: None needed - clean rebase
+
+### Verified Dixis Rules
+
+**Checkout Route** (frontend/src/app/api/checkout/route.ts):
+- ✅ Shared Prisma client: `import { prisma } from '@/lib/db/client'`
+- ✅ Atomic guard: `updateMany({ where: { stock: { gte: qty } }})`
+- ✅ 409 error: `{ status: 409 }` for oversell
+- ✅ OrderItem.status: 'PENDING' (uppercase)
+- ✅ Transaction safety: All operations in `$transaction`
+
+**Path Structure**:
+- ✅ /my/orders: Producer orders inbox (canonical UI)
+- ✅ /my/products: Producer products CRUD (canonical UI)
+- ✅ /producer/orders: Redirect to /my/orders
+- ✅ /producer/products: Redirect to /my/products
+
+**Tests**:
+- ✅ frontend/tests/orders/orders-mvp.spec.ts (canonical location)
+
+### CI Trigger
+
+**Issue**: CI was skipped after force-push
+**Solution**: Created empty commit `8ac9f7d` to trigger workflow
+**Result**: CI running, auto-merge armed
+
+### PR #392 Final Status
+
+**Mergeable**: MERGEABLE ✅
+**State**: OPEN (waiting for CI checks)
+**Auto-merge**: ENABLED (squash merge)
+**Checks**: 
+- 1 SKIPPED (expected)
+- 1 SUCCESS
+- Others PENDING
+
+### Next Steps
+- CI checks will complete automatically
+- Auto-merge will trigger when all checks pass
+- PR #392 will be squashed and merged to main
