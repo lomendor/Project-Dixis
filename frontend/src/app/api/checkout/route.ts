@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             price: product!.price,
             titleSnap: product!.title,
             priceSnap: product!.price,
-            status: 'pending'
+            status: 'PENDING'
           }
         });
 
