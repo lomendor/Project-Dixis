@@ -1317,3 +1317,47 @@ Finalize docs canonicalization and ensure uploads are ignored.
 - Migrations path: `prisma/migrations` (relative to config file)
 - Single Prisma client instance prevents connection pool exhaustion
 - Build output confirms: "Loaded Prisma config from prisma.config.ts"
+
+## Pass 112.2 — Atomic stock guard + race protection ✅
+- **Atomic Decrement**: Replace `product.update` with `updateMany` + `stock >= qty` WHERE clause
+- **Race Condition Guard**: Database-level atomicity prevents concurrent oversell scenarios
+- **Count Validation**: If `updateMany` returns `count !== 1`, throw OVERSALE (409 Conflict)
+- **Test Coverage**: Existing concurrency test validates protection (`tests/orders/checkout-stock.spec.ts`)
+- **CI/CD**: Lint + typecheck already in workflow via `qa:all:ci` script
+
+### Technical Implementation
+**Before** (Pass 112.1):
+```typescript
+await tx.product.update({
+  where: { id: item.productId },
+  data: { stock: { decrement: item.qty } }
+});
+```
+
+**After** (Pass 112.2):
+```typescript
+const res = await tx.product.updateMany({
+  where: {
+    id: item.productId,
+    stock: { gte: item.qty }
+  },
+  data: { stock: { decrement: item.qty } }
+});
+
+if (res.count !== 1) {
+  throw new Error('OVERSALE');
+}
+```
+
+### Race Protection Strategy
+- **Database-Level Atomicity**: `WHERE stock >= qty` ensures validation happens in same query
+- **Transaction Isolation**: Combined with `$transaction`, prevents phantom reads
+- **Concurrent Safety**: Two orders for last item → one succeeds (count=1), one fails (count=0)
+- **Error Response**: 409 Conflict with Greek message "Ανεπαρκές απόθεμα"
+
+### Validation
+- ✅ TypeScript compilation passes
+- ✅ Build completes successfully
+- ✅ Concurrency test exists and validates race protection
+- ✅ PrismaClient instances scanned (only shared client + seed script)
+- ✅ PR #385 created with full evidence and AC links
