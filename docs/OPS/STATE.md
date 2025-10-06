@@ -1277,3 +1277,16 @@ Finalize docs canonicalization and ensure uploads are ignored.
 3. Deleted corrupted 35GB backup file
 4. Recreated docs/OPS/ with canonical uppercase path
 5. Created unified CI script for consistent test execution
+
+## Pass 110.2d — CI artifacts & config refinement ✅
+- **Playwright Config**: Existing `frontend/playwright.config.ts` already configured with HTML reports and failure-only artifacts (screenshot/video/trace)
+- **CI Script Updated**: `scripts/ci/run-playwright.sh` now uses `--config=playwright.config.ts` instead of direct path
+- **HTML Report Env**: Added `PW_TEST_HTML_REPORT=1` to CI script
+- **Workflow Artifacts**: Already configured to upload playwright-report and test-results (retention: 7 days)
+- **.gitignore Updated**: Added `frontend/playwright-report/` and `frontend/test-results/` to prevent accidental commits
+
+### Technical Notes
+- Workflow already has comprehensive artifact upload (both on-failure and always)
+- Config uses `retain-on-failure` for video/trace (optimized for CI storage)
+- HTML reporter set to `open: 'never'` for CI compatibility
+- CI timeout: 180s per test, 20s expect timeout (enhanced for shipping flows)

@@ -7,6 +7,7 @@ cd "$ROOT/frontend"
 # Default test env
 export BASE_URL="${BASE_URL:-http://127.0.0.1:3000}"
 export OTP_BYPASS="${OTP_BYPASS:-000000}"
+export PW_TEST_HTML_REPORT=1
 
 # Package manager
 PM="npm"; [ -f pnpm-lock.yaml ] && PM="pnpm"; [ -f yarn.lock ] && PM="yarn"
@@ -31,8 +32,8 @@ APP_PID=$!
 # Wait until server is up
 npx wait-on "$BASE_URL"
 
-# Run full suite under frontend/tests/**
-npx playwright test frontend/tests --reporter=line
+# Run full suite via config
+npx playwright test --config=playwright.config.ts
 
 # Teardown
 kill $APP_PID || true
