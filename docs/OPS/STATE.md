@@ -1290,3 +1290,17 @@ Finalize docs canonicalization and ensure uploads are ignored.
 - Config uses `retain-on-failure` for video/trace (optimized for CI storage)
 - HTML reporter set to `open: 'never'` for CI compatibility
 - CI timeout: 180s per test, 20s expect timeout (enhanced for shipping flows)
+
+## Pass 111.1 — Postgres finisher ✅
+- **STATE Path Fixed**: No frontend/docs needed (already clean), verified docs/OPS/ as canonical location
+- **CI Postgres Wait**: Added `npx wait-on tcp:127.0.0.1:5432` before Prisma migrate deploy
+- **Env Example Canonicalized**: 
+  - Root `.env.example` → pointer to `frontend/.env.example`
+  - Frontend `.env.example` → canonical with DATABASE_URL already present
+  - CI DATABASE_URL set at workflow job level
+- **Build Verified**: ✅ Frontend builds successfully (43 routes, 0 errors)
+
+### Technical Notes
+- Postgres healthcheck: wait-on tcp ensures port 5432 is accessible before migrations
+- No duplicate STATE.md files (frontend/docs/ was already clean)
+- Env example strategy: Root points to frontend for clarity

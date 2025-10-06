@@ -23,6 +23,8 @@ npx playwright install --with-deps
 
 # Database setup (if DATABASE_URL exists)
 if [ -n "${DATABASE_URL:-}" ]; then
+  echo "▶ Waiting for Postgres on tcp:5432..."
+  npx wait-on tcp:127.0.0.1:5432
   echo "▶ Running Prisma migrations..."
   npx prisma migrate deploy
   echo "▶ Seeding database..."
