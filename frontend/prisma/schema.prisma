@@ -97,16 +97,21 @@ model Event {
 }
 
 model Notification {
-  id        String    @id @default(cuid())
-  channel   String // 'SMS' | 'EMAIL'
-  to        String
-  template  String // logical template id
-  payload   Json // rendered variables
-  status    String    @default("QUEUED") // QUEUED | SENT | FAILED
-  sentAt    DateTime?
-  error     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  channel       String // 'SMS' | 'EMAIL'
+  to            String
+  template      String // logical template id
+  payload       Json // rendered variables
+  status        String    @default("QUEUED") // QUEUED | SENT | FAILED
+  sentAt        DateTime?
+  error         String?
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime?
+  dedupId       String?   @db.VarChar(64)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([channel, status, createdAt])
+  @@index([status, nextAttemptAt])
+  @@index([dedupId])
 }

@@ -1,0 +1,20 @@
+name: cron-notifications
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl production cron endpoint
+        env:
+          CRON_URL: ${{ secrets.CRON_URL }}           # e.g. https://app.dixis.gr/api/jobs/notifications/run
+          CRON_KEY: ${{ secrets.CRON_KEY }}           # same as DIXIS_CRON_KEY in production
+        run: |
+          if [ -z "$CRON_URL" ] || [ -z "$CRON_KEY" ]; then
+            echo "No CRON_URL/CRON_KEY configured — skipping."; exit 0;
+          fi
+          curl -fsS -X POST "$CRON_URL" -H "X-CRON-KEY: $CRON_KEY" || true
