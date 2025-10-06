@@ -8,17 +8,13 @@ export async function emitEvent(type: EventType, payload: any){
   if(type==='order.created'){
     const phone = payload?.shipping?.phone || '';
     if(phone){
-      await prisma.notification.create({
-        data:{ channel:'SMS', to: phone, template:'order_created', payload:{ orderId: payload.orderId, items: payload.items?.length||0 } }
-      });
+      await (await import('@/lib/notify/queue')).queueNotification('SMS', phone, 'order_created', { orderId: payload.orderId, items: payload.items?.length||0 });
     }
   }
   if(type==='orderItem.status.changed'){
     const phone = payload?.buyerPhone || '';
     if(phone){
-      await prisma.notification.create({
-        data:{ channel:'SMS', to: phone, template:'order_status_changed', payload:{ orderId: payload.orderId, itemTitle: payload.titleSnap, status: payload.status } }
-      });
+      await (await import('@/lib/notify/queue')).queueNotification('SMS', phone, 'order_status_changed', { orderId: payload.orderId, itemTitle: payload.titleSnap, status: payload.status });
     }
   }
 }

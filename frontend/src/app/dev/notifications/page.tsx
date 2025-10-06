@@ -3,7 +3,19 @@ import { renderSMS } from '@/lib/notify/templates';
 
 export const dynamic = 'force-dynamic';
 
+function maskPhone(v:string){
+  if(!v) return '';
+  const digits = v.replace(/\D/g,'');
+  if(digits.length <= 3) return '***';
+  const tail = digits.slice(-3);
+  return v.replace(digits, '*'.repeat(Math.max(0,digits.length-3)) + tail);
+}
+
 export default async function Page(){
+  if (process.env.NODE_ENV === 'production' && process.env.DIXIS_DEV !== '1') {
+    // προφυλάσσουμε την outbox σελίδα στην παραγωγή
+    return (<main><h1>404</h1><p>Not found.</p></main>);
+  }
   const rows = await prisma.notification.findMany({ orderBy:{ createdAt:'desc' }, take: 100 });
   return (
     <main style={{padding:'2rem'}}>
@@ -23,7 +35,7 @@ export default async function Page(){
             <tr key={n.id} style={{borderTop:'1px solid #eee'}}>
               <td style={{padding:'0.5rem'}}>{new Date(n.createdAt as any).toLocaleString()}</td>
               <td style={{padding:'0.5rem'}}>{n.channel}</td>
-              <td style={{padding:'0.5rem'}}>{n.to}</td>
+              <td style={{padding:'0.5rem'}}>{maskPhone(n.to as any)}</td>
               <td style={{padding:'0.5rem'}}>{n.template}</td>
               <td style={{padding:'0.5rem'}}>
                 {n.channel==='SMS' ? renderSMS(n.template, (n.payload as any)) : JSON.stringify(n.payload)}
