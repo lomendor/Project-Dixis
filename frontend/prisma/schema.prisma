@@ -74,6 +74,8 @@ model OrderItem {
   producerId String
   qty        Int
   price      Float
+  titleSnap  String?
+  priceSnap  Float?
   status     String   @default("pending")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
