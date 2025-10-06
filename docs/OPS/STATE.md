@@ -1360,4 +1360,49 @@ if (res.count !== 1) {
 - ✅ Build completes successfully
 - ✅ Concurrency test exists and validates race protection
 - ✅ PrismaClient instances scanned (only shared client + seed script)
-- ✅ PR #385 created with full evidence and AC links
+- ✅ PR #385 merged successfully
+
+## Pass 112.3 — Cart oversell UX + graceful 409 handling ✅
+- **Prerequisite**: PR #385 merged (provides `/api/checkout` with 409 oversell response)
+- **Greek Error Banner**: Display "Κάποια προϊόντα εξαντλήθηκαν. Ενημερώσαμε τις διαθέσιμες ποσότητες." on 409 status
+- **Auto Cart Reload**: Automatically call `loadCart()` to refresh quantities after oversell error
+- **Busy State Management**: Added `isCheckoutBusy` state to disable checkout button during processing
+- **Error Detection**: Catches 409 status or Greek "Ανεπαρκές απόθεμα" message from API
+
+### Technical Implementation
+**Cart Page Handler** (`frontend/src/app/cart/page.tsx:67-130`):
+```typescript
+try {
+  const order = await processCheckout();
+  if (order) {
+    // Success flow
+  }
+} catch (err: any) {
+  if (err?.status === 409 || err?.message?.includes('Ανεπαρκές απόθεμα')) {
+    setOversellError('Κάποια προϊόντα εξαντλήθηκαν. Ενημερώσαμε τις διαθέσιμες ποσότητες.');
+    await loadCart(); // Refresh current stock levels
+  }
+} finally {
+  setIsCheckoutBusy(false);
+}
+```
+
+**UI Components**:
+- **Banner**: Red background with warning icon, Greek message, dismiss button (`data-testid="oversell-error-banner"`)
+- **Button State**: Disabled during `isCheckoutBusy` to prevent double-submission
+- **Cart Item Display**: Shows quantity with `data-testid="cart-item-qty"` for E2E testing
+
+### User Flow
+1. User attempts checkout with quantity exceeding stock
+2. Backend `/api/checkout` returns 409 with "Ανεπαρκές απόθεμα"
+3. Frontend catches error and displays Greek banner
+4. Cart automatically reloads to show updated quantities
+5. User can retry checkout with adjusted quantities
+
+### Validation
+- ✅ PR #385 dependency merged (atomic `/api/checkout`)
+- ✅ TypeScript compilation passes
+- ✅ Build completes successfully (cart page 27.5 kB)
+- ✅ Error handling covers both COD and card payment flows
+- ✅ Greek-first UX maintained throughout
+- ✅ PR #389 created and armed for auto-merge
