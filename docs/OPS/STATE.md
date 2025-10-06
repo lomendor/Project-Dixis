@@ -49,3 +49,12 @@
 - `/orders/[id]`: copy button, nav link, button group layout
 - Tests moved to `frontend/tests/cart/`, paths updated to main routes
 - Αφαίρεση -simple pages (single implementation, no duplication)
+
+## Pass 108 — Order lifecycle (per-item status)
+- OrderItemStatus enum: PLACED, ACCEPTED, FULFILLED, REJECTED, CANCELLED
+- Producer actions: ACCEPT/REJECT (PLACED), FULFILL (ACCEPTED), stock returns on REJECT
+- Buyer cancel: POST /api/me/orders/[id], only when all items PLACED, stock returns
+- Order status recalc: all rejected/cancelled → CANCELLED
+- UI: `/my/sales` (producer actions), `/orders/[id]` (status badges + cancel button)
+- Dev notifications (JSON files → .tmp/mails/)
+- Playwright tests: ACCEPT/REJECT/FULFILL, buyer cancel, stock returns (7 scenarios)
