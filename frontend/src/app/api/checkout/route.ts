@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // Create order items and decrement stock
+      // Create order items and decrement stock atomically
       for (const item of items) {
         const product = productsMap.get(item.productId);
 
@@ -83,11 +83,19 @@ export async function POST(request: NextRequest) {
           }
         });
 
-        // Decrement stock (oversell already checked)
-        await tx.product.update({
-          where: { id: item.productId },
+        // Atomic decrement with stock validation (prevents race conditions)
+        const res = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            stock: { gte: item.qty }
+          },
           data: { stock: { decrement: item.qty } }
         });
+
+        // If count !== 1, another transaction consumed the stock
+        if (res.count !== 1) {
+          throw new Error('OVERSALE');
+        }
       }
 
       return {
