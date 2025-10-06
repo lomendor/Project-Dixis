@@ -160,6 +160,18 @@
 - **LOC**: +1129/-1121 (10 files)
 - **Architecture**: Unified endpoints (producer→me) with backward-compatible redirects
 
+**Pass 110.2**: CI + Docs Finisher (PR #377)
+- **Status**: ⏳ Auto-merge armed (2025-10-06)
+- **Changes**:
+  - ✅ Created `scripts/ci/run-playwright.sh` — Robust CI runner for full E2E tests
+  - ✅ Script handles: deps install, Playwright browsers, Prisma, build, server start, tests, cleanup
+  - ✅ Updated `docs/README.md` to reference `docs/OPS/` (canonical path)
+  - ✅ Docs path: `docs/ops/` on macOS (case-insensitive filesystem, same as docs/OPS)
+  - ⚠️ CI workflow not modified (keeping current smoke tests for safety)
+  - 📝 Script available for future CI integration
+- **LOC**: +67/-1 (2 files)
+- **Infrastructure**: CI script ready for full test suite execution
+
 
 **Pass 65**: PR #320 Merged + Retry Skip Analysis
 - **Status**: ✅ Complete (2025-10-04T10:26:48Z)
