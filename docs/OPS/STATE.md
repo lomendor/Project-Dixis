@@ -1406,3 +1406,56 @@ try {
 - ✅ Error handling covers both COD and card payment flows
 - ✅ Greek-first UX maintained throughout
 - ✅ PR #389 created and armed for auto-merge
+
+## Pass 113.1 — /my/products enhanced with server actions + validation ✅
+- **Canonical Path**: `/my/products` (no /admin duplication)
+- **Zod Validation**: ProductFormSchema with Greek error messages
+- **Server Actions**: Full CRUD operations (create, update, toggleActive, delete)
+- **Shared Client**: Uses `@/lib/db/client` for all Prisma operations
+- **E2E Tests**: Playwright tests for products CRUD workflow
+
+### Technical Implementation
+**Validation Schema** (`frontend/src/lib/validations/product.ts`):
+```typescript
+export const ProductFormSchema = z.object({
+  title: z.string().min(2, 'Δώστε τίτλο (≥2 χαρακτήρες)'),
+  category: z.string().min(1, 'Επιλέξτε κατηγορία'),
+  price: z.coerce.number().min(0, 'Τιμή ≥ 0'),
+  unit: z.string().min(1, 'Μονάδα μέτρησης'),
+  stock: z.coerce.number().int().min(0, 'Απόθεμα ≥ 0'),
+  // ... + description, imageUrl, isActive, producerId
+});
+```
+
+**Server Actions** (`frontend/src/app/my/products/actions/actions.ts`):
+- `createProduct(formData)`: Zod validation → Prisma create → revalidatePath
+- `updateProduct(id, formData)`: Zod validation → Prisma update → revalidatePath
+- `toggleActive(id, active)`: Toggle isActive field (archive/restore)
+- `deleteProduct(id)`: Hard delete with redirect
+
+**E2E Tests** (`frontend/tests/admin/products-crud.spec.ts`):
+- OTP bypass login helper
+- Products list page load verification
+- Create product workflow (with form filling)
+- Test-friendly with flexible selectors
+
+### Architecture Notes
+- **No /admin Duplication**: Removed empty admin/products directories to maintain single canonical path
+- **Server-Side**: Actions use 'use server' directive for Next.js App Router
+- **Path Revalidation**: All mutations trigger `revalidatePath('/my/products')`
+- **Error Handling**: Greek error messages returned for validation failures
+- **Type Safety**: Zod schema infers TypeScript types for forms
+
+### Integration
+- Works with existing `/my/products` client-side UI
+- Uses Prisma Product model (id, producerId, title, category, price, unit, stock, isActive)
+- Compatible with `/api/me/products` API routes
+- Maintains AuthGuard producer role protection
+
+### Validation
+- ✅ TypeScript compilation passes
+- ✅ Zod schema validates all Product fields
+- ✅ Server actions properly revalidate paths
+- ✅ E2E tests created for CRUD workflow
+- ✅ Shared Prisma client pattern maintained
+- ✅ PR #390 created and armed for auto-merge
