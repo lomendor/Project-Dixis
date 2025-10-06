@@ -70,6 +70,55 @@ export default function OrderDetails() {
     });
   };
 
+  const copyOrderCode = async () => {
+    try {
+      await navigator.clipboard.writeText(order?.id.toString() || '');
+      alert('Ο κωδικός αντιγράφηκε.');
+    } catch {
+      // Fallback for older browsers
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = order?.id.toString() || '';
+        ta.style.position = 'fixed';
+        ta.style.left = '-10000px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert(ok ? 'Ο κωδικός αντιγράφηκε.' : 'Αποτυχία αντιγραφής.');
+      } catch {
+        alert('Αποτυχία αντιγραφής.');
+      }
+    }
+  };
+
+  const cancelOrder = async () => {
+    if (!confirm('Θέλετε να ακυρώσετε την παραγγελία;')) return;
+    try {
+      const r = await fetch(`/api/me/orders/${order?.id}`, { method: 'POST' });
+      if (r.ok) {
+        alert('Η παραγγελία ακυρώθηκε.');
+        loadOrder();
+      } else {
+        const j = await r.json();
+        alert(j?.error || 'Δεν είναι δυνατή η ακύρωση');
+      }
+    } catch {
+      alert('Σφάλμα σύνδεσης');
+    }
+  };
+
+  const getItemStatusColor = (status: string) => {
+    switch (status) {
+      case 'PLACED': return 'bg-gray-100 text-gray-700';
+      case 'ACCEPTED': return 'bg-yellow-100 text-yellow-700';
+      case 'FULFILLED': return 'bg-green-100 text-green-700';
+      case 'REJECTED': return 'bg-red-100 text-red-700';
+      case 'CANCELLED': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
   if (!isAuthenticated) {
     return null; // Will redirect in useEffect
   }
@@ -122,6 +171,28 @@ export default function OrderDetails() {
                   </span>
                 </div>
               </div>
+              <div className="flex gap-3 mt-4 flex-wrap">
+                <button
+                  onClick={copyOrderCode}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium"
+                >
+                  Αντιγραφή κωδικού
+                </button>
+                <Link
+                  href="/my/orders"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium"
+                >
+                  Οι παραγγελίες μου
+                </Link>
+                {order.status === 'PLACED' && (
+                  <button
+                    onClick={cancelOrder}
+                    className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium"
+                  >
+                    Ακύρωση παραγγελίας
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -151,9 +222,16 @@ export default function OrderDetails() {
 
                           {/* Product Details */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-medium text-gray-900">
-                              {item.product.name}
-                            </h3>
+                            <div className="flex items-start justify-between">
+                              <h3 className="text-sm font-medium text-gray-900">
+                                {item.product.name}
+                              </h3>
+                              {(item as any).status && (
+                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getItemStatusColor((item as any).status)}`}>
+                                  {(item as any).status}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-600">
                               By {item.product.producer.name}
                             </p>
