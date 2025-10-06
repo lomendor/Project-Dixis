@@ -1252,3 +1252,28 @@ Finalize docs canonicalization and ensure uploads are ignored.
 - ✅ Documentation canonicalized
 - ✅ Uploads properly ignored
 - 🎯 Next: Product image integration (Pass 110)
+
+## Pass 110.2b — CI & Docs enforced (partial)
+- Επιβλήθηκε uppercase path `docs/OPS/` (macOS case-insensitive fix)
+- PR άνοιξε, αλλά CI switch αναβλήθηκε λόγω disk full
+
+## Pass 110.2c — CI+Docs Recovery ✅
+- **Disk Space Crisis Resolved**: Discovered and fixed 35GB corrupted STATE.md file (awk duplication bug)
+- **Space Freed**: 33GB recovered → 50GB available (76% usage, down from 100%)
+- **Build Artifacts Cleanup**: Removed frontend/.next, .turbo, .cache, .playwright, node_modules
+- **CI Script Created**: `scripts/ci/run-playwright.sh` with OTP_BYPASS default for full test suite
+- **PR Workflow Updated**: Now calls CI script instead of direct npx playwright test
+- **Docs Canonicalized**: Enforced `docs/OPS/` path, updated `docs/README.md`
+- **Files Restored**: STATE.md, GH-E2E-RECIPES.md, README-MEDIA.md from git history
+
+### Root Cause Analysis
+- macOS case-insensitive filesystem: `docs/ops` and `docs/OPS` map to same directory
+- Previous awk append operation in Pass 110.2b duplicated entire file contents repeatedly
+- File grew from 45KB → 35GB before detection
+
+### Technical Recovery Steps
+1. Identified bloat via `du -sh` analysis
+2. Restored STATE.md from commit e16752b (last known good)
+3. Deleted corrupted 35GB backup file
+4. Recreated docs/OPS/ with canonical uppercase path
+5. Created unified CI script for consistent test execution

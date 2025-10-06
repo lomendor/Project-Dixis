@@ -4,64 +4,35 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT/frontend"
 
-# Package manager detection
-PM="npm"
-[ -f pnpm-lock.yaml ] && PM="pnpm"
-[ -f yarn.lock ] && PM="yarn"
+# Default test env
+export BASE_URL="${BASE_URL:-http://127.0.0.1:3000}"
+export OTP_BYPASS="${OTP_BYPASS:-000000}"
 
-echo "Using package manager: $PM"
+# Package manager
+PM="npm"; [ -f pnpm-lock.yaml ] && PM="pnpm"; [ -f yarn.lock ] && PM="yarn"
 
-# Install dependencies
-echo "Installing dependencies..."
-if [ "$PM" = "pnpm" ]; then 
-  pnpm i --frozen-lockfile
-elif [ "$PM" = "yarn" ]; then 
-  yarn install --frozen-lockfile
-else 
-  npm ci
+# Install (fresh if node_modules λείπει)
+if [ "$PM" = "pnpm" ]; then pnpm i --frozen-lockfile
+elif [ "$PM" = "yarn" ]; then yarn install --frozen-lockfile
+else npm ci
 fi
 
-# Install Playwright browsers with system dependencies
-echo "Installing Playwright browsers..."
+# Playwright deps & browsers
 npx playwright install --with-deps
 
-# Generate Prisma client
-echo "Generating Prisma client..."
+# Build & start app
 npx prisma generate || true
-
-# Build the application
-echo "Building application..."
-if [ "$PM" = "pnpm" ]; then 
-  pnpm build
-elif [ "$PM" = "yarn" ]; then 
-  yarn build
-else 
-  npm run build
-fi
-
-# Start the server in background
-echo "Starting server on :3000..."
-if [ "$PM" = "pnpm" ]; then 
-  pnpm start &
-elif [ "$PM" = "yarn" ]; then 
-  yarn start &
-else 
-  npm start &
+if [ "$PM" = "pnpm" ]; then pnpm build; pnpm start &
+elif [ "$PM" = "yarn" ]; then yarn build; yarn start &
+else npm run build; npm start &
 fi
 APP_PID=$!
 
-# Wait for server to be ready
-echo "Waiting for server to be ready..."
-npx wait-on http://127.0.0.1:3000 -t 60000
+# Wait until server is up
+npx wait-on "$BASE_URL"
 
-# Run Playwright tests
-echo "Running Playwright tests..."
-export BASE_URL="http://127.0.0.1:3000"
-npx playwright test --reporter=line
+# Run full suite under frontend/tests/**
+npx playwright test frontend/tests --reporter=line
 
-# Cleanup
-echo "Cleaning up..."
-kill $APP_PID 2>/dev/null || true
-wait $APP_PID 2>/dev/null || true
-
-echo "✓ Playwright tests completed"
+# Teardown
+kill $APP_PID || true
