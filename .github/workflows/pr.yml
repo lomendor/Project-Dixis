@@ -64,7 +64,10 @@ jobs:
 
       - name: Generate Prisma Client
         if: env.DOCS_ONLY != 'true'
-        run: npx prisma generate
+        env:
+          DIXIS_SMS_DISABLE: '1'
+          DIXIS_EMAIL_DISABLE: '1'
+        run: npm run prisma:gen
 
       - name: Run full QA suite
         if: env.DOCS_ONLY != 'true'
@@ -159,6 +162,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public
+      DIXIS_SMS_DISABLE: '1'
+      DIXIS_EMAIL_DISABLE: '1'
 
     steps:
       - name: Checkout
