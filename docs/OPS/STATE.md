@@ -1406,3 +1406,55 @@ try {
 - ✅ Error handling covers both COD and card payment flows
 - ✅ Greek-first UX maintained throughout
 - ✅ PR #389 created and armed for auto-merge
+
+## Pass 114.4 — Release Finalizer ✅
+
+**Date**: 2025-10-06
+**Status**: ✅ Complete
+**Version**: v0.2.0 released, 0.2.1-next in progress
+
+### Achievements
+
+1. **✅ Canonical CHANGELOG**:
+   - Moved CHANGELOG.md from frontend/ to repo root
+   - Removed frontend/CHANGELOG.md (single canonical file)
+   - Committed to release/v0.2.0 branch
+   - Synced v0.2.0 entry to main branch
+
+2. **✅ Tag Verification & Update**:
+   - Found v0.2.0 tag pointing to wrong commit (b1de6ea on release branch)
+   - Updated tag to point to origin/main merge commit (dc1f6f0)
+   - Force-pushed tag to remote
+
+3. **✅ GitHub Release Published**:
+   - Edited v0.2.0 release with canonical CHANGELOG.md
+   - Set draft=false to publish release
+   - Release URL: https://github.com/lomendor/Project-Dixis/releases/tag/v0.2.0
+
+4. **✅ PR #394 Handled**:
+   - Attempted rebase but found conflicts
+   - Closed PR #394 as superseded (main already has all changes via #392)
+   - Comment added explaining closure
+
+5. **✅ Version Bump to 0.2.1-next**:
+   - Bumped frontend/package.json: 1.0.0 → 0.2.1-next
+   - Created chore/bump-0.2.1-next branch
+   - Opened PR #395 with auto-merge armed
+   - Updates CHANGELOG.md with v0.2.0 entry on main
+
+### Technical Notes
+- **Tag Strategy**: Release tags should point to main's merge commit, not release branch
+- **CHANGELOG Location**: Root-level CHANGELOG is project-wide standard
+- **Release Branch**: Temporary branch for release prep, not permanent
+- **PR Conflicts**: When release branch conflicts with main, close if main has all changes
+
+### Files Changed
+- `CHANGELOG.md` (root): Created canonical version
+- `frontend/CHANGELOG.md`: Deleted (moved to root)
+- `frontend/package.json`: Bumped to 0.2.1-next
+- PR #395: chore/bump-0.2.1-next → main
+
+### Next Steps
+- ⏳ PR #395 CI checks (auto-merge armed)
+- 🎯 Begin Pass 115 (next feature work)
+- 📊 Monitor v0.2.0 release stability

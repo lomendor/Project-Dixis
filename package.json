@@ -1,6 +1,6 @@
 {
   "name": "project-dixis",
-  "version": "1.0.0",
+  "version": "0.2.1-next",
   "description": "Project-Dixis: Modern Laravel + Next.js Agricultural Marketplace",
   "engines": {
     "node": ">=20"
