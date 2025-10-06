@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 
 export async function POST(request: NextRequest) {
+  // Optional rate limiting: 10/min per IP (soft guard)
+  const { rateLimit, rlHeaders } = await import('@/lib/rl/db');
+  const ip = request.headers.get('x-forwarded-for') || 'local';
+  const rl = await rateLimit('checkout', String(ip), 10, 60, 1);
+  if (!rl.ok) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Πολλές προσπάθειες αγοράς. Δοκιμάστε σε λίγο.' }),
+      { status: 429, headers: { 'Content-Type': 'application/json', ...rlHeaders(rl) } }
+    );
+  }
+
   try {
     const body = await request.json();
     const { items, shipping } = body;

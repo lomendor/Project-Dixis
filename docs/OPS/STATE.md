@@ -1901,3 +1901,133 @@ DIXIS_CRON_KEY=<strong-random-key>
 - 🎯 Pass 119: Notification delivery metrics dashboard
 - 📊 Monitor worker performance: attempts distribution, backoff effectiveness
 - 📊 Track dedup hit rate: % of notifications deduplicated
+
+## Pass 118 — API Guardrails (Rate Limiting) ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #400 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Implement DB-backed rate limiting for critical API endpoints with 429 responses, Greek error messages, and standard RateLimit headers.
+
+### Achievements
+
+1. **✅ RateLimit Database Model**:
+   - Created `RateLimit` table with time-bucket strategy
+   - Fields: `id`, `name`, `key`, `bucket`, `count`, `createdAt`
+   - Unique constraint: `@@unique([name, key, bucket])`
+   - Index: `@@index([name, key, bucket])`
+   - Migration: `20251007023102_ratelimit_buckets`
+   - Bucket = floor(now / windowSec) for automatic time-based buckets
+
+2. **✅ Rate Limiting Helper Functions**:
+   - Created `lib/rl/db.ts` with `rateLimit()` function
+   - Parameters: `name`, `key`, `limit`, `windowSec`, `burst`
+   - Returns: `{ ok, limit, remaining, reset }` object
+   - DB upsert pattern: increments count on existing bucket, creates if new
+   - `rlHeaders()` helper: generates standard RateLimit headers
+
+3. **✅ Cron Endpoint Rate Limiting**:
+   - Guard: `/api/jobs/notifications/run`
+   - Limit: 1/min (burst 2), effectively 12/hour by cron key
+   - 429 response with Greek message: "Πολλές αιτήσεις στο cron. Δοκιμάστε αργότερα."
+   - Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+4. **✅ Dev Deliver Endpoint Rate Limiting**:
+   - Guard: `/api/dev/notifications/deliver`
+   - Limit: 3/5min per IP/session
+   - 429 response with Greek message: "Πολλές αιτήσεις στο dev deliver."
+   - IP extraction: `x-forwarded-for` header or 'local'
+
+5. **✅ Checkout Endpoint Rate Limiting (Soft Guard)**:
+   - Guard: `/api/checkout`
+   - Limit: 10/min per IP
+   - 429 response with Greek message: "Πολλές προσπάθειες αγοράς. Δοκιμάστε σε λίγο."
+   - Prevents checkout abuse while allowing legitimate rapid purchases
+
+6. **✅ E2E Test Coverage**:
+   - Created `tests/rl/rl.spec.ts` (3 comprehensive tests):
+     - Cron burst test: Validates 429 on rapid calls with header validation
+     - Dev deliver threshold test: Confirms rate limit triggers after 3 calls in 5min
+     - Checkout soft guard test: Verifies 10/min limit or validation errors
+   - All tests handle both dev (200) and production guard (404) responses
+
+7. **✅ Environment Documentation**:
+   - Updated `.env.example` with `DIXIS_RL_DISABLE` flag
+   - Default: DB-backed rate limiting (DIXIS_RL_DISABLE=0)
+   - Optional: Memory-only dev fallback (not implemented, DB works everywhere)
+
+### Technical Notes
+- **Time-Bucket Strategy**: Automatic bucket rotation based on window size
+- **DB Upsert Pattern**: Atomic increment prevents race conditions
+- **Greek-First Errors**: All 429 messages in Greek for user experience
+- **Standard Headers**: RFC-compliant RateLimit headers for client integration
+- **Burst Support**: Allows temporary spikes (e.g., burst=2 for 1/min = 2 allowed in same window)
+- **IP-Based Limiting**: Uses `x-forwarded-for` for distributed deployments
+
+### Files Changed (9 files, +165/-3)
+- `prisma/schema.prisma`: RateLimit model (+9 lines)
+- `prisma/migrations/20251007023102_ratelimit_buckets/migration.sql`: New (+16 lines)
+- `lib/rl/db.ts`: Rate limiting logic (new, +35 lines)
+- `app/api/jobs/notifications/run/route.ts`: Cron guard (+11 lines)
+- `app/api/dev/notifications/deliver/route.ts`: Dev deliver guard (+13 lines)
+- `app/api/checkout/route.ts`: Checkout soft guard (+11 lines)
+- `tests/rl/rl.spec.ts`: E2E tests (new, +67 lines)
+- `.env.example`: DIXIS_RL_DISABLE documentation (+3 lines)
+- `docs/OPS/STATE.md`: Pass 118 documentation (this entry)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 48 pages successfully
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with RateLimit model
+
+### Rate Limit Configuration
+
+**Cron Endpoint** (`/api/jobs/notifications/run`):
+```typescript
+rateLimit('cron-run', cronKey, 1, 60, 2)
+// 1 request per 60 seconds, burst of 2
+// = 2 requests allowed in same minute, then 1/min
+// = ~12 requests per hour max
+```
+
+**Dev Deliver** (`/api/dev/notifications/deliver`):
+```typescript
+rateLimit('dev-deliver', ip, 3, 300, 1)
+// 3 requests per 300 seconds (5 minutes)
+// No burst = exactly 3 in 5min window
+```
+
+**Checkout** (`/api/checkout`):
+```typescript
+rateLimit('checkout', ip, 10, 60, 1)
+// 10 requests per 60 seconds (1 minute)
+// Soft guard for abuse prevention
+```
+
+### 429 Response Example
+```json
+// Request
+POST /api/jobs/notifications/run
+X-CRON-KEY: valid-key
+
+// Response (after rate limit exceeded)
+HTTP/1.1 429 Too Many Requests
+X-RateLimit-Limit: 1
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1696723260
+Content-Type: application/json
+
+{
+  "error": "Πολλές αιτήσεις στο cron. Δοκιμάστε αργότερα."
+}
+```
+
+### Next Steps
+- ⏳ PR #400 CI checks (auto-merge armed)
+- 🎯 Pass 119: Notification delivery metrics dashboard
+- 🎯 Pass 120: Rate limit cleanup job (remove old buckets)
+- 📊 Monitor rate limit hit rates by endpoint
+- 📊 Consider adaptive rate limiting based on load

@@ -115,3 +115,16 @@ model Notification {
   @@index([status, nextAttemptAt])
   @@index([dedupId])
 }
+
+/// --- Pass 118: Rate limiting (DB buckets)
+model RateLimit {
+  id        String   @id @default(cuid())
+  name      String
+  key       String
+  bucket    Int
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([name, key, bucket])
+  @@index([name, key, bucket])
+}
