@@ -107,6 +107,13 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    // Emit event + notification stubs
+    await (await import('@/lib/events/bus')).emitEvent('order.created', {
+      orderId: result.orderId,
+      items,
+      shipping
+    });
+
     return NextResponse.json({
       success: true,
       order: result
