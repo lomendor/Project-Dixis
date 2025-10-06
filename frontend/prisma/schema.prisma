@@ -8,21 +8,109 @@ datasource db {
 }
 
 model Producer {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String    @id @default(cuid())
+  slug        String    @unique
   name        String
   region      String
   category    String
   description String?
   phone       String?
   email       String?
-  products    Int      @default(0)
-  rating      Float?   @default(0)
+  products    Int       @default(0)
+  rating      Float?    @default(0)
   imageUrl    String?
+  ownerPhone  String?   @unique
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Product     Product[]
+
+  @@index([region, category])
+  @@index([name])
+}
+
+model OtpRequest {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  @@index([phone])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  phone     String
+  role      String   @default("consumer") // consumer | producer | admin
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([phone])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  producerId  String
+  producer    Producer @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  title       String
+  slug        String   @unique
+  category    String
+  price       Decimal? @db.Decimal(10,2)
+  unit        String?  // π.χ. kg, lt, τεμ
+  stock       Int      @default(0)
+  imageUrl    String?
+  description String?  @db.Text
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([region, category])
-  @@index([name])
+  @@index([producerId])
+  @@index([title, category])
+}
+
+enum OrderStatus {
+  PLACED
+  CANCELLED
+}
+
+enum OrderItemStatus {
+  PLACED
+  ACCEPTED
+  FULFILLED
+  REJECTED
+  CANCELLED
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  buyerPhone     String
+  status         OrderStatus @default(PLACED)
+  currency       String      @default("EUR")
+  total          Decimal     @db.Decimal(12,2)
+  shippingName   String
+  shippingLine1  String
+  shippingCity   String
+  shippingPostal String
+  contactEmail   String?
+  createdAt      DateTime    @default(now())
+  items          OrderItem[]
+
+  @@index([buyerPhone, createdAt])
+}
+
+model OrderItem {
+  id         String          @id @default(cuid())
+  orderId    String
+  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  producerId String
+  titleSnap  String
+  unitSnap   String?         // kg/lt/τεμ (snapshot)
+  priceSnap  Decimal         @db.Decimal(10,2)
+  qty        Int
+  subtotal   Decimal         @db.Decimal(12,2)
+  status     OrderItemStatus @default(PLACED)
+  createdAt  DateTime        @default(now())
+
+  @@index([producerId])
 }
