@@ -51,6 +51,7 @@ export default function MyOrdersPage(){
   return (
     <main style={{padding:16}}>
       <h1>Οι Παραγγελίες μου</h1>
+      <div style={{margin:'8px 0'}}><a className="btn" href="/api/me/orders/export.csv" download>Εξαγωγή CSV</a></div>
       {orders.length === 0 ? (
         <p style={{color:'#6b7280'}}>Δεν έχετε πραγματοποιήσει παραγγελίες ακόμα.</p>
       ) : (
