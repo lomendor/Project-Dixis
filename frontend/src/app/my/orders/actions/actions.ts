@@ -37,7 +37,7 @@ export async function setOrderItemStatus(
     const updated = await prisma.orderItem.update({
       where: { id },
       data: { status: next.toLowerCase() },
-      select: { id: true, orderId: true, titleSnap: true }
+      select: { id: true, orderId: true, titleSnap: true, order: { select: { buyerPhone: true } } }
     });
 
     // Emit event + notification
@@ -46,7 +46,7 @@ export async function setOrderItemStatus(
       itemId: updated.id,
       titleSnap: updated.titleSnap,
       status: next,
-      buyerPhone: 'N/A' // TODO: Fetch from order
+      buyerPhone: updated.order?.buyerPhone || ''
     });
 
     revalidatePath('/my/orders');
