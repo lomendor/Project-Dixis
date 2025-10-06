@@ -49,3 +49,56 @@ OrderItem: id, orderId, productId, producerId, qty, price, status, createdAt, up
 - **Product**: (producerId, createdAt) for producer dashboard, (category) for filtering
 - **Order**: (buyerPhone, createdAt) for user orders, (status, createdAt) for admin
 - **OrderItem**: (orderId) for order details, (producerId, status) for producer fulfillment
+
+## Pass 113.2 — Public Catalog ✅
+
+**Date**: 2025-10-06
+**PR**: #391
+**Branch**: feat/pass1132-public-catalog
+
+### Completed
+- ✅ **/products**: Public product list page with search/filters/pagination
+- ✅ **/product/[id]**: Product detail page with add-to-cart functionality
+- ✅ **Active-Only Display**: Only shows `isActive: true` products
+- ✅ **Greek-First UI**: All user-facing text in Greek with accessibility labels
+- ✅ **Playwright E2E Tests**: Comprehensive catalog workflow coverage
+
+### Implementation Details
+
+**Public Product List** (frontend/src/app/products/page.tsx):
+- Server-side rendering with Prisma queries
+- Filters: `q` (title search), `category`, `region` (producer)
+- Pagination: 24 items per page with navigation controls
+- Security: WHERE clause filters `isActive: true` only
+- Responsive grid layout with Tailwind
+- "Εξαντλήθηκε" badge for out-of-stock items (stock=0)
+
+**Product Detail Page** (frontend/src/app/product/[id]/page.tsx):
+- Server-side rendering with producer data included
+- Full product info: title, price, unit, stock, description, image
+- Add to cart form with quantity input
+- Disabled state when stock=0 with "Εξαντλήθηκε" badge
+- Producer information display (name, region)
+- Redirects to /products if product not found or inactive
+
+**E2E Test Suite** (frontend/tests/catalog/catalog-basic.spec.ts):
+1. Catalog shows only active products (archived products hidden)
+2. Product detail page loads with add-to-cart button visible
+3. Products list accessible without authentication
+
+### Technical Implementation
+- **Security**: Server-side `isActive: true` filtering prevents archived product leaks
+- **Performance**: Prisma select optimization, pagination with skip/take
+- **Accessibility**: aria-labels, semantic HTML, htmlFor attributes
+- **Greek-First**: All placeholders, labels, buttons, messages in Greek
+- **Stock Management**: Quantity input capped at available stock, disabled when stock=0
+
+### Files Changed
+- frontend/src/app/products/page.tsx (created, 158 LOC)
+- frontend/src/app/product/[id]/page.tsx (created, 123 LOC)
+- frontend/tests/catalog/catalog-basic.spec.ts (created, 183 LOC)
+
+### Next Steps
+- Monitor PR #391 CI status
+- Continue with cart integration enhancements
+- Consider implementing category/region filter dropdowns (vs text inputs)
