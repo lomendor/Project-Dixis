@@ -1629,3 +1629,143 @@ Polish notifications system with security, privacy, and type safety improvements
 - 🎯 Pass 116: External notification providers (Twilio SMS, SendGrid Email)
 - 🎯 Pass 117: Background worker to process QUEUED → SENT
 - 📊 Consider notification archival strategy (SENT → archived after N days)
+
+## Pass 116 — External Notifiers (Twilio/SendGrid) ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #398 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Add Twilio SMS and SendGrid Email adapters with environment-based safety toggles for CI/dev environments.
+
+### Achievements
+
+1. **✅ Prisma Schema Extension**:
+   - Added `sentAt DateTime?` field to track successful delivery timestamp
+   - Added `error String?` field to capture delivery failures
+   - Migration: `20251007003019_notifications_sentAt_error`
+   - Enables delivery auditing and debugging
+
+2. **✅ Twilio SMS Provider**:
+   - Created `lib/notify/providers/twilio.ts`
+   - Environment variables: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER
+   - Disable toggle: `DIXIS_SMS_DISABLE=1` for CI/dev
+   - Uses Basic auth with Buffer encoding
+   - Returns `{ ok: true, simulated: true }` when disabled
+   - Real API call only if secrets present and not disabled
+
+3. **✅ SendGrid Email Provider**:
+   - Created `lib/notify/providers/sendgrid.ts`
+   - Environment variables: SENDGRID_API_KEY, SENDGRID_FROM
+   - Disable toggle: `DIXIS_EMAIL_DISABLE=1` for CI/dev
+   - Uses Bearer token authentication
+   - Returns `{ ok: true, simulated: true }` when disabled
+   - Real API call only if secrets present and not disabled
+
+4. **✅ Email Templates**:
+   - Created `lib/notify/emailTemplates.ts` with `renderEmail()`
+   - order_created: "Η παραγγελία #ID καταχωρήθηκε" with HTML body
+   - order_status_changed: "Ενημέρωση παραγγελίας #ID" with HTML body
+   - Returns `{ subject, html }` objects for SendGrid
+
+5. **✅ Delivery Helpers**:
+   - Created `lib/notify/deliver.ts` with two functions:
+   - `deliverOne(id)`: Delivers single notification by ID
+     - Fetches from DB, validates status === 'QUEUED'
+     - Dispatches to SMS/EMAIL provider
+     - Updates status to 'SENT' or 'FAILED'
+     - Records sentAt timestamp and error message
+     - Returns `{ ok, simulated }` result
+   - `deliverQueued(limit=10)`: Processes multiple QUEUED notifications
+     - Fetches oldest QUEUED notifications
+     - Calls deliverOne() for each
+     - Returns array of results
+
+6. **✅ Dev-Only API Endpoint**:
+   - Created `POST /api/dev/notifications/deliver`
+   - Protected by production guard (NODE_ENV + DIXIS_DEV check)
+   - Calls `deliverQueued(20)` to process batch
+   - Returns `{ delivered: [...results] }` JSON
+   - Enables manual delivery testing in dev environment
+
+7. **✅ Environment Documentation**:
+   - Updated `.env.example` with comprehensive provider configuration
+   - Documented all Twilio and SendGrid variables
+   - Added safety toggles: DIXIS_SMS_DISABLE, DIXIS_EMAIL_DISABLE
+   - Included DIXIS_DEV flag for production dev-only routes
+
+8. **✅ Package Scripts**:
+   - Added `prisma:gen`: Explicit Prisma generate with --schema path
+   - Added `notify:deliver`: curl helper to trigger dev API endpoint
+   - Ensures consistent Prisma client generation across environments
+
+9. **✅ CI Guards**:
+   - Updated `.github/workflows/pr.yml`:
+   - Added `DIXIS_SMS_DISABLE=1` to qa job Prisma generation
+   - Added `DIXIS_EMAIL_DISABLE=1` to qa job Prisma generation
+   - Added both disable flags to smoke-tests job environment
+   - Uses `npm run prisma:gen` script for consistency
+   - Prevents external API calls during CI runs
+
+10. **✅ E2E Smoke Tests**:
+    - Created `tests/notifications/deliver-stub.spec.ts`
+    - Test 1: API simulates delivery when DIXIS_SMS_DISABLE=1
+      - Validates 200 response with { delivered } array
+      - Confirms all items have simulated: true
+    - Test 2: Dev page shows notifications outbox
+      - Verifies /dev/notifications accessibility
+      - Confirms table structure visible
+
+### Technical Notes
+- **Safety First**: All external calls disabled by default in CI/dev
+- **Real Delivery**: Only happens if secrets present AND not disabled
+- **Atomic Updates**: sentAt and error fields updated in same transaction
+- **Error Handling**: Try/catch around provider calls, status → FAILED on exception
+- **Graceful Simulation**: Returns success with simulated flag when disabled
+- **Production Ready**: Drop-in configuration change enables real delivery
+
+### Files Changed (11 files, +175/-6)
+- `prisma/schema.prisma`: sentAt + error fields (+2 lines)
+- `prisma/migrations/20251007003019_notifications_sentAt_error/migration.sql`: New (+2 lines)
+- `lib/notify/providers/twilio.ts`: Twilio adapter (new, +17 lines)
+- `lib/notify/providers/sendgrid.ts`: SendGrid adapter (new, +16 lines)
+- `lib/notify/emailTemplates.ts`: Email templates (new, +14 lines)
+- `lib/notify/deliver.ts`: Delivery helpers (new, +38 lines)
+- `app/api/dev/notifications/deliver/route.ts`: Dev API (new, +11 lines)
+- `.env.example`: Provider configuration (+15 lines)
+- `package.json`: prisma:gen + notify:deliver scripts (+2 lines)
+- `.github/workflows/pr.yml`: CI guards (+4 lines)
+- `tests/notifications/deliver-stub.spec.ts`: E2E tests (new, +34 lines)
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 47 pages successfully
+- ✅ New route: `/api/dev/notifications/deliver` (212 B)
+- ✅ Migration created and ready for deployment
+- ✅ Prisma client regenerated with new fields
+
+### Environment Variables Summary
+```bash
+# Twilio SMS
+TWILIO_ACCOUNT_SID=""
+TWILIO_AUTH_TOKEN=""
+TWILIO_FROM_NUMBER=""
+
+# SendGrid Email
+SENDGRID_API_KEY=""
+SENDGRID_FROM=""
+
+# Safety Toggles (CI/Dev)
+DIXIS_SMS_DISABLE="1"
+DIXIS_EMAIL_DISABLE="1"
+
+# Dev-only Routes (Production)
+DIXIS_DEV="0"
+```
+
+### Next Steps
+- ⏳ PR #398 CI checks (auto-merge armed)
+- 🎯 Pass 117: Background worker to process QUEUED → SENT automatically
+- 🎯 Pass 118: Rate limiting for delivery API endpoints
+- 📊 Monitor delivery success/failure rates via sentAt/error fields
