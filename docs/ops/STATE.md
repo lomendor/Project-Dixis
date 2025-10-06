@@ -1,8 +1,8 @@
-# OS / STATE — Phase 2 Kickoff
+# OS / STATE — Pass 110 Complete
 
-**Date**: 2025-10-03
-**Status**: Phase 2 Active
-**Branch**: main (Phase 1 merged), feat/phase2-ci-cleanup (active)
+**Date**: 2025-10-06
+**Status**: Media Upload UX Complete
+**Branch**: main, feat/pass110-image-ux (PR #377 active)
 
 ## Phase 1 Complete ✅
 
@@ -117,10 +117,33 @@
 
 **Pass 63**: Finalize CI Discipline & E2E Full Analysis
 - **Status**: ✅ Complete (2025-10-04T08:21:41Z)
-- **PR #317**: ✅ Merged (strict commit discipline restored)
-- **PR #318**: ✅ Merged (docs updates for Pass 61 & 62)
-- **E2E Full Suite**: Previous run cancelled (18241439278), new run triggered (18241903973)
-  - URL: https://github.com/lomendor/Project-Dixis/actions/runs/18241903973
+
+## Pass 109-110 Media Upload Series ✅
+
+**Pass 109**: Secure Uploads (PR #374)
+- **Status**: ✅ Merged (2025-10-06)
+- **Changes**: POST /api/me/uploads endpoint, storage drivers (fs/S3), 5MB limit, optional sharp processing
+
+**Pass 109b**: Media Canonicalization (PR #375)
+- **Status**: ✅ Merged (2025-10-06)
+- **Changes**: Unified `lib/media/storage.ts`, SHA-256 hash filenames, yyyymm folders
+
+**Pass 109b.2**: Docs Finalization (PR #376)
+- **Status**: ✅ Merged (2025-10-06)
+- **Changes**: Fixed STATE.md corruption (34GB → 41KB), verified .gitignore
+
+**Pass 110**: Product Image UX (PR #377)
+- **Status**: ⏳ Auto-merge armed (2025-10-06)
+- **Changes**:
+  - ✅ `UploadImage.client.tsx` — Drag-drop upload component (5MB max, Greek UI)
+  - ✅ `/producer/products/create` — Product creation with image upload
+  - ✅ `/producer/products/[id]/edit` — Product editing with image upload
+  - ✅ `/producer/products` — Thumbnail column with placeholder fallback
+  - ✅ API: POST/PUT/GET endpoints for products with image_url
+  - ✅ E2E Tests: 5 scenarios covering upload workflow
+  - ✅ Build: ✅ Passed (45 pages, TypeScript strict mode)
+- **LOC**: +994/-37 (7 files)
+- **Tests**: 5 Playwright scenarios (upload, placeholder, edit, remove, validation)
 - **Quality Gates**: All checks passing with unified gate
 - **Coverage**: 112/117 tests passing (95.7%), 5 skips remaining
 
