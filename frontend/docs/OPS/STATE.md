@@ -102,3 +102,105 @@ OrderItem: id, orderId, productId, producerId, qty, price, status, createdAt, up
 - Monitor PR #391 CI status
 - Continue with cart integration enhancements
 - Consider implementing category/region filter dropdowns (vs text inputs)
+
+## Pass 114 — Orders MVP ✅
+
+**Date**: 2025-10-06
+**PR**: #392
+**Branch**: feat/pass114-orders-mvp
+
+### Completed
+- ✅ **Checkout Enhancement**: /api/checkout now creates Order + OrderItems with product snapshots
+- ✅ **Producer Orders Inbox**: /my/orders with status-based tabs and actions
+- ✅ **Status Flow**: PENDING → ACCEPTED → FULFILLED with server actions
+- ✅ **E2E Tests**: Complete order workflow + oversell protection validation
+
+### Schema Changes
+
+**OrderItem Model** (frontend/prisma/schema.prisma):
+- Added `titleSnap` (String?) - Product title snapshot at order time
+- Added `priceSnap` (Float?) - Product price snapshot at order time
+- Migration: `20251006000000_add_orderitem_snapshots`
+
+**Purpose**: Historical tracking of product details at time of purchase, independent of current product data.
+
+### Checkout API Enhancement
+
+**Order Creation Flow** (frontend/src/app/api/checkout/route.ts):
+1. Validate stock for all items (throw 'OVERSALE' if insufficient)
+2. Fetch product data including `title` for snapshots
+3. Create Order record with buyer/shipping details
+4. Create OrderItems with:
+   - `titleSnap`: Product title at order time
+   - `priceSnap`: Product price at order time
+   - `producerId`: For producer order filtering
+   - `status`: 'pending' (lowercase)
+5. Atomic stock decrement with race condition protection
+6. Returns `orderId` in response
+
+**Oversell Protection**: Maintained 409 Conflict response for insufficient stock.
+
+### Producer Orders Inbox
+
+**Page** (frontend/src/app/my/orders/page.tsx):
+- **Tabs**: PENDING, ACCEPTED, REJECTED, FULFILLED (Greek labels)
+- **Filtering**: Server-side query by `status` field (lowercase)
+- **Display**: Shows titleSnap, priceSnap, qty, orderId, createdAt
+- **Actions**:
+  - PENDING tab: "Αποδοχή" (Accept), "Απόρριψη" (Reject)
+  - ACCEPTED tab: "Ολοκλήρωση" (Fulfill)
+  - REJECTED/FULFILLED: No actions (terminal states)
+
+**Server Actions** (frontend/src/app/my/orders/actions/actions.ts):
+- `setOrderItemStatus(id, next)`: Handles status transitions
+- **Validation Rules**:
+  ```
+  PENDING → [ACCEPTED, REJECTED]
+  ACCEPTED → [FULFILLED, REJECTED]
+  REJECTED → [] (terminal)
+  FULFILLED → [] (terminal)
+  ```
+- Blocks invalid transitions with Greek error message
+- Revalidates `/my/orders` path after updates
+
+### E2E Test Coverage
+
+**Test Suite** (frontend/tests/orders/orders-mvp.spec.ts):
+
+**Test 1 - Full Order Flow**:
+1. Create producer + product (stock=3)
+2. Checkout 2 items via API
+3. Navigate to /my/orders?tab=PENDING
+4. Verify order visible, click "Αποδοχή"
+5. Navigate to /my/orders?tab=ACCEPTED
+6. Verify order visible, click "Ολοκλήρωση"
+7. Navigate to /my/orders?tab=FULFILLED
+8. Verify order visible (complete flow)
+
+**Test 2 - Oversell Protection**:
+1. Create producer + product (stock=1)
+2. Attempt checkout of 2 items
+3. Verify 409 status code
+4. Verify error message contains "Ανεπαρκές απόθεμα"
+
+### Technical Implementation
+
+**Status Values**: Lowercase in database (`pending`, `accepted`, `rejected`, `fulfilled`)
+**UI Display**: Uppercase for comparisons, Greek labels via EL map
+**Database Queries**: Direct Prisma with server components (no API overhead)
+**Form Actions**: Server actions with inline `'use server'` directive
+**Path Revalidation**: Automatic cache invalidation after mutations
+
+### Files Changed
+- frontend/prisma/schema.prisma (modified, +2 fields)
+- frontend/prisma/migrations/20251006000000_add_orderitem_snapshots/migration.sql (created)
+- frontend/src/app/api/checkout/route.ts (modified, +snapshots)
+- frontend/src/app/my/orders/page.tsx (created, 138 LOC)
+- frontend/src/app/my/orders/actions/actions.ts (created, 47 LOC)
+- frontend/tests/orders/orders-mvp.spec.ts (created, 237 LOC)
+
+### Next Steps
+- Monitor PR #392 CI status
+- Consider adding order-level status aggregation (all items fulfilled → order fulfilled)
+- Implement buyer-side order history (/account/orders)
+- Add email notifications for status changes
