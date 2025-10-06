@@ -21,6 +21,14 @@ fi
 # Playwright deps & browsers
 npx playwright install --with-deps
 
+# Database setup (if DATABASE_URL exists)
+if [ -n "${DATABASE_URL:-}" ]; then
+  echo "▶ Running Prisma migrations..."
+  npx prisma migrate deploy
+  echo "▶ Seeding database..."
+  npm run -s db:seed || true
+fi
+
 # Build & start app
 npx prisma generate || true
 if [ "$PM" = "pnpm" ]; then pnpm build; pnpm start &
