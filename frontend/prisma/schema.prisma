@@ -73,6 +73,14 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum OrderItemStatus {
+  PLACED
+  ACCEPTED
+  FULFILLED
+  REJECTED
+  CANCELLED
+}
+
 model Order {
   id             String      @id @default(cuid())
   buyerPhone     String
@@ -91,17 +99,18 @@ model Order {
 }
 
 model OrderItem {
-  id         String   @id @default(cuid())
+  id         String          @id @default(cuid())
   orderId    String
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId  String
   producerId String
   titleSnap  String
-  unitSnap   String?  // kg/lt/τεμ (snapshot)
-  priceSnap  Decimal  @db.Decimal(10,2)
+  unitSnap   String?         // kg/lt/τεμ (snapshot)
+  priceSnap  Decimal         @db.Decimal(10,2)
   qty        Int
-  subtotal   Decimal  @db.Decimal(12,2)
-  createdAt  DateTime @default(now())
+  subtotal   Decimal         @db.Decimal(12,2)
+  status     OrderItemStatus @default(PLACED)
+  createdAt  DateTime        @default(now())
 
   @@index([producerId])
 }
