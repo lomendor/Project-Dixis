@@ -884,3 +884,40 @@ export default function Page() { redirect('/my/orders'); }
   - `.env.example` (SMTP_DEV_MAILBOX already documented)
 - No schema changes, no new dependencies, dev-friendly testing
 
+## Pass 145 — Status Emails (PAID/PACKING/SHIPPED/DELIVERED/CANCELLED) + Admin New Order Notice
+- **Order Status Email Template** (`frontend/src/lib/mail/templates/orderStatus.ts`):
+  - Greek-first subject: "Dixis — Ενημέρωση Παραγγελίας #<orderId>: <Status>"
+  - Status labels mapped: PAID→'Πληρωμή', PACKING→'Συσκευασία', SHIPPED→'Απεστάλη', DELIVERED→'Παραδόθηκε', CANCELLED→'Ακυρώθηκε'
+  - Simple HTML email with new status message
+  - Exports: subject(orderId, status), html({ id, status })
+- **Admin New Order Notice Template** (`frontend/src/lib/mail/templates/newOrderAdmin.ts`):
+  - Greek-first subject: "Dixis — Νέα Παραγγελία #<orderId>"
+  - Plain text format with order summary
+  - Includes: order ID, buyer name, buyer phone, total (formatted €)
+  - Exports: subject(orderId), text({ id, buyerName, buyerPhone, total })
+- **Checkout Integration** (`frontend/src/app/api/checkout/route.ts`):
+  - Added admin notification after successful order creation
+  - Sends email to DEV_MAIL_TO (if configured)
+  - Uses newOrderAdmin template with order summary
+  - Graceful error handling (logs warning, doesn't fail checkout)
+  - Executed after order creation, before response
+- **Status Route Update** (`frontend/src/app/api/admin/orders/[id]/status/route.ts`):
+  - Added customer status email on status change
+  - Sends email only if customer has email in order
+  - Uses orderStatus template with new status
+  - Graceful error handling (logs warning, doesn't fail status update)
+  - Replaced old renderOrderEmail with direct template usage
+- **E2E Tests** (`frontend/tests/checkout/status-email.spec.ts`):
+  - Test 1: Admin notice → verify email to DEV_MAIL_TO with order ID and buyer name
+  - Test 2: Status change → verify customer email with correct subject (status label + order ID)
+  - Both tests use producer auth, create test products, and check dev mailbox
+  - Requires: OTP_BYPASS, SMTP_DEV_MAILBOX=1, DEV_MAIL_TO (admin test)
+- **Files**:
+  - `frontend/src/lib/mail/templates/orderStatus.ts` (customer status email)
+  - `frontend/src/lib/mail/templates/newOrderAdmin.ts` (admin new order notice)
+  - `frontend/src/app/api/checkout/route.ts` (added admin notice)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (added customer status email)
+  - `frontend/tests/checkout/status-email.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 145 docs)
+- No schema changes, no new dependencies, graceful degradation on email failures
+

@@ -9,6 +9,7 @@ import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
 import { decrementStockAtomic, StockError } from '@/lib/inventory/stock';
 import { z } from 'zod';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
+import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 
 // Comprehensive checkout validation schema
 const CheckoutSchema = z.object({
@@ -190,6 +191,25 @@ export async function POST(request: NextRequest) {
       items,
       shipping: validatedShipping
     });
+
+    // EMAIL: admin new order notice (optional via DEV_MAIL_TO)
+    try {
+      const to = process.env.DEV_MAIL_TO || '';
+      if (to) {
+        await sendMailSafe({
+          to,
+          subject: NewOrderAdmin.subject(result.orderId),
+          text: NewOrderAdmin.text({
+            id: result.orderId,
+            buyerName: validatedShipping.name,
+            buyerPhone: validatedShipping.phone,
+            total: Number(result.total || 0)
+          })
+        });
+      }
+    } catch (e) {
+      console.warn('[mail] admin new-order failed:', (e as Error).message);
+    }
 
     return NextResponse.json({
       success: true,

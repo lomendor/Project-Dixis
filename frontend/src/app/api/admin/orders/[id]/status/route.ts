@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
-import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
+import { sendMailSafe } from '@/lib/mail/mailer';
 import { restockFromOrder } from '@/lib/inventory/stock';
+import * as OrderStatus from '@/lib/mail/templates/orderStatus';
 
 // Admin check helper
 async function checkAdmin(req: Request): Promise<boolean> {
@@ -80,31 +81,25 @@ export async function POST(
       console.warn('[order] restock failed:', e?.message);
     }
 
-    // EMAIL: status update notification (safe fallback)
+    // EMAIL: customer status update (optional - only if customer has email)
     try {
       const fullOrder = await prisma.order.findUnique({
-        where: { id: updated.id },
-        include: { items: true }
+        where: { id: updated.id }
       });
       if (fullOrder) {
-        const { subject, html, text } = await renderOrderEmail('status', {
-          id: fullOrder.id,
-          buyerName: fullOrder.buyerName || undefined,
-          buyerEmail: (fullOrder as any).customerEmail || undefined,
-          status: String(fullOrder.status || 'PENDING'),
-          total: Number(fullOrder.total || 0),
-          items: fullOrder.items.map(i => ({
-            titleSnap: i.titleSnap || undefined,
-            qty: i.qty,
-            price: i.price
-          }))
-        });
-        const toEmail = (fullOrder as any).customerEmail || process.env.DEV_MAIL_TO || '';
-        if (toEmail) {
-          await sendMailSafe({ to: toEmail, subject, html, text });
+        const customerEmail = (fullOrder as any).customerEmail?.trim?.();
+        if (customerEmail) {
+          await sendMailSafe({
+            to: customerEmail,
+            subject: OrderStatus.subject(fullOrder.id, String(fullOrder.status || 'PENDING')),
+            html: OrderStatus.html({
+              id: fullOrder.id,
+              status: String(fullOrder.status || 'PENDING')
+            })
+          });
+          console.log(`[admin] Status ${from}→${to}, email sent to ${customerEmail}`);
         }
       }
-      console.log(`[admin] Status changed ${from}→${to}, email sent`);
     } catch (e) {
       console.warn('[admin status email] skipped:', (e as Error).message);
     }
