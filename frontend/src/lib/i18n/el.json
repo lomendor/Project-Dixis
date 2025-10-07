@@ -1,0 +1,23 @@
+{
+  "cart.title": "Καλάθι",
+  "cart.empty": "Το καλάθι σας είναι άδειο.",
+  "cart.update": "Ενημέρωση",
+  "cart.remove": "Αφαίρεση",
+  "cart.continue": "Συνέχεια στο ταμείο",
+  "checkout.title": "Στοιχεία αποστολής",
+  "checkout.submit": "Ολοκλήρωση παραγγελίας",
+  "checkout.error.generic": "Κάτι πήγε στραβά. Δοκιμάστε ξανά.",
+  "checkout.error.oversell": "Ανεπαρκές απόθεμα. Παρακαλώ αλλάξτε ποσότητες.",
+  "checkout.error.empty": "Το καλάθι είναι άδειο.",
+  "form.name": "Ονοματεπώνυμο",
+  "form.address": "Διεύθυνση",
+  "form.city": "Πόλη",
+  "form.postal": "Τ.Κ.",
+  "form.phone": "Τηλέφωνο",
+  "order.success.title": "Ευχαριστούμε!",
+  "order.success.body": "Η παραγγελία σας καταχωρήθηκε με αριθμό #{id}.",
+  "errors.phone": "Παρακαλώ δώστε έγκυρο ελληνικό τηλέφωνο.",
+  "errors.postal": "Παρακαλώ δώστε έγκυρο Τ.Κ. (5 ψηφία).",
+  "errors.forbidden": "Απαγορεύεται",
+  "errors.notfound": "Δεν βρέθηκε"
+}
