@@ -1,178 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/client';
+import { requireProducer } from '@/lib/auth/requireProducer';
 
 /**
- * GET /api/producer/products
- * Returns products for the authenticated producer (only if approved)
+ * GET /api/me/products
+ * Returns products for the authenticated producer (scoped to producer's phone/session)
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Mock authentication
-    const userToken = request.headers.get('authorization');
-    const userId = getCurrentUserId(userToken);
+    const producer = await requireProducer();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is an approved producer
-    const producerProfile = await getProducerProfile(userId);
-
-    if (!producerProfile || producerProfile.status !== 'active') {
-      return NextResponse.json(
-        { error: 'Producer not approved or profile not found' },
-        { status: 403 }
-      );
-    }
-
-    // Get products for this producer
-    const products = await getProducerProducts(producerProfile.id);
+    // Fetch products scoped to this producer only
+    const products = await prisma.product.findMany({
+      where: {
+        producerId: producer.id
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        price: true,
+        unit: true,
+        stock: true,
+        description: true,
+        imageUrl: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
 
     return NextResponse.json({
       products,
       total: products.length,
-      producer: producerProfile,
+      producer: {
+        id: producer.id,
+        name: producer.name
+      }
     });
 
-  } catch (error) {
+  } catch (error: any) {
+    // requireProducer throws Response objects for 401/403
+    if (error instanceof Response) {
+      return error;
+    }
+
     console.error('Producer products error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Σφάλμα κατά την ανάκτηση προϊόντων' },
       { status: 500 }
     );
   }
 }
 
-// Mock helper functions
-function getCurrentUserId(token: string | null): number | null {
-  if (!token) return null;
-  return 1; // Mock user ID for testing
-}
-
-async function getProducerProfile(userId: number) {
-  // Mock producer profile lookup
-  const mockProfiles: Record<number, any> = {
-    1: {
-      id: 1,
-      user_id: userId,
-      name: 'Δημήτρης Παπαδόπουλος',
-      business_name: 'Παπαδόπουλος Αγρόκτημα',
-      status: 'active', // Only active producers can access products
-      created_at: '2025-09-15T20:00:00.000Z',
-      updated_at: '2025-09-15T20:00:00.000Z',
-    },
-    2: {
-      id: 2,
-      user_id: userId,
-      name: 'Μαρία Γιαννοπούλου',
-      status: 'pending', // Pending producer - no access to products
-      created_at: '2025-09-14T15:30:00.000Z',
-      updated_at: '2025-09-15T10:15:00.000Z',
-    },
-  };
-
-  return mockProfiles[userId] || null;
-}
-
-// In-memory storage for created products
-let mockProductsDb: any[] = [
-  {
-    id: 1,
-    producer_id: 1,
-    name: 'biologikes-tomates',
-    title: 'Βιολογικές Ντομάτες Κρήτης',
-    price: 3.50,
-    currency: 'EUR',
-    stock: 25,
-    image_url: null,
-    weight_grams: 1000,
-    length_cm: 15,
-    width_cm: 10,
-    height_cm: 8,
-    is_active: true,
-    status: 'available' as const,
-    created_at: '2025-09-15T20:00:00.000Z',
-    updated_at: '2025-09-15T20:00:00.000Z',
-  },
-  {
-    id: 2,
-    producer_id: 1,
-    name: 'elaiólado-extra-partheno',
-    title: 'Εξαιρετικό Παρθένο Ελαιόλαδο',
-    price: 12.80,
-    currency: 'EUR',
-    stock: 15,
-    image_url: null,
-    weight_grams: 500,
-    length_cm: 25,
-    width_cm: 7,
-    height_cm: 7,
-    is_active: true,
-    status: 'available' as const,
-    created_at: '2025-09-15T20:00:00.000Z',
-    updated_at: '2025-09-15T20:00:00.000Z',
-  },
-];
-
-async function getProducerProducts(producerId: number) {
-  // Mock products for the producer
-  // In real app: SELECT from products WHERE producer_id = ?
-  return mockProductsDb.filter(p => p.producer_id === producerId);
-}
-
 /**
- * POST /api/producer/products
+ * POST /api/me/products
  * Create a new product for the authenticated producer
  */
 export async function POST(request: NextRequest) {
   try {
-    const userToken = request.headers.get('authorization');
-    const userId = getCurrentUserId(userToken);
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const producerProfile = await getProducerProfile(userId);
-
-    if (!producerProfile || producerProfile.status !== 'active') {
-      return NextResponse.json(
-        { error: 'Producer not approved or profile not found' },
-        { status: 403 }
-      );
-    }
-
+    const producer = await requireProducer();
     const body = await request.json();
-    const { title, name, price, stock, image_url, is_active, currency } = body;
 
-    if (!title || !name || price === undefined || stock === undefined) {
+    const { title, category, price, unit, stock, description, imageUrl, isActive } = body;
+
+    // Validate required fields
+    if (!title || !category || price === undefined || !unit || stock === undefined) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Υποχρεωτικά πεδία λείπουν' },
         { status: 400 }
       );
     }
 
-    const newProduct = {
-      id: mockProductsDb.length + 1,
-      producer_id: producerProfile.id,
-      name,
-      title,
-      price: parseFloat(price),
-      currency: currency || 'EUR',
-      stock: parseInt(stock),
-      image_url: image_url || null,
-      is_active: is_active ?? true,
-      status: 'available' as const,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    // Create product scoped to this producer (ignore any producerId in body)
+    const product = await prisma.product.create({
+      data: {
+        producerId: producer.id, // Force producer scoping
+        title: String(title).trim(),
+        category: String(category).trim(),
+        price: parseFloat(price),
+        unit: String(unit).trim(),
+        stock: parseInt(stock, 10),
+        description: description ? String(description).trim() : null,
+        imageUrl: imageUrl || null,
+        isActive: isActive !== undefined ? Boolean(isActive) : true
+      }
+    });
 
-    mockProductsDb.push(newProduct);
+    return NextResponse.json({ success: true, product }, { status: 201 });
 
-    return NextResponse.json(newProduct, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof Response) {
+      return error;
+    }
+
     console.error('Create product error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Σφάλμα κατά τη δημιουργία προϊόντος' },
       { status: 500 }
     );
   }

@@ -1,137 +1,161 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Import shared mock storage from parent route
-// In a real app, this would be a database query
-const getMockProductsDb = () => {
-  // This is a workaround to share state - in real app use DB
-  return (global as any).__mockProductsDb || [
-    {
-      id: 1,
-      producer_id: 1,
-      name: 'biologikes-tomates',
-      title: 'Βιολογικές Ντομάτες Κρήτης',
-      price: 3.50,
-      currency: 'EUR',
-      stock: 25,
-      image_url: null,
-      is_active: true,
-      created_at: '2025-09-15T20:00:00.000Z',
-      updated_at: '2025-09-15T20:00:00.000Z',
-    },
-    {
-      id: 2,
-      producer_id: 1,
-      name: 'elaiólado-extra-partheno',
-      title: 'Εξαιρετικό Παρθένο Ελαιόλαδο',
-      price: 12.80,
-      currency: 'EUR',
-      stock: 15,
-      image_url: null,
-      is_active: true,
-      created_at: '2025-09-15T20:00:00.000Z',
-      updated_at: '2025-09-15T20:00:00.000Z',
-    },
-  ];
-};
+import { prisma } from '@/lib/db/client';
+import { requireProducer } from '@/lib/auth/requireProducer';
 
 /**
- * GET /api/producer/products/[id]
- * Get a single product by ID
+ * GET /api/me/products/[id]
+ * Get a single product by ID (scoped to producer)
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const userToken = request.headers.get('authorization');
-    const userId = getCurrentUserId(userToken);
+    const producer = await requireProducer();
+    const productId = params.id;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const productId = parseInt(params.id);
-    const products = getMockProductsDb();
-    const product = products.find((p: any) => p.id === productId);
+    // Fetch product scoped to this producer
+    const product = await prisma.product.findFirst({
+      where: {
+        id: productId,
+        producerId: producer.id // Scoping: only producer's products
+      },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        price: true,
+        unit: true,
+        stock: true,
+        description: true,
+        imageUrl: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
 
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Δεν βρέθηκε' },
+        { status: 404 }
+      );
     }
 
-    // Check if product belongs to this producer's producer_id
-    if (product.producer_id !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    return NextResponse.json({ product });
+
+  } catch (error: any) {
+    if (error instanceof Response) {
+      return error;
     }
 
-    return NextResponse.json(product);
-  } catch (error) {
     console.error('Get product error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Σφάλμα κατά την ανάκτηση προϊόντος' },
       { status: 500 }
     );
   }
 }
 
 /**
- * PUT /api/producer/products/[id]
- * Update a product by ID
+ * PUT /api/me/products/[id]
+ * Update a product by ID (scoped to producer)
  */
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const userToken = request.headers.get('authorization');
-    const userId = getCurrentUserId(userToken);
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const productId = parseInt(params.id);
-    const products = getMockProductsDb();
-    const productIndex = products.findIndex((p: any) => p.id === productId);
-
-    if (productIndex === -1) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    // Check if product belongs to this producer
-    if (products[productIndex].producer_id !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
+    const producer = await requireProducer();
+    const productId = params.id;
     const body = await request.json();
-    const { title, name, price, stock, image_url, is_active, currency } = body;
 
-    // Update product
-    const updatedProduct = {
-      ...products[productIndex],
-      title: title ?? products[productIndex].title,
-      name: name ?? products[productIndex].name,
-      price: price !== undefined ? parseFloat(price) : products[productIndex].price,
-      stock: stock !== undefined ? parseInt(stock) : products[productIndex].stock,
-      image_url: image_url !== undefined ? image_url : products[productIndex].image_url,
-      is_active: is_active ?? products[productIndex].is_active,
-      currency: currency ?? products[productIndex].currency,
-      updated_at: new Date().toISOString(),
-    };
+    const { title, category, price, unit, stock, description, imageUrl, isActive } = body;
 
-    products[productIndex] = updatedProduct;
+    // Update product scoped to this producer (prevents updating other producers' products)
+    const product = await prisma.product.updateMany({
+      where: {
+        id: productId,
+        producerId: producer.id // Critical: scoping check
+      },
+      data: {
+        ...(title !== undefined && { title: String(title).trim() }),
+        ...(category !== undefined && { category: String(category).trim() }),
+        ...(price !== undefined && { price: parseFloat(price) }),
+        ...(unit !== undefined && { unit: String(unit).trim() }),
+        ...(stock !== undefined && { stock: parseInt(stock, 10) }),
+        ...(description !== undefined && { description: description ? String(description).trim() : null }),
+        ...(imageUrl !== undefined && { imageUrl: imageUrl || null }),
+        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+        updatedAt: new Date()
+      }
+    });
 
-    return NextResponse.json(updatedProduct);
-  } catch (error) {
+    if (product.count === 0) {
+      return NextResponse.json(
+        { error: 'Δεν βρέθηκε' },
+        { status: 404 }
+      );
+    }
+
+    // Fetch updated product
+    const updated = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+
+    return NextResponse.json({ success: true, product: updated });
+
+  } catch (error: any) {
+    if (error instanceof Response) {
+      return error;
+    }
+
     console.error('Update product error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Σφάλμα κατά την ενημέρωση προϊόντος' },
       { status: 500 }
     );
   }
 }
 
-// Mock helper function
-function getCurrentUserId(token: string | null): number | null {
-  if (!token) return null;
-  return 1; // Mock user ID for testing
+/**
+ * DELETE /api/me/products/[id]
+ * Delete a product by ID (scoped to producer)
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const producer = await requireProducer();
+    const productId = params.id;
+
+    // Delete product scoped to this producer
+    const result = await prisma.product.deleteMany({
+      where: {
+        id: productId,
+        producerId: producer.id // Critical: prevents deleting others' products
+      }
+    });
+
+    if (result.count === 0) {
+      return NextResponse.json(
+        { error: 'Δεν βρέθηκε' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, deleted: productId });
+
+  } catch (error: any) {
+    if (error instanceof Response) {
+      return error;
+    }
+
+    console.error('Delete product error:', error);
+    return NextResponse.json(
+      { error: 'Σφάλμα κατά τη διαγραφή προϊόντος' },
+      { status: 500 }
+    );
+  }
 }
