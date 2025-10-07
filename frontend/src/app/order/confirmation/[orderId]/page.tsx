@@ -331,8 +331,16 @@ export default function OrderConfirmationPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href="/"
+              href="/orders"
               className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-center font-medium"
+              data-testid="view-orders-btn"
+            >
+              Οι Παραγγελίες Μου
+            </Link>
+
+            <Link
+              href="/"
+              className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors text-center font-medium"
               data-testid="continue-shopping-btn"
             >
               Συνέχεια Αγορών
