@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
+import { checkoutApi } from '@/lib/api/checkout';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,23 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { items, shipping } = body;
+    const { items: bodyItems, shipping } = body;
+    let items = Array.isArray(bodyItems) ? bodyItems : undefined;
+
+    // Fallback from backend cart (align with useCheckout/checkoutApi)
+    if (!items || items.length === 0) {
+      try {
+        const result = await checkoutApi.getValidatedCart();
+        if (result.success && result.data) {
+          items = result.data.map((cartLine: any) => ({
+            productId: cartLine.product_id,
+            qty: cartLine.quantity
+          }));
+        }
+      } catch (e) {
+        // If backend cart unavailable, items stays empty and we return 400
+      }
+    }
 
     if (!items || items.length === 0) {
       return NextResponse.json(
