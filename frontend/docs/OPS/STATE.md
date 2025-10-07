@@ -641,3 +641,8 @@ export default function Page() { redirect('/my/orders'); }
 - Server-side pricing (DB), 409 on insufficient stock
 - UI: μήνυμα σφάλματος στο checkout
 - e2e: oversell (409) και concurrent checkouts (1 win / 1 fail)
+
+## Pass 152 — Rewire Emails after Atomic Checkout
+- Checkout: post-commit hooks για order confirmation, admin new-order, low-stock
+- Non-blocking email αποστολές
+- e2e: mailbox checks για confirmation/admin/low-stock

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
+import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
 
 export async function POST(request: NextRequest) {
@@ -81,15 +82,20 @@ export async function POST(request: NextRequest) {
       return { orderId: order.id, total: order.total, lines };
     });
 
-    // EMAIL: order confirmation (with tracking link)
+    // EMAILS: post-commit (best-effort)
     try {
       const email = payload?.shipping?.email?.trim?.();
+      const phone = payload?.shipping?.phone?.trim?.() || '';
+      const orderId = result.orderId;
+      const adminTo = process.env.DEV_MAIL_TO || '';
+
+      // 1) Order confirmation to customer
       if (email) {
         await sendMailSafe({
           to: email,
-          subject: OrderTpl.subject(result.orderId),
+          subject: OrderTpl.subject(orderId),
           html: OrderTpl.html({
-            id: result.orderId,
+            id: orderId,
             total: Number(result.total || 0),
             items: result.lines.map((i: any) => ({
               title: String(i.title || ''),
@@ -101,13 +107,27 @@ export async function POST(request: NextRequest) {
               line1: String(payload?.shipping?.line1 || ''),
               city: String(payload?.shipping?.city || ''),
               postal: String(payload?.shipping?.postal || ''),
-              phone: String(payload?.shipping?.phone || '')
+              phone
             }
           })
         });
       }
+
+      // 2) Admin new-order notice
+      if (adminTo) {
+        await sendMailSafe({
+          to: adminTo,
+          subject: NewOrderAdmin.subject(orderId),
+          text: NewOrderAdmin.text({
+            id: orderId,
+            buyerName: String(payload?.shipping?.name || ''),
+            buyerPhone: phone,
+            total: Number(result.total || 0)
+          })
+        });
+      }
     } catch (e) {
-      console.warn('[mail] order confirmation failed:', (e as Error).message);
+      console.warn('[mail] post-commit emails failed:', (e as Error).message);
     }
 
     // EMAIL: low-stock admin (threshold from env, default 3)
