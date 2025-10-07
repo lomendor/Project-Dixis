@@ -611,3 +611,24 @@ export default function Page() { redirect('/my/orders'); }
 - E2E test: Producer creates product → edits → toggles active → checkout → `/me/orders` verification
 - No schema changes, no new dependencies
 
+
+## Pass 136 — Producer Ownership Hardening
+- **Helper**: `resolveProducerIdStrict()` — no fallback, strict mapping via userId or phone
+- **Strict Filtering**: `/me/products` & `/me/orders` scoped αυστηρά ανά producerId
+  - No "first producer" fallback — shows error message if no mapping found
+  - List page: filters by producerId, shows CTA if unmapped
+  - Create page: requires producerId, throws error if unmapped
+  - Edit page: scopes to producerId (cannot edit other producers' products)
+  - Orders page: shows only orders containing producer's products
+- **Types Cleanup**: Removed `as any` from create operations, using `Prisma.ProductUncheckedCreateInput`
+- **Redirects**: `/producer/{products,orders,onboarding}` → 301 to `/me/*` pages
+- **E2E Isolation**: `tests/producer/isolation.spec.ts` — Producer A cannot see/edit Producer B data
+- **Files**:
+  - `frontend/src/lib/auth/resolve-producer.ts` (strict resolver)
+  - `frontend/src/app/me/products/page.tsx` (hardened list)
+  - `frontend/src/app/me/products/new/page.tsx` (typed create, no fallback)
+  - `frontend/src/app/me/products/[id]/page.tsx` (scoped edit)
+  - `frontend/src/app/me/orders/page.tsx` (strict filtering)
+  - `frontend/src/app/producer/{products,orders,onboarding}/page.tsx` (redirects)
+  - `frontend/tests/producer/isolation.spec.ts` (e2e test)
+- No schema changes, multi-tenant safety enforced

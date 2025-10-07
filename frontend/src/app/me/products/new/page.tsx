@@ -2,6 +2,8 @@ import { requireProducer } from '@/lib/auth/producer';
 import { prisma } from '@/lib/db/client';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
+import type { Prisma } from '@prisma/client';
 
 export const metadata = { title: 'Νέο Προϊόν | Dixis' };
 
@@ -17,26 +19,22 @@ const ProductSchema = z.object({
 
 async function createProduct(formData: FormData){
   "use server";
-  const user = await requireProducer();
+  await requireProducer();
   const data = Object.fromEntries(formData) as any;
   data.isActive = data.isActive === 'on' || data.isActive === 'true';
 
   const parsed = ProductSchema.safeParse(data);
   if(!parsed.success) throw new Error('invalid_input');
 
-  // Best-effort: Use user.id as producerId, fallback to first producer in DB
-  let producerId = user?.id || '';
-  if (!producerId) {
-    const fallbackProducer = await prisma.producer.findFirst({ select: { id: true } });
-    producerId = fallbackProducer?.id || 'unknown';
-  }
+  const producerId = await resolveProducerIdStrict();
+  if (!producerId) { throw new Error('no_producer_mapping'); }
 
-  await prisma.product.create({
-    data: {
-      ...parsed.data,
-      producerId
-    } as any
-  });
+  const payload = {
+    ...parsed.data,
+    producerId
+  } as Prisma.ProductUncheckedCreateInput;
+
+  await prisma.product.create({ data: payload });
   redirect('/me/products');
 }
 

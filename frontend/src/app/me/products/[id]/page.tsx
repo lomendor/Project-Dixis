@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/client';
 import { requireProducer } from '@/lib/auth/producer';
+import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
 import { redirect, notFound } from 'next/navigation';
 import { z } from 'zod';
 
@@ -37,8 +38,11 @@ async function deactivate(id:string){
 
 export default async function EditProductPage({ params }:{ params:{ id:string } }){
   await requireProducer();
-  const p = await prisma.product.findUnique({ where:{ id: params.id } });
-  
+  const producerId = await resolveProducerIdStrict();
+  if (!producerId) return notFound();
+
+  const p = await prisma.product.findFirst({ where:{ id: params.id, producerId } });
+
   if(!p) return notFound();
   
   return (

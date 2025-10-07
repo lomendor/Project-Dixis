@@ -1,23 +1,25 @@
 import { prisma } from '@/lib/db/client';
 import { requireProducer } from '@/lib/auth/producer';
+import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
 import Link from 'next/link';
 
 export const metadata = { title: 'Τα Προϊόντα μου | Dixis' };
 export const dynamic = 'force-dynamic'; // Prevent static generation
 
 export default async function MyProductsPage({ searchParams }:{ searchParams?:{ q?:string, active?:string } }){
-  const user = await requireProducer();
+  await requireProducer();
   const q = (searchParams?.q||'').trim();
   const active = (searchParams?.active||'').toLowerCase();
   const where:any = {};
 
-  // Best-effort: Filter by producerId if available
-  try {
-    const producerId = user?.id || user?.phone || 'unknown';
-    where.producerId = producerId;
-  } catch {
-    // Fallback: show all products (dev scenario)
-    console.warn('[me/products] producerId filtering not available');
+  const producerId = await resolveProducerIdStrict();
+  if (!producerId) {
+    return (
+      <main style={{display:'grid', gap:12, padding:'2rem'}}>
+        <h1>Τα Προϊόντα μου</h1>
+        <p style={{color:'#b00'}}>Ο λογαριασμός σας δεν είναι συνδεδεμένος με παραγωγό. Επικοινωνήστε με τον διαχειριστή.</p>
+      </main>
+    );
   }
 
   if(q) where.OR = [{ title: { contains: q } }, { category: { contains: q } }];
@@ -25,7 +27,8 @@ export default async function MyProductsPage({ searchParams }:{ searchParams?:{ 
   if(active==='false') where.isActive = false;
 
   const items = await prisma.product.findMany({
-    where, orderBy:{ updatedAt: 'desc' },
+    where: { ...where, producerId },
+    orderBy:{ updatedAt: 'desc' },
     select:{ id:true, title:true, category:true, price:true, unit:true, stock:true, isActive:true }
   });
 

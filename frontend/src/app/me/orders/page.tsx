@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/client';
 import { requireProducer } from '@/lib/auth/producer';
+import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
 
 export const metadata = { title: 'Οι Παραγγελίες μου | Dixis' };
 export const dynamic = 'force-dynamic'; // Prevent static generation
@@ -7,44 +8,35 @@ export const dynamic = 'force-dynamic'; // Prevent static generation
 export default async function MyOrdersPage(){
   await requireProducer();
 
-  // Best-effort: Try to filter by ownerId if exists, otherwise show all orders with items
-  let orders: any[] = [];
-  try {
-    // Attempt to filter by ownerId relation if schema supports it
-    orders = await prisma.order.findMany({
-      where: {
-        items: {
-          some: {
-            product: {
-              // @ts-ignore - best effort, may not exist
-              ownerId: (await requireProducer())?.id
-            }
-          }
-        }
-      },
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch {
-    // Fallback: show all orders (dev scenario when ownerId doesn't exist)
-    console.warn('[me/orders] ownerId filtering not available, showing all orders');
-    orders = await prisma.order.findMany({
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+  const producerId = await resolveProducerIdStrict();
+  if (!producerId) {
+    return (
+      <main style={{padding:'2rem'}}>
+        <h1>Οι Παραγγελίες μου</h1>
+        <p style={{color:'#b00'}}>Δεν υπάρχει αντιστοίχιση παραγωγού για τον λογαριασμό σας.</p>
+      </main>
+    );
   }
+
+  const orders = await prisma.order.findMany({
+    where: {
+      items: {
+        some: {
+          product: {
+            producerId
+          }
+        }
+      }
+    },
+    include: {
+      items: {
+        include: {
+          product: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
 
   const fmt = (n:number) => new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' }).format(n);
   const fmtDate = (d:Date) => new Intl.DateTimeFormat('el-GR', {
@@ -115,7 +107,7 @@ export default async function MyOrdersPage(){
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <div className="text-sm text-gray-600">
-                  <span className="font-medium">Πελάτης:</span> {order.customerName || '-'}
+                  <span className="font-medium">Πελάτης:</span> {order.buyerName || '-'}
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">Σύνολο Παραγγελίας</p>
