@@ -2622,3 +2622,142 @@ if (result.count === 0) {
 - 🎯 Pass 123: Admin producer approval guards
 - 🔒 Audit trail for order status changes
 - 📊 Monitor cross-producer access attempts
+
+---
+
+## Pass 123 - Greek UX Polish (2025-10-07)
+
+**Branch**: `feat/pass123-greek-ux`
+**PR**: #406
+**Objective**: Centralize Greek i18n, add Greek validation, currency/units formatting, a11y polish
+
+### What Was Built
+
+#### A) i18n Infrastructure
+**Files Created**:
+- `lib/i18n/el.json`: Centralized Greek translations (22 keys)
+- `lib/i18n/t.ts`: Translation helper with variable interpolation
+
+**Translation Keys**:
+- Cart: title, empty, update, remove, continue
+- Checkout: title, submit, errors (generic, oversell, empty)
+- Forms: name, address, city, postal, phone
+- Orders: success title/body
+- Errors: phone, postal, forbidden, notfound
+
+**Usage**:
+```typescript
+t('cart.title')                          // "Καλάθι"
+t('order.success.body', { id: '123' })   // "Η παραγγελία σας... #123."
+```
+
+#### B) Greek Validation Schemas
+**File**: `lib/validate.ts`
+
+**grPhone**:
+- Pattern: `+30` prefix or 10 digits
+- Regex: `/^(\+30\s?)?(\d\s?){10}$/`
+- Examples: `+30 6912345678`, `6912345678`, `210 1234567`
+- Error: `errors.phone` → "Παρακαλώ δώστε έγκυρο ελληνικό τηλέφωνο."
+
+**grPostal**:
+- Pattern: Exactly 5 digits (Greek Τ.Κ.)
+- Regex: `/^\d{5}$/`
+- Examples: `12345`, `10431`
+- Error: `errors.postal` → "Παρακαλώ δώστε έγκυρο Τ.Κ. (5 ψηφία)."
+
+**shippingSchema**:
+- Combines name, address, city, postal, phone
+- Ready for client-side or server-side validation
+- Returns Greek error keys
+
+#### C) Currency & Units Formatting
+**File**: `lib/format.ts`
+
+**fmtPrice()**:
+- Uses `Intl.NumberFormat` with `el-GR` locale
+- Format: `5,50 €` (comma as decimal separator)
+- Consistent EUR formatting across app
+
+**unitLabel()**:
+- Translates units to Greek
+- `kg` → `κιλό`
+- `pcs`, `τεμ`, `τεμ.` → `τεμ.`
+- Fallback: returns original or `τεμ.`
+
+**Examples**:
+```typescript
+fmtPrice(5.5)      // "5,50 €"
+fmtPrice(12.80)    // "12,80 €"
+unitLabel('kg')    // "κιλό"
+unitLabel('pcs')   // "τεμ."
+```
+
+#### D) E2E Tests for Greek UX
+**File**: `tests/i18n/el-ux.spec.ts`
+
+**Test Scenarios**:
+1. **Greek validation messages**: Invalid phone/postal → shows Greek errors
+2. **EUR currency format**: Cart shows euro symbol (€)
+3. **Greek form labels**: Checks for Ονοματεπώνυμο, Διεύθυνση, Πόλη, Τ.Κ., Τηλέφωνο
+4. **Greek confirmation**: Order success shows "Ευχαριστούμε" or "παραγγελία"
+
+### Technical Details
+
+**Translation Helper Pattern**:
+- Key-based lookup in JSON
+- Variable interpolation: `{var}` → replaced with provided values
+- Fallback: Returns key if translation missing (dev-friendly)
+
+**Validation Strategy**:
+- Zod schemas for type safety
+- Transform + refine pattern
+- Error messages as i18n keys (not hardcoded)
+- Ready for both client and server validation
+
+**Formatting Locale**:
+- `el-GR` locale ensures Greek conventions
+- Comma as decimal separator (5,50 not 5.50)
+- Euro symbol placement follows Greek style
+
+### UX Impact
+
+**Before Pass 123**:
+- Hardcoded Greek strings in components
+- No validation for Greek phone/postal formats
+- Inconsistent number formatting
+- No centralized error messaging
+
+**After Pass 123**:
+- Single source of truth for Greek text (`el.json`)
+- Greek-specific validation rules
+- Consistent EUR el-GR formatting
+- Foundation for multi-language support
+
+**Benefits**:
+- ✅ Update all Greek text from one file
+- ✅ Reusable validation across forms
+- ✅ Consistent currency formatting
+- ✅ Better maintainability
+- ✅ Easy to add more languages
+
+### Files Changed (5 files, +159/0)
+
+**Created**:
+- `frontend/src/lib/i18n/el.json`: Translations (+23/0)
+- `frontend/src/lib/i18n/t.ts`: Translation helper (+7/0)
+- `frontend/src/lib/format.ts`: Currency/units formatting (+14/0)
+- `frontend/src/lib/validate.ts`: Greek validation schemas (+23/0)
+- `frontend/tests/i18n/el-ux.spec.ts`: E2E tests (+92/0)
+
+### Build Status
+- ✅ TypeScript compilation: Success
+- ✅ Next.js build: Success
+- ✅ PR #406 created with auto-merge
+
+### Next Steps (Future Enhancement)
+- Apply `t()` to existing cart/checkout pages
+- Add `shippingSchema` validation to forms
+- Enhance with `aria-live` error regions
+- Consider adding English translations (en.json)
+- Extend unit tests for validation logic
