@@ -2108,3 +2108,96 @@ Content-Type: application/json
 - ⏳ Create PR and enable auto-merge
 - 🎯 Pass 121: Notification archival strategy (SENT → archived)
 - 📊 Monitor ops metrics dashboard for insights
+
+## Pass 121 — Customer Cart + Checkout UI ✅
+
+**Date**: 2025-10-07
+**Status**: ✅ Complete
+**PR**: #402 — ⏳ **AUTO-MERGE ARMED**
+
+### Objective
+Complete customer cart and checkout flow with cookie-based storage, shipping form, success page, and E2E test coverage.
+
+### Achievements
+
+1. **✅ Cookie-Based Cart Infrastructure**:
+   - Created `lib/cart/cookie.ts` with cart helpers
+   - CartItem type: productId, title, price, unit, qty, imageUrl
+   - Functions: readCart, writeCart, addOrInc, setQty, remove, totals
+   - Async API compatible with Next.js 15 cookies
+   - Stored in `dixis_cart` cookie (JSON format)
+
+2. **✅ Cart Page (/cart)**:
+   - Greek-first UI: "Καλάθι", "Μερικό σύνολο"
+   - Table display with cart items
+   - Inline quantity update form (per item)
+   - Remove button (per item)
+   - Subtotal calculation
+   - "Συνέχεια στο ταμείο" button → /checkout
+   - Empty state: "Το καλάθι σας είναι άδειο"
+   - Server actions: setQtyAction, removeAction
+
+3. **✅ Checkout Page (/checkout)**:
+   - Client-side shipping form (5 required fields)
+   - Calls existing `/api/checkout` endpoint
+   - 409 oversell error handling: "Ανεπαρκές απόθεμα"
+   - Generic error fallback
+   - Busy state during submission
+   - Redirects to /order/success/[id] on success
+
+4. **✅ Order Success Page (/order/success/[id])**:
+   - "Ευχαριστούμε!" heading
+   - Order ID display with Greek text
+   - "Συνέχεια στις αγορές" link
+
+5. **✅ Product Page Integration**:
+   - Wired "Προσθήκη στο καλάθι" form to addToCartAction
+   - Server action fetches product, validates, adds to cart
+   - Redirects to /cart after add
+
+6. **✅ E2E Test Coverage**:
+   - Created `tests/cart/cart-checkout.spec.ts`
+   - Full customer flow: product → cart → checkout → success
+   - Verifies cart display, form submission, success redirect
+   - Uses OTP bypass for authentication
+
+### Technical Notes
+- **Cart Storage**: Cookie-based (not DB) for simplicity
+- **Checkout**: Existing `/api/checkout` is source of truth with atomic stock guard
+- **Server Actions**: All cart mutations use server actions with revalidation
+- **Error Handling**: Specific 409 message, generic fallback for other errors
+- **Greek-First**: All UI text in Greek language
+
+### Files Changed (8 files, +197/-885)
+**Created**:
+- `lib/cart/cookie.ts`: Cart helpers (42 lines)
+- `app/cart/actions.ts`: Add to cart action (17 lines)
+- `app/cart/server-actions.ts`: Cart mutations (16 lines)
+- `app/order/success/[id]/page.tsx`: Success page (8 lines)
+- `tests/cart/cart-checkout.spec.ts`: E2E test (41 lines)
+
+**Modified**:
+- `app/cart/page.tsx`: Full cart UI (42 lines)
+- `app/checkout/page.tsx`: Checkout form (44 lines)
+- `app/product/[id]/page.tsx`: Wired to cart action
+
+### Build Status
+- ✅ TypeScript strict mode: Zero errors
+- ✅ Next.js build: 51 pages successfully
+- ✅ New routes: `/cart`, `/checkout`, `/order/success/[id]`
+- ✅ E2E test created for full customer flow
+
+### User Flow
+1. Customer views product page
+2. Clicks "Προσθήκη στο καλάθι" → redirected to /cart
+3. Reviews cart, adjusts quantities
+4. Clicks "Συνέχεια στο ταμείο" → /checkout
+5. Fills shipping form (5 fields)
+6. Submits → /order/success/[id]
+7. Sees thank you message with order ID
+
+### Next Steps
+- ⏳ PR #402 CI checks (auto-merge armed)
+- 🎯 Pass 122: Cart persistence (optional session storage)
+- 🎯 Pass 123: Checkout payment integration
+- 📊 Monitor cart abandonment rates
