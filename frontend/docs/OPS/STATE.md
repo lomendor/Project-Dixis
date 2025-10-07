@@ -602,3 +602,31 @@ export default function Page() { redirect('/my/orders'); }
 - Greek-first UI and email templates
 - Configurable threshold via environment variable
 - Graceful email failures (log only, don't break checkout)
+
+## Pass 149 — Admin Guard Hardening
+- **Admin Pages Security**:
+  - All `/admin/**` pages: `export const dynamic = 'force-dynamic'`
+  - Direct `requireAdmin()` import and server-side call
+  - Products page: Try/catch with unauthorized fallback
+  - Orders pages: Updated to use requireAdmin directly
+- **Unauthorized Fallback UI**:
+  - "Δεν επιτρέπεται" message
+  - "Απαιτείται σύνδεση διαχειριστή" explanation
+  - No data exposure for unauthorized users
+- **E2E Tests** (`frontend/tests/admin/auth.spec.ts`):
+  - Test 1: Unauthorized user sees guard message on /admin/products
+  - Test 2: Authorized admin can view /admin/products list
+- **Pages Hardened**:
+  - `frontend/src/app/admin/products/page.tsx` (with unauthorized fallback)
+  - `frontend/src/app/admin/orders/page.tsx` (force-dynamic + requireAdmin)
+  - `frontend/src/app/admin/orders/[id]/page.tsx` (force-dynamic + requireAdmin)
+- **Files**:
+  - `frontend/src/app/admin/products/page.tsx` (hardened with fallback)
+  - `frontend/src/app/admin/orders/page.tsx` (hardened)
+  - `frontend/src/app/admin/orders/[id]/page.tsx` (hardened)
+  - `frontend/tests/admin/auth.spec.ts` (e2e auth tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 149 docs)
+- No schema changes, no new dependencies
+- Server-side authentication enforcement
+- Dynamic SSR for proper auth checks
+- Graceful unauthorized fallback (no crashes)

@@ -1,21 +1,18 @@
 import { prisma } from '@/lib/db/client';
+import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελίες (Admin) | Dixis' };
 
 const statuses = ['PENDING', 'PAID', 'PACKING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
-
-async function checkAdmin() {
-  const { requireAdmin } = await import('@/lib/auth/admin');
-  await requireAdmin();
-}
 
 export default async function AdminOrdersPage({
   searchParams
 }: {
   searchParams?: { q?: string; status?: string };
 }) {
-  await checkAdmin();
+  await requireAdmin?.();
 
   const q = searchParams?.q?.trim() || '';
   const st = (searchParams?.status || '').toUpperCase();

@@ -1,17 +1,9 @@
 import { prisma } from '@/lib/db/client';
+import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Admin — Προϊόντα | Dixis' };
-
-async function checkAdmin() {
-  try {
-    const { requireAdmin } = await import('@/lib/auth/admin');
-    await requireAdmin();
-  } catch {
-    throw new Error('Unauthorized');
-  }
-}
 
 function thr() {
   return Number.parseInt(process.env.LOW_STOCK_THRESHOLD || '3') || 3;
@@ -22,7 +14,8 @@ export default async function Page({
 }: {
   searchParams?: { q?: string; active?: string; low?: string; page?: string };
 }) {
-  await checkAdmin();
+  try {
+    await requireAdmin?.();
 
   const q = (searchParams?.q || '').trim();
   const active = searchParams?.active || '';
@@ -130,4 +123,12 @@ export default async function Page({
       </nav>
     </main>
   );
+  } catch {
+    return (
+      <main style={{ padding: 16 }}>
+        <h1>Δεν επιτρέπεται</h1>
+        <p>Απαιτείται σύνδεση διαχειριστή.</p>
+      </main>
+    );
+  }
 }
