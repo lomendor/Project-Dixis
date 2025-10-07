@@ -1,3 +1,4 @@
+import { addToCartAction } from '@/app/cart/actions';
 import { prisma } from '@/lib/db/client';
 import Link from 'next/link';
 
