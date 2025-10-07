@@ -841,3 +841,46 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/OPS/STATE.md` (Pass 143 docs)
 - No schema changes, no new dependencies, local file storage only
 
+## Pass 144 — Customer Emails v1 (Order Confirmation + Dev Mailbox)
+- **Email Template** (`frontend/src/lib/mail/templates/orderConfirmation.ts`):
+  - Greek-first subject: "Dixis — Επιβεβαίωση Παραγγελίας #<orderId>"
+  - HTML email with order details: items table, total, shipping address
+  - Formatted with Greek locale (currency, layout)
+  - Thank you message and next steps
+- **Dev Mailbox System**:
+  - `frontend/src/lib/mail/devMailbox.ts`: Filesystem-based email storage
+  - Saves emails to `frontend/.tmp/dev-mailbox/` with timestamps
+  - Functions: put(), list(), latestFor(email)
+  - Only active when `SMTP_DEV_MAILBOX=1`
+- **Updated Mailer** (`frontend/src/lib/mail/mailer.ts`):
+  - Integrated dev mailbox into sendMailSafe()
+  - Routes emails to dev mailbox when SMTP_DEV_MAILBOX=1
+  - Returns success with 'dev_mailbox' reason
+  - Falls back to SMTP or no-op otherwise
+- **Dev Mailbox API** (`/api/dev/mailbox`):
+  - GET endpoint for retrieving emails from dev mailbox
+  - Query param `?to=email` returns latest email for that address
+  - Without param, returns list of last 20 emails
+  - Protected: only works when SMTP_DEV_MAILBOX=1 (403 otherwise)
+- **Checkout Integration**:
+  - Sends confirmation email after successful order creation
+  - Only if customer provides email in shipping form
+  - Uses new orderConfirmation template
+  - Graceful error handling (logs warning, doesn't fail checkout)
+  - Fetches full order with items for email content
+- **E2E Tests** (`frontend/tests/checkout/email.spec.ts`):
+  - Test 1: Checkout with email → verify email in dev mailbox with order ID
+  - Test 2: Checkout without email → no crash (safe no-op)
+  - Both tests use producer auth and create test products
+  - Dev mailbox check validates subject and content
+- **Files**:
+  - `frontend/src/lib/mail/templates/orderConfirmation.ts` (email template)
+  - `frontend/src/lib/mail/devMailbox.ts` (dev mailbox system)
+  - `frontend/src/lib/mail/mailer.ts` (updated with dev mailbox)
+  - `frontend/src/app/api/dev/mailbox/route.ts` (dev API)
+  - `frontend/src/app/api/checkout/route.ts` (integrated email sending)
+  - `frontend/tests/checkout/email.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 144 docs)
+  - `.env.example` (SMTP_DEV_MAILBOX already documented)
+- No schema changes, no new dependencies, dev-friendly testing
+

@@ -29,11 +29,17 @@ async function getTransport(): Promise<Transporter | null>{
 
 export async function sendMailSafe(input: MailInput): Promise<MailResult>{
   const env = readEnv();
-  // Dev mailbox sink (γράφει στο .tmp/last-mail.json για γρήγορο έλεγχο)
+  // Dev mailbox sink (γράφει στο dev mailbox system για tests)
   if(env.devMailbox){
-    const fs = await import('fs');
-    fs.mkdirSync('frontend/.tmp', { recursive:true });
-    fs.writeFileSync('frontend/.tmp/last-mail.json', JSON.stringify({ at: new Date().toISOString(), ...input }, null, 2));
+    const { put } = await import('./devMailbox');
+    await put({
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      at: Date.now()
+    });
+    return { ok:true, provider:'noop', reason:'dev_mailbox' };
   }
   const t = await getTransport();
   if(!t){

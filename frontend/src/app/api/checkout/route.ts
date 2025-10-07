@@ -8,6 +8,7 @@ import { createPaymentIntent } from '@/lib/payments/provider';
 import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
 import { decrementStockAtomic, StockError } from '@/lib/inventory/stock';
 import { z } from 'zod';
+import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 
 // Comprehensive checkout validation schema
 const CheckoutSchema = z.object({
@@ -148,31 +149,35 @@ export async function POST(request: NextRequest) {
       console.warn('[checkout] payment init failed', String(e).substring(0, 100));
     }
 
-    // EMAIL: order confirmation (safe fallback)
+    // EMAIL: order confirmation (safe fallback - use new template)
     try {
-      const fullOrder = await prisma.order.findUnique({
-        where: { id: result.orderId },
-        include: { items: true }
-      });
-      if (fullOrder) {
-        const { subject, html, text } = await renderOrderEmail('confirm', {
-          id: fullOrder.id,
-          buyerName: fullOrder.buyerName || undefined,
-          buyerEmail: (fullOrder as any).customerEmail || undefined,
-          total: Number(fullOrder.total || 0),
-          createdAt: fullOrder.createdAt,
-          shippingLine1: fullOrder.shippingLine1 || undefined,
-          shippingCity: fullOrder.shippingCity || undefined,
-          shippingPostal: fullOrder.shippingPostal || undefined,
-          items: fullOrder.items.map(i => ({
-            titleSnap: i.titleSnap || undefined,
-            qty: i.qty,
-            price: i.price
-          }))
+      const email = validatedShipping.email?.trim?.();
+      if (email) {
+        const fullOrder = await prisma.order.findUnique({
+          where: { id: result.orderId },
+          include: { items: true }
         });
-        const toEmail = (fullOrder as any).customerEmail || process.env.DEV_MAIL_TO || '';
-        if (toEmail) {
-          await sendMailSafe({ to: toEmail, subject, html, text });
+        if (fullOrder) {
+          await sendMailSafe({
+            to: email,
+            subject: OrderTpl.subject(fullOrder.id),
+            html: OrderTpl.html({
+              id: fullOrder.id,
+              total: Number(fullOrder.total || 0),
+              items: fullOrder.items.map(i => ({
+                title: String(i.titleSnap || ''),
+                qty: Number(i.qty || 0),
+                price: Number(i.price || 0)
+              })),
+              shipping: {
+                name: String(validatedShipping.name || ''),
+                line1: String(validatedShipping.line1 || ''),
+                city: String(validatedShipping.city || ''),
+                postal: String(validatedShipping.postal || ''),
+                phone: String(validatedShipping.phone || '')
+              }
+            })
+          });
         }
       }
     } catch (e) {
