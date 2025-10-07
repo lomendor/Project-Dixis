@@ -7,6 +7,7 @@ import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
 import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
+import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -208,6 +209,38 @@ export async function POST(request: NextRequest) {
       }
     } catch (e) {
       console.warn('[mail] order confirmation failed:', (e as Error).message);
+    }
+
+    // EMAIL: low-stock admin (threshold from env, default 3)
+    try {
+      const threshold = parseInt(String(process.env.LOW_STOCK_THRESHOLD || '3')) || 3;
+      const pids = Array.from(
+        new Set((items || []).map((i: any) => String(i.productId)).filter(Boolean))
+      );
+      if (pids.length) {
+        const products = await prisma.product.findMany({
+          where: { id: { in: pids } },
+          select: { id: true, title: true, stock: true }
+        });
+        const low = products.filter((p) => Number(p.stock || 0) <= threshold);
+        if (low.length) {
+          const to = process.env.DEV_MAIL_TO || 'dev@localhost';
+          await sendMailSafe({
+            to,
+            subject: LowStockAdmin.subject(
+              low.map((l) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
+              result.orderId
+            ),
+            text: LowStockAdmin.text({
+              orderId: result.orderId,
+              items: low.map((l) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
+              threshold
+            })
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('[mail] low-stock admin failed:', (e as Error).message);
     }
 
     return NextResponse.json({
