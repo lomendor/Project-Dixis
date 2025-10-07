@@ -411,3 +411,20 @@ export default function Page() { redirect('/my/orders'); }
 
 **Επόμενα**: Χρήση AGENT docs σε επόμενους passes για μείωση context bloat.
 
+
+## Pass AG1.2 — Scanners fixed & docs regenerated (2025-10-07)
+
+**Στόχος**: Διόρθωση scanners για σωστή έξοδο σε `frontend/docs/AGENT/SYSTEM/`
+
+**Υλοποίηση**:
+- ✅ Scanners γράφουν πάντα σε `frontend/docs/AGENT/SYSTEM/` (absolute paths)
+- ✅ Αναγέννηση `routes.md` (30+ routes, non-empty)
+- ✅ Αναγέννηση `db-schema.md` (Prisma schema)
+- ✅ npm scripts verified: `agent:routes`, `agent:schema`, `agent:docs`
+
+**Αλλαγές**:
+- scripts/scan-routes.mjs: Χρήση `path.join('frontend','docs','AGENT','SYSTEM','routes.md')`
+- scripts/scan-prisma.mjs: Χρήση `path.join('frontend','docs','AGENT','SYSTEM','db-schema.md')`
+- Logs: Εμφανίζουν count routes & bytes
+
+**Επόμενα**: Scanners λειτουργούν σωστά από οποιοδήποτε directory.
