@@ -568,3 +568,37 @@ export default function Page() { redirect('/my/orders'); }
 - No schema changes, no new dependencies
 - Graceful email failures (log only, don't break checkout)
 - Dev mailbox system for reliable testing (SMTP_DEV_MAILBOX=1)
+
+## Pass 148 — Admin Inventory v1 + Low-stock Alerts
+- **Admin Products Page** (`/admin/products`):
+  - Product list with search (title)
+  - Filters: active status, low-stock only
+  - Low badge display (≤ threshold)
+  - Pagination (25 items per page)
+  - Shows: title, price/unit, stock, status
+- **Low-Stock Email Alert**:
+  - Template: `lowStockAdmin.ts` (Greek-first)
+  - Triggered after successful checkout
+  - Checks products with stock ≤ LOW_STOCK_THRESHOLD (default 3)
+  - Sends admin notice to DEV_MAIL_TO
+  - Subject includes critical items + order ID
+  - Body lists all low-stock items with current stock
+- **Checkout Integration** (`frontend/src/app/api/checkout/route.ts`):
+  - Added low-stock check after order creation
+  - Graceful error handling (logs warning, doesn't fail checkout)
+  - Uses LOW_STOCK_THRESHOLD env variable
+- **E2E Tests**:
+  - `lowstock-email.spec.ts`: Verifies admin email sent when stock drops to low threshold
+  - `products-list.spec.ts`: Verifies Low badge display and filter functionality
+- **Files**:
+  - `frontend/src/lib/mail/templates/lowStockAdmin.ts` (email template)
+  - `frontend/src/app/admin/products/page.tsx` (admin UI)
+  - `frontend/src/app/api/checkout/route.ts` (low-stock alerts)
+  - `frontend/tests/checkout/lowstock-email.spec.ts` (e2e email test)
+  - `frontend/tests/admin/products-list.spec.ts` (e2e admin UI test)
+  - `.env.example` (LOW_STOCK_THRESHOLD)
+  - `frontend/docs/OPS/STATE.md` (Pass 148 docs)
+- No schema changes, no new dependencies
+- Greek-first UI and email templates
+- Configurable threshold via environment variable
+- Graceful email failures (log only, don't break checkout)
