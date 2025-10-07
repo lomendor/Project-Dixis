@@ -6,6 +6,7 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import ToastContainer from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
+import CartProvider from "@/components/CartProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -174,14 +175,16 @@ export default function RootLayout({
         {/* Skip to main content link for screen readers */}
         <SkipLink />
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-          <ToastProvider>
-            <AuthProvider>
-              <main data-testid="page-root">
-                {children}
-              </main>
-              <ToastContainer />
-            </AuthProvider>
-          </ToastProvider>
+          <CartProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <main data-testid="page-root">
+                  {children}
+                </main>
+                <ToastContainer />
+              </AuthProvider>
+            </ToastProvider>
+          </CartProvider>
         </ErrorBoundary>
       </body>
     </html>
