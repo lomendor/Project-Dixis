@@ -630,3 +630,8 @@ export default function Page() { redirect('/my/orders'); }
 - Server-side authentication enforcement
 - Dynamic SSR for proper auth checks
 - Graceful unauthorized fallback (no crashes)
+
+## Pass 150 — Admin Dashboard v0
+- Νέα σελίδα `/admin` με KPIs (7ημ orders & revenue, pending, low-stock)
+- Πίνακες: τελευταίες παραγγελίες, top προϊόντα 30 ημερών
+- e2e: render & βασικοί δείκτες
