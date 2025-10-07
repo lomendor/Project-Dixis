@@ -534,3 +534,24 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/tests/admin/orders-export-print.spec.ts` (e2e)
   - `.env.example` (ADMIN_ORDERS_PAGE_SIZE)
 - No schema changes, no new packages
+
+## Pass 132 — Admin Dashboard (KPIs + daily revenue + top products)
+- **Stats API**: `/api/admin/stats` (server-side compute, no schema changes)
+  - KPIs: totalOrders, revenueTotal, avgOrder, ordersToday
+  - Status breakdown: PENDING/PAID/PACKING/SHIPPED/DELIVERED/CANCELLED counts
+  - Last 14 days: Daily order count and revenue
+  - Top 10 products: By quantity sold (30-day window)
+- **Dashboard Page**: `/admin/dashboard`
+  - 4 KPI cards with responsive grid layout
+  - Status breakdown table
+  - Daily revenue/orders table (14 days)
+  - Top products table with ranking
+  - EL-first UI with Greek formatting (dates, currency)
+- **E2E Tests**:
+  - Stats API: Validates response structure, KPIs, arrays
+  - Dashboard: Page loads, KPI cards visible, sections present
+- **Files**:
+  - `frontend/src/app/api/admin/stats/route.ts` (stats API)
+  - `frontend/src/app/admin/dashboard/page.tsx` (dashboard page)
+  - `frontend/tests/admin/dashboard.spec.ts` (e2e tests)
+- No schema changes, no chart libraries (plain tables)
