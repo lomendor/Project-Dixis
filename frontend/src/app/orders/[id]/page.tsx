@@ -1,308 +1,137 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { prisma } from '@/lib/db/client';
+import { requireSessionUser } from '@/lib/auth/session';
 import Link from 'next/link';
-import { apiClient, Order } from '@/lib/api';
-import Navigation from '@/components/Navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { notFound } from 'next/navigation';
 
-export default function OrderDetails() {
-  const params = useParams();
-  const router = useRouter();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
+export const metadata = { title: 'Παραγγελία | Dixis' };
 
-  const orderId = parseInt(params.id as string);
+export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+  const user = await requireSessionUser();
+  const orderId = params.id;
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
+  // Fetch order with items, scoped to current user's phone
+  const order = await prisma.order.findFirst({
+    where: { 
+      id: orderId, 
+      buyerPhone: user.phone 
+    },
+    include: { 
+      items: { 
+        select: { 
+          id: true, 
+          qty: true, 
+          price: true, 
+          titleSnap: true, 
+          priceSnap: true 
+        } 
+      } 
     }
+  });
 
-    if (orderId) {
-      loadOrder();
-    }
-  }, [orderId, isAuthenticated, router]);
-
-  const loadOrder = async () => {
-    try {
-      setLoading(true);
-      const orderData = await apiClient.getOrder(orderId);
-      setOrder(orderData);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load order');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'text-yellow-800 bg-yellow-100';
-      case 'confirmed':
-        return 'text-blue-800 bg-blue-100';
-      case 'processing':
-        return 'text-orange-800 bg-orange-100';
-      case 'shipped':
-        return 'text-purple-800 bg-purple-100';
-      case 'delivered':
-        return 'text-green-800 bg-green-100';
-      case 'cancelled':
-        return 'text-red-800 bg-red-100';
-      default:
-        return 'text-gray-800 bg-gray-100';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+  if (!order) {
+    notFound();
   }
 
+  const total = Number(order.total ?? order.items.reduce((sum, item) => 
+    sum + Number(item.price || item.priceSnap || 0) * Number(item.qty || 0), 0
+  ));
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Link
-            href="/cart"
-            className="text-green-600 hover:text-green-700 flex items-center text-sm font-medium"
-          >
-            ← Back to Cart
-          </Link>
+    <main style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ marginBottom: 24 }}>
+        <Link href="/orders" style={{ color: '#16a34a', textDecoration: 'underline', fontSize: 14 }}>
+          ← Πίσω στις παραγγελίες
+        </Link>
+      </div>
+
+      <div style={{ background: 'white', borderRadius: 8, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ marginBottom: 24, fontSize: 28 }}>Παραγγελία #{order.id.slice(0, 8)}</h1>
+
+        <div style={{ display: 'grid', gap: 16, marginBottom: 32 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+            <span style={{ color: '#6b7280' }}>Ημερομηνία:</span>
+            <span style={{ fontWeight: 500 }}>
+              {new Date(order.createdAt).toLocaleString('el-GR', { 
+                dateStyle: 'long', 
+                timeStyle: 'short' 
+              })}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+            <span style={{ color: '#6b7280' }}>Κατάσταση:</span>
+            <span style={{ 
+              padding: '4px 12px', 
+              borderRadius: 16, 
+              background: order.status === 'pending' ? '#fef3c7' : '#d1fae5',
+              color: order.status === 'pending' ? '#92400e' : '#065f46',
+              fontSize: 14,
+              fontWeight: 500
+            }}>
+              {order.status === 'pending' ? 'Εκκρεμής' : order.status}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+            <span style={{ color: '#6b7280' }}>Παραλήπτης:</span>
+            <span style={{ fontWeight: 500 }}>{order.buyerName}</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+            <span style={{ color: '#6b7280' }}>Διεύθυνση:</span>
+            <div style={{ textAlign: 'right' }}>
+              <div>{order.shippingLine1}</div>
+              {order.shippingLine2 && <div>{order.shippingLine2}</div>}
+              <div>{order.shippingPostal} {order.shippingCity}</div>
+            </div>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={loadOrder}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : order ? (
-          <div className="space-y-8">
-            {/* Order Header */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <h2 style={{ marginBottom: 16, fontSize: 20 }}>Προϊόντα</h2>
+
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {order.items.map((item) => {
+            const itemPrice = Number(item.price || item.priceSnap || 0);
+            const itemTotal = itemPrice * item.qty;
+
+            return (
+              <li key={item.id} style={{ 
+                padding: 16, 
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    Order #{order.id}
-                  </h1>
-                  <p className="text-gray-600">
-                    Placed on {formatDate(order.created_at)}
-                  </p>
-                </div>
-                <div className="mt-4 md:mt-0">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
-                    {order.status.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Order Items */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-lg shadow-md">
-                  <div className="p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                      Order Items
-                    </h2>
-                    
-                    <div className="space-y-4">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                          {/* Product Image */}
-                          <div className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                            {item.product.images.length > 0 ? (
-                              <img
-                                src={item.product.images[0].image_path}
-                                alt={item.product.images[0].alt_text || item.product.name}
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-                            ) : (
-                              <span className="text-gray-400 text-xs">No Image</span>
-                            )}
-                          </div>
-
-                          {/* Product Details */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-medium text-gray-900">
-                              {item.product.name}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              By {item.product.producer.name}
-                            </p>
-                            <div className="flex items-center justify-between mt-2">
-                              <span className="text-sm text-gray-600">
-                                Quantity: {item.quantity} {item.product.unit}(s)
-                              </span>
-                              <span className="text-sm font-medium text-green-600">
-                                €{(parseFloat(item.price) * item.quantity).toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div style={{ fontWeight: 500, marginBottom: 4 }}>{item.titleSnap}</div>
+                  <div style={{ fontSize: 14, color: '#6b7280' }}>
+                    Ποσότητα: {item.qty} × {new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(itemPrice)}
                   </div>
                 </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="lg:col-span-1 space-y-6">
-                {/* Order Summary Card */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Order Summary
-                  </h2>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">€{parseFloat(order.subtotal || order.total_amount).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Shipping</span>
-                      <div className="text-right">
-                        <span className="font-medium">
-                          {order.shipping_cost ? `€${order.shipping_cost.toFixed(2)}` : 'Free'}
-                        </span>
-                        {order.shipping_carrier && (
-                          <div className="text-xs text-gray-500">{order.shipping_carrier}</div>
-                        )}
-                        {order.shipping_eta_days && (
-                          <div className="text-xs text-gray-500">{order.shipping_eta_days} day(s)</div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="border-t border-gray-200 pt-3">
-                      <div className="flex justify-between text-base font-semibold">
-                        <span>Total</span>
-                        <span className="text-green-600">€{parseFloat(order.total_amount).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
+                <div style={{ fontWeight: 600 }}>
+                  {new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(itemTotal)}
                 </div>
+              </li>
+            );
+          })}
+        </ul>
 
-                {/* Shipping Information */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Delivery Information
-                  </h2>
-                  
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="text-gray-600">Payment Method:</span>
-                      <p className="font-medium capitalize">
-                        {order.payment_method.replace('_', ' ')}
-                      </p>
-                    </div>
-                    
-                    {(order.postal_code || order.city) && (
-                      <div>
-                        <span className="text-gray-600">Delivery Location:</span>
-                        <p className="font-medium">
-                          {order.city}{order.postal_code && `, ${order.postal_code}`}
-                        </p>
-                        {order.shipping_carrier && order.shipping_eta_days && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Via {order.shipping_carrier} • Estimated {order.shipping_eta_days} day(s)
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    
-                    {order.shipping_address && (
-                      <div>
-                        <span className="text-gray-600">Full Address:</span>
-                        <p className="font-medium">
-                          {order.shipping_address}
-                        </p>
-                      </div>
-                    )}
-                    
-                    {order.notes && (
-                      <div>
-                        <span className="text-gray-600">Notes:</span>
-                        <p className="font-medium">
-                          {order.notes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Continue Shopping */}
-                <div className="text-center">
-                  <Link
-                    href="/"
-                    className="inline-flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium"
-                  >
-                    Continue Shopping
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Success Message for New Orders */}
-            {order.status === 'pending' && (
-              <div data-testid="order-success" className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">
-                      Order placed successfully!
-                    </h3>
-                    <p className="mt-1 text-sm text-green-700">
-                      Thank you for your order. We&rsquo;ll notify you when your items are ready for delivery.
-                      Payment will be collected upon delivery.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Order not found.</p>
-            <Link
-              href="/"
-              className="mt-4 inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg"
-            >
-              Back to Products
-            </Link>
-          </div>
-        )}
-      </main>
-    </div>
+        <div style={{ 
+          marginTop: 24, 
+          paddingTop: 24, 
+          borderTop: '2px solid #e5e7eb',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 20,
+          fontWeight: 600
+        }}>
+          <span>Σύνολο:</span>
+          <span style={{ color: '#16a34a' }}>
+            {new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(total)}
+          </span>
+        </div>
+      </div>
+    </main>
   );
 }

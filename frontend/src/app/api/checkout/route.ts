@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/client';
 import { checkoutApi } from '@/lib/api/checkout';
 import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
+import { sendMailSafe } from '@/lib/mail/mailer';
 
 export async function POST(request: NextRequest) {
   try {
@@ -146,6 +147,60 @@ export async function POST(request: NextRequest) {
         status: order.status
       };
     });
+
+    // EMAIL: customer notification
+    try {
+      const customerEmail = (shipping.email || validatedShipping.phone || buyerPhone) as string;
+      const to = process.env.DIXIS_DEV === '1' ? (process.env.DEV_MAIL_TO || '') : customerEmail;
+      if (to && to.includes('@')) {
+        await sendMailSafe({
+          to,
+          subject: 'Επιβεβαίωση παραγγελίας - Dixis',
+          html: `<p>Η παραγγελία #${result.orderId} καταχωρήθηκε επιτυχώς.</p><p>Σύνολο: ${new Intl.NumberFormat('el-GR', {style:'currency', currency:'EUR'}).format(Number(result.total))}</p>`
+        });
+      }
+    } catch (err) {
+      console.warn('[checkout] customer email failed:', err);
+    }
+
+    // EMAIL: producers notification (group by producer)
+    try {
+      const orderItems = await prisma.orderItem.findMany({
+        where: { orderId: result.orderId },
+        select: { id: true, qty: true, titleSnap: true, producerId: true, priceSnap: true }
+      });
+
+      const groupedByProducer = new Map<string, any[]>();
+      for (const item of orderItems) {
+        const pid = String(item.producerId);
+        if (!groupedByProducer.has(pid)) {
+          groupedByProducer.set(pid, []);
+        }
+        groupedByProducer.get(pid)!.push(item);
+      }
+
+      for (const [producerId, itemsList] of groupedByProducer) {
+        const producer = await prisma.producer.findUnique({
+          where: { id: producerId },
+          select: { email: true, name: true }
+        });
+
+        const to = producer?.email || (process.env.DIXIS_DEV === '1' ? (process.env.DEV_MAIL_TO || '') : '');
+        if (to && to.includes('@')) {
+          const itemsHtml = itemsList.map(it =>
+            `<li>${it.titleSnap} × ${it.qty} (${new Intl.NumberFormat('el-GR', {style:'currency', currency:'EUR'}).format(Number(it.priceSnap) * it.qty)})</li>`
+          ).join('');
+
+          await sendMailSafe({
+            to,
+            subject: 'Νέα παραγγελία - Dixis',
+            html: `<p>Γεια σας ${producer?.name || 'Παραγωγός'},</p><p>Έχετε ${itemsList.length} νέο/α είδος/ηματα στην παραγγελία #${result.orderId}:</p><ul>${itemsHtml}</ul>`
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[checkout] producer emails failed:', err);
+    }
 
     // Emit event + notification stubs
     await (await import('@/lib/events/bus')).emitEvent('order.created', {
