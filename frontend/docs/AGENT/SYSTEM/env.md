@@ -2,8 +2,15 @@
 
 ## Authentication & Session
 
-- ADMIN_PHONES — λίστα τηλεφώνων (comma-separated, E.164) με admin πρόσβαση.  
+- ADMIN_PHONES — λίστα τηλεφώνων (comma-separated, E.164) με admin πρόσβαση.
   Αν δεν οριστεί (dev/CI), ο guard είναι permissive. Σε production **πρέπει** να οριστεί.
+
+## Email / SMTP
+
+- **SMTP_HOST / SMTP_PORT / SMTP_SECURE / SMTP_USER / SMTP_PASS / SMTP_FROM** — ρυθμίσεις SMTP για αποστολή emails.
+  Αν λείπουν → η αποστολή γίνεται **noop** (λογκάρει μόνο).
+- **SMTP_DEV_MAILBOX**=1 — γράφει την τελευταία αποστολή σε `frontend/.tmp/last-mail.json` για γρήγορο έλεγχο.
+- **DEV_MAIL_TO** — προαιρετικό default recipient σε dev.
 
 ## Orders & Admin
 
