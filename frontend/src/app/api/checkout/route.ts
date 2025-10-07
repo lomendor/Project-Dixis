@@ -5,6 +5,28 @@ import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
 import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
+import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
+import { decrementStockAtomic, StockError } from '@/lib/inventory/stock';
+import { z } from 'zod';
+import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
+
+// Comprehensive checkout validation schema
+const CheckoutSchema = z.object({
+  items: z.array(z.object({
+    productId: z.string().min(1, 'Μη έγκυρο προϊόν'),
+    qty: z.number().int().min(1, 'Ελάχιστη ποσότητα 1')
+  })).min(1, 'Το καλάθι είναι άδειο'),
+  shipping: z.object({
+    name: z.string().min(2, 'Ονοματεπώνυμο απαιτείται'),
+    phone: z.string().min(7, 'Τηλέφωνο απαιτείται'),
+    line1: z.string().min(3, 'Διεύθυνση απαιτείται'),
+    line2: z.string().optional(),
+    city: z.string().min(2, 'Πόλη απαιτείται'),
+    postal: z.string().min(3, 'Τ.Κ. απαιτείται'),
+    email: z.string().email('Μη έγκυρο email').optional().or(z.literal('')).transform(v => v === '' ? undefined : v)
+  }),
+  paymentMethod: z.literal('COD').optional().default('COD')
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,67 +42,38 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { items: bodyItems, shipping } = body;
-    let items = Array.isArray(bodyItems) ? bodyItems : undefined;
 
-    // Fallback from backend cart (align with useCheckout/checkoutApi)
-    if (!items || items.length === 0) {
-      try {
-        const result = await checkoutApi.getValidatedCart();
-        if (result.success && result.data) {
-          items = result.data.map((cartLine: any) => ({
-            productId: cartLine.product_id,
-            qty: cartLine.quantity
-          }));
-        }
-      } catch (e) {
-        // If backend cart unavailable, items stays empty and we return 400
-      }
-    }
-
-    if (!items || items.length === 0) {
+    // VALIDATE_INPUT: Comprehensive Zod validation
+    let parsed: z.infer<typeof CheckoutSchema>;
+    try {
+      parsed = CheckoutSchema.parse(body);
+    } catch (e: any) {
+      const firstError = e.errors?.[0];
       return NextResponse.json(
-        { error: 'Το καλάθι είναι άδειο' },
+        {
+          error: firstError?.message || 'Μη έγκυρα δεδομένα',
+          field: firstError?.path?.join('.')
+        },
         { status: 400 }
       );
     }
-
-    // Validate shipping data with Greek phone/postal validation
-    const validation = shippingSchema.safeParse(shipping);
-    if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      const errorMessage = firstError.message.startsWith('errors.')
-        ? t(firstError.message)
-        : firstError.message;
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 400 }
-      );
-    }
-
-    // Use validated data
-    const validatedShipping = validation.data;
+    // Use parsed and validated data
+    const items = parsed.items;
+    const validatedShipping = parsed.shipping;
 
     // Get phone from session (mock for now)
     const buyerPhone = request.headers.get('x-buyer-phone') || '+306912345678';
 
     // Wrap in transaction (oversell-safe)
     const result = await prisma.$transaction(async (tx) => {
-      // Validate stock for all items
-      for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true, price: true, producerId: true }
-        });
-
-        if (!product) {
-          throw new Error(`Product ${item.productId} not found`);
-        }
-
-        if (product.stock < item.qty) {
+      // STOCK: decrement atomically with low-stock warnings
+      try {
+        await decrementStockAtomic(items.map(i => ({ productId: i.productId, qty: Number(i.qty || 0) })), tx);
+      } catch (e: any) {
+        if (e?.code === 'INSUFFICIENT_STOCK') {
           throw new Error('OVERSALE');
         }
+        throw e;
       }
 
       // Calculate subtotal and fetch product snapshots
@@ -92,8 +85,11 @@ export async function POST(request: NextRequest) {
           where: { id: item.productId },
           select: { price: true, producerId: true, title: true }
         });
+        if (!product) {
+          throw new Error(`Product ${item.productId} not found`);
+        }
         productsMap.set(item.productId, product);
-        subtotal += product!.price * item.qty;
+        subtotal += product.price * item.qty;
       }
 
       // SHIPPING: compute
@@ -106,7 +102,7 @@ export async function POST(request: NextRequest) {
           buyerPhone,
           buyerName: validatedShipping.name,
           shippingLine1: validatedShipping.line1,
-          shippingLine2: body.shipping?.line2 || null,
+          shippingLine2: validatedShipping.line2 || null,
           shippingCity: validatedShipping.city,
           shippingPostal: validatedShipping.postal,
           total,
@@ -114,7 +110,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // Create order items and decrement stock atomically
+      // Create order items
       for (const item of items) {
         const product = productsMap.get(item.productId);
 
@@ -130,24 +126,9 @@ export async function POST(request: NextRequest) {
             status: 'PENDING'
           }
         });
-
-        // Atomic decrement with stock validation (prevents race conditions)
-        const res = await tx.product.updateMany({
-          where: {
-            id: item.productId,
-            stock: { gte: item.qty }
-          },
-          data: { stock: { decrement: item.qty } }
-        });
-
-        // If count !== 1, another transaction consumed the stock
-        if (res.count !== 1) {
-          throw new Error('OVERSALE');
-        }
       }
 
       // Note: shipping cost is included in total
-      // If Order model had a 'meta' or 'shippingCost' field, we could store it separately
       console.log(`[checkout] Order ${order.id}: subtotal=${subtotal}, shipping=${shipping}, total=${total}`);
 
       return {
@@ -168,6 +149,41 @@ export async function POST(request: NextRequest) {
       console.warn('[checkout] payment init failed', String(e).substring(0, 100));
     }
 
+    // EMAIL: order confirmation (safe fallback - use new template)
+    try {
+      const email = validatedShipping.email?.trim?.();
+      if (email) {
+        const fullOrder = await prisma.order.findUnique({
+          where: { id: result.orderId },
+          include: { items: true }
+        });
+        if (fullOrder) {
+          await sendMailSafe({
+            to: email,
+            subject: OrderTpl.subject(fullOrder.id),
+            html: OrderTpl.html({
+              id: fullOrder.id,
+              total: Number(fullOrder.total || 0),
+              items: fullOrder.items.map(i => ({
+                title: String(i.titleSnap || ''),
+                qty: Number(i.qty || 0),
+                price: Number(i.price || 0)
+              })),
+              shipping: {
+                name: String(validatedShipping.name || ''),
+                line1: String(validatedShipping.line1 || ''),
+                city: String(validatedShipping.city || ''),
+                postal: String(validatedShipping.postal || ''),
+                phone: String(validatedShipping.phone || '')
+              }
+            })
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('[checkout email] skipped:', (e as Error).message);
+    }
+
     // Emit event + notification stubs
     await (await import('@/lib/events/bus')).emitEvent('order.created', {
       orderId: result.orderId,
@@ -177,6 +193,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      orderId: result.orderId,
       order: result
     }, { headers: rlHeaders(rl) });
 
