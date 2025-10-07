@@ -555,3 +555,14 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/src/app/admin/dashboard/page.tsx` (dashboard page)
   - `frontend/tests/admin/dashboard.spec.ts` (e2e tests)
 - No schema changes, no chart libraries (plain tables)
+
+## Pass 133 — Admin Guard Hardening
+- `requireAdmin()` με ENV allowlist (`ADMIN_PHONES`), permissive αν λείπει (dev/CI)
+- Graceful fallback: αν το ENV δεν είναι ρυθμισμένο, ο guard δεν μπλοκάρει (non-breaking για CI/dev)
+- Σε production **πρέπει** να οριστεί το `ADMIN_PHONES` με comma-separated E.164 phones
+- Helper: `isAdminRequest()` για συνθήκες στα RSC
+- Ενημέρωση `.env.example` και δημιουργία `frontend/docs/AGENT/SYSTEM/env.md`
+- **Files**:
+  - `frontend/src/lib/auth/admin.ts` (hardened guard)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (env documentation)
+  - `.env.example` (ADMIN_PHONES)
