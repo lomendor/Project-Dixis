@@ -1,6 +1,6 @@
 import fs from 'fs'; import path from 'path';
 const ROOTS = ['frontend/src/app','frontend/app'];
-const out = 'docs/AGENT/SYSTEM/routes.md';
+const out = 'frontend/docs/AGENT/SYSTEM/routes.md';
 function walk(dir){
   if(!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).flatMap(name=>{

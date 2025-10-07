@@ -381,3 +381,20 @@ export default function Page() { redirect('/my/orders'); }
 - CI checks will complete automatically
 - Auto-merge will trigger when all checks pass
 - PR #392 will be squashed and merged to main
+
+## Pass AG1.1 — Agent Docs Canonicalization (2025-10-07)
+
+**Στόχος**: Canonical path για Agent Docs: `frontend/docs/AGENT/**`
+
+**Υλοποίηση**:
+- ✅ Μεταφορά root `docs/AGENT/**` → `frontend/docs/AGENT/**`
+- ✅ Ενημέρωση scanners: output → `frontend/docs/AGENT/SYSTEM/`
+- ✅ Αναγέννηση `routes.md` (30+ routes) & `db-schema.md`
+- ✅ Canonical structure established
+
+**Αλλαγές**:
+- scripts/scan-routes.mjs: output → frontend/docs/AGENT/SYSTEM/routes.md
+- scripts/scan-prisma.mjs: output → frontend/docs/AGENT/SYSTEM/db-schema.md
+- frontend/docs/AGENT/: All agent docs unified here
+
+**Επόμενα**: Όλα τα agent docs στο canonical path `frontend/docs/AGENT/`.
