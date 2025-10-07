@@ -655,3 +655,38 @@ export default function Page() { redirect('/my/orders'); }
   - `.env.example` (LOW_STOCK_THRESHOLD)
 - No schema changes, inventory safety enforced
 
+## Pass 138 — Storefront v1
+- **Customer Pages**: EL-first public storefront with full checkout flow
+  - `/` (Home): Featured products, category links, welcome message
+  - `/products`: List with search, category filters, pagination (24/page), stock indicators
+  - `/products/[id]`: Detail page with Add to Cart (qty ≤ stock, disabled if stock=0)
+  - `/cart`: Cart summary with quantity management, subtotal display
+  - `/checkout`: Shipping form + COD payment, calls existing `/api/checkout`
+  - `/checkout/confirmation`: Success page with orderId display
+- **Cart System**: Client-side localStorage with React Context
+  - `CartProvider`: React Context for global cart state
+  - Cart utilities: addItem, setQty, removeItem, clearCart (stock safety enforced)
+  - Persists across page refreshes, serializes to checkout API
+- **Stock Safety**: Client-side validation prevents qty > stock
+  - AddToCartButton enforces maxQty limits
+  - Cart page enforces stock limits on quantity changes
+  - Products show "Εξαντλημένο" badge when stock=0
+- **E2E Tests**: `tests/storefront/browse.spec.ts`
+  - Full flow: Browse → Add to cart → Checkout COD → Confirmation
+  - Search and filter products
+  - Cart quantity management
+  - Empty cart redirects
+- **Files**:
+  - `frontend/src/lib/cart/cart.ts` (cart utilities)
+  - `frontend/src/components/CartProvider.tsx` (React Context)
+  - `frontend/src/app/layout.tsx` (CartProvider wired)
+  - `frontend/src/app/(storefront)/page.tsx` (home page)
+  - `frontend/src/app/(storefront)/products/page.tsx` (product list)
+  - `frontend/src/app/(storefront)/products/[id]/page.tsx` (product detail)
+  - `frontend/src/app/(storefront)/products/[id]/AddToCartButton.tsx` (add to cart)
+  - `frontend/src/app/(storefront)/cart/page.tsx` (cart page)
+  - `frontend/src/app/(storefront)/checkout/page.tsx` (checkout page)
+  - `frontend/src/app/(storefront)/checkout/confirmation/page.tsx` (confirmation)
+  - `frontend/tests/storefront/browse.spec.ts` (e2e tests)
+- No schema changes, no new packages, integrates with existing checkout API
+
