@@ -506,3 +506,31 @@ export default function Page() { redirect('/my/orders'); }
 - Server actions για status changes
 
 **Επόμενα**: Admin analytics dashboard, bulk actions.
+
+## Pass 131 — Admin Orders Utilities (CSV export + pagination + print view) + e2e
+- **CSV Export API**: `/api/admin/orders.csv` με φίλτρα (status, q) που επιστρέφει `text/csv; charset=utf-8` με BOM για Excel
+  - Header row: id, createdAt, status, buyerName, buyerPhone, totalEUR
+  - Proper CSV escaping για quotes και newlines
+  - Filename: `orders-YYYY-MM-DD.csv`
+- **Pagination** στο `/admin/orders`:
+  - ENV: `ADMIN_ORDERS_PAGE_SIZE=20` (default)
+  - Query params: `page`, `pageSize` (max 200)
+  - UI controls: Προηγούμενη/Επόμενη με disabled states
+  - Display: "Σελίδα X από Y (Z συνολικά)"
+  - CSV link preserves filters
+- **Print View**: `/admin/orders/[id]/print`
+  - Full order details (items, totals, shipping address)
+  - Print-friendly styling με `@media print`
+  - EL-first με Greek date/currency formatting
+  - Print button + back link (hidden on print)
+  - Link από detail page: 🖨 Εκτύπωση
+- **E2E Tests**:
+  - CSV: Επιστρέφει 200, BOM + header row, valid structure
+  - Print: Φορτώνει σελίδα, εμφανίζει order info, print button visible
+- **Files**:
+  - `frontend/src/app/api/admin/orders.csv/route.ts` (CSV API)
+  - `frontend/src/app/admin/orders/page.tsx` (pagination + CSV link)
+  - `frontend/src/app/admin/orders/[id]/print/page.tsx` (print view)
+  - `frontend/tests/admin/orders-export-print.spec.ts` (e2e)
+  - `.env.example` (ADMIN_ORDERS_PAGE_SIZE)
+- No schema changes, no new packages
