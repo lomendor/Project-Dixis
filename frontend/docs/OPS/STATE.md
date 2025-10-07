@@ -635,3 +635,9 @@ export default function Page() { redirect('/my/orders'); }
 - Νέα σελίδα `/admin` με KPIs (7ημ orders & revenue, pending, low-stock)
 - Πίνακες: τελευταίες παραγγελίες, top προϊόντα 30 ημερών
 - e2e: render & βασικοί δείκτες
+
+## Pass 151 — Atomic Checkout (stock lock + server-price)
+- Prisma $transaction: stock checks, conditional decrements, order & items snapshots
+- Server-side pricing (DB), 409 on insufficient stock
+- UI: μήνυμα σφάλματος στο checkout
+- e2e: oversell (409) και concurrent checkouts (1 win / 1 fail)

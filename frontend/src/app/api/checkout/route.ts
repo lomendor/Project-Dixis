@@ -1,208 +1,107 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
-import { checkoutApi } from '@/lib/api/checkout';
-import { shippingSchema } from '@/lib/validate';
-import { t } from '@/lib/i18n/t';
-import { computeShipping } from '@/lib/checkout/shipping';
-import { createPaymentIntent } from '@/lib/payments/provider';
 import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
 
 export async function POST(request: NextRequest) {
+  // ATOMIC CHECKOUT BEGIN
   try {
-    // Rate limiting: 10/min per IP (soft guard)
-    const { rateLimit, rlHeaders } = await import('@/lib/rl/db');
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
-    const rl = await rateLimit('checkout', ip, 10, 60, 1);
-    if (!rl.ok) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Πολλές προσπάθειες αγοράς. Δοκιμάστε ξανά σε λίγο.' }),
-        { status: 429, headers: { 'Content-Type': 'application/json', ...rlHeaders(rl) } }
-      );
-    }
+    const payload = await request.json().catch(():null => null) as any;
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    if (!items.length) return NextResponse.json({ error: 'Δεν υπάρχουν είδη στο καλάθι' }, { status: 400 });
 
-    const body = await request.json();
-    const { items: bodyItems, shipping } = body;
-    let items = Array.isArray(bodyItems) ? bodyItems : undefined;
+    // Συλλογή productIds & ποσότητες
+    const want = items.map((i: any) => ({ id: String(i.productId || ''), qty: Math.max(1, Number(i.qty || 0)) }));
+    const ids = Array.from(new Set(want.map((w:any) => w.id).filter(Boolean))) as string[];
+    if (!ids.length) return NextResponse.json({ error: 'Μη έγκυρα είδη' }, { status: 400 });
 
-    // Fallback from backend cart (align with useCheckout/checkoutApi)
-    if (!items || items.length === 0) {
-      try {
-        const result = await checkoutApi.getValidatedCart();
-        if (result.success && result.data) {
-          items = result.data.map((cartLine: any) => ({
-            productId: cartLine.product_id,
-            qty: cartLine.quantity
-          }));
-        }
-      } catch (e) {
-        // If backend cart unavailable, items stays empty and we return 400
-      }
-    }
-
-    if (!items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Το καλάθι είναι άδειο' },
-        { status: 400 }
-      );
-    }
-
-    // Validate shipping data with Greek phone/postal validation
-    const validation = shippingSchema.safeParse(shipping);
-    if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      const errorMessage = firstError.message.startsWith('errors.')
-        ? t(firstError.message)
-        : firstError.message;
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 400 }
-      );
-    }
-
-    // Use validated data
-    const validatedShipping = validation.data;
-
-    // Get phone from session (mock for now)
-    const buyerPhone = request.headers.get('x-buyer-phone') || '+306912345678';
-
-    // Wrap in transaction (oversell-safe)
     const result = await prisma.$transaction(async (tx) => {
-      // Validate stock for all items
-      for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true, price: true, producerId: true }
-        });
+      // Διαβάζουμε τα προϊόντα από DB
+      const products = await tx.product.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, price: true, stock: true, isActive: true, producerId: true } });
+      if (products.length !== ids.length) throw Object.assign(new Error('Κάποια προϊόντα δεν βρέθηκαν'), { code: 400 });
 
-        if (!product) {
-          throw new Error(`Product ${item.productId} not found`);
-        }
-
-        if (product.stock < item.qty) {
-          throw new Error('OVERSALE');
-        }
-      }
-
-      // Calculate subtotal and fetch product snapshots
-      let subtotal = 0;
-      const productsMap = new Map();
-
-      for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { price: true, producerId: true, title: true }
-        });
-        productsMap.set(item.productId, product);
-        subtotal += product!.price * item.qty;
-      }
-
-      // SHIPPING: compute
-      const shipping = computeShipping(subtotal);
-      const total = subtotal + shipping;
-
-      // Create order (use validated shipping data)
-      const order = await tx.order.create({
-        data: {
-          buyerPhone,
-          buyerName: validatedShipping.name,
-          shippingLine1: validatedShipping.line1,
-          shippingLine2: body.shipping?.line2 || null,
-          shippingCity: validatedShipping.city,
-          shippingPostal: validatedShipping.postal,
-          total,
-          status: 'pending'
-        }
+      // Map για lookup
+      const byId = new Map(products.map(p => [p.id, p]));
+      // Συνθέτουμε order lines από DB (όχι client τιμές)
+      const lines = want.map((w:any) => {
+        const p = byId.get(w.id);
+        if (!p) throw Object.assign(new Error('Το προϊόν δεν βρέθηκε'), { code: 400 });
+        if (!p.isActive) throw Object.assign(new Error(`Το προϊόν "${p.title}" δεν είναι διαθέσιμο`), { code: 400 });
+        return { id: p.id, title: p.title, qty: w.qty, price: Number(p.price || 0), stock: Number(p.stock || 0), producerId: p.producerId };
       });
 
-      // Create order items and decrement stock atomically
-      for (const item of items) {
-        const product = productsMap.get(item.productId);
+      // Έλεγχος stock
+      const insufficient = lines.filter((l:any) => l.qty > l.stock);
+      if (insufficient.length) {
+        const names = insufficient.slice(0, 3).map((l:any) => `"${l.title}"`).join(', ');
+        throw Object.assign(new Error(`Μη διαθέσιμο απόθεμα για: ${names}`), { code: 409 });
+      }
 
-        await tx.orderItem.create({
-          data: {
-            orderId: order.id,
-            productId: item.productId,
-            producerId: product!.producerId,
-            qty: item.qty,
-            price: product!.price,
-            titleSnap: product!.title,
-            priceSnap: product!.price,
-            status: 'PENDING'
-          }
+      // Μειώνουμε stock conditionally (ώστε να αποτύχει αν άλλαξε stock μεταξύ ελέγχου)
+      for (const l of lines) {
+        const r = await tx.product.updateMany({
+          where: { id: l.id, stock: { gte: l.qty } },
+          data: { stock: { decrement: l.qty } }
         });
-
-        // Atomic decrement with stock validation (prevents race conditions)
-        const res = await tx.product.updateMany({
-          where: {
-            id: item.productId,
-            stock: { gte: item.qty }
-          },
-          data: { stock: { decrement: item.qty } }
-        });
-
-        // If count !== 1, another transaction consumed the stock
-        if (res.count !== 1) {
-          throw new Error('OVERSALE');
+        if (r.count !== 1) {
+          throw Object.assign(new Error(`Το απόθεμα ενημερώθηκε για "${l.title}", προσπαθήστε ξανά`), { code: 409 });
         }
       }
 
-      // Note: shipping cost is included in total
-      // If Order model had a 'meta' or 'shippingCost' field, we could store it separately
-      console.log(`[checkout] Order ${order.id}: subtotal=${subtotal}, shipping=${shipping}, total=${total}`);
+      // Υπολογισμός συνόλου από DB τιμές
+      const total = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
 
-      return {
-        orderId: order.id,
-        total: order.total,
-        subtotal,
-        shipping,
-        status: order.status
-      };
-    });
+      // Δημιουργία παραγγελίας + items (snapshots)
+      const order = await tx.order.create({
+        data: {
+          status: 'PENDING',
+          total,
+          buyerName: String(payload?.shipping?.name || ''),
+          buyerPhone: String(payload?.shipping?.phone || ''),
+          shippingLine1: String(payload?.shipping?.line1 || ''),
+          shippingLine2: String(payload?.shipping?.line2 || ''),
+          shippingCity: String(payload?.shipping?.city || ''),
+          shippingPostal: String(payload?.shipping?.postal || ''),
+          items: {
+            create: lines.map((l:any) => ({
+              productId: l.id,
+              producerId: l.producerId,
+              qty: l.qty,
+              price: l.price,
+              titleSnap: l.title,
+              priceSnap: l.price,
+              status: 'PENDING'
+            }))
+          }
+        },
+        select: { id: true, total: true }
+      });
 
-    // PAYMENT: create (COD fallback)
-    try {
-      const amountCents = Math.round(result.total * 100);
-      const pay = await createPaymentIntent({ amount: amountCents, method: 'cod' });
-      console.log('[checkout] payment', pay);
-    } catch (e) {
-      console.warn('[checkout] payment init failed', String(e).substring(0, 100));
-    }
-
-    // Emit event + notification stubs
-    await (await import('@/lib/events/bus')).emitEvent('order.created', {
-      orderId: result.orderId,
-      items,
-      shipping: validatedShipping
+      return { orderId: order.id, total: order.total, lines };
     });
 
     // EMAIL: order confirmation (with tracking link)
     try {
-      const email = body?.shipping?.email?.trim?.();
+      const email = payload?.shipping?.email?.trim?.();
       if (email) {
-        const orderItems = await prisma.orderItem.findMany({
-          where: { orderId: result.orderId },
-          select: { titleSnap: true, qty: true, price: true }
-        });
         await sendMailSafe({
           to: email,
           subject: OrderTpl.subject(result.orderId),
           html: OrderTpl.html({
             id: result.orderId,
             total: Number(result.total || 0),
-            items: orderItems.map((i) => ({
-              title: String(i.titleSnap || ''),
+            items: result.lines.map((i: any) => ({
+              title: String(i.title || ''),
               qty: Number(i.qty || 0),
               price: Number(i.price || 0)
             })),
             shipping: {
-              name: String(validatedShipping.name || ''),
-              line1: String(validatedShipping.line1 || ''),
-              city: String(validatedShipping.city || ''),
-              postal: String(validatedShipping.postal || ''),
-              phone: String(validatedShipping.phone || '')
+              name: String(payload?.shipping?.name || ''),
+              line1: String(payload?.shipping?.line1 || ''),
+              city: String(payload?.shipping?.city || ''),
+              postal: String(payload?.shipping?.postal || ''),
+              phone: String(payload?.shipping?.phone || '')
             }
           })
         });
@@ -214,9 +113,7 @@ export async function POST(request: NextRequest) {
     // EMAIL: low-stock admin (threshold from env, default 3)
     try {
       const threshold = parseInt(String(process.env.LOW_STOCK_THRESHOLD || '3')) || 3;
-      const pids = Array.from(
-        new Set((items || []).map((i: any) => String(i.productId)).filter(Boolean))
-      );
+      const pids = result.lines.map((l: any) => l.id);
       if (pids.length) {
         const products = await prisma.product.findMany({
           where: { id: { in: pids } },
@@ -243,22 +140,14 @@ export async function POST(request: NextRequest) {
       console.warn('[mail] low-stock admin failed:', (e as Error).message);
     }
 
-    return NextResponse.json({
-      success: true,
-      order: result
-    }, { headers: rlHeaders(rl) });
-
+    // ΕΠΙΤΥΧΙΑ
+    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
   } catch (e: any) {
-    if (String(e.message || '').includes('OVERSALE')) {
-      return NextResponse.json(
-        { error: 'Ανεπαρκές απόθεμα' },
-        { status: 409 }
-      );
-    }
-    console.error('Checkout error:', e);
-    return NextResponse.json(
-      { error: 'Σφάλμα κατά την ολοκλήρωση της παραγγελίας' },
-      { status: 500 }
-    );
+    const code = Number(e?.code || 0);
+    if (code === 409) return NextResponse.json({ error: e.message || 'Μη διαθέσιμο απόθεμα' }, { status: 409 });
+    if (code === 400) return NextResponse.json({ error: e.message || 'Μη έγκυρα δεδομένα' }, { status: 400 });
+    console.warn('[checkout] atomic error:', e?.message);
+    return NextResponse.json({ error: 'Σφάλμα παραγγελίας' }, { status: 500 });
   }
+  // ATOMIC CHECKOUT END
 }
