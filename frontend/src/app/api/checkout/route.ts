@@ -7,6 +7,25 @@ import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
 import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
 import { decrementStockAtomic, StockError } from '@/lib/inventory/stock';
+import { z } from 'zod';
+
+// Comprehensive checkout validation schema
+const CheckoutSchema = z.object({
+  items: z.array(z.object({
+    productId: z.string().min(1, 'Μη έγκυρο προϊόν'),
+    qty: z.number().int().min(1, 'Ελάχιστη ποσότητα 1')
+  })).min(1, 'Το καλάθι είναι άδειο'),
+  shipping: z.object({
+    name: z.string().min(2, 'Ονοματεπώνυμο απαιτείται'),
+    phone: z.string().min(7, 'Τηλέφωνο απαιτείται'),
+    line1: z.string().min(3, 'Διεύθυνση απαιτείται'),
+    line2: z.string().optional(),
+    city: z.string().min(2, 'Πόλη απαιτείται'),
+    postal: z.string().min(3, 'Τ.Κ. απαιτείται'),
+    email: z.string().email('Μη έγκυρο email').optional().or(z.literal('')).transform(v => v === '' ? undefined : v)
+  }),
+  paymentMethod: z.literal('COD').optional().default('COD')
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,47 +41,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { items: bodyItems, shipping } = body;
-    let items = Array.isArray(bodyItems) ? bodyItems : undefined;
 
-    // Fallback from backend cart (align with useCheckout/checkoutApi)
-    if (!items || items.length === 0) {
-      try {
-        const result = await checkoutApi.getValidatedCart();
-        if (result.success && result.data) {
-          items = result.data.map((cartLine: any) => ({
-            productId: cartLine.product_id,
-            qty: cartLine.quantity
-          }));
-        }
-      } catch (e) {
-        // If backend cart unavailable, items stays empty and we return 400
-      }
-    }
-
-    if (!items || items.length === 0) {
+    // VALIDATE_INPUT: Comprehensive Zod validation
+    let parsed: z.infer<typeof CheckoutSchema>;
+    try {
+      parsed = CheckoutSchema.parse(body);
+    } catch (e: any) {
+      const firstError = e.errors?.[0];
       return NextResponse.json(
-        { error: 'Το καλάθι είναι άδειο' },
+        {
+          error: firstError?.message || 'Μη έγκυρα δεδομένα',
+          field: firstError?.path?.join('.')
+        },
         { status: 400 }
       );
     }
-
-    // Validate shipping data with Greek phone/postal validation
-    const validation = shippingSchema.safeParse(shipping);
-    if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      const errorMessage = firstError.message.startsWith('errors.')
-        ? t(firstError.message)
-        : firstError.message;
-
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 400 }
-      );
-    }
-
-    // Use validated data
-    const validatedShipping = validation.data;
+    // Use parsed and validated data
+    const items = parsed.items;
+    const validatedShipping = parsed.shipping;
 
     // Get phone from session (mock for now)
     const buyerPhone = request.headers.get('x-buyer-phone') || '+306912345678';
@@ -105,7 +101,7 @@ export async function POST(request: NextRequest) {
           buyerPhone,
           buyerName: validatedShipping.name,
           shippingLine1: validatedShipping.line1,
-          shippingLine2: body.shipping?.line2 || null,
+          shippingLine2: validatedShipping.line2 || null,
           shippingCity: validatedShipping.city,
           shippingPostal: validatedShipping.postal,
           total,
@@ -192,6 +188,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      orderId: result.orderId,
       order: result
     }, { headers: rlHeaders(rl) });
 

@@ -53,10 +53,11 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Αποτυχία ολοκλήρωσης παραγγελίας');
       }
 
-      // Clear cart and redirect to confirmation
+      // Clear cart and redirect to confirm page
+      const orderId = data.orderId || data.order?.orderId || data.id;
       C.clearCart();
       refresh();
-      router.push(`/checkout/confirmation?orderId=${data.orderId || data.order?.orderId || data.id}`);
+      router.push(`/checkout/confirm/${orderId}`);
     } catch (err: any) {
       setError(err.message || 'Παρουσιάστηκε σφάλμα');
     } finally {

@@ -690,3 +690,34 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/tests/storefront/browse.spec.ts` (e2e tests)
 - No schema changes, no new packages, integrates with existing checkout API
 
+## Pass 139 — Checkout Hardening
+- **Server Validation**: Comprehensive Zod validation in `/api/checkout`
+  - Items validation: non-empty array, productId required, qty ≥1
+  - Shipping validation: all required fields (name, phone, line1, city, postal)
+  - Email validation: optional but must be valid format if provided
+  - Payment method: COD only (literal validation)
+  - Error responses: 400 with `{error, field?}` structure in Greek
+- **Confirm Page**: `/checkout/confirm/[id]` (EL-first)
+  - Displays order ID, date, status, total
+  - Shows shipping address
+  - Info box with next steps (email, COD payment, updates)
+  - Links to home and continue shopping
+  - Dynamic rendering to fetch order details
+- **Client Redirect**: Checkout now redirects to `/checkout/confirm/[orderId]`
+  - No more alert messages
+  - Cart cleared on successful checkout
+  - Clean URL structure with order ID
+- **E2E Tests**: `tests/storefront/checkout-hardening.spec.ts`
+  - Test 1: Empty cart blocked (400)
+  - Test 2: Missing shipping data blocked (400)
+  - Test 3: Invalid quantity blocked (400)
+  - Test 4: Invalid email blocked (400)
+  - Test 5: Happy path redirects to confirm page
+- **Files**:
+  - `frontend/src/app/api/checkout/route.ts` (Zod validation)
+  - `frontend/src/app/checkout/confirm/[id]/page.tsx` (confirm page)
+  - `frontend/src/app/checkout/page.tsx` (redirect update)
+  - `frontend/tests/storefront/checkout-hardening.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 139 docs)
+- No schema changes, Zod already installed
+
