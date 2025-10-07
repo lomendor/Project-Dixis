@@ -1,9 +1,11 @@
 import { prisma } from '@/lib/db/client';
+import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
 
+export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
 
 const transitions: Record<string, string[]> = {
@@ -14,11 +16,6 @@ const transitions: Record<string, string[]> = {
   DELIVERED: [],
   CANCELLED: []
 };
-
-async function checkAdmin() {
-  const { requireAdmin } = await import('@/lib/auth/admin');
-  await requireAdmin();
-}
 
 async function changeStatusAction(orderId: string, newStatus: string) {
   'use server';
@@ -49,7 +46,7 @@ export default async function AdminOrderDetailPage({
 }: {
   params: { id: string };
 }) {
-  await checkAdmin();
+  await requireAdmin?.();
 
   const id = params.id;
   const order = await prisma.order.findUnique({
