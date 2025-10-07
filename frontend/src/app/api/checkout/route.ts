@@ -5,6 +5,7 @@ import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
 import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
+import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
 
 export async function POST(request: NextRequest) {
   try {
@@ -166,6 +167,37 @@ export async function POST(request: NextRequest) {
       console.log('[checkout] payment', pay);
     } catch (e) {
       console.warn('[checkout] payment init failed', String(e).substring(0, 100));
+    }
+
+    // EMAIL: order confirmation (safe fallback)
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: result.orderId },
+        include: { items: true }
+      });
+      if (fullOrder) {
+        const { subject, html, text } = await renderOrderEmail('confirm', {
+          id: fullOrder.id,
+          buyerName: fullOrder.buyerName || undefined,
+          buyerEmail: (fullOrder as any).customerEmail || undefined,
+          total: Number(fullOrder.total || 0),
+          createdAt: fullOrder.createdAt,
+          shippingLine1: fullOrder.shippingLine1 || undefined,
+          shippingCity: fullOrder.shippingCity || undefined,
+          shippingPostal: fullOrder.shippingPostal || undefined,
+          items: fullOrder.items.map(i => ({
+            titleSnap: i.titleSnap || undefined,
+            qty: i.qty,
+            price: i.price
+          }))
+        });
+        const toEmail = (fullOrder as any).customerEmail || process.env.DEV_MAIL_TO || '';
+        if (toEmail) {
+          await sendMailSafe({ to: toEmail, subject, html, text });
+        }
+      }
+    } catch (e) {
+      console.warn('[checkout email] skipped:', (e as Error).message);
     }
 
     // Emit event + notification stubs
