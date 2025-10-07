@@ -528,3 +528,43 @@ export default function Page() { redirect('/my/orders'); }
 - No schema changes, no new dependencies
 - Greek-first UI with status timeline visualization
 - Server-side security: phone normalization (strip spaces, lowercase) for matching
+
+## Pass 147 — Mail Reconcile + Tracking Links
+- **Mailer Infrastructure** (`frontend/src/lib/mail/`):
+  - `mailer.ts`: sendMailSafe() with dev mailbox integration
+  - `devMailbox.ts`: Filesystem-based email storage for testing
+  - Dev mailbox API: `/api/dev/mailbox` (GET endpoint)
+- **Order Confirmation Template** (`orderConfirmation.ts`):
+  - Greek-first email with order details
+  - Tracking link: `/orders/track/{id}?phone={phone}`
+  - Items table, total, shipping address
+- **Checkout Integration** (`frontend/src/app/api/checkout/route.ts`):
+  - Sends confirmation email after successful order
+  - Uses orderConfirmation template with tracking link
+  - Graceful error handling (logs warning, doesn't fail checkout)
+- **Confirm Page** (`/order/confirmation/[orderId]/page.tsx`):
+  - Added "Παρακολούθηση παραγγελίας »" CTA button
+  - Links to tracking page with order ID + phone
+- **Admin Order Page** (`/admin/orders/[id]/page.tsx`):
+  - "Copy Tracking Link" button in actions sidebar
+  - Client component for clipboard API
+  - Copies full tracking URL with phone param
+- **E2E Tests**:
+  - `email-tracking.spec.ts`: Verifies email contains tracking link in dev mailbox
+  - `tracking-link.spec.ts`: Verifies admin page shows copy button
+- **Files**:
+  - `frontend/src/lib/mail/mailer.ts` (sendMailSafe)
+  - `frontend/src/lib/mail/devMailbox.ts` (dev mailbox system)
+  - `frontend/src/lib/mail/templates/orderConfirmation.ts` (email template with tracking link)
+  - `frontend/src/app/api/dev/mailbox/route.ts` (dev API)
+  - `frontend/src/app/api/checkout/route.ts` (email integration)
+  - `frontend/src/app/order/confirmation/[orderId]/page.tsx` (tracking CTA)
+  - `frontend/src/app/admin/orders/[id]/page.tsx` (copy link button)
+  - `frontend/src/app/admin/orders/[id]/CopyTrackingLink.tsx` (client component)
+  - `frontend/tests/checkout/email-tracking.spec.ts` (e2e email test)
+  - `frontend/tests/admin/tracking-link.spec.ts` (e2e admin test)
+  - `.env.example` (SMTP_DEV_MAILBOX, DEV_MAIL_TO)
+  - `frontend/docs/OPS/STATE.md` (Pass 147 docs)
+- No schema changes, no new dependencies
+- Graceful email failures (log only, don't break checkout)
+- Dev mailbox system for reliable testing (SMTP_DEV_MAILBOX=1)

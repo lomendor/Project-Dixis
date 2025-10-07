@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/client';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { CopyTrackingLink } from './CopyTrackingLink';
 
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
 
@@ -187,7 +188,13 @@ export default async function AdminOrderDetailPage({
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow p-6 sticky top-4">
             <h2 className="text-xl font-semibold mb-4">Ενέργειες</h2>
-            
+
+            {/* Tracking Link */}
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <p className="text-sm text-gray-600 mb-2">Tracking Link:</p>
+              <CopyTrackingLink orderId={order.id} phone={String((order as any).buyerPhone || '')} />
+            </div>
+
             {availableTransitions.length > 0 ? (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600 mb-3">Αλλαγή κατάστασης:</p>
