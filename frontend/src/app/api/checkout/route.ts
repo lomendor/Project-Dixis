@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { checkoutApi } from '@/lib/api/checkout';
+import { shippingSchema } from '@/lib/validate';
+import { t } from '@/lib/i18n/t';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,12 +43,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!shipping || !shipping.name || !shipping.line1 || !shipping.city || !shipping.postal) {
+    // Validate shipping data with Greek phone/postal validation
+    const validation = shippingSchema.safeParse(shipping);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      const errorMessage = firstError.message.startsWith('errors.')
+        ? t(firstError.message)
+        : firstError.message;
+
       return NextResponse.json(
-        { error: 'Η διεύθυνση αποστολής είναι υποχρεωτική' },
+        { error: errorMessage },
         { status: 400 }
       );
     }
+
+    // Use validated data
+    const validatedShipping = validation.data;
 
     // Get phone from session (mock for now)
     const buyerPhone = request.headers.get('x-buyer-phone') || '+306912345678';
@@ -82,15 +94,15 @@ export async function POST(request: NextRequest) {
         total += product!.price * item.qty;
       }
 
-      // Create order
+      // Create order (use validated shipping data)
       const order = await tx.order.create({
         data: {
           buyerPhone,
-          buyerName: shipping.name,
-          shippingLine1: shipping.line1,
+          buyerName: validatedShipping.name,
+          shippingLine1: validatedShipping.line1,
           shippingLine2: shipping.line2 || null,
-          shippingCity: shipping.city,
-          shippingPostal: shipping.postal,
+          shippingCity: validatedShipping.city,
+          shippingPostal: validatedShipping.postal,
           total,
           status: 'pending'
         }
