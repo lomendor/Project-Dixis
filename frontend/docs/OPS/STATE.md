@@ -506,3 +506,25 @@ export default function Page() { redirect('/my/orders'); }
 - Server actions για status changes
 
 **Επόμενα**: Admin analytics dashboard, bulk actions.
+
+## Pass 146 — Public Order Tracking
+- **Lookup Page** (`/orders/lookup`): Φόρμα με ID παραγγελίας + κινητό → redirect στο tracking
+- **Redirect Helper** (`/orders/track`): GET με query params → redirect στο dynamic route
+- **Tracking Page** (`/orders/track/[id]`):
+  - Δημόσια προβολή κατάστασης παραγγελίας
+  - Server-side phone verification guard (normalized comparison)
+  - Εμφάνιση: order ID, status timeline, items table, total
+  - Αν δεν ταιριάζει το τηλέφωνο → "Δεν βρέθηκε παραγγελία"
+- **E2E Tests** (`frontend/tests/storefront/track.spec.ts`):
+  - Test 1: Correct phone → tracking page με order details
+  - Test 2: Wrong phone → error message (no data exposure)
+  - Uses producer auth, creates test product + order
+- **Files**:
+  - `frontend/src/app/orders/lookup/page.tsx` (lookup form)
+  - `frontend/src/app/orders/track/page.tsx` (redirect helper)
+  - `frontend/src/app/orders/track/[id]/page.tsx` (tracking page with phone guard)
+  - `frontend/tests/storefront/track.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 146 docs)
+- No schema changes, no new dependencies
+- Greek-first UI with status timeline visualization
+- Server-side security: phone normalization (strip spaces, lowercase) for matching
