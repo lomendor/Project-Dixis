@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/client';
+import { requireProducer } from '@/lib/auth/requireProducer';
 import { setOrderItemStatus } from './actions/actions';
 
 const TABS = ['PENDING', 'ACCEPTED', 'REJECTED', 'FULFILLED'] as const;
@@ -38,11 +39,18 @@ export default async function Page({
 }: {
   searchParams: Record<string, string | undefined>;
 }) {
+  // Require authenticated producer and scope orders to their products
+  const producer = await requireProducer();
+
   const tab = (searchParams?.tab || 'PENDING').toUpperCase();
   const cur = TABS.includes(tab as any) ? tab : 'PENDING';
 
+  // Fetch only order items for products belonging to this producer
   const rows = await prisma.orderItem.findMany({
-    where: { status: cur.toLowerCase() },
+    where: {
+      status: cur.toLowerCase(),
+      producerId: producer.id // Critical: scope to producer's orders only
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,

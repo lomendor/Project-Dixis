@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/db/client';
+import { requireProducer } from '@/lib/auth/requireProducer';
 import { revalidatePath } from 'next/cache';
 
 // Allowed status transitions
@@ -16,9 +17,15 @@ export async function setOrderItemStatus(
   next: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'FULFILLED'
 ) {
   try {
-    // Get current status
-    const item = await prisma.orderItem.findUnique({
-      where: { id },
+    // Require producer authentication
+    const producer = await requireProducer();
+
+    // Get current status and verify item belongs to producer
+    const item = await prisma.orderItem.findFirst({
+      where: {
+        id,
+        producerId: producer.id // Critical: ensure item belongs to producer
+      },
       select: { status: true }
     });
 
@@ -33,10 +40,22 @@ export async function setOrderItemStatus(
       return { ok: false, error: 'Μη επιτρεπτή μετάβαση κατάστασης.' };
     }
 
-    // Update status
-    const updated = await prisma.orderItem.update({
+    // Update status (use updateMany for additional safety check)
+    const result = await prisma.orderItem.updateMany({
+      where: {
+        id,
+        producerId: producer.id // Double-check ownership
+      },
+      data: { status: next.toLowerCase() }
+    });
+
+    if (result.count === 0) {
+      return { ok: false, error: 'Δεν βρέθηκε η γραμμή παραγγελίας.' };
+    }
+
+    // Fetch updated record for event emission
+    const updated = await prisma.orderItem.findUnique({
       where: { id },
-      data: { status: next.toLowerCase() },
       select: { id: true, orderId: true, titleSnap: true, order: { select: { buyerPhone: true } } }
     });
 
