@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db/client';
 import { checkoutApi } from '@/lib/api/checkout';
 import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
+import { computeShipping } from '@/lib/checkout/shipping';
+import { createPaymentIntent } from '@/lib/payments/provider';
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,8 +83,8 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Calculate total and fetch product snapshots
-      let total = 0;
+      // Calculate subtotal and fetch product snapshots
+      let subtotal = 0;
       const productsMap = new Map();
 
       for (const item of items) {
@@ -91,8 +93,12 @@ export async function POST(request: NextRequest) {
           select: { price: true, producerId: true, title: true }
         });
         productsMap.set(item.productId, product);
-        total += product!.price * item.qty;
+        subtotal += product!.price * item.qty;
       }
+
+      // SHIPPING: compute
+      const shipping = computeShipping(subtotal);
+      const total = subtotal + shipping;
 
       // Create order (use validated shipping data)
       const order = await tx.order.create({
@@ -100,7 +106,7 @@ export async function POST(request: NextRequest) {
           buyerPhone,
           buyerName: validatedShipping.name,
           shippingLine1: validatedShipping.line1,
-          shippingLine2: shipping.line2 || null,
+          shippingLine2: body.shipping?.line2 || null,
           shippingCity: validatedShipping.city,
           shippingPostal: validatedShipping.postal,
           total,
@@ -140,18 +146,33 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Note: shipping cost is included in total
+      // If Order model had a 'meta' or 'shippingCost' field, we could store it separately
+      console.log(`[checkout] Order ${order.id}: subtotal=${subtotal}, shipping=${shipping}, total=${total}`);
+
       return {
         orderId: order.id,
         total: order.total,
+        subtotal,
+        shipping,
         status: order.status
       };
     });
+
+    // PAYMENT: create (COD fallback)
+    try {
+      const amountCents = Math.round(result.total * 100);
+      const pay = await createPaymentIntent({ amount: amountCents, method: 'cod' });
+      console.log('[checkout] payment', pay);
+    } catch (e) {
+      console.warn('[checkout] payment init failed', String(e).substring(0, 100));
+    }
 
     // Emit event + notification stubs
     await (await import('@/lib/events/bus')).emitEvent('order.created', {
       orderId: result.orderId,
       items,
-      shipping
+      shipping: validatedShipping
     });
 
     return NextResponse.json({

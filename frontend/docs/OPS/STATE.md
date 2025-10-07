@@ -428,3 +428,36 @@ export default function Page() { redirect('/my/orders'); }
 - Logs: Εμφανίζουν count routes & bytes
 
 **Επόμενα**: Scanners λειτουργούν σωστά από οποιοδήποτε directory.
+
+## Pass 129 — Checkout polish (Shipping + Payment abstraction w/ COD) (2025-10-07)
+
+**Στόχος**: Προσθήκη υπολογισμού μεταφορικών και payment abstraction με COD fallback.
+
+**Υλοποίηση**:
+- ✅ Shipping calculator: `lib/checkout/shipping.ts`
+  - Flat fee: `SHIPPING_FLAT_EUR` (default 3.5€)
+  - Free over threshold: `SHIPPING_FREE_OVER_EUR` (default 35€)
+- ✅ Payment abstraction: `lib/payments/provider.ts`
+  - COD fallback (Stripe to be added later)
+  - `createPaymentIntent()` returns COD by default
+- ✅ Quote API: `/api/checkout/quote`
+  - POST with `{ subtotal }` → returns `{ subtotal, shipping, total }`
+- ✅ Checkout route updated:
+  - Imports `computeShipping` and `createPaymentIntent`
+  - Calculates subtotal → shipping → total
+  - Stores in order.meta (best-effort)
+  - Creates COD payment intent
+- ✅ ShippingSummary component: EL-first cost breakdown
+- ✅ E2E tests: below/above threshold scenarios
+- ✅ ENV: `SHIPPING_FLAT_EUR`, `SHIPPING_FREE_OVER_EUR`
+
+**Αρχεία**:
+- frontend/src/lib/checkout/shipping.ts
+- frontend/src/lib/payments/provider.ts
+- frontend/src/app/api/checkout/quote/route.ts
+- frontend/src/app/api/checkout/route.ts (updated)
+- frontend/src/components/ShippingSummary.tsx
+- frontend/tests/checkout/shipping-fee.spec.ts
+- .env.example
+
+**Επόμενα**: Stripe/Viva integration σε επόμενο pass.
