@@ -5,6 +5,8 @@ import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
 import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
+import { sendMailSafe } from '@/lib/mail/mailer';
+import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -174,6 +176,39 @@ export async function POST(request: NextRequest) {
       items,
       shipping: validatedShipping
     });
+
+    // EMAIL: order confirmation (with tracking link)
+    try {
+      const email = body?.shipping?.email?.trim?.();
+      if (email) {
+        const orderItems = await prisma.orderItem.findMany({
+          where: { orderId: result.orderId },
+          select: { titleSnap: true, qty: true, price: true }
+        });
+        await sendMailSafe({
+          to: email,
+          subject: OrderTpl.subject(result.orderId),
+          html: OrderTpl.html({
+            id: result.orderId,
+            total: Number(result.total || 0),
+            items: orderItems.map((i) => ({
+              title: String(i.titleSnap || ''),
+              qty: Number(i.qty || 0),
+              price: Number(i.price || 0)
+            })),
+            shipping: {
+              name: String(validatedShipping.name || ''),
+              line1: String(validatedShipping.line1 || ''),
+              city: String(validatedShipping.city || ''),
+              postal: String(validatedShipping.postal || ''),
+              phone: String(validatedShipping.phone || '')
+            }
+          })
+        });
+      }
+    } catch (e) {
+      console.warn('[mail] order confirmation failed:', (e as Error).message);
+    }
 
     return NextResponse.json({
       success: true,

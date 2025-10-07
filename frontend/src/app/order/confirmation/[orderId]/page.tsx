@@ -331,6 +331,14 @@ export default function OrderConfirmationPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
+              href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/orders/track/${order.id}?phone=${encodeURIComponent(order.shippingAddress.phone || '')}`}
+              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
+              data-testid="track-order-btn"
+            >
+              Παρακολούθηση παραγγελίας »
+            </Link>
+
+            <Link
               href="/"
               className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-center font-medium"
               data-testid="continue-shopping-btn"
