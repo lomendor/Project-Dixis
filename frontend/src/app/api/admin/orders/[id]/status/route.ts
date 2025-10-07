@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
+import { restockFromOrder } from '@/lib/inventory/stock';
 
 // Admin check helper
 async function checkAdmin(req: Request): Promise<boolean> {
@@ -64,6 +65,20 @@ export async function POST(
       where: { id },
       data: { status: to }
     });
+
+    // RESTOCK on CANCELLED (only if status became CANCELLED and wasn't already)
+    try {
+      const was = String(order.status || 'PENDING').toUpperCase();
+      const now = String(updated.status || 'PENDING').toUpperCase();
+      if (now === 'CANCELLED' && was !== 'CANCELLED') {
+        await prisma.$transaction(async (tx) => {
+          await restockFromOrder(updated.id, tx);
+        });
+        console.log('[order] restocked items for', updated.id);
+      }
+    } catch (e: any) {
+      console.warn('[order] restock failed:', e?.message);
+    }
 
     // EMAIL: status update notification (safe fallback)
     try {

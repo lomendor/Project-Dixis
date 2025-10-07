@@ -632,3 +632,26 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/src/app/producer/{products,orders,onboarding}/page.tsx` (redirects)
   - `frontend/tests/producer/isolation.spec.ts` (e2e test)
 - No schema changes, multi-tenant safety enforced
+
+## Pass 137 — Inventory Guards
+- **Checkout**: Atomic stock decrement with oversell protection (Prisma $transaction)
+  - Uses `decrementStockAtomic()` helper inside transaction
+  - Throws StockError if insufficient stock → returns 400 with Greek error message
+  - Low stock warnings when stock < threshold (ENV: LOW_STOCK_THRESHOLD)
+  - Optional admin email notification (DEV_MAIL_TO) for low stock
+- **Admin CANCELLED**: Automatic restock of items
+  - Restocks items when order status changes to CANCELLED (one-time only)
+  - Transaction-safe increment of product stock
+  - Logs restock activity
+- **E2E Tests**: `tests/checkout/stock.spec.ts`
+  - Test 1: Successful checkout decrements stock
+  - Test 2: Oversell blocked (qty > stock returns 400)
+  - Test 3: Cancel → restock items
+- **Files**:
+  - `frontend/src/lib/inventory/stock.ts` (atomic ops helper)
+  - `frontend/src/app/api/checkout/route.ts` (integrated atomic decrement)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (restock on cancel)
+  - `frontend/tests/checkout/stock.spec.ts` (e2e tests)
+  - `.env.example` (LOW_STOCK_THRESHOLD)
+- No schema changes, inventory safety enforced
+
