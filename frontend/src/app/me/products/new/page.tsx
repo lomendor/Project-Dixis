@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
 import type { Prisma } from '@prisma/client';
+import ImageUploadField from '@/components/ImageUploadField';
 
 export const metadata = { title: 'Νέο Προϊόν | Dixis' };
 
@@ -147,6 +148,8 @@ export default async function NewProductPage(){
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
+
+        <ImageUploadField name="imageUrl" />
 
         <div className="flex gap-4">
           <button 

@@ -807,3 +807,37 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/OPS/STATE.md` (Pass 142 docs)
 - No schema migration needed (field already exists), no new dependencies
 
+## Pass 143 — Product Image Upload (local file storage)
+- **Upload API** (`POST /api/upload`):
+  - Accepts FormData with `file` field
+  - Validates: max 5MB, image types only (png, jpg, webp, gif)
+  - Saves to `public/uploads/<uuid>.<ext>`
+  - Returns `{ url: "/uploads/<uuid>.<ext>" }`
+  - Uses Node.js fs/promises for file operations
+- **ImageUploadField Component** (`frontend/src/components/ImageUploadField.tsx`):
+  - Client component with file input
+  - Uploads to `/api/upload` on file select
+  - Shows loading state and error messages
+  - Displays image preview after upload
+  - Auto-fills corresponding `imageUrl` input field in form
+- **Producer Portal Integration**:
+  - `/me/products/new`: Added ImageUploadField below URL input
+  - `/me/products/[id]`: Added ImageUploadField below URL input
+  - Both forms keep text URL input for manual entry or external URLs
+  - Upload component updates hidden input programmatically
+- **E2E Tests** (`frontend/tests/producer/upload.spec.ts`):
+  - Test 1: Upload image → create product → verify hero image on detail page
+  - Test 2: Validate file size limit (5MB check)
+  - Test 3: Validate image type (reject non-images)
+  - All tests use producer authentication with OTP bypass
+- **Files**:
+  - `frontend/src/app/api/upload/route.ts` (upload API)
+  - `frontend/src/components/ImageUploadField.tsx` (upload component)
+  - `frontend/src/app/me/products/new/page.tsx` (integrated upload)
+  - `frontend/src/app/me/products/[id]/page.tsx` (integrated upload)
+  - `frontend/public/uploads/.gitkeep` (upload directory)
+  - `frontend/public/placeholder.png` (test fixture)
+  - `frontend/tests/producer/upload.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 143 docs)
+- No schema changes, no new dependencies, local file storage only
+

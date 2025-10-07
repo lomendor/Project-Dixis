@@ -3,6 +3,7 @@ import { requireProducer } from '@/lib/auth/producer';
 import { resolveProducerIdStrict } from '@/lib/auth/resolve-producer';
 import { redirect, notFound } from 'next/navigation';
 import { z } from 'zod';
+import ImageUploadField from '@/components/ImageUploadField';
 
 export const dynamic = 'force-dynamic'; // Prevent static generation
 
@@ -150,6 +151,8 @@ export default async function EditProductPage({ params }:{ params:{ id:string } 
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
+
+        <ImageUploadField name="imageUrl" />
 
         <div className="flex gap-4">
           <button 
