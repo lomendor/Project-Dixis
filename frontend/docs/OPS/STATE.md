@@ -566,3 +566,22 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/src/lib/auth/admin.ts` (hardened guard)
   - `frontend/docs/AGENT/SYSTEM/env.md` (env documentation)
   - `.env.example` (ADMIN_PHONES)
+
+## Pass 134 — Emails (Order Confirmation + Status Update)
+- **Mailer**: Safe SMTP με graceful fallback (noop αν λείπουν envs)
+- **Templates**: Ελληνικά HTML + text για confirmation & status update
+- **Checkout hook**: Αυτόματη αποστολή επιβεβαίωσης μετά την παραγγελία
+- **Admin status hook**: Αυτόματη αποστολή ενημέρωσης σε αλλαγή κατάστασης
+- **Admin preview**: `/admin/emails/preview?kind=confirm|status&id=<orderId>`
+- **Dev mailbox**: `SMTP_DEV_MAILBOX=1` γράφει σε `frontend/.tmp/last-mail.json`
+- **ENV**: SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_DEV_MAILBOX, DEV_MAIL_TO
+- **Files**:
+  - `frontend/src/lib/mail/mailer.ts` (safe SMTP + render helpers)
+  - `frontend/src/emails/order-confirmation.ts` (EL template)
+  - `frontend/src/emails/order-status-update.ts` (EL template)
+  - `frontend/src/app/api/checkout/route.ts` (confirmation hook)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (status hook)
+  - `frontend/src/app/admin/emails/preview/page.tsx` (preview page)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (SMTP docs)
+  - `.env.example` (SMTP config)
+- Dependency: nodemailer
