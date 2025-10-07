@@ -1,3 +1,36 @@
 # App Routes
 
-
+- `/`
+- `/account/orders`
+- `/account/orders/[orderId]`
+- `/admin/analytics`
+- `/admin/orders`
+- `/admin/pricing`
+- `/admin/producers`
+- `/admin/producers/images`
+- `/admin/toggle`
+- `/auth/login`
+- `/auth/register`
+- `/cart`
+- `/checkout`
+- `/checkout/payment/[orderId]`
+- `/dev-check`
+- `/dev/notifications`
+- `/my/orders`
+- `/my/products`
+- `/my/products/[id]/edit`
+- `/my/products/create`
+- `/ops/metrics`
+- `/order/confirmation/[orderId]`
+- `/orders/[id]`
+- `/producer/analytics`
+- `/producer/dashboard`
+- `/producer/onboarding`
+- `/producer/orders`
+- `/producer/products`
+- `/producer/products/[id]/edit`
+- `/producer/products/create`
+- `/product/[id]`
+- `/products`
+- `/products/[id]`
+- `/test-error`
