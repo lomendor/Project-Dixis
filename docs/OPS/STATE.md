@@ -2398,3 +2398,85 @@ Product Page → Backend API (Laravel) → checkoutApi.getValidatedCart() → Ch
 - ⏳ CI passes and PR auto-merges
 - 🎯 Pass 122: Additional checkout/cart enhancements aligned with backend cart
 - 📊 Monitor ops metrics for checkout API performance
+
+---
+
+## Pass 122 - Producer Scoping & Guards (2025-10-07)
+
+**Branch**: `feat/pass122-producer-scoping`
+**PR**: #404
+**Objective**: Implement multi-tenant producer scoping to prevent cross-producer data access
+
+### What Was Built
+
+#### A) `requireProducer()` Helper
+**File**: `frontend/src/lib/auth/requireProducer.ts`
+
+**Purpose**: Central authentication guard for producer-scoped endpoints
+
+**Flow**:
+1. Get phone from session (`getSessionPhone()`)
+2. Query Producer by phone + isActive
+3. Throw 401 if no session
+4. Throw 403 if no producer profile
+5. Return producer record
+
+**Greek Errors**:
+- 401: "Απαιτείται είσοδος"
+- 403: "Δεν έχετε ολοκληρώσει το προφίλ παραγωγού"
+
+#### B) Producer-Scoped Product APIs
+
+**GET /api/me/products**: Lists products filtered by `producerId = producer.id`
+**POST /api/me/products**: Forces `producerId = producer.id` (ignores body)
+**PUT /api/me/products/[id]**: Uses `updateMany` with `where: { id, producerId }` → 404 if count=0
+**DELETE /api/me/products/[id]**: Uses `deleteMany` with `where: { id, producerId }` → 404 if count=0
+
+**Security Pattern**: `updateMany`/`deleteMany` prevents info leakage (returns 404 instead of throwing if row doesn't match)
+
+#### C) E2E Multi-Account Tests
+**File**: `frontend/tests/security/producer-scoping.spec.ts`
+
+**Scenarios**:
+- Producer B cannot see Producer A's products
+- Producer B cannot update/delete Producer A's products (404 "Δεν βρέθηκε")
+- Unauthenticated requests → 401
+- Non-producer sessions → 403
+
+### Technical Details
+
+**Producer Identification**: `Producer.phone` (unique) matches session phone
+**Scoping**: All queries add `where: { producerId: producer.id }`
+**Tampering Protection**: producerId in request body is ignored
+**Greek UX**: 401/403/404/500 errors in Greek
+
+### Security Impact
+
+**Attack Scenarios Prevented**:
+- ✅ Cross-producer product access
+- ✅ Cross-producer product modification
+- ✅ Cross-producer product deletion
+- ✅ ProducerId tampering in request body
+- ✅ Unauthenticated access
+- ✅ Non-producer access
+
+### Files Changed (4 files, +400/-235)
+
+**Modified**:
+- `frontend/src/app/api/me/products/route.ts`: Scoped GET/POST
+- `frontend/src/app/api/me/products/[id]/route.ts`: Scoped GET/PUT/DELETE
+
+**Created**:
+- `frontend/src/lib/auth/requireProducer.ts`: Auth helper
+- `frontend/tests/security/producer-scoping.spec.ts`: Multi-account E2E
+
+### Build Status
+- ✅ TypeScript compilation: Success
+- ✅ Next.js build: Success
+- ✅ PR #404 created with auto-merge
+
+### Next Steps
+- ⏳ CI passes and PR auto-merges
+- 🎯 Pass 123: Producer-scoped orders (/my/orders)
+- 🔒 Audit logging for producer actions
+- 📊 Monitor unauthorized access attempts
