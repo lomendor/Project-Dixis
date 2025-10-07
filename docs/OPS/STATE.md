@@ -2480,3 +2480,145 @@ Product Page → Backend API (Laravel) → checkoutApi.getValidatedCart() → Ch
 - 🎯 Pass 123: Producer-scoped orders (/my/orders)
 - 🔒 Audit logging for producer actions
 - 📊 Monitor unauthorized access attempts
+
+---
+
+## Pass 122.1 - Orders Scoping & Real Session (2025-10-07)
+
+**Branch**: `feat/pass1221-producer-orders-guards`
+**PR**: #405
+**Objective**: Extend producer scoping to /my/orders and verify real session resolution
+
+### What Was Built
+
+#### A) Session Resolution Status
+**Finding**: `requireProducer()` already uses real session resolution
+- Gets phone from `dixis_session` cookie via `getSessionPhone()`
+- Queries Producer table by `phone` field (unique identifier)
+- No User/Session model exists (phone-based auth)
+- ✅ No mock session - already production-ready
+
+#### B) /my/orders Page Scoping
+**File**: `frontend/src/app/my/orders/page.tsx`
+
+**Changes**:
+- Added `requireProducer()` authentication at page level
+- Scoped OrderItem query to `producerId: producer.id`
+- Producer only sees orders for their own products
+
+**Before**:
+```typescript
+const rows = await prisma.orderItem.findMany({
+  where: { status: cur.toLowerCase() },
+  // ... NO producer filter
+});
+```
+
+**After**:
+```typescript
+const producer = await requireProducer();
+const rows = await prisma.orderItem.findMany({
+  where: {
+    status: cur.toLowerCase(),
+    producerId: producer.id // Critical: scope to producer
+  },
+  // ...
+});
+```
+
+#### C) Order Action Guards
+**File**: `frontend/src/app/my/orders/actions/actions.ts`
+
+**Changes to `setOrderItemStatus`**:
+1. Added `requireProducer()` authentication
+2. Verify order item ownership before fetching status
+3. Use `updateMany` with double ownership check
+4. Return error if item doesn't belong to producer
+
+**Security Flow**:
+```typescript
+const producer = await requireProducer();
+
+// Verify ownership before checking status
+const item = await prisma.orderItem.findFirst({
+  where: { id, producerId: producer.id },
+  select: { status: true }
+});
+
+if (!item) {
+  return { ok: false, error: 'Δεν βρέθηκε η γραμμή παραγγελίας.' };
+}
+
+// Update with double-check using updateMany
+const result = await prisma.orderItem.updateMany({
+  where: { id, producerId: producer.id },
+  data: { status: next.toLowerCase() }
+});
+
+if (result.count === 0) {
+  return { ok: false, error: 'Δεν βρέθηκε η γραμμή παραγγελίας.' };
+}
+```
+
+#### D) E2E Multi-Account Tests
+**File**: `frontend/tests/security/orders-scoping.spec.ts`
+
+**Scenarios**:
+- Producer B cannot view Producer A's orders (list test)
+- Order status actions are producer-scoped
+- Unauthenticated access is rejected
+
+### Security Impact
+
+**Before Pass 122.1**:
+- `/my/orders` showed ALL order items matching status (any producer)
+- `setOrderItemStatus` updated ANY order item by ID (no ownership check)
+- Cross-producer order visibility
+- Cross-producer order manipulation
+
+**After Pass 122.1**:
+- `/my/orders` filtered by `producerId: producer.id`
+- `setOrderItemStatus` checks ownership twice (findFirst + updateMany)
+- Zero cross-producer order access
+- Action guards prevent status manipulation
+
+**Attack Scenarios Prevented**:
+- ✅ Producer B listing Producer A's orders → empty result
+- ✅ Producer B changing status of Producer A's order → error
+- ✅ Direct action calls bypassing UI → ownership check fails
+- ✅ Unauthenticated access → 401 before any DB query
+
+### Technical Details
+
+**OrderItem Schema**:
+- Has `producerId` field (already indexed)
+- Scoping uses existing field (no schema changes)
+
+**Action Safety Pattern**:
+- First check: `findFirst` with `where: { id, producerId }`
+- Second check: `updateMany` with `where: { id, producerId }`
+- Double verification prevents race conditions
+
+**Greek UX**:
+- Page: `requireProducer()` throws 401/403
+- Action: "Δεν βρέθηκε η γραμμή παραγγελίας."
+
+### Files Changed (3 files, +206/-7)
+
+**Modified**:
+- `frontend/src/app/my/orders/page.tsx`: Producer scoping (+3/-1)
+- `frontend/src/app/my/orders/actions/actions.ts`: Action guards (+27/-6)
+
+**Created**:
+- `frontend/tests/security/orders-scoping.spec.ts`: E2E tests (+176/0)
+
+### Build Status
+- ✅ TypeScript compilation: Success
+- ✅ Next.js build: Success
+- ✅ PR #405 created with auto-merge
+
+### Next Steps
+- ⏳ CI passes and PR auto-merges
+- 🎯 Pass 123: Admin producer approval guards
+- 🔒 Audit trail for order status changes
+- 📊 Monitor cross-producer access attempts
