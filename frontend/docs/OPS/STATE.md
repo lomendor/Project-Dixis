@@ -381,3 +381,33 @@ export default function Page() { redirect('/my/orders'); }
 - CI checks will complete automatically
 - Auto-merge will trigger when all checks pass
 - PR #392 will be squashed and merged to main
+
+## Pass AG1 — Agent Docs & Context Hygiene (2025-10-07)
+
+**Στόχος**: Δημιουργία `docs/AGENT` δομής για καλύτερη διαχείριση context και ομαλή συνέχεια σε νέα chats.
+
+**Υλοποίηση**:
+- ✅ Δομή `docs/AGENT/{SYSTEM,SOPs,TASKS,COMMANDS,SUMMARY}`
+- ✅ README.md με οδηγίες για agents
+- ✅ SYSTEM docs: architecture.md, env.md (registry)
+- ✅ SOPs: SOP-Feature-Pass.md, SOP-Context-Hygiene.md
+- ✅ COMMANDS/update-doc.md με init/after-pass modes
+- ✅ Templates: Pass-000-Template.md, Pass-000-TLDR.md
+- ✅ Helper scripts (.mjs): scan-routes.mjs, scan-prisma.mjs
+- ✅ npm scripts: `agent:routes`, `agent:schema`, `agent:docs`
+- ✅ Auto-generated: routes.md, db-schema.md
+
+**Αρχεία**:
+- docs/AGENT/README.md
+- docs/AGENT/SYSTEM/{architecture,env,routes,db-schema}.md
+- docs/AGENT/SOPs/{SOP-Feature-Pass,SOP-Context-Hygiene}.md
+- docs/AGENT/COMMANDS/update-doc.md
+- docs/AGENT/TASKS/Pass-000-Template.md
+- docs/AGENT/SUMMARY/Pass-000-TLDR.md
+- scripts/{scan-routes,scan-prisma}.mjs
+- frontend/package.json (npm scripts)
+
+**PR**: #410 (merged)
+
+**Επόμενα**: Χρήση AGENT docs σε επόμενους passes για μείωση context bloat.
+
