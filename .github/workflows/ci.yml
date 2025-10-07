@@ -187,6 +187,12 @@ jobs:
 
     env:
       FRONTEND_PORT: 3000
+      OTP_BYPASS: "000000"
+      ADMIN_PHONES: "+306900000084"
+      PRODUCER_PHONES: "+306900000021,+306900000022"
+      LOW_STOCK_THRESHOLD: "5"
+      BASE_URL: "http://127.0.0.1:3000"
+      PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3000"
 
     services:
       postgres:

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
+import { sendMailSafe } from '@/lib/mail/mailer';
+import { restockFromOrder } from '@/lib/inventory/stock';
+import * as OrderStatus from '@/lib/mail/templates/orderStatus';
 
 // Admin check helper
 async function checkAdmin(req: Request): Promise<boolean> {
@@ -64,19 +67,42 @@ export async function POST(
       data: { status: to }
     });
 
-    // Optional: send email to customer (no-op if SMTP missing)
-    // TODO: Re-enable when mailer module is available
-    // try {
-    //   const { sendMailSafe } = await import('@/lib/mail/mailer');
-    //   await sendMailSafe({
-    //     to: customerEmail,
-    //     subject: `Ενημέρωση παραγγελίας #${updated.id}`,
-    //     html: `<p>Η παραγγελία σας άλλαξε σε: <b>${to}</b>.</p>`
-    //   });
-    // } catch (e) {
-    //   console.warn('[admin status mail] skipped:', (e as Error).message);
-    // }
-    console.log(`[admin] Status changed ${from}→${to} (email notification disabled)`);
+    // RESTOCK on CANCELLED (only if status became CANCELLED and wasn't already)
+    try {
+      const was = String(order.status || 'PENDING').toUpperCase();
+      const now = String(updated.status || 'PENDING').toUpperCase();
+      if (now === 'CANCELLED' && was !== 'CANCELLED') {
+        await prisma.$transaction(async (tx) => {
+          await restockFromOrder(updated.id, tx);
+        });
+        console.log('[order] restocked items for', updated.id);
+      }
+    } catch (e: any) {
+      console.warn('[order] restock failed:', e?.message);
+    }
+
+    // EMAIL: customer status update (optional - only if customer has email)
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: updated.id }
+      });
+      if (fullOrder) {
+        const customerEmail = (fullOrder as any).customerEmail?.trim?.();
+        if (customerEmail) {
+          await sendMailSafe({
+            to: customerEmail,
+            subject: OrderStatus.subject(fullOrder.id, String(fullOrder.status || 'PENDING')),
+            html: OrderStatus.html({
+              id: fullOrder.id,
+              status: String(fullOrder.status || 'PENDING')
+            })
+          });
+          console.log(`[admin] Status ${from}→${to}, email sent to ${customerEmail}`);
+        }
+      }
+    } catch (e) {
+      console.warn('[admin status email] skipped:', (e as Error).message);
+    }
 
     console.log(`[order] ${id} status ${from}→${to}`);
     

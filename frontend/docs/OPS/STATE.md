@@ -506,3 +506,418 @@ export default function Page() { redirect('/my/orders'); }
 - Server actions για status changes
 
 **Επόμενα**: Admin analytics dashboard, bulk actions.
+
+## Pass 131 — Admin Orders Utilities (CSV export + pagination + print view) + e2e
+- **CSV Export API**: `/api/admin/orders.csv` με φίλτρα (status, q) που επιστρέφει `text/csv; charset=utf-8` με BOM για Excel
+  - Header row: id, createdAt, status, buyerName, buyerPhone, totalEUR
+  - Proper CSV escaping για quotes και newlines
+  - Filename: `orders-YYYY-MM-DD.csv`
+- **Pagination** στο `/admin/orders`:
+  - ENV: `ADMIN_ORDERS_PAGE_SIZE=20` (default)
+  - Query params: `page`, `pageSize` (max 200)
+  - UI controls: Προηγούμενη/Επόμενη με disabled states
+  - Display: "Σελίδα X από Y (Z συνολικά)"
+  - CSV link preserves filters
+- **Print View**: `/admin/orders/[id]/print`
+  - Full order details (items, totals, shipping address)
+  - Print-friendly styling με `@media print`
+  - EL-first με Greek date/currency formatting
+  - Print button + back link (hidden on print)
+  - Link από detail page: 🖨 Εκτύπωση
+- **E2E Tests**:
+  - CSV: Επιστρέφει 200, BOM + header row, valid structure
+  - Print: Φορτώνει σελίδα, εμφανίζει order info, print button visible
+- **Files**:
+  - `frontend/src/app/api/admin/orders.csv/route.ts` (CSV API)
+  - `frontend/src/app/admin/orders/page.tsx` (pagination + CSV link)
+  - `frontend/src/app/admin/orders/[id]/print/page.tsx` (print view)
+  - `frontend/tests/admin/orders-export-print.spec.ts` (e2e)
+  - `.env.example` (ADMIN_ORDERS_PAGE_SIZE)
+- No schema changes, no new packages
+
+## Pass 132 — Admin Dashboard (KPIs + daily revenue + top products)
+- **Stats API**: `/api/admin/stats` (server-side compute, no schema changes)
+  - KPIs: totalOrders, revenueTotal, avgOrder, ordersToday
+  - Status breakdown: PENDING/PAID/PACKING/SHIPPED/DELIVERED/CANCELLED counts
+  - Last 14 days: Daily order count and revenue
+  - Top 10 products: By quantity sold (30-day window)
+- **Dashboard Page**: `/admin/dashboard`
+  - 4 KPI cards with responsive grid layout
+  - Status breakdown table
+  - Daily revenue/orders table (14 days)
+  - Top products table with ranking
+  - EL-first UI with Greek formatting (dates, currency)
+- **E2E Tests**:
+  - Stats API: Validates response structure, KPIs, arrays
+  - Dashboard: Page loads, KPI cards visible, sections present
+- **Files**:
+  - `frontend/src/app/api/admin/stats/route.ts` (stats API)
+  - `frontend/src/app/admin/dashboard/page.tsx` (dashboard page)
+  - `frontend/tests/admin/dashboard.spec.ts` (e2e tests)
+- No schema changes, no chart libraries (plain tables)
+
+## Pass 133 — Admin Guard Hardening
+- `requireAdmin()` με ENV allowlist (`ADMIN_PHONES`), permissive αν λείπει (dev/CI)
+- Graceful fallback: αν το ENV δεν είναι ρυθμισμένο, ο guard δεν μπλοκάρει (non-breaking για CI/dev)
+- Σε production **πρέπει** να οριστεί το `ADMIN_PHONES` με comma-separated E.164 phones
+- Helper: `isAdminRequest()` για συνθήκες στα RSC
+- Ενημέρωση `.env.example` και δημιουργία `frontend/docs/AGENT/SYSTEM/env.md`
+- **Files**:
+  - `frontend/src/lib/auth/admin.ts` (hardened guard)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (env documentation)
+  - `.env.example` (ADMIN_PHONES)
+
+## Pass 134 — Emails (Order Confirmation + Status Update)
+- **Mailer**: Safe SMTP με graceful fallback (noop αν λείπουν envs)
+- **Templates**: Ελληνικά HTML + text για confirmation & status update
+- **Checkout hook**: Αυτόματη αποστολή επιβεβαίωσης μετά την παραγγελία
+- **Admin status hook**: Αυτόματη αποστολή ενημέρωσης σε αλλαγή κατάστασης
+- **Admin preview**: `/admin/emails/preview?kind=confirm|status&id=<orderId>`
+- **Dev mailbox**: `SMTP_DEV_MAILBOX=1` γράφει σε `frontend/.tmp/last-mail.json`
+- **ENV**: SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_DEV_MAILBOX, DEV_MAIL_TO
+- **Files**:
+  - `frontend/src/lib/mail/mailer.ts` (safe SMTP + render helpers)
+  - `frontend/src/emails/order-confirmation.ts` (EL template)
+  - `frontend/src/emails/order-status-update.ts` (EL template)
+  - `frontend/src/app/api/checkout/route.ts` (confirmation hook)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (status hook)
+  - `frontend/src/app/admin/emails/preview/page.tsx` (preview page)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (SMTP docs)
+  - `.env.example` (SMTP config)
+- Dependency: nodemailer
+## Pass 135 — Producer Portal v1 (Products CRUD + Orders)
+- **Producer Guard**: `requireProducer()` με ENV allowlist (`PRODUCER_PHONES`), permissive αν λείπει (dev/CI)
+  - Λειτουργεί όπως το `requireAdmin()` με allowlist τηλεφώνων
+  - Best-effort ownership: Χρήση `ownerId` στο schema αν υπάρχει
+- **Product Pages**: `/me/products` CRUD με Server Actions & Zod validation
+  - List: `/me/products` — αναζήτηση, φίλτρα (active status), responsive table
+  - Create: `/me/products/new` — φόρμα με πεδία: title, category, price, unit, stock, isActive, description
+  - Edit: `/me/products/[id]` — επεξεργασία + soft delete (isActive toggle)
+  - Server Actions: createProduct, updateProduct, deactivate (no new API routes)
+  - Zod schema: Validation για όλα τα πεδία (min length, number coercion, etc.)
+- **Orders Page**: `/me/orders` — παραγγελίες που περιέχουν προϊόντα του παραγωγού
+  - Best-effort filtering: Προσπαθεί `ownerId` relation, fallback σε όλες τις παραγγελίες (dev)
+  - Εμφανίζει: order ID, ημερομηνία, κατάσταση, items του παραγωγού, συνολικό ποσό
+  - EL-first UI: Greek locale για dates, currency formatting
+- **ENV**: PRODUCER_PHONES — comma-separated E.164 phones με πρόσβαση στο `/me/*`
+- **Files**:
+  - `frontend/src/lib/auth/producer.ts` (producer guard)
+  - `frontend/src/app/me/products/page.tsx` (product list)
+  - `frontend/src/app/me/products/new/page.tsx` (create product)
+  - `frontend/src/app/me/products/[id]/page.tsx` (edit product)
+  - `frontend/src/app/me/orders/page.tsx` (orders list)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (PRODUCER_PHONES docs)
+  - `.env.example` (PRODUCER_PHONES)
+- E2E test: Producer creates product → edits → toggles active → checkout → `/me/orders` verification
+- No schema changes, no new dependencies
+
+
+## Pass 136 — Producer Ownership Hardening
+- **Helper**: `resolveProducerIdStrict()` — no fallback, strict mapping via userId or phone
+- **Strict Filtering**: `/me/products` & `/me/orders` scoped αυστηρά ανά producerId
+  - No "first producer" fallback — shows error message if no mapping found
+  - List page: filters by producerId, shows CTA if unmapped
+  - Create page: requires producerId, throws error if unmapped
+  - Edit page: scopes to producerId (cannot edit other producers' products)
+  - Orders page: shows only orders containing producer's products
+- **Types Cleanup**: Removed `as any` from create operations, using `Prisma.ProductUncheckedCreateInput`
+- **Redirects**: `/producer/{products,orders,onboarding}` → 301 to `/me/*` pages
+- **E2E Isolation**: `tests/producer/isolation.spec.ts` — Producer A cannot see/edit Producer B data
+- **Files**:
+  - `frontend/src/lib/auth/resolve-producer.ts` (strict resolver)
+  - `frontend/src/app/me/products/page.tsx` (hardened list)
+  - `frontend/src/app/me/products/new/page.tsx` (typed create, no fallback)
+  - `frontend/src/app/me/products/[id]/page.tsx` (scoped edit)
+  - `frontend/src/app/me/orders/page.tsx` (strict filtering)
+  - `frontend/src/app/producer/{products,orders,onboarding}/page.tsx` (redirects)
+  - `frontend/tests/producer/isolation.spec.ts` (e2e test)
+- No schema changes, multi-tenant safety enforced
+
+## Pass 137 — Inventory Guards
+- **Checkout**: Atomic stock decrement with oversell protection (Prisma $transaction)
+  - Uses `decrementStockAtomic()` helper inside transaction
+  - Throws StockError if insufficient stock → returns 400 with Greek error message
+  - Low stock warnings when stock < threshold (ENV: LOW_STOCK_THRESHOLD)
+  - Optional admin email notification (DEV_MAIL_TO) for low stock
+- **Admin CANCELLED**: Automatic restock of items
+  - Restocks items when order status changes to CANCELLED (one-time only)
+  - Transaction-safe increment of product stock
+  - Logs restock activity
+- **E2E Tests**: `tests/checkout/stock.spec.ts`
+  - Test 1: Successful checkout decrements stock
+  - Test 2: Oversell blocked (qty > stock returns 400)
+  - Test 3: Cancel → restock items
+- **Files**:
+  - `frontend/src/lib/inventory/stock.ts` (atomic ops helper)
+  - `frontend/src/app/api/checkout/route.ts` (integrated atomic decrement)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (restock on cancel)
+  - `frontend/tests/checkout/stock.spec.ts` (e2e tests)
+  - `.env.example` (LOW_STOCK_THRESHOLD)
+- No schema changes, inventory safety enforced
+
+## Pass 138 — Storefront v1
+- **Customer Pages**: EL-first public storefront with full checkout flow
+  - `/` (Home): Featured products, category links, welcome message
+  - `/products`: List with search, category filters, pagination (24/page), stock indicators
+  - `/products/[id]`: Detail page with Add to Cart (qty ≤ stock, disabled if stock=0)
+  - `/cart`: Cart summary with quantity management, subtotal display
+  - `/checkout`: Shipping form + COD payment, calls existing `/api/checkout`
+  - `/checkout/confirmation`: Success page with orderId display
+- **Cart System**: Client-side localStorage with React Context
+  - `CartProvider`: React Context for global cart state
+  - Cart utilities: addItem, setQty, removeItem, clearCart (stock safety enforced)
+  - Persists across page refreshes, serializes to checkout API
+- **Stock Safety**: Client-side validation prevents qty > stock
+  - AddToCartButton enforces maxQty limits
+  - Cart page enforces stock limits on quantity changes
+  - Products show "Εξαντλημένο" badge when stock=0
+- **E2E Tests**: `tests/storefront/browse.spec.ts`
+  - Full flow: Browse → Add to cart → Checkout COD → Confirmation
+  - Search and filter products
+  - Cart quantity management
+  - Empty cart redirects
+- **Files**:
+  - `frontend/src/lib/cart/cart.ts` (cart utilities)
+  - `frontend/src/components/CartProvider.tsx` (React Context)
+  - `frontend/src/app/layout.tsx` (CartProvider wired)
+  - `frontend/src/app/(storefront)/page.tsx` (home page)
+  - `frontend/src/app/(storefront)/products/page.tsx` (product list)
+  - `frontend/src/app/(storefront)/products/[id]/page.tsx` (product detail)
+  - `frontend/src/app/(storefront)/products/[id]/AddToCartButton.tsx` (add to cart)
+  - `frontend/src/app/(storefront)/cart/page.tsx` (cart page)
+  - `frontend/src/app/(storefront)/checkout/page.tsx` (checkout page)
+  - `frontend/src/app/(storefront)/checkout/confirmation/page.tsx` (confirmation)
+  - `frontend/tests/storefront/browse.spec.ts` (e2e tests)
+- No schema changes, no new packages, integrates with existing checkout API
+
+## Pass 139 — Checkout Hardening
+- **Server Validation**: Comprehensive Zod validation in `/api/checkout`
+  - Items validation: non-empty array, productId required, qty ≥1
+  - Shipping validation: all required fields (name, phone, line1, city, postal)
+  - Email validation: optional but must be valid format if provided
+  - Payment method: COD only (literal validation)
+  - Error responses: 400 with `{error, field?}` structure in Greek
+- **Confirm Page**: `/checkout/confirm/[id]` (EL-first)
+  - Displays order ID, date, status, total
+  - Shows shipping address
+  - Info box with next steps (email, COD payment, updates)
+  - Links to home and continue shopping
+  - Dynamic rendering to fetch order details
+- **Client Redirect**: Checkout now redirects to `/checkout/confirm/[orderId]`
+  - No more alert messages
+  - Cart cleared on successful checkout
+  - Clean URL structure with order ID
+- **E2E Tests**: `tests/storefront/checkout-hardening.spec.ts`
+  - Test 1: Empty cart blocked (400)
+  - Test 2: Missing shipping data blocked (400)
+  - Test 3: Invalid quantity blocked (400)
+  - Test 4: Invalid email blocked (400)
+  - Test 5: Happy path redirects to confirm page
+- **Files**:
+  - `frontend/src/app/api/checkout/route.ts` (Zod validation)
+  - `frontend/src/app/checkout/confirm/[id]/page.tsx` (confirm page)
+  - `frontend/src/app/checkout/page.tsx` (redirect update)
+  - `frontend/tests/storefront/checkout-hardening.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 139 docs)
+- No schema changes, Zod already installed
+
+## Pass 140 — Admin Orders v1
+- **Admin Orders List** (`/admin/orders`):
+  - Filters: status, search (ID/name/phone), date range (from–to)
+  - Pagination: 20 items per page (configurable via ENV)
+  - CSV export link with filters
+  - Security: `requireAdmin()` guard
+  - Responsive table with status badges
+- **Order Detail Page** (`/admin/orders/[id]`):
+  - Full order information display
+  - Customer details and shipping address
+  - Order items with prices and totals
+  - Status transition buttons with server actions
+  - Valid transitions: PENDING → PAID/PACKING/CANCELLED, PAID → PACKING/CANCELLED, PACKING → SHIPPED/CANCELLED, SHIPPED → DELIVERED
+  - Calls existing `/api/admin/orders/[id]/status` API
+  - Print view link
+- **Status Management**:
+  - Server actions for status changes
+  - Automatic revalidation of pages
+  - CANCELLED status triggers restock (via existing inventory/stock.ts)
+  - Status change emails sent (via existing mailer)
+- **E2E Tests**: `tests/admin/orders.spec.ts`
+  - Test 1: Create order → admin changes PENDING → PACKING → CANCELLED
+  - Test 2: Filter orders by status
+  - Test 3: Search orders by name/phone/ID
+  - Test 4: Filter orders by date range
+  - Validates restock and email flows
+- **Files**:
+  - `frontend/src/app/admin/orders/page.tsx` (list with date filters)
+  - `frontend/src/app/admin/orders/[id]/page.tsx` (already existed from Pass 130)
+  - `frontend/tests/admin/orders.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 140 docs)
+- No schema changes, uses existing API routes and email/restock infrastructure
+
+## Pass 141 — CI Workflow (GitHub Actions + Playwright)
+- **CI Workflow** (`.github/workflows/ci.yml`):
+  - Already comprehensive with backend + frontend + e2e jobs
+  - Added ENV variables for E2E tests:
+    - `OTP_BYPASS="000000"` — bypass OTP for test authentication
+    - `ADMIN_PHONES="+306900000084"` — admin test phone
+    - `PRODUCER_PHONES="+306900000021,+306900000022"` — producer test phones
+    - `LOW_STOCK_THRESHOLD="5"` — low stock alert threshold
+    - `BASE_URL="http://127.0.0.1:3000"` — frontend URL
+    - `PLAYWRIGHT_BASE_URL="http://127.0.0.1:3000"` — Playwright base URL
+  - E2E job runs full stack: backend + frontend + Playwright tests
+  - Artifacts uploaded: playwright-report/ and test-results/ (7-day retention)
+- **Playwright Config** (`frontend/playwright.config.ts`):
+  - Already configured with webServer (npm run dev)
+  - Has CI-specific configuration with isCI checks
+  - Multiple projects for different test types
+  - Global setup for auth
+- **npm Scripts** (`frontend/package.json`):
+  - Already has `test:e2e: "playwright test"`
+  - Has `start: "next start"` and `start:ci: "next start -p 3000"`
+  - Has `build: "next build"`
+  - No modifications needed
+- **Files**:
+  - `.github/workflows/ci.yml` (updated with ENV vars)
+  - `frontend/playwright.config.ts` (no changes, verified)
+  - `frontend/package.json` (no changes, verified)
+  - `frontend/docs/OPS/STATE.md` (Pass 141 docs)
+- No schema changes, no new dependencies, ENV configuration only
+
+## Pass 142 — Product Images (imageUrl field + UI thumbnails)
+- **Prisma Schema**: `imageUrl String?` field already exists in Product model (optional)
+- **Producer Portal Forms**:
+  - `/me/products/new`: Added imageUrl input field with URL validation
+  - `/me/products/[id]`: Added imageUrl input field with URL validation
+  - Zod schema validates URL format and transforms empty string to undefined
+- **Storefront Pages** (already had imageUrl support):
+  - `/products` list: Shows thumbnails for products with images (h-48 container)
+  - `/products/[id]` detail: Shows hero image (h-96 container) with fallback "Χωρίς εικόνα"
+  - Images use `object-cover` for proper aspect ratio handling
+- **E2E Tests** (`frontend/tests/storefront/images.spec.ts`):
+  - Test 1: Product with imageUrl shows hero image on detail page
+  - Test 2: Product without imageUrl shows fallback text
+  - Test 3: Products list shows thumbnails for products with images
+  - All tests use producer authentication with OTP bypass
+- **Files**:
+  - `frontend/src/app/me/products/new/page.tsx` (added imageUrl field)
+  - `frontend/src/app/me/products/[id]/page.tsx` (added imageUrl field)
+  - `frontend/src/app/products/page.tsx` (verified imageUrl support exists)
+  - `frontend/src/app/products/[id]/page.tsx` (verified imageUrl support exists)
+  - `frontend/tests/storefront/images.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 142 docs)
+- No schema migration needed (field already exists), no new dependencies
+
+## Pass 143 — Product Image Upload (local file storage)
+- **Upload API** (`POST /api/upload`):
+  - Accepts FormData with `file` field
+  - Validates: max 5MB, image types only (png, jpg, webp, gif)
+  - Saves to `public/uploads/<uuid>.<ext>`
+  - Returns `{ url: "/uploads/<uuid>.<ext>" }`
+  - Uses Node.js fs/promises for file operations
+- **ImageUploadField Component** (`frontend/src/components/ImageUploadField.tsx`):
+  - Client component with file input
+  - Uploads to `/api/upload` on file select
+  - Shows loading state and error messages
+  - Displays image preview after upload
+  - Auto-fills corresponding `imageUrl` input field in form
+- **Producer Portal Integration**:
+  - `/me/products/new`: Added ImageUploadField below URL input
+  - `/me/products/[id]`: Added ImageUploadField below URL input
+  - Both forms keep text URL input for manual entry or external URLs
+  - Upload component updates hidden input programmatically
+- **E2E Tests** (`frontend/tests/producer/upload.spec.ts`):
+  - Test 1: Upload image → create product → verify hero image on detail page
+  - Test 2: Validate file size limit (5MB check)
+  - Test 3: Validate image type (reject non-images)
+  - All tests use producer authentication with OTP bypass
+- **Files**:
+  - `frontend/src/app/api/upload/route.ts` (upload API)
+  - `frontend/src/components/ImageUploadField.tsx` (upload component)
+  - `frontend/src/app/me/products/new/page.tsx` (integrated upload)
+  - `frontend/src/app/me/products/[id]/page.tsx` (integrated upload)
+  - `frontend/public/uploads/.gitkeep` (upload directory)
+  - `frontend/public/placeholder.png` (test fixture)
+  - `frontend/tests/producer/upload.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 143 docs)
+- No schema changes, no new dependencies, local file storage only
+
+## Pass 144 — Customer Emails v1 (Order Confirmation + Dev Mailbox)
+- **Email Template** (`frontend/src/lib/mail/templates/orderConfirmation.ts`):
+  - Greek-first subject: "Dixis — Επιβεβαίωση Παραγγελίας #<orderId>"
+  - HTML email with order details: items table, total, shipping address
+  - Formatted with Greek locale (currency, layout)
+  - Thank you message and next steps
+- **Dev Mailbox System**:
+  - `frontend/src/lib/mail/devMailbox.ts`: Filesystem-based email storage
+  - Saves emails to `frontend/.tmp/dev-mailbox/` with timestamps
+  - Functions: put(), list(), latestFor(email)
+  - Only active when `SMTP_DEV_MAILBOX=1`
+- **Updated Mailer** (`frontend/src/lib/mail/mailer.ts`):
+  - Integrated dev mailbox into sendMailSafe()
+  - Routes emails to dev mailbox when SMTP_DEV_MAILBOX=1
+  - Returns success with 'dev_mailbox' reason
+  - Falls back to SMTP or no-op otherwise
+- **Dev Mailbox API** (`/api/dev/mailbox`):
+  - GET endpoint for retrieving emails from dev mailbox
+  - Query param `?to=email` returns latest email for that address
+  - Without param, returns list of last 20 emails
+  - Protected: only works when SMTP_DEV_MAILBOX=1 (403 otherwise)
+- **Checkout Integration**:
+  - Sends confirmation email after successful order creation
+  - Only if customer provides email in shipping form
+  - Uses new orderConfirmation template
+  - Graceful error handling (logs warning, doesn't fail checkout)
+  - Fetches full order with items for email content
+- **E2E Tests** (`frontend/tests/checkout/email.spec.ts`):
+  - Test 1: Checkout with email → verify email in dev mailbox with order ID
+  - Test 2: Checkout without email → no crash (safe no-op)
+  - Both tests use producer auth and create test products
+  - Dev mailbox check validates subject and content
+- **Files**:
+  - `frontend/src/lib/mail/templates/orderConfirmation.ts` (email template)
+  - `frontend/src/lib/mail/devMailbox.ts` (dev mailbox system)
+  - `frontend/src/lib/mail/mailer.ts` (updated with dev mailbox)
+  - `frontend/src/app/api/dev/mailbox/route.ts` (dev API)
+  - `frontend/src/app/api/checkout/route.ts` (integrated email sending)
+  - `frontend/tests/checkout/email.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 144 docs)
+  - `.env.example` (SMTP_DEV_MAILBOX already documented)
+- No schema changes, no new dependencies, dev-friendly testing
+
+## Pass 145 — Status Emails (PAID/PACKING/SHIPPED/DELIVERED/CANCELLED) + Admin New Order Notice
+- **Order Status Email Template** (`frontend/src/lib/mail/templates/orderStatus.ts`):
+  - Greek-first subject: "Dixis — Ενημέρωση Παραγγελίας #<orderId>: <Status>"
+  - Status labels mapped: PAID→'Πληρωμή', PACKING→'Συσκευασία', SHIPPED→'Απεστάλη', DELIVERED→'Παραδόθηκε', CANCELLED→'Ακυρώθηκε'
+  - Simple HTML email with new status message
+  - Exports: subject(orderId, status), html({ id, status })
+- **Admin New Order Notice Template** (`frontend/src/lib/mail/templates/newOrderAdmin.ts`):
+  - Greek-first subject: "Dixis — Νέα Παραγγελία #<orderId>"
+  - Plain text format with order summary
+  - Includes: order ID, buyer name, buyer phone, total (formatted €)
+  - Exports: subject(orderId), text({ id, buyerName, buyerPhone, total })
+- **Checkout Integration** (`frontend/src/app/api/checkout/route.ts`):
+  - Added admin notification after successful order creation
+  - Sends email to DEV_MAIL_TO (if configured)
+  - Uses newOrderAdmin template with order summary
+  - Graceful error handling (logs warning, doesn't fail checkout)
+  - Executed after order creation, before response
+- **Status Route Update** (`frontend/src/app/api/admin/orders/[id]/status/route.ts`):
+  - Added customer status email on status change
+  - Sends email only if customer has email in order
+  - Uses orderStatus template with new status
+  - Graceful error handling (logs warning, doesn't fail status update)
+  - Replaced old renderOrderEmail with direct template usage
+- **E2E Tests** (`frontend/tests/checkout/status-email.spec.ts`):
+  - Test 1: Admin notice → verify email to DEV_MAIL_TO with order ID and buyer name
+  - Test 2: Status change → verify customer email with correct subject (status label + order ID)
+  - Both tests use producer auth, create test products, and check dev mailbox
+  - Requires: OTP_BYPASS, SMTP_DEV_MAILBOX=1, DEV_MAIL_TO (admin test)
+- **Files**:
+  - `frontend/src/lib/mail/templates/orderStatus.ts` (customer status email)
+  - `frontend/src/lib/mail/templates/newOrderAdmin.ts` (admin new order notice)
+  - `frontend/src/app/api/checkout/route.ts` (added admin notice)
+  - `frontend/src/app/api/admin/orders/[id]/status/route.ts` (added customer status email)
+  - `frontend/tests/checkout/status-email.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 145 docs)
+- No schema changes, no new dependencies, graceful degradation on email failures
+
