@@ -179,6 +179,16 @@ export default async function AdminOrderDetailPage({
                   }).format(total)}
                 </span>
               </div>
+              <div className="mt-4">
+                <Link
+                  href={`/admin/orders/${order.id}/print`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                >
+                  🖨 Εκτύπωση
+                </Link>
+              </div>
             </div>
           </div>
         </div>

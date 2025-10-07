@@ -1,2 +1,6 @@
 import { redirect } from 'next/navigation';
-export default function Page(){ redirect('/my/products'); }
+
+export default function Page(): never {
+  redirect('/me/products');
+
+}
