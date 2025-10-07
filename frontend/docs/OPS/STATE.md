@@ -461,3 +461,48 @@ export default function Page() { redirect('/my/orders'); }
 - .env.example
 
 **Επόμενα**: Stripe/Viva integration σε επόμενο pass.
+
+## Pass 130 — Admin Orders Dashboard (2025-10-07)
+
+**Στόχος**: Admin UI για διαχείριση παραγγελιών με status transitions.
+
+**Υλοποίηση**:
+- ✅ `/admin/orders` - Λίστα παραγγελιών
+  - Φίλτρα: Κατάσταση (PENDING/PAID/PACKING/SHIPPED/DELIVERED/CANCELLED)
+  - Αναζήτηση: ID, όνομα, τηλέφωνο
+  - Πίνακας με στοιχεία παραγγελίας
+  
+- ✅ `/admin/orders/[id]` - Λεπτομέρειες παραγγελίας
+  - Πλήρη στοιχεία παραγγελίας και πελάτη
+  - Λίστα προϊόντων με τιμές
+  - Διεύθυνση αποστολής
+  - Actions για αλλαγή κατάστασης
+  
+- ✅ API: `POST /api/admin/orders/[id]/status`
+  - Admin-only (με fallback σε session check)
+  - Safe transitions:
+    - PENDING → PACKING/CANCELLED
+    - PAID → PACKING/CANCELLED
+    - PACKING → SHIPPED/CANCELLED
+    - SHIPPED → DELIVERED
+  - Validation: Απορρίπτει invalid transitions
+  
+- ✅ Email notifications (graceful no-op):
+  - Ενημέρωση πελάτη σε αλλαγή status
+  - Χρήση sendMailSafe() από Pass 128R
+  
+- ✅ E2E tests: Admin orders smoke tests
+
+**Αρχεία**:
+- frontend/src/app/api/admin/orders/[id]/status/route.ts
+- frontend/src/app/admin/orders/page.tsx
+- frontend/src/app/admin/orders/[id]/page.tsx
+- frontend/tests/admin/orders-status.spec.ts
+
+**UI Features**:
+- EL-first interface
+- Status badges με χρώματα
+- Responsive table design
+- Server actions για status changes
+
+**Επόμενα**: Admin analytics dashboard, bulk actions.
