@@ -1,506 +1,261 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useCart } from '@/components/CartProvider';
+import * as C from '@/lib/cart/cart';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-
-interface ShippingAddress {
-  name: string;
-  line1: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  phone?: string;
-}
-
-interface ShippingQuote {
-  costCents: number;
-  label: string;
-}
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  weightGrams: number;
-}
-
-type CheckoutStep = 'shipping' | 'review' | 'payment';
 
 export default function CheckoutPage() {
+  const { cart, refresh } = useCart();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const [step, setStep] = useState<CheckoutStep>('shipping');
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+  const [form, setForm] = useState({
     name: '',
+    phone: '',
     line1: '',
     city: '',
-    postalCode: '',
-    country: 'GR',
-    phone: '',
+    postal: '',
+    email: ''
   });
-  const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
 
-  // Mock cart data for development
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-    // Mock cart items
-    setCartItems([
-      {
-        id: 1,
-        name: 'Βιολογικές Ντομάτες Κρήτης',
-        price: 3.50,
-        quantity: 2,
-        weightGrams: 2000,
-      },
-      {
-        id: 2,
-        name: 'Εξαιρετικό Παρθένο Ελαιόλαδο',
-        price: 12.80,
-        quantity: 1,
-        weightGrams: 500,
-      },
-    ]);
-  }, [isAuthenticated, router]);
-
-  const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  };
-
-  const calculateTotalWeight = () => {
-    return cartItems.reduce((sum, item) => sum + (item.weightGrams * item.quantity), 0);
-  };
-
-  const handleShippingSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Get shipping quote
-      const totalWeight = calculateTotalWeight();
-      const quote = await getShippingQuote(totalWeight, shippingAddress.postalCode);
-      setShippingQuote(quote);
-      setStep('review');
-    } catch {
-      setError('Σφάλμα κατά τον υπολογισμό των εξόδων αποστολής');
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.items.map((it) => ({
+            productId: it.productId,
+            qty: it.qty
+          })),
+          shipping: {
+            name: form.name,
+            phone: form.phone,
+            line1: form.line1,
+            city: form.city,
+            postal: form.postal,
+            email: form.email || undefined
+          },
+          paymentMethod: 'COD'
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Αποτυχία ολοκλήρωσης παραγγελίας');
+      }
+
+      // Clear cart and redirect to confirmation
+      C.clearCart();
+      refresh();
+      router.push(`/checkout/confirmation?orderId=${data.orderId || data.order?.orderId || data.id}`);
+    } catch (err: any) {
+      setError(err.message || 'Παρουσιάστηκε σφάλμα');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePayment = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      // Process payment with FakePaymentProvider
-      const orderId = await processPayment();
-      router.push(`/order/confirmation/${orderId}`);
-    } catch {
-      setError('Σφάλμα κατά την επεξεργασία της πληρωμής');
-      setLoading(false);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return null;
+  if (cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Το καλάθι σας είναι άδειο</h1>
+          <p className="text-gray-600 mb-8">Προσθέστε προϊόντα για να συνεχίσετε</p>
+          <button
+            onClick={() => router.push('/products')}
+            className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+          >
+            Συνέχεια Αγορών
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="checkout-cta">Ολοκλήρωση Παραγγελίας</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Ολοκλήρωση Παραγγελίας</h1>
 
-          {/* Step Indicator */}
-          <div className="flex items-center space-x-4 mt-6">
-            {[
-              { key: 'shipping', label: 'Διεύθυνση Αποστολής' },
-              { key: 'review', label: 'Επιβεβαίωση' },
-              { key: 'payment', label: 'Πληρωμή' },
-            ].map((stepInfo, index) => (
-              <div key={stepInfo.key} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step === stepInfo.key
-                      ? 'bg-green-600 text-white'
-                      : index < ['shipping', 'review', 'payment'].indexOf(step)
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-300 text-gray-600'
-                  }`}
-                >
-                  {index + 1}
+        <form onSubmit={handleSubmit} className="lg:grid lg:grid-cols-3 lg:gap-8">
+          {/* Shipping form */}
+          <div className="lg:col-span-2 mb-8 lg:mb-0">
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <h2 className="text-xl font-semibold mb-4">Στοιχεία Αποστολής</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Ονοματεπώνυμο *
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
                 </div>
-                <span className="ml-2 text-sm font-medium text-gray-900">
-                  {stepInfo.label}
-                </span>
-                {index < 2 && (
-                  <div className="ml-4 w-8 h-px bg-gray-300"></div>
-                )}
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Τηλέφωνο *
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    placeholder="+30 6900000000"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="line1" className="block text-sm font-medium text-gray-700 mb-1">
+                    Διεύθυνση *
+                  </label>
+                  <input
+                    id="line1"
+                    type="text"
+                    required
+                    value={form.line1}
+                    onChange={(e) => setForm({ ...form, line1: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      Πόλη *
+                    </label>
+                    <input
+                      id="city"
+                      type="text"
+                      required
+                      value={form.city}
+                      onChange={(e) => setForm({ ...form, city: e.target.value })}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="postal" className="block text-sm font-medium text-gray-700 mb-1">
+                      Τ.Κ. *
+                    </label>
+                    <input
+                      id="postal"
+                      type="text"
+                      required
+                      value={form.postal}
+                      onChange={(e) => setForm({ ...form, postal: e.target.value })}
+                      placeholder="12345"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email (προαιρετικό)
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-4">Τρόπος Πληρωμής</h2>
+              <div className="flex items-center gap-3 p-4 border-2 border-green-600 rounded-lg bg-green-50">
+                <input
+                  type="radio"
+                  id="cod"
+                  name="payment"
+                  value="COD"
+                  checked
+                  readOnly
+                  className="w-4 h-4"
+                />
+                <label htmlFor="cod" className="flex-1 cursor-pointer">
+                  <span className="font-semibold">Αντικαταβολή (COD)</span>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Πληρώστε κατά την παράδοση
+                  </p>
+                </label>
               </div>
-            )}
-
-            {step === 'shipping' && (
-              <ShippingAddressForm
-                address={shippingAddress}
-                onChange={setShippingAddress}
-                onSubmit={handleShippingSubmit}
-                loading={loading}
-              />
-            )}
-
-            {step === 'review' && (
-              <ReviewStep
-                shippingAddress={shippingAddress}
-                shippingQuote={shippingQuote}
-                onEditShipping={() => setStep('shipping')}
-                onProceedToPayment={() => setStep('payment')}
-              />
-            )}
-
-            {step === 'payment' && (
-              <PaymentStep
-                onProcessPayment={handlePayment}
-                loading={loading}
-              />
-            )}
+            </div>
           </div>
 
-          {/* Order Summary */}
+          {/* Order summary */}
           <div className="lg:col-span-1">
-            <OrderSummary
-              items={cartItems}
-              subtotal={calculateSubtotal()}
-              shippingQuote={shippingQuote}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+            <div className="bg-white p-6 rounded-lg shadow sticky top-4">
+              <h2 className="text-xl font-semibold mb-4">Σύνοψη Παραγγελίας</h2>
 
-// Helper functions (will be moved to API later)
-async function getShippingQuote(totalWeightGrams: number, postalCode: string): Promise<ShippingQuote> {
-  // Mock shipping estimator
-  const response = await fetch('/api/checkout/quote', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ totalWeightGrams, postalCode }),
-  });
+              <div className="space-y-3 mb-4 pb-4 border-b">
+                {cart.items.map((item) => (
+                  <div key={item.productId} className="flex justify-between text-sm">
+                    <span className="text-gray-700">
+                      {item.title} x {item.qty}
+                    </span>
+                    <span className="font-medium">€{(item.price * item.qty).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
 
-  if (!response.ok) {
-    throw new Error('Failed to get shipping quote');
-  }
+              <div className="space-y-2 mb-4 pb-4 border-b">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Υποσύνολο</span>
+                  <span className="font-semibold">€{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>Μεταφορικά</span>
+                  <span>Υπολογίζονται από το σύστημα</span>
+                </div>
+              </div>
 
-  return response.json();
-}
+              <div className="flex justify-between text-lg font-bold mb-6">
+                <span>Εκτιμώμενο Σύνολο</span>
+                <span>€{subtotal.toFixed(2)}+</span>
+              </div>
 
-async function processPayment(): Promise<string> {
-  // Mock payment processing
-  const response = await fetch('/api/checkout/pay', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paymentMethod: 'fake' }),
-  });
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  {error}
+                </div>
+              )}
 
-  if (!response.ok) {
-    throw new Error('Payment failed');
-  }
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
+              </button>
 
-  const result = await response.json();
-  return result.orderId;
-}
-
-// Component definitions (will be extracted to separate files if needed)
-function ShippingAddressForm({
-  address,
-  onChange,
-  onSubmit,
-  loading,
-}: {
-  address: ShippingAddress;
-  // eslint-disable-next-line no-unused-vars
-  onChange: (address: ShippingAddress) => void;
-  // eslint-disable-next-line no-unused-vars
-  onSubmit: (e: React.FormEvent) => void;
-  loading: boolean;
-}) {
-  const handleChange = (field: keyof ShippingAddress) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    onChange({ ...address, [field]: e.target.value });
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Διεύθυνση Αποστολής</h2>
-
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Πλήρες Όνομα *
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={address.name}
-            onChange={handleChange('name')}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            data-testid="shipping-name-input"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="line1" className="block text-sm font-medium text-gray-700 mb-1">
-            Διεύθυνση *
-          </label>
-          <input
-            type="text"
-            id="line1"
-            value={address.line1}
-            onChange={handleChange('line1')}
-            required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            data-testid="shipping-address-input"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-              Πόλη *
-            </label>
-            <input
-              type="text"
-              id="city"
-              value={address.city}
-              onChange={handleChange('city')}
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              data-testid="shipping-city-input"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-              Ταχυδρομικός Κώδικας *
-            </label>
-            <input
-              type="text"
-              id="postalCode"
-              value={address.postalCode}
-              onChange={handleChange('postalCode')}
-              required
-              pattern="[0-9]{5}"
-              placeholder="12345"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              data-testid="shipping-postal-code-input"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-            Τηλέφωνο (προαιρετικό)
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            value={address.phone}
-            onChange={handleChange('phone')}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            data-testid="shipping-phone-input"
-          />
-        </div>
-
-        <div className="pt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-green-400 font-medium"
-            data-testid="continue-to-review-btn"
-          >
-            {loading ? 'Υπολογισμός...' : 'Συνέχεια στην Επιβεβαίωση'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function ReviewStep({
-  shippingAddress,
-  shippingQuote,
-  onEditShipping,
-  onProceedToPayment,
-}: {
-  shippingAddress: ShippingAddress;
-  shippingQuote: ShippingQuote | null;
-  onEditShipping: () => void;
-  onProceedToPayment: () => void;
-}) {
-  return (
-    <div className="space-y-6">
-      {/* Shipping Address Review */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Διεύθυνση Αποστολής</h2>
-          <button
-            onClick={onEditShipping}
-            className="text-green-600 hover:text-green-700 text-sm font-medium"
-            data-testid="edit-shipping-btn"
-          >
-            Επεξεργασία
-          </button>
-        </div>
-
-        <div className="text-gray-600">
-          <p className="font-medium">{shippingAddress.name}</p>
-          <p>{shippingAddress.line1}</p>
-          <p>{shippingAddress.city}, {shippingAddress.postalCode}</p>
-          <p>Ελλάδα</p>
-          {shippingAddress.phone && <p>Τηλ: {shippingAddress.phone}</p>}
-        </div>
-      </div>
-
-      {/* Shipping Method */}
-      {shippingQuote && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Μέθοδος Αποστολής</h2>
-          <div className="flex items-center justify-between p-4 border border-green-200 rounded-lg bg-green-50">
-            <div>
-              <p className="font-medium text-gray-900">{shippingQuote.label}</p>
-              <p className="text-sm text-gray-600">Παράδοση σε 2-3 εργάσιμες ημέρες</p>
+              <p className="text-xs text-gray-500 text-center mt-4">
+                Πατώντας "Ολοκλήρωση Παραγγελίας" αποδέχεστε τους όρους χρήσης
+              </p>
             </div>
-            <p className="font-medium text-gray-900">
-              €{(shippingQuote.costCents / 100).toFixed(2)}
-            </p>
           </div>
-        </div>
-      )}
-
-      <div className="pt-4">
-        <button
-          onClick={onProceedToPayment}
-          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 font-medium"
-          data-testid="proceed-to-payment-btn"
-        >
-          Συνέχεια στην Πληρωμή
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PaymentStep({
-  onProcessPayment,
-  loading,
-}: {
-  onProcessPayment: () => void;
-  loading: boolean;
-}) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Πληρωμή</h2>
-
-      <div className="mb-6">
-        <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
-          <h3 className="font-medium text-gray-900 mb-2">Demo Payment Provider</h3>
-          <p className="text-sm text-gray-600">
-            Αυτή είναι μια προσομοίωση πληρωμής για τους σκοπούς της ανάπτυξης.
-            Η πληρωμή θα είναι πάντα επιτυχής.
-          </p>
-        </div>
-      </div>
-
-      <button
-        onClick={onProcessPayment}
-        disabled={loading}
-        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-green-400 font-medium"
-        data-testid="process-payment-btn"
-      >
-        {loading ? 'Επεξεργασία Πληρωμής...' : 'Ολοκλήρωση Παραγγελίας'}
-      </button>
-    </div>
-  );
-}
-
-function OrderSummary({
-  items,
-  subtotal,
-  shippingQuote,
-}: {
-  items: CartItem[];
-  subtotal: number;
-  shippingQuote: ShippingQuote | null;
-}) {
-  const total = subtotal + (shippingQuote ? shippingQuote.costCents / 100 : 0);
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Σύνοψη Παραγγελίας</h2>
-
-      {/* Items */}
-      <div className="space-y-3 mb-4">
-        {items.map((item) => (
-          <div key={item.id} className="flex justify-between items-start">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{item.name}</p>
-              <p className="text-sm text-gray-600">Ποσότητα: {item.quantity}</p>
-            </div>
-            <p className="text-sm font-medium text-gray-900">
-              €{(item.price * item.quantity).toFixed(2)}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <div className="border-t border-gray-200 pt-4 space-y-2">
-        {/* Subtotal */}
-        <div className="flex justify-between">
-          <p className="text-sm text-gray-600">Υποσύνολο</p>
-          <p className="text-sm text-gray-900">€{subtotal.toFixed(2)}</p>
-        </div>
-
-        {/* Shipping */}
-        <div className="flex justify-between">
-          <p className="text-sm text-gray-600">Αποστολή</p>
-          <p className="text-sm text-gray-900">
-            {shippingQuote ? `€${(shippingQuote.costCents / 100).toFixed(2)}` : 'Υπολογισμός...'}
-          </p>
-        </div>
-
-        {/* Total */}
-        <div className="flex justify-between pt-2 border-t border-gray-200">
-          <p className="font-medium text-gray-900">Σύνολο</p>
-          <p className="font-medium text-gray-900" data-testid="order-total">
-            €{total.toFixed(2)}
-          </p>
-        </div>
+        </form>
       </div>
     </div>
   );

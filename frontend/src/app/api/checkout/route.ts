@@ -5,6 +5,8 @@ import { shippingSchema } from '@/lib/validate';
 import { t } from '@/lib/i18n/t';
 import { computeShipping } from '@/lib/checkout/shipping';
 import { createPaymentIntent } from '@/lib/payments/provider';
+import { sendMailSafe, renderOrderEmail } from '@/lib/mail/mailer';
+import { decrementStockAtomic, StockError } from '@/lib/inventory/stock';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,20 +69,14 @@ export async function POST(request: NextRequest) {
 
     // Wrap in transaction (oversell-safe)
     const result = await prisma.$transaction(async (tx) => {
-      // Validate stock for all items
-      for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { stock: true, price: true, producerId: true }
-        });
-
-        if (!product) {
-          throw new Error(`Product ${item.productId} not found`);
-        }
-
-        if (product.stock < item.qty) {
+      // STOCK: decrement atomically with low-stock warnings
+      try {
+        await decrementStockAtomic(items.map(i => ({ productId: i.productId, qty: Number(i.qty || 0) })), tx);
+      } catch (e: any) {
+        if (e?.code === 'INSUFFICIENT_STOCK') {
           throw new Error('OVERSALE');
         }
+        throw e;
       }
 
       // Calculate subtotal and fetch product snapshots
@@ -92,8 +88,11 @@ export async function POST(request: NextRequest) {
           where: { id: item.productId },
           select: { price: true, producerId: true, title: true }
         });
+        if (!product) {
+          throw new Error(`Product ${item.productId} not found`);
+        }
         productsMap.set(item.productId, product);
-        subtotal += product!.price * item.qty;
+        subtotal += product.price * item.qty;
       }
 
       // SHIPPING: compute
@@ -114,7 +113,7 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      // Create order items and decrement stock atomically
+      // Create order items
       for (const item of items) {
         const product = productsMap.get(item.productId);
 
@@ -130,24 +129,9 @@ export async function POST(request: NextRequest) {
             status: 'PENDING'
           }
         });
-
-        // Atomic decrement with stock validation (prevents race conditions)
-        const res = await tx.product.updateMany({
-          where: {
-            id: item.productId,
-            stock: { gte: item.qty }
-          },
-          data: { stock: { decrement: item.qty } }
-        });
-
-        // If count !== 1, another transaction consumed the stock
-        if (res.count !== 1) {
-          throw new Error('OVERSALE');
-        }
       }
 
       // Note: shipping cost is included in total
-      // If Order model had a 'meta' or 'shippingCost' field, we could store it separately
       console.log(`[checkout] Order ${order.id}: subtotal=${subtotal}, shipping=${shipping}, total=${total}`);
 
       return {
@@ -166,6 +150,37 @@ export async function POST(request: NextRequest) {
       console.log('[checkout] payment', pay);
     } catch (e) {
       console.warn('[checkout] payment init failed', String(e).substring(0, 100));
+    }
+
+    // EMAIL: order confirmation (safe fallback)
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: result.orderId },
+        include: { items: true }
+      });
+      if (fullOrder) {
+        const { subject, html, text } = await renderOrderEmail('confirm', {
+          id: fullOrder.id,
+          buyerName: fullOrder.buyerName || undefined,
+          buyerEmail: (fullOrder as any).customerEmail || undefined,
+          total: Number(fullOrder.total || 0),
+          createdAt: fullOrder.createdAt,
+          shippingLine1: fullOrder.shippingLine1 || undefined,
+          shippingCity: fullOrder.shippingCity || undefined,
+          shippingPostal: fullOrder.shippingPostal || undefined,
+          items: fullOrder.items.map(i => ({
+            titleSnap: i.titleSnap || undefined,
+            qty: i.qty,
+            price: i.price
+          }))
+        });
+        const toEmail = (fullOrder as any).customerEmail || process.env.DEV_MAIL_TO || '';
+        if (toEmail) {
+          await sendMailSafe({ to: toEmail, subject, html, text });
+        }
+      }
+    } catch (e) {
+      console.warn('[checkout email] skipped:', (e as Error).message);
     }
 
     // Emit event + notification stubs
