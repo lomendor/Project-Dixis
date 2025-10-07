@@ -13,18 +13,30 @@ async function checkAdmin() {
 export default async function AdminOrdersPage({
   searchParams
 }: {
-  searchParams?: { q?: string; status?: string };
+  searchParams?: { q?: string; status?: string; from?: string; to?: string; page?: string; pageSize?: string };
 }) {
   await checkAdmin();
 
   const q = searchParams?.q?.trim() || '';
   const st = (searchParams?.status || '').toUpperCase();
-  
+  const fromDate = searchParams?.from ? new Date(searchParams.from) : null;
+  const toDate = searchParams?.to ? new Date(searchParams.to) : null;
+  const page = Math.max(1, parseInt(String(searchParams?.page || '1'), 10) || 1);
+  const envSize = Number(process.env.ADMIN_ORDERS_PAGE_SIZE || 20);
+  const pageSize = Math.max(1, Math.min(200, parseInt(String(searchParams?.pageSize || envSize), 10) || envSize));
+
   const where: any = {};
   if (st && statuses.includes(st as any)) {
     where.status = st;
   }
-  
+
+  if (fromDate || toDate) {
+    where.createdAt = {
+      ...(fromDate ? { gte: fromDate } : {}),
+      ...(toDate ? { lte: toDate } : {})
+    };
+  }
+
   if (q) {
     where.OR = [
       { id: { contains: q } },
@@ -33,6 +45,7 @@ export default async function AdminOrdersPage({
     ];
   }
 
+  const totalCount = await prisma.order.count({ where });
   const orders = await prisma.order.findMany({
     where,
     orderBy: { createdAt: 'desc' },
@@ -43,19 +56,21 @@ export default async function AdminOrdersPage({
       status: true,
       buyerName: true,
       buyerPhone: true
-    }
+    },
+    skip: (page - 1) * pageSize,
+    take: pageSize
   });
 
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Παραγγελίες (Admin)</h1>
       
-      <form className="flex gap-4 mb-6">
+      <form className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <input
           name="q"
           placeholder="Αναζήτηση (ID/όνομα/τηλέφωνο)"
           defaultValue={q}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+          className="px-4 py-2 border border-gray-300 rounded-lg"
         />
         <select
           name="status"
@@ -69,6 +84,20 @@ export default async function AdminOrdersPage({
             </option>
           ))}
         </select>
+        <input
+          type="date"
+          name="from"
+          defaultValue={searchParams?.from || ''}
+          placeholder="Από"
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        />
+        <input
+          type="date"
+          name="to"
+          defaultValue={searchParams?.to || ''}
+          placeholder="Έως"
+          className="px-4 py-2 border border-gray-300 rounded-lg"
+        />
         <button
           type="submit"
           className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -76,6 +105,17 @@ export default async function AdminOrdersPage({
           Φίλτρα
         </button>
       </form>
+
+      <div className="mb-4">
+        <a
+          href={`/api/admin/orders.csv?q=${encodeURIComponent(q)}&status=${encodeURIComponent(st)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          📥 Εξαγωγή CSV
+        </a>
+      </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="w-full">
@@ -151,6 +191,34 @@ export default async function AdminOrdersPage({
           <p className="text-center py-8 text-gray-500">Δεν βρέθηκαν παραγγελίες.</p>
         )}
       </div>
+
+      <nav className="flex items-center justify-between mt-6">
+        <a
+          href={`?q=${encodeURIComponent(q)}&status=${encodeURIComponent(st)}&from=${searchParams?.from || ''}&to=${searchParams?.to || ''}&page=${Math.max(1, page - 1)}&pageSize=${pageSize}`}
+          className={`px-4 py-2 rounded-lg ${
+            page <= 1
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-green-600 text-white hover:bg-green-700'
+          }`}
+          aria-disabled={page <= 1}
+        >
+          « Προηγούμενη
+        </a>
+        <span className="text-gray-700">
+          Σελίδα {page} από {Math.max(1, Math.ceil(totalCount / pageSize))} ({totalCount} συνολικά)
+        </span>
+        <a
+          href={`?q=${encodeURIComponent(q)}&status=${encodeURIComponent(st)}&from=${searchParams?.from || ''}&to=${searchParams?.to || ''}&page=${page + 1}&pageSize=${pageSize}`}
+          className={`px-4 py-2 rounded-lg ${
+            page >= Math.ceil(totalCount / pageSize)
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              : 'bg-green-600 text-white hover:bg-green-700'
+          }`}
+          aria-disabled={page >= Math.ceil(totalCount / pageSize)}
+        >
+          Επόμενη »
+        </a>
+      </nav>
     </main>
   );
 }
