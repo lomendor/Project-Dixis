@@ -3,6 +3,17 @@ import { prisma } from '@/lib/db/client';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 10/min per IP (soft guard)
+    const { rateLimit, rlHeaders } = await import('@/lib/rl/db');
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || request.headers.get('x-real-ip') || 'unknown';
+    const rl = await rateLimit('checkout', ip, 10, 60, 1);
+    if (!rl.ok) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Πολλές προσπάθειες αγοράς. Δοκιμάστε ξανά σε λίγο.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json', ...rlHeaders(rl) } }
+      );
+    }
+
     const body = await request.json();
     const { items, shipping } = body;
 
@@ -117,7 +128,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       order: result
-    });
+    }, { headers: rlHeaders(rl) });
 
   } catch (e: any) {
     if (String(e.message || '').includes('OVERSALE')) {

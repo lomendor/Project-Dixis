@@ -115,3 +115,15 @@ model Notification {
   @@index([status, nextAttemptAt])
   @@index([dedupId])
 }
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  name      String // e.g., 'cron-run', 'dev-deliver', 'checkout'
+  key       String // e.g., IP address, cron key, user ID
+  bucket    Int // time bucket = floor(now / windowSec)
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([name, key, bucket])
+  @@index([name, key, bucket])
+}
