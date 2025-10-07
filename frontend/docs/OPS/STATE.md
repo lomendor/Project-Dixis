@@ -585,3 +585,29 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/AGENT/SYSTEM/env.md` (SMTP docs)
   - `.env.example` (SMTP config)
 - Dependency: nodemailer
+## Pass 135 — Producer Portal v1 (Products CRUD + Orders)
+- **Producer Guard**: `requireProducer()` με ENV allowlist (`PRODUCER_PHONES`), permissive αν λείπει (dev/CI)
+  - Λειτουργεί όπως το `requireAdmin()` με allowlist τηλεφώνων
+  - Best-effort ownership: Χρήση `ownerId` στο schema αν υπάρχει
+- **Product Pages**: `/me/products` CRUD με Server Actions & Zod validation
+  - List: `/me/products` — αναζήτηση, φίλτρα (active status), responsive table
+  - Create: `/me/products/new` — φόρμα με πεδία: title, category, price, unit, stock, isActive, description
+  - Edit: `/me/products/[id]` — επεξεργασία + soft delete (isActive toggle)
+  - Server Actions: createProduct, updateProduct, deactivate (no new API routes)
+  - Zod schema: Validation για όλα τα πεδία (min length, number coercion, etc.)
+- **Orders Page**: `/me/orders` — παραγγελίες που περιέχουν προϊόντα του παραγωγού
+  - Best-effort filtering: Προσπαθεί `ownerId` relation, fallback σε όλες τις παραγγελίες (dev)
+  - Εμφανίζει: order ID, ημερομηνία, κατάσταση, items του παραγωγού, συνολικό ποσό
+  - EL-first UI: Greek locale για dates, currency formatting
+- **ENV**: PRODUCER_PHONES — comma-separated E.164 phones με πρόσβαση στο `/me/*`
+- **Files**:
+  - `frontend/src/lib/auth/producer.ts` (producer guard)
+  - `frontend/src/app/me/products/page.tsx` (product list)
+  - `frontend/src/app/me/products/new/page.tsx` (create product)
+  - `frontend/src/app/me/products/[id]/page.tsx` (edit product)
+  - `frontend/src/app/me/orders/page.tsx` (orders list)
+  - `frontend/docs/AGENT/SYSTEM/env.md` (PRODUCER_PHONES docs)
+  - `.env.example` (PRODUCER_PHONES)
+- E2E test: Producer creates product → edits → toggles active → checkout → `/me/orders` verification
+- No schema changes, no new dependencies
+

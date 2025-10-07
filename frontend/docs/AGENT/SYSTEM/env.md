@@ -2,8 +2,13 @@
 
 ## Authentication & Session
 
-- ADMIN_PHONES — λίστα τηλεφώνων (comma-separated, E.164) με admin πρόσβαση.
+- **ADMIN_PHONES** — λίστα τηλεφώνων (comma-separated, E.164) με admin πρόσβαση.
   Αν δεν οριστεί (dev/CI), ο guard είναι permissive. Σε production **πρέπει** να οριστεί.
+
+- **PRODUCER_PHONES** — λίστα τηλεφώνων (comma-separated, E.164) με producer πρόσβαση στο `/me/*`.
+  Αν δεν οριστεί (dev/CI), ο guard είναι permissive (όλοι οι authenticated χρήστες έχουν πρόσβαση).
+  Σε production, οριστε τα τηλέφωνα των παραγωγών για να περιορίσετε την πρόσβαση.
+  Παράδειγμα: `PRODUCER_PHONES="+306912345678,+306987654321"`
 
 ## Email / SMTP
 
