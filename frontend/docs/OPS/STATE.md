@@ -646,3 +646,8 @@ export default function Page() { redirect('/my/orders'); }
 - Checkout: post-commit hooks για order confirmation, admin new-order, low-stock
 - Non-blocking email αποστολές
 - e2e: mailbox checks για confirmation/admin/low-stock
+
+## Pass 153 — Storefront Catalog + Cart v1
+- Σελίδες: `/products`, `/products/[id]`, `/cart`
+- Cart: LocalStorage (χωρίς schema), EL-first UI
+- e2e: περιήγηση → add to cart → checkout
