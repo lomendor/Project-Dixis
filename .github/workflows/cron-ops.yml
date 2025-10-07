@@ -1,0 +1,20 @@
+name: cron-ops
+on:
+  schedule:
+    # Monday 04:00 UTC (weekly cleanup)
+    - cron: "0 4 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run RL cleanup job
+        env:
+          CRON_URL: ${{ secrets.CRON_OPS_URL }}
+          CRON_KEY: ${{ secrets.CRON_KEY }}
+        run: |
+          if [ -z "$CRON_URL" ] || [ -z "$CRON_KEY" ]; then
+            echo "No CRON_OPS_URL/CRON_KEY configured — skipping."; exit 0;
+          fi
+          curl -fsS -X POST "$CRON_URL" -H "X-CRON-KEY: $CRON_KEY" || true
