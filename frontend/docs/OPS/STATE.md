@@ -721,3 +721,36 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/OPS/STATE.md` (Pass 139 docs)
 - No schema changes, Zod already installed
 
+## Pass 140 — Admin Orders v1
+- **Admin Orders List** (`/admin/orders`):
+  - Filters: status, search (ID/name/phone), date range (from–to)
+  - Pagination: 20 items per page (configurable via ENV)
+  - CSV export link with filters
+  - Security: `requireAdmin()` guard
+  - Responsive table with status badges
+- **Order Detail Page** (`/admin/orders/[id]`):
+  - Full order information display
+  - Customer details and shipping address
+  - Order items with prices and totals
+  - Status transition buttons with server actions
+  - Valid transitions: PENDING → PAID/PACKING/CANCELLED, PAID → PACKING/CANCELLED, PACKING → SHIPPED/CANCELLED, SHIPPED → DELIVERED
+  - Calls existing `/api/admin/orders/[id]/status` API
+  - Print view link
+- **Status Management**:
+  - Server actions for status changes
+  - Automatic revalidation of pages
+  - CANCELLED status triggers restock (via existing inventory/stock.ts)
+  - Status change emails sent (via existing mailer)
+- **E2E Tests**: `tests/admin/orders.spec.ts`
+  - Test 1: Create order → admin changes PENDING → PACKING → CANCELLED
+  - Test 2: Filter orders by status
+  - Test 3: Search orders by name/phone/ID
+  - Test 4: Filter orders by date range
+  - Validates restock and email flows
+- **Files**:
+  - `frontend/src/app/admin/orders/page.tsx` (list with date filters)
+  - `frontend/src/app/admin/orders/[id]/page.tsx` (already existed from Pass 130)
+  - `frontend/tests/admin/orders.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 140 docs)
+- No schema changes, uses existing API routes and email/restock infrastructure
+
