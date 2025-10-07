@@ -754,3 +754,32 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/OPS/STATE.md` (Pass 140 docs)
 - No schema changes, uses existing API routes and email/restock infrastructure
 
+## Pass 141 — CI Workflow (GitHub Actions + Playwright)
+- **CI Workflow** (`.github/workflows/ci.yml`):
+  - Already comprehensive with backend + frontend + e2e jobs
+  - Added ENV variables for E2E tests:
+    - `OTP_BYPASS="000000"` — bypass OTP for test authentication
+    - `ADMIN_PHONES="+306900000084"` — admin test phone
+    - `PRODUCER_PHONES="+306900000021,+306900000022"` — producer test phones
+    - `LOW_STOCK_THRESHOLD="5"` — low stock alert threshold
+    - `BASE_URL="http://127.0.0.1:3000"` — frontend URL
+    - `PLAYWRIGHT_BASE_URL="http://127.0.0.1:3000"` — Playwright base URL
+  - E2E job runs full stack: backend + frontend + Playwright tests
+  - Artifacts uploaded: playwright-report/ and test-results/ (7-day retention)
+- **Playwright Config** (`frontend/playwright.config.ts`):
+  - Already configured with webServer (npm run dev)
+  - Has CI-specific configuration with isCI checks
+  - Multiple projects for different test types
+  - Global setup for auth
+- **npm Scripts** (`frontend/package.json`):
+  - Already has `test:e2e: "playwright test"`
+  - Has `start: "next start"` and `start:ci: "next start -p 3000"`
+  - Has `build: "next build"`
+  - No modifications needed
+- **Files**:
+  - `.github/workflows/ci.yml` (updated with ENV vars)
+  - `frontend/playwright.config.ts` (no changes, verified)
+  - `frontend/package.json` (no changes, verified)
+  - `frontend/docs/OPS/STATE.md` (Pass 141 docs)
+- No schema changes, no new dependencies, ENV configuration only
+
