@@ -14,6 +14,7 @@ const ProductSchema = z.object({
   stock: z.coerce.number().int().min(0).default(0),
   isActive: z.coerce.boolean().default(true),
   description: z.string().optional().default(''),
+  imageUrl: z.string().url('URL εικόνας μη έγκυρο').optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
 });
 
 async function updateProduct(id:string, formData: FormData){
@@ -129,14 +130,27 @@ export default async function EditProductPage({ params }:{ params:{ id:string } 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Περιγραφή
           </label>
-          <textarea 
-            name="description" 
+          <textarea
+            name="description"
             defaultValue={(p as any).description||''}
             rows={4}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           ></textarea>
         </div>
-        
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            URL Εικόνας
+          </label>
+          <input
+            name="imageUrl"
+            type="url"
+            placeholder="https://example.com/image.jpg (προαιρετικό)"
+            defaultValue={(p as any).imageUrl||''}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+        </div>
+
         <div className="flex gap-4">
           <button 
             type="submit"

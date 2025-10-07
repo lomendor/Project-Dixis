@@ -783,3 +783,27 @@ export default function Page() { redirect('/my/orders'); }
   - `frontend/docs/OPS/STATE.md` (Pass 141 docs)
 - No schema changes, no new dependencies, ENV configuration only
 
+## Pass 142 — Product Images (imageUrl field + UI thumbnails)
+- **Prisma Schema**: `imageUrl String?` field already exists in Product model (optional)
+- **Producer Portal Forms**:
+  - `/me/products/new`: Added imageUrl input field with URL validation
+  - `/me/products/[id]`: Added imageUrl input field with URL validation
+  - Zod schema validates URL format and transforms empty string to undefined
+- **Storefront Pages** (already had imageUrl support):
+  - `/products` list: Shows thumbnails for products with images (h-48 container)
+  - `/products/[id]` detail: Shows hero image (h-96 container) with fallback "Χωρίς εικόνα"
+  - Images use `object-cover` for proper aspect ratio handling
+- **E2E Tests** (`frontend/tests/storefront/images.spec.ts`):
+  - Test 1: Product with imageUrl shows hero image on detail page
+  - Test 2: Product without imageUrl shows fallback text
+  - Test 3: Products list shows thumbnails for products with images
+  - All tests use producer authentication with OTP bypass
+- **Files**:
+  - `frontend/src/app/me/products/new/page.tsx` (added imageUrl field)
+  - `frontend/src/app/me/products/[id]/page.tsx` (added imageUrl field)
+  - `frontend/src/app/products/page.tsx` (verified imageUrl support exists)
+  - `frontend/src/app/products/[id]/page.tsx` (verified imageUrl support exists)
+  - `frontend/tests/storefront/images.spec.ts` (e2e tests)
+  - `frontend/docs/OPS/STATE.md` (Pass 142 docs)
+- No schema migration needed (field already exists), no new dependencies
+
