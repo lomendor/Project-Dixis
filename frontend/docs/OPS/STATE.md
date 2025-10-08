@@ -695,3 +695,14 @@ export default function Page() { redirect('/my/orders'); }
 - Eliminates PostgreSQL service dependency in CI
 - Faster test runs (SQLite in-memory)
 - Consistent env setup across all test runs
+
+## Pass CI-01.1 — Finalize CI PR #460 ✅
+**Date**: 2025-10-08
+
+**Actions**:
+- ✅ Updated PR #460 body with Reports + Test Summary sections
+- ✅ Added `ai-pass` label to PR #460
+- ✅ Renamed e2e-postgres.yml job: "E2E (PostgreSQL)" → "E2E (SQLite)"
+- ⏳ Commit + push changes to ci/pass-ci01-stabilize branch
+- ⏳ Enable auto-merge on PR #460
+- ⏳ Wait for merge, retrigger PRs #453, #454, #458, #459
