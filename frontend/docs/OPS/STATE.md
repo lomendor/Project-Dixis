@@ -674,3 +674,27 @@ export default function Page() { redirect('/my/orders'); }
 - e2e-postgres: production parity job with PostgreSQL service
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
+
+## Pass 166c — Guardrails Align & Branch Protection
+- Aligned policy-gate & labeler patterns to cover both `prisma/` and `frontend/prisma/`
+- Fixed e2e-postgres with explicit `--schema prisma/schema.prisma` paths
+- Created standalone typecheck workflow
+- Configured branch protection with 5 required checks via GitHub API
+- Required checks: policy-gate/gate, typecheck/typecheck, CI/build-and-test, e2e-postgres/E2E, CodeQL/Analyze
+
+## Pass 167 — Storefront Filters & Search
+- Product catalog page `/products` with comprehensive filtering
+- Filters: category, price range (min/max), stock availability, sort (new/price asc/desc), text search
+- URL state management with searchParams (shareable/bookmarkable)
+- Prisma indexes: isActive+stock, price, createdAt, title
+- Search helper: `lib/search/products.ts` with pagination
+- E2E test: `tests/storefront/products-filters.spec.ts`
+
+## Pass 168 — Product Detail + Cart (cookie-based) + Cart Page
+- Product detail page `/products/[id]` with add-to-cart functionality
+- Cart cookie helper `lib/cart/cookie.ts` (14-day expiry, httpOnly: false)
+- Cart functions: getCart(), addItem(), setQty(), removeItem(), total()
+- Cart page `/cart` with quantity management, remove items, checkout CTA
+- Server Actions for cart operations with redirect-after-post pattern
+- E2E tests: add-to-cart flow, quantity updates, out-of-stock handling
+- Stock status display with disabled button when unavailable
