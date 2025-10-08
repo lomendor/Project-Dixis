@@ -718,3 +718,9 @@ export default function Page() { redirect('/my/orders'); }
 - `frontend/playwright.config.ts` με baseURL & webServer
 - `.github/workflows/ci.yml`: build + e2e (Chromium)
 - README badge + `frontend/docs/OPS/CI.md`
+
+## Pass 164 — Admin Dashboard KPIs
+- `/admin`: Έσοδα 7ημ (statuses: PAID, PACKING, SHIPPED, DELIVERED)
+- Κατανομή status (μετρητής ανά status)
+- Χαμηλά αποθέματα (top-5, threshold από ENV)
+- e2e: dashboard smoke
