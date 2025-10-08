@@ -40,6 +40,7 @@ export type Locker = {
   address: string;
   city: string;
   postalCode: string;
+  provider?: string;
   distance?: number;
 };
 
@@ -53,6 +54,7 @@ const LockerSchema = z.object({
   address: z.string(),
   city: z.string(),
   postalCode: z.string(),
+  provider: z.string().optional(),
   distance: z.number().optional(),
 });
 
