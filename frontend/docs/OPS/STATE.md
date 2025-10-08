@@ -905,4 +905,9 @@ export default function Page() { redirect('/my/orders'); }
 - HF-12: Unified E2E port 3001 (scripts, Playwright, workflow) + sanity ping
 - HF-13.1: E2E watchdog (global-timeout 20m, max-failures=1) + analysis
 - HF-13.2: Split E2E gate — blocking @smoke (2 tests), Full suite available as test:e2e:ci
-- HF-14: Added /api/healthz (SSR-safe), smoke tests use it, CI pings healthz before tests
+- HF-14: Added /api/healthz (SSR-safe), smoke tests use it, CI pings healthz before tests ✅
+- HF-14.1: Moved smoke test to tests/e2e/ + added auth-helpers stub (test discovery fix) ✅
+  - **Result**: E2E (SQLite) PASSED in 3m31s - smoke test executes successfully
+  - **Issue**: Playwright testDir='./tests/e2e' but smoke was in tests/smoke/
+  - **Fix**: Moved tests/smoke/smoke.spec.ts → tests/e2e/smoke.spec.ts
+  - **Fix**: Created tests/e2e/helpers/auth-helpers.ts stub (account-orders.spec.ts dependency)
