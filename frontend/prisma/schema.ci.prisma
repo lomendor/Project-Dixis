@@ -107,7 +107,7 @@ model Notification {
   error         String?
   attempts      Int       @default(0)
   nextAttemptAt DateTime?
-  dedupId       String?   @db.VarChar(64)
+  dedupId       String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
