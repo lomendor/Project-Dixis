@@ -681,3 +681,9 @@ export default function Page() { redirect('/my/orders'); }
 - PR #453 labeled `risk-ok` for Prisma index changes
 - Tests: `tests/storefront/products-filters.spec.ts`, `tests/storefront/cart.spec.ts`
 - Fixes E2E failures by providing proper seed endpoint for test product creation
+
+## Pass 167.fix.1 — E2E Polish (Seed JSON & BASE_URL)
+- Seed API JSON shape: returns `{ id, item }` (both for compat and direct access)
+- Tests use `BASE_URL` env var instead of hardcoded ports
+- Fixed ID extraction: `j.item.id` with fallback `j.item?.id || j.id`
+- Ensures tests work with Playwright config's BASE_URL setting
