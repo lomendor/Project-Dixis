@@ -850,3 +850,33 @@ export default function Page() { redirect('/my/orders'); }
 - E2E uses correct package manager (pnpm-native)
 - Slower CI builds have sufficient time to complete
 - Proper lockfile usage (pnpm-lock.yaml)
+
+## Pass HF-08 — Fix corepack ordering ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E failing with "Unable to locate executable file: pnpm"
+
+**Root Cause**: `setup-node` with `cache: pnpm` runs before `corepack enable`, so pnpm not available
+
+**Solution**: Moved `corepack enable` step before `setup-node`
+
+**Impact**: pnpm is available when setup-node tries to cache
+
+## Pass HF-09 — Normalize E2E workflow ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E workflow needs proper working directory and cache path configuration
+
+**Root Cause**:
+- `cache-dependency-path` pointed to `pnpm-lock.yaml` (incorrect, should be `frontend/pnpm-lock.yaml`)
+- Missing sanity check for pnpm availability
+
+**Solution**:
+- ✅ Confirmed `defaults.run.working-directory: frontend` present
+- ✅ Fixed `cache-dependency-path: 'frontend/pnpm-lock.yaml'`
+- ✅ Added `pnpm --version` sanity check step
+
+**Impact**:
+- Correct pnpm cache path resolution
+- Early detection of pnpm availability issues
+- Proper workflow normalization
