@@ -47,6 +47,7 @@
     "e2e": "playwright test",
     "ci:db": "npx prisma db push --accept-data-loss",
     "ci:gen": "npx prisma generate",
+    "ci:migrate": "npx prisma migrate deploy || npx prisma db push --accept-data-loss",
     "build:ci": "next build",
     "test:e2e:ci": "dotenv -e .env.ci -- playwright test --reporter=line",
     "pree2e:smoke": "node -e \"const p=process.cwd(); if(!p.includes('Project-Dixis/frontend')){console.error('❌ Wrong workspace:',p); process.exit(1)}\"",
