@@ -42,6 +42,8 @@ export type Locker = {
   postalCode: string;
   provider?: string;
   distance?: number;
+  operating_hours?: string;
+  notes?: string;
 };
 
 export interface LockerSearchResponse {
@@ -56,6 +58,8 @@ const LockerSchema = z.object({
   postalCode: z.string(),
   provider: z.string().optional(),
   distance: z.number().optional(),
+  operating_hours: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 export const LockerSearchResponseSchema = z.object({
