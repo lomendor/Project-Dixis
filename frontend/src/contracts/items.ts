@@ -1,9 +1,17 @@
-export type ItemQty = { product_id: number | string; qty: number };
-export type ItemQuantity = { product_id: number | string; quantity: number };
-export type ItemAny = ItemQty | ItemQuantity;
+/** Canonical cart items after normalization */
+export type Item = { product_id: number; qty: number };
 
-export function toQty(items: ItemAny[]): ItemQty[] {
-  return (items||[]).map((i:any) => 'qty' in i
-    ? { product_id: Number(i.product_id), qty: Number(i.qty) }
-    : { product_id: Number(i.product_id), qty: Number(i.quantity) });
+/** Επιτρεπτά inputs πριν το normalize */
+export type ItemInput =
+  | { product_id: number | string; qty: number }
+  | { product_id: number | string; quantity: number };
+
+export function normalizeItems(items: ItemInput[] = []): Item[] {
+  return items.map((i: any) => ({
+    product_id: Number(i.product_id),
+    qty: Number('qty' in i ? i.qty : i.quantity),
+  }));
 }
+
+// Συμβατότητα με παλιά ονόματα
+export const toQty = normalizeItems;
