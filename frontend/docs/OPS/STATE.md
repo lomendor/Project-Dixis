@@ -674,3 +674,10 @@ export default function Page() { redirect('/my/orders'); }
 - e2e-postgres: production parity job with PostgreSQL service
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
+
+## Pass 167 — Storefront Filters & Search
+- `/products` με φίλτρα: κατηγορία, τιμή (min/max), διαθεσιμότητα, ταξινόμηση, αναζήτηση τίτλου
+- URL state με searchParams (shareable/bookmarkable)
+- Prisma indexes: isActive+stock, price, createdAt, title για ταχύτερα queries
+- `searchProducts()` helper στο `lib/search/products.ts`
+- e2e: filters/search smoke με seed προϊόντων
