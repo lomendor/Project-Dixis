@@ -49,7 +49,7 @@
     "ci:gen": "npx prisma generate --schema prisma/schema.ci.prisma",
     "ci:migrate": "npx prisma db push --accept-data-loss --skip-generate --schema prisma/schema.ci.prisma",
     "build:ci": "next build",
-    "test:e2e:ci": "dotenv -e .env.ci -- playwright test --reporter=line,html --global-timeout=1200000 --max-failures=1",
+    "test:e2e:ci": "npx -y dotenv-cli -e .env.ci -- playwright test --reporter=line,html --global-timeout=1200000 --max-failures=1",
     "pree2e:smoke": "node -e \"const p=process.cwd(); if(!p.includes('Project-Dixis/frontend')){console.error('❌ Wrong workspace:',p); process.exit(1)}\"",
     "e2e:smoke": "playwright test tests/e2e/smoke.spec.ts tests/e2e/e3-docs-smoke.spec.ts",
     "e2e:ui": "playwright test --ui",
@@ -89,7 +89,7 @@
     "agent:routes": "node ../scripts/scan-routes.mjs",
     "agent:schema": "node ../scripts/scan-prisma.mjs",
     "agent:docs": "npm run agent:routes && npm run agent:schema",
-    "test:e2e:smoke": "dotenv -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1"
+    "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
