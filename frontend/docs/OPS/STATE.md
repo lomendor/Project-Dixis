@@ -724,3 +724,10 @@ export default function Page() { redirect('/my/orders'); }
 - Κατανομή status (μετρητής ανά status)
 - Χαμηλά αποθέματα (top-5, threshold από ENV)
 - e2e: dashboard smoke
+
+## Pass 165 — Producer Application & Admin Review
+- Public: `/producers/apply` (φόρμα)
+- API: `/api/producers/apply` (δημιουργία + admin notice)
+- Admin: `/admin/producers/applications` (λίστα) & `/admin/producers/applications/[id]` (λεπτομέρεια/αλλαγή status)
+- Prisma: `ProducerApplication` + `ApplicationStatus` + indexes
+- e2e: submit + admin listing + detail + status change

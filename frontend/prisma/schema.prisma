@@ -131,3 +131,28 @@ model RateLimit {
   @@unique([name, key, bucket])
   @@index([name, key, bucket])
 }
+
+
+enum ApplicationStatus {
+  PENDING
+  REVIEW
+  APPROVED
+  REJECTED
+}
+
+model ProducerApplication {
+  id           String            @id @default(cuid())
+  producerName String
+  companyName  String?
+  afm          String?   // ΑΦΜ
+  email        String
+  phone        String?
+  categories   String?   // comma-separated
+  note         String?
+  status       ApplicationStatus @default(PENDING)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
