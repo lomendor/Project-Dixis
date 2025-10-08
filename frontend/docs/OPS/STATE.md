@@ -831,3 +831,22 @@ export default function Page() { redirect('/my/orders'); }
 **Solution**: Changed `npm ci` to `npm install` in e2e-postgres.yml
 
 **Impact**: E2E can install dependencies without lockfile requirement
+
+## Pass HF-07 — E2E pnpm-native + webServer timeout bump ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E should use pnpm (matches pnpm-lock.yaml), slow builds need more timeout
+
+**Root Cause**:
+- Workflow uses npm instead of pnpm (repo standard)
+- webServer timeout 120s insufficient for CI builds
+
+**Solution**:
+- ✅ Switched e2e-postgres.yml to pnpm: cache pnpm, corepack enable, pnpm install --frozen-lockfile
+- ✅ Updated all commands: pnpm exec playwright install, pnpm run test:e2e:ci
+- ✅ Bumped Playwright webServer timeout: 120s → 180s
+
+**Impact**:
+- E2E uses correct package manager (pnpm-native)
+- Slower CI builds have sufficient time to complete
+- Proper lockfile usage (pnpm-lock.yaml)
