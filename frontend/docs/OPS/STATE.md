@@ -880,3 +880,24 @@ export default function Page() { redirect('/my/orders'); }
 - Correct pnpm cache path resolution
 - Early detection of pnpm availability issues
 - Proper workflow normalization
+
+## Pass HF-10 — Fix qty vs quantity TypeScript error ✅
+**Date**: 2025-10-08
+
+**Issue**: TypeScript build failing with "Property 'qty' is missing in type '{ product_id: number; quantity: number; }'"
+
+**Root Cause**:
+- Component uses `quantity` field name
+- ShippingQuoteRequest interface expects `qty` field name
+- Type mismatch between component props and contract interface
+
+**Solution**:
+- ✅ Created `frontend/src/contracts/items.ts` with `toQty()` normalizer function
+- ✅ Accepts both `ItemQty` (qty) and `ItemQuantity` (quantity) types
+- ✅ Updated DeliveryMethodSelector to import and use `toQty(items)` before API call
+- ✅ Canonical field: `qty` (contract standard), `quantity` accepted as alias
+
+**Impact**:
+- TypeScript build error resolved
+- Flexible type system accepts both field names
+- Normalization ensures API contract compliance
