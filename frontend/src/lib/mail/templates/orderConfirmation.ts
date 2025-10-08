@@ -8,6 +8,7 @@ export function html(params: {
   items: { title: string; qty: number; price: number }[];
   shipping: { name: string; line1: string; city: string; postal: string; phone: string };
   trackingCode?: string;
+  totals?: any;
 }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
@@ -28,7 +29,13 @@ export function html(params: {
       <thead><tr><th align="left">Προϊόν</th><th>Ποσότητα</th><th>Σύνολο</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p><b>Σύνολο:</b> ${fmt(params.total || 0)}</p>
+    <h3>Σύνολα παραγγελίας</h3>
+    <table style="font-size:14px">
+      <tr><td>Μερικό:</td><td><b>${fmt(Number((params as any).totals?.subtotal ?? (params as any).total ?? 0))}</b></td></tr>
+      <tr><td>Μεταφορικά:</td><td><b>${fmt(Number((params as any).totals?.shipping ?? 0))}</b></td></tr>
+      <tr><td>ΦΠΑ:</td><td><b>${fmt(Number((params as any).totals?.vat ?? 0))}</b></td></tr>
+      <tr><td>Σύνολο:</td><td><b>${fmt(Number((params as any).totals?.total ?? (params as any).total ?? 0))}</b></td></tr>
+    </table>
     <p><a href="${trackUrl}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:6px;text-decoration:none">Παρακολούθηση παραγγελίας</a></p>
   </div>`;
 }

@@ -4,6 +4,7 @@ import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
+import { computeTotals } from '@/lib/checkout/totals';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
@@ -51,13 +52,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Υπολογισμός συνόλου από DB τιμές
-      const total = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
+      const totals = computeTotals(lines.map(l=>({ price: Number(l.price||0), qty: Number(l.qty||0) })));
 
       // Δημιουργία παραγγελίας + items (snapshots)
       const order = await tx.order.create({
         data: {
           status: 'PENDING',
-          total,
+          total: totals.total,
+          totals,
           buyerName: String(payload?.shipping?.name || ''),
           buyerPhone: String(payload?.shipping?.phone || ''),
           buyerEmail: String(payload?.shipping?.email || '').trim() || null,
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
         select: { id: true, total: true }
       });
 
-      return { orderId: order.id, total: order.total, lines };
+      return { orderId: order.id, total: order.total, totals, lines };
     });
 
     // EMAILS: post-commit (best-effort)
@@ -116,7 +118,8 @@ export async function POST(request: NextRequest) {
               postal: String(payload?.shipping?.postal || ''),
               phone
             },
-            trackingCode: ord?.trackingCode
+            trackingCode: ord?.trackingCode,
+            totals: result.totals
           })
         });
       }

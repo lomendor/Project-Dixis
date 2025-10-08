@@ -694,3 +694,10 @@ export default function Page() { redirect('/my/orders'); }
 - Προσθήκη `prisma:migrate` script σε package.json
 - Αναγέννηση `docs/AGENT/SYSTEM/db-schema.md` (trackingCode + buyerEmail verified)
 - e2e orders (emails/tracking/status) εκτελέστηκαν στο πραγματικό schema
+
+## Pass 160 — Shipping & VAT Totals (server-side)
+- Atomic checkout: server υπολογισμοί (VAT, shipping) και αποθήκευση `Order.totals` (JSON)
+- Emails: confirmation breakdown (Μερικό/Μεταφορικά/ΦΠΑ/Σύνολο)
+- Tracking page: breakdown section με totals
+- Defaults από .env (VAT_RATE=0.13, SHIPPING_FLAT_EUR=3.5, SHIPPING_FREE_FROM_EUR=25)
+- e2e: εμφάνιση breakdown labels στη σελίδα tracking

@@ -63,6 +63,7 @@ model Order {
   shippingCity   String
   shippingPostal String
   total          Float
+  totals         Json?
   status         String      @default("pending")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

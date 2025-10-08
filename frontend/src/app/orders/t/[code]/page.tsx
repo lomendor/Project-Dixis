@@ -9,7 +9,7 @@ export default async function Page({ params }:{ params:{ code:string } }){
   const code = String(params.code||'');
   const o = await prisma.order.findFirst({
     where:{ trackingCode: code },
-    select:{ id:true,status:true,total:true,updatedAt:true,items:{ select:{ titleSnap:true, qty:true, price:true } } }
+    select:{ id:true,status:true,total:true,totals:true,updatedAt:true,items:{ select:{ titleSnap:true, qty:true, price:true } } }
   });
   if(!o) return notFound();
 
@@ -51,6 +51,20 @@ export default async function Page({ params }:{ params:{ code:string } }){
           </tbody>
         </table>
       </section>
+
+      {o.totals && (
+        <section>
+          <h3>Σύνολα</h3>
+          <table style={{width:'100%',maxWidth:420}}>
+            <tbody>
+              <tr><td>Μερικό</td><td style={{textAlign:'right'}}>{fmt(Number((o.totals as any).subtotal||0))}</td></tr>
+              <tr><td>Μεταφορικά</td><td style={{textAlign:'right'}}>{fmt(Number((o.totals as any).shipping||0))}</td></tr>
+              <tr><td>ΦΠΑ</td><td style={{textAlign:'right'}}>{fmt(Number((o.totals as any).vat||0))}</td></tr>
+              <tr><td><b>Σύνολο</b></td><td style={{textAlign:'right'}}><b>{fmt(Number((o.totals as any).total||o.total||0))}</b></td></tr>
+            </tbody>
+          </table>
+        </section>
+      )}
 
       <p style={{opacity:.7}}>Για αλλαγές ή απορίες επικοινωνήστε με την υποστήριξη.</p>
     </main>
