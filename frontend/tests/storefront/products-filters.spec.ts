@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 const base = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 test('filters & search on /products', async ({ request, page }) => {
-  // seed 3 products
+  // seed 3 products using dev API
   const mk = async (title:string, category:string, price:number, stock:number)=> {
-    const r = await request.post(base+'/api/me/products', { data:{ title, category, price, unit:'τεμ', stock, isActive:true }});
+    const r = await request.post(base+'/api/dev/seed/product', { data:{ title, category, price, unit:'τεμ', stock, isActive:true }});
     expect([200,201]).toContain(r.status());
-    return (await r.json()).item.id;
+    return (await r.json()).id;
   };
   await mk('Ελιές Καλαμών', 'Ελιές', 4.5, 10);
   await mk('Μέλι Θυμαρίσιο', 'Μέλι', 9.9, 0);
