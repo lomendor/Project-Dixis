@@ -47,7 +47,23 @@ export default async function Page({
 
   return (
     <main style={{ display: 'grid', gap: 12, padding: 16 }}>
-      <h1>Προϊόντα</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1>Προϊόντα</h1>
+        <Link
+          href="/admin/products/new"
+          style={{
+            padding: '8px 16px',
+            border: '1px solid #ddd',
+            borderRadius: 6,
+            backgroundColor: '#4caf50',
+            color: '#fff',
+            fontWeight: 700,
+            textDecoration: 'none'
+          }}
+        >
+          + Νέο Προϊόν
+        </Link>
+      </div>
       <form
         style={{
           display: 'grid',
@@ -74,6 +90,7 @@ export default async function Page({
             <th>Τιμή</th>
             <th>Απόθεμα</th>
             <th>Κατάσταση</th>
+            <th>Ενέργειες</th>
           </tr>
         </thead>
         <tbody>
@@ -102,6 +119,20 @@ export default async function Page({
                 )}
               </td>
               <td>{p.isActive ? 'Ενεργό' : 'Ανενεργό'}</td>
+              <td>
+                <Link
+                  href={`/admin/products/${p.id}`}
+                  style={{
+                    padding: '4px 12px',
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    textDecoration: 'none',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  Επεξεργασία
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

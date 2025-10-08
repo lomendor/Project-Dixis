@@ -657,3 +657,15 @@ export default function Page() { redirect('/my/orders'); }
 - Καθαρισμός cart σε επιτυχές 201 + redirect σε confirm
 - Storefront header: Cart count
 - e2e: πλήρης UI ροή & cart clear
+
+## Pass 155 — Admin Products CRUD + Image & Description
+- Prisma: Product.imageUrl?, Product.description? (already existed in schema)
+- Admin: new/edit σελίδες με forms (imageUrl, description)
+  - `/admin/products/new` → δημιουργία προϊόντος
+  - `/admin/products/[id]` → επεξεργασία προϊόντος
+  - Admin list: "Νέο Προϊόν" κουμπί, "Επεξεργασία" link ανά προϊόν
+- Upload API: υπάρχει `/api/uploads` (local fs & S3 support)
+- Storefront: εικόνες σε list/detail, περιγραφή στο detail
+  - Products list: grid με thumbnails (96×96)
+  - Product detail: μεγάλη εικόνα + περιγραφή (pre-wrap)
+- e2e: εμφάνιση εικόνας/περιγραφής & αναζήτηση
