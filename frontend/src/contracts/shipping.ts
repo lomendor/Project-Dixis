@@ -19,11 +19,13 @@ export interface ShippingQuoteRequest {
 }
 
 export interface ShippingQuoteResponse {
-  method: DeliveryMethod;
-  cost: number;
-  estimatedDays: number;
-  available: boolean;
-  message?: string;
+  data: {
+    method: DeliveryMethod;
+    cost: number;
+    estimatedDays: number;
+    available: boolean;
+    message?: string;
+  };
 }
 
 export interface LockerSearchResponse {
