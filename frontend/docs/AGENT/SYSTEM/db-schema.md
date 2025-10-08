@@ -71,6 +71,7 @@ model Order {
 
   @@index([buyerPhone, createdAt])
   @@index([status, createdAt])
+  @@index([createdAt])
 }
 
 model OrderItem {

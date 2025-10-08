@@ -707,3 +707,9 @@ export default function Page() { redirect('/my/orders'); }
 - Storefront: badge "Εξαντλημένο" & απενεργοποίηση κουμπιού όταν stock<=0
 - Admin notice: email χαμηλού αποθέματος (DEV_MAIL_TO) όταν `stock <= LOW_STOCK_THRESHOLD`
 - e2e: αποτροπή υπερ-πώλησης (400), μείωση stock, low-stock notice (optional)
+
+## Pass 162 — Admin Orders List + CSV
+- Admin: `/admin/orders` φίλτρα (status, ημερομηνίες), αναζήτηση (ID), σελιδοποίηση
+- CSV export: `/api/admin/orders/export.csv`
+- Prisma: indexes σε `Order(status, createdAt)` και `Order(createdAt)`
+- e2e: orders list + CSV smoke

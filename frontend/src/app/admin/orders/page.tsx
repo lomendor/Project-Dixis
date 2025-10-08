@@ -1,153 +1,75 @@
+export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Παραγγελίες (Admin) | Dixis' };
+function parseDate(s?:string){ if(!s) return undefined; const d=new Date(s); return isNaN(+d)?undefined:d; }
+const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
 
-const statuses = ['PENDING', 'PAID', 'PACKING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
-
-export default async function AdminOrdersPage({
-  searchParams
-}: {
-  searchParams?: { q?: string; status?: string };
-}) {
+export default async function Page({ searchParams }:{ searchParams?:Record<string,string|undefined> }){
   await requireAdmin?.();
+  const q = String(searchParams?.q||'').trim();
+  const status = String(searchParams?.status||'').trim().toUpperCase();
+  const from = parseDate(String(searchParams?.from||''));
+  const to = parseDate(String(searchParams?.to||''));
+  const page = Math.max(1, Number(searchParams?.page||1));
+  const pageSize = Math.min(50, Math.max(5, Number(searchParams?.pageSize||10)));
 
-  const q = searchParams?.q?.trim() || '';
-  const st = (searchParams?.status || '').toUpperCase();
-  
-  const where: any = {};
-  if (st && statuses.includes(st as any)) {
-    where.status = st;
-  }
-  
-  if (q) {
-    where.OR = [
-      { id: { contains: q } },
-      { buyerName: { contains: q } },
-      { buyerPhone: { contains: q } }
-    ];
-  }
+  const where:any = {};
+  if(q) where.id = { contains: q };
+  if(status) where.status = status;
+  if(from || to) where.createdAt = { gte: from || undefined, lte: to || undefined };
 
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      createdAt: true,
-      total: true,
-      status: true,
-      buyerName: true,
-      buyerPhone: true
-    }
-  });
+  const [rows, total] = await Promise.all([
+    prisma.order.findMany({
+      where, orderBy:{ createdAt:'desc' },
+      select:{ id:true, status:true, total:true, updatedAt:true },
+      skip:(page-1)*pageSize, take:pageSize
+    }),
+    prisma.order.count({ where })
+  ]);
+  const pages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Παραγγελίες (Admin)</h1>
-      
-      <form className="flex gap-4 mb-6">
-        <input
-          name="q"
-          placeholder="Αναζήτηση (ID/όνομα/τηλέφωνο)"
-          defaultValue={q}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-        />
-        <select
-          name="status"
-          defaultValue={st}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
-        >
-          <option value="">Όλες</option>
-          {statuses.map(s => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
+    <main style={{display:'grid',gap:16,padding:16}}>
+      <h1>Παραγγελίες</h1>
+
+      <form method="get" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
+        <input name="q" placeholder="Αναζήτηση με ID" defaultValue={q}/>
+        <select name="status" defaultValue={status}>
+          <option value="">— Όλα τα status —</option>
+          {['PENDING','PAID','PACKING','SHIPPED','DELIVERED','CANCELLED'].map(s=><option key={s} value={s}>{s}</option>)}
         </select>
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          Φίλτρα
-        </button>
+        <input type="date" name="from" defaultValue={searchParams?.from as string||''}/>
+        <input type="date" name="to" defaultValue={searchParams?.to as string||''}/>
+        <select name="pageSize" defaultValue={String(pageSize)}>
+          {[10,20,30,50].map(n=><option key={n} value={n}>{n}/σελίδα</option>)}
+        </select>
+        <button type="submit">Φίλτρο</button>
+        <a href={`/api/admin/orders/export?${new URLSearchParams({ q, status, from:searchParams?.from||'', to:searchParams?.to||'' }).toString()}`} target="_blank" rel="noopener">Λήψη CSV</a>
       </form>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                #
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ημερομηνία
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Πελάτης
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Τηλέφωνο
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Σύνολο
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Κατάσταση
-              </th>
+      <table style={{width:'100%',borderCollapse:'collapse'}}>
+        <thead><tr><th>ID</th><th>Status</th><th>Total</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+          {rows.map(o=>(
+            <tr key={o.id} style={{borderTop:'1px solid #eee'}}>
+              <td>#{o.id}</td>
+              <td>{o.status}</td>
+              <td>{fmt(Number(o.total||0))}</td>
+              <td>{new Date(o.updatedAt as any).toLocaleString('el-GR')}</td>
+              <td><Link href={`/admin/orders/${o.id}`}>Άνοιγμα</Link></td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {orders.map(o => (
-              <tr key={o.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <Link
-                    href={`/admin/orders/${o.id}`}
-                    className="text-green-600 hover:text-green-700 font-medium"
-                  >
-                    #{o.id.substring(0, 8)}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {new Date(o.createdAt).toLocaleString('el-GR')}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {o.buyerName || '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {o.buyerPhone || '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {new Intl.NumberFormat('el-GR', {
-                    style: 'currency',
-                    currency: 'EUR'
-                  }).format(Number(o.total || 0))}
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      o.status === 'DELIVERED'
-                        ? 'bg-green-100 text-green-800'
-                        : o.status === 'CANCELLED'
-                        ? 'bg-red-100 text-red-800'
-                        : o.status === 'SHIPPED'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {String(o.status || 'PENDING')}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        
-        {orders.length === 0 && (
-          <p className="text-center py-8 text-gray-500">Δεν βρέθηκαν παραγγελίες.</p>
-        )}
-      </div>
+          ))}
+          {!rows.length && <tr><td colSpan={5} style={{textAlign:'center',padding:24,opacity:.7}}>Καμία παραγγελία</td></tr>}
+        </tbody>
+      </table>
+
+      <nav style={{display:'flex',gap:8,alignItems:'center',justifyContent:'flex-end'}}>
+        <span>Σελίδα {page}/{pages}</span>
+        <a href={`?${new URLSearchParams({ ...searchParams as any, page:String(Math.max(1,page-1)), pageSize:String(pageSize) }).toString()}`} aria-disabled={page<=1} style={{opacity:page<=1?.5:1,pointerEvents:page<=1?'none':'auto'}}>« Προηγ.</a>
+        <a href={`?${new URLSearchParams({ ...searchParams as any, page:String(Math.min(pages,page+1)), pageSize:String(pageSize) }).toString()}`} aria-disabled={page>=pages} style={{opacity:page>=pages?.5:1,pointerEvents:page>=pages?'none':'auto'}}>Επόμ.»</a>
+      </nav>
     </main>
   );
 }
