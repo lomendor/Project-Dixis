@@ -6,10 +6,10 @@
 
 import { z } from 'zod';
 
-export type DeliveryMethod = 'HOME_DELIVERY' | 'LOCKER_DELIVERY' | 'STORE_PICKUP';
+export type DeliveryMethod = 'HOME' | 'LOCKER' | 'STORE_PICKUP';
 export type PaymentMethod = 'CARD' | 'COD';
 
-export const DeliveryMethodSchema = z.enum(['HOME_DELIVERY', 'LOCKER_DELIVERY', 'STORE_PICKUP']);
+export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER', 'STORE_PICKUP']);
 
 export interface ShippingQuoteRequest {
   postalCode: string;
@@ -46,8 +46,8 @@ export const DEFAULT_DELIVERY_OPTIONS: Array<{
   baseCost?: number;
 }> = [
   { code: 'STORE_PICKUP', label: 'Παραλαβή από κατάστημα', etaDays: 0, baseCost: 0 },
-  { code: 'HOME_DELIVERY', label: 'Παράδοση στο σπίτι', etaDays: 2, baseCost: 3.5 },
-  { code: 'LOCKER_DELIVERY', label: 'Παράδοση σε locker', etaDays: 1, baseCost: 2.0 },
+  { code: 'HOME', label: 'Παράδοση στο σπίτι', etaDays: 2, baseCost: 3.5 },
+  { code: 'LOCKER', label: 'Παράδοση σε locker', etaDays: 1, baseCost: 2.0 },
 ];
 
 export function calculateShippingCost(
