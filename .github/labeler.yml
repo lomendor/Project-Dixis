@@ -5,6 +5,7 @@ ai-pass:
 risk-paths:
   - changed-files:
     - any-glob-to-any-file:
+      - 'prisma/**'
       - 'frontend/prisma/**'
       - 'frontend/src/app/api/checkout/**'
       - 'frontend/src/app/api/admin/orders/**'

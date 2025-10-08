@@ -674,3 +674,14 @@ export default function Page() { redirect('/my/orders'); }
 - e2e-postgres: production parity job with PostgreSQL service
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
+
+## Pass 166c — Guardrails Align & Protection
+- policy-gate/labeler patterns aligned (root & frontend prisma)
+- e2e-postgres: explicit prisma --schema path
+- typecheck workflow ensured
+- Branch protection contexts aligned with 5 required checks:
+  - policy-gate / gate
+  - typecheck / typecheck
+  - CI / build-and-test
+  - e2e-postgres / E2E (PostgreSQL)
+  - CodeQL / Analyze (javascript)

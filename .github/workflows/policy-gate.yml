@@ -25,7 +25,7 @@ jobs:
       - name: Enforce risk label for sensitive paths
         run: |
           set -e
-          RISK_REGEX='^(frontend/prisma/|frontend/src/app/api/checkout/|frontend/src/app/api/admin/orders/|frontend/src/lib/mail/|frontend/src/lib/auth/|.github/workflows/)'
+          RISK_REGEX='^(prisma/|frontend/prisma/|frontend/src/app/api/checkout/|frontend/src/app/api/admin/orders/|frontend/src/lib/mail/|frontend/src/lib/auth/|.github/workflows/)'
 
           if grep -Eq "$RISK_REGEX" changed.txt; then
             echo "⚠️  Risky paths detected in PR"
