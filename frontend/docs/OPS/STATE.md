@@ -669,3 +669,8 @@ export default function Page() { redirect('/my/orders'); }
   - Products list: grid με thumbnails (96×96)
   - Product detail: μεγάλη εικόνα + περιγραφή (pre-wrap)
 - e2e: εμφάνιση εικόνας/περιγραφής & αναζήτηση
+
+## Pass 156 — Public Order Tracking + Admin Order Detail
+- Storefront: `/orders/track/[id]` (public) με μη-ευαίσθητα στοιχεία
+- Admin: `/admin/orders/[id]` με αλλαγή status & βασικές πληροφορίες
+- e2e: tracking page + admin status change
