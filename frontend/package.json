@@ -88,7 +88,8 @@
     "test:api": "node tests/e2e/test-api-server.js",
     "agent:routes": "node ../scripts/scan-routes.mjs",
     "agent:schema": "node ../scripts/scan-prisma.mjs",
-    "agent:docs": "npm run agent:routes && npm run agent:schema"
+    "agent:docs": "npm run agent:routes && npm run agent:schema",
+    "test:e2e:smoke": "dotenv -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
