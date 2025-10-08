@@ -902,3 +902,4 @@ export default function Page() { redirect('/my/orders'); }
 - Flexible type system accepts both field names
 - Normalization ensures API contract compliance
 - HF-11 resume: verified/normalized items (product_id:number) & selector payload
+- HF-12: Unified E2E port 3001 (scripts, Playwright, workflow) + sanity ping

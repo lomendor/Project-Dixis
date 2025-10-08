@@ -121,7 +121,7 @@ export default defineConfig({
     command: 'npm run ci:gen && npm run ci:migrate && npm run build:ci && npm run start:ci',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    timeout: 180000_000,
     stdout: 'ignore',
     stderr: 'pipe',
   } : {

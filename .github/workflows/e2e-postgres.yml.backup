@@ -10,9 +10,6 @@ jobs:
     name: E2E (SQLite)
     runs-on: ubuntu-latest
 
-    env:
-      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
-
     defaults:
       run:
         working-directory: frontend
@@ -39,11 +36,6 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
-
-      - name: Sanity ping
-        run: |
-          echo "Testing if frontend is accessible..."
-          timeout 10 bash -c 'until curl -sS http://127.0.0.1:3001 >/dev/null 2>&1; do sleep 1; done' || echo "⚠️ Frontend not yet accessible (normal if webServer starts with tests)"
 
       - name: Run E2E tests (SQLite via .env.ci)
         run: pnpm run test:e2e:ci
