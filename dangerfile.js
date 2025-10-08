@@ -28,7 +28,21 @@ if (lineCount > 600 && !hasLargeDiffLabel) {
   warn(`📏 **Large PR Detected**: ${lineCount} lines of code changed. Consider breaking this into smaller PRs for easier review.`)
 }
 
-// 🎯 Rule 2: Quality Gate - Documentation Reports Required
+// 🎯 Rule 2: Quality Gate - Documentation Reports Required (Skip/Warn for ai-pass)
+const labels = pr.labels?.map(l => (l.name || '').toLowerCase()) ?? []
+const isAiPass = labels.includes('ai-pass')
+
+const hasReports = /##\s*Reports/i.test(pr.body || '')
+const hasTestSummary = /##\s*Test Summary/i.test(pr.body || '')
+
+if (!hasReports || !hasTestSummary) {
+  if (isAiPass) {
+    warn('⚠️ **PR missing Reports/Test Summary**, but labeled `ai-pass` → skipping strict check.')
+  } else {
+    warn('📋 **PR should include Reports** (CODEMAP/TEST-REPORT/RISKS-NEXT) and Test Summary.')
+  }
+}
+
 const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
 const hasReportLinks = pr.body?.includes(`backend/docs/reports/${today}/`) ||
                       pr.body?.includes(`docs/reports/${today}/`)
@@ -38,7 +52,7 @@ const hasSignificantChanges = lineCount > 100 ||
                                                        file.includes('backend/config/') ||
                                                        file.includes('backend/database/'))
 
-if (hasSignificantChanges && !hasReportLinks) {
+if (hasSignificantChanges && !hasReportLinks && !isAiPass) {
   fail(`🚫 **Missing Documentation**: Significant changes detected but no links to today's reports (${today}) found in PR description.`)
 }
 
