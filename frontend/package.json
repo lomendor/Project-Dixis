@@ -15,6 +15,7 @@
     "start:ci": "next start -p 3000",
     "mock:api": "node ../scripts/mock-api/lhci-mock.cjs",
     "prisma:gen": "prisma generate --schema=./prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --name sync_schema",
     "db:gen": "prisma generate",
     "db:mig": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

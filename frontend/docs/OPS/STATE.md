@@ -686,3 +686,11 @@ export default function Page() { redirect('/my/orders'); }
 - Admin status route: περνά trackingCode στο email (best-effort)
 - Schema: `Order.buyerEmail?` για status notifications
 - e2e: αλλαγή status → status email με tokenized link → tracking page δείχνει PACKING
+
+## Pass 159 — Prisma migration applied + schema path harmonization
+- Εφαρμόστηκε migration για `Order.buyerEmail?` και έγινε `prisma generate`
+- Κανονικοποίηση Prisma schema: `frontend/prisma/schema.prisma`
+- Ενημέρωση `scripts/scan-prisma.mjs` για σωστό path (prioritize frontend/prisma)
+- Προσθήκη `prisma:migrate` script σε package.json
+- Αναγέννηση `docs/AGENT/SYSTEM/db-schema.md` (trackingCode + buyerEmail verified)
+- e2e orders (emails/tracking/status) εκτελέστηκαν στο πραγματικό schema

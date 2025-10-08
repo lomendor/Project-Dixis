@@ -7,9 +7,9 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const OUT = path.join(repoRoot, 'frontend', 'docs', 'AGENT', 'SYSTEM', 'db-schema.md');
 const candidates = [
+  path.join(repoRoot, 'frontend/prisma/schema.prisma'),
   path.join(repoRoot, 'prisma/schema.prisma'),
-  path.join(repoRoot, 'backend/prisma/schema.prisma'),
-  path.join(repoRoot, 'frontend/prisma/schema.prisma')
+  path.join(repoRoot, 'backend/prisma/schema.prisma')
 ];
 
 const P = candidates.find(f=>fs.existsSync(f));

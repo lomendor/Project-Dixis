@@ -54,8 +54,10 @@ model Product {
 
 model Order {
   id             String      @id @default(cuid())
+  trackingCode   String      @unique @default(cuid())
   buyerPhone     String
   buyerName      String
+  buyerEmail     String?
   shippingLine1  String
   shippingLine2  String?
   shippingCity   String
