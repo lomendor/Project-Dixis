@@ -674,3 +674,10 @@ export default function Page() { redirect('/my/orders'); }
 - e2e-postgres: production parity job with PostgreSQL service
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
+
+## Pass 167.fix — Unblock E2E & Policy Gate
+- Dev seed API: `POST /api/dev/seed/product` (blocked in production via DIXIS_ENV check)
+- E2E tests updated to use `/api/dev/seed/product` instead of `/api/me/products` or `/api/admin/products`
+- PR #453 labeled `risk-ok` for Prisma index changes
+- Tests: `tests/storefront/products-filters.spec.ts`, `tests/storefront/cart.spec.ts`
+- Fixes E2E failures by providing proper seed endpoint for test product creation
