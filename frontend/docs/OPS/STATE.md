@@ -753,3 +753,29 @@ export default function Page() { redirect('/my/orders'); }
 - ✅ Changed `.env.ci` DATABASE_URL: `postgresql://...` → `file:./test.db`
 
 **Impact**: CI now correctly uses SQLite for all E2E tests, no PostgreSQL dependency
+
+## Pass CI-04 — Dual Prisma Schemas (Prod Postgres, CI SQLite) ✅
+**Date**: 2025-10-08
+
+**Issue**: Changing `schema.prisma` provider to sqlite breaks production which uses PostgreSQL
+
+**Root Cause**: Single schema file cannot support different providers for dev/prod (Postgres) vs CI (SQLite)
+
+**Solution - Dual Schema Strategy**:
+- ✅ Reverted `prisma/schema.prisma` to `provider = "postgresql"` (prod/dev default)
+- ✅ Created `prisma/schema.ci.prisma` with `provider = "sqlite"` (CI-only)
+- ✅ Updated CI scripts to use `--schema prisma/schema.ci.prisma`:
+  - `ci:db`: `prisma db push --accept-data-loss --schema prisma/schema.ci.prisma`
+  - `ci:gen`: `prisma generate --schema prisma/schema.ci.prisma`
+  - `ci:migrate`: `prisma db push --skip-generate --schema prisma/schema.ci.prisma`
+- ✅ Playwright webServer already correct (uses `ci:gen → ci:migrate → build:ci → start:ci`)
+
+**Files Modified**:
+- `prisma/schema.prisma`: Reverted provider to `postgresql`
+- `prisma/schema.ci.prisma`: New file (identical models, sqlite provider)
+- `package.json`: CI scripts updated with `--schema` flags
+
+**Impact**:
+- Production/dev environments use PostgreSQL (proper provider match)
+- CI uses SQLite via dedicated schema (fast, deterministic tests)
+- Zero production risk - CI-only changes
