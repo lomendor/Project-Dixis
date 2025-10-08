@@ -905,3 +905,4 @@ export default function Page() { redirect('/my/orders'); }
 - HF-12: Unified E2E port 3001 (scripts, Playwright, workflow) + sanity ping
 - HF-13.1: E2E watchdog (global-timeout 20m, max-failures=1) + analysis
 - HF-13.2: Split E2E gate — blocking @smoke (2 tests), Full suite available as test:e2e:ci
+- HF-14: Added /api/healthz (SSR-safe), smoke tests use it, CI pings healthz before tests
