@@ -12,10 +12,13 @@ export type PaymentMethod = 'CARD' | 'COD';
 export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER', 'STORE_PICKUP']);
 
 export interface ShippingQuoteRequest {
-  postalCode: string;
-  city: string;
-  weight?: number;
-  orderValue?: number;
+  items: Array<{
+    product_id: number;
+    qty: number;
+  }>;
+  postal_code: string;
+  delivery_method: DeliveryMethod;
+  payment_method?: PaymentMethod;
 }
 
 export interface ShippingQuoteResponse {
