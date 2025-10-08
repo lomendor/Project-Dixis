@@ -67,13 +67,13 @@ export default function LockerSearch({
 
       const data = parseResult.data;
 
-      // Since parseResult.success is true, data.success is always true
-      setLockers(data.data);
+      // Extract lockers from validated response
+      setLockers(data.lockers);
       setSearchAttempted(true);
 
       // Auto-select first locker if none selected
-      if (data.data.length > 0 && !selectedLockerId) {
-        onLockerSelected(data.data[0].id);
+      if (data.lockers.length > 0 && !selectedLockerId) {
+        onLockerSelected(data.lockers[0].id);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Σφάλμα δικτύου';
