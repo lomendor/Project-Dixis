@@ -6,7 +6,8 @@ test('filters & search on /products', async ({ request, page }) => {
   const mk = async (title:string, category:string, price:number, stock:number)=> {
     const r = await request.post(base+'/api/dev/seed/product', { data:{ title, category, price, unit:'τεμ', stock, isActive:true }});
     expect([200,201]).toContain(r.status());
-    return (await r.json()).id;
+    const j = await r.json();
+    return j.item.id;
   };
   await mk('Ελιές Καλαμών', 'Ελιές', 4.5, 10);
   await mk('Μέλι Θυμαρίσιο', 'Μέλι', 9.9, 0);
