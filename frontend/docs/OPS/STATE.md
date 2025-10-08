@@ -679,22 +679,24 @@ export default function Page() { redirect('/my/orders'); }
 **Date**: 2025-10-08
 
 **Changes**:
-- ✅ `.env.ci` for CI-only envs (SQLite, BASE_URL, OTP_BYPASS, etc.)
+- ✅ `.env.ci` for CI-only envs (PostgreSQL, BASE_URL, OTP_BYPASS, etc.)
 - ✅ Playwright webServer: CI mode uses `ci:gen && ci:db && build:ci && start:ci`
-- ✅ Switch E2E/Smoke to SQLite via `prisma db push` (no migrations needed)
+- ✅ E2E/Smoke use PostgreSQL service via `prisma migrate deploy`
 - ✅ package.json scripts: `ci:db`, `ci:gen`, `build:ci`, `test:e2e:ci`
-- ✅ Simplified e2e-postgres.yml workflow (removed PostgreSQL service, use SQLite)
+- ✅ e2e-postgres.yml workflow with PostgreSQL service container
 
 **Architecture**:
-- CI tests run on SQLite for speed and simplicity
-- Production still uses PostgreSQL
+- CI tests run on PostgreSQL service (postgres:16-alpine)
+- Production uses PostgreSQL (same provider, schema compatible)
 - dotenv-cli loads .env.ci in CI context
 - Playwright webServer builds and starts Next.js automatically
+- Migrations run via `prisma migrate deploy` (production-safe)
 
 **Impact**:
-- Eliminates PostgreSQL service dependency in CI
-- Faster test runs (SQLite in-memory)
-- Consistent env setup across all test runs
+- PostgreSQL service ensures schema compatibility
+- Consistent database provider across all environments
+- Proper migration support (not db push)
+- Explicit env loading via dotenv-cli
 
 ## Pass CI-01.1 — Finalize CI PR #460 ✅
 **Date**: 2025-10-08
