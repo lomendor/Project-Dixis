@@ -10,33 +10,6 @@ jobs:
     name: E2E (PostgreSQL)
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dixis_test?schema=public
-      PORT: 3000
-      OTP_BYPASS: "000000"
-      ADMIN_PHONES: "+306900000084"
-      DEV_MAIL_TO: ""
-      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
-      VAT_RATE: "0.13"
-      SHIPPING_FLAT_EUR: "3.5"
-      SHIPPING_FREE_FROM_EUR: "25"
-      DIXIS_ENV: preview
-
     defaults:
       run:
         working-directory: frontend
@@ -55,17 +28,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Run migrations
-        run: npx prisma migrate deploy
-
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Run E2E tests (SQLite via .env.ci)
+        run: npm run test:e2e:ci
+        env:
+          CI: true
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4

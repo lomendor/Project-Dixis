@@ -117,7 +117,14 @@ export default defineConfig({
     }
   ],
 
-  webServer: {
+  webServer: isCI ? {
+    command: 'npm run ci:gen && npm run ci:db && npm run build:ci && npm run start:ci',
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  } : {
     command: 'npm run dev -- --port 3030',
     url: baseURL, // Phase-4: Use normalized URL
     reuseExistingServer: true,
