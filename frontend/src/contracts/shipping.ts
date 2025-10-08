@@ -34,16 +34,29 @@ export interface ShippingQuoteResponse {
   };
 }
 
+export type Locker = {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  distance?: number;
+};
+
 export interface LockerSearchResponse {
-  lockers: Array<{
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    distance?: number;
-  }>;
+  lockers: Locker[];
 }
+
+export const LockerSearchResponseSchema = z.object({
+  lockers: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    address: z.string(),
+    city: z.string(),
+    postalCode: z.string(),
+    distance: z.number().optional(),
+  })),
+});
 
 export const DEFAULT_DELIVERY_OPTIONS: Array<{
   code: DeliveryMethod;
