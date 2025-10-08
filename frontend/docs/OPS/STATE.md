@@ -820,3 +820,14 @@ export default function Page() { redirect('/my/orders'); }
 **Solution**: Removed npm cache configuration from `.github/workflows/e2e-postgres.yml` (no cache needed)
 
 **Impact**: E2E workflow can run without cache dependency errors
+
+## Pass HF-06 — Fix E2E npm ci → npm install ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E failing with "`npm ci` command can only install with an existing package-lock.json"
+
+**Root Cause**: Workflow uses `npm ci` which requires package-lock.json (removed in HF-04)
+
+**Solution**: Changed `npm ci` to `npm install` in e2e-postgres.yml
+
+**Impact**: E2E can install dependencies without lockfile requirement
