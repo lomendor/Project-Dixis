@@ -1,4 +1,4 @@
-name: e2e-postgres
+name: e2e-sqlite
 on:
   pull_request:
     branches: [ main ]
@@ -7,23 +7,8 @@ on:
 
 jobs:
   e2e:
-    name: E2E (PostgreSQL)
+    name: E2E (SQLite)
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: dixis_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     defaults:
       run:

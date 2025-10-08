@@ -740,3 +740,16 @@ export default function Page() { redirect('/my/orders'); }
 - ✅ CI webServer sequence: `ci:gen → ci:migrate (db push) → build:ci → start:ci`
 
 **Impact**: CI now applies schema directly from prisma/schema.prisma, bypassing broken migrations
+
+## Pass CI-03 — Enforce SQLite-Only for CI ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E workflow named "PostgreSQL" but actually should use SQLite for speed
+
+**Solution**:
+- ✅ Renamed `e2e-postgres.yml` → `e2e-sqlite.yml` workflow
+- ✅ Removed PostgreSQL service container (unnecessary)
+- ✅ Updated workflow name: "E2E (PostgreSQL)" → "E2E (SQLite)"
+- ✅ Changed `.env.ci` DATABASE_URL: `postgresql://...` → `file:./test.db`
+
+**Impact**: CI now correctly uses SQLite for all E2E tests, no PostgreSQL dependency
