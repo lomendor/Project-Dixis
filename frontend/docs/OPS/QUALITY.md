@@ -61,3 +61,40 @@ PRs are automatically labeled based on file changes:
 - `fe-api-integration.yml` (archived - redundant with ci.yml)
 
 **Result**: ~25% CI time reduction, single source of truth for e2e
+
+## Pass 166c — Guardrails Alignment & Protection
+
+### Required Status Check Contexts
+
+All PRs to `main` must pass these checks (exact context names):
+
+1. **policy-gate / gate**
+   - Enforces `risk-ok` label for sensitive paths
+   - Now covers both `prisma/**` and `frontend/prisma/**`
+
+2. **typecheck / typecheck**
+   - TypeScript strict mode validation
+   - Runs `tsc --noEmit` on frontend code
+
+3. **CI / build-and-test**
+   - Backend tests + Frontend build + Unit tests
+   - Main integration check
+
+4. **e2e-postgres / E2E (PostgreSQL)**
+   - Production parity with PostgreSQL service
+   - Fixed schema path: explicit `--schema prisma/schema.prisma`
+
+5. **CodeQL / Analyze (javascript)**
+   - Security vulnerability scanning
+   - JavaScript/TypeScript analysis
+
+### Pattern Alignment (166c)
+
+**Sensitive paths** (both policy-gate and labeler):
+- `prisma/**` — Root Prisma schema (if exists)
+- `frontend/prisma/**` — Frontend Prisma schema
+- `frontend/src/app/api/checkout/**` — Payment/checkout logic
+- `frontend/src/app/api/admin/orders/**` — Admin order operations
+- `frontend/src/lib/mail/**` — Email templates
+- `frontend/src/lib/auth/**` — Authentication logic
+- `.github/workflows/**` — CI/CD definitions
