@@ -45,7 +45,7 @@
     "test:gdpr": "vitest run tests/unit/gdpr-dsr.spec.ts",
     "test:execution-issues": "npm run test:shipping && npm run test:checkout && npm run test:gdpr",
     "e2e": "playwright test",
-    "ci:db": "npx prisma db push --accept-data-loss",
+    "ci:db": "npx prisma migrate deploy",
     "ci:gen": "npx prisma generate",
     "build:ci": "next build",
     "test:e2e:ci": "dotenv -e .env.ci -- playwright test --reporter=line",
