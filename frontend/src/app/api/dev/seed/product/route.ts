@@ -20,7 +20,7 @@ export async function POST(req: Request){
     };
     if(!data.title) return NextResponse.json({ error:'title required' }, { status: 400 });
     const item = await prisma.product.create({ data });
-    return NextResponse.json({ id: item.id, ...item }, { status: 201 });
+    return NextResponse.json({ id: item.id, item }, { status: 201 });
   }catch(e:any){
     return NextResponse.json({ error: e?.message || 'seed failed' }, { status: 500 });
   }
