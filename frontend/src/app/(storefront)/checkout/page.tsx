@@ -1,110 +1,108 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useCart } from '@/lib/cart/context';
+import { calc, fmt } from '@/lib/checkout/totals';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
-declare global {
-  interface Window {
-    __mkOrderPayload?: (data: any) => any;
-  }
-}
+export default function Page(){
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const err = searchParams?.get('err');
+  const { items, clear } = useCart();
+  const [loading, setLoading] = useState(false);
 
-export default function CheckoutPage() {
-  const [cart, setCart] = useState<any[]>([]);
-  const [error, setError] = useState('');
+  const lines = items.map(i=>({ price:Number(i.price||0), qty:Number(i.qty||0) }));
+  const totals = calc(lines);
 
-  useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem('dixis_cart_v1') || '{"items":[]}');
-      setCart(Array.isArray(s.items) ? s.items : []);
-    } catch {
-      setCart([]);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name  = String(formData.get('name')||'').trim();
+    const phone = String(formData.get('phone')||'').trim();
+    const email = String(formData.get('email')||'').trim();
+    const line1 = String(formData.get('line1')||'').trim();
+    const city  = String(formData.get('city')||'').trim();
+    const postal= String(formData.get('postal')||'').trim();
+
+    if(!items.length){ router.push('/cart'); return; }
+    if(!name || !phone || !line1 || !city || !postal){
+      router.push('/checkout?err=missing');
+      return;
     }
-  }, []);
 
-  const total = cart.reduce((sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0), 0);
-  const fmt = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
+    setLoading(true);
+    try{
+      const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000';
+      const res = await fetch(`${base}/api/checkout`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          items: items.map(i=>({ productId: i.productId, qty: i.qty })),
+          shipping: { name, phone, email, line1, city, postal },
+          payment: { method:'COD' }
+        })
+      });
+
+      if(!res.ok){
+        router.push('/checkout?err=submit');
+        return;
+      }
+
+      const body = await res.json();
+      const orderId = body.orderId || body.id || '';
+      clear();
+      router.push(`/thank-you?orderId=${encodeURIComponent(orderId)}`);
+    }catch(e){
+      router.push('/checkout?err=submit');
+    }finally{
+      setLoading(false);
+    }
+  }
 
   return (
-    <main style={{ display: 'grid', gap: 12, padding: 16, maxWidth: 600 }}>
+    <main style={{display:'grid',gap:16,padding:16,maxWidth:1200,margin:'0 auto'}}>
       <h1>Ολοκλήρωση Παραγγελίας</h1>
-
-      {cart.length === 0 && <p>Το καλάθι είναι άδειο.</p>}
-
-      {cart.length > 0 && (
-        <>
-          <div style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-            <h3>Περίληψη Παραγγελίας</h3>
-            {cart.map((i: any) => (
-              <div key={i.productId} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                <span>{i.title} × {i.qty}</span>
-                <span>{fmt(Number(i.price || 0) * Number(i.qty || 0))}</span>
-              </div>
-            ))}
-            <div style={{ borderTop: '1px solid #eee', marginTop: 8, paddingTop: 8, fontWeight: 700 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Σύνολο:</span>
-                <span>{fmt(total)}</span>
-              </div>
+      {!items.length ? (
+        <div style={{opacity:.7}}>Το καλάθι είναι άδειο. <a href="/products">Δες προϊόντα</a></div>
+      ) : (
+        <div style={{display:'grid',gridTemplateColumns:'1fr 380px',gap:16,alignItems:'start'}}>
+          <form onSubmit={handleSubmit} style={{display:'grid',gap:12}}>
+            <h2>Στοιχεία Αποστολής</h2>
+            <input name="name" placeholder="Ονοματεπώνυμο" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+            <input name="phone" placeholder="+30…" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+            <input name="email" type="email" placeholder="email (προαιρετικό)" style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+            <input name="line1" placeholder="Διεύθυνση" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+            <div style={{display:'grid',gridTemplateColumns:'1fr 160px',gap:8}}>
+              <input name="city" placeholder="Πόλη" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+              <input name="postal" placeholder="Τ.Κ." required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
             </div>
-          </div>
-
-          <form data-checkout-form>
-            <div style={{ display: 'grid', gap: 8 }}>
-              <h3>Στοιχεία Αποστολής</h3>
-              <input name="name" placeholder="Ονοματεπώνυμο *" required style={{ padding: 8 }} />
-              <input name="line1" placeholder="Διεύθυνση *" required style={{ padding: 8 }} />
-              <input name="city" placeholder="Πόλη *" required style={{ padding: 8 }} />
-              <input name="postal" placeholder="Τ.Κ. *" required style={{ padding: 8 }} />
-              <input name="phone" type="tel" placeholder="Τηλέφωνο *" required style={{ padding: 8 }} />
-              <input name="email" type="email" placeholder="Email (προαιρετικό)" style={{ padding: 8 }} />
-              <button type="submit" style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 6, backgroundColor: '#4caf50', color: '#fff', fontWeight: 700 }}>
-                Ολοκλήρωση Παραγγελίας
-              </button>
-              <div id="checkout-error" data-error style={{ color: '#b00', minHeight: 20 }}></div>
-            </div>
+            <button type="submit" disabled={loading} style={{padding:'12px 24px',backgroundColor:loading?'#ccc':'#0070f3',color:'white',border:'none',borderRadius:6,fontSize:16,fontWeight:'bold',cursor:loading?'not-allowed':'pointer'}}>
+              {loading ? 'Υποβολή...' : 'Ολοκλήρωση Παραγγελίας'}
+            </button>
+            {err && <p style={{color:'crimson',margin:0}}>Σφάλμα: {err === 'missing' ? 'Συμπληρώστε όλα τα πεδία' : 'Αποτυχία υποβολής'}</p>}
           </form>
-        </>
+
+          <aside style={{border:'1px solid #eee',borderRadius:8,padding:16,backgroundColor:'#f8f9fa'}}>
+            <h3 style={{margin:'0 0 12px 0'}}>Σύνοψη Παραγγελίας</h3>
+            <ul style={{listStyle:'none',padding:0,margin:'0 0 16px 0'}}>
+              {items.map(it=>(
+                <li key={it.productId} style={{display:'flex',justifyContent:'space-between',gap:8,padding:'6px 0'}}>
+                  <span>{it.title} × {it.qty}</span>
+                  <span>{fmt(Number(it.price)*Number(it.qty))}</span>
+                </li>
+              ))}
+            </ul>
+            <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'12px 0'}}/>
+            <div style={{display:'grid',gap:8}}>
+              <div style={{display:'flex',justifyContent:'space-between'}}><span>Υποσύνολο</span><b>{fmt(totals.subtotal)}</b></div>
+              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>ΦΠΑ ({(totals.rate*100).toFixed(0)}%)</span><span>{fmt(totals.vat)}</span></div>
+              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>Μεταφορικά</span><span>{totals.shipping === 0 ? 'Δωρεάν' : fmt(totals.shipping)}</span></div>
+              <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'8px 0'}}/>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:20,fontWeight:'bold'}}><span>Σύνολο</span><span>{fmt(totals.total)}</span></div>
+            </div>
+          </aside>
+        </div>
       )}
-      <script suppressHydrationWarning dangerouslySetInnerHTML={{__html:`
-(function(){
-  function readCart(){
-    try{ var s=JSON.parse(localStorage.getItem('dixis_cart_v1')||'{"items":[]}'); return Array.isArray(s.items)?s.items:[]; }catch{ return []; }
-  }
-  function itemsForApi(items){
-    return items.map(function(i){ return { productId: String(i.productId||''), qty: Math.max(1, Number(i.qty||1)) }; })
-                .filter(function(x){ return x.productId; });
-  }
-  window.__mkOrderPayload = function(form){
-    var items = itemsForApi(readCart());
-    return {
-      items: items,
-      shipping: {
-        name: String(form.name||''),
-        line1: String(form.line1||''),
-        city: String(form.city||''),
-        postal: String(form.postal||''),
-        phone: String(form.phone||''),
-        email: String(form.email||'')
-      },
-      payment: { method: 'COD' }
-    };
-  };
-  document.addEventListener('submit', async function(e){
-    var f=e.target; if(!(f && f.matches && f.matches('form[data-checkout-form]'))) return;
-    e.preventDefault();
-    var out=document.querySelector('[data-error]'); if(out) out.textContent='';
-    try{
-      var data=Object.fromEntries(new FormData(f).entries());
-      var payload=window.__mkOrderPayload(data);
-      if(!(payload.items&&payload.items.length)){ if(out) out.textContent='Το καλάθι είναι άδειο.'; return; }
-      var res=await fetch('/api/checkout',{ method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) });
-      var json=await res.json();
-      if(!res.ok){ if(out) out.textContent = json?.error || 'Αποτυχία παραγγελίας'; return; }
-      try{ localStorage.setItem('dixis_cart_v1', JSON.stringify({items:[]})); }catch{}
-      location.href = '/checkout/confirm/'+(json.orderId||'');
-    }catch(err){ if(out) out.textContent = 'Σφάλμα δικτύου'; }
-  }, { passive:false });
-})();`}}/>
     </main>
   );
 }
-

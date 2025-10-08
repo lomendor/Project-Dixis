@@ -674,3 +674,25 @@ export default function Page() { redirect('/my/orders'); }
 - e2e-postgres: production parity job with PostgreSQL service
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
+
+## Pass 169 — Checkout Page + Totals + Thank You + E2E ✅
+**Date**: 2025-10-08
+**Files**:
+- `frontend/src/lib/checkout/totals.ts` — VAT/shipping calculation
+- `frontend/src/app/(storefront)/checkout/page.tsx` — client component with cart integration
+- `frontend/src/app/(storefront)/thank-you/page.tsx` — order confirmation
+- `frontend/tests/storefront/checkout.spec.ts` — e2e checkout flow
+
+**Changes**:
+- ✅ Totals helper with `VAT_RATE`, `SHIPPING_FLAT_EUR`, `SHIPPING_FREE_FROM_EUR` (env-based)
+- ✅ `/checkout` page with shipping form + cart summary
+- ✅ Client-side submission → `/api/checkout` (COD) → redirect to `/thank-you?orderId=...`
+- ✅ `/thank-you` confirmation page with order ID display
+- ✅ E2E test: seed → add-to-cart → checkout form → thank-you
+- ✅ Greek-first labels, currency formatting (`Intl.NumberFormat('el-GR')`)
+- ✅ Cart clear after successful order
+
+**Architecture**:
+- Client component pattern (aligned with existing cart store using localStorage)
+- Loading states and error handling
+- Portable BASE_URL in tests
