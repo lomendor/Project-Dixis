@@ -657,3 +657,20 @@ export default function Page() { redirect('/my/orders'); }
 - Καθαρισμός cart σε επιτυχές 201 + redirect σε confirm
 - Storefront header: Cart count
 - e2e: πλήρης UI ροή & cart clear
+
+## Pass 166a — Guardrails & CI Audit (READ-ONLY)
+- Inventory: 22 workflows (5 .bak/.tmp files)
+- Duplicates: frontend-e2e.yml, e2e-full.yml, fe-api-integration.yml (redundant with ci.yml)
+- Branch protection: only `quality-gates` required (insufficient)
+- Missing: CodeQL, auto-labeler, postgres e2e, policy-gate
+- Playwright: webServer configured (Pass 163)
+- Prisma: PostgreSQL provider, 7 migrations
+
+## Pass 166b — Apply Guardrails per Audit
+- Cleanup: removed *.bak/*.tmp, archived duplicate e2e workflows
+- Policy gate: blocks risky paths without `risk-ok` label
+- Auto-labeler: path-based labels (frontend, backend, ci, docs, tests, risk-paths)
+- CodeQL: security scanning enabled (JS/TS)
+- e2e-postgres: production parity job with PostgreSQL service
+- README: added badges (policy-gate, e2e-postgres, CodeQL)
+- QUALITY.md: documented required checks & optimization

@@ -1,6 +1,9 @@
 # Project-Dixis
 
-![CI Status](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml/badge.svg)
+[![CI Status](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml)
+[![policy-gate](https://github.com/lomendor/Project-Dixis/actions/workflows/policy-gate.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/policy-gate.yml)
+[![e2e-postgres](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-postgres.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-postgres.yml)
+[![CodeQL](https://github.com/lomendor/Project-Dixis/actions/workflows/codeql.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/codeql.yml)
 
 **Modern Laravel 11 API** for agricultural marketplace connecting producers and consumers.
 

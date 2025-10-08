@@ -1,0 +1,47 @@
+name: policy-gate
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled, reopened]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: diff
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          git diff --name-only origin/${{ github.base_ref }}...HEAD > changed.txt
+          echo "Changed files:"
+          cat changed.txt
+
+      - name: Enforce risk label for sensitive paths
+        run: |
+          set -e
+          RISK_REGEX='^(frontend/prisma/|frontend/src/app/api/checkout/|frontend/src/app/api/admin/orders/|frontend/src/lib/mail/|frontend/src/lib/auth/|.github/workflows/)'
+
+          if grep -Eq "$RISK_REGEX" changed.txt; then
+            echo "⚠️  Risky paths detected in PR"
+
+            # Check if risk-ok label exists
+            if gh pr view ${{ github.event.pull_request.number }} --json labels -q '.labels[].name' | grep -q '^risk-ok$'; then
+              echo "✅ Label 'risk-ok' present - proceeding"
+              exit 0
+            else
+              echo "::error::❌ Risky paths touched without approval. Add label 'risk-ok' to proceed."
+              echo "::error::Affected paths match: $RISK_REGEX"
+              exit 1
+            fi
+          else
+            echo "✅ No risky paths touched"
+            exit 0
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
