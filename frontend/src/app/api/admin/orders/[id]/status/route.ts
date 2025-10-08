@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
+import { sendMailSafe } from '@/lib/mail/mailer';
+import * as OrderStatusTpl from '@/lib/mail/templates/orderStatus';
 
 // Admin check helper
 async function checkAdmin(req: Request): Promise<boolean> {
@@ -64,19 +66,32 @@ export async function POST(
       data: { status: to }
     });
 
-    // Optional: send email to customer (no-op if SMTP missing)
-    // TODO: Re-enable when mailer module is available
-    // try {
-    //   const { sendMailSafe } = await import('@/lib/mail/mailer');
-    //   await sendMailSafe({
-    //     to: customerEmail,
-    //     subject: `Ενημέρωση παραγγελίας #${updated.id}`,
-    //     html: `<p>Η παραγγελία σας άλλαξε σε: <b>${to}</b>.</p>`
-    //   });
-    // } catch (e) {
-    //   console.warn('[admin status mail] skipped:', (e as Error).message);
-    // }
-    console.log(`[admin] Status changed ${from}→${to} (email notification disabled)`);
+    // EMAIL: customer status update (best-effort, tokenized link)
+    // Note: Order schema doesn't store email yet. When buyerEmail field is added to Order,
+    // status emails will be sent automatically. For now, this prepares the infrastructure.
+    try {
+      const email = (updated as any).buyerEmail || null;
+      if (email) {
+        const ord = await prisma.order.findUnique({
+          where: { id: updated.id },
+          select: { trackingCode: true }
+        });
+        await sendMailSafe({
+          to: String(email),
+          subject: OrderStatusTpl.subject(updated.id, String(updated.status || '')),
+          html: OrderStatusTpl.html({
+            id: updated.id,
+            status: String(updated.status || ''),
+            trackingCode: ord?.trackingCode
+          })
+        });
+        console.log(`[mail] Status email sent to ${email}`);
+      } else {
+        console.log(`[mail] No email in Order - status notification skipped (add buyerEmail to Order schema)`);
+      }
+    } catch (e: any) {
+      console.warn('[mail] status email failed:', e?.message);
+    }
 
     console.log(`[order] ${id} status ${from}→${to}`);
     

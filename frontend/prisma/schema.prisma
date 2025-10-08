@@ -54,6 +54,7 @@ model Order {
   trackingCode   String      @unique @default(cuid())
   buyerPhone     String
   buyerName      String
+  buyerEmail     String?
   shippingLine1  String
   shippingLine2  String?
   shippingCity   String

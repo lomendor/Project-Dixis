@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
           total,
           buyerName: String(payload?.shipping?.name || ''),
           buyerPhone: String(payload?.shipping?.phone || ''),
+          buyerEmail: String(payload?.shipping?.email || '').trim() || null,
           shippingLine1: String(payload?.shipping?.line1 || ''),
           shippingLine2: String(payload?.shipping?.line2 || ''),
           shippingCity: String(payload?.shipping?.city || ''),

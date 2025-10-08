@@ -680,3 +680,9 @@ export default function Page() { redirect('/my/orders'); }
 - Public route: `/orders/t/[code]` (noindex) με μη-ευαίσθητα στοιχεία
 - Emails: confirmation & status περιλαμβάνουν link με tracking code
 - e2e: email link → tracking page OK
+
+## Pass 158 — Tokenized Status Emails
+- Template: `orderStatus.ts` (EL-first) με link `/orders/t/<code>` (fallback σε legacy /orders/track/[id])
+- Admin status route: περνά trackingCode στο email (best-effort)
+- Schema: `Order.buyerEmail?` για status notifications
+- e2e: αλλαγή status → status email με tokenized link → tracking page δείχνει PACKING
