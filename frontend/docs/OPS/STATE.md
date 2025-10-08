@@ -809,3 +809,14 @@ export default function Page() { redirect('/my/orders'); }
 - Zero lockfile changes
 - CI scripts unchanged functionally (still load .env.ci)
 - Clean PR hygiene (no devDep noise)
+
+## Pass HF-05 — Fix E2E Workflow Cache Config ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E (SQLite) failing with "Some specified paths were not resolved, unable to cache dependencies"
+
+**Root Cause**: Workflow configured to cache using `frontend/package-lock.json` which was removed in HF-04
+
+**Solution**: Removed npm cache configuration from `.github/workflows/e2e-postgres.yml` (no cache needed)
+
+**Impact**: E2E workflow can run without cache dependency errors
