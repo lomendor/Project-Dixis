@@ -40,14 +40,14 @@ export async function POST(request: NextRequest) {
         throw Object.assign(new Error(`Μη διαθέσιμο απόθεμα για: ${names}`), { code: 409 });
       }
 
-      // Μειώνουμε stock conditionally (ώστε να αποτύχει αν άλλαξε stock μεταξύ ελέγχου)
+      // Atomic stock deduction (fail fast on insufficient stock)
       for (const l of lines) {
         const r = await tx.product.updateMany({
-          where: { id: l.id, stock: { gte: l.qty } },
+          where: { id: l.id, isActive: true, stock: { gte: l.qty } },
           data: { stock: { decrement: l.qty } }
         });
         if (r.count !== 1) {
-          throw Object.assign(new Error(`Το απόθεμα ενημερώθηκε για "${l.title}", προσπαθήστε ξανά`), { code: 409 });
+          throw Object.assign(new Error('OUT_OF_STOCK'), { code: 'OUT_OF_STOCK', productId: l.id });
         }
       }
 
@@ -174,6 +174,9 @@ export async function POST(request: NextRequest) {
     // ΕΠΙΤΥΧΙΑ
     return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
   } catch (e: any) {
+    if (e?.code === 'OUT_OF_STOCK') {
+      return NextResponse.json({ error: 'OUT_OF_STOCK' }, { status: 400 });
+    }
     const code = Number(e?.code || 0);
     if (code === 409) return NextResponse.json({ error: e.message || 'Μη διαθέσιμο απόθεμα' }, { status: 409 });
     if (code === 400) return NextResponse.json({ error: e.message || 'Μη έγκυρα δεδομένα' }, { status: 400 });

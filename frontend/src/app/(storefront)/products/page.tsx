@@ -24,7 +24,7 @@ export default async function Page({ searchParams }:{ searchParams?:{ q?:string 
             <div style={{display:'grid',gap:4,alignContent:'center'}}>
               <Link href={`/products/${p.id}`}><b>{p.title}</b></Link>
               <div>{fmt(Number(p.price||0))} / {p.unit}</div>
-              <div style={{opacity:.7}}>Απόθεμα: {Number(p.stock||0)}</div>
+              <div style={{opacity:.7}}>Απόθεμα: {Number(p.stock||0)} {Number(p.stock||0)<=0 && <span style={{color:'#b00',marginLeft:8}}>(Εξαντλημένο)</span>}</div>
             </div>
           </li>
         ))}

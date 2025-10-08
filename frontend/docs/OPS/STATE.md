@@ -701,3 +701,9 @@ export default function Page() { redirect('/my/orders'); }
 - Tracking page: breakdown section με totals
 - Defaults από .env (VAT_RATE=0.13, SHIPPING_FLAT_EUR=3.5, SHIPPING_FREE_FROM_EUR=25)
 - e2e: εμφάνιση breakdown labels στη σελίδα tracking
+
+## Pass 161 — Inventory Guards & Low-Stock Notice
+- Checkout: ατομική αφαίρεση αποθέματος ανά γραμμή με guard `stock >= qty` (OUT_OF_STOCK=400)
+- Storefront: badge "Εξαντλημένο" & απενεργοποίηση κουμπιού όταν stock<=0
+- Admin notice: email χαμηλού αποθέματος (DEV_MAIL_TO) όταν `stock <= LOW_STOCK_THRESHOLD`
+- e2e: αποτροπή υπερ-πώλησης (400), μείωση stock, low-stock notice (optional)
