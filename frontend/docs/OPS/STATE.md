@@ -779,3 +779,33 @@ export default function Page() { redirect('/my/orders'); }
 - Production/dev environments use PostgreSQL (proper provider match)
 - CI uses SQLite via dedicated schema (fast, deterministic tests)
 - Zero production risk - CI-only changes
+
+## Pass HF-03 — Fix SQLite Schema Validation ✅
+**Date**: 2025-10-08
+
+**Issue**: E2E (SQLite) failing with "Native type VarChar is not supported for sqlite connector"
+
+**Root Cause**: `schema.ci.prisma` contained `@db.VarChar(64)` on `dedupId` field (PostgreSQL-specific)
+
+**Solution**: Removed `@db.VarChar(64)` attribute from `schema.ci.prisma` (SQLite doesn't support native types)
+
+**Impact**: SQLite schema now validates correctly, E2E workflow can proceed
+
+## Pass HF-04 — PR Hygiene Clean (No Lockfile Churn) ✅
+**Date**: 2025-10-08
+
+**Issue**: PR Hygiene checks failing due to lockfile changes and devDependency noise
+
+**Root Cause**:
+- `dotenv-cli` added as devDependency causes lockfile churn
+- Accidental `package-lock.json` created (repo uses pnpm)
+
+**Solution**:
+- ✅ Removed `dotenv-cli` from devDependencies
+- ✅ Switched CI scripts to use `npx -y dotenv-cli` (on-demand, no install needed)
+- ✅ Removed accidental `frontend/package-lock.json`
+
+**Impact**:
+- Zero lockfile changes
+- CI scripts unchanged functionally (still load .env.ci)
+- Clean PR hygiene (no devDep noise)
