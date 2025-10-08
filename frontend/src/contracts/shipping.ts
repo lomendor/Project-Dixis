@@ -24,10 +24,13 @@ export interface ShippingQuoteRequest {
 export interface ShippingQuoteResponse {
   data: {
     method: DeliveryMethod;
-    cost: number;
-    estimatedDays: number;
+    cost_cents: number;
+    estimated_delivery_days: number;
     available: boolean;
     message?: string;
+    breakdown?: {
+      locker_discount_cents?: number;
+    };
   };
 }
 
