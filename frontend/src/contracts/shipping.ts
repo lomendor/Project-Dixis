@@ -47,16 +47,21 @@ export interface LockerSearchResponse {
   lockers: Locker[];
 }
 
-export const LockerSearchResponseSchema = z.object({
-  lockers: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    address: z.string(),
-    city: z.string(),
-    postalCode: z.string(),
-    distance: z.number().optional(),
-  })),
+const LockerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  address: z.string(),
+  city: z.string(),
+  postalCode: z.string(),
+  distance: z.number().optional(),
 });
+
+export const LockerSearchResponseSchema = z.object({
+  lockers: z.array(LockerSchema),
+});
+
+// Ensure Locker type matches the schema
+export type LockerFromSchema = z.infer<typeof LockerSchema>;
 
 export const DEFAULT_DELIVERY_OPTIONS: Array<{
   code: DeliveryMethod;
