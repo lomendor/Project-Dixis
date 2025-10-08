@@ -89,6 +89,12 @@ export async function POST(request: NextRequest) {
       const orderId = result.orderId;
       const adminTo = process.env.DEV_MAIL_TO || '';
 
+      // Fetch trackingCode for email links
+      const ord = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: { trackingCode: true }
+      });
+
       // 1) Order confirmation to customer
       if (email) {
         await sendMailSafe({
@@ -108,7 +114,8 @@ export async function POST(request: NextRequest) {
               city: String(payload?.shipping?.city || ''),
               postal: String(payload?.shipping?.postal || ''),
               phone
-            }
+            },
+            trackingCode: ord?.trackingCode
           })
         });
       }

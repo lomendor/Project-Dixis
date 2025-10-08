@@ -674,3 +674,9 @@ export default function Page() { redirect('/my/orders'); }
 - Storefront: `/orders/track/[id]` (public) με μη-ευαίσθητα στοιχεία
 - Admin: `/admin/orders/[id]` με αλλαγή status & βασικές πληροφορίες
 - e2e: tracking page + admin status change
+
+## Pass 157 — Secure Public Tracking (trackingCode)
+- Prisma: `Order.trackingCode @unique @default(cuid())`
+- Public route: `/orders/t/[code]` (noindex) με μη-ευαίσθητα στοιχεία
+- Emails: confirmation & status περιλαμβάνουν link με tracking code
+- e2e: email link → tracking page OK

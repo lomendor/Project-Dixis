@@ -7,6 +7,7 @@ export function html(params: {
   total: number;
   items: { title: string; qty: number; price: number }[];
   shipping: { name: string; line1: string; city: string; postal: string; phone: string };
+  trackingCode?: string;
 }) {
   const fmt = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
@@ -16,7 +17,9 @@ export function html(params: {
     )
     .join('');
   const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-  const track = `${base}/orders/track/${params.id}?phone=${encodeURIComponent(params.shipping.phone || '')}`;
+  const trackUrl = params.trackingCode
+    ? `${base}/orders/t/${params.trackingCode}`
+    : `${base}/orders/track/${params.id}?phone=${encodeURIComponent(params.shipping.phone || '')}`;
 
   return `<div style="font-family:system-ui,Arial,sans-serif">
     <h2>Ευχαριστούμε για την παραγγελία σας!</h2>
@@ -26,6 +29,6 @@ export function html(params: {
       <tbody>${rows}</tbody>
     </table>
     <p><b>Σύνολο:</b> ${fmt(params.total || 0)}</p>
-    <p><a href="${track}" target="_blank" rel="noopener">Παρακολούθηση παραγγελίας</a></p>
+    <p><a href="${trackUrl}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:6px;text-decoration:none">Παρακολούθηση παραγγελίας</a></p>
   </div>`;
 }
