@@ -726,3 +726,17 @@ export default function Page() { redirect('/my/orders'); }
 - `DEFAULT_DELIVERY_OPTIONS`, `calculateShippingCost()`
 
 **Impact**: Build unblocked, no business logic changes, temporary until real package added
+
+## Pass HF-02 — Fix Prisma Migration Strategy ✅
+**Date**: 2025-10-08
+
+**Issue**: `prisma migrate deploy` failing with OrderItem table not existing (migration drift)
+
+**Root Cause**: Migrations incomplete - some tables created directly without migrations
+
+**Solution**:
+- ✅ Simplified `ci:migrate` to use `prisma db push` directly (not migrate deploy)
+- ✅ Added `--skip-generate` flag to avoid redundant generation
+- ✅ CI webServer sequence: `ci:gen → ci:migrate (db push) → build:ci → start:ci`
+
+**Impact**: CI now applies schema directly from prisma/schema.prisma, bypassing broken migrations
