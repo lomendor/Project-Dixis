@@ -2,15 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Cart (cookie-based)', () => {
   test('add to cart from product page → cart page → update qty', async ({ page }) => {
-    // 1) Seed test product via API
-    const res = await page.request.post('http://127.0.0.1:3001/api/admin/products', {
+    // 1) Seed test product via dev API
+    const res = await page.request.post('http://127.0.0.1:3001/api/dev/seed/product', {
       data: {
         title: 'E2E Cart Test Product',
         category: 'Test',
         price: 10.5,
         unit: 'kg',
-        stock: 50,
-        producerId: 'test-producer-id'
+        stock: 50
       }
     });
     expect(res.ok()).toBeTruthy();
@@ -49,15 +48,14 @@ test.describe('Cart (cookie-based)', () => {
   });
 
   test('out-of-stock product should disable add-to-cart', async ({ page }) => {
-    // 1) Seed out-of-stock product
-    const res = await page.request.post('http://127.0.0.1:3001/api/admin/products', {
+    // 1) Seed out-of-stock product via dev API
+    const res = await page.request.post('http://127.0.0.1:3001/api/dev/seed/product', {
       data: {
         title: 'E2E Out of Stock Product',
         category: 'Test',
         price: 5,
         unit: 'piece',
-        stock: 0,
-        producerId: 'test-producer-id'
+        stock: 0
       }
     });
     expect(res.ok()).toBeTruthy();
