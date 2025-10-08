@@ -651,3 +651,9 @@ export default function Page() { redirect('/my/orders'); }
 - Σελίδες: `/products`, `/products/[id]`, `/cart`
 - Cart: LocalStorage (χωρίς schema), EL-first UI
 - e2e: περιήγηση → add to cart → checkout
+
+## Pass 154 — Cart → Atomic Checkout UI
+- Checkout UI διαβάζει LocalStorage cart και καλεί /api/checkout
+- Καθαρισμός cart σε επιτυχές 201 + redirect σε confirm
+- Storefront header: Cart count
+- e2e: πλήρης UI ροή & cart clear
