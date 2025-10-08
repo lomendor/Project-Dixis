@@ -903,3 +903,4 @@ export default function Page() { redirect('/my/orders'); }
 - Normalization ensures API contract compliance
 - HF-11 resume: verified/normalized items (product_id:number) & selector payload
 - HF-12: Unified E2E port 3001 (scripts, Playwright, workflow) + sanity ping
+- HF-13.1: E2E watchdog (global-timeout 20m, max-failures=1) + analysis
