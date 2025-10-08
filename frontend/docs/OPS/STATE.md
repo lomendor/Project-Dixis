@@ -713,3 +713,8 @@ export default function Page() { redirect('/my/orders'); }
 - CSV export: `/api/admin/orders/export.csv`
 - Prisma: indexes σε `Order(status, createdAt)` και `Order(createdAt)`
 - e2e: orders list + CSV smoke
+
+## Pass 163 — CI (GitHub Actions) + Playwright webServer
+- `frontend/playwright.config.ts` με baseURL & webServer
+- `.github/workflows/ci.yml`: build + e2e (Chromium)
+- README badge + `frontend/docs/OPS/CI.md`

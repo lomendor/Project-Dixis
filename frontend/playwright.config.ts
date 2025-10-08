@@ -117,9 +117,28 @@ export default defineConfig({
     }
   ],
 
-  webServer: {
+  webServer: isCI ? {
+    command: 'npm run build && npm run start',
+    url: baseURL,
+    reuseExistingServer: false,
+    timeout: 120_000,
+    env: {
+      NODE_ENV: 'production',
+      PORT: String(new URL(baseURL).port || 3000),
+      NEXT_TELEMETRY_DISABLED: '1',
+      DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
+      OTP_BYPASS: process.env.OTP_BYPASS || '000000',
+      ADMIN_PHONES: process.env.ADMIN_PHONES || '+306900000084',
+      DEV_MAIL_TO: process.env.DEV_MAIL_TO || '',
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || baseURL,
+      VAT_RATE: process.env.VAT_RATE || '0.13',
+      SHIPPING_FLAT_EUR: process.env.SHIPPING_FLAT_EUR || '3.5',
+      SHIPPING_FREE_FROM_EUR: process.env.SHIPPING_FREE_FROM_EUR || '25',
+      DIXIS_ENV: 'preview',
+    },
+  } : {
     command: 'npm run dev -- --port 3030',
-    url: baseURL, // Phase-4: Use normalized URL
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 90_000,
     stdout: 'ignore',

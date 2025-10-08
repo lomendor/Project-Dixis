@@ -1,5 +1,6 @@
 # Project-Dixis
 
+[![CI](https://github.com/lomendor/Project-Dixis/actions/workflows/ci.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/ci.yml)
 ![CI Status](https://github.com/lomendor/Project-Dixis/actions/workflows/backend-ci.yml/badge.svg)
 
 **Modern Laravel 11 API** for agricultural marketplace connecting producers and consumers.
