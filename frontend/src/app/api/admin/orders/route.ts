@@ -20,8 +20,7 @@ export async function GET(req: Request) {
         status: true,
         total: true,
         buyerName: true,
-        buyerPhone: true,
-        buyerEmail: true
+        buyerPhone: true
       }
     });
 

@@ -39,7 +39,6 @@ export async function GET(
       total: order.total,
       buyerName: order.buyerName,
       buyerPhone: order.buyerPhone,
-      buyerEmail: order.buyerEmail,
       shippingLine1: order.shippingLine1,
       shippingCity: order.shippingCity,
       shippingPostal: order.shippingPostal,
