@@ -1,0 +1,44 @@
+{
+  "title": "Orders Management",
+  "columns": {
+    "id": "ID",
+    "date": "Date",
+    "customer": "Customer",
+    "phone": "Phone",
+    "total": "Total",
+    "status": "Status"
+  },
+  "filters": {
+    "status": "Status Filter",
+    "search": "Search (ID/Phone/Email)",
+    "searchPlaceholder": "Search...",
+    "allStatuses": "All Statuses",
+    "apply": "Apply",
+    "reset": "Reset"
+  },
+  "status": {
+    "PAID": "Paid",
+    "PACKING": "Packing",
+    "SHIPPED": "Shipped",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "pending": "Pending"
+  },
+  "actions": {
+    "export": "Export CSV",
+    "viewDetails": "View Details"
+  },
+  "empty": {
+    "title": "No orders found",
+    "description": "Try changing your search filters"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results"
+  }
+}
