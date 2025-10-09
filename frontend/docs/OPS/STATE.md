@@ -985,3 +985,18 @@ export default function Page() { redirect('/my/orders'); }
   - No external dependencies
 - **LOC**: ~30 (toast utility + updates)
 
+## Pass 171C — Admin Orders Hardening (Pagination E2E + Excel-safe CSV) (2025-10-09)
+- **Excel-Safe CSV**: Added UTF-8 BOM (`\uFEFF`) for proper Greek character rendering in Excel
+- **Pagination E2E Test**: Validates Next/Prev buttons change results and maintain state
+- **CSV Content Validation**: Enhanced export test to verify BOM, headers, filtered data
+- **Files**:
+  - `src/app/api/admin/orders/export/route.ts` (added BOM for Excel compatibility)
+  - `tests/admin/orders/pagination.spec.ts` (pagination navigation E2E test)
+  - `tests/admin/orders/list-and-export.spec.ts` (enhanced with content + BOM validation)
+- **Technical**:
+  - BOM ensures Excel displays Greek characters correctly
+  - Pagination test seeds 35 orders, validates page 1→2→1 navigation
+  - CSV validation checks BOM (charCodeAt(0) === 0xFEFF), headers, filtered content
+- **No schema changes**, hardening existing functionality
+- **LOC**: ~80 (BOM + E2E tests)
+

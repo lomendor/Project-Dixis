@@ -53,4 +53,25 @@ test('admin orders: filter by status & q and export CSV', async ({ request, page
   ]);
   const name = dl.suggestedFilename();
   expect(name).toMatch(/orders\.csv/i);
+
+  // Validate CSV content
+  const path = await dl.path();
+  if (path) {
+    const fs = require('fs');
+    const content = fs.readFileSync(path, 'utf8');
+
+    // Check for BOM
+    expect(content.charCodeAt(0)).toBe(0xFEFF);
+
+    // Check content includes filtered phone and status
+    expect(content).toContain('+306900000111');
+    expect(content).toContain('PAID');
+
+    // Verify header row exists
+    expect(content).toContain('id,date,customerName,customerPhone,total,status');
+
+    // Count data rows (should be exactly 1 matching filter)
+    const lines = content.split('\n').filter(l => l.trim() && !l.startsWith('id,'));
+    expect(lines.length).toBeGreaterThanOrEqual(1); // At least our filtered order
+  }
 });

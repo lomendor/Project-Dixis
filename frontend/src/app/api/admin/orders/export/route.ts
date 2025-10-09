@@ -58,7 +58,10 @@ export async function GET(req: Request) {
     )
     .join('\n');
 
-  return new Response(csv, {
+  // Add BOM for Excel-safe UTF-8
+  const out = '\uFEFF' + csv;
+
+  return new Response(out, {
     headers: {
       'content-type': 'text/csv; charset=utf-8',
       'content-disposition': 'attachment; filename="orders.csv"',
