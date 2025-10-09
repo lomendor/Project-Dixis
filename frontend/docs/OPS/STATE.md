@@ -951,3 +951,22 @@ export default function Page() { redirect('/my/orders'); }
 - **No schema changes**, used existing Order model
 - **LOC**: ~250 (within ≤300 LOC limit)
 
+## Pass 171B — Admin Orders (Drawer + Inline Actions) (2025-10-09)
+- **OrderDrawer Component**: Right-side panel showing order details (ID, date, customer, items, total, address)
+- **StatusActions Component**: Inline status change buttons (PACKING/SHIPPED/DELIVERED/CANCELLED)
+- **OrdersTable Enhancement**: Added actions column + drawer integration on row click
+- **Optimistic UI**: Status changes update drawer state immediately with alert feedback
+- **E2E Test**: `tests/admin/orders/status-and-drawer.spec.ts` validates drawer + status change
+- **Files**:
+  - `src/components/admin/orders/OrderDrawer.tsx` (drawer component)
+  - `src/components/admin/orders/StatusActions.tsx` (inline actions)
+  - `src/components/admin/orders/OrdersTable.tsx` (updated with drawer + actions)
+  - `tests/admin/orders/status-and-drawer.spec.ts` (E2E test)
+- **Technical**:
+  - Fixed right panel (420px) with close button
+  - Async POST to existing admin status API
+  - Alert-based feedback (future: toast library)
+  - Row click opens drawer with full order context
+- **No schema changes**, uses existing admin API
+- **LOC**: ~150 (within ≤300 LOC limit)
+
