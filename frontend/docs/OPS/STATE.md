@@ -1065,3 +1065,17 @@ export default function Page() { redirect('/my/orders'); }
 - **No schema changes**, ENV configuration only
 - **LOC**: ~70 (E2E tests + .env.ci)
 
+## Pass 172C — Checkout UI Shipping Display (DEFERRED) (2025-10-09)
+- **Status**: DEFERRED - No checkout summary component exists yet
+- **Placeholder Test**: Created `shipping-ui.spec.ts` (skipped) for future UI implementation
+- **API Complete**: Pass 172B already provides `computedShipping` and `computedTotal` in API response
+- **Files**:
+  - `frontend/tests/checkout/shipping-ui.spec.ts` (placeholder test, skipped)
+  - `docs/AGENT/SUMMARY/Pass-172C.md` (documentation)
+- **Future Work**:
+  - Create checkout summary component
+  - Display "Μεταφορικά:" and "Σύνολο:" from API response
+  - Enable UI test when component exists
+- **No schema changes**, placeholder documentation only
+- **LOC**: ~20 (placeholder test + docs)
+
