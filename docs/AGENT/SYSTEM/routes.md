@@ -1,19 +1,23 @@
 # App Routes
 
 - `/`
+- `/(storefront)/cart`
+- `/(storefront)/checkout`
+- `/(storefront)/products`
+- `/(storefront)/products/[id]`
 - `/account/orders`
 - `/account/orders/[orderId]`
+- `/admin`
 - `/admin/analytics`
 - `/admin/orders`
+- `/admin/orders/[id]`
 - `/admin/pricing`
 - `/admin/producers`
 - `/admin/producers/images`
+- `/admin/products`
 - `/admin/toggle`
 - `/auth/login`
 - `/auth/register`
-- `/cart`
-- `/checkout`
-- `/checkout/payment/[orderId]`
 - `/dev-check`
 - `/dev/notifications`
 - `/my/orders`
@@ -23,6 +27,9 @@
 - `/ops/metrics`
 - `/order/confirmation/[orderId]`
 - `/orders/[id]`
+- `/orders/lookup`
+- `/orders/track`
+- `/orders/track/[id]`
 - `/producer/analytics`
 - `/producer/dashboard`
 - `/producer/onboarding`
@@ -31,6 +38,4 @@
 - `/producer/products/[id]/edit`
 - `/producer/products/create`
 - `/product/[id]`
-- `/products`
-- `/products/[id]`
 - `/test-error`
