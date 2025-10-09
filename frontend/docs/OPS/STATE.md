@@ -1047,3 +1047,21 @@ export default function Page() { redirect('/my/orders'); }
 - **LOC**: ~90 (checkout integration + E2E tests)
 - **Next Step**: Pass 172C could add UI display of shipping costs in checkout summary
 
+## HF-172B.2 — CI Environment + Free Shipping E2E (2025-10-09)
+- **Added .env.ci**: CI-specific environment configuration with SHIPPING_* variables
+- **FREE_THRESHOLD**: Set to 50 EUR for free shipping test scenario
+- **Reinstated E2E**: Created `shipping-free-threshold.spec.ts` with proper ENV-based testing
+- **Files**:
+  - `.env.ci` (CI environment configuration)
+  - `frontend/tests/checkout/shipping-free-threshold.spec.ts` (free threshold E2E tests)
+  - `docs/AGENT/SUMMARY/Pass-172B.2.md` (documentation)
+- **Test Coverage**:
+  - Test 1: Free shipping when subtotal >= 50 EUR
+  - Test 2: Normal shipping when subtotal < 50 EUR
+- **Technical**:
+  - No runtime ENV mutation (server reads .env.ci on startup)
+  - Playwright webServer uses .env.ci via dotenv-cli
+  - Two scenarios validate free shipping threshold behavior
+- **No schema changes**, ENV configuration only
+- **LOC**: ~70 (E2E tests + .env.ci)
+
