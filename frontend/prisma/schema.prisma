@@ -47,6 +47,10 @@ model Product {
   @@index([producerId, createdAt])
   @@index([category])
   @@index([isActive])
+  @@index([isActive, stock])
+  @@index([price])
+  @@index([createdAt])
+  @@index([title])
 }
 
 model Order {

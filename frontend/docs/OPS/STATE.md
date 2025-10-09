@@ -675,6 +675,13 @@ export default function Page() { redirect('/my/orders'); }
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
 
+## Pass 167 — Storefront Filters & Search
+- `/products` με φίλτρα: κατηγορία, τιμή (min/max), διαθεσιμότητα, ταξινόμηση, αναζήτηση τίτλου
+- URL state με searchParams (shareable/bookmarkable)
+- Prisma indexes: isActive+stock, price, createdAt, title για ταχύτερα queries
+- `searchProducts()` helper στο `lib/search/products.ts`
+- e2e: filters/search smoke με seed προϊόντων
+
 ## Pass CI-01 — Make CI Green ✅
 **Date**: 2025-10-08
 
