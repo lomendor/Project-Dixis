@@ -1023,3 +1023,27 @@ export default function Page() { redirect('/my/orders'); }
 - **LOC**: ~120 (engine + API + tests)
 - **Next Step**: Pass 172B will integrate shipping engine into checkout UI/totals
 
+## Pass 172B — Checkout Totals with Shipping Engine Integration (2025-10-09)
+- **Checkout API Enhancement**: Integrated shipping engine into `/api/checkout` POST endpoint
+- **Response Fields**: Added `computedShipping` and `computedTotal` to checkout API response
+- **Shipping Method Support**: Reads `shipping.method` from payload (default: COURIER)
+- **Feature-Flag Driven**: Controlled by `SHIPPING_ENABLED` env variable (defaults to 'true')
+- **Safe Implementation**: Graceful fallback if shipping computation fails (logs warning, returns order data)
+- **E2E Tests**: Three scenarios validating COURIER, COURIER_COD, and free threshold behavior
+- **Files**:
+  - `src/app/api/checkout/route.ts` (integrated shipping computation)
+  - `tests/checkout/shipping-totals.spec.ts` (E2E tests)
+  - `docs/AGENT/SUMMARY/Pass-172B.md` (documentation)
+- **Technical**:
+  - Uses `shippingQuote({ method, subtotal })` to compute shipping cost
+  - Adds shipping to order total: `computedTotal = orderTotal + computedShipping`
+  - Try/catch wrapper ensures checkout doesn't fail on shipping errors
+  - No DB schema changes (shipping not persisted in Order model)
+- **Test Coverage**:
+  - Test 1: COURIER includes only BASE shipping fee
+  - Test 2: COURIER_COD includes BASE + COD fee
+  - Test 3: Free threshold zeroes shipping when subtotal >= FREE_THRESHOLD
+- **No schema changes**, computation-only enhancement
+- **LOC**: ~90 (checkout integration + E2E tests)
+- **Next Step**: Pass 172C could add UI display of shipping costs in checkout summary
+

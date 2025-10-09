@@ -4,6 +4,7 @@ import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
+import { quote as shippingQuote } from '@/lib/shipping/engine';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
@@ -160,8 +161,29 @@ export async function POST(request: NextRequest) {
       console.warn('[mail] low-stock admin failed:', (e as Error).message);
     }
 
-    // ΕΠΙΤΥΧΙΑ
-    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
+    // SHIPPING: compute shipping cost and final total
+    try {
+      const enabled = (process.env.SHIPPING_ENABLED || 'true') === 'true';
+      let computedShipping = 0;
+      if (enabled) {
+        const method = (payload?.shipping?.method) ? String(payload.shipping.method).toUpperCase() : 'COURIER';
+        const subtotal = Number(result.total || 0);
+        const q = shippingQuote({ method: method as any, subtotal });
+        computedShipping = Number(q.cost || 0);
+      }
+      const computedTotal = Number(result.total || 0) + Number(computedShipping || 0);
+
+      return NextResponse.json({
+        success: true,
+        orderId: result.orderId,
+        total: result.total,
+        computedShipping,
+        computedTotal
+      }, { status: 201 });
+    } catch (e) {
+      console.warn('[shipping] compute failed:', (e as Error)?.message);
+      return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
+    }
   } catch (e: any) {
     const code = Number(e?.code || 0);
     if (code === 409) return NextResponse.json({ error: e.message || 'Μη διαθέσιμο απόθεμα' }, { status: 409 });
