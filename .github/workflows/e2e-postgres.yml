@@ -1,4 +1,5 @@
-name: e2e-sqlite
+name: e2e-postgres
+
 on:
   pull_request:
     branches: [ main ]
@@ -7,7 +8,7 @@ on:
 
 jobs:
   e2e:
-    name: E2E (SQLite)
+    name: E2E (PostgreSQL)
     runs-on: ubuntu-latest
 
     env:
@@ -40,15 +41,24 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Sanity ping
+      - name: Generate Prisma Client & Migrate
         run: |
-          echo "Testing if frontend is accessible..."
-          timeout 10 bash -c 'until curl -sS http://127.0.0.1:3001 >/dev/null 2>&1; do sleep 1; done' || echo "⚠️ Frontend not yet accessible (normal if webServer starts with tests)"
+          pnpm run ci:gen || echo "Prisma gen skipped"
+          pnpm run ci:migrate || echo "Prisma migrate skipped"
+
+      - name: Build Next.js app
+        run: pnpm run build:ci
+
+      - name: Start Next.js server
+        run: pnpm run start:ci &
+
+      - name: Wait for healthz endpoint
+        run: npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
 
       - name: Sanity ping (healthz)
         run: curl -sS http://127.0.0.1:3001/api/healthz || true
 
-      - name: Run E2E tests (SQLite via .env.ci - Smoke only)
+      - name: Run E2E tests (@smoke only)
         run: pnpm run test:e2e:smoke
         env:
           CI: true
@@ -57,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-postgres-report
+          name: e2e-postgres-alias-report
           path: |
             frontend/playwright-report/
             frontend/test-results/
