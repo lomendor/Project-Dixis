@@ -1079,3 +1079,25 @@ export default function Page() { redirect('/my/orders'); }
 - **No schema changes**, placeholder documentation only
 - **LOC**: ~20 (placeholder test + docs)
 
+## Pass 172C.real — Checkout ShippingSummary Widget (EL-first) (2025-10-09)
+- **Component Created**: `ShippingSummary.tsx` client-side widget for checkout page
+- **Display**: Shows Υποσύνολο/Μεταφορικά/Σύνολο (Greek-first UI)
+- **API Integration**: Calls `/api/shipping/quote` to get shipping cost
+- **Data Source**: Reads subtotal from `localStorage.cartSubtotal` or `?subtotal=` query param
+- **Checkout Integration**: Injected into checkout page after order summary
+- **Files**:
+  - `src/components/checkout/ShippingSummary.tsx` (created)
+  - `src/app/(storefront)/checkout/page.tsx` (modified - integrated widget)
+  - `tests/checkout/shipping-ui.spec.ts` (replaced placeholder with real tests)
+  - `docs/AGENT/SUMMARY/Pass-172C.real.md` (documentation)
+- **Test Coverage**:
+  - Test 1: UI display validation (Σύνοψη, Μεταφορικά, Σύνολο visible)
+  - Test 2: Calculation validation (shipping cost from API)
+- **Technical**:
+  - Client-side component with useEffect API call
+  - Graceful fallback if API fails (shows 0 for shipping)
+  - Feature-flag safe (uses existing /api/shipping/quote)
+  - Automatically syncs with cart changes via localStorage
+- **No schema changes**, UI enhancement only
+- **LOC**: ~130 (component + checkout integration + E2E tests)
+
