@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/db/client';
 import OrdersTable from '@/components/admin/orders/OrdersTable';
 import Filters from '@/components/admin/orders/Filters';
+import ToastHost from '@/components/admin/orders/toast';
 
 type Status = 'PAID' | 'PACKING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
@@ -76,6 +77,7 @@ export default async function Page({ searchParams }: {
           Export CSV
         </Link>
       </div>
+      <ToastHost />
     </div>
   );
 }

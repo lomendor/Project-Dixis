@@ -970,3 +970,18 @@ export default function Page() { redirect('/my/orders'); }
 - **No schema changes**, uses existing admin API
 - **LOC**: ~150 (within ≤300 LOC limit)
 
+## Pass 171B.1 — Admin Orders Polish (Toast + Pagination) (2025-10-09)
+- **Toast Notifications**: Replaced alert() with lightweight toast utility (no deps)
+- **Pagination Controls**: Added Previous/Next links to OrdersTable
+- **PR #466 Hygiene**: Added Reports + Test Summary sections, retriggered CI
+- **Files**:
+  - `src/components/admin/orders/toast.tsx` (toast utility + ToastHost component)
+  - `src/components/admin/orders/StatusActions.tsx` (updated to use toast)
+  - `src/components/admin/orders/OrdersTable.tsx` (added pagination links)
+  - `src/app/(admin)/orders/page.tsx` (integrated ToastHost)
+- **Technical**:
+  - Toast: Fixed bottom-right position, 2.2s auto-dismiss, queue-based
+  - Pagination: Previous/Next links with page bounds (1 to max pages)
+  - No external dependencies
+- **LOC**: ~30 (toast utility + updates)
+

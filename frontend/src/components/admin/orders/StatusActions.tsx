@@ -1,4 +1,5 @@
 'use client';
+import { toast } from './toast';
 import { useState } from 'react';
 type Status = 'PAID'|'PACKING'|'SHIPPED'|'DELIVERED'|'CANCELLED';
 const nexts:Status[] = ['PACKING','SHIPPED','DELIVERED','CANCELLED'];
@@ -9,7 +10,7 @@ export default function StatusActions({ orderId, current, onChanged }:{ orderId:
     try{
       setLoading(s);
       const res = await fetch(`/api/admin/orders/${orderId}/status`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ status:s }) });
-      if(res.ok){ onChanged(s); alert(`Κατάσταση ενημερώθηκε: ${s}`); } else { alert('Αποτυχία αλλαγής κατάστασης'); }
+      if(res.ok){ onChanged(s); toast(`Κατάσταση ενημερώθηκε: ${s}`); } else { toast('Αποτυχία αλλαγής κατάστασης'); }
     }finally{ setLoading(false); }
   }
   return (

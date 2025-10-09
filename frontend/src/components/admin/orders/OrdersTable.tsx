@@ -37,7 +37,13 @@ export default function OrdersTable({ rows, total, page, perPage }:{ rows:any[],
           }) : <tr><td colSpan={6} style={{padding:16,textAlign:'center',opacity:0.7}}>Δεν βρέθηκαν παραγγελίες.</td></tr>}
         </tbody>
       </table>
-      <div style={{marginTop:12,opacity:0.7}}>Σελίδα {page} / {pages}</div>
+      <div style={{marginTop:12,opacity:0.7}}>
+        Σελίδα {page} / {pages}
+        <div style={{marginTop:8, display:'flex', gap:8}}>
+          <a href={`?page=${Math.max(1,page-1)}`}>Προηγούμενη</a>
+          <a href={`?page=${Math.min(pages,page+1)}`}>Επόμενη</a>
+        </div>
+      </div>
       <OrderDrawer order={selected} onClose={()=>setSelected(null)} />
     </div>
   );
