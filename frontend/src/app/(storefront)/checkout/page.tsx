@@ -2,9 +2,9 @@
 import { useCart } from '@/lib/cart/context';
 import { calc, fmt } from '@/lib/checkout/totals';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
-export default function Page(){
+function CheckoutContent(){
   const router = useRouter();
   const searchParams = useSearchParams();
   const err = searchParams?.get('err');
@@ -105,5 +105,14 @@ export default function Page(){
         </div>
       )}
     </main>
+  );
+}
+
+
+export default function Page(){
+  return (
+    <Suspense fallback={<div style={{padding:16}}>Φόρτωση...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
