@@ -5,25 +5,25 @@ import Link from 'next/link';
 
 const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
 
-export default function Page(){
-  const cart = getCart();
+export default async function Page(){
+  const cart = await getCart();
 
   async function updateQty(formData: FormData){
     'use server';
     const productId = String(formData.get('productId')||'');
     const qty = Number(formData.get('qty')||0);
-    setQty(productId, qty);
+    await setQty(productId, qty);
     redirect('/cart');
   }
 
   async function remove(formData: FormData){
     'use server';
     const productId = String(formData.get('productId')||'');
-    removeItem(productId);
+    await removeItem(productId);
     redirect('/cart');
   }
 
-  const cartTotal = total(cart);
+  const cartTotal = await total(cart);
   const isEmpty = cart.items.length === 0;
 
   return (

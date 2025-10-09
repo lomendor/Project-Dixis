@@ -13,7 +13,7 @@ export default async function Page({ params }:{ params:{ id:string } }){
   async function addToCart(formData: FormData){
     'use server';
     const qty = Math.max(1, Math.min(99, Number(formData.get('qty')||1)));
-    addItem({ productId: p.id, title: p.title, price: Number(p.price||0), qty });
+    await addItem({ productId: p.id, title: p.title, price: Number(p.price||0), qty });
     redirect('/cart');
   }
 
