@@ -68,7 +68,7 @@ test('admin orders: filter by status & q and export CSV', async ({ request, page
     expect(content).toContain('PAID');
 
     // Verify header row exists
-    expect(content).toContain('id,date,customerName,customerPhone,total,status');
+    expect(content).toContain('id,date,customerName,customerPhone,email,total,status');
 
     // Count data rows (should be exactly 1 matching filter)
     const lines = content.split('\n').filter(l => l.trim() && !l.startsWith('id,'));
