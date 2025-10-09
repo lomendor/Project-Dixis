@@ -918,3 +918,13 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+## OPS — STATE.md Union Merge Policy ✅
+**Date**: 2025-10-09
+
+**Changes**:
+- ✅ Added `.gitattributes` with `merge=union` for STATE.md and AGENT summaries
+- ✅ Created `docs/AGENT/SOPs/SOP-Feature-Pass.md` with append-only policy
+- ✅ Future PRs will auto-merge STATE.md changes without conflicts
+
+**Impact**: Eliminates merge conflicts for parallel PRs updating STATE.md simultaneously
