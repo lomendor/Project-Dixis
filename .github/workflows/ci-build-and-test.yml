@@ -18,15 +18,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: pnpm version
         run: pnpm --version
