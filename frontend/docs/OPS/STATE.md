@@ -1000,3 +1000,26 @@ export default function Page() { redirect('/my/orders'); }
 - **No schema changes**, hardening existing functionality
 - **LOC**: ~80 (BOM + E2E tests)
 
+## Pass 172A — Shipping Engine (Feature-Flag API) + HF-171C.1 (2025-10-09)
+- **Shipping Engine**: ENV-driven quote calculation (base, COD fee, free threshold, remote surcharge)
+- **API Endpoint**: `/api/shipping/quote?method=...&subtotal=...` for future checkout integration
+- **i18n**: Greek/English translations for shipping terms (pickup, courier, courier_cod)
+- **E2E Test**: Light API validation for COURIER and COURIER_COD methods
+- **Hotfix HF-171C.1**: Fixed CSV header assertion to include `email` column
+- **Files**:
+  - `src/lib/shipping/engine.ts` (shipping cost calculation logic)
+  - `src/app/api/shipping/quote/route.ts` (API endpoint)
+  - `src/lib/i18n/el/shipping.json` (Greek translations)
+  - `src/lib/i18n/en/shipping.json` (English translations)
+  - `tests/shipping/quote.spec.ts` (E2E API validation)
+  - `.env.example` (shipping ENV variables)
+  - `tests/admin/orders/list-and-export.spec.ts` (CSV header fix)
+- **Technical**:
+  - Feature-flag driven: SHIPPING_ENABLED env variable
+  - Configurable rates: BASE_EUR, COD_FEE_EUR, FREE_THRESHOLD_EUR, REMOTE_SURCHARGE_EUR
+  - No business logic changes to checkout (safety pattern)
+  - API returns: `{ ok, method, subtotal, cost, breakdown: { base, cod, remote, promo } }`
+- **No schema changes**, API-only implementation
+- **LOC**: ~120 (engine + API + tests)
+- **Next Step**: Pass 172B will integrate shipping engine into checkout UI/totals
+
