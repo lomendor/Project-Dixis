@@ -10,6 +10,7 @@ import {
   type ShippingQuoteResponse,
   type LockerSearchResponse
 } from '@dixis/contracts/shipping';
+import { toQty } from '@/contracts/items';
 import { formatCurrency } from '@/env';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import LockerSearch from './LockerSearch';
@@ -64,7 +65,7 @@ export default function DeliveryMethodSelector({
 
     try {
       const requestPayload: ShippingQuoteRequest = {
-        items,
+        items: toQty(items),
         postal_code: postalCode,
         delivery_method: deliveryMethod,
         payment_method: paymentMethod

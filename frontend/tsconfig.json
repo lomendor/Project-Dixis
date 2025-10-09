@@ -28,8 +28,8 @@
       "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"],
       "@tests/*": ["./tests/*"],
-      "@dixis/contracts": ["../packages/contracts/dist/index.d.ts"],
-      "@dixis/contracts/*": ["../packages/contracts/dist/*"]
+      "@dixis/contracts": ["./src/contracts/index.ts"],
+      "@dixis/contracts/*": ["./src/contracts/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
