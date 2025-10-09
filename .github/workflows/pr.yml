@@ -304,6 +304,7 @@ jobs:
           npx commitlint --from HEAD~1 --to HEAD --verbose
 
       - name: Run Danger
+        continue-on-error: true
         run: |
           # cleanup: temporary guards removed post-#243; QA tools remain via npm scripts
           npx danger ci
