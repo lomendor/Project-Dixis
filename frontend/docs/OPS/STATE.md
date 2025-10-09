@@ -916,3 +916,4 @@ export default function Page() { redirect('/my/orders'); }
   - **Fix**: Created `.github/workflows/e2e-postgres.yml` running @smoke tests (SQLite/healthz)
   - **Result**: Satisfies required status check while maintaining fast smoke test gate (~3-4min)
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
+- HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
