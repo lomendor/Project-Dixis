@@ -59,9 +59,10 @@ jobs:
         run: curl -sS http://127.0.0.1:3001/api/healthz || true
 
       - name: Run E2E tests (@smoke only)
-        run: pnpm run test:e2e:smoke
+        run: npx dotenv-cli -e .env.ci -- npx playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1
         env:
           CI: true
+          SKIP_WEBSERVER: 'true'
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4

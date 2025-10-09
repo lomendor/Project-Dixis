@@ -117,7 +117,7 @@ export default defineConfig({
     }
   ],
 
-  webServer: isCI ? {
+  webServer: process.env.SKIP_WEBSERVER ? undefined : isCI ? {
     command: 'npm run ci:gen && npm run ci:migrate && npm run build:ci && npm run start:ci',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
