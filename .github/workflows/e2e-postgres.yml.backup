@@ -1,5 +1,4 @@
-name: e2e-postgres
-
+name: e2e-sqlite
 on:
   pull_request:
     branches: [ main ]
@@ -8,11 +7,8 @@ on:
 
 jobs:
   e2e:
-    name: E2E (PostgreSQL)
+    name: E2E (SQLite)
     runs-on: ubuntu-latest
-
-    env:
-      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
 
     defaults:
       run:
@@ -41,34 +37,16 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Generate Prisma Client & Migrate
-        run: |
-          pnpm run ci:gen || echo "Prisma gen skipped"
-          pnpm run ci:migrate || echo "Prisma migrate skipped"
-
-      - name: Build Next.js app
-        run: pnpm run build:ci
-
-      - name: Start Next.js server
-        run: pnpm run start:ci &
-
-      - name: Wait for healthz endpoint
-        run: npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
-
-      - name: Sanity ping (healthz)
-        run: curl -sS http://127.0.0.1:3001/api/healthz || true
-
-      - name: Run E2E tests (@smoke only)
-        run: npx dotenv-cli -e .env.ci -- npx playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1
+      - name: Run E2E tests (SQLite via .env.ci)
+        run: pnpm run test:e2e:ci
         env:
           CI: true
-          SKIP_WEBSERVER: 'true'
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e-postgres-alias-report
+          name: e2e-postgres-report
           path: |
             frontend/playwright-report/
             frontend/test-results/

@@ -4,7 +4,7 @@ const isCI = !!process.env.CI;
 
 // Phase-4: Host alignment - normalize FE & API to same host (127.0.0.1)
 function normalizeHosts() {
-  let baseURL = process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000';
+  let baseURL = process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3001';
   const apiBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
 
   // Force localhost to 127.0.0.1 for cookie compatibility
@@ -117,7 +117,14 @@ export default defineConfig({
     }
   ],
 
-  webServer: {
+  webServer: process.env.SKIP_WEBSERVER ? undefined : isCI ? {
+    command: 'npm run ci:gen && npm run ci:migrate && npm run build:ci && npm run start:ci',
+    url: baseURL,
+    reuseExistingServer: !process.env.CI,
+    timeout: 180000,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  } : {
     command: 'npm run dev -- --port 3030',
     url: baseURL, // Phase-4: Use normalized URL
     reuseExistingServer: true,
