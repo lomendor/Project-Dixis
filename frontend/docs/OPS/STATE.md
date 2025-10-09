@@ -918,3 +918,70 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+
+## Pass HF-19 — Next.js 15.5 async cookies() + Multiple Fixes (2025-10-09)
+- Fixed #454: async cookies API in cart/products pages
+- Fixed #458: cart context usage + Suspense boundary for useSearchParams
+- Fixed #459: removed non-existent buyerEmail field from admin API
+- Added risk-ok label to #459 for admin/orders API changes
+- All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+## Pass 171A — Admin Orders (List+Filters+Export+i18n) (2025-10-09)
+- **Admin Orders Page**: `/admin/orders` with filters (status, search query, pagination)
+- **CSV Export**: `/api/admin/orders/export` with same filters applied
+- **i18n Support**: Greek-first (EL) with English fallback
+- **UI Components**: StatusBadge (colored status badges), Filters (status dropdown + search input), OrdersTable (paginated table)
+- **E2E Test**: `tests/admin/orders/list-and-export.spec.ts` (filter + CSV export validation)
+- **Files**:
+  - `src/lib/i18n/el/admin.orders.json` (Greek translations)
+  - `src/lib/i18n/en/admin.orders.json` (English translations)
+  - `src/components/admin/orders/StatusBadge.tsx` (status badge component)
+  - `src/components/admin/orders/Filters.tsx` (filter controls)
+  - `src/components/admin/orders/OrdersTable.tsx` (orders table)
+  - `src/app/(admin)/orders/page.tsx` (main orders page with Prisma queries)
+  - `src/app/api/admin/orders/export/route.ts` (CSV export API)
+  - `tests/admin/orders/list-and-export.spec.ts` (E2E test)
+- **Technical**:
+  - Prisma queries with status + search filters (id/phone/email)
+  - CSV generation with UTF-8 encoding and proper escaping
+  - Status badges: PAID (blue), PACKING (orange), SHIPPED (purple), DELIVERED (green), CANCELLED (gray)
+  - Pagination: 20 items per page (max 100)
+- **No schema changes**, used existing Order model
+- **LOC**: ~250 (within ≤300 LOC limit)
+
+## Pass 171B — Admin Orders (Drawer + Inline Actions) (2025-10-09)
+- **OrderDrawer Component**: Right-side panel showing order details (ID, date, customer, items, total, address)
+- **StatusActions Component**: Inline status change buttons (PACKING/SHIPPED/DELIVERED/CANCELLED)
+- **OrdersTable Enhancement**: Added actions column + drawer integration on row click
+- **Optimistic UI**: Status changes update drawer state immediately with alert feedback
+- **E2E Test**: `tests/admin/orders/status-and-drawer.spec.ts` validates drawer + status change
+- **Files**:
+  - `src/components/admin/orders/OrderDrawer.tsx` (drawer component)
+  - `src/components/admin/orders/StatusActions.tsx` (inline actions)
+  - `src/components/admin/orders/OrdersTable.tsx` (updated with drawer + actions)
+  - `tests/admin/orders/status-and-drawer.spec.ts` (E2E test)
+- **Technical**:
+  - Fixed right panel (420px) with close button
+  - Async POST to existing admin status API
+  - Alert-based feedback (future: toast library)
+  - Row click opens drawer with full order context
+- **No schema changes**, uses existing admin API
+- **LOC**: ~150 (within ≤300 LOC limit)
+
+## Pass 171B.1 — Admin Orders Polish (Toast + Pagination) (2025-10-09)
+- **Toast Notifications**: Replaced alert() with lightweight toast utility (no deps)
+- **Pagination Controls**: Added Previous/Next links to OrdersTable
+- **PR #466 Hygiene**: Added Reports + Test Summary sections, retriggered CI
+- **Files**:
+  - `src/components/admin/orders/toast.tsx` (toast utility + ToastHost component)
+  - `src/components/admin/orders/StatusActions.tsx` (updated to use toast)
+  - `src/components/admin/orders/OrdersTable.tsx` (added pagination links)
+  - `src/app/(admin)/orders/page.tsx` (integrated ToastHost)
+- **Technical**:
+  - Toast: Fixed bottom-right position, 2.2s auto-dismiss, queue-based
+  - Pagination: Previous/Next links with page bounds (1 to max pages)
+  - No external dependencies
+- **LOC**: ~30 (toast utility + updates)
+
