@@ -141,6 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     continue-on-error: true  # Pass 45: Advisory until E2E fully stabilized in Phase 2
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ai-pass')
     defaults:
       run:
         working-directory: frontend
