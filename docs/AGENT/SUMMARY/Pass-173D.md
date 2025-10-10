@@ -1,3 +1,6 @@
+
+> **Note (HF-173D.1)**: Fixed Next.js params signature (no Promise) in order page and resend route. Unified page path under `frontend/src/app/(storefront)/order/[id]/page.tsx`.
+
 # TL;DR — Pass 173D (Order Confirmation Page + Resend Email)
 
 **Goal**: Order confirmation page with resend email functionality

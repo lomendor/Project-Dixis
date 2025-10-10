@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+type Props = { params: { id: string } };
 
 export async function POST(request: NextRequest, { params }: Props) {
-  try {
-    const { id } = await params;
+try {
+    const { id } = params;
 
     // Verify order exists
     const order = await prisma.order.findUnique({
