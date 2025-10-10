@@ -928,3 +928,10 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+
+## Pass 173C — Checkout Shipping Method Selector + Live Totals (2025-10-10)
+- Created ShippingSelector component with Greek-first labels (PICKUP/COURIER/COURIER_COD)
+- Ready for integration with ShippingSummary for live total updates
+- E2E tests: 2 scenarios (method switching + Greek labels)
+- Zero schema changes, component ready for checkout page integration
+- Summary: docs/AGENT/SUMMARY/Pass-173C.md
