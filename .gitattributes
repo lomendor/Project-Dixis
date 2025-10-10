@@ -1,0 +1,3 @@
+# Auto-merge append-only docs to avoid PR conflicts
+frontend/docs/OPS/STATE.md merge=union
+docs/AGENT/SUMMARY/*.md merge=union
