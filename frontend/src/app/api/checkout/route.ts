@@ -4,6 +4,7 @@ import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
+import { normalizeMethod, calculateShippingCost } from '@/contracts/shipping';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
@@ -51,13 +52,20 @@ export async function POST(request: NextRequest) {
       }
 
       // Υπολογισμός συνόλου από DB τιμές
-      const total = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
+      const subtotal = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
+
+      // Υπολογισμός μεταφορικών (normalize aliases to canonical)
+      const shippingMethod = normalizeMethod(payload?.shipping?.method);
+      const computedShipping = Number(calculateShippingCost(shippingMethod, subtotal));
+      const total = subtotal + computedShipping;
 
       // Δημιουργία παραγγελίας + items (snapshots)
       const order = await tx.order.create({
         data: {
           status: 'PENDING',
           total,
+          shippingMethod,
+          computedShipping,
           buyerName: String(payload?.shipping?.name || ''),
           buyerPhone: String(payload?.shipping?.phone || ''),
           shippingLine1: String(payload?.shipping?.line1 || ''),

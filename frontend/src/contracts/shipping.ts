@@ -6,10 +6,15 @@
 
 import { z } from 'zod';
 
+// Canonical shipping method codes
+export type ShippingMethod = 'PICKUP' | 'COURIER' | 'COURIER_COD';
+
+// Legacy alias types for backward compatibility
 export type DeliveryMethod = 'HOME' | 'LOCKER' | 'STORE_PICKUP';
 export type PaymentMethod = 'CARD' | 'COD';
 
 export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER', 'STORE_PICKUP']);
+export const ShippingMethodSchema = z.enum(['PICKUP', 'COURIER', 'COURIER_COD']);
 
 export interface ShippingQuoteRequest {
   items: Array<{
@@ -81,13 +86,37 @@ export const DEFAULT_DELIVERY_OPTIONS: Array<{
 ];
 
 export function calculateShippingCost(
-  method: DeliveryMethod,
+  method: DeliveryMethod | ShippingMethod,
   orderValue: number,
   freeShippingThreshold = 25
 ): number {
-  if (method === 'STORE_PICKUP') return 0;
+  const normalized = normalizeMethod(method as string);
+
+  if (normalized === 'PICKUP') return 0;
   if (orderValue >= freeShippingThreshold) return 0;
 
-  const option = DEFAULT_DELIVERY_OPTIONS.find(o => o.code === method);
-  return option?.baseCost ?? 0;
+  // BASE costs for canonical methods
+  if (normalized === 'COURIER') return 3.5;
+  if (normalized === 'COURIER_COD') return 3.5; // Same base cost as COURIER
+
+  return 0;
+}
+
+/**
+ * Normalize shipping method aliases to canonical codes
+ * Aliases: HOME, LOCKER, COURIER_HOME → COURIER
+ *          STORE_PICKUP, PICK-UP, PICK_UP → PICKUP
+ *          COD, CASH_ON_DELIVERY → COURIER_COD
+ */
+export function normalizeMethod(code?: string): ShippingMethod {
+  const c = String(code || '').toUpperCase().trim();
+
+  // Normalize aliases to canonical codes
+  if (c === 'HOME' || c === 'LOCKER' || c === 'COURIER_HOME') return 'COURIER';
+  if (c === 'STORE_PICKUP' || c === 'PICK-UP' || c === 'PICK_UP') return 'PICKUP';
+  if (c === 'COD' || c === 'CASH_ON_DELIVERY') return 'COURIER_COD';
+
+  // If already canonical, return as-is
+  const known: readonly ShippingMethod[] = ['PICKUP', 'COURIER', 'COURIER_COD'];
+  return known.includes(c as ShippingMethod) ? (c as ShippingMethod) : 'COURIER';
 }

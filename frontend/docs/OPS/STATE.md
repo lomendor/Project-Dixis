@@ -928,3 +928,4 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+- Pass 173L.fix: Normalize shipping aliases→canonical (HOME→COURIER, STORE_PICKUP→PICKUP, LOCKER→COURIER) + persist canonical in checkout + comprehensive e2e tests
