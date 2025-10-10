@@ -938,3 +938,69 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+
+## Pass HF-19 — Next.js 15.5 async cookies() + Multiple Fixes (2025-10-09)
+- Fixed #454: async cookies API in cart/products pages
+- Fixed #458: cart context usage + Suspense boundary for useSearchParams
+- Fixed #459: removed non-existent buyerEmail field from admin API
+- Added risk-ok label to #459 for admin/orders API changes
+- All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+## Pass CI-SYNC-01 — Prisma Schema Parity Fix (2025-10-10) ✅
+**Date**: 2025-10-10
+**PR**: #486
+**Branch**: ci/sync-01-prisma-schema-parity
+
+**Issue**: PRs #479-#485 failing with TypeScript errors about missing Prisma fields (publicToken, shippingMethod, computedShipping)
+
+**Root Cause**:
+- `schema.ci.prisma` (SQLite for E2E) diverged from `schema.prisma` (PostgreSQL for production)
+- Prisma client generated from schema.ci.prisma before migrations run in CI
+- Code references fields that don't exist in the generated client
+- TypeScript compilation fails with "Property does not exist" errors
+
+**Solution**:
+- ✅ Created `scripts/ci/sync-ci-schema.ts` - automatic sync script
+  - Reads schema.prisma
+  - Converts PostgreSQL → SQLite (provider, datasource URL)
+  - Removes PostgreSQL-specific annotations (@db.Text, @db.Decimal, @db.Uuid)
+  - Converts uuid() → cuid() for SQLite compatibility
+  - Writes to schema.ci.prisma with auto-generated header warning
+
+- ✅ Updated `frontend/package.json` with CI prep scripts:
+  - `ci:prisma:sync` - Run sync script
+  - `ci:prisma:sqlite` - Sync + push + generate for SQLite
+  - `ci:prisma:pg` - Migrate + generate for PostgreSQL
+  - `ci:prep` - Unified CI preparation (sync + migrate + generate)
+
+- ✅ Updated `frontend/playwright.config.ts`:
+  - Changed webServer command from `npm run ci:gen && npm run ci:migrate` to `npm run ci:prep`
+  - Ensures proper sync → migrate → generate order
+
+- ✅ Created `.github/workflows/schema-parity.yml` gate workflow:
+  - Triggers on PR changes to schema.prisma or schema.ci.prisma
+  - Runs sync script and checks for git diff
+  - Fails if schemas are out of sync
+  - Prevents future divergence
+
+**Impact**:
+- Schema parity automatically maintained
+- CI generates correct Prisma client with all fields
+- TypeScript compilation succeeds
+- PRs #479-#485 can now pass when retriggered
+- Future schema changes automatically synced to CI schema
+
+**Technical Details**:
+- Sync script: 67 lines TypeScript with regex transformations
+- Package.json: Added 4 new CI scripts (sync, sqlite, pg, prep)
+- Playwright config: 1 line change (ci:prep replaces manual steps)
+- Schema parity workflow: 46 lines YAML with validation logic
+
+**Files Changed**:
+- scripts/ci/sync-ci-schema.ts (created, 67 LOC)
+- frontend/package.json (modified, +4 scripts)
+- frontend/playwright.config.ts (modified, 1 line)
+- .github/workflows/schema-parity.yml (created, 46 LOC)
+
