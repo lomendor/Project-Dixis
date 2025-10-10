@@ -675,6 +675,26 @@ export default function Page() { redirect('/my/orders'); }
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
 
+## Pass 170 — Admin Orders Dashboard ✅
+**Date**: 2025-10-08
+
+**Changes**:
+- ✅ GET `/api/admin/orders` — List orders (id, createdAt, status, total, buyer info)
+- ✅ GET `/api/admin/orders/[id]` — Order detail (full info + items + shipping)
+- ✅ Admin pages already existed: `/admin/orders` (list), `/admin/orders/[id]` (detail)
+- ✅ Status update via existing POST `/api/admin/orders/[id]/status` (emails customer)
+- ✅ E2E test: checkout → admin views order → set PACKING → customer receives email
+
+**Architecture**:
+- Admin pages use Prisma directly for SSR
+- GET APIs added for completeness (future integrations)
+- Simple session check (`dixis_session` cookie presence)
+- Status transitions trigger customer emails (existing functionality preserved)
+
+**Files**:
+- `frontend/src/app/api/admin/orders/route.ts` (GET list API)
+- `frontend/src/app/api/admin/orders/[id]/route.ts` (GET detail API)
+- `frontend/tests/admin/orders-dashboard.spec.ts` (e2e test)
 ## Pass CI-01 — Make CI Green ✅
 **Date**: 2025-10-08
 
@@ -944,4 +964,59 @@ export default function Page() { redirect('/my/orders'); }
   - ❌ Full E2E tests (requires schema changes + UI integration)
 - **TODO**: Add `shippingMethod` field to Order schema in future pass, then re-run UI integration
 - **Docs**: `docs/AGENT/SUMMARY/Pass-173J.md` (detailed blockers & future work)
+## Pass CI-SYNC-01 — Prisma Schema Parity Fix (2025-10-10) ✅
+**Date**: 2025-10-10
+**PR**: #486
+**Branch**: ci/sync-01-prisma-schema-parity
+
+**Issue**: PRs #479-#485 failing with TypeScript errors about missing Prisma fields (publicToken, shippingMethod, computedShipping)
+
+**Root Cause**:
+- `schema.ci.prisma` (SQLite for E2E) diverged from `schema.prisma` (PostgreSQL for production)
+- Prisma client generated from schema.ci.prisma before migrations run in CI
+- Code references fields that don't exist in the generated client
+- TypeScript compilation fails with "Property does not exist" errors
+
+**Solution**:
+- ✅ Created `scripts/ci/sync-ci-schema.ts` - automatic sync script
+  - Reads schema.prisma
+  - Converts PostgreSQL → SQLite (provider, datasource URL)
+  - Removes PostgreSQL-specific annotations (@db.Text, @db.Decimal, @db.Uuid)
+  - Converts uuid() → cuid() for SQLite compatibility
+  - Writes to schema.ci.prisma with auto-generated header warning
+
+- ✅ Updated `frontend/package.json` with CI prep scripts:
+  - `ci:prisma:sync` - Run sync script
+  - `ci:prisma:sqlite` - Sync + push + generate for SQLite
+  - `ci:prisma:pg` - Migrate + generate for PostgreSQL
+  - `ci:prep` - Unified CI preparation (sync + migrate + generate)
+
+- ✅ Updated `frontend/playwright.config.ts`:
+  - Changed webServer command from `npm run ci:gen && npm run ci:migrate` to `npm run ci:prep`
+  - Ensures proper sync → migrate → generate order
+
+- ✅ Created `.github/workflows/schema-parity.yml` gate workflow:
+  - Triggers on PR changes to schema.prisma or schema.ci.prisma
+  - Runs sync script and checks for git diff
+  - Fails if schemas are out of sync
+  - Prevents future divergence
+
+**Impact**:
+- Schema parity automatically maintained
+- CI generates correct Prisma client with all fields
+- TypeScript compilation succeeds
+- PRs #479-#485 can now pass when retriggered
+- Future schema changes automatically synced to CI schema
+
+**Technical Details**:
+- Sync script: 67 lines TypeScript with regex transformations
+- Package.json: Added 4 new CI scripts (sync, sqlite, pg, prep)
+- Playwright config: 1 line change (ci:prep replaces manual steps)
+- Schema parity workflow: 46 lines YAML with validation logic
+
+**Files Changed**:
+- scripts/ci/sync-ci-schema.ts (created, 67 LOC)
+- frontend/package.json (modified, +4 scripts)
+- frontend/playwright.config.ts (modified, 1 line)
+- .github/workflows/schema-parity.yml (created, 46 LOC)
 
