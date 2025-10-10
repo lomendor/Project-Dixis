@@ -675,6 +675,26 @@ export default function Page() { redirect('/my/orders'); }
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
 
+## Pass 170 — Admin Orders Dashboard ✅
+**Date**: 2025-10-08
+
+**Changes**:
+- ✅ GET `/api/admin/orders` — List orders (id, createdAt, status, total, buyer info)
+- ✅ GET `/api/admin/orders/[id]` — Order detail (full info + items + shipping)
+- ✅ Admin pages already existed: `/admin/orders` (list), `/admin/orders/[id]` (detail)
+- ✅ Status update via existing POST `/api/admin/orders/[id]/status` (emails customer)
+- ✅ E2E test: checkout → admin views order → set PACKING → customer receives email
+
+**Architecture**:
+- Admin pages use Prisma directly for SSR
+- GET APIs added for completeness (future integrations)
+- Simple session check (`dixis_session` cookie presence)
+- Status transitions trigger customer emails (existing functionality preserved)
+
+**Files**:
+- `frontend/src/app/api/admin/orders/route.ts` (GET list API)
+- `frontend/src/app/api/admin/orders/[id]/route.ts` (GET detail API)
+- `frontend/tests/admin/orders-dashboard.spec.ts` (e2e test)
 ## Pass CI-01 — Make CI Green ✅
 **Date**: 2025-10-08
 
