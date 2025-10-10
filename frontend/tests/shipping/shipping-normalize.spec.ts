@@ -91,7 +91,7 @@ test.describe('Shipping method normalization', () => {
 
     const order = await apiResponse.json();
     expect(String(order.shippingMethod)).toBe('COURIER_COD');
-    expect(Number(order.computedShipping)).toBe(3.5); // Same base cost as COURIER
+    expect(Number(order.computedShipping)).toBe(5.0); // 3.5 base + 1.5 COD fee
   });
 
   test('Free shipping threshold: order ≥€25 → computedShipping == 0', async () => {
@@ -121,5 +121,29 @@ test.describe('Shipping method normalization', () => {
 
     expect(String(order.shippingMethod)).toBe('COURIER');
     expect(Number(order.computedShipping)).toBe(0); // Free shipping over €25
+  });
+
+  test('COURIER_COD cost >= COURIER cost (includes codFee)', async () => {
+    // Create COURIER order
+    const courierData = await placeOrder('COURIER');
+    const courierId = courierData.orderId || courierData.id;
+
+    // Create COURIER_COD order
+    const codData = await placeOrder('COURIER_COD');
+    const codId = codData.orderId || codData.id;
+
+    // Fetch both orders
+    const courierResponse = await fetch(base + `/api/orders/${courierId}`);
+    const courierOrder = await courierResponse.json();
+
+    const codResponse = await fetch(base + `/api/orders/${codId}`);
+    const codOrder = await codResponse.json();
+
+    // Verify COD includes additional fee
+    const courierCost = Number(courierOrder.computedShipping);
+    const codCost = Number(codOrder.computedShipping);
+
+    expect(codCost).toBeGreaterThanOrEqual(courierCost);
+    expect(codCost).toBe(5.0); // 3.5 base + 1.5 COD fee
   });
 });

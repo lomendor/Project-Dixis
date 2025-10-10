@@ -74,6 +74,7 @@ export const LockerSearchResponseSchema = z.object({
 // Ensure Locker type matches the schema
 export type LockerFromSchema = z.infer<typeof LockerSchema>;
 
+// Legacy delivery options (for backward compatibility)
 export const DEFAULT_DELIVERY_OPTIONS: Array<{
   code: DeliveryMethod;
   label: string;
@@ -85,6 +86,19 @@ export const DEFAULT_DELIVERY_OPTIONS: Array<{
   { code: 'LOCKER', label: 'Παράδοση σε locker', etaDays: 1, baseCost: 2.0 },
 ];
 
+// Canonical shipping options with COD fee
+export const DEFAULT_OPTIONS: Array<{
+  code: ShippingMethod;
+  label: string;
+  etaDays?: number;
+  baseCost: number;
+  codFee?: number;
+}> = [
+  { code: 'PICKUP', label: 'Παραλαβή από κατάστημα', etaDays: 0, baseCost: 0 },
+  { code: 'COURIER', label: 'Παράδοση με κούριερ', etaDays: 2, baseCost: 3.5 },
+  { code: 'COURIER_COD', label: 'Αντικαταβολή', etaDays: 2, baseCost: 3.5, codFee: 1.5 },
+];
+
 export function calculateShippingCost(
   method: DeliveryMethod | ShippingMethod,
   orderValue: number,
@@ -92,14 +106,21 @@ export function calculateShippingCost(
 ): number {
   const normalized = normalizeMethod(method as string);
 
+  // PICKUP is always free
   if (normalized === 'PICKUP') return 0;
+
+  // Free shipping over threshold (applies to COURIER and COURIER_COD)
   if (orderValue >= freeShippingThreshold) return 0;
 
-  // BASE costs for canonical methods
-  if (normalized === 'COURIER') return 3.5;
-  if (normalized === 'COURIER_COD') return 3.5; // Same base cost as COURIER
+  // Look up shipping option
+  const option = DEFAULT_OPTIONS.find(o => o.code === normalized);
+  if (!option) return 0;
 
-  return 0;
+  // Calculate total cost: base + COD fee (if applicable)
+  const base = Number(option.baseCost || 0);
+  const cod = normalized === 'COURIER_COD' ? Number(option.codFee || 0) : 0;
+
+  return Number((base + cod).toFixed(2));
 }
 
 /**
