@@ -928,3 +928,45 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+
+## Pass 174Q — Quick-Wins Triad (PR Hygiene + Totals/Taxes + Observability) ✅
+**Date**: 2025-10-10
+
+### (A) PR Hygiene
+- ✅ Created `.github/pull_request_template.md` with Summary/Reports/Test Summary sections
+- ✅ Created `.github/labeler.yml` for automatic label assignment (ai-pass, risk-ok)
+- ✅ Applied template and labels to open PRs #479-#485
+
+### (B) Totals/Taxes Helper
+- ✅ Created `frontend/src/lib/cart/totals.ts` - single source of truth for order calculations
+  - Exports: calcTotals(), fmtEUR(), round2()
+  - Types: ShippingMethod, TotalsInput, Totals, Money
+  - Features: Subtotal, shipping, COD fee, tax (configurable rate)
+  - EL-formatted currency (€34,32 format)
+- ✅ Created `frontend/tests/totals/totals.spec.ts` with 2 Playwright tests:
+  - Test 1: COD courier totals with tax (13%) - verifies all calculations + EL formatting
+  - Test 2: Pickup with no shipping/tax - verifies zero fees
+
+### (C) Minimal Observability
+- ✅ Created `frontend/src/lib/observability/request.ts` - requestId utility
+  - Extracts x-request-id from headers or generates UUID
+- ✅ Created `/api/dev/health` endpoint (dev-only):
+  - Returns: { ok, env, requestId, time }
+  - Sets x-request-id response header
+  - Blocked in production (404 response)
+
+**Technical Details**:
+- PR template enforces consistent documentation structure
+- Labeler config auto-applies labels based on file paths
+- Totals helper: Type-safe, EL-localized, tax-ready (default 0%)
+- Health endpoint: SSR-safe, environment-aware, traceable requests
+
+**Files Changed**:
+- .github/pull_request_template.md (created)
+- .github/labeler.yml (created)
+- frontend/src/lib/cart/totals.ts (created, 32 LOC)
+- frontend/tests/totals/totals.spec.ts (created, 29 LOC)
+- frontend/src/lib/observability/request.ts (created, 3 LOC)
+- frontend/src/app/api/dev/health/route.ts (created, 9 LOC)
+
+**Total**: 6 files created, ~73 LOC added
