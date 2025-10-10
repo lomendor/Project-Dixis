@@ -220,3 +220,12 @@ textarea:focus {
     padding: 0 var(--space-6);
   }
 }
+
+/* --- Dixis Print Rules --- */
+@media print {
+  .no-print, nav, [data-testid="print-button"] {
+    display: none !important;
+  }
+  a { text-decoration: none !important; color: black !important; }
+  body { background: white !important; }
+}
