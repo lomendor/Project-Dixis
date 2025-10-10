@@ -118,7 +118,7 @@ export default defineConfig({
   ],
 
   webServer: process.env.SKIP_WEBSERVER ? undefined : isCI ? {
-    command: 'npm run ci:gen && npm run ci:migrate && npm run build:ci && npm run start:ci',
+    command: 'npm run ci:prep && npm run build:ci && npm run start:ci',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180000,
