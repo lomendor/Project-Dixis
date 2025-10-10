@@ -1,3 +1,40 @@
+## Pass 173D — Order Confirmation Page + Resend Email ✅
+- **Order Confirmation Page**: Created `/order/[id]` with Greek-first UI
+  - Server component with Prisma order fetch
+  - Displays: order ID, status, items table, shipping details, totals
+  - Server action for resend email button
+  - 404 handling via Next.js `notFound()`
+
+- **Resend Email API**: Created POST `/api/orders/[id]/resend`
+  - Log-only mode when SMTP not configured (checks `process.env.SMTP_HOST` + `SMTP_USER`)
+  - Returns 200 with `{ success, message, mode }` on success
+  - Returns 404 for non-existent orders
+  - Console logs resend attempts with timestamp
+
+- **Checkout Integration**: Modified checkout page redirect
+  - Changed: `/checkout/confirm/[id]` → `/order/[id]`
+  - Flow: Checkout success → clear cart → redirect to order confirmation
+
+- **E2E Tests**: Created `tests/order/order-confirmation.spec.ts`
+  - Test 1: Full checkout flow redirects to confirmation with correct totals
+  - Test 2: Resend email button calls API and returns 200
+  - Test 3: Non-existent order shows 404
+
+### Technical Notes
+- **Zero DB changes**: Uses existing Order + OrderItem schema
+- **Server component**: Dynamic page generation for SEO
+- **Greek status labels**: PENDING → "Εκκρεμής", etc.
+- **Progressive enhancement**: Works without JavaScript (server action)
+- **LOC**: ~180 (page ~145, API ~35, tests ~90, docs)
+
+### Files Created
+- `frontend/src/app/(storefront)/order/[id]/page.tsx`
+- `frontend/src/app/api/orders/[id]/resend/route.ts`
+- `frontend/tests/order/order-confirmation.spec.ts`
+- `docs/AGENT/SUMMARY/Pass-173D.md`
+
+### Files Modified
+- `frontend/src/app/(storefront)/checkout/page.tsx` (1 line: redirect URL)
 
 ## Pass 111 — PostgreSQL CI/CD consolidation ✅
 - **Database Provider**: Already using PostgreSQL in Prisma schema (provider = "postgresql")
@@ -938,3 +975,20 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+
+## Pass HF-19 — Next.js 15.5 async cookies() + Multiple Fixes (2025-10-09)
+- Fixed #454: async cookies API in cart/products pages
+- Fixed #458: cart context usage + Suspense boundary for useSearchParams
+- Fixed #459: removed non-existent buyerEmail field from admin API
+- Added risk-ok label to #459 for admin/orders API changes
+- All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+
+## Pass 173C — Checkout Shipping Method Selector + Live Totals (2025-10-10)
+- Created ShippingSelector component with Greek-first labels (PICKUP/COURIER/COURIER_COD)
+- Ready for integration with ShippingSummary for live total updates
+- E2E tests: 2 scenarios (method switching + Greek labels)
+- Zero schema changes, component ready for checkout page integration
+- Summary: docs/AGENT/SUMMARY/Pass-173C.md

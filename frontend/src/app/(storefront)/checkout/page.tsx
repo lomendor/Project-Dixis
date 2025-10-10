@@ -100,7 +100,7 @@ export default function CheckoutPage() {
       var json=await res.json();
       if(!res.ok){ if(out) out.textContent = json?.error || 'Αποτυχία παραγγελίας'; return; }
       try{ localStorage.setItem('dixis_cart_v1', JSON.stringify({items:[]})); }catch{}
-      location.href = '/checkout/confirm/'+(json.orderId||'');
+      location.href = '/order/'+(json.orderId||'');
     }catch(err){ if(out) out.textContent = 'Σφάλμα δικτύου'; }
   }, { passive:false });
 })();`}}/>
