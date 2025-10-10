@@ -928,3 +928,20 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+
+## Pass 173J — Shipping Cost Transparency (PARTIAL) ⚠️
+- **Goal**: Unified shipping method labels in checkout & order pages (Greek-first)
+- **Status**: Infrastructure created, UI integration blocked by schema limitations
+- **Delivered**:
+  - ✅ Shipping format helper library (`frontend/src/lib/shipping/format.ts`)
+  - ✅ `labelFor()` function: Method codes → Greek labels (Παραλαβή, Κούριερ, etc.)
+  - ✅ `costFor()` function: Calculate shipping costs with threshold logic
+  - ✅ E2E test structure for shipping transparency
+  - ✅ Reuse of existing `@dixis/contracts/shipping` stub
+- **Blocked**:
+  - ❌ Order page shipping label display (Order model has no `shippingMethod` field)
+  - ❌ Checkout page shipping label display (checkout summary page structure unclear)
+  - ❌ Full E2E tests (requires schema changes + UI integration)
+- **TODO**: Add `shippingMethod` field to Order schema in future pass, then re-run UI integration
+- **Docs**: `docs/AGENT/SUMMARY/Pass-173J.md` (detailed blockers & future work)
+
