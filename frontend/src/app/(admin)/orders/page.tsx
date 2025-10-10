@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Item = {
   id: string;
@@ -11,6 +12,7 @@ type Item = {
 };
 
 export default function AdminOrders() {
+  const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<string>('');
@@ -19,6 +21,7 @@ export default function AdminOrders() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(20);
+  const [unauthorized, setUnauthorized] = useState(false);
 
   async function fetchList(pg = 1) {
     const params = new URLSearchParams({ page: String(pg), limit: String(limit) });
@@ -28,6 +31,13 @@ export default function AdminOrders() {
     if (to) params.set('to', to);
 
     const r = await fetch(`/api/admin/orders?${params.toString()}`, { cache: 'no-store' });
+
+    if (r.status === 401) {
+      setUnauthorized(true);
+      router.push('/login?returnUrl=/admin/orders');
+      return;
+    }
+
     const j = await r.json();
 
     setItems(j.items || []);
@@ -41,6 +51,15 @@ export default function AdminOrders() {
   }, []);
 
   const pages = Math.max(1, Math.ceil(total / limit));
+
+  if (unauthorized) {
+    return (
+      <div style={{ maxWidth: 980, margin: '24px auto', padding: '0 12px' }}>
+        <h1>Μη Εξουσιοδοτημένη Πρόσβαση</h1>
+        <p>Απαιτείται σύνδεση ως διαχειριστής. Ανακατεύθυνση...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 980, margin: '24px auto', padding: '0 12px' }}>
