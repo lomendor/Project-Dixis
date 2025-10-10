@@ -4,11 +4,25 @@ import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
+import { CheckoutSchema } from '@/lib/validation/checkout.zod';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
   try {
-    const payload = await request.json().catch(():null => null) as any;
+    const rawPayload = await request.json().catch(():null => null) as any;
+
+    // Zod validation with Greek error messages
+    let payload;
+    try {
+      payload = CheckoutSchema.parse(rawPayload);
+    } catch (e: any) {
+      const zodErrors = e?.errors || [];
+      const errors = Object.fromEntries(
+        zodErrors.map((err: any) => [err.path.join('.'), err.message])
+      );
+      return NextResponse.json({ success: false, errors }, { status: 400 });
+    }
+
     const items = Array.isArray(payload?.items) ? payload.items : [];
     if (!items.length) return NextResponse.json({ error: 'Δεν υπάρχουν είδη στο καλάθι' }, { status: 400 });
 

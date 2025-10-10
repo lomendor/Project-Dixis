@@ -928,3 +928,10 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+
+## Pass 173B — Checkout Validation (EL-first) + Server Zod (2025-10-10)
+- Server-side Zod validation in POST /api/checkout with 400 & Greek errors
+- Structured error response: { errors: { field: message } }
+- E2E tests: 4 scenarios (invalid fields, valid payload, empty cart, missing fields)
+- Zero schema changes, Zod already installed (no new deps)
+- Summary: docs/AGENT/SUMMARY/Pass-173B.md
