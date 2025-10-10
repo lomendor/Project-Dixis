@@ -938,3 +938,186 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+
+## Pass HF-19 — Next.js 15.5 async cookies() + Multiple Fixes (2025-10-09)
+- Fixed #454: async cookies API in cart/products pages
+- Fixed #458: cart context usage + Suspense boundary for useSearchParams
+- Fixed #459: removed non-existent buyerEmail field from admin API
+- Added risk-ok label to #459 for admin/orders API changes
+- All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+## Pass 171A — Admin Orders (List+Filters+Export+i18n) (2025-10-09)
+- **Admin Orders Page**: `/admin/orders` with filters (status, search query, pagination)
+- **CSV Export**: `/api/admin/orders/export` with same filters applied
+- **i18n Support**: Greek-first (EL) with English fallback
+- **UI Components**: StatusBadge (colored status badges), Filters (status dropdown + search input), OrdersTable (paginated table)
+- **E2E Test**: `tests/admin/orders/list-and-export.spec.ts` (filter + CSV export validation)
+- **Files**:
+  - `src/lib/i18n/el/admin.orders.json` (Greek translations)
+  - `src/lib/i18n/en/admin.orders.json` (English translations)
+  - `src/components/admin/orders/StatusBadge.tsx` (status badge component)
+  - `src/components/admin/orders/Filters.tsx` (filter controls)
+  - `src/components/admin/orders/OrdersTable.tsx` (orders table)
+  - `src/app/(admin)/orders/page.tsx` (main orders page with Prisma queries)
+  - `src/app/api/admin/orders/export/route.ts` (CSV export API)
+  - `tests/admin/orders/list-and-export.spec.ts` (E2E test)
+- **Technical**:
+  - Prisma queries with status + search filters (id/phone/email)
+  - CSV generation with UTF-8 encoding and proper escaping
+  - Status badges: PAID (blue), PACKING (orange), SHIPPED (purple), DELIVERED (green), CANCELLED (gray)
+  - Pagination: 20 items per page (max 100)
+- **No schema changes**, used existing Order model
+- **LOC**: ~250 (within ≤300 LOC limit)
+
+## Pass 171B — Admin Orders (Drawer + Inline Actions) (2025-10-09)
+- **OrderDrawer Component**: Right-side panel showing order details (ID, date, customer, items, total, address)
+- **StatusActions Component**: Inline status change buttons (PACKING/SHIPPED/DELIVERED/CANCELLED)
+- **OrdersTable Enhancement**: Added actions column + drawer integration on row click
+- **Optimistic UI**: Status changes update drawer state immediately with alert feedback
+- **E2E Test**: `tests/admin/orders/status-and-drawer.spec.ts` validates drawer + status change
+- **Files**:
+  - `src/components/admin/orders/OrderDrawer.tsx` (drawer component)
+  - `src/components/admin/orders/StatusActions.tsx` (inline actions)
+  - `src/components/admin/orders/OrdersTable.tsx` (updated with drawer + actions)
+  - `tests/admin/orders/status-and-drawer.spec.ts` (E2E test)
+- **Technical**:
+  - Fixed right panel (420px) with close button
+  - Async POST to existing admin status API
+  - Alert-based feedback (future: toast library)
+  - Row click opens drawer with full order context
+- **No schema changes**, uses existing admin API
+- **LOC**: ~150 (within ≤300 LOC limit)
+
+## Pass 171B.1 — Admin Orders Polish (Toast + Pagination) (2025-10-09)
+- **Toast Notifications**: Replaced alert() with lightweight toast utility (no deps)
+- **Pagination Controls**: Added Previous/Next links to OrdersTable
+- **PR #466 Hygiene**: Added Reports + Test Summary sections, retriggered CI
+- **Files**:
+  - `src/components/admin/orders/toast.tsx` (toast utility + ToastHost component)
+  - `src/components/admin/orders/StatusActions.tsx` (updated to use toast)
+  - `src/components/admin/orders/OrdersTable.tsx` (added pagination links)
+  - `src/app/(admin)/orders/page.tsx` (integrated ToastHost)
+- **Technical**:
+  - Toast: Fixed bottom-right position, 2.2s auto-dismiss, queue-based
+  - Pagination: Previous/Next links with page bounds (1 to max pages)
+  - No external dependencies
+- **LOC**: ~30 (toast utility + updates)
+
+## Pass 171C — Admin Orders Hardening (Pagination E2E + Excel-safe CSV) (2025-10-09)
+- **Excel-Safe CSV**: Added UTF-8 BOM (`\uFEFF`) for proper Greek character rendering in Excel
+- **Pagination E2E Test**: Validates Next/Prev buttons change results and maintain state
+- **CSV Content Validation**: Enhanced export test to verify BOM, headers, filtered data
+- **Files**:
+  - `src/app/api/admin/orders/export/route.ts` (added BOM for Excel compatibility)
+  - `tests/admin/orders/pagination.spec.ts` (pagination navigation E2E test)
+  - `tests/admin/orders/list-and-export.spec.ts` (enhanced with content + BOM validation)
+- **Technical**:
+  - BOM ensures Excel displays Greek characters correctly
+  - Pagination test seeds 35 orders, validates page 1→2→1 navigation
+  - CSV validation checks BOM (charCodeAt(0) === 0xFEFF), headers, filtered content
+- **No schema changes**, hardening existing functionality
+- **LOC**: ~80 (BOM + E2E tests)
+
+## Pass 172A — Shipping Engine (Feature-Flag API) + HF-171C.1 (2025-10-09)
+- **Shipping Engine**: ENV-driven quote calculation (base, COD fee, free threshold, remote surcharge)
+- **API Endpoint**: `/api/shipping/quote?method=...&subtotal=...` for future checkout integration
+- **i18n**: Greek/English translations for shipping terms (pickup, courier, courier_cod)
+- **E2E Test**: Light API validation for COURIER and COURIER_COD methods
+- **Hotfix HF-171C.1**: Fixed CSV header assertion to include `email` column
+- **Files**:
+  - `src/lib/shipping/engine.ts` (shipping cost calculation logic)
+  - `src/app/api/shipping/quote/route.ts` (API endpoint)
+  - `src/lib/i18n/el/shipping.json` (Greek translations)
+  - `src/lib/i18n/en/shipping.json` (English translations)
+  - `tests/shipping/quote.spec.ts` (E2E API validation)
+  - `.env.example` (shipping ENV variables)
+  - `tests/admin/orders/list-and-export.spec.ts` (CSV header fix)
+- **Technical**:
+  - Feature-flag driven: SHIPPING_ENABLED env variable
+  - Configurable rates: BASE_EUR, COD_FEE_EUR, FREE_THRESHOLD_EUR, REMOTE_SURCHARGE_EUR
+  - No business logic changes to checkout (safety pattern)
+  - API returns: `{ ok, method, subtotal, cost, breakdown: { base, cod, remote, promo } }`
+- **No schema changes**, API-only implementation
+- **LOC**: ~120 (engine + API + tests)
+- **Next Step**: Pass 172B will integrate shipping engine into checkout UI/totals
+
+## Pass 172B — Checkout Totals with Shipping Engine Integration (2025-10-09)
+- **Checkout API Enhancement**: Integrated shipping engine into `/api/checkout` POST endpoint
+- **Response Fields**: Added `computedShipping` and `computedTotal` to checkout API response
+- **Shipping Method Support**: Reads `shipping.method` from payload (default: COURIER)
+- **Feature-Flag Driven**: Controlled by `SHIPPING_ENABLED` env variable (defaults to 'true')
+- **Safe Implementation**: Graceful fallback if shipping computation fails (logs warning, returns order data)
+- **E2E Tests**: Three scenarios validating COURIER, COURIER_COD, and free threshold behavior
+- **Files**:
+  - `src/app/api/checkout/route.ts` (integrated shipping computation)
+  - `tests/checkout/shipping-totals.spec.ts` (E2E tests)
+  - `docs/AGENT/SUMMARY/Pass-172B.md` (documentation)
+- **Technical**:
+  - Uses `shippingQuote({ method, subtotal })` to compute shipping cost
+  - Adds shipping to order total: `computedTotal = orderTotal + computedShipping`
+  - Try/catch wrapper ensures checkout doesn't fail on shipping errors
+  - No DB schema changes (shipping not persisted in Order model)
+- **Test Coverage**:
+  - Test 1: COURIER includes only BASE shipping fee
+  - Test 2: COURIER_COD includes BASE + COD fee
+  - Test 3: Free threshold zeroes shipping when subtotal >= FREE_THRESHOLD
+- **No schema changes**, computation-only enhancement
+- **LOC**: ~90 (checkout integration + E2E tests)
+- **Next Step**: Pass 172C could add UI display of shipping costs in checkout summary
+
+## HF-172B.2 — CI Environment + Free Shipping E2E (2025-10-09)
+- **Added .env.ci**: CI-specific environment configuration with SHIPPING_* variables
+- **FREE_THRESHOLD**: Set to 50 EUR for free shipping test scenario
+- **Reinstated E2E**: Created `shipping-free-threshold.spec.ts` with proper ENV-based testing
+- **Files**:
+  - `.env.ci` (CI environment configuration)
+  - `frontend/tests/checkout/shipping-free-threshold.spec.ts` (free threshold E2E tests)
+  - `docs/AGENT/SUMMARY/Pass-172B.2.md` (documentation)
+- **Test Coverage**:
+  - Test 1: Free shipping when subtotal >= 50 EUR
+  - Test 2: Normal shipping when subtotal < 50 EUR
+- **Technical**:
+  - No runtime ENV mutation (server reads .env.ci on startup)
+  - Playwright webServer uses .env.ci via dotenv-cli
+  - Two scenarios validate free shipping threshold behavior
+- **No schema changes**, ENV configuration only
+- **LOC**: ~70 (E2E tests + .env.ci)
+
+## Pass 172C — Checkout UI Shipping Display (DEFERRED) (2025-10-09)
+- **Status**: DEFERRED - No checkout summary component exists yet
+- **Placeholder Test**: Created `shipping-ui.spec.ts` (skipped) for future UI implementation
+- **API Complete**: Pass 172B already provides `computedShipping` and `computedTotal` in API response
+- **Files**:
+  - `frontend/tests/checkout/shipping-ui.spec.ts` (placeholder test, skipped)
+  - `docs/AGENT/SUMMARY/Pass-172C.md` (documentation)
+- **Future Work**:
+  - Create checkout summary component
+  - Display "Μεταφορικά:" and "Σύνολο:" from API response
+  - Enable UI test when component exists
+- **No schema changes**, placeholder documentation only
+- **LOC**: ~20 (placeholder test + docs)
+
+## Pass 172C.real — Checkout ShippingSummary Widget (EL-first) (2025-10-09)
+- **Component Created**: `ShippingSummary.tsx` client-side widget for checkout page
+- **Display**: Shows Υποσύνολο/Μεταφορικά/Σύνολο (Greek-first UI)
+- **API Integration**: Calls `/api/shipping/quote` to get shipping cost
+- **Data Source**: Reads subtotal from `localStorage.cartSubtotal` or `?subtotal=` query param
+- **Checkout Integration**: Injected into checkout page after order summary
+- **Files**:
+  - `src/components/checkout/ShippingSummary.tsx` (created)
+  - `src/app/(storefront)/checkout/page.tsx` (modified - integrated widget)
+  - `tests/checkout/shipping-ui.spec.ts` (replaced placeholder with real tests)
+  - `docs/AGENT/SUMMARY/Pass-172C.real.md` (documentation)
+- **Test Coverage**:
+  - Test 1: UI display validation (Σύνοψη, Μεταφορικά, Σύνολο visible)
+  - Test 2: Calculation validation (shipping cost from API)
+- **Technical**:
+  - Client-side component with useEffect API call
+  - Graceful fallback if API fails (shows 0 for shipping)
+  - Feature-flag safe (uses existing /api/shipping/quote)
+  - Automatically syncs with cart changes via localStorage
+- **No schema changes**, UI enhancement only
+- **LOC**: ~130 (component + checkout integration + E2E tests)
+

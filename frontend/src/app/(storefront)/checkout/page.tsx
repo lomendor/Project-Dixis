@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import ShippingSummary from '@/components/checkout/ShippingSummary';
 
 declare global {
   interface Window {
@@ -22,6 +23,11 @@ export default function CheckoutPage() {
 
   const total = cart.reduce((sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0), 0);
   const fmt = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
+
+  useEffect(() => {
+    // Save cart subtotal to localStorage for ShippingSummary component
+    localStorage.setItem('cartSubtotal', String(total));
+  }, [total]);
 
   return (
     <main style={{ display: 'grid', gap: 12, padding: 16, maxWidth: 600 }}>
@@ -46,6 +52,8 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
+
+          <ShippingSummary />
 
           <form data-checkout-form>
             <div style={{ display: 'grid', gap: 8 }}>
