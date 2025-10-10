@@ -964,6 +964,13 @@ export default function Page() { redirect('/my/orders'); }
   - ❌ Full E2E tests (requires schema changes + UI integration)
 - **TODO**: Add `shippingMethod` field to Order schema in future pass, then re-run UI integration
 - **Docs**: `docs/AGENT/SUMMARY/Pass-173J.md` (detailed blockers & future work)
+
+## Pass 173I — Admin Order Detail (inline status + print view) + e2e (2025-10-10)
+- Admin order detail page at `/admin/orders/[id]`: customer info, status chip, inline status update
+- Inline status change: dropdown + "Ενημέρωση" button → POST `/api/admin/orders/[id]/status`
+- Print-friendly view: CSS-only (hides buttons/links with @media print)
+- E2E tests: admin views detail, changes status, print button present
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-173I.md
 ## Pass CI-SYNC-01 — Prisma Schema Parity Fix (2025-10-10) ✅
 **Date**: 2025-10-10
 **PR**: #486

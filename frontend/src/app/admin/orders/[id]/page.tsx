@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
+import PrintButton from '@/components/PrintButton';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -91,7 +92,12 @@ export default async function AdminOrderDetailPage({
         >
           ← Πίσω στη λίστα
         </Link>
-        <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
+          <div className="no-print flex gap-2">
+            <PrintButton />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
