@@ -1,3 +1,40 @@
+## Pass 173D — Order Confirmation Page + Resend Email ✅
+- **Order Confirmation Page**: Created `/order/[id]` with Greek-first UI
+  - Server component with Prisma order fetch
+  - Displays: order ID, status, items table, shipping details, totals
+  - Server action for resend email button
+  - 404 handling via Next.js `notFound()`
+
+- **Resend Email API**: Created POST `/api/orders/[id]/resend`
+  - Log-only mode when SMTP not configured (checks `process.env.SMTP_HOST` + `SMTP_USER`)
+  - Returns 200 with `{ success, message, mode }` on success
+  - Returns 404 for non-existent orders
+  - Console logs resend attempts with timestamp
+
+- **Checkout Integration**: Modified checkout page redirect
+  - Changed: `/checkout/confirm/[id]` → `/order/[id]`
+  - Flow: Checkout success → clear cart → redirect to order confirmation
+
+- **E2E Tests**: Created `tests/order/order-confirmation.spec.ts`
+  - Test 1: Full checkout flow redirects to confirmation with correct totals
+  - Test 2: Resend email button calls API and returns 200
+  - Test 3: Non-existent order shows 404
+
+### Technical Notes
+- **Zero DB changes**: Uses existing Order + OrderItem schema
+- **Server component**: Dynamic page generation for SEO
+- **Greek status labels**: PENDING → "Εκκρεμής", etc.
+- **Progressive enhancement**: Works without JavaScript (server action)
+- **LOC**: ~180 (page ~145, API ~35, tests ~90, docs)
+
+### Files Created
+- `frontend/src/app/(storefront)/order/[id]/page.tsx`
+- `frontend/src/app/api/orders/[id]/resend/route.ts`
+- `frontend/tests/order/order-confirmation.spec.ts`
+- `docs/AGENT/SUMMARY/Pass-173D.md`
+
+### Files Modified
+- `frontend/src/app/(storefront)/checkout/page.tsx` (1 line: redirect URL)
 
 ## Pass 111 — PostgreSQL CI/CD consolidation ✅
 - **Database Provider**: Already using PostgreSQL in Prisma schema (provider = "postgresql")
