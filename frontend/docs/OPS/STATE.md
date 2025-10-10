@@ -928,3 +928,10 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+
+## Pass 173A — Storefront Checkout UX (EL-first) + Validation (2025-10-10)
+- Greek-first i18n labels for checkout (el/checkout.json, en/checkout.json)
+- Lightweight validation utils: isGRPhone, isPostal5, isEmail (no external deps)
+- E2E tests: 4 scenarios (Greek labels, valid data, order summary, empty cart)
+- Zero schema changes, zero new dependencies
+- Summary: docs/AGENT/SUMMARY/Pass-173A.md
