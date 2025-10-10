@@ -1,0 +1,20 @@
+{
+  "title": "Checkout",
+  "name": "Full name",
+  "phone": "Phone",
+  "address": "Address",
+  "city": "City",
+  "postal": "Postal code",
+  "email": "Email",
+  "errors": {
+    "name": "Enter your full name",
+    "phone": "Valid phone (+30...)",
+    "postal": "Valid 5-digit postal code",
+    "email": "Valid email"
+  },
+  "summary": {
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total"
+  }
+}

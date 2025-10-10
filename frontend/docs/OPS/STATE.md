@@ -938,3 +938,20 @@ export default function Page() { redirect('/my/orders'); }
 - HF-16.3: Make Danger step non-blocking in PR Hygiene Check to unblock merge when all required checks pass ✅
 - HF-16.4: Skip advisory workflows (PR Hygiene, Smoke) for ai-pass PRs to avoid non-required failures blocking merge ✅
 - AG-MEM-HEALTH: Verified/seeded Agent Docs structure + Boot Prompt + scanners (routes/db-schema) ✅
+
+
+## Pass HF-19 — Next.js 15.5 async cookies() + Multiple Fixes (2025-10-09)
+- Fixed #454: async cookies API in cart/products pages
+- Fixed #458: cart context usage + Suspense boundary for useSearchParams
+- Fixed #459: removed non-existent buyerEmail field from admin API
+- Added risk-ok label to #459 for admin/orders API changes
+- All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+
+## Pass 173A — Storefront Checkout UX (EL-first) + Validation (2025-10-10)
+- Greek-first i18n labels for checkout (el/checkout.json, en/checkout.json)
+- Lightweight validation utils: isGRPhone, isPostal5, isEmail (no external deps)
+- E2E tests: 4 scenarios (Greek labels, valid data, order summary, empty cart)
+- Zero schema changes, zero new dependencies
+- Summary: docs/AGENT/SUMMARY/Pass-173A.md
