@@ -928,3 +928,43 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+## Pass 173M — Public Order Tracking (tokenized) ✅ (2025-10-10)
+**Goal**: Enable customers to track their orders publicly via secure token (no PII exposure)
+
+**Schema Changes** (non-breaking):
+- ✅ Added `Order.publicToken String @unique @default(uuid())` to Prisma schema
+- ✅ Created migration: `20251010000000_add_order_public_token`
+- ✅ Updated Prisma client generation
+
+**API Implementation**:
+- ✅ Created GET `/api/orders/track/[token]` endpoint (public, no auth required)
+- ✅ Returns: id, status, total, shippingMethod, computedShipping, items (title/qty/price only)
+- ✅ NO PII exposure: excludes buyerPhone, buyerName, shipping address, email
+
+**UI Implementation**:
+- ✅ Created `/orders/track/[token]` page with Greek-first labels
+- ✅ Displays: Κατάσταση, Μεταφορικά (Μέθοδος + Κόστος), Προϊόντα, Σύνολο
+- ✅ Error handling for invalid tokens (404 + user-friendly message)
+- ✅ Loading states with spinner
+
+**Email Integration**:
+- ✅ Updated `orderConfirmation.ts` template to include publicToken parameter
+- ✅ Updated checkout route to pass publicToken to email template
+- ✅ Tracking link format: `{SITE_URL}/orders/track/{publicToken}`
+- ✅ Styled tracking button (green, padded, rounded) in email
+
+**E2E Tests** (comprehensive):
+- ✅ Test: Checkout creates order with publicToken → track API returns data (no PII)
+- ✅ Test: Track page shows status, shipping method, and cost
+- ✅ Test: Invalid token returns 404 with error message
+- ✅ Test: Track page displays Greek labels for all shipping methods
+- ✅ Test: Free shipping threshold (≥€25) displays €0.00 on track page
+
+**Technical Notes**:
+- Public tracking uses UUID token (not order ID) for security
+- No authentication required (public endpoint)
+- Greek status labels: Εκκρεμής, Επιβεβαιωμένη, Σε αποστολή, Παραδόθηκε, Ακυρώθηκε
+- Greek shipping labels: Παραλαβή από κατάστημα, Παράδοση με κούριερ, Αντικαταβολή
+- Migration is non-breaking (uses @default(uuid()))
+- All existing orders will get publicToken on next access (automatic backfill)
+
