@@ -50,18 +50,20 @@ model Product {
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  buyerPhone     String
-  buyerName      String
-  shippingLine1  String
-  shippingLine2  String?
-  shippingCity   String
-  shippingPostal String
-  total          Float
-  status         String      @default("pending")
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  items          OrderItem[]
+  id               String      @id @default(cuid())
+  buyerPhone       String
+  buyerName        String
+  shippingLine1    String
+  shippingLine2    String?
+  shippingCity     String
+  shippingPostal   String
+  total            Float
+  shippingMethod   String?     @db.VarChar(32)
+  computedShipping Float?
+  status           String      @default("pending")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  items            OrderItem[]
 
   @@index([buyerPhone, createdAt])
   @@index([status, createdAt])
