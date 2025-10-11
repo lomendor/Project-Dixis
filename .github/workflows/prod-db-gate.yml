@@ -1,0 +1,26 @@
+name: Prod DB Gate (PostgreSQL provider)
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'frontend/prisma/schema.prisma'
+      - '.github/workflows/prod-db-gate.yml'
+      - 'scripts/ci/assert-pg-provider.ts'
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend/prisma/schema.prisma'
+      - '.github/workflows/prod-db-gate.yml'
+      - 'scripts/ci/assert-pg-provider.ts'
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: tsx scripts/ci/assert-pg-provider.ts
+      - run: npx tsx scripts/ci/assert-pg-provider.ts
