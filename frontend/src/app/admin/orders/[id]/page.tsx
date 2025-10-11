@@ -5,9 +5,30 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
 import PrintButton from '@/components/PrintButton';
+import { labelFor, costFor } from '@/lib/shipping/format';
+import { fmtEUR } from '@/lib/cart/totals';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
+
+
+const ShippingPanel: React.FC<{ order: any }> = ({ order }) => {
+  const method = order?.shippingMethod || order?.deliveryMethod || 'HOME';
+  const label = labelFor(method);
+  const cost = typeof order?.shippingCost === 'number' 
+    ? Number(order.shippingCost) 
+    : costFor(method, order?.total || 0);
+  
+  return (
+    <div className="mt-4 rounded border p-3 bg-gray-50" data-testid="admin-order-shipping">
+      <div className="text-sm text-gray-600 mb-1">Τρόπος αποστολής</div>
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{label}</span>
+        <span className="tabular-nums text-green-700">{fmtEUR(cost)}</span>
+      </div>
+    </div>
+  );
+};
 
 const transitions: Record<string, string[]> = {
   PENDING: ['PACKING', 'CANCELLED'],
