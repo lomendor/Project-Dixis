@@ -955,6 +955,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 179E: Status emails with deep links to /track/[token] + e2e validation ✅
 - Pass 179S: UX polish for /track/[token] — loading + error boundary ✅
 - Pass 179R: Legacy redirect /orders/track/[token] → /track/[token] + e2e ✅
+- Pass 180T: Tracking Timeline UI — visual order flow (PAID → PACKING → SHIPPED → DELIVERED) + Greek labels ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -1015,3 +1016,33 @@ export default function Page() { redirect('/my/orders'); }
 - Backward compatibility for emails sent with old URL format
 - Users experience seamless redirect (no broken links)
 - Clean migration path from `/orders/track/` to `/track/`
+
+## Pass 180T — Tracking Timeline UI (2025-10-12)
+**Goal**: Add visual timeline showing order progress flow on public tracking page
+
+**Changes**:
+- ✅ Created `lib/tracking/status.ts`: OrderStatus types, status labels (EL-first), normalization + helper functions
+- ✅ Created Timeline component at `app/track/[token]/components/Timeline.tsx`: Visual flow PAID → PACKING → SHIPPED → DELIVERED
+- ✅ Integrated Timeline into `/track/[token]/page.tsx`: Shows visual progress above order details
+- ✅ Created e2e test `tests/tracking/timeline-ui.spec.ts`: Validates Greek labels and timeline rendering
+
+**Technical Details**:
+- **Visual Design**: Circular nodes with connecting lines, green for completed steps, gray for pending
+- **Greek Labels**: EL_LABEL mapping - Πληρωμή, Συσκευασία, Απεστάλη, Παραδόθηκε, Ακυρώθηκε
+- **Status Flow**: Linear progression PAID → PACKING → SHIPPED → DELIVERED
+- **Cancelled Orders**: Special red alert box below timeline instead of progress flow
+- **Client Component**: Timeline uses 'use client' for proper rendering with visual styling
+- **No Business Logic Changes**: Purely presentational enhancement, uses existing status data
+
+**Implementation Notes**:
+- `normalizeStatus()`: Safely converts DB status strings to typed OrderStatus
+- `getStatusIndex()`: Returns position in STATUS_ORDER array for progress calculation
+- Current status shows bold label with checkmark icon in completed green nodes
+- Responsive design with flex layout, proper spacing, and accessibility considerations
+
+**Impact**:
+- Users see clear visual representation of order progress
+- Better UX understanding of "where is my order"
+- Greek-first labels maintain local market focus
+- No database or API changes required
+- Complements existing text-based status display

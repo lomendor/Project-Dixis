@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { statusLabel } from '@/lib/tracking/labels'
+import { normalizeStatus } from '@/lib/tracking/status'
+import Timeline from './components/Timeline'
 
 export const metadata = {
   title: 'Παρακολούθηση παραγγελίας — Dixis',
@@ -23,10 +25,15 @@ export default async function TrackPage({ params }:{ params:{ token:string } }){
     )
   }
   const o = data.order
+  const currentStatus = normalizeStatus(o.status)
+
   return (
     <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
       <h1>Παρακολούθηση παραγγελίας</h1>
-      <section style={{padding:'12px 0'}}>
+
+      <Timeline currentStatus={currentStatus} />
+
+      <section style={{padding:'12px 0', marginTop:'20px'}}>
         <div><b>Κωδικός:</b> {params.token}</div>
         <div><b>Κατάσταση:</b> {statusLabel(o.status)}</div>
         {typeof o.total === 'number' ? <div><b>Σύνολο:</b> {new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(o.total)}</div> : null}
