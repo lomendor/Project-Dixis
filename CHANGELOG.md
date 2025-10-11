@@ -1,87 +1,46 @@
 # Changelog
 
-All notable changes to Project Dixis will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [0.2.0] - 2025-10-06
+## v0.3.0-alpha — 2025-10-11
 
 ### Highlights
-- **Orders MVP**: Atomic checkout guard, producer orders inbox with status flow (PENDING→ACCEPTED→FULFILLED)
-- **Public Catalog**: /products list with search/filters, /product/[id] detail pages  
-- **/my/products CRUD**: Full producer product management (EL-first, server actions, Zod validation)
-- **CI Hardening**: Artifacts preservation, lint/typecheck workflows, PostgreSQL adoption
-- **Database**: PostgreSQL with Prisma, atomic stock guards, oversell protection (409)
+- DB hardening: unique `publicToken` + backfill + dev e2e (Pass 178A)
+- Quick Wins: PR template, totals/taxes helper + tests, /api/dev/health + x-request-id (Pass 178Q)
+- Public order tracking via token (Pass 173M)
+- Status emails with tracking links + publicToken backfill
+- Shipping normalization + workflow improvements
+- CI labeler format fixes + schema-parity enhancements
 
-### Added
-- Producer orders inbox at /my/orders with status tabs (PENDING/ACCEPTED/REJECTED/FULFILLED)
-- Server actions for order status transitions with validation
-- Public product catalog at /products with search, category, and region filters
-- Product detail pages at /product/[id] with add-to-cart functionality
-- Product snapshots (titleSnap, priceSnap) in OrderItem for historical tracking
-- Atomic stock decrement with updateMany guard to prevent oversell race conditions
-- 409 Conflict response for oversell scenarios with Greek error messages
-- PostgreSQL database with comprehensive migrations
-- Prisma schema enhancements for Orders, OrderItems, and Products
-- Playwright E2E tests for orders flow and public catalog
-- Producer path redirects (/producer/orders → /my/orders, /producer/products → /my/products)
+### Changes
+* db: harden Order.publicToken (unique) + backfill + dev e2e checks (Pass 178A) (#495) (3849a3e)
+* feat: Quick Wins — PR template; totals/taxes helper + tests; dev health + requestId (Pass 178Q) (#494) (0d41049)
+* supersede: #484 — feat(tracking): Public order tracking via token (Pass 173M)... (#491) (804e951)
+* ci: fix labeler format + remove schema-parity lockfile dependency (Pass 177J) (#493) (cb0cf13)
+* supersede: #485 — feat(tracking): Status emails link + publicToken backfill (P... (#492) (d2c4130)
+* supersede: #483 — fix(shipping): normalize aliases→canonical + persist canonic... (#490) (1559701)
+* supersede: #482 — Orders API + UI shipping display (rebased on main) (#489) (d65da8d)
+* feat(admin): add shipping info panel to order details (label+cost) (#488) (a22000a)
+* feat(shipping): Infrastructure for shipping transparency (Pass 173J - PARTIAL) (#480) (6612034)
+* feat: Quick-Wins Triad — PR hygiene + Totals/Taxes + Observability (Pass 174Q) (#487) (685b65b)
+* chore(admin): Finalize Pass 173I — Print button + global print CSS (no schema) (#479) (af5c7eb)
+* ci: fix Prisma schema parity (schema.ci.prisma ↔ schema.prisma) (#486) (62ccfc1)
+* feat(admin): Orders dashboard (list+detail+status) + e2e (Pass 170) (#459) (45d72f9)
+* ci(playwright): Stabilize CI with SQLite + .env.ci (Pass CI-01) (#462) (6e4791e)
+* ops(guardrails): apply audit deltas — policy-gate, labeler, codeql, postgres e2e, required checks (Pass 166b) (#451) (3b27010)
+* feat(storefront): wire cart to atomic checkout UI + cart count + e2e (Pass 154) (#439) (7ba14a1)
+* feat(storefront): catalog + cart v1 + e2e (Pass 153) (#438) (766a57f)
+* ops(checkout): rewire emails after atomic checkout + e2e (Pass 152) (#437) (271503c)
+* sec(checkout): atomic stock lock + server price + e2e (Pass 151) (#436) (b0817db)
+* feat(admin): dashboard v0 (KPIs + latest orders + low-stock) + e2e (Pass 150) (#435) (c14d075)
+* sec(admin): restore guards on /admin/** + e2e (Pass 149) (#434) (4447003)
+* feat(inventory): admin products list + low-stock alerts + e2e (Pass 148) (#433) (f321f7f)
+* ops/mail: reconcile templates + tracking links (email/confirm/admin) + e2e (Pass 147) (#432) (4ec175c)
+* feat(tracking): public order lookup/track + e2e (Pass 146) (#431) (30d4d1e)
+* feat(admin): orders dashboard + status transitions + e2e (Pass 130) (#415) (0eadc5d)
+* feat(checkout): shipping calc + COD payment abstraction + quote API + e2e (Pass 129) (#414) (54db6be)
+* docs(agent): fix scanners with repo root detection + regenerate (Pass AG1.2) (#413) (4a4cd4b)
+* docs(agent): Add generated routes/schema + update STATE.md (Pass AG1) (#412) (03ed68f)
+* docs(agent): Add generated routes/schema + update STATE.md (Pass AG1) (#411) (2f38d06)
+* ops(agent): Agent Docs system + scanners (.mjs) + generated routes/schema (Pass AG1) (#410) (044d447)
 
-### Changed
-- OrderItem status normalized to uppercase 'PENDING' for UI consistency
-- Tests moved to canonical location under frontend/tests/
-- CI workflows enhanced with artifact preservation
-- Database provider switched from SQLite to PostgreSQL
+_Auto-generated from commit history._
 
-### Technical
-- **Pass 110.x**: CI/CD infrastructure, Playwright config, docs enforcement
-- **Pass 111.x**: PostgreSQL setup with migrations and seeding
-- **Pass 112.x**: Database hardening with atomic stock guards, oversell protection
-- **Pass 113.x**: Products CRUD with Zod validation, public catalog implementation  
-- **Pass 114.x**: Orders MVP, status flow, release preparation
-
-## [Unreleased]
-
-## [0.1.3] - 2025-08-26
-
-### Added
-- **Comprehensive E2E testing with Playwright** covering complete user journeys
-- **Enhanced UI polish** with dedicated loading, error, and empty state components
-- **Better user feedback** with toast notifications replacing basic alerts
-- **Test data attributes** throughout frontend for reliable E2E testing
-- **CHANGELOG.md** with complete project history and semantic versioning
-- **DEPLOYMENT.md** with comprehensive deployment guide for all environments
-
-### Changed
-- Improved cart success/error feedback from alerts to elegant toast notifications
-- Enhanced empty states with contextual messaging and clear user actions
-- Better loading states with descriptive text and consistent styling
-- Upgraded error handling with retry functionality and professional styling
-
-### Technical
-- **Playwright configuration** with multi-browser support (Chromium, Firefox, WebKit)
-- **CI pipeline enhancement** with E2E tests running on dual server setup
-- **Test coverage** for complete user journey: catalog → product → login → cart → checkout → success
-- **GitHub Actions** artifact collection for test results and reports
-- **Release hygiene** with proper semantic versioning and comprehensive documentation
-
-## [0.1.2] - 2025-08-26
-
-### Fixed
-- Force-dynamic and no-store caching for products and featured endpoints
-- Fixed toFixed precision errors in cart calculations
-
-### Changed
-- Updated cart UX to reduce user confusion
-- Added testids for better button disambiguation
-
-## [0.1.1] - 2025-08-26
-
-### Added
-- Complete VPS deployment pipeline
-- Context engineering for production readiness
-- All staging validation checks
-
-### Fixed
-- Production environment variables
-- Database connection handling
