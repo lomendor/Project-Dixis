@@ -1,0 +1,45 @@
+name: PR Reports (auto-fill)
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure gh
+        uses: cli/cli-action@v2
+      - name: Build Reports section if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -e
+          BODY=$(gh pr view $PR_NUMBER --repo "$REPO" --json body -q .body || echo "")
+          # αν έχει "## Reports", άστο
+          echo "$BODY" | grep -q "## Reports" && { echo "Reports already present. Skipping."; exit 0; }
+
+          CODEMAP="https://${{ github.server_url##https://github.com }}/$REPO/blob/main/docs/AGENT/SYSTEM/routes.md"
+          TEST_REPORT="https://${{ github.server_url##https://github.com }}/$REPO/actions?query=workflow%3A%22CI+%2F+build-and-test%22+event%3Apull_request"
+          RISKS_NEXT="https://${{ github.server_url ##https://github.com }}/$REPO/blob/main/frontend/docs/OPS/STATE.md"
+
+          TEST_SUMMARY="Tests triggered. Δείτε CI run: $RUN_URL"
+
+          cat > /tmp/reports_add.md <<MD
+
+## Test Summary
+$TEST_SUMMARY
+
+## Reports
+- CODEMAP: $CODEMAP
+- TEST-REPORT: $TEST_REPORT
+- RISKS-NEXT: $RISKS_NEXT
+MD
+          printf "%s\n\n%s\n" "$BODY" "$(cat /tmp/reports_add.md)" > /tmp/new_body.md
+          gh pr edit $PR_NUMBER --repo "$REPO" --body-file /tmp/new_body.md
+          echo "Reports appended."
