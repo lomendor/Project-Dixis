@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
+import PrintButton from '@/components/PrintButton';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };

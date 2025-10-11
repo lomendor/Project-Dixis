@@ -948,4 +948,3 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
-- Pass 173L: Orders GET API returns shipping fields + confirmation/admin UI shows label/cost + comprehensive e2e tests
