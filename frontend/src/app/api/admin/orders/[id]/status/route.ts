@@ -69,7 +69,8 @@ export async function POST(
       where: { id: updated.id },
       select: {
         id: true,
-        status: true
+        status: true,
+        publicToken: true
       }
     }).catch((): null => null);
 
@@ -88,14 +89,14 @@ export async function POST(
       // Email will be sent when email field is added
       const customerEmail = process.env.DEV_MAIL_TO; // Send to dev for testing
 
-      if (customerEmail) {
+      if (customerEmail && fresh) {
         await sendMailSafe({
           to: customerEmail,
           subject: orderStatusTpl.subject(updated.id, to),
           html: orderStatusTpl.html({
             id: updated.id,
             status: to,
-            publicToken: ''  // publicToken not in schema, future enhancement
+            publicToken: fresh.publicToken || ''
           })
         });
         console.log(`[admin] Status email sent to ${customerEmail}`);

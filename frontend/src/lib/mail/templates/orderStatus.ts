@@ -18,7 +18,7 @@ export function html(params: {
 
   const statusLabel = statusLabels[params.status.toUpperCase()] || params.status;
   const base = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001').replace(/\/$/, '');
-  const trackLink = params.publicToken ? `${base}/orders/track/${params.publicToken}` : '';
+  const trackLink = params.publicToken ? `${base}/track/${params.publicToken}` : '';
 
   return `<div style="font-family:system-ui,Arial,sans-serif">
     <h2>Ενημέρωση Παραγγελίας</h2>

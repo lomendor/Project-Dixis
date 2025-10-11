@@ -952,3 +952,25 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 178A: Hardening shipping/tracking — @@unique(publicToken), backfill, dev endpoints, e2e checks
 - Release v0.3.0-alpha prepared (CHANGELOG)
 - Pass 179T: Public tracking page (/track/[token]) + read-only API + e2e smoke + noindex
+- Pass 179E: Status emails with deep links to /track/[token] + e2e validation ✅
+
+## Pass 179E — Status Email Tracking Links (2025-10-11)
+**Goal**: Add deep links to public order tracking page in status change emails
+
+**Changes**:
+- ✅ Updated `orderStatus.ts` email template: Fixed tracking URL from `/orders/track/` → `/track/`
+- ✅ Patched `[id]/status/route.ts`: Now passes `publicToken` from order to email template
+- ✅ Created e2e test `tests/emails/status-email-link.spec.ts`: Validates email HTML contains tracking link
+- ✅ Verified `.env.example` has `NEXT_PUBLIC_SITE_URL` (already present at line 8)
+
+**Technical Details**:
+- Email template uses `NEXT_PUBLIC_SITE_URL` with fallback to `http://localhost:3001`
+- CTA button with Greek label "Παρακολούθηση παραγγελίας"
+- Tracking link only shown if `publicToken` exists (conditional rendering)
+- Status route fetches `publicToken` alongside order data for email
+
+**Impact**:
+- Users receive clickable tracking links in status emails
+- Links direct to public `/track/[token]` page (Pass 179T)
+- No authentication required for tracking
+- Safer than including full order details in email
