@@ -954,6 +954,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 179T: Public tracking page (/track/[token]) + read-only API + e2e smoke + noindex
 - Pass 179E: Status emails with deep links to /track/[token] + e2e validation ✅
 - Pass 179S: UX polish for /track/[token] — loading + error boundary ✅
+- Pass 179G: Prod-DB Safety Gate — fail PRs to main if schema.prisma provider != postgresql ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -994,3 +995,22 @@ export default function Page() { redirect('/my/orders'); }
 - Better perceived performance with loading states
 - Graceful error handling with user-friendly messaging
 - Improved accessibility with proper ARIA labels
+
+## Pass 179G — Prod-DB Safety Gate (2025-10-11)
+**Goal**: Prevent accidental SQLite provider in production paths (main branch)
+
+**Changes**:
+- ✅ Created `scripts/ci/assert-pg-provider.ts`: Validates schema provider is postgresql
+- ✅ Created `.github/workflows/prod-db-gate.yml`: CI workflow for PR/push to main
+- ✅ Triggers on schema.prisma changes or workflow file changes
+
+**Technical Details**:
+- Parses frontend/prisma/schema.prisma for `provider = "..."` statement
+- Fails with clear error message if provider != "postgresql"
+- Runs on: PRs to main + pushes to main
+- Uses Node.js 20 + npx tsx for TypeScript execution
+
+**Impact**:
+- Prevents accidental SQLite commits reaching production (main branch)
+- Clear failure message guides developers to fix provider
+- Automated safety net for database provider consistency
