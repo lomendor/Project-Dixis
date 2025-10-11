@@ -13,8 +13,6 @@ export async function GET(_req: Request, ctx: { params: { token: string } }) {
       status: true,
       createdAt: true,
       updatedAt: true,
-      shippingMethod: true,
-      computedShipping: true,
       total: true
     }
   })
