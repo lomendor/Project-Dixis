@@ -949,3 +949,4 @@ export default function Page() { redirect('/my/orders'); }
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
 - Pass 178Q: PR template; totals/taxes helper + tests; /api/dev/health + x-request-id
+- Pass 178A: Hardening shipping/tracking — @@unique(publicToken), backfill, dev endpoints, e2e checks
