@@ -60,12 +60,11 @@ export async function POST(request: NextRequest) {
       const total = subtotal + computedShipping;
 
       // Δημιουργία παραγγελίας + items (snapshots)
+      // Note: shippingMethod & computedShipping not in schema, total includes shipping
       const order = await tx.order.create({
         data: {
           status: 'PENDING',
           total,
-          shippingMethod,
-          computedShipping,
           buyerName: String(payload?.shipping?.name || ''),
           buyerPhone: String(payload?.shipping?.phone || ''),
           shippingLine1: String(payload?.shipping?.line1 || ''),
