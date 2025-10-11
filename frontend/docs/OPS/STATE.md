@@ -956,6 +956,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 179S: UX polish for /track/[token] — loading + error boundary ✅
 - Pass 179R: Legacy redirect /orders/track/[token] → /track/[token] + e2e ✅
 - Pass 180T: Tracking Timeline UI — visual order flow (PAID → PACKING → SHIPPED → DELIVERED) + Greek labels ✅
+- Pass 180T.F: Invalid-token UX + A11Y polish (role/aria-current/alert) ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -1046,3 +1047,32 @@ export default function Page() { redirect('/my/orders'); }
 - Greek-first labels maintain local market focus
 - No database or API changes required
 - Complements existing text-based status display
+
+## Pass 180T.F — Invalid-Token UX + A11Y Polish (2025-10-12)
+**Goal**: Improve accessibility and user experience for invalid tokens on tracking page
+
+**Changes**:
+- ✅ Added A11Y roles to Timeline: `<ol role="list">`, `<li role="listitem">`, `aria-current="step"`
+- ✅ Added `role="alert"` to cancelled status indicator in Timeline
+- ✅ Enhanced invalid-token UX: Friendly Greek error message with `role="alert"`
+- ✅ Created e2e test `tests/tracking/invalid-token.spec.ts`: Validates error message for invalid tokens
+
+**Technical Details**:
+- **Timeline A11Y**: Semantic list structure with ARIA roles for screen readers
+- **Current Step**: `aria-current="step"` marks active order status in timeline
+- **Alert Roles**: Important messages (cancelled, invalid token) use `role="alert"` for immediate announcement
+- **Invalid Token Message**: "Μη έγκυρο token. Δεν βρέθηκε παραγγελία. Ελέγξτε το link στο email ή επικοινωνήστε μαζί μας."
+- **Visual Styling**: Red alert box (#fff4f4 background, #f5c2c7 border) for error state
+
+**Implementation Notes**:
+- Changed Timeline from `<div>` to semantic `<ol>` with proper list item roles
+- `aria-current` dynamically set only on current status step
+- Error message provides actionable guidance (check email link, contact support)
+- No business logic changes - purely UX/A11Y enhancement
+
+**Impact**:
+- Better screen reader support for visually impaired users
+- Clear error messaging for invalid/expired tracking links
+- WCAG compliance improvements
+- More helpful UX when users have token issues
+- Maintains Greek-first approach with accessible patterns

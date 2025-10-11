@@ -16,11 +16,13 @@ async function getData(token:string){
 
 export default async function TrackPage({ params }:{ params:{ token:string } }){
   const data = await getData(params.token)
-  if(!data?.ok){
+  if(!data?.ok || !data?.order){
     return (
       <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
         <h1>Παρακολούθηση παραγγελίας</h1>
-        <p>Δεν βρέθηκε παραγγελία για το συγκεκριμένο token.</p>
+        <div role="alert" style={{background:'#fff4f4', border:'1px solid #f5c2c7', padding:12, borderRadius:8, marginTop:12}}>
+          <b>Μη έγκυρο token.</b> Δεν βρέθηκε παραγγελία. Ελέγξτε το link στο email ή επικοινωνήστε μαζί μας.
+        </div>
       </main>
     )
   }
