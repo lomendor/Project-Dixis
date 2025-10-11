@@ -11,13 +11,13 @@ export default function Timeline({ currentStatus }: TimelineProps) {
 
   return (
     <div style={{ padding: '20px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+      <ol role="list" style={{ display: 'flex', alignItems: 'center', position: 'relative', listStyle: 'none', margin: 0, padding: 0 }}>
         {STATUS_ORDER.map((status, idx) => {
           const isCompleted = !isCancelled && idx <= currentIdx
           const isCurrent = status === currentStatus && !isCancelled
 
           return (
-            <div key={status} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <li key={status} role="listitem" aria-current={isCurrent ? "step" : undefined} style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               {/* Connecting line */}
               {idx < STATUS_ORDER.length - 1 && (
                 <div style={{
@@ -62,14 +62,14 @@ export default function Timeline({ currentStatus }: TimelineProps) {
               }}>
                 {EL_LABEL[status]}
               </div>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ol>
 
       {/* Cancelled status indicator */}
       {isCancelled && (
-        <div style={{
+        <div role="alert" style={{
           marginTop: '20px',
           padding: '12px',
           backgroundColor: '#fef2f2',
