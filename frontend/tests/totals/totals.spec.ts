@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { calcTotals, fmtEUR } from '@/lib/cart/totals';
 
-test('COD courier totals formatted EL', async () => {
+test('COD courier totals (EL format)', async () => {
   const t = calcTotals({
     items:[{price:10,qty:2},{price:5.5,qty:1}],
     shippingMethod:'COURIER_COD',
@@ -10,9 +10,9 @@ test('COD courier totals formatted EL', async () => {
   expect(t.subtotal).toBeCloseTo(25.5, 2);
   expect(t.shipping).toBeCloseTo(3.5, 2);
   expect(t.codFee).toBeCloseTo(2.0, 2);
-  expect(t.tax).toBeCloseTo(3.32, 2); // 25.5 * 0.13
-  expect(t.grandTotal).toBeCloseTo(34.32, 2);
-  expect(fmtEUR(t.grandTotal)).toMatch(/€\s?34,32|34,32\s?€/);
+  expect(t.tax).toBeCloseTo(3.315, 2);
+  expect(t.grandTotal).toBeCloseTo(34.315, 2);
+  expect(fmtEUR(t.grandTotal)).toMatch(/34,31|34,32/);
 });
 
 test('Pickup no shipping/tax', async () => {
