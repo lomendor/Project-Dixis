@@ -20,8 +20,6 @@ export async function GET(
         shippingLine2: true,
         shippingCity: true,
         shippingPostal: true,
-        shippingMethod: true,
-        computedShipping: true,
         createdAt: true,
         updatedAt: true,
         items: {
@@ -47,8 +45,6 @@ export async function GET(
       id: order.id,
       status: order.status,
       total: Number(order.total || 0),
-      shippingMethod: order.shippingMethod ?? null,
-      computedShipping: Number(order.computedShipping ?? 0),
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
       shipping: {

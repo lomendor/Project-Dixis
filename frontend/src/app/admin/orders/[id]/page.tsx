@@ -4,29 +4,9 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
-import { labelFor } from '@/lib/shipping/format';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
-
-
-const ShippingPanel: React.FC<{ order: any }> = ({ order }) => {
-  const method = order?.shippingMethod || order?.deliveryMethod || 'HOME';
-  const label = labelFor(method);
-  const cost = typeof order?.shippingCost === 'number' 
-    ? Number(order.shippingCost) 
-    : costFor(method, order?.total || 0);
-  
-  return (
-    <div className="mt-4 rounded border p-3 bg-gray-50" data-testid="admin-order-shipping">
-      <div className="text-sm text-gray-600 mb-1">Τρόπος αποστολής</div>
-      <div className="flex items-center justify-between">
-        <span className="font-medium">{label}</span>
-        <span className="tabular-nums text-green-700">{fmtEUR(cost)}</span>
-      </div>
-    </div>
-  );
-};
 
 const transitions: Record<string, string[]> = {
   PENDING: ['PACKING', 'CANCELLED'],
@@ -113,9 +93,6 @@ export default async function AdminOrderDetailPage({
         </Link>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
-          <div className="no-print flex gap-2">
-            <PrintButton />
-          </div>
         </div>
       </div>
 
@@ -193,17 +170,6 @@ export default async function AdminOrderDetailPage({
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
-              {/* Shipping Method & Cost */}
-              {order.shippingMethod && (
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Μεταφορικά (<span data-testid="admin-order-shipping">{labelFor(order.shippingMethod)}</span>):
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    €{Number(order.computedShipping || 0).toFixed(2)}
-                  </span>
-                </div>
-              )}
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold">Σύνολο:</span>
                 <span className="text-xl font-bold text-green-600">
