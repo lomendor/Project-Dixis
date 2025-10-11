@@ -4,34 +4,28 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { labelFor } from '@/lib/shipping/format';
 
 interface Order {
   id: string;
-  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered';
+  status: string;
   createdAt: string;
   total: number;
-  currency: string;
+  shippingMethod?: string | null;
+  computedShipping?: number;
   items: Array<{
     id: number;
     name: string;
     price: number;
     quantity: number;
   }>;
-  shippingAddress: {
+  shipping: {
     name: string;
     line1: string;
+    line2?: string;
     city: string;
-    postalCode: string;
-    country: string;
+    postal: string;
     phone?: string;
-  };
-  shipment?: {
-    id: string;
-    status: 'pending' | 'processing' | 'shipped' | 'delivered';
-    trackingNumber?: string;
-    estimatedDelivery?: string;
-    shippingCost: number;
-    carrier: string;
   };
 }
 
@@ -62,45 +56,15 @@ export default function OrderConfirmationPage() {
       setLoading(true);
       setError('');
 
-      // Mock order data for development
-      const mockOrder: Order = {
-        id: orderId,
-        status: 'paid',
-        createdAt: new Date().toISOString(),
-        total: 19.80,
-        currency: 'EUR',
-        items: [
-          {
-            id: 1,
-            name: 'Βιολογικές Ντομάτες Κρήτης',
-            price: 3.50,
-            quantity: 2,
-          },
-          {
-            id: 2,
-            name: 'Εξαιρετικό Παρθένο Ελαιόλαδο',
-            price: 12.80,
-            quantity: 1,
-          },
-        ],
-        shippingAddress: {
-          name: 'Δημήτρης Παπαδόπουλος',
-          line1: 'Βασιλίσσης Σοφίας 123',
-          city: 'Αθήνα',
-          postalCode: '10671',
-          country: 'GR',
-          phone: '+30 210 1234567',
-        },
-        shipment: {
-          id: 'SHIP-' + orderId,
-          status: 'pending',
-          shippingCost: 4.50,
-          carrier: 'ΕΛΤΑ Courier',
-          estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString('el-GR'),
-        },
-      };
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/api/orders/${orderId}`);
 
-      setOrder(mockOrder);
+      if (!response.ok) {
+        throw new Error('Failed to load order');
+      }
+
+      const data = await response.json();
+      setOrder(data);
     } catch {
       setError('Σφάλμα κατά τη φόρτωση της παραγγελίας');
     } finally {
@@ -108,16 +72,16 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  const getStatusBadge = (status: Order['status']) => {
-    const statusConfig = {
-      pending: { label: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' },
-      paid: { label: 'Πληρωμένη', color: 'bg-green-100 text-green-800' },
-      processing: { label: 'Επεξεργασία', color: 'bg-blue-100 text-blue-800' },
-      shipped: { label: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' },
-      delivered: { label: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' },
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; color: string }> = {
+      PENDING: { label: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' },
+      PAID: { label: 'Πληρωμένη', color: 'bg-green-100 text-green-800' },
+      PROCESSING: { label: 'Επεξεργασία', color: 'bg-blue-100 text-blue-800' },
+      SHIPPED: { label: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' },
+      DELIVERED: { label: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status.toUpperCase()] || statusConfig['PENDING'];
     return (
       <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
         {config.label}
@@ -125,21 +89,6 @@ export default function OrderConfirmationPage() {
     );
   };
 
-  const getShipmentStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { label: 'Αναμένεται', color: 'bg-gray-100 text-gray-800' },
-      processing: { label: 'Προετοιμασία', color: 'bg-blue-100 text-blue-800' },
-      shipped: { label: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' },
-      delivered: { label: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' },
-    };
-
-    const config = statusConfig[status as keyof typeof statusConfig];
-    return (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${config.color}`}>
-        {config.label}
-      </span>
-    );
-  };
 
   if (!isAuthenticated) {
     return null;
@@ -279,59 +228,38 @@ export default function OrderConfirmationPage() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Διεύθυνση Αποστολής</h3>
             <div className="text-gray-600">
-              <p className="font-medium">{order.shippingAddress.name}</p>
-              <p>{order.shippingAddress.line1}</p>
-              <p>{order.shippingAddress.city}, {order.shippingAddress.postalCode}</p>
+              <p className="font-medium">{order.shipping.name}</p>
+              <p>{order.shipping.line1}</p>
+              {order.shipping.line2 && <p>{order.shipping.line2}</p>}
+              <p>{order.shipping.city}, {order.shipping.postal}</p>
               <p>Ελλάδα</p>
-              {order.shippingAddress.phone && (
-                <p className="mt-2">Τηλ: {order.shippingAddress.phone}</p>
+              {order.shipping.phone && (
+                <p className="mt-2">Τηλ: {order.shipping.phone}</p>
               )}
             </div>
           </div>
 
-          {/* Shipment Status */}
-          {order.shipment && (
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Κατάσταση Αποστολής</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Κατάσταση:</span>
-                  {getShipmentStatusBadge(order.shipment.status)}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Μεταφορέας:</span>
-                  <span className="text-sm text-gray-600">{order.shipment.carrier}</span>
-                </div>
-
-                {order.shipment.trackingNumber && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Κωδικός Παρακολούθησης:</span>
-                    <span className="text-sm font-mono text-gray-600">{order.shipment.trackingNumber}</span>
-                  </div>
-                )}
-
-                {order.shipment.estimatedDelivery && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Εκτιμώμενη Παράδοση:</span>
-                    <span className="text-sm text-gray-600">{order.shipment.estimatedDelivery}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Κόστος Αποστολής:</span>
-                  <span className="text-sm text-gray-600">€{order.shipment.shippingCost.toFixed(2)}</span>
-                </div>
+          {/* Shipping Method & Cost */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Μεταφορικά</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">
+                  Μέθοδος (<span data-testid="order-shipping-label">{labelFor(order.shippingMethod)}</span>):
+                </span>
+                <span className="text-sm text-gray-600" data-testid="order-shipping">
+                  €{Number(order.computedShipping || 0).toFixed(2)}
+                </span>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/orders/track/${order.id}?phone=${encodeURIComponent(order.shippingAddress.phone || '')}`}
+              href={`${process.env.NEXT_PUBLIC_SITE_URL || ''}/orders/track/${order.id}`}
               className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
               data-testid="track-order-btn"
             >

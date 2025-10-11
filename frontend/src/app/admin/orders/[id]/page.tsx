@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
-import PrintButton from '@/components/PrintButton';
-import { labelFor, costFor } from '@/lib/shipping/format';
-import { fmtEUR } from '@/lib/cart/totals';
+import { labelFor } from '@/lib/shipping/format';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -195,6 +193,17 @@ export default async function AdminOrderDetailPage({
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
+              {/* Shipping Method & Cost */}
+              {order.shippingMethod && (
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Μεταφορικά (<span data-testid="admin-order-shipping">{labelFor(order.shippingMethod)}</span>):
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    €{Number(order.computedShipping || 0).toFixed(2)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold">Σύνολο:</span>
                 <span className="text-xl font-bold text-green-600">
