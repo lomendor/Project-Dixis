@@ -953,6 +953,7 @@ export default function Page() { redirect('/my/orders'); }
 - Release v0.3.0-alpha prepared (CHANGELOG)
 - Pass 179T: Public tracking page (/track/[token]) + read-only API + e2e smoke + noindex
 - Pass 179E: Status emails with deep links to /track/[token] + e2e validation ✅
+- Pass 179S: UX polish for /track/[token] — loading + error boundary ✅
 - Pass 179R: Legacy redirect /orders/track/[token] → /track/[token] + e2e ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
@@ -975,6 +976,25 @@ export default function Page() { redirect('/my/orders'); }
 - Links direct to public `/track/[token]` page (Pass 179T)
 - No authentication required for tracking
 - Safer than including full order details in email
+
+## Pass 179S — UX Polish for Tracking Page (2025-10-11)
+**Goal**: Enhance UX with loading and error states for public tracking page
+
+**Changes**:
+- ✅ Added `loading.tsx`: Skeleton loader for `/track/[token]` (lightweight gray bars)
+- ✅ Added `error.tsx`: Client-side error boundary with Greek messaging + retry button
+- ✅ Minor UX tweak: Added `aria-label="Token"` to input field for accessibility
+
+**Technical Details**:
+- Loading skeleton uses simple div shapes with gray backgrounds
+- Error boundary logs to console and provides user-friendly Greek error message
+- Reset button allows retry without page refresh
+- No business logic changes, purely presentational enhancements
+
+**Impact**:
+- Better perceived performance with loading states
+- Graceful error handling with user-friendly messaging
+- Improved accessibility with proper ARIA labels
 
 ## Pass 179R — Legacy Redirect for Tracking (2025-10-11)
 **Goal**: Maintain backward compatibility for old tracking URL format
