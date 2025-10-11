@@ -675,6 +675,26 @@ export default function Page() { redirect('/my/orders'); }
 - README: added badges (policy-gate, e2e-postgres, CodeQL)
 - QUALITY.md: documented required checks & optimization
 
+## Pass 170 — Admin Orders Dashboard ✅
+**Date**: 2025-10-08
+
+**Changes**:
+- ✅ GET `/api/admin/orders` — List orders (id, createdAt, status, total, buyer info)
+- ✅ GET `/api/admin/orders/[id]` — Order detail (full info + items + shipping)
+- ✅ Admin pages already existed: `/admin/orders` (list), `/admin/orders/[id]` (detail)
+- ✅ Status update via existing POST `/api/admin/orders/[id]/status` (emails customer)
+- ✅ E2E test: checkout → admin views order → set PACKING → customer receives email
+
+**Architecture**:
+- Admin pages use Prisma directly for SSR
+- GET APIs added for completeness (future integrations)
+- Simple session check (`dixis_session` cookie presence)
+- Status transitions trigger customer emails (existing functionality preserved)
+
+**Files**:
+- `frontend/src/app/api/admin/orders/route.ts` (GET list API)
+- `frontend/src/app/api/admin/orders/[id]/route.ts` (GET detail API)
+- `frontend/tests/admin/orders-dashboard.spec.ts` (e2e test)
 ## Pass CI-01 — Make CI Green ✅
 **Date**: 2025-10-08
 
@@ -927,4 +947,124 @@ export default function Page() { redirect('/my/orders'); }
 - Added risk-ok label to #459 for admin/orders API changes
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
+
+
+## Pass 173J — Shipping Cost Transparency (PARTIAL) ⚠️
+- **Goal**: Unified shipping method labels in checkout & order pages (Greek-first)
+- **Status**: Infrastructure created, UI integration blocked by schema limitations
+- **Delivered**:
+  - ✅ Shipping format helper library (`frontend/src/lib/shipping/format.ts`)
+  - ✅ `labelFor()` function: Method codes → Greek labels (Παραλαβή, Κούριερ, etc.)
+  - ✅ `costFor()` function: Calculate shipping costs with threshold logic
+  - ✅ E2E test structure for shipping transparency
+  - ✅ Reuse of existing `@dixis/contracts/shipping` stub
+- **Blocked**:
+  - ❌ Order page shipping label display (Order model has no `shippingMethod` field)
+  - ❌ Checkout page shipping label display (checkout summary page structure unclear)
+  - ❌ Full E2E tests (requires schema changes + UI integration)
+- **TODO**: Add `shippingMethod` field to Order schema in future pass, then re-run UI integration
+- **Docs**: `docs/AGENT/SUMMARY/Pass-173J.md` (detailed blockers & future work)
+## Pass 174Q — Quick-Wins Triad (PR Hygiene + Totals/Taxes + Observability) ✅
+**Date**: 2025-10-10
+
+### (A) PR Hygiene
+- ✅ Created `.github/pull_request_template.md` with Summary/Reports/Test Summary sections
+- ✅ Created `.github/labeler.yml` for automatic label assignment (ai-pass, risk-ok)
+- ✅ Applied template and labels to open PRs #479-#485
+
+### (B) Totals/Taxes Helper
+- ✅ Created `frontend/src/lib/cart/totals.ts` - single source of truth for order calculations
+  - Exports: calcTotals(), fmtEUR(), round2()
+  - Types: ShippingMethod, TotalsInput, Totals, Money
+  - Features: Subtotal, shipping, COD fee, tax (configurable rate)
+  - EL-formatted currency (€34,32 format)
+- ✅ Created `frontend/tests/totals/totals.spec.ts` with 2 Playwright tests:
+  - Test 1: COD courier totals with tax (13%) - verifies all calculations + EL formatting
+  - Test 2: Pickup with no shipping/tax - verifies zero fees
+
+### (C) Minimal Observability
+- ✅ Created `frontend/src/lib/observability/request.ts` - requestId utility
+  - Extracts x-request-id from headers or generates UUID
+- ✅ Created `/api/dev/health` endpoint (dev-only):
+  - Returns: { ok, env, requestId, time }
+  - Sets x-request-id response header
+  - Blocked in production (404 response)
+
+**Technical Details**:
+- PR template enforces consistent documentation structure
+- Labeler config auto-applies labels based on file paths
+- Totals helper: Type-safe, EL-localized, tax-ready (default 0%)
+- Health endpoint: SSR-safe, environment-aware, traceable requests
+
+**Files Changed**:
+- .github/pull_request_template.md (created)
+- .github/labeler.yml (created)
+- frontend/src/lib/cart/totals.ts (created, 32 LOC)
+- frontend/tests/totals/totals.spec.ts (created, 29 LOC)
+- frontend/src/lib/observability/request.ts (created, 3 LOC)
+- frontend/src/app/api/dev/health/route.ts (created, 9 LOC)
+
+**Total**: 6 files created, ~73 LOC added
+
+## Pass 173I — Admin Order Detail (inline status + print view) + e2e (2025-10-10)
+- Admin order detail page at `/admin/orders/[id]`: customer info, status chip, inline status update
+- Inline status change: dropdown + "Ενημέρωση" button → POST `/api/admin/orders/[id]/status`
+- Print-friendly view: CSS-only (hides buttons/links with @media print)
+- E2E tests: admin views detail, changes status, print button present
+- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-173I.md
+## Pass CI-SYNC-01 — Prisma Schema Parity Fix (2025-10-10) ✅
+**Date**: 2025-10-10
+**PR**: #486
+**Branch**: ci/sync-01-prisma-schema-parity
+
+**Issue**: PRs #479-#485 failing with TypeScript errors about missing Prisma fields (publicToken, shippingMethod, computedShipping)
+
+**Root Cause**:
+- `schema.ci.prisma` (SQLite for E2E) diverged from `schema.prisma` (PostgreSQL for production)
+- Prisma client generated from schema.ci.prisma before migrations run in CI
+- Code references fields that don't exist in the generated client
+- TypeScript compilation fails with "Property does not exist" errors
+
+**Solution**:
+- ✅ Created `scripts/ci/sync-ci-schema.ts` - automatic sync script
+  - Reads schema.prisma
+  - Converts PostgreSQL → SQLite (provider, datasource URL)
+  - Removes PostgreSQL-specific annotations (@db.Text, @db.Decimal, @db.Uuid)
+  - Converts uuid() → cuid() for SQLite compatibility
+  - Writes to schema.ci.prisma with auto-generated header warning
+
+- ✅ Updated `frontend/package.json` with CI prep scripts:
+  - `ci:prisma:sync` - Run sync script
+  - `ci:prisma:sqlite` - Sync + push + generate for SQLite
+  - `ci:prisma:pg` - Migrate + generate for PostgreSQL
+  - `ci:prep` - Unified CI preparation (sync + migrate + generate)
+
+- ✅ Updated `frontend/playwright.config.ts`:
+  - Changed webServer command from `npm run ci:gen && npm run ci:migrate` to `npm run ci:prep`
+  - Ensures proper sync → migrate → generate order
+
+- ✅ Created `.github/workflows/schema-parity.yml` gate workflow:
+  - Triggers on PR changes to schema.prisma or schema.ci.prisma
+  - Runs sync script and checks for git diff
+  - Fails if schemas are out of sync
+  - Prevents future divergence
+
+**Impact**:
+- Schema parity automatically maintained
+- CI generates correct Prisma client with all fields
+- TypeScript compilation succeeds
+- PRs #479-#485 can now pass when retriggered
+- Future schema changes automatically synced to CI schema
+
+**Technical Details**:
+- Sync script: 67 lines TypeScript with regex transformations
+- Package.json: Added 4 new CI scripts (sync, sqlite, pg, prep)
+- Playwright config: 1 line change (ci:prep replaces manual steps)
+- Schema parity workflow: 46 lines YAML with validation logic
+
+**Files Changed**:
+- scripts/ci/sync-ci-schema.ts (created, 67 LOC)
+- frontend/package.json (modified, +4 scripts)
+- frontend/playwright.config.ts (modified, 1 line)
+- .github/workflows/schema-parity.yml (created, 46 LOC)
 

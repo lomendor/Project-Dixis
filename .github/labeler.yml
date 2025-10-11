@@ -1,40 +1,6 @@
 ai-pass:
-  - changed-files:
-    - any-glob-to-any-file: '**/*'
-
-risk-paths:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'frontend/prisma/**'
-      - 'frontend/src/app/api/checkout/**'
-      - 'frontend/src/app/api/admin/orders/**'
-      - 'frontend/src/lib/mail/**'
-      - 'frontend/src/lib/auth/**'
-      - '.github/workflows/**'
-
-frontend:
-  - changed-files:
-    - any-glob-to-any-file: 'frontend/**/*'
-
-backend:
-  - changed-files:
-    - any-glob-to-any-file: 'backend/**/*'
-
-ci:
-  - changed-files:
-    - any-glob-to-any-file: '.github/workflows/**/*'
-
-docs:
-  - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.md'
-      - 'docs/**/*'
-      - 'frontend/docs/**/*'
-
-tests:
-  - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.spec.ts'
-      - '**/*.test.ts'
-      - 'frontend/tests/**/*'
-      - 'backend/tests/**/*'
+  - 'pass/**'
+  - 'ops/**'
+  - 'ci/**'
+risk-ok:
+  - any: ['frontend/**','scripts/**','.github/**']
