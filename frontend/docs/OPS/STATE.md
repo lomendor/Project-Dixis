@@ -950,3 +950,4 @@ export default function Page() { redirect('/my/orders'); }
 
 - Pass 178Q: PR template; totals/taxes helper + tests; /api/dev/health + x-request-id
 - Pass 178A: Hardening shipping/tracking — @@unique(publicToken), backfill, dev endpoints, e2e checks
+- PR #495 merged (178A — hardening shipping/tracking).
