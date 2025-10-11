@@ -954,6 +954,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 179T: Public tracking page (/track/[token]) + read-only API + e2e smoke + noindex
 - Pass 179E: Status emails with deep links to /track/[token] + e2e validation ✅
 - Pass 179S: UX polish for /track/[token] — loading + error boundary ✅
+- Pass 179R: Legacy redirect /orders/track/[token] → /track/[token] + e2e ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -994,3 +995,23 @@ export default function Page() { redirect('/my/orders'); }
 - Better perceived performance with loading states
 - Graceful error handling with user-friendly messaging
 - Improved accessibility with proper ARIA labels
+
+## Pass 179R — Legacy Redirect for Tracking (2025-10-11)
+**Goal**: Maintain backward compatibility for old tracking URL format
+
+**Changes**:
+- ✅ Added redirect page at `/orders/track/[token]/page.tsx`
+- ✅ Server-side redirect using Next.js `redirect()` function
+- ✅ Created e2e test `tests/tracking/redirect-legacy.spec.ts`
+- ✅ Maintains `noindex,nofollow` robots meta
+
+**Technical Details**:
+- Instant server-side 307 redirect (temporary redirect)
+- Preserves token parameter during redirect
+- No client-side JavaScript required
+- Test validates redirect + final page heading
+
+**Impact**:
+- Backward compatibility for emails sent with old URL format
+- Users experience seamless redirect (no broken links)
+- Clean migration path from `/orders/track/` to `/track/`
