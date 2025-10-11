@@ -76,10 +76,10 @@ export async function POST(request: NextRequest) {
             }))
           }
         },
-        select: { id: true, total: true }
+        select: { id: true, publicToken: true, total: true }
       });
 
-      return { orderId: order.id, total: order.total, lines };
+      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines };
     });
 
     // EMAILS: post-commit (best-effort)
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       const email = payload?.shipping?.email?.trim?.();
       const phone = payload?.shipping?.phone?.trim?.() || '';
       const orderId = result.orderId;
+      const publicToken = result.publicToken;
       const adminTo = process.env.DEV_MAIL_TO || '';
 
       // 1) Order confirmation to customer
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
           subject: OrderTpl.subject(orderId),
           html: OrderTpl.html({
             id: orderId,
+            publicToken,
             total: Number(result.total || 0),
             items: result.lines.map((i: any) => ({
               title: String(i.title || ''),

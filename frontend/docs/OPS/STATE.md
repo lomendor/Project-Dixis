@@ -948,123 +948,43 @@ export default function Page() { redirect('/my/orders'); }
 - All 4 PRs (#453/#454/#458/#459) have auto-merge enabled
 - Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-HF-19.md
 
+## Pass 173M — Public Order Tracking (tokenized) ✅ (2025-10-10)
+**Goal**: Enable customers to track their orders publicly via secure token (no PII exposure)
 
-## Pass 173J — Shipping Cost Transparency (PARTIAL) ⚠️
-- **Goal**: Unified shipping method labels in checkout & order pages (Greek-first)
-- **Status**: Infrastructure created, UI integration blocked by schema limitations
-- **Delivered**:
-  - ✅ Shipping format helper library (`frontend/src/lib/shipping/format.ts`)
-  - ✅ `labelFor()` function: Method codes → Greek labels (Παραλαβή, Κούριερ, etc.)
-  - ✅ `costFor()` function: Calculate shipping costs with threshold logic
-  - ✅ E2E test structure for shipping transparency
-  - ✅ Reuse of existing `@dixis/contracts/shipping` stub
-- **Blocked**:
-  - ❌ Order page shipping label display (Order model has no `shippingMethod` field)
-  - ❌ Checkout page shipping label display (checkout summary page structure unclear)
-  - ❌ Full E2E tests (requires schema changes + UI integration)
-- **TODO**: Add `shippingMethod` field to Order schema in future pass, then re-run UI integration
-- **Docs**: `docs/AGENT/SUMMARY/Pass-173J.md` (detailed blockers & future work)
-## Pass 174Q — Quick-Wins Triad (PR Hygiene + Totals/Taxes + Observability) ✅
-**Date**: 2025-10-10
+**Schema Changes** (non-breaking):
+- ✅ Added `Order.publicToken String @unique @default(uuid())` to Prisma schema
+- ✅ Created migration: `20251010000000_add_order_public_token`
+- ✅ Updated Prisma client generation
 
-### (A) PR Hygiene
-- ✅ Created `.github/pull_request_template.md` with Summary/Reports/Test Summary sections
-- ✅ Created `.github/labeler.yml` for automatic label assignment (ai-pass, risk-ok)
-- ✅ Applied template and labels to open PRs #479-#485
+**API Implementation**:
+- ✅ Created GET `/api/orders/track/[token]` endpoint (public, no auth required)
+- ✅ Returns: id, status, total, shippingMethod, computedShipping, items (title/qty/price only)
+- ✅ NO PII exposure: excludes buyerPhone, buyerName, shipping address, email
 
-### (B) Totals/Taxes Helper
-- ✅ Created `frontend/src/lib/cart/totals.ts` - single source of truth for order calculations
-  - Exports: calcTotals(), fmtEUR(), round2()
-  - Types: ShippingMethod, TotalsInput, Totals, Money
-  - Features: Subtotal, shipping, COD fee, tax (configurable rate)
-  - EL-formatted currency (€34,32 format)
-- ✅ Created `frontend/tests/totals/totals.spec.ts` with 2 Playwright tests:
-  - Test 1: COD courier totals with tax (13%) - verifies all calculations + EL formatting
-  - Test 2: Pickup with no shipping/tax - verifies zero fees
+**UI Implementation**:
+- ✅ Created `/orders/track/[token]` page with Greek-first labels
+- ✅ Displays: Κατάσταση, Μεταφορικά (Μέθοδος + Κόστος), Προϊόντα, Σύνολο
+- ✅ Error handling for invalid tokens (404 + user-friendly message)
+- ✅ Loading states with spinner
 
-### (C) Minimal Observability
-- ✅ Created `frontend/src/lib/observability/request.ts` - requestId utility
-  - Extracts x-request-id from headers or generates UUID
-- ✅ Created `/api/dev/health` endpoint (dev-only):
-  - Returns: { ok, env, requestId, time }
-  - Sets x-request-id response header
-  - Blocked in production (404 response)
+**Email Integration**:
+- ✅ Updated `orderConfirmation.ts` template to include publicToken parameter
+- ✅ Updated checkout route to pass publicToken to email template
+- ✅ Tracking link format: `{SITE_URL}/orders/track/{publicToken}`
+- ✅ Styled tracking button (green, padded, rounded) in email
 
-**Technical Details**:
-- PR template enforces consistent documentation structure
-- Labeler config auto-applies labels based on file paths
-- Totals helper: Type-safe, EL-localized, tax-ready (default 0%)
-- Health endpoint: SSR-safe, environment-aware, traceable requests
+**E2E Tests** (comprehensive):
+- ✅ Test: Checkout creates order with publicToken → track API returns data (no PII)
+- ✅ Test: Track page shows status, shipping method, and cost
+- ✅ Test: Invalid token returns 404 with error message
+- ✅ Test: Track page displays Greek labels for all shipping methods
+- ✅ Test: Free shipping threshold (≥€25) displays €0.00 on track page
 
-**Files Changed**:
-- .github/pull_request_template.md (created)
-- .github/labeler.yml (created)
-- frontend/src/lib/cart/totals.ts (created, 32 LOC)
-- frontend/tests/totals/totals.spec.ts (created, 29 LOC)
-- frontend/src/lib/observability/request.ts (created, 3 LOC)
-- frontend/src/app/api/dev/health/route.ts (created, 9 LOC)
-
-**Total**: 6 files created, ~73 LOC added
-
-## Pass 173I — Admin Order Detail (inline status + print view) + e2e (2025-10-10)
-- Admin order detail page at `/admin/orders/[id]`: customer info, status chip, inline status update
-- Inline status change: dropdown + "Ενημέρωση" button → POST `/api/admin/orders/[id]/status`
-- Print-friendly view: CSS-only (hides buttons/links with @media print)
-- E2E tests: admin views detail, changes status, print button present
-- Comprehensive SUMMARY created: docs/AGENT/SUMMARY/Pass-173I.md
-## Pass CI-SYNC-01 — Prisma Schema Parity Fix (2025-10-10) ✅
-**Date**: 2025-10-10
-**PR**: #486
-**Branch**: ci/sync-01-prisma-schema-parity
-
-**Issue**: PRs #479-#485 failing with TypeScript errors about missing Prisma fields (publicToken, shippingMethod, computedShipping)
-
-**Root Cause**:
-- `schema.ci.prisma` (SQLite for E2E) diverged from `schema.prisma` (PostgreSQL for production)
-- Prisma client generated from schema.ci.prisma before migrations run in CI
-- Code references fields that don't exist in the generated client
-- TypeScript compilation fails with "Property does not exist" errors
-
-**Solution**:
-- ✅ Created `scripts/ci/sync-ci-schema.ts` - automatic sync script
-  - Reads schema.prisma
-  - Converts PostgreSQL → SQLite (provider, datasource URL)
-  - Removes PostgreSQL-specific annotations (@db.Text, @db.Decimal, @db.Uuid)
-  - Converts uuid() → cuid() for SQLite compatibility
-  - Writes to schema.ci.prisma with auto-generated header warning
-
-- ✅ Updated `frontend/package.json` with CI prep scripts:
-  - `ci:prisma:sync` - Run sync script
-  - `ci:prisma:sqlite` - Sync + push + generate for SQLite
-  - `ci:prisma:pg` - Migrate + generate for PostgreSQL
-  - `ci:prep` - Unified CI preparation (sync + migrate + generate)
-
-- ✅ Updated `frontend/playwright.config.ts`:
-  - Changed webServer command from `npm run ci:gen && npm run ci:migrate` to `npm run ci:prep`
-  - Ensures proper sync → migrate → generate order
-
-- ✅ Created `.github/workflows/schema-parity.yml` gate workflow:
-  - Triggers on PR changes to schema.prisma or schema.ci.prisma
-  - Runs sync script and checks for git diff
-  - Fails if schemas are out of sync
-  - Prevents future divergence
-
-**Impact**:
-- Schema parity automatically maintained
-- CI generates correct Prisma client with all fields
-- TypeScript compilation succeeds
-- PRs #479-#485 can now pass when retriggered
-- Future schema changes automatically synced to CI schema
-
-**Technical Details**:
-- Sync script: 67 lines TypeScript with regex transformations
-- Package.json: Added 4 new CI scripts (sync, sqlite, pg, prep)
-- Playwright config: 1 line change (ci:prep replaces manual steps)
-- Schema parity workflow: 46 lines YAML with validation logic
-
-**Files Changed**:
-- scripts/ci/sync-ci-schema.ts (created, 67 LOC)
-- frontend/package.json (modified, +4 scripts)
-- frontend/playwright.config.ts (modified, 1 line)
-- .github/workflows/schema-parity.yml (created, 46 LOC)
+**Technical Notes**:
+- Public tracking uses UUID token (not order ID) for security
+- No authentication required (public endpoint)
+- Greek status labels: Εκκρεμής, Επιβεβαιωμένη, Σε αποστολή, Παραδόθηκε, Ακυρώθηκε
+- Greek shipping labels: Παραλαβή από κατάστημα, Παράδοση με κούριερ, Αντικαταβολή
+- Migration is non-breaking (uses @default(uuid()))
+- All existing orders will get publicToken on next access (automatic backfill)
 
