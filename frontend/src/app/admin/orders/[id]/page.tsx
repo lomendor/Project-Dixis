@@ -94,9 +94,6 @@ export default async function AdminOrderDetailPage({
         </Link>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
-          <div className="no-print flex gap-2">
-            <PrintButton />
-          </div>
         </div>
       </div>
 
