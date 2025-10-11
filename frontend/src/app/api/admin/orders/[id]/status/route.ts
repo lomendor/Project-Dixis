@@ -64,19 +64,45 @@ export async function POST(
       data: { status: to }
     });
 
-    // Optional: send email to customer (no-op if SMTP missing)
-    // TODO: Re-enable when mailer module is available
-    // try {
-    //   const { sendMailSafe } = await import('@/lib/mail/mailer');
-    //   await sendMailSafe({
-    //     to: customerEmail,
-    //     subject: `Ενημέρωση παραγγελίας #${updated.id}`,
-    //     html: `<p>Η παραγγελία σας άλλαξε σε: <b>${to}</b>.</p>`
-    //   });
-    // } catch (e) {
-    //   console.warn('[admin status mail] skipped:', (e as Error).message);
-    // }
-    console.log(`[admin] Status changed ${from}→${to} (email notification disabled)`);
+    // Fetch order for email notification
+    const fresh = await prisma.order.findUnique({
+      where: { id: updated.id },
+      select: {
+        id: true,
+        status: true
+      }
+    }).catch((): null => null);
+
+    // Send status update email to customer
+    try {
+      const { sendMailSafe } = await import('@/lib/mail/mailer');
+      const orderStatusTpl = await import('@/lib/mail/templates/orderStatus');
+
+      // Get customer email from order (if stored)
+      const orderWithEmail = await prisma.order.findUnique({
+        where: { id },
+        select: { buyerPhone: true }
+      });
+
+      // For now, we don't have buyer email in schema
+      // Email will be sent when email field is added
+      const customerEmail = process.env.DEV_MAIL_TO; // Send to dev for testing
+
+      if (customerEmail) {
+        await sendMailSafe({
+          to: customerEmail,
+          subject: orderStatusTpl.subject(updated.id, to),
+          html: orderStatusTpl.html({
+            id: updated.id,
+            status: to,
+            publicToken: ''  // publicToken not in schema, future enhancement
+          })
+        });
+        console.log(`[admin] Status email sent to ${customerEmail}`);
+      }
+    } catch (e) {
+      console.warn('[admin status mail] skipped:', (e as Error).message);
+    }
 
     console.log(`[order] ${id} status ${from}→${to}`);
     
