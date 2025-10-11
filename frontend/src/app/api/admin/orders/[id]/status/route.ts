@@ -64,15 +64,14 @@ export async function POST(
       data: { status: to }
     });
 
-    // Fetch order with publicToken for email (if field exists)
+    // Fetch order for email notification
     const fresh = await prisma.order.findUnique({
       where: { id: updated.id },
       select: {
         id: true,
-        status: true,
-        publicToken: true
+        status: true
       }
-    }).catch(() => null);
+    }).catch((): null => null);
 
     // Send status update email to customer
     try {
@@ -96,7 +95,7 @@ export async function POST(
           html: orderStatusTpl.html({
             id: updated.id,
             status: to,
-            publicToken: (fresh as any)?.publicToken || ''
+            publicToken: ''  // publicToken not in schema, future enhancement
           })
         });
         console.log(`[admin] Status email sent to ${customerEmail}`);
