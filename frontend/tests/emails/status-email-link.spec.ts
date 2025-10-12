@@ -1,43 +1,37 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, request as pwRequest } from '@playwright/test'
 const base = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'http://127.0.0.1:3001'
+const adminPhone = (process.env.ADMIN_PHONES||'+306900000084').split(',')[0]
+const bypass = process.env.OTP_BYPASS || '000000'
 
-test.describe('Status Email Tracking Links', () => {
-  test('status email contains tracking link to /track/[token]', async ({ request }) => {
-    // This test assumes mailbox API is available (dev-only)
-    // Skip in CI if mailbox not configured
-    const isDev = process.env.NODE_ENV === 'development' || process.env.CI !== 'true'
-    test.skip(!isDev, 'Mailbox only available in dev mode')
+async function adminCookie(){
+  const ctx = await pwRequest.newContext()
+  await ctx.post(base+'/api/auth/request-otp', { data:{ phone: adminPhone }})
+  const vr = await ctx.post(base+'/api/auth/verify-otp', { data:{ phone: adminPhone, code: bypass }})
+  return (await vr.headersArray()).find(h=>h.name.toLowerCase()==='set-cookie')?.value?.split('dixis_session=')[1]?.split(';')[0] || ''
+}
 
-    // Create an order first (mock/seed)
-    // For now, we'll just verify the email template HTML contains /track/ pattern
-
-    // Smoke test: check that orderStatus template can generate HTML with tracking link
-    const mockHtml = `<div style="font-family:system-ui,Arial,sans-serif">
-    <h2>Ενημέρωση Παραγγελίας</h2>
-    <p>Αρ. Παραγγελίας: <b>#test123</b></p>
-    <p>Η κατάσταση της παραγγελίας σας άλλαξε σε:</p>
-    <p style="font-size:20px;font-weight:bold;color:#16a34a">Πληρωμένη</p>
-    <p><a href="http://localhost:3001/track/abc123xyz" target="_blank" rel="noopener" style="display:inline-block;padding:10px 20px;background-color:#16a34a;color:#fff;text-decoration:none;border-radius:6px;margin-top:10px">Παρακολούθηση παραγγελίας</a></p>
-  </div>`
-
-    // Verify the HTML contains tracking link pattern
-    expect(mockHtml).toContain('/track/')
-    expect(mockHtml).toContain('Παρακολούθηση παραγγελίας')
-    expect(mockHtml).toContain('href="')
+test('status email contains public tracking link (if dev mailbox available)', async ({ request }) => {
+  // seed
+  const cookie = await adminCookie()
+  const prod = await request.post(base+'/api/me/products', { 
+    headers:{ cookie:`dixis_session=${cookie}` },
+    data:{ title:'Ελιές Θρούμπες', category:'Ελιές', price:5.2, unit:'τεμ', stock:5, isActive:true }
   })
+  const pid = (await prod.json()).item.id
+  const email='status-link@example.com'
+  const ord = await request.post(base+'/api/checkout', { data:{ items:[{ productId: pid, qty:1 }], shipping:{ name:'Πελάτης', line1:'Οδός 1', city:'Αθήνα', postal:'11111', phone:'+306900000555', email }, payment:{ method:'COD' }}})
+  const body = await ord.json(); const oid = body.orderId || body.id
 
-  test('status email without token has no tracking link', async () => {
-    // When publicToken is empty/missing, no link should be rendered
-    const mockHtmlNoToken = `<div style="font-family:system-ui,Arial,sans-serif">
-    <h2>Ενημέρωση Παραγγελίας</h2>
-    <p>Αρ. Παραγγελίας: <b>#test456</b></p>
-    <p>Η κατάσταση της παραγγελίας σας άλλαξε σε:</p>
-    <p style="font-size:20px;font-weight:bold;color:#16a34a">Ακυρώθηκε</p>
-
-  </div>`
-
-    // Verify no tracking link when token missing
-    expect(mockHtmlNoToken).not.toContain('/track/')
-    expect(mockHtmlNoToken).not.toContain('Παρακολούθηση')
+  // αλλάζουμε status για να σταλεί email
+  const res = await request.post(base+`/api/admin/orders/${oid}/status`, { 
+    headers:{ cookie:`dixis_session=${cookie}` },
+    data:{ status:'PACKING' }
   })
+  expect([200,204]).toContain(res.status())
+
+  // mailbox (αν υπάρχει)
+  const inbox = await request.get(base+`/api/dev/mailbox?to=${email}`)
+  if (inbox.status() \!== 200){ test.skip(true, 'dev mailbox not available'); return; }
+  const j = await inbox.json()
+  expect(j.item?.html || j.item?.text || '').toMatch(/\/track\//i)
 })
