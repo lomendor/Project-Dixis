@@ -1,3 +1,31 @@
+## Pass 192 — Observability Lite rollout (x-request-id + /api/dev/health db-ping) + e2e ✅
+- **x-request-id Header**: Added to all admin producers API responses (GET/POST/PATCH/DELETE)
+- **Structured Logging**: `logWithId(rid, msg, details)` helper logs with request ID prefix for traceability
+- **Dev Health Endpoint**: `/api/dev/health` returns `{ ok, env, requestId, db }` with Prisma ping
+- **Database Health Check**: Lightweight `SELECT 1` query works with both SQLite (CI) and PostgreSQL (prod)
+- **Dev-only Protection**: Health endpoint hidden in production via `DIXIS_ENV` check (returns 404)
+- **E2E Test**: `tests/observability/health.spec.ts` - validates response structure, headers, db connectivity
+- **Observability Helpers**: `lib/observability/request.ts` - getRequestId() and logWithId() utilities
+
+### Observability Integration
+```typescript
+// All admin producers APIs now include:
+const rid = getRequestId(req.headers)
+const res = NextResponse.json(data)
+res.headers.set('x-request-id', rid)
+logWithId(rid, 'operation', details)
+```
+
+### Health Endpoint Response
+```json
+{
+  "ok": true,
+  "env": "local",
+  "requestId": "uuid-v4-here",
+  "db": "ok"  // or "fail" or "na"
+}
+```
+
 ## Pass 191 — Admin Producers CRUD (list/create/toggle active) + e2e ✅
 - **Admin API**: GET /api/admin/producers (list with filters), POST /api/admin/producers (create), PATCH /api/admin/producers/[id] (update/toggle), DELETE /api/admin/producers/[id]
 - **Admin UI**: Simple /admin/producers page with create form and list table
