@@ -1258,3 +1258,4 @@ export default function Page() { redirect('/my/orders'); }
 - HF 186A.e2e: Use BASE_URL + proper seeding for admin quick actions test
 - Pass 187B: Admin Orders List (filters/search/status badges/pagination) + e2e
 - Pass 188A: Admin Order quick actions (DELIVERED/CANCELLED) + e2e
+- Pass 189A: Public Tracking MVP (/track/:token + API + e2e)
