@@ -1,3 +1,28 @@
+# OS / STATE — Pass Q2 Complete
+
+**Date**: 2025-10-08
+**Status**: Quiet PR Reports (Auto-fill + ai-pass Skip)
+**Branch**: main, chore/pass-q2-quiet-reports (PR pending)
+
+## Pass Q2 — Quiet PR Reports ✅
+
+**Date**: 2025-10-08
+**Branch**: chore/pass-q2-quiet-reports
+
+**Changes**:
+- ✅ Auto-fill PR Reports/Test Summary via `.github/workflows/pr-reports.yml`
+- ✅ Danger: skip/warn for `ai-pass` label (no fail on missing Reports)
+- ✅ Workflow triggers on PR opened/edited/synchronize/reopened
+- ✅ Auto-appends Reports section if missing: CODEMAP, TEST-REPORT, RISKS-NEXT
+- ✅ Danger continues to warn for serious issues (tests fail/CodeQL)
+
+**Impact**:
+- PRs with `ai-pass` label get soft warnings instead of hard failures
+- Auto-generated Reports section reduces PR prep overhead
+- Maintains quality gates for non-AI PRs
+
+---
+
 # OS / STATE — Pass 110 Complete
 
 **Date**: 2025-10-06
