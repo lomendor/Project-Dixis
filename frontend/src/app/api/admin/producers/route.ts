@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 import { z } from 'zod'
+import { getRequestId, logWithId } from '@/lib/observability/request'
 
 const CreateSchema = z.object({
   name: z.string().min(2),
@@ -14,6 +15,7 @@ const CreateSchema = z.object({
 })
 
 export async function GET(req: Request) {
+  const rid = getRequestId(req.headers)
   // TODO: Add admin session check (assume middleware/guard exists)
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
@@ -30,19 +32,26 @@ export async function GET(req: Request) {
     take: 100
   })
 
-  return NextResponse.json({ items })
+  const res = NextResponse.json({ items })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, 'GET /api/admin/producers', { count: items.length, q, onlyActive })
+  return res
 }
 
 export async function POST(req: Request) {
+  const rid = getRequestId(req.headers)
   // TODO: Add admin session check
   const data = await req.json().catch(() => ({}))
   const parsed = CreateSchema.safeParse(data)
 
   if (!parsed.success) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       { error: 'Λάθος δεδομένα', issues: parsed.error.format() },
       { status: 400 }
     )
+    res.headers.set('x-request-id', rid)
+    logWithId(rid, 'POST /api/admin/producers [validation error]', { error: parsed.error.format() })
+    return res
   }
 
   const item = await prisma.producer.create({
@@ -58,5 +67,8 @@ export async function POST(req: Request) {
     }
   })
 
-  return NextResponse.json({ item }, { status: 201 })
+  const res = NextResponse.json({ item }, { status: 201 })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, 'POST /api/admin/producers [created]', { id: item.id, name: item.name })
+  return res
 }

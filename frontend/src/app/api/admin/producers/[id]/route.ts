@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 import { z } from 'zod'
+import { getRequestId, logWithId } from '@/lib/observability/request'
 
 const UpdateSchema = z.object({
   name: z.string().min(2).optional(),
@@ -18,21 +19,28 @@ export async function PATCH(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
+  const rid = getRequestId(_req.headers)
   const params = await ctx.params
   const id = params.id
   const body = await _req.json().catch(() => ({}))
   const parsed = UpdateSchema.safeParse(body)
 
   if (!parsed.success) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       { error: 'Λάθος δεδομένα', issues: parsed.error.format() },
       { status: 400 }
     )
+    res.headers.set('x-request-id', rid)
+    logWithId(rid, `PATCH /api/admin/producers/${id} [validation error]`, { error: parsed.error.format() })
+    return res
   }
 
   const existing = await prisma.producer.findUnique({ where: { id } })
   if (!existing) {
-    return NextResponse.json({ error: 'Δεν βρέθηκε' }, { status: 404 })
+    const res = NextResponse.json({ error: 'Δεν βρέθηκε' }, { status: 404 })
+    res.headers.set('x-request-id', rid)
+    logWithId(rid, `PATCH /api/admin/producers/${id} [not found]`)
+    return res
   }
 
   const isActive = parsed.data.toggleActive ? !existing.isActive : parsed.data.isActive
@@ -51,15 +59,26 @@ export async function PATCH(
     }
   })
 
-  return NextResponse.json({ item })
+  const res = NextResponse.json({ item })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, `PATCH /api/admin/producers/${id} [updated]`, {
+    toggleActive: parsed.data.toggleActive,
+    wasActive: existing.isActive,
+    nowActive: item.isActive
+  })
+  return res
 }
 
 export async function DELETE(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
+  const rid = getRequestId(_req.headers)
   const params = await ctx.params
   const id = params.id
   await prisma.producer.delete({ where: { id } })
-  return NextResponse.json({ ok: true })
+  const res = NextResponse.json({ ok: true })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, `DELETE /api/admin/producers/${id} [deleted]`)
+  return res
 }
