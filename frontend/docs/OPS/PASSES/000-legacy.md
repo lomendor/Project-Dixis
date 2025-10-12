@@ -1,12 +1,3 @@
-# Aggregated STATE
-
-> Generated from PASS files under frontend/docs/OPS/PASSES/
-
-
----
-
-## 000-legacy.md
-
 
 ## Pass 111 — PostgreSQL CI/CD consolidation ✅
 - **Database Provider**: Already using PostgreSQL in Prisma schema (provider = "postgresql")
@@ -1109,14 +1100,4 @@ export default function Page() { redirect('/my/orders'); }
   - Automatically syncs with cart changes via localStorage
 - **No schema changes**, UI enhancement only
 - **LOC**: ~130 (component + checkout integration + E2E tests)
-
-
-
----
-
-## 2025-10-13_0001-ops.md
-
-Pass 2025-10-13_0001
-- Normalize STATE to per-pass files and generator.
-- Close superseded checkout PRs after #456.
 
