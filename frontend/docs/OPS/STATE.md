@@ -1383,3 +1383,4 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 188A: Admin Order quick actions (DELIVERED/CANCELLED) + e2e
 - Pass 189A: Public Tracking MVP (/track/:token + API + e2e)
 - Pass 189B: Status emails now include tracking link (Public Tracking)
+- HF-200A.2: dev seed endpoint + hardened items mapping; stabilized E2E
