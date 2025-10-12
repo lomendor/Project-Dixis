@@ -1223,3 +1223,36 @@ export default function Page() { redirect('/my/orders'); }
 - PR #507 CI should now pass
 - Order summary emails will work correctly
 - Totals calculated with default COURIER shipping
+
+## Pass 186A — Admin Quick Actions (PACKING/SHIPPED) + e2e (2025-10-12)
+**Goal**: Add quick action buttons for common status transitions in admin order detail page
+
+**Implementation**:
+- ✅ Created `OrderStatusQuickActions.tsx` client component
+- ✅ PACKING button visible when status is PENDING or PAID
+- ✅ SHIPPED button visible when status is PACKING
+- ✅ Greek-first UI: "Συσκευασία" and "Απεστάλη" labels
+- ✅ Current status display with Greek labels
+- ✅ Disabled state while API call in progress
+- ✅ Integrated into admin order detail page
+- ✅ E2E test: order-quick-actions.spec.ts
+
+**Technical Details**:
+- **Component**: Client component with useState for loading state
+- **API Integration**: POST to `/api/admin/orders/[id]/status`
+- **Visual Feedback**: Disabled buttons during execution, page reload on success
+- **Test IDs**: `data-testid="qa-packing"` and `data-testid="qa-shipped"`
+- **Flow**: Create order → PENDING → click PACKING → click SHIPPED → verify UI
+- **Error Handling**: Alert on failure with Greek message
+
+**Files Changed**:
+- `frontend/src/app/admin/orders/[id]/OrderStatusQuickActions.tsx` (created, 76 LOC)
+- `frontend/src/app/admin/orders/[id]/page.tsx` (modified, +8 LOC)
+- `frontend/tests/admin/order-quick-actions.spec.ts` (created, 56 LOC)
+
+**Impact**:
+- Faster admin workflow for common status changes
+- No server action needed for quick transitions
+- Better UX with immediate visual feedback
+- E2E coverage for status transition flow
+- HF 186A.e2e: Use BASE_URL + proper seeding for admin quick actions test
