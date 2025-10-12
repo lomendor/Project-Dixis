@@ -31,7 +31,7 @@ test('status email contains public tracking link (if dev mailbox available)', as
 
   // mailbox (αν υπάρχει)
   const inbox = await request.get(base+`/api/dev/mailbox?to=${email}`)
-  if (inbox.status() \!== 200){ test.skip(true, 'dev mailbox not available'); return; }
+  if (inbox.status() !== 200){ test.skip(true, 'dev mailbox not available'); return; }
   const j = await inbox.json()
   expect(j.item?.html || j.item?.text || '').toMatch(/\/track\//i)
 })
