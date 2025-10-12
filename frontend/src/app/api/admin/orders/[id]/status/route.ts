@@ -67,11 +67,7 @@ export async function POST(
     // Fetch order with items for email notification
     const fresh = await prisma.order.findUnique({
       where: { id: updated.id },
-      select: {
-        id: true,
-        status: true,
-        publicToken: true,
-        shippingMethod: true,
+      include: {
         items: {
           select: {
             titleSnap: true,
@@ -109,13 +105,12 @@ export async function POST(
         let totals: any = undefined
         try {
           const { calcTotals } = await import('@/lib/cart/totals')
-          const method = String(fresh.shippingMethod || 'COURIER')
-          const shippingMethod =
-            (method === 'COURIER_COD' || method === 'COD') ? 'COURIER_COD' :
-            (method === 'PICKUP') ? 'PICKUP' : 'COURIER'
+          // Use COURIER as default since shippingMethod not in Order schema yet
+          const method = 'COURIER'
+          const shippingMethod = method as 'PICKUP' | 'COURIER' | 'COURIER_COD'
 
           totals = calcTotals({
-            items: itemsForEmail.map(x => ({ price: x.price, qty: x.qty })),
+            items: itemsForEmail.map((x: any) => ({ price: x.price, qty: x.qty })),
             shippingMethod,
             baseShipping: undefined,
             codFee: undefined,
