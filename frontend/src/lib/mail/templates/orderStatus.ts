@@ -28,3 +28,33 @@ export function html(params: {
     ${trackLink ? `<p><a href="${trackLink}" target="_blank" rel="noopener" style="display:inline-block;padding:10px 20px;background-color:#16a34a;color:#fff;text-decoration:none;border-radius:6px;margin-top:10px">Παρακολούθηση παραγγελίας</a></p>` : ''}
   </div>`;
 }
+
+export function text(params: {
+  id: string;
+  status: string;
+  publicToken?: string;
+}) {
+  const statusLabels: Record<string, string> = {
+    PENDING: 'Εκκρεμής',
+    PAID: 'Πληρωμένη',
+    PACKING: 'Συσκευασία',
+    SHIPPED: 'Σε αποστολή',
+    DELIVERED: 'Παραδόθηκε',
+    CANCELLED: 'Ακυρώθηκε'
+  };
+
+  const statusLabel = statusLabels[params.status.toUpperCase()] || params.status;
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001').replace(/\/$/, '');
+  const trackLink = params.publicToken ? `${base}/track/${params.publicToken}` : '';
+
+  const lines = [
+    `Ενημέρωση Παραγγελίας #${params.id}`,
+    `Νέα κατάσταση: ${statusLabel}`
+  ];
+
+  if (trackLink) {
+    lines.push(`Παρακολούθηση: ${trackLink}`);
+  }
+
+  return lines.join('\n');
+}

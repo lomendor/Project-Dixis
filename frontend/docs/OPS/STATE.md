@@ -958,6 +958,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 180T: Tracking Timeline UI — visual order flow (PAID → PACKING → SHIPPED → DELIVERED) + Greek labels ✅
 - Pass 180T.F: Invalid-token UX + A11Y polish (role/aria-current/alert) ✅
 - Pass 181C: Copy tracking link button (Αντιγραφή συνδέσμου) + e2e ✅
+- Pass 182L: Status emails include tracking link (text version) + Admin copy button ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -1108,3 +1109,37 @@ export default function Page() { redirect('/my/orders'); }
 - Accessibility-first design with aria-live regions
 - Greek-first labels maintain local market consistency
 - Zero breaking changes, purely additive feature
+
+## Pass 182L — Tracking Links in Emails + Admin Copy (2025-10-12)
+**Goal**: Ensure status emails include tracking links and admin can copy tracking URLs
+
+**Changes**:
+- ✅ Added `text()` export to `orderStatus.ts` template: Plain text version with tracking link
+- ✅ Updated status route to pass `text` parameter to `sendMailSafe()`
+- ✅ Created `CopyTrackingLink.tsx` component for admin: Clipboard integration with Tailwind styling
+- ✅ Updated admin order page to display copy button with `publicToken`
+- ✅ Created e2e test `tests/admin/tracking-link-admin.spec.ts`
+- ✅ Updated STATE.md with Pass 182L documentation
+
+**Technical Details**:
+- **Email Text Version**: Greek labels, multi-line format (Title, Status, Tracking URL)
+- **Template Structure**:
+  - HTML: Button CTA "Παρακολούθηση παραγγελίας" (existing from Pass 179E)
+  - Text: Plain text with URL on separate line
+- **Admin Component**: Tailwind-styled button with green focus ring, hover states
+- **publicToken Usage**: Fetched from order, passed to both email and admin UI
+- **Copy Feedback**: Checkmark (✓) + "Αντιγράφηκε!" message (2s timeout)
+
+**Implementation Notes**:
+- Text template mirrors HTML structure with Greek labels
+- Status route already fetches `publicToken` (from Pass 179E)
+- Admin button reuses clipboard API pattern from public CopyLink
+- No schema changes - uses existing `publicToken` field
+- Graceful fallback if publicToken missing (shows nothing)
+
+**Impact**:
+- Email clients without HTML support get tracking links
+- Admin users can quickly share tracking URLs
+- Consistent UX between public and admin interfaces
+- Better customer communication with direct tracking access
+- Zero breaking changes
