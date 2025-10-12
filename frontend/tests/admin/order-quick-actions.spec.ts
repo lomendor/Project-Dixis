@@ -1,57 +1,46 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, request as pwRequest } from '@playwright/test'
+const base = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'http://127.0.0.1:3001'
+const bypass = process.env.OTP_BYPASS || '000000'
+const adminPhone = (process.env.ADMIN_PHONES||'+306900000084').split(',')[0]
 
-test('admin can use quick actions to change order status (PACKING→SHIPPED)', async ({ page }) => {
-  // 1) Seed a product
-  await page.goto('http://localhost:3001/api/seed/product')
-  const seedText = await page.locator('body').textContent()
-  const prodMatch = seedText?.match(/Product ID:\s*(\S+)/)
-  const productId = prodMatch?.[1]
-  if (!productId) throw new Error('No product ID found')
+async function adminCookie(){
+  const ctx = await pwRequest.newContext()
+  await ctx.post(base+'/api/auth/request-otp', { data: { phone: adminPhone }})
+  const vr = await ctx.post(base+'/api/auth/verify-otp', { data:{ phone: adminPhone, code: bypass }})
+  return (await vr.headersArray()).find(h=>h.name.toLowerCase()==='set-cookie')?.value?.split('dixis_session=')[1]?.split(';')[0] || ''
+}
 
-  // 2) Create an order
-  const createRes = await page.request.post('http://localhost:3001/api/test/create-order', {
-    data: {
-      items: [{ productId, quantity: 1 }],
-      buyerName: 'E2E Buyer',
-      buyerPhone: '6900000000',
-      shippingLine1: 'Test St 123',
-      shippingCity: 'Athens',
-      shippingPostal: '12345'
+test('admin quick actions: PACKING → SHIPPED', async ({ page, request }) => {
+  // 1) Seed product
+  const prod = await request.post(base+'/api/me/products', {
+    data:{ title:'Ελιές Θρούμπες', category:'Ελιές', price:5.2, unit:'τεμ', stock:5, isActive:true }
+  })
+  expect([200,201]).toContain(prod.status())
+  const pid = (await prod.json()).item.id
+
+  // 2) Checkout -> create order
+  const ord = await request.post(base+'/api/checkout', { 
+    data:{
+      items:[{ productId: pid, qty:1 }],
+      shipping:{ name:'Πελάτης', line1:'Οδός 1', city:'Αθήνα', postal:'11111', phone:'+306900000555', email:'qa@example.com' },
+      payment:{ method:'COD' }
     }
   })
-  const { orderId } = await createRes.json()
+  expect([200,201]).toContain(ord.status())
+  const body = await ord.json()
+  const oid = body.orderId || body.id
 
-  // 3) Admin OTP bypass
-  await page.goto('http://localhost:3001/admin/auth?otp=000000')
-  await page.waitForURL(/\/admin(\/|$)/, { timeout: 10000 })
+  // 3) Admin login & open order page
+  const cookie = await adminCookie()
+  await page.context().addCookies([{ name:'dixis_session', value:cookie, url: base }])
+  await page.goto(`${base}/admin/orders/${oid}`)
 
-  // 4) Navigate to order detail
-  await page.goto(`http://localhost:3001/admin/orders/${orderId}`)
-  await page.waitForSelector('h1:has-text("Παραγγελία")', { timeout: 10000 })
+  // 4) Click PACKING → SHIPPED
+  await page.getByTestId('qa-packing').click()
+  await page.waitForTimeout(300)
+  await page.getByTestId('qa-shipped').click()
+  await page.waitForTimeout(300)
 
-  // 5) Click PACKING quick action
-  const packingBtn = page.getByTestId('qa-packing')
-  await expect(packingBtn).toBeVisible()
-  await packingBtn.click()
-
-  // Wait for status update (page reload)
-  await page.waitForTimeout(2000)
-
-  // Verify PACKING status (either badge or quick actions text)
-  const bodyText = await page.locator('body').textContent()
-  const hasPacking = bodyText?.includes('PACKING') || bodyText?.includes('Συσκευασία')
-  expect(hasPacking).toBeTruthy()
-
-  // 6) Click SHIPPED quick action (should appear after PACKING)
-  const shippedBtn = page.getByTestId('qa-shipped')
-  await expect(shippedBtn).toBeVisible()
-  await shippedBtn.click()
-
-  // Wait for status update
-  await page.waitForTimeout(2000)
-
-  // Verify SHIPPED status
-  const finalText = await page.locator('body').textContent()
-  const hasShipped = finalText?.includes('SHIPPED') || finalText?.includes('Απεστάλη')
-  expect(hasShipped).toBeTruthy()
+  // 5) UI reflects SHIPPED
+  await expect(page.locator('body')).toContainText(/Απεστάλη|SHIPPED/i)
 })

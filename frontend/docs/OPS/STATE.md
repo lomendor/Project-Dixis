@@ -1255,3 +1255,4 @@ export default function Page() { redirect('/my/orders'); }
 - No server action needed for quick transitions
 - Better UX with immediate visual feedback
 - E2E coverage for status transition flow
+- HF 186A.e2e: Use BASE_URL + proper seeding for admin quick actions test
