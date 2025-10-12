@@ -64,13 +64,17 @@ export async function POST(
       data: { status: to }
     });
 
-    // Fetch order for email notification
+    // Fetch order with items for email notification
     const fresh = await prisma.order.findUnique({
       where: { id: updated.id },
-      select: {
-        id: true,
-        status: true,
-        publicToken: true
+      include: {
+        items: {
+          select: {
+            titleSnap: true,
+            qty: true,
+            price: true
+          }
+        }
       }
     }).catch((): null => null);
 
@@ -90,19 +94,47 @@ export async function POST(
       const customerEmail = process.env.DEV_MAIL_TO; // Send to dev for testing
 
       if (customerEmail && fresh) {
+        // Prepare items for email
+        const itemsForEmail = (fresh.items || []).map((it: any) => ({
+          title: it.titleSnap || '—',
+          qty: Number(it.qty || 0),
+          price: Number(it.price || 0)
+        }))
+
+        // Calculate totals
+        let totals: any = undefined
+        try {
+          const { calcTotals } = await import('@/lib/cart/totals')
+          // Use COURIER as default since shippingMethod not in Order schema yet
+          const method = 'COURIER'
+          const shippingMethod = method as 'PICKUP' | 'COURIER' | 'COURIER_COD'
+
+          totals = calcTotals({
+            items: itemsForEmail.map((x: any) => ({ price: x.price, qty: x.qty })),
+            shippingMethod,
+            baseShipping: undefined,
+            codFee: undefined,
+            taxRate: 0
+          })
+        } catch (_) {}
+
         await sendMailSafe({
           to: customerEmail,
           subject: orderStatusTpl.subject(updated.id, to),
           html: orderStatusTpl.html({
             id: updated.id,
             status: to,
-            publicToken: fresh.publicToken || ''
-          }),
+            publicToken: fresh.publicToken || '',
+            items: itemsForEmail,
+            totals
+          } as any),
           text: orderStatusTpl.text({
             id: updated.id,
             status: to,
-            publicToken: fresh.publicToken || ''
-          })
+            publicToken: fresh.publicToken || '',
+            items: itemsForEmail,
+            totals
+          } as any)
         });
         console.log(`[admin] Status email sent to ${customerEmail}`);
       }
