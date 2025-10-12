@@ -2,6 +2,7 @@
 import { statusLabel } from '@/lib/tracking/labels'
 import { normalizeStatus } from '@/lib/tracking/status'
 import Timeline from './components/Timeline'
+import { CopyLink } from './components/CopyLink'
 
 export const metadata = {
   title: 'Παρακολούθηση παραγγελίας — Dixis',
@@ -32,6 +33,8 @@ export default async function TrackPage({ params }:{ params:{ token:string } }){
   return (
     <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
       <h1>Παρακολούθηση παραγγελίας</h1>
+
+      <CopyLink token={String(o.publicToken || params.token)} />
 
       <Timeline currentStatus={currentStatus} />
 
