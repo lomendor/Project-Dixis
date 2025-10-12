@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         select: { id: true, publicToken: true, total: true }
       });
 
-      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines };
+      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines, shippingMethod, computedShipping };
     });
 
     // EMAILS: post-commit (best-effort)
