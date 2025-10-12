@@ -1,49 +1,33 @@
-// @ts-nocheck
-import { statusLabel } from '@/lib/tracking/labels'
-import { normalizeStatus } from '@/lib/tracking/status'
-import Timeline from './components/Timeline'
-import { CopyLink } from './components/CopyLink'
+import StatusBadge from '@/components/admin/StatusBadge'
 
-export const metadata = {
-  title: 'Παρακολούθηση παραγγελίας — Dixis',
-  robots: { index:false, follow:false }
-}
-
-async function getData(token:string){
-  const res = await fetch((process.env.NEXT_PUBLIC_SITE_URL||'') + '/api/public/track/' + token, { cache:'no-store' })
-  if(!res.ok) return null
+async function fetchData(token:string){
+  const base = process.env.NEXT_PUBLIC_SITE_URL || ''
+  const res = await fetch(`${base}/api/track/${token}`, { cache:'no-store' })
+  if (!res.ok) return null
   return res.json()
 }
 
 export default async function TrackPage({ params }:{ params:{ token:string } }){
-  const data = await getData(params.token)
-  if(!data?.ok || !data?.order){
-    return (
-      <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
-        <h1>Παρακολούθηση παραγγελίας</h1>
-        <div role="alert" style={{background:'#fff4f4', border:'1px solid #f5c2c7', padding:12, borderRadius:8, marginTop:12}}>
-          <b>Μη έγκυρο token.</b> Δεν βρέθηκε παραγγελία. Ελέγξτε το link στο email ή επικοινωνήστε μαζί μας.
-        </div>
-      </main>
-    )
-  }
-  const o = data.order
-  const currentStatus = normalizeStatus(o.status)
-
+  const data = await fetchData(params.token)
+  if (!data) return <div style={{padding:16}}>Δεν βρέθηκε παραγγελία για το συγκεκριμένο σύνδεσμο.</div>
+  const fmt = (n:number)=> new Intl.NumberFormat('el-GR',{ style:'currency', currency:'EUR' }).format(n)
   return (
-    <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
-      <h1>Παρακολούθηση παραγγελίας</h1>
-
-      <CopyLink token={String(o.publicToken || params.token)} />
-
-      <Timeline currentStatus={currentStatus} />
-
-      <section style={{padding:'12px 0', marginTop:'20px'}}>
-        <div><b>Κωδικός:</b> {params.token}</div>
-        <div><b>Κατάσταση:</b> {statusLabel(o.status)}</div>
-        {typeof o.total === 'number' ? <div><b>Σύνολο:</b> {new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(o.total)}</div> : null}
-        <div style={{marginTop:10, fontSize:13, color:'#666'}}>Τελευταία ενημέρωση: {new Date(o.updatedAt||o.createdAt).toLocaleString('el-GR')}</div>
-      </section>
-    </main>
+    <div style={{padding:'20px 16px', maxWidth:720, margin:'0 auto'}}>
+      <h1 style={{fontSize:22, marginBottom:12}}>Παρακολούθηση Παραγγελίας</h1>
+      <div style={{display:'flex', gap:12, alignItems:'center', marginBottom:12}}>
+        <span style={{opacity:0.7}}>Κωδικός:</span><b>#{data.id}</b>
+        <span style={{opacity:0.7}}>Κατάσταση:</span><StatusBadge status={data.status}/>
+      </div>
+      <div style={{opacity:0.8, marginTop:6}}>
+        <div>Ημ/νία: {data.createdAt ? new Date(data.createdAt).toLocaleString('el-GR') : '—'}</div>
+        <div>Πελάτης: {data.buyerName || '—'}</div>
+        <div>Σύνολο: {typeof data.total === 'number' ? fmt(data.total) : '—'}</div>
+      </div>
+      <p style={{marginTop:16, fontSize:14, opacity:0.7}}>
+        Ο σύνδεσμος είναι μόνο για ενημέρωση κατάστασης.
+      </p>
+    </div>
   )
 }
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
