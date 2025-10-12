@@ -192,7 +192,7 @@ export default async function AdminOrderDetailPage({
             {/* Tracking Link */}
             <div className="mb-6 pb-6 border-b border-gray-200">
               <p className="text-sm text-gray-600 mb-2">Tracking Link:</p>
-              <CopyTrackingLink orderId={order.id} phone={String((order as any).buyerPhone || '')} />
+              <CopyTrackingLink publicToken={order.publicToken || ''} />
             </div>
 
             {availableTransitions.length > 0 ? (

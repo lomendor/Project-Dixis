@@ -97,6 +97,11 @@ export async function POST(
             id: updated.id,
             status: to,
             publicToken: fresh.publicToken || ''
+          }),
+          text: orderStatusTpl.text({
+            id: updated.id,
+            status: to,
+            publicToken: fresh.publicToken || ''
           })
         });
         console.log(`[admin] Status email sent to ${customerEmail}`);
