@@ -957,6 +957,7 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 179R: Legacy redirect /orders/track/[token] → /track/[token] + e2e ✅
 - Pass 180T: Tracking Timeline UI — visual order flow (PAID → PACKING → SHIPPED → DELIVERED) + Greek labels ✅
 - Pass 180T.F: Invalid-token UX + A11Y polish (role/aria-current/alert) ✅
+- Pass 181C: Copy tracking link button (Αντιγραφή συνδέσμου) + e2e ✅
 
 ## Pass 179E — Status Email Tracking Links (2025-10-11)
 **Goal**: Add deep links to public order tracking page in status change emails
@@ -1076,3 +1077,34 @@ export default function Page() { redirect('/my/orders'); }
 - WCAG compliance improvements
 - More helpful UX when users have token issues
 - Maintains Greek-first approach with accessible patterns
+
+## Pass 181C — Copy Tracking Link Button (2025-10-12)
+**Goal**: Add "Copy Link" button for easy sharing of order tracking URL
+
+**Changes**:
+- ✅ Created `CopyLink.tsx` component: Client-side button with clipboard API integration
+- ✅ Integrated into `/track/[token]` page above timeline
+- ✅ Created e2e test `tests/tracking/copy-link.spec.ts`: Validates button click and state change
+- ✅ Updated STATE.md with Pass 181C documentation
+
+**Technical Details**:
+- **Button Label (EL)**: "Αντιγραφή συνδέσμου" → "Αντιγράφηκε!" (2s timeout)
+- **Clipboard API**: Uses `navigator.clipboard.writeText()` with try/catch fallback
+- **Visual Feedback**: Green background (#f0fdf4) and text (#16a34a) when copied
+- **Accessibility**: `aria-live="polite"` announces state change to screen readers
+- **URL Display**: Shows full tracking URL below button for manual copy
+- **Token Source**: Uses `publicToken` from order data, falls back to URL param
+
+**Implementation Notes**:
+- Client component using `'use client'` directive and React `useState`
+- Graceful degradation if clipboard API not available
+- Auto-resets to initial state after 2 seconds
+- No server-side logic or API changes
+- Positioned prominently after heading, before timeline
+
+**Impact**:
+- Easier order tracking link sharing for users
+- Better UX for mobile devices (tap to copy vs manual selection)
+- Accessibility-first design with aria-live regions
+- Greek-first labels maintain local market consistency
+- Zero breaking changes, purely additive feature
