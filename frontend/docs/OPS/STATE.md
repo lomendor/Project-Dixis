@@ -1,3 +1,27 @@
+## Pass 190B — Admin Orders API → embed totals (single source of truth) + e2e ✅
+- **Admin API Enhancement**: GET /api/admin/orders/[id] now returns `totals` object
+- **Single Source**: Uses same `calcTotals()` helper from Pass 190A
+- **Default Values**: COURIER shipping (€3.50), no COD fee (stored order doesn't track payment method yet)
+- **Tax Support**: Reads DIXIS_TAX_RATE env var (default 0)
+- **Test**: `tests/admin/admin-orders-totals.spec.ts` - validates totals exist and have positive values
+
+### Response Format
+```json
+{
+  "id": "...",
+  "status": "PENDING",
+  "total": 17.5,
+  "items": [...],
+  "totals": {
+    "subtotal": 14.00,
+    "shipping": 3.50,
+    "codFee": 0.00,
+    "tax": 0.00,
+    "grandTotal": 17.50
+  }
+}
+```
+
 ## Pass 190A — Totals/Taxes Roll-out (checkout API + helper tests) ✅
 - **Totals Helper**: Created `lib/cart/totals.ts` with single source of truth for all totals calculation
 - **Types**: `Money`, `ShippingMethod`, `TotalsInput`, `Totals` interfaces
