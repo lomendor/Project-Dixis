@@ -1,3 +1,19 @@
+## Pass 191 — Admin Producers CRUD (list/create/toggle active) + e2e ✅
+- **Admin API**: GET /api/admin/producers (list with filters), POST /api/admin/producers (create), PATCH /api/admin/producers/[id] (update/toggle), DELETE /api/admin/producers/[id]
+- **Admin UI**: Simple /admin/producers page with create form and list table
+- **Toggle Active**: Convenience endpoint for toggling producer isActive status
+- **E2E Test**: `tests/admin/producers-crud.spec.ts` - validates create, list, toggle operations
+- **EL-first**: Greek labels throughout UI (Όνομα, Περιοχή, Κατηγορία, etc.)
+- **Schema**: Uses existing Producer model (id, name, slug, region, category, email, phone, isActive)
+
+### API Endpoints
+```typescript
+GET  /api/admin/producers      // List with ?q= search, ?active=1 filter
+POST /api/admin/producers      // Create (name, slug, region, category, email?, phone?)
+PATCH /api/admin/producers/[id] // Update or toggleActive
+DELETE /api/admin/producers/[id] // Delete
+```
+
 ## Pass 190C — Admin UI TotalsCard (EL) + tolerant UI e2e ✅
 - **TotalsCard Component**: Reusable admin component displaying subtotal, shipping, COD, tax, grandTotal with EL formatting
 - **EL Formatting**: Uses `fmtEUR()` from `lib/cart/totals` for Greek currency display
