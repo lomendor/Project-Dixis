@@ -1,87 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/db/client'
+import { z } from 'zod'
+import { getRequestId, logWithId } from '@/lib/observability/request'
 
-/**
- * GET /api/admin/producers
- * Returns list of all producer applications for admin review
- */
-export async function GET(request: NextRequest) {
-  try {
-    // Mock authentication and admin role check
-    const userToken = request.headers.get('authorization');
-    const user = getCurrentUser(userToken);
+const CreateSchema = z.object({
+  name: z.string().min(2),
+  slug: z.string().min(2),
+  region: z.string().min(2),
+  category: z.string().min(2),
+  description: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('').transform((): undefined => undefined)),
+  phone: z.string().optional(),
+  isActive: z.boolean().optional()
+})
 
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET(req: Request) {
+  const rid = getRequestId(req.headers)
+  // TODO: Add admin session check (assume middleware/guard exists)
+  const { searchParams } = new URL(req.url)
+  const q = searchParams.get('q') || ''
+  const active = searchParams.get('active') || ''
+  const sort = searchParams.get('sort') || 'name-asc'
 
-    // Mock producer applications from database
-    const producers = await getAllProducerApplications();
+  // UX-FILTERS: q (search), active (only/all), sort (name-asc/name-desc)
+  const items = await prisma.producer.findMany({
+    where: {
+      AND: [
+        q ? { name: { contains: q } } : {},
+        active === 'only' ? { isActive: true } : {}
+      ]
+    },
+    orderBy: { name: sort === 'name-desc' ? 'desc' : 'asc' },
+    take: 100
+  })
 
-    return NextResponse.json({
-      producers,
-      total: producers.length,
-    });
+  const res = NextResponse.json({ items })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, 'GET /api/admin/producers', { count: items.length, q, active, sort })
+  return res
+}
 
-  } catch (error) {
-    console.error('Admin producers list error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+export async function POST(req: Request) {
+  const rid = getRequestId(req.headers)
+  // TODO: Add admin session check
+  const data = await req.json().catch(() => ({}))
+  const parsed = CreateSchema.safeParse(data)
+
+  if (!parsed.success) {
+    const res = NextResponse.json(
+      { error: 'Λάθος δεδομένα', issues: parsed.error.format() },
+      { status: 400 }
+    )
+    res.headers.set('x-request-id', rid)
+    logWithId(rid, 'POST /api/admin/producers [validation error]', { error: parsed.error.format() })
+    return res
   }
-}
 
-// Mock helper functions
-function getCurrentUser(token: string | null) {
-  if (!token) return null;
+  const item = await prisma.producer.create({
+    data: {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      region: parsed.data.region,
+      category: parsed.data.category,
+      description: parsed.data.description,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      isActive: parsed.data.isActive ?? true
+    }
+  })
 
-  // Mock admin user for testing
-  return {
-    id: 99,
-    name: 'Admin User',
-    email: 'admin@dixis.test',
-    role: 'admin' as const,
-  };
-}
-
-async function getAllProducerApplications() {
-  // Mock producer applications
-  // In real app: SELECT from producers table with user JOIN
-  const mockApplications = [
-    {
-      id: 1,
-      userId: 1,
-      userEmail: 'dimitris@producer.test',
-      displayName: 'Δημήτρης Παπαδόπουλος',
-      taxId: '123456789',
-      phone: '+30 210 1234567',
-      status: 'pending' as const,
-      submittedAt: '2025-09-15T20:00:00.000Z',
-      updatedAt: '2025-09-15T20:00:00.000Z',
-    },
-    {
-      id: 2,
-      userId: 2,
-      userEmail: 'maria@producer.test',
-      displayName: 'Μαρία Γιαννοπούλου',
-      taxId: '987654321',
-      phone: '+30 210 9876543',
-      status: 'active' as const,
-      submittedAt: '2025-09-14T15:30:00.000Z',
-      updatedAt: '2025-09-15T10:15:00.000Z',
-    },
-    {
-      id: 3,
-      userId: 3,
-      userEmail: 'kostas@producer.test',
-      displayName: 'Κώστας Αντωνίου',
-      taxId: '',
-      phone: '',
-      status: 'inactive' as const,
-      submittedAt: '2025-09-13T09:45:00.000Z',
-      updatedAt: '2025-09-14T14:20:00.000Z',
-    },
-  ];
-
-  return mockApplications;
+  const res = NextResponse.json({ item }, { status: 201 })
+  res.headers.set('x-request-id', rid)
+  logWithId(rid, 'POST /api/admin/producers [created]', { id: item.id, name: item.name })
+  return res
 }

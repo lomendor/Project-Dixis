@@ -51,6 +51,7 @@ model Product {
 
 model Order {
   id             String      @id @default(cuid())
+  publicToken    String      @unique @default(uuid())
   buyerPhone     String
   buyerName      String
   shippingLine1  String
@@ -65,6 +66,7 @@ model Order {
 
   @@index([buyerPhone, createdAt])
   @@index([status, createdAt])
+  @@index([publicToken])
 }
 
 model OrderItem {

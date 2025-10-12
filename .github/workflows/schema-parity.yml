@@ -1,0 +1,60 @@
+name: Schema Parity Gate
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/prisma/schema.prisma'
+      - 'frontend/prisma/schema.ci.prisma'
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/prisma/schema.prisma'
+      - 'frontend/prisma/schema.ci.prisma'
+
+jobs:
+  check-parity:
+    name: Verify schema.ci.prisma ↔ schema.prisma parity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run schema sync script
+        working-directory: frontend
+        run: npm run ci:prisma:sync
+
+      - name: Check for schema divergence
+        working-directory: frontend
+        run: |
+          if git diff --exit-code prisma/schema.ci.prisma; then
+            echo "✅ schema.ci.prisma is in sync with schema.prisma"
+          else
+            echo "❌ schema.ci.prisma is out of sync with schema.prisma"
+            echo ""
+            echo "Detected changes:"
+            git diff prisma/schema.ci.prisma
+            echo ""
+            echo "To fix this, run: npm run ci:prisma:sync"
+            exit 1
+          fi
+
+      - name: Validation summary
+        if: success()
+        run: |
+          echo "### ✅ Schema Parity Validated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- schema.prisma (PostgreSQL)" >> $GITHUB_STEP_SUMMARY
+          echo "- schema.ci.prisma (SQLite)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Both schemas are in sync." >> $GITHUB_STEP_SUMMARY

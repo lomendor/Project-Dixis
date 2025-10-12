@@ -64,19 +64,83 @@ export async function POST(
       data: { status: to }
     });
 
-    // Optional: send email to customer (no-op if SMTP missing)
-    // TODO: Re-enable when mailer module is available
-    // try {
-    //   const { sendMailSafe } = await import('@/lib/mail/mailer');
-    //   await sendMailSafe({
-    //     to: customerEmail,
-    //     subject: `Ενημέρωση παραγγελίας #${updated.id}`,
-    //     html: `<p>Η παραγγελία σας άλλαξε σε: <b>${to}</b>.</p>`
-    //   });
-    // } catch (e) {
-    //   console.warn('[admin status mail] skipped:', (e as Error).message);
-    // }
-    console.log(`[admin] Status changed ${from}→${to} (email notification disabled)`);
+    // Fetch order with items for email notification
+    const fresh = await prisma.order.findUnique({
+      where: { id: updated.id },
+      include: {
+        items: {
+          select: {
+            titleSnap: true,
+            qty: true,
+            price: true
+          }
+        }
+      }
+    }).catch((): null => null);
+
+    // Send status update email to customer
+    try {
+      const { sendMailSafe } = await import('@/lib/mail/mailer');
+      const orderStatusTpl = await import('@/lib/mail/templates/orderStatus');
+
+      // Get customer email from order (if stored)
+      const orderWithEmail = await prisma.order.findUnique({
+        where: { id },
+        select: { buyerPhone: true }
+      });
+
+      // For now, we don't have buyer email in schema
+      // Email will be sent when email field is added
+      const customerEmail = process.env.DEV_MAIL_TO; // Send to dev for testing
+
+      if (customerEmail && fresh) {
+        // Prepare items for email
+        const itemsForEmail = (fresh.items || []).map((it: any) => ({
+          title: it.titleSnap || '—',
+          qty: Number(it.qty || 0),
+          price: Number(it.price || 0)
+        }))
+
+        // Calculate totals
+        let totals: any = undefined
+        try {
+          const { calcTotals } = await import('@/lib/cart/totals')
+          // Use COURIER as default since shippingMethod not in Order schema yet
+          const method = 'COURIER'
+          const shippingMethod = method as 'PICKUP' | 'COURIER' | 'COURIER_COD'
+
+          totals = calcTotals({
+            items: itemsForEmail.map((x: any) => ({ price: x.price, qty: x.qty })),
+            shippingMethod,
+            baseShipping: undefined,
+            codFee: undefined,
+            taxRate: 0
+          })
+        } catch (_) {}
+
+        await sendMailSafe({
+          to: customerEmail,
+          subject: orderStatusTpl.subject(updated.id, to),
+          html: orderStatusTpl.html({
+            id: updated.id,
+            status: to,
+            publicToken: fresh.publicToken || '',
+            items: itemsForEmail,
+            totals
+          } as any),
+          text: orderStatusTpl.text({
+            id: updated.id,
+            status: to,
+            publicToken: fresh.publicToken || '',
+            items: itemsForEmail,
+            totals
+          } as any)
+        });
+        console.log(`[admin] Status email sent to ${customerEmail}`);
+      }
+    } catch (e) {
+      console.warn('[admin status mail] skipped:', (e as Error).message);
+    }
 
     console.log(`[order] ${id} status ${from}→${to}`);
     

@@ -1,153 +1,71 @@
-import { prisma } from '@/lib/db/client';
-import { requireAdmin } from '@/lib/auth/admin';
-import Link from 'next/link';
+import Link from 'next/link'
+import StatusBadge from '@/components/admin/StatusBadge'
+import { Suspense } from 'react'
+import OrdersClient from './widget'
 
-export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Παραγγελίες (Admin) | Dixis' };
+async function fetchOrders(params: URLSearchParams){
+  // Προσπάθησε να καλέσεις υπάρχον admin API
+  const q = params.toString()
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/admin/orders${q ? `?${q}`:''}`, { cache:'no-store' })
+  if (!res.ok) throw new Error('Failed to load orders')
+  const data = await res.json()
+  return data
+}
 
-const statuses = ['PENDING', 'PAID', 'PACKING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
-
-export default async function AdminOrdersPage({
-  searchParams
-}: {
-  searchParams?: { q?: string; status?: string };
-}) {
-  await requireAdmin?.();
-
-  const q = searchParams?.q?.trim() || '';
-  const st = (searchParams?.status || '').toUpperCase();
-  
-  const where: any = {};
-  if (st && statuses.includes(st as any)) {
-    where.status = st;
-  }
-  
-  if (q) {
-    where.OR = [
-      { id: { contains: q } },
-      { buyerName: { contains: q } },
-      { buyerPhone: { contains: q } }
-    ];
-  }
-
-  const orders = await prisma.order.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      createdAt: true,
-      total: true,
-      status: true,
-      buyerName: true,
-      buyerPhone: true
-    }
-  });
-
+export default async function OrdersPage({ searchParams }:{ searchParams: Record<string,string|undefined> }){
+  const sp = new URLSearchParams()
+  for (const k of ['q','status','page']) if (searchParams[k]) sp.set(k, String(searchParams[k]))
+  const data = await fetchOrders(sp)
+  const items = Array.isArray(data.items)? data.items : (Array.isArray(data)? data : [])
+  const page = Number(searchParams.page||1)||1
+  const total = Number(data.total||items.length)
+  const perPage = Number(data.perPage||20)
+  const pages = Math.max(1, Math.ceil(total/perPage))
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Παραγγελίες (Admin)</h1>
-      
-      <form className="flex gap-4 mb-6">
-        <input
-          name="q"
-          placeholder="Αναζήτηση (ID/όνομα/τηλέφωνο)"
-          defaultValue={q}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-        />
-        <select
-          name="status"
-          defaultValue={st}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
-        >
-          <option value="">Όλες</option>
-          {statuses.map(s => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          Φίλτρα
-        </button>
-      </form>
-
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                #
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ημερομηνία
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Πελάτης
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Τηλέφωνο
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Σύνολο
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Κατάσταση
-              </th>
+    <div style={{padding:'16px 20px'}}>
+      <h1 style={{fontSize:20, marginBottom:12}}>Παραγγελίες</h1>
+      <OrdersClient />
+      <div style={{overflowX:'auto', marginTop:12}}>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead>
+            <tr style={{textAlign:'left',borderBottom:'1px solid #eee'}}>
+              <th style={{padding:'8px'}}>ID</th>
+              <th style={{padding:'8px'}}>Ημ/νία</th>
+              <th style={{padding:'8px'}}>Πελάτης</th>
+              <th style={{padding:'8px'}}>Τηλέφωνο</th>
+              <th style={{padding:'8px'}}>Email</th>
+              <th style={{padding:'8px'}}>Status</th>
+              <th style={{padding:'8px'}}>Σύνολο</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {orders.map(o => (
-              <tr key={o.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <Link
-                    href={`/admin/orders/${o.id}`}
-                    className="text-green-600 hover:text-green-700 font-medium"
-                  >
-                    #{o.id.substring(0, 8)}
-                  </Link>
+          <tbody>
+            {items.map((o:any)=>(
+              <tr key={o.id} style={{borderBottom:'1px solid #f1f5f9'}}>
+                <td style={{padding:'8px'}}>
+                  <Link href={`/admin/orders/${o.id}`} style={{textDecoration:'underline'}}>{o.id}</Link>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {new Date(o.createdAt).toLocaleString('el-GR')}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {o.buyerName || '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {o.buyerPhone || '-'}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {new Intl.NumberFormat('el-GR', {
-                    style: 'currency',
-                    currency: 'EUR'
-                  }).format(Number(o.total || 0))}
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      o.status === 'DELIVERED'
-                        ? 'bg-green-100 text-green-800'
-                        : o.status === 'CANCELLED'
-                        ? 'bg-red-100 text-red-800'
-                        : o.status === 'SHIPPED'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {String(o.status || 'PENDING')}
-                  </span>
-                </td>
+                <td style={{padding:'8px'}}>{o.createdAt? new Date(o.createdAt).toLocaleString('el-GR') : '—'}</td>
+                <td style={{padding:'8px'}}>{o.buyerName||'—'}</td>
+                <td style={{padding:'8px'}}>{o.buyerPhone||'—'}</td>
+                <td style={{padding:'8px'}}>{o.buyerEmail||'—'}</td>
+                <td style={{padding:'8px'}}><StatusBadge status={o.status}/></td>
+                <td style={{padding:'8px'}}>{typeof o.total==='number' ? new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(o.total) : '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        
-        {orders.length === 0 && (
-          <p className="text-center py-8 text-gray-500">Δεν βρέθηκαν παραγγελίες.</p>
-        )}
       </div>
-    </main>
-  );
+      <div style={{marginTop:12,display:'flex',gap:8,alignItems:'center'}}>
+        <span>Σελίδα {page}/{pages}</span>
+        <div style={{marginLeft:'auto',display:'flex',gap:6}}>
+          {page>1 && <Link href={`/admin/orders?${new URLSearchParams({...Object.fromEntries(sp), page:String(page-1)})}`}>« Προηγούμενη</Link>}
+          {page<pages && <Link href={`/admin/orders?${new URLSearchParams({...Object.fromEntries(sp), page:String(page+1)})}`}>Επόμενη »</Link>}
+        </div>
+      </div>
+    </div>
+  )
 }
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+

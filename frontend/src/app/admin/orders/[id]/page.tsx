@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
+import PrintButton from '@/components/PrintButton';
+import OrderActions from '@/components/admin/OrderActions';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -91,7 +93,9 @@ export default async function AdminOrderDetailPage({
         >
           ← Πίσω στη λίστα
         </Link>
-        <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -186,10 +190,16 @@ export default async function AdminOrderDetailPage({
           <div className="bg-white rounded-lg shadow p-6 sticky top-4">
             <h2 className="text-xl font-semibold mb-4">Ενέργειες</h2>
 
+            {/* Quick Actions */}
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <p className="text-sm text-gray-600 mb-3">Γρήγορες ενέργειες:</p>
+              <OrderActions id={order.id} status={currentStatus} />
+            </div>
+
             {/* Tracking Link */}
             <div className="mb-6 pb-6 border-b border-gray-200">
               <p className="text-sm text-gray-600 mb-2">Tracking Link:</p>
-              <CopyTrackingLink orderId={order.id} phone={String((order as any).buyerPhone || '')} />
+              <CopyTrackingLink publicToken={order.publicToken || ''} />
             </div>
 
             {availableTransitions.length > 0 ? (

@@ -4,6 +4,8 @@ import { sendMailSafe } from '@/lib/mail/mailer';
 import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
+import { normalizeMethod, calculateShippingCost } from '@/contracts/shipping';
+import { calcTotals } from '@/lib/cart/totals';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
@@ -51,9 +53,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Υπολογισμός συνόλου από DB τιμές
-      const total = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
+      const subtotal = lines.reduce((s:number, l:any) => s + Number(l.price) * Number(l.qty), 0);
+
+      // Υπολογισμός μεταφορικών (normalize aliases to canonical)
+      const shippingMethod = normalizeMethod(payload?.shipping?.method);
+      const computedShipping = Number(calculateShippingCost(shippingMethod, subtotal));
+      const total = subtotal + computedShipping;
 
       // Δημιουργία παραγγελίας + items (snapshots)
+      // Note: shippingMethod & computedShipping not in schema, total includes shipping
       const order = await tx.order.create({
         data: {
           status: 'PENDING',
@@ -76,10 +84,10 @@ export async function POST(request: NextRequest) {
             }))
           }
         },
-        select: { id: true, total: true }
+        select: { id: true, publicToken: true, total: true }
       });
 
-      return { orderId: order.id, total: order.total, lines };
+      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines, shippingMethod, computedShipping };
     });
 
     // EMAILS: post-commit (best-effort)
@@ -87,6 +95,7 @@ export async function POST(request: NextRequest) {
       const email = payload?.shipping?.email?.trim?.();
       const phone = payload?.shipping?.phone?.trim?.() || '';
       const orderId = result.orderId;
+      const publicToken = result.publicToken;
       const adminTo = process.env.DEV_MAIL_TO || '';
 
       // 1) Order confirmation to customer
@@ -96,6 +105,7 @@ export async function POST(request: NextRequest) {
           subject: OrderTpl.subject(orderId),
           html: OrderTpl.html({
             id: orderId,
+            publicToken,
             total: Number(result.total || 0),
             items: result.lines.map((i: any) => ({
               title: String(i.title || ''),
@@ -160,8 +170,15 @@ export async function POST(request: NextRequest) {
       console.warn('[mail] low-stock admin failed:', (e as Error).message);
     }
 
-    // ΕΠΙΤΥΧΙΑ
-    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
+    // ΕΠΙΤΥΧΙΑ - calculate totals for response
+    const totals = calcTotals({
+      items: result.lines.map((l: any) => ({ price: Number(l.price || 0), qty: Number(l.qty || 0) })),
+      shippingMethod: result.shippingMethod as any,
+      baseShipping: result.computedShipping,
+      codFee: result.shippingMethod === 'COURIER_COD' ? 2.0 : 0,
+      taxRate: 0
+    });
+    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total, totals }, { status: 201 });
   } catch (e: any) {
     const code = Number(e?.code || 0);
     if (code === 409) return NextResponse.json({ error: e.message || 'Μη διαθέσιμο απόθεμα' }, { status: 409 });
