@@ -1384,3 +1384,9 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 189A: Public Tracking MVP (/track/:token + API + e2e)
 - Pass 189B: Status emails now include tracking link (Public Tracking)
 - HF-200A.2: dev seed endpoint + hardened items mapping; stabilized E2E
+
+## Pass 201S — Shipping Totals Consistency
+- Unified totals helper (`lib/cart/totals.ts`)
+- Checkout API: totals computation (log-only, already in place)
+- Admin Orders UI: subtotal breakdown + shipping note
+- 2 Playwright unit tests (COD courier, Pickup)

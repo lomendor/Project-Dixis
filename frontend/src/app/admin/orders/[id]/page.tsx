@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
 import PrintButton from '@/components/PrintButton';
 import OrderActions from '@/components/admin/OrderActions';
+import { fmtEUR } from '@/lib/cart/totals';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -180,6 +181,20 @@ export default async function AdminOrderDetailPage({
                     currency: 'EUR'
                   }).format(total)}
                 </span>
+              </div>
+              {/* Totals Breakdown (read-only, best-effort) */}
+              <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 space-y-1">
+                <div className="flex justify-between">
+                  <span>Υποσύνολο:</span>
+                  <span>{fmtEUR(order.items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 0), 0))}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Μεταφορικά:</span>
+                  <span>Περιλαμβάνονται στο σύνολο</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Σημείωση: Τα μεταφορικά και η μέθοδος αποστολής αποθηκεύονται στο σύνολο.
+                </div>
               </div>
             </div>
           </div>
