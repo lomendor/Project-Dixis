@@ -1,3 +1,21 @@
+## Pass 190A — Totals/Taxes Roll-out (checkout API + helper tests) ✅
+- **Totals Helper**: Created `lib/cart/totals.ts` with single source of truth for all totals calculation
+- **Types**: `Money`, `ShippingMethod`, `TotalsInput`, `Totals` interfaces
+- **Calculation**: `calcTotals()` returns `{ subtotal, shipping, codFee, tax, grandTotal }`
+- **Shipping Logic**: PICKUP (€0), COURIER (€3.50), COURIER_COD (€3.50 + €2 COD fee)
+- **Tax Support**: Configurable `taxRate` on subtotal (default 0)
+- **EL Formatting**: `fmtEUR()` for Greek currency, `round2()` for 2-decimal precision
+- **API Integration**: Checkout route now returns `totals` object in response (non-breaking addition)
+
+### Tests
+- **Unit**: `tests/totals/totals.helper.spec.ts` - 7 test cases covering all shipping methods, tax, rounding
+- **Integration**: `tests/totals/checkout.totals.spec.ts` - 2 API tests validating POST /api/checkout returns correct totals for COURIER_COD and PICKUP
+
+### Technical Implementation
+```typescript
+// Checkout response now includes:
+{ success: true, orderId, total, totals: { subtotal, shipping, codFee, tax, grandTotal } }
+```
 
 ## Pass 111 — PostgreSQL CI/CD consolidation ✅
 - **Database Provider**: Already using PostgreSQL in Prisma schema (provider = "postgresql")
