@@ -1143,3 +1143,66 @@ export default function Page() { redirect('/my/orders'); }
 - Consistent UX between public and admin interfaces
 - Better customer communication with direct tracking access
 - Zero breaking changes
+
+## Pass 183E — Email Base Template + EL Footer (2025-10-12)
+**Goal**: Create unified email template with Greek-first copy and professional footer
+
+**Changes**:
+- ✅ Created `base.ts` template: Reusable HTML/text email base with header, footer, company info
+- ✅ Updated `orderStatus.ts`: Now uses `baseHtml()` and `baseText()` for consistent branding
+- ✅ Updated `newOrderAdmin.ts`: Now uses `baseText()` with formatted currency and company footer
+- ✅ Added env vars to `.env.example`: NEXT_PUBLIC_COMPANY_NAME, NEXT_PUBLIC_SUPPORT_EMAIL, NEXT_PUBLIC_SUPPORT_PHONE
+- ✅ Created test `tests/emails/status-footer.spec.ts`: Validates footer presence and tracking links
+- ✅ Updated STATE.md with Pass 183E documentation
+
+**Technical Details**:
+- **Base Template Components**:
+  - `companyInfo()`: Reads company details from env vars with fallbacks
+  - `baseHtml(title, bodyHtml)`: Wraps content in professional email layout with header/footer
+  - `baseText(title, lines)`: Text-only version with company footer
+
+- **Email Layout (HTML)**:
+  - Header: Dark background (#111) with company name
+  - Body: Clean white content area with title and dynamic body HTML
+  - Footer: Light gray (#fafafa) with contact info (email, phone, website)
+  - Greek-first: All labels and structure in Greek
+
+- **Status Email Updates**:
+  - Button color changed from green (#16a34a) to dark (#111) for brand consistency
+  - Uses `baseHtml()` wrapper for header/footer
+  - Text version uses `baseText()` with filtered lines
+  - Both versions include tracking link when publicToken available
+
+- **Admin Email Updates**:
+  - Uses `baseText()` for consistent footer
+  - Currency formatting with `Intl.NumberFormat('el-GR', {style:'currency', currency:'EUR'})`
+  - Null-safe with `|| '—'` fallbacks for buyer info
+
+**Environment Variables**:
+```env
+NEXT_PUBLIC_COMPANY_NAME=Dixis
+NEXT_PUBLIC_SUPPORT_EMAIL=support@example.com
+NEXT_PUBLIC_SUPPORT_PHONE=+30 210 0000000
+```
+
+**Test Coverage**:
+- `tests/emails/status-footer.spec.ts`:
+  - Validates HTML email includes "Επικοινωνία:" footer
+  - Validates tracking link button text "Παρακολούθηση παραγγελίας"
+  - Validates text version includes "Παρακολούθηση:" with token
+  - Validates admin email includes footer and proper formatting
+
+**Implementation Notes**:
+- Zero breaking changes - only additive wrapper functionality
+- All existing email logic preserved, now wrapped in base template
+- Dynamic company info from env allows easy branding customization
+- Greek-first approach maintained throughout (footer labels, currency, formatting)
+- Consistent visual identity across all transactional emails
+
+**Impact**:
+- Professional email appearance with branded header/footer
+- Consistent contact information across all customer communications
+- Easy to customize branding via environment variables
+- Better trust signals with visible support contact info
+- Improved accessibility with text alternatives
+- Zero disruption to existing email functionality

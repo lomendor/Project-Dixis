@@ -1,3 +1,5 @@
+import { baseText } from './base'
+
 export function subject(orderId: string) {
   return `Dixis — Νέα Παραγγελία #${orderId}`;
 }
@@ -8,13 +10,16 @@ export function text(params: {
   buyerPhone: string;
   total: number;
 }) {
-  return [
+  const fmt = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
+
+  const lines = [
     `Νέα παραγγελία #${params.id}`,
-    '',
-    `Πελάτης: ${params.buyerName}`,
-    `Τηλέφωνο: ${params.buyerPhone}`,
-    `Σύνολο: €${params.total.toFixed(2)}`,
+    `Πελάτης: ${params.buyerName || '—'}`,
+    `Τηλέφωνο: ${params.buyerPhone || '—'}`,
+    `Σύνολο: ${fmt(params.total || 0)}`,
     '',
     `Λεπτομέρειες: /admin/orders/${params.id}`
-  ].join('\n');
+  ];
+
+  return baseText(subject(params.id), lines);
 }
