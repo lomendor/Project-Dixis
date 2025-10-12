@@ -5,6 +5,7 @@ import * as OrderTpl from '@/lib/mail/templates/orderConfirmation';
 import * as NewOrderAdmin from '@/lib/mail/templates/newOrderAdmin';
 import * as LowStockAdmin from '@/lib/mail/templates/lowStockAdmin';
 import { normalizeMethod, calculateShippingCost } from '@/contracts/shipping';
+import { calcTotals } from '@/lib/cart/totals';
 
 export async function POST(request: NextRequest) {
   // ATOMIC CHECKOUT BEGIN
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
         select: { id: true, publicToken: true, total: true }
       });
 
-      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines };
+      return { orderId: order.id, publicToken: order.publicToken, total: order.total, lines, shippingMethod, computedShipping };
     });
 
     // EMAILS: post-commit (best-effort)
@@ -169,8 +170,15 @@ export async function POST(request: NextRequest) {
       console.warn('[mail] low-stock admin failed:', (e as Error).message);
     }
 
-    // ΕΠΙΤΥΧΙΑ
-    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total }, { status: 201 });
+    // ΕΠΙΤΥΧΙΑ - calculate totals for response
+    const totals = calcTotals({
+      items: result.lines.map((l: any) => ({ price: Number(l.price || 0), qty: Number(l.qty || 0) })),
+      shippingMethod: result.shippingMethod as any,
+      baseShipping: result.computedShipping,
+      codFee: result.shippingMethod === 'COURIER_COD' ? 2.0 : 0,
+      taxRate: 0
+    });
+    return NextResponse.json({ success: true, orderId: result.orderId, total: result.total, totals }, { status: 201 });
   } catch (e: any) {
     const code = Number(e?.code || 0);
     if (code === 409) return NextResponse.json({ error: e.message || 'Μη διαθέσιμο απόθεμα' }, { status: 409 });
