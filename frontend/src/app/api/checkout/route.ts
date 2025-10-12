@@ -173,9 +173,9 @@ export async function POST(request: NextRequest) {
     // ΕΠΙΤΥΧΙΑ - calculate totals for response
     const totals = calcTotals({
       items: result.lines.map((l: any) => ({ price: Number(l.price || 0), qty: Number(l.qty || 0) })),
-      shippingMethod: shippingMethod as any,
-      baseShipping: computedShipping,
-      codFee: shippingMethod === 'COURIER_COD' ? 2.0 : 0,
+      shippingMethod: result.shippingMethod as any,
+      baseShipping: result.computedShipping,
+      codFee: result.shippingMethod === 'COURIER_COD' ? 2.0 : 0,
       taxRate: 0
     });
     return NextResponse.json({ success: true, orderId: result.orderId, total: result.total, totals }, { status: 201 });
