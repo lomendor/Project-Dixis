@@ -1,5 +1,6 @@
 'use client';
 import { useCart } from '@/lib/cart/context';
+import type { CartItem } from '@/lib/cart/store';
 import { calc, fmt } from '@/lib/checkout/totals';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -8,10 +9,11 @@ export default function Page(){
   const router = useRouter();
   const searchParams = useSearchParams();
   const err = searchParams?.get('err');
-  const { items, clear } = useCart();
+  const cart = useCart();
+  const items = cart.getCart().items;
   const [loading, setLoading] = useState(false);
 
-  const lines = items.map(i=>({ price:Number(i.price||0), qty:Number(i.qty||0) }));
+  const lines = items.map((i: CartItem)=>({ price:Number(i.price||0), qty:Number(i.qty||0) }));
   const totals = calc(lines);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
@@ -37,7 +39,7 @@ export default function Page(){
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          items: items.map(i=>({ productId: i.productId, qty: i.qty })),
+          items: items.map((i: CartItem)=>({ productId: i.productId, qty: i.qty })),
           shipping: { name, phone, email, line1, city, postal },
           payment: { method:'COD' }
         })
@@ -50,7 +52,7 @@ export default function Page(){
 
       const body = await res.json();
       const orderId = body.orderId || body.id || '';
-      clear();
+      cart.clear();
       router.push(`/thank-you?orderId=${encodeURIComponent(orderId)}`);
     }catch(e){
       router.push('/checkout?err=submit');
@@ -85,7 +87,7 @@ export default function Page(){
           <aside style={{border:'1px solid #eee',borderRadius:8,padding:16,backgroundColor:'#f8f9fa'}}>
             <h3 style={{margin:'0 0 12px 0'}}>Σύνοψη Παραγγελίας</h3>
             <ul style={{listStyle:'none',padding:0,margin:'0 0 16px 0'}}>
-              {items.map(it=>(
+              {items.map((it: CartItem)=>(
                 <li key={it.productId} style={{display:'flex',justifyContent:'space-between',gap:8,padding:'6px 0'}}>
                   <span>{it.title} × {it.qty}</span>
                   <span>{fmt(Number(it.price)*Number(it.qty))}</span>
