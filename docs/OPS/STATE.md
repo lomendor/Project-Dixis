@@ -1,3 +1,46 @@
+# OS / STATE — Pass 202P Complete (PDAC-lite SOP)
+
+**Date**: 2025-10-13
+**Status**: PDAC-lite Workflow Enabled
+**Branch**: ci/pass-ci01-stabilize (pending docs-only commit)
+
+## Pass 202P — Enable PDAC-lite (Plan→Delegate→Assess→Codify) ✅
+
+**Date**: 2025-10-13
+**Files**:
+- `docs/AGENT/SOPs/SOP-PDAC-lite.md` — 4-phase structured workflow methodology
+- `~/.claude/agents/plan-agent.md` — Architecture planning sub-agent (Opus, read-only)
+- `~/.claude/agents/scan-agent.md` — Inventory scanner sub-agent (Sonnet, read-only)
+- `~/.claude/agents/test-agent.md` — E2E test strategy sub-agent (Sonnet, read-only)
+
+**Changes**:
+- ✅ Created comprehensive PDAC-lite SOP with 4-phase workflow
+- ✅ Phase 1 (Plan): Context gathering in Plan Mode (read-only, no writes)
+- ✅ Phase 2 (Delegate): 3 specialized sub-agents append findings to TASKS
+- ✅ Phase 3 (Assess): Synthesis + quality gates (AC, tests, risks)
+- ✅ Phase 4 (Codify): Small commits, PR hygiene, documentation
+- ✅ Integration with existing SOP-Feature-Pass
+- ✅ Fallback if sub-agents unavailable (parent agent research)
+- ✅ Example workflow for shipping method selection
+- ✅ Metrics, troubleshooting, and success criteria
+
+**Architecture**:
+- Documentation-only changes (no app code modified)
+- Sub-agents use read-only tools (Read, Grep, Glob, Search_files)
+- plan-agent: Opus model for high-level architecture/decomposition
+- scan-agent: Sonnet model for inventory (routes, API, DB models, tests)
+- test-agent: Sonnet model for E2E test strategy (2-3 scenarios max)
+- Idempotent operation (safe to run multiple times)
+
+**When to Use PDAC-lite**:
+- ✅ Complex features (>3 files affected)
+- ✅ Architectural decisions needed
+- ✅ Unclear test strategy
+- ❌ Trivial fixes (<10 LOC)
+- ❌ Documentation-only changes
+
+---
+
 # OS / STATE — Pass 169 Complete
 
 **Date**: 2025-10-08
