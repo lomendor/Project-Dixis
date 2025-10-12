@@ -8,7 +8,7 @@ const CreateSchema = z.object({
   region: z.string().min(2),
   category: z.string().min(2),
   description: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('').transform(() => undefined)),
+  email: z.string().email().optional().or(z.literal('').transform((): undefined => undefined)),
   phone: z.string().optional(),
   isActive: z.boolean().optional()
 })
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   const items = await prisma.producer.findMany({
     where: {
       AND: [
-        q ? { name: { contains: q, mode: 'insensitive' } } : {},
+        q ? { name: { contains: q } } : {},
         onlyActive ? { isActive: true } : {}
       ]
     },

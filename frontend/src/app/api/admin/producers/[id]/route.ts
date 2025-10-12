@@ -8,7 +8,7 @@ const UpdateSchema = z.object({
   region: z.string().min(2).optional(),
   category: z.string().min(2).optional(),
   description: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('').transform(() => undefined)),
+  email: z.string().email().optional().or(z.literal('').transform((): undefined => undefined)),
   phone: z.string().optional(),
   isActive: z.boolean().optional(),
   toggleActive: z.boolean().optional() // convenience
