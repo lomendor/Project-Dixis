@@ -1256,3 +1256,4 @@ export default function Page() { redirect('/my/orders'); }
 - Better UX with immediate visual feedback
 - E2E coverage for status transition flow
 - HF 186A.e2e: Use BASE_URL + proper seeding for admin quick actions test
+- Pass 187B: Admin Orders List (filters/search/status badges/pagination) + e2e
