@@ -1,3 +1,21 @@
+## Pass 193 — Admin Producers UX polish (search/filter/sort + nav link) + e2e ✅
+- **Search**: Text search on producer name via `?q=` parameter
+- **Filter**: Active/All filter via `?active=only` or `?active=` (all)
+- **Sort**: Name ascending/descending via `?sort=name-asc` or `?sort=name-desc`
+- **Server Component**: Converted from client to server component using Next.js searchParams
+- **Greek UI**: EL-first labels (Αναζήτηση ονόματος, Μόνο ενεργοί, Όνομα ↑/↓)
+- **E2E Test**: `tests/admin/producers-ux.spec.ts` - validates search, filter, and sort functionality
+- **API Enhancement**: GET /api/admin/producers now supports q/active/sort parameters
+
+### UX Features
+```typescript
+// URL-based filtering
+/admin/producers?q=Ελιές&active=only&sort=name-desc
+
+// API parameters
+GET /api/admin/producers?q=search&active=only&sort=name-asc|name-desc
+```
+
 ## Pass 192 — Observability Lite rollout (x-request-id + /api/dev/health db-ping) + e2e ✅
 - **x-request-id Header**: Added to all admin producers API responses (GET/POST/PATCH/DELETE)
 - **Structured Logging**: `logWithId(rid, msg, details)` helper logs with request ID prefix for traceability

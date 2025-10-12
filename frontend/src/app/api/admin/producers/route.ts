@@ -19,22 +19,24 @@ export async function GET(req: Request) {
   // TODO: Add admin session check (assume middleware/guard exists)
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
-  const onlyActive = searchParams.get('active') === '1'
+  const active = searchParams.get('active') || ''
+  const sort = searchParams.get('sort') || 'name-asc'
 
+  // UX-FILTERS: q (search), active (only/all), sort (name-asc/name-desc)
   const items = await prisma.producer.findMany({
     where: {
       AND: [
         q ? { name: { contains: q } } : {},
-        onlyActive ? { isActive: true } : {}
+        active === 'only' ? { isActive: true } : {}
       ]
     },
-    orderBy: { name: 'asc' },
+    orderBy: { name: sort === 'name-desc' ? 'desc' : 'asc' },
     take: 100
   })
 
   const res = NextResponse.json({ items })
   res.headers.set('x-request-id', rid)
-  logWithId(rid, 'GET /api/admin/producers', { count: items.length, q, onlyActive })
+  logWithId(rid, 'GET /api/admin/producers', { count: items.length, q, active, sort })
   return res
 }
 

@@ -1,145 +1,114 @@
-'use client';
-import * as React from 'react'
+import React from 'react'
+import Link from 'next/link'
 
-interface Producer {
-  id: string
-  name: string
-  email?: string | null
-  phone?: string | null
-  region: string
-  category: string
-  isActive: boolean
+function FIcon({dir}:{dir:'asc'|'desc'}){
+  return <span aria-hidden>{dir==='asc' ? '↑' : '↓'}</span>
 }
 
-function Row({p, onToggle}:{p:Producer; onToggle:(id:string)=>void}){
-  return (
-    <tr>
-      <td style={{padding:'8px'}}>{p.name}</td>
-      <td style={{padding:'8px'}}>{p.region}</td>
-      <td style={{padding:'8px'}}>{p.category}</td>
-      <td style={{padding:'8px'}}>{p.email||'—'}</td>
-      <td style={{padding:'8px'}}>{p.phone||'—'}</td>
-      <td style={{padding:'8px'}}>
-        <span style={{color: p.isActive?'green':'#999'}}>
-          {p.isActive?'Ενεργός':'Ανενεργός'}
-        </span>
-      </td>
-      <td style={{padding:'8px'}}>
-        <button onClick={()=>onToggle(p.id)} style={{cursor:'pointer'}}>
-          toggle
-        </button>
-      </td>
-    </tr>
-  )
-}
+async function fetchProducers(q:string, active:string, sort:string){
+  const params = new URLSearchParams()
+  if(q) params.set('q', q)
+  if(active) params.set('active', active)
+  if(sort) params.set('sort', sort)
 
-export default function ProducersPage(){
-  const [items,setItems]=React.useState<Producer[]>([])
-  const [form,setForm]=React.useState({
-    name:'',
-    slug:'',
-    region:'',
-    category:'',
-    email:'',
-    phone:''
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:3001'
+  const res = await fetch(`${url}/api/admin/producers?${params.toString()}`, {
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' }
   })
 
-  const load=async()=>{
-    const r=await fetch('/api/admin/producers')
-    const j=await r.json()
-    setItems(j.items||[])
-  }
+  if(!res.ok) throw new Error('Failed to load producers')
+  return res.json()
+}
 
-  React.useEffect(()=>{ load() },[])
+export default async function Page({ searchParams }: {
+  searchParams: Promise<{ q?:string; active?:string; sort?:string }>
+}){
+  const params = await searchParams
+  const q = params?.q || ''
+  const active = params?.active || ''
+  const sort = params?.sort || 'name-asc'
 
-  const submit=async(e:React.FormEvent)=>{
-    e.preventDefault()
-    await fetch('/api/admin/producers',{
-      method:'POST',
-      headers:{'content-type':'application/json'},
-      body: JSON.stringify(form)
-    })
-    setForm({name:'',slug:'',region:'',category:'',email:'',phone:''})
-    load()
-  }
-
-  const toggle=async(id:string)=>{
-    await fetch(`/api/admin/producers/${id}`,{
-      method:'PATCH',
-      headers:{'content-type':'application/json'},
-      body: JSON.stringify({toggleActive:true})
-    })
-    load()
-  }
+  const data = await fetchProducers(q, active, sort)
+  const list = data?.items || data || []
 
   return (
-    <main style={{padding:16}}>
+    <main style={{padding:'16px', maxWidth:960, margin:'0 auto'}}>
       <h1>Παραγωγοί</h1>
 
-      <form onSubmit={submit} style={{display:'flex', gap:8, margin:'12px 0', flexWrap:'wrap'}}>
+      <form action="/admin/producers" method="get" style={{
+        display:'grid',
+        gridTemplateColumns:'1fr 160px 160px',
+        gap:8,
+        marginBottom:16
+      }}>
         <input
-          placeholder="Όνομα"
-          value={form.name}
-          onChange={e=>setForm({...form, name:e.target.value})}
-          required
-          style={{padding:'4px 8px'}}
+          name="q"
+          defaultValue={q}
+          placeholder="Αναζήτηση ονόματος…"
+          style={{padding:'8px'}}
         />
-        <input
-          placeholder="Slug"
-          value={form.slug}
-          onChange={e=>setForm({...form, slug:e.target.value})}
-          required
-          style={{padding:'4px 8px'}}
-        />
-        <input
-          placeholder="Περιοχή"
-          value={form.region}
-          onChange={e=>setForm({...form, region:e.target.value})}
-          required
-          style={{padding:'4px 8px'}}
-        />
-        <input
-          placeholder="Κατηγορία"
-          value={form.category}
-          onChange={e=>setForm({...form, category:e.target.value})}
-          required
-          style={{padding:'4px 8px'}}
-        />
-        <input
-          placeholder="Email"
-          value={form.email}
-          onChange={e=>setForm({...form, email:e.target.value})}
-          style={{padding:'4px 8px'}}
-        />
-        <input
-          placeholder="Τηλέφωνο"
-          value={form.phone}
-          onChange={e=>setForm({...form, phone:e.target.value})}
-          style={{padding:'4px 8px'}}
-        />
-        <button type="submit" style={{padding:'4px 12px', cursor:'pointer'}}>
-          Προσθήκη
+        <select name="active" defaultValue={active} style={{padding:'8px'}}>
+          <option value="">Όλοι</option>
+          <option value="only">Μόνο ενεργοί</option>
+        </select>
+        <select name="sort" defaultValue={sort} style={{padding:'8px'}}>
+          <option value="name-asc">Όνομα ↑</option>
+          <option value="name-desc">Όνομα ↓</option>
+        </select>
+        <button
+          type="submit"
+          style={{
+            gridColumn:'1 / -1',
+            padding:'8px',
+            cursor:'pointer',
+            backgroundColor:'#0070f3',
+            color:'white',
+            border:'none',
+            borderRadius:'4px'
+          }}
+        >
+          Εφαρμογή
         </button>
       </form>
 
-      <table style={{borderCollapse:'collapse', width:'100%', marginTop:'20px'}}>
+      <table width="100%" cellPadding={8} style={{borderCollapse:'collapse'}}>
         <thead>
-          <tr style={{backgroundColor:'#f5f5f5'}}>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Όνομα</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Περιοχή</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Κατηγορία</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Email</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Τηλ</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Κατάσταση</th>
-            <th style={{padding:'8px', textAlign:'left', borderBottom:'2px solid #ddd'}}>Ενέργεια</th>
+          <tr style={{textAlign:'left', borderBottom:'2px solid #ddd', backgroundColor:'#f5f5f5'}}>
+            <th>
+              Όνομα {sort.startsWith('name-') && <FIcon dir={sort.endsWith('asc')?'asc':'desc'} />}
+            </th>
+            <th>Περιοχή</th>
+            <th>Κατηγορία</th>
+            <th>Ενεργός</th>
           </tr>
         </thead>
         <tbody>
-          {items.map(p=>(
-            <Row key={p.id} p={p} onToggle={toggle}/>
+          {list.map((p:any)=>(
+            <tr key={p.id} style={{borderBottom:'1px solid #f0f0f0'}}>
+              <td>{p.name||'—'}</td>
+              <td>{p.region||'—'}</td>
+              <td>{p.category||'—'}</td>
+              <td style={{color: p.isActive ? 'green' : '#999'}}>
+                {p.isActive ? 'Ναι' : 'Όχι'}
+              </td>
+            </tr>
           ))}
+          {list.length===0 && (
+            <tr>
+              <td colSpan={4} style={{opacity:0.7, textAlign:'center', padding:16}}>
+                Δεν βρέθηκαν αποτελέσματα.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+
+      <div style={{marginTop:16}}>
+        <Link href="/admin" style={{color:'#0070f3', textDecoration:'none'}}>
+          ← Επιστροφή στο Admin
+        </Link>
+      </div>
     </main>
   )
 }
