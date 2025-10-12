@@ -1143,3 +1143,63 @@ export default function Page() { redirect('/my/orders'); }
 - Consistent UX between public and admin interfaces
 - Better customer communication with direct tracking access
 - Zero breaking changes
+
+## Pass 185S — Order Summary in Status Emails (2025-10-12)
+**Goal**: Add order summary with items and totals to status change emails
+
+**Changes**:
+- ✅ Updated `orderStatus.ts`: Added `renderSummary()` and `renderSummaryText()` helpers
+- ✅ Enhanced HTML email: Table with items (title, qty, price, line total) + totals breakdown
+- ✅ Enhanced text email: Plain text item list + totals summary  
+- ✅ Updated status route: Fetches items, calculates totals using `calcTotals()` helper
+- ✅ Created test `tests/emails/order-summary.spec.ts`: Validates summary in both formats
+- ✅ Updated STATE.md with Pass 185S documentation
+
+**Technical Details**:
+- **Order Summary Table (HTML)**:
+  - Headers: Προϊόν, Ποσ., Τιμή, Μερικό
+  - Rows: Up to 20 items with Greek currency formatting
+  - Totals section: Υποσύνολο, Μεταφορικά, Αντικαταβολή (conditional), Φόρος (conditional), Σύνολο
+  - Styled with borders, padding, responsive table layout
+
+- **Order Summary (Text)**:
+  - Format: "Product × Qty — €Price"
+  - Totals breakdown in plain text
+  - Filters empty lines for clean output
+
+- **Status Route Integration**:
+  - Fetches order items (titleSnap, qty, price) with order query
+  - Maps items to email-friendly format with null-safe defaults
+  - Calculates totals using `calcTotals()` from `@/lib/cart/totals`
+  - Determines shipping method from order (PICKUP, COURIER, COURIER_COD)
+  - Passes items and totals to both html() and text() template functions
+  - Graceful fallback: Shows empty summary if items/totals unavailable
+
+- **Helper Functions**:
+  - `fmtEUR()`: Greek currency formatting (€18,20)
+  - `calcTotals()`: Single source of truth for order calculations
+  - `renderSummary()`: Generates HTML table with totals
+  - `renderSummaryText()`: Generates plain text summary
+
+**Test Coverage**:
+- `tests/emails/order-summary.spec.ts`:
+  - Validates HTML includes "Σύνοψη παραγγελίας" heading
+  - Validates item titles appear in HTML (Ελιές Θρούμπες, Λάδι 1L)
+  - Validates totals labels (Υποσύνολο, Σύνολο)
+  - Validates text version includes summary and totals
+
+**Implementation Notes**:
+- Zero breaking changes - summary only appears when items provided
+- Works with existing email infrastructure
+- Greek-first labels throughout (Ποσότητα, Μερικό, Υποσύνολο)
+- Conditional display of COD fee and tax (only if > 0)
+- Up to 20 items shown (prevents email bloat for large orders)
+- Type-safe with LineItem and Totals interfaces
+
+**Impact**:
+- Customers see complete order details in status emails
+- No need to visit site to check order contents
+- Transparent pricing breakdown builds trust
+- Consistent calculations using shared totals helper
+- Better UX for order tracking communications
+- Professional, detailed email format
