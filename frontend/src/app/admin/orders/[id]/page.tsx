@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { CopyTrackingLink } from './CopyTrackingLink';
 import PrintButton from '@/components/PrintButton';
-import { OrderStatusQuickActions } from './OrderStatusQuickActions';
+import OrderActions from '@/components/admin/OrderActions';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -191,10 +191,10 @@ export default async function AdminOrderDetailPage({
             <h2 className="text-xl font-semibold mb-4">Ενέργειες</h2>
 
             {/* Quick Actions */}
-            <OrderStatusQuickActions
-              orderId={order.id}
-              currentStatus={currentStatus}
-            />
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <p className="text-sm text-gray-600 mb-3">Γρήγορες ενέργειες:</p>
+              <OrderActions id={order.id} status={currentStatus} />
+            </div>
 
             {/* Tracking Link */}
             <div className="mb-6 pb-6 border-b border-gray-200">
