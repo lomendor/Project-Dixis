@@ -1259,3 +1259,4 @@ export default function Page() { redirect('/my/orders'); }
 - Pass 187B: Admin Orders List (filters/search/status badges/pagination) + e2e
 - Pass 188A: Admin Order quick actions (DELIVERED/CANCELLED) + e2e
 - Pass 189A: Public Tracking MVP (/track/:token + API + e2e)
+- Pass 189B: Status emails now include tracking link (Public Tracking)
