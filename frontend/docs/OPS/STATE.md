@@ -1,3 +1,22 @@
+## Pass 190C — Admin UI TotalsCard (EL) + tolerant UI e2e ✅
+- **TotalsCard Component**: Reusable admin component displaying subtotal, shipping, COD, tax, grandTotal with EL formatting
+- **EL Formatting**: Uses `fmtEUR()` from `lib/cart/totals` for Greek currency display
+- **Conditional Display**: Only shows COD and tax rows if values > 0
+- **Test ID**: `data-testid="totals-card"` for e2e testing
+- **Tolerant E2E**: `tests/admin/admin-orders-ui-totals.spec.ts` - checks for UI presence, skips gracefully if not found
+- **Ready for Integration**: Component created, no admin order detail page exists yet (will be used when page is built)
+
+### Component Structure
+```tsx
+<TotalsCard totals={{
+  subtotal: 14.00,
+  shipping: 3.50,
+  codFee: 0.00,
+  tax: 0.00,
+  grandTotal: 17.50
+}} />
+```
+
 ## Pass 190B — Admin Orders API → embed totals (single source of truth) + e2e ✅
 - **Admin API Enhancement**: GET /api/admin/orders/[id] now returns `totals` object
 - **Single Source**: Uses same `calcTotals()` helper from Pass 190A
