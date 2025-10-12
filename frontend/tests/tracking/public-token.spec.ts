@@ -3,13 +3,13 @@ import { test, expect, request as pwRequest } from '@playwright/test'
 const base = process.env.PLAYWRIGHT_BASE_URL || process.env.BASE_URL || 'http://127.0.0.1:3001'
 
 test('public tracking: create order → fetch via token → page shows details', async ({ request }) => {
-  // 1) Seed product via dev endpoint
-  const seed = await request.post(`${base}/api/dev/seed-product`, { 
-    data:{ 
-      title:'Λάδι Ελιάς Test', 
-      category:'Έλαια', 
-      price:8.9, 
-      unit:'τεμ', 
+  // 1) Seed product via dev endpoint (producer-aware)
+  const seed = await request.post(`${base}/api/dev/seed-producer-product`, {
+    data:{
+      title:'Λάδι Ελιάς Test',
+      category:'Έλαια',
+      price:8.9,
+      unit:'τεμ',
       stock:10
     }
   })
