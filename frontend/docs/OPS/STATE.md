@@ -1,3 +1,11 @@
+## Pass 203A — Admin Orders Totals Display (read-only) + E2E ✅
+- **Totals Presenter**: Created `lib/admin/orders/totalsPresenter.ts` for safe read-only totals computation
+- **Admin Orders Detail**: Wired to display full breakdown (Υποσύνολο, Μεταφορικά, Αντικαταβολή, ΦΠΑ) via unified helper
+- **E2E Test**: New `tests/admin/orders/totals-ui.spec.ts` verifies Greek labels + € format
+- **Data Safety**: `data-testid="totals-card"` added for test stability
+- **No Breaking Changes**: NO schema changes, NO API changes (read-only presenter), backward compatible
+- **TypeScript**: 0 errors in strict mode ✅
+
 ## Pass 174Q.reapply — PR Template/Hygiene Sweep + Pre-Plan 203A (docs-only) ✅
 - **PR Template**: Added `.github/pull_request_template.md` with required sections (Summary, AC, Test Plan, Reports)
 - **Labeler Config**: Created `.github/labeler.yml` for automated PR labeling (ai-pass, risk-ok)
