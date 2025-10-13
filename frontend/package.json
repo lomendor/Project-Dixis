@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:3001": "PORT=3001 next dev -p 3001",
     "dev:stop": "bash ../scripts/dev/stop-port.sh 3001",
     "dev:start": "PORT=3001 next dev -p 3001",
     "dev:restart": "npm run dev:stop && npm run dev:start",
@@ -98,6 +99,7 @@
     "agent:schema": "node ../scripts/scan-prisma.mjs",
     "agent:docs": "npm run agent:routes && npm run agent:schema",
     "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1",
+    "test:smoke": "playwright test -g @smoke --reporter=line",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
