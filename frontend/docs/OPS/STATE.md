@@ -5,6 +5,7 @@
 - **PDAC Phases 1-3**: Executed Plan→Delegate→Assess (emulated plan/scan/test sub-agents)
 - **Scope Definition**: Primary (Admin Orders totals UI refactor ~30 LOC) + Optional (Checkout shipping selector ~50 LOC)
 - **Quality Gates**: All criteria met, ready for Codify phase pending user scope decision
+- **Orchestration**: PR #524 (Pass 202S) and #525 (Pass 174Q) merged successfully; hygiene sweep applied labels/Reports to 31 open PRs
 
 ## Pass 193 — Admin Producers UX polish (search/filter/sort + nav link) + e2e ✅
 - **Search**: Text search on producer name via `?q=` parameter
