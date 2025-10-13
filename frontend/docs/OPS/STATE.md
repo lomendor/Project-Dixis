@@ -1605,4 +1605,11 @@ export default function Page() { redirect('/my/orders'); }
 - Checkout API: totals computation (log-only, already in place)
 - Admin Orders UI: subtotal breakdown + shipping note
 - 2 Playwright unit tests (COD courier, Pickup)
-- Pass 174R.4: Money Contract Normalization (cents-first projection in helpers/adapters/tests)
+- Pass 176: Storefront /products (EL-first) + idempotent seed + e2e
+
+## Pass 176 — Storefront /products (EL-first) + idempotent seed + e2e ✅
+**Date**: 2025-10-14
+- Created /products page with Greek-first UI (search, filters, grid layout)
+- Made seed idempotent (deleteMany before create)
+- Created E2E tests: products list load + search filter
+- Fixed Next.js 15 async searchParams requirement
