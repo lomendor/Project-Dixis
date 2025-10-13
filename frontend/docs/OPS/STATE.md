@@ -1,3 +1,11 @@
+## Pass 174Q.reapply — PR Template/Hygiene Sweep + Pre-Plan 203A (docs-only) ✅
+- **PR Template**: Added `.github/pull_request_template.md` with required sections (Summary, AC, Test Plan, Reports)
+- **Labeler Config**: Created `.github/labeler.yml` for automated PR labeling (ai-pass, risk-ok)
+- **Pre-Plan Pass 203A**: Created comprehensive TASKS and SUMMARY documents for Admin Orders totals display + optional Checkout shipping selector
+- **PDAC Phases 1-3**: Executed Plan→Delegate→Assess (emulated plan/scan/test sub-agents)
+- **Scope Definition**: Primary (Admin Orders totals UI refactor ~30 LOC) + Optional (Checkout shipping selector ~50 LOC)
+- **Quality Gates**: All criteria met, ready for Codify phase pending user scope decision
+
 ## Pass 193 — Admin Producers UX polish (search/filter/sort + nav link) + e2e ✅
 - **Search**: Text search on producer name via `?q=` parameter
 - **Filter**: Active/All filter via `?active=only` or `?active=` (all)
