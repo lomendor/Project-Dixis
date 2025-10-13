@@ -1,3 +1,17 @@
+## Pass 208 — ESLint Zero + Land PR #536 ✅
+- **ESLint Zero**: Fixed the single blocking ESLint error
+  - Changed `@ts-ignore` to `@ts-expect-error` in `src/app/api/orders/public/[token]/route.ts:41`
+  - Result: 0 errors, 430 warnings (down from 1 error, 430 warnings)
+  - Status: GREEN - zero blocking errors ✅
+- **LINT-REPORT.md Updated**: Reflected ESLint Zero achievement
+  - Updated summary, overall stats, critical issues section
+  - Marked blocking error fix as complete
+- **Surgical Fix**: Minimal change without altering behavior
+  - TypeScript best practice: `@ts-expect-error` is safer than `@ts-ignore`
+  - Only touched 1 line in 1 file (route.ts:41)
+- **No Business Logic Changes**: Pure code quality improvement
+- **Next**: Land PR #536 (Port Discipline) with ESLint Zero confidence
+
 ## Pass 207 — Lint Report + PR Hygiene Sweep ✅
 - **ESLint Report**: Created `docs/OPS/LINT-REPORT.md` with objective lint analysis
   - 1 error, 430 warnings across 236 files
