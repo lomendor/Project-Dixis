@@ -1,3 +1,22 @@
+## Pass 203B — Admin Orders LIST Totals E2E Test Coverage ✅
+- **Test Coverage**: Added `tests/admin/orders/totals-list.spec.ts` for Admin Orders LIST page
+- **Discovery**: LIST page already displays totals correctly in EL format via `Intl.NumberFormat('el-GR')` (line 52)
+- **Test-Only PR**: No application code changes required - existing implementation already correct
+- **E2E Validation**: Test verifies € symbol presence, "Σύνολο" column header, and table rendering
+- **Greek Localization**: Confirms EL currency formatting works as expected in LIST view
+- **Minimal Impact**: +48 LOC test-only, zero risk to production code
+- **PR #529**: feat/pass-203b-admin-orders-list-e2e → main (auto-merge enabled)
+
+## Pass 203A — Admin Orders Detail Totals Display (read-only) + E2E ✅
+- **Totals Presenter**: Created `lib/admin/orders/totalsPresenter.ts` for safe read-only totals computation
+- **Admin Orders Detail**: Wired to display full breakdown (Υποσύνολο, Μεταφορικά, Αντικαταβολή, ΦΠΑ) via unified helper
+- **E2E Test**: New `tests/admin/orders/totals-ui.spec.ts` verifies Greek labels + € format
+- **Data Safety**: `data-testid="totals-card"` added for test stability
+- **No Breaking Changes**: NO schema changes, NO API changes (read-only presenter), backward compatible
+- **TypeScript**: 0 errors in strict mode ✅
+- **PR #527**: feat/pass-203a-admin-orders-totals → main (MERGED ✅)
+- **PR #528**: docs/pass-203a-state → main (STATE.md update, auto-merge enabled)
+
 ## Pass 174Q.reapply — PR Template/Hygiene Sweep + Pre-Plan 203A (docs-only) ✅
 - **PR Template**: Added `.github/pull_request_template.md` with required sections (Summary, AC, Test Plan, Reports)
 - **Labeler Config**: Created `.github/labeler.yml` for automated PR labeling (ai-pass, risk-ok)
