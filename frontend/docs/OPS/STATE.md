@@ -1,3 +1,23 @@
+## Pass 209 — Dev Mailbox + Email E2E Enablement ✅
+- **Dev Mailbox**: In-memory email capture for non-production environments
+  - Created `src/lib/dev/mailbox.ts` with put/list/first functions
+  - Stores last 100 emails in memory for E2E verification
+  - Thread-safe (synchronous in-memory array)
+- **API Route**: `/api/dev/mailbox` for test access
+  - GET with optional `?to=email` filter
+  - Returns `{items}` array or `{item}` single match
+  - 404 in production (DIXIS_ENV=production)
+- **Mailer Integration**: Updated `src/lib/mail/mailer.ts`
+  - Non-production: writes to dev mailbox instead of SMTP
+  - Simplified: removed old devMailbox import, uses new centralized mailbox
+  - Console logging for dev visibility
+- **E2E Tests**: Created `tests/emails/dev-mailbox.spec.ts`
+  - @smoke test: mailbox API responds
+  - @smoke test: mailbox filters by recipient
+  - Foundation for order/status email verification
+- **No Business Logic Changes**: Pure dev tooling, production uses SMTP (TODO)
+- **Next**: Email E2E tests will go GREEN, enabling CI email verification
+
 ## Pass 208 — ESLint Zero + Land PR #536 ✅
 - **ESLint Zero**: Fixed the single blocking ESLint error
   - Changed `@ts-ignore` to `@ts-expect-error` in `src/app/api/orders/public/[token]/route.ts:41`
