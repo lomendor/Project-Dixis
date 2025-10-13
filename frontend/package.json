@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "next dev",
     "dev:3001": "PORT=3001 next dev -p 3001",
+    "dev:stop": "bash ../scripts/dev/stop-port.sh 3001",
+    "dev:start": "PORT=3001 next dev -p 3001",
+    "dev:restart": "npm run dev:stop && npm run dev:start",
     "clean": "rimraf .next && rimraf node_modules/.cache || true",
     "dev:clean": "npm run clean:cache && npm run dev",
     "build": "next build",
