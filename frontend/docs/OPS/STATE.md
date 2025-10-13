@@ -1,3 +1,26 @@
+## Pass 204 — Harden Session Cookies (HttpOnly/SameSite/Secure) + OTP Auth ✅
+- **Security Helper**: Created `lib/auth/cookies.ts` with industry-standard cookie attributes
+  - `setSessionCookie()`: HttpOnly, SameSite=lax, Secure (prod), Path=/, MaxAge=7d
+  - `clearSessionCookie()`: Safe cookie removal
+  - `getSessionToken()`: Extract token from request cookies
+- **OTP Authentication**: Created `/api/auth/request-otp` and `/api/auth/verify-otp` endpoints
+  - Admin bypass with `ADMIN_PHONES` and `OTP_BYPASS` env vars
+  - Session cookie set on successful verification
+  - Graceful error handling with Greek messages
+- **E2E Security Test**: Created `tests/security/cookie-security.spec.ts`
+  - Verifies HttpOnly, SameSite=lax, Path=/, MaxAge=604800 attributes
+  - Tests XSS/CSRF protection mechanisms
+  - Validates admin authentication flow
+- **Security Attributes**:
+  - **HttpOnly**: ✅ Prevents JavaScript access (XSS protection)
+  - **SameSite=lax**: ✅ Prevents CSRF attacks
+  - **Secure**: ✅ HTTPS-only in production (DIXIS_ENV=production)
+  - **Path=/**: ✅ Cookie available across all routes
+  - **MaxAge=604800**: ✅ 7-day session expiration
+- **TypeScript**: 0 errors in strict mode ✅
+- **No Business Logic Changes**: Pure security hardening, backward compatible
+- **PR #533**: feat/pass-204-harden-session-cookies → main (auto-merge enabled)
+
 ## Pass 203C — Admin Status Actions (Greek labels + E2E) ✅
 - **Status Helper**: Created `lib/admin/orders/status.ts` with Greek label mappings (Πληρωμένη, Συσκευασία, Απεστάλη, Παραδόθηκε, Ακυρώθηκε)
 - **Admin Orders Detail**: Enhanced status change buttons to display Greek labels via `statusLabel()` helper
