@@ -3,7 +3,19 @@
 
 import { randomBytes } from 'crypto';
 
-export function getRequestId(): string {
+/**
+ * Get or generate request ID from headers
+ * @param headers - Optional headers to extract existing request ID from
+ * @returns Request ID (16-char hex string)
+ */
+export function getRequestId(headers?: Headers): string {
+  // Try to get existing request ID from headers
+  if (headers) {
+    const existing = headers.get('x-request-id');
+    if (existing) return existing;
+  }
+
+  // Generate new request ID
   return randomBytes(8).toString('hex');
 }
 
