@@ -1,7 +1,8 @@
-// Lightweight observability helpers
-export function getRequestId(headers: Headers){
-  return headers.get('x-request-id') || crypto.randomUUID()
-}
-export function logWithId(rid: string, msg: string, details?: any){
-  try { console.log(`[rid:${rid}] ${msg}`, details ?? '') } catch {}
+// Request ID helper for observability
+// Pass 174Q — Quick-Wins Triad
+
+import { randomBytes } from 'crypto';
+
+export function getRequestId(): string {
+  return randomBytes(8).toString('hex');
 }

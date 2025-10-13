@@ -1,4 +1,10 @@
 ai-pass:
-  - any: ['docs/**','.github/**','scripts/**','frontend/tests/**','frontend/docs/**']
+  - changed-files:
+    - any-glob-to-any-file: 'docs/AGENT/SUMMARY/Pass-*.md'
+
 risk-ok:
-  - any: ['frontend/**','backend/**','.github/**','docs/**']
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'frontend/src/lib/**'
+      - 'frontend/tests/**'
+      - 'docs/**'
