@@ -1605,4 +1605,30 @@ export default function Page() { redirect('/my/orders'); }
 - Checkout API: totals computation (log-only, already in place)
 - Admin Orders UI: subtotal breakdown + shipping note
 - 2 Playwright unit tests (COD courier, Pickup)
-- Pass 174R.4: Money Contract Normalization (cents-first projection in helpers/adapters/tests)
+
+## Pass 174R.3 — Wire totals into API routes ✅
+**Date**: 2025-10-13
+- Created `frontend/src/lib/cart/totals-wire.ts` adapter for flexible input mapping
+- Discovery: Checkout route already has totals (Pass 174Q), admin orders is summary-only
+- No route patches needed - wire adapter + tests only
+- Created `frontend/tests/checkout/totals-wire.spec.ts` with 4 E2E tests
+- PR #540: MERGED successfully with 17/17 checks passing
+
+## Pass 174R.4 — Money Contract Normalization (cents-first) ✅
+**Date**: 2025-10-13
+- Created `frontend/src/types/money.ts` with branded `Cents` type
+- Branded type: `export type Cents = number & { readonly __brand: 'Cents' };`
+- Conversion helpers: `toCents()`, `fromCents()`, `fmtEUR()`
+- Enhanced `frontend/src/lib/cart/totals.ts` to expose `*Cents` fields (non-breaking)
+- Enhanced `frontend/src/lib/cart/totals-wire.ts` with `withCentsProjection()` helper
+- Created `frontend/tests/totals/cents.spec.ts` with 7 comprehensive tests
+- PR #541: MERGED successfully
+
+## Pass 174R.5b — DEV UI Unblock (non-vision build hygiene) ✅
+**Date**: 2025-10-13
+- Created `frontend/src/types/images.d.ts` with image module declarations
+- Verified `.env.local` configuration (DIXIS_ENV=local, PORT=3001)
+- Ran typecheck: PASSED with no errors
+- Ran build: PASSED with exit code 0 (59/59 pages generated successfully)
+- Build warnings: MISSING_MESSAGE for i18n keys (non-breaking)
+- Ready to commit and create PR #542
