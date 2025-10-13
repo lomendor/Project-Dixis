@@ -7,6 +7,7 @@ import { CopyTrackingLink } from './CopyTrackingLink';
 import PrintButton from '@/components/PrintButton';
 import OrderActions from '@/components/admin/OrderActions';
 import { fmtEUR } from '@/lib/cart/totals';
+import { computeDisplayTotals } from '@/lib/admin/orders/totalsPresenter';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -81,6 +82,9 @@ export default async function AdminOrderDetailPage({
   const total = Number(
     order.total || order.items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 0), 0)
   );
+
+  // Compute totals via unified helper
+  const T = computeDisplayTotals(order);
 
   const currentStatus = String(order.status || 'PENDING').toUpperCase();
   const availableTransitions = transitions[currentStatus] || [];
@@ -182,18 +186,25 @@ export default async function AdminOrderDetailPage({
                   }).format(total)}
                 </span>
               </div>
-              {/* Totals Breakdown (read-only, best-effort) */}
-              <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 space-y-1">
+              {/* Totals Breakdown (read-only, unified helper) */}
+              <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 space-y-1" data-testid="totals-card">
                 <div className="flex justify-between">
                   <span>Υποσύνολο:</span>
-                  <span>{fmtEUR(order.items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 0), 0))}</span>
+                  <span>{T.fmt.subtotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Μεταφορικά:</span>
-                  <span>Περιλαμβάνονται στο σύνολο</span>
+                  <span>{T.shipping === 0 ? 'Δωρεάν' : T.fmt.shipping}</span>
                 </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  Σημείωση: Τα μεταφορικά και η μέθοδος αποστολής αποθηκεύονται στο σύνολο.
+                {T.codFee > 0 && (
+                  <div className="flex justify-between">
+                    <span>Αντικαταβολή:</span>
+                    <span>{T.fmt.codFee}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>ΦΠΑ ({((Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)) * 100).toFixed(0)}%):</span>
+                  <span>{T.fmt.tax}</span>
                 </div>
               </div>
             </div>
