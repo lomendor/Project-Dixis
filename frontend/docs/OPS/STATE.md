@@ -1,3 +1,26 @@
+## Pass 206 — Canonical Port :3001 + No Background Tasks + Quick Audit Snapshot ✅
+- **Port Discipline**: Established :3001 as canonical dev port for consistency
+  - `dev:stop`: Kill any process on :3001 (via `scripts/dev/stop-port.sh`)
+  - `dev:start`: Start Next.js explicitly on PORT=3001
+  - `dev:restart`: Stop + start in one command
+  - Prevents "port already in use" errors and background task accumulation
+- **Playwright Integration**: Already configured with `reuseExistingServer: true` (line 130)
+  - Won't start second server if one exists on :3001
+  - Faster test execution by reusing dev server
+  - No port conflicts during local E2E runs
+- **Documentation**: Created `docs/OPS/PORTS.md` with port management guidelines
+  - Common issues and solutions
+  - Environment variable reference
+  - CI/local consistency notes
+- **Audit Snapshot**: Created `docs/OPS/AUDIT-ALPHA.md` with repo health metrics
+  - Last 10 PRs state and mergeability
+  - CI/CD health indicators
+  - Environment parity analysis (Local SQLite → CI/Prod PostgreSQL)
+  - Risk assessment and recommendations
+- **Developer Experience**: Eliminated port conflicts and background process chaos
+- **No Business Logic Changes**: Pure developer tooling and documentation
+- **PR #536**: feat/pass-206-port-discipline → main (auto-merge enabled)
+
 ## Pass 204 — Harden Session Cookies (HttpOnly/SameSite/Secure) + OTP Auth ✅
 - **Security Helper**: Created `lib/auth/cookies.ts` with industry-standard cookie attributes
   - `setSessionCookie()`: HttpOnly, SameSite=lax, Secure (prod), Path=/, MaxAge=7d
