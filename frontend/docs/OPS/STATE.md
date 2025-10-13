@@ -1,3 +1,29 @@
+## Pass 205 — Local Dev HOWTO & Smoke Tests ✅
+- **Local Dev Guide**: Created `docs/OPS/HOWTO-LOCAL.md` with step-by-step Greek instructions for local development setup
+  - Covers prerequisites (Node.js ≥18, port 3001 availability)
+  - Installation instructions for npm/pnpm/yarn
+  - Environment configuration (OTP_BYPASS, ADMIN_PHONES, DIXIS_ENV)
+  - Prisma setup for SQLite local database
+  - Admin login credentials (+306900000084 / 000000)
+  - Troubleshooting tips (port conflicts, Prisma issues)
+- **Bootstrap Script**: Created `scripts/dev/bootstrap.sh` for automated one-command setup
+  - Automatic .env.local configuration with dev defaults
+  - Smart package manager detection (pnpm → yarn → npm)
+  - Prisma database setup (db push + generate)
+  - Auto-starts dev server on port 3001
+  - Complete setup in <2 minutes from clone
+- **Smoke Tests**: Created `tests/smoke/home.spec.ts` with @smoke tag for rapid system validation
+  - Tests home page response (200/301/302)
+  - Tests API health endpoint
+  - Fast execution (~5s) for quick sanity checks
+  - Ideal for pre-commit validation
+- **NPM Scripts**: Added convenience scripts to package.json
+  - `dev:3001`: Start dev server on port 3001 explicitly
+  - `test:smoke`: Run smoke tests with clean reporter output
+- **Developer Experience**: Streamlined onboarding from hours to minutes
+- **Documentation-Only**: No business logic changes, pure developer tooling
+- **PR #535**: feat/pass-205-local-dev-howto-smoke → main (auto-merge enabled)
+
 ## Pass 204 — Harden Session Cookies (HttpOnly/SameSite/Secure) + OTP Auth ✅
 - **Security Helper**: Created `lib/auth/cookies.ts` with industry-standard cookie attributes
   - `setSessionCookie()`: HttpOnly, SameSite=lax, Secure (prod), Path=/, MaxAge=7d
