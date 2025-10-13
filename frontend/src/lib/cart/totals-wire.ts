@@ -1,7 +1,9 @@
 // Totals wire adapter (cents-based API mapping)
 // Pass 174R.3 — Wire totals into API routes
+// Pass 174R.4 — Money Contract Normalization (cents-first projection)
 
 import { calcTotals, type ShippingMethod } from '@/lib/cart/totals';
+import { Cents, toCents } from '@/types/money';
 
 type Item = { priceCents?: number; price?: number; qty?: number; quantity?: number };
 type ShippingCtx = { method?: string; baseCostCents?: number; codFeeCents?: number } | null;
@@ -50,13 +52,14 @@ export function computeTotalsFromContext(ctx: {
   // Return in requested format (defaults to cents-based)
   const cents = ctx.preferCents !== false;
 
+  // Return with branded Cents types (Pass 174R.4)
   return cents
     ? {
-        subtotalCents: Number(t.subtotal || 0),
-        shippingCents: Number(t.shipping || 0),
-        codCents: Number(t.codFee || 0),
-        taxCents: Number(t.tax || 0),
-        totalCents: Number(t.grandTotal || 0),
+        subtotalCents: t.subtotalCents,
+        shippingCents: t.shippingCents,
+        codCents: t.codFeeCents,
+        taxCents: t.taxCents,
+        totalCents: t.grandTotalCents,
       }
     : {
         subtotal: Number(t.subtotal || 0),
@@ -65,4 +68,31 @@ export function computeTotalsFromContext(ctx: {
         tax: Number(t.tax || 0),
         grandTotal: Number(t.grandTotal || 0),
       };
+}
+
+/**
+ * Ensure cents projection is always present in totals object (non-breaking helper)
+ * Pass 174R.4 — Adds branded Cents fields if missing
+ * @param obj - Object with optional totals property
+ * @returns Same object with guaranteed cents fields in totals
+ */
+export function withCentsProjection<T extends { totals?: any }>(obj: T): T {
+  const t = (obj as any).totals || {};
+
+  // Ensure *Cents fields exist (use toCents if raw values present)
+  const ensure = (key: string, rawValue: number) => {
+    const centsKey = key + 'Cents';
+    if (typeof t[centsKey] === 'undefined' && typeof rawValue === 'number') {
+      t[centsKey] = toCents(rawValue);
+    }
+  };
+
+  if (typeof t.subtotal === 'number') ensure('subtotal', t.subtotal);
+  if (typeof t.shipping === 'number') ensure('shipping', t.shipping);
+  if (typeof t.codFee === 'number') ensure('codFee', t.codFee);
+  if (typeof t.tax === 'number') ensure('tax', t.tax);
+  if (typeof t.grandTotal === 'number') ensure('grandTotal', t.grandTotal);
+
+  (obj as any).totals = t;
+  return obj;
 }

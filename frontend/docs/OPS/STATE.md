@@ -1605,3 +1605,4 @@ export default function Page() { redirect('/my/orders'); }
 - Checkout API: totals computation (log-only, already in place)
 - Admin Orders UI: subtotal breakdown + shipping note
 - 2 Playwright unit tests (COD courier, Pickup)
+- Pass 174R.4: Money Contract Normalization (cents-first projection in helpers/adapters/tests)
