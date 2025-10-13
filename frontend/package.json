@@ -94,7 +94,8 @@
     "agent:routes": "node ../scripts/scan-routes.mjs",
     "agent:schema": "node ../scripts/scan-prisma.mjs",
     "agent:docs": "npm run agent:routes && npm run agent:schema",
-    "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1"
+    "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
