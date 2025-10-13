@@ -1,5 +1,30 @@
-<<<<<<< HEAD
-=======
+## Pass 174Q — Quick-Wins Triad (PR Hygiene + Totals/Taxes + Mini Observability) ✅
+- **PR Hygiene**: Enhanced PR template and auto-labeler configuration
+  - `.github/pull_request_template.md` already existed (Summary, AC, Test Plan, Reports)
+  - Created `.github/labeler.yml` for auto-labeling (ai-pass, risk-ok)
+  - Applied labels to 5 key open PRs (#531, #530, #528, #506, #497)
+  - Labels created if not existing (ai-pass: purple, risk-ok: green)
+- **Totals/Taxes Helper**: Created `lib/cart/totals.ts` with EL formatting
+  - `fmtEUR()`: Greek currency formatting using Intl.NumberFormat('el-GR')
+  - `round2()`: 2-decimal precision rounding
+  - `calcTotals()`: Comprehensive totals calculation
+  - Supports PICKUP/COURIER/COURIER_COD shipping methods
+  - 2 Playwright unit tests: COD courier totals, Pickup (no shipping)
+- **Mini Observability**: Dev health endpoint + request ID support
+  - Created `lib/observability/request.ts` with `getRequestId()` helper
+  - Created `/api/dev/health` endpoint (dev-only, 404 in production)
+  - Returns JSON with ok, env, requestId, time
+  - Sets x-request-id header in response
+- **No Business Logic Changes**: Pure infrastructure improvements
+- **Files Created** (7 files):
+  - `.github/labeler.yml`
+  - `frontend/src/lib/cart/totals.ts`
+  - `frontend/tests/totals/totals.spec.ts`
+  - `frontend/src/lib/observability/request.ts`
+  - `frontend/src/app/api/dev/health/route.ts`
+  - `docs/AGENT/SUMMARY/Pass-174Q.md`
+  - `frontend/docs/OPS/STATE.md` (this entry)
+
 ## Pass 211 — Resolve Conflicts & Land #537 → #536 (STATE.md consolidation) ✅
 - **Conflict Resolution**: Resolved STATE.md and package.json merge conflicts
   - Consolidated Pass entries: Pass 205 (main) + Passes 206-210 (PR #537)
@@ -50,7 +75,6 @@
 - **No Business Logic Changes**: Pure dev tooling, production uses SMTP (TODO)
 - **Next**: Email E2E tests will go GREEN, enabling CI email verification
 
->>>>>>> origin/main
 ## Pass 208 — ESLint Zero + Land PR #536 ✅
 - **ESLint Zero**: Fixed the single blocking ESLint error
   - Changed `@ts-ignore` to `@ts-expect-error` in `src/app/api/orders/public/[token]/route.ts:41`
@@ -104,9 +128,6 @@
 - **No Business Logic Changes**: Pure developer tooling and documentation
 - **PR #536**: feat/pass-206-port-discipline → main (auto-merge enabled)
 
-<<<<<<< HEAD
-=======
-## Pass 205 — Local Dev HOWTO & Smoke Tests ✅
 - **Local Dev Guide**: Created `docs/OPS/HOWTO-LOCAL.md` with step-by-step Greek instructions for local development setup
   - Covers prerequisites (Node.js ≥18, port 3001 availability)
   - Installation instructions for npm/pnpm/yarn
@@ -132,7 +153,6 @@
 - **Documentation-Only**: No business logic changes, pure developer tooling
 - **PR #535**: feat/pass-205-local-dev-howto-smoke → main (auto-merge enabled)
 
->>>>>>> origin/main
 ## Pass 204 — Harden Session Cookies (HttpOnly/SameSite/Secure) + OTP Auth ✅
 - **Security Helper**: Created `lib/auth/cookies.ts` with industry-standard cookie attributes
   - `setSessionCookie()`: HttpOnly, SameSite=lax, Secure (prod), Path=/, MaxAge=7d
