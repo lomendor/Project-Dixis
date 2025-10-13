@@ -8,6 +8,7 @@ import PrintButton from '@/components/PrintButton';
 import OrderActions from '@/components/admin/OrderActions';
 import { fmtEUR } from '@/lib/cart/totals';
 import { computeDisplayTotals } from '@/lib/admin/orders/totalsPresenter';
+import { label as statusLabel } from '@/lib/admin/orders/status';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
@@ -229,7 +230,7 @@ export default async function AdminOrderDetailPage({
             </div>
 
             {availableTransitions.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3" data-testid="status-actions">
                 <p className="text-sm text-gray-600 mb-3">Αλλαγή κατάστασης:</p>
                 {availableTransitions.map(nextStatus => (
                   <form
@@ -247,7 +248,7 @@ export default async function AdminOrderDetailPage({
                           : 'bg-green-600 hover:bg-green-700 text-white'
                       }`}
                     >
-                      Αλλαγή σε {nextStatus}
+                      Αλλαγή σε {statusLabel(nextStatus as any)}
                     </button>
                   </form>
                 ))}
