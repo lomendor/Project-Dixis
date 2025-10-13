@@ -1,3 +1,17 @@
+## Pass 211 — Resolve Conflicts & Land #537 → #536 (STATE.md consolidation) ✅
+- **Conflict Resolution**: Resolved STATE.md and package.json merge conflicts
+  - Consolidated Pass entries: Pass 205 (main) + Passes 206-210 (PR #537)
+  - Merged package.json scripts: dev:3001, dev:stop/start/restart (all included)
+  - Used merge strategy (not rebase) to handle divergence
+- **PR #537 Status**: Conflicts resolved, CI checks running
+  - Auto-merge enabled (squash on green)
+  - Gate/Triage/Danger passed ✅
+  - Pending: typecheck, E2E, CodeQL, build-and-test
+- **PR #536 Status**: Will rebase after #537 lands
+  - Only triage check exists (passed)
+  - Needs rebase on updated main after #537 merges
+- **Next**: Wait for PR #537 CI → auto-merge → rebase #536 → land
+
 ## Pass 210 — Email E2E GREEN + Back-compat Shim + Land PRs ✅
 - **Back-compat Shim**: Created `src/lib/mail/devMailbox.ts`
   - Re-exports new centralized mailbox (`@/lib/dev/mailbox`)
