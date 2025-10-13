@@ -1,6 +1,11 @@
-// Totals/Taxes helper (EL-first formatting)
+// Totals/Taxes helper (EL-format)
 // Pass 174Q — Quick-Wins Triad
 
+/**
+ * Format cents as EUR with Greek locale formatting
+ * @param cents - Amount in cents
+ * @returns Formatted string (e.g., "50,00 €")
+ */
 export function fmtEUR(cents: number): string {
   return new Intl.NumberFormat('el-GR', {
     style: 'currency',
@@ -10,72 +15,77 @@ export function fmtEUR(cents: number): string {
   }).format(cents / 100);
 }
 
+/**
+ * Round to 2 decimal places
+ */
 export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
 export type ShippingMethod = 'PICKUP' | 'COURIER' | 'COURIER_COD';
 
+export interface CartItem {
+  price: number; // in cents
+  qty: number;
+}
+
 export interface TotalsInput {
-  subtotalCents: number;
+  items: CartItem[];
   shippingMethod: ShippingMethod;
-  shippingCostCents?: number;
-  codFeeCents?: number;
-  taxRate?: number;
+  baseShipping?: number; // in cents
+  codFee?: number; // in cents
+  taxRate?: number; // e.g., 0.24 for 24%
 }
 
 export interface TotalsOutput {
-  subtotalCents: number;
-  shippingCents: number;
-  codCents: number;
-  taxCents: number;
-  totalCents: number;
-  subtotalEUR: string;
-  shippingEUR: string;
-  codEUR: string;
-  taxEUR: string;
-  totalEUR: string;
+  subtotal: number; // in cents
+  shipping: number; // in cents
+  codFee: number; // in cents
+  tax: number; // in cents
+  grandTotal: number; // in cents
 }
 
+/**
+ * Calculate order totals with shipping, COD, and tax
+ * @param input - TotalsInput with items, shipping method, fees, and tax rate
+ * @returns TotalsOutput with all calculated totals in cents
+ */
 export function calcTotals(input: TotalsInput): TotalsOutput {
   const {
-    subtotalCents,
+    items,
     shippingMethod,
-    shippingCostCents = 0,
-    codFeeCents = 0,
+    baseShipping = 0,
+    codFee = 0,
     taxRate = 0,
   } = input;
 
-  let shippingCents = 0;
-  let codCents = 0;
+  // Calculate subtotal from items
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  // Apply shipping cost for courier methods
+  // Calculate shipping based on method
+  let shipping = 0;
   if (shippingMethod === 'COURIER' || shippingMethod === 'COURIER_COD') {
-    shippingCents = shippingCostCents;
+    shipping = baseShipping;
   }
 
-  // Apply COD fee for COURIER_COD
+  // Calculate COD fee if applicable
+  let codFeeAmount = 0;
   if (shippingMethod === 'COURIER_COD') {
-    codCents = codFeeCents;
+    codFeeAmount = codFee;
   }
 
-  // Calculate tax
-  const taxableCents = subtotalCents + shippingCents + codCents;
-  const taxCents = Math.round(taxableCents * taxRate);
+  // Calculate tax on subtotal + shipping + COD
+  const taxableAmount = subtotal + shipping + codFeeAmount;
+  const tax = Math.round(taxableAmount * taxRate);
 
-  // Calculate total
-  const totalCents = taxableCents + taxCents;
+  // Calculate grand total
+  const grandTotal = taxableAmount + tax;
 
   return {
-    subtotalCents,
-    shippingCents,
-    codCents,
-    taxCents,
-    totalCents,
-    subtotalEUR: fmtEUR(subtotalCents),
-    shippingEUR: fmtEUR(shippingCents),
-    codEUR: fmtEUR(codCents),
-    taxEUR: fmtEUR(taxCents),
-    totalEUR: fmtEUR(totalCents),
+    subtotal,
+    shipping,
+    codFee: codFeeAmount,
+    tax,
+    grandTotal,
   };
 }

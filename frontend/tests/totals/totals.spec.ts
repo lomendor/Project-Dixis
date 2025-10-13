@@ -3,44 +3,57 @@ import { calcTotals, fmtEUR } from '@/lib/cart/totals';
 
 test('COD courier totals with EL formatting', () => {
   const result = calcTotals({
-    subtotalCents: 5000, // €50.00
+    items: [
+      { price: 2500, qty: 2 }, // €25.00 × 2 = €50.00
+    ],
     shippingMethod: 'COURIER_COD',
-    shippingCostCents: 350, // €3.50
-    codFeeCents: 150, // €1.50
+    baseShipping: 350, // €3.50
+    codFee: 150, // €1.50
     taxRate: 0.24, // 24% VAT
   });
 
-  expect(result.subtotalCents).toBe(5000);
-  expect(result.shippingCents).toBe(350);
-  expect(result.codCents).toBe(150);
-  expect(result.taxCents).toBe(1320); // (5000 + 350 + 150) * 0.24 = 1320
-  expect(result.totalCents).toBe(6820); // 5000 + 350 + 150 + 1320 = 6820
+  expect(result.subtotal).toBe(5000); // 2500 × 2
+  expect(result.shipping).toBe(350);
+  expect(result.codFee).toBe(150);
+  expect(result.tax).toBe(1320); // (5000 + 350 + 150) * 0.24 = 1320
+  expect(result.grandTotal).toBe(6820); // 5000 + 350 + 150 + 1320 = 6820
 
   // Verify EL formatting (Greek locale uses comma for decimals)
-  expect(result.subtotalEUR).toMatch(/50[,\.]00/);
-  expect(result.shippingEUR).toMatch(/3[,\.]50/);
-  expect(result.codEUR).toMatch(/1[,\.]50/);
-  expect(result.taxEUR).toMatch(/13[,\.]20/);
-  expect(result.totalEUR).toMatch(/68[,\.]20/);
+  const formattedSubtotal = fmtEUR(result.subtotal);
+  const formattedShipping = fmtEUR(result.shipping);
+  const formattedCodFee = fmtEUR(result.codFee);
+  const formattedTax = fmtEUR(result.tax);
+  const formattedGrandTotal = fmtEUR(result.grandTotal);
 
-  console.log('✅ COD totals:', result.totalEUR);
+  expect(formattedSubtotal).toMatch(/50[,\.]00/);
+  expect(formattedShipping).toMatch(/3[,\.]50/);
+  expect(formattedCodFee).toMatch(/1[,\.]50/);
+  expect(formattedTax).toMatch(/13[,\.]20/);
+  expect(formattedGrandTotal).toMatch(/68[,\.]20/);
+
+  console.log('✅ COD totals:', formattedGrandTotal);
 });
 
 test('Pickup with no shipping/tax', () => {
   const result = calcTotals({
-    subtotalCents: 3000, // €30.00
+    items: [
+      { price: 1500, qty: 2 }, // €15.00 × 2 = €30.00
+    ],
     shippingMethod: 'PICKUP',
   });
 
-  expect(result.subtotalCents).toBe(3000);
-  expect(result.shippingCents).toBe(0);
-  expect(result.codCents).toBe(0);
-  expect(result.taxCents).toBe(0);
-  expect(result.totalCents).toBe(3000);
+  expect(result.subtotal).toBe(3000);
+  expect(result.shipping).toBe(0);
+  expect(result.codFee).toBe(0);
+  expect(result.tax).toBe(0);
+  expect(result.grandTotal).toBe(3000);
 
   // Verify EL formatting
-  expect(result.subtotalEUR).toMatch(/30[,\.]00/);
-  expect(result.totalEUR).toMatch(/30[,\.]00/);
+  const formattedSubtotal = fmtEUR(result.subtotal);
+  const formattedGrandTotal = fmtEUR(result.grandTotal);
 
-  console.log('✅ Pickup totals:', result.totalEUR);
+  expect(formattedSubtotal).toMatch(/30[,\.]00/);
+  expect(formattedGrandTotal).toMatch(/30[,\.]00/);
+
+  console.log('✅ Pickup totals:', formattedGrandTotal);
 });
