@@ -1,6 +1,4 @@
 ai-pass:
-  - changed-files:
-      - any-glob-to-any-file: ['pass/**','ops/**','ci/**','.github/**','scripts/**']
+  - any: ['docs/**','.github/**','scripts/**','frontend/tests/**','frontend/docs/**']
 risk-ok:
-  - changed-files:
-      - any-glob-to-any-file: ['frontend/**','backend/**','scripts/**','.github/**']
+  - any: ['frontend/**','backend/**','.github/**','docs/**']
