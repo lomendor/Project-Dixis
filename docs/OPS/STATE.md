@@ -2836,3 +2836,4 @@ unitLabel('pcs')   // "τεμ."
 - Enhance with `aria-live` error regions
 - Consider adding English translations (en.json)
 - Extend unit tests for validation logic
+- Pass 202S: Checkout UI wired to unified totals helper (calcTotals/fmtEUR) + 1 E2E test. No schema changes.

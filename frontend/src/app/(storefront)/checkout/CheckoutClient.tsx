@@ -3,7 +3,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useCart } from '@/lib/cart/context'
 import type { CartItem } from '@/lib/cart/store'
-import { calc, fmt } from '@/lib/checkout/totals'
+import { calcTotals, fmtEUR } from '@/lib/cart/totals'
 
 export default function CheckoutClient(){
   const router = useRouter()
@@ -14,7 +14,13 @@ export default function CheckoutClient(){
   const [loading, setLoading] = useState(false)
 
   const lines = items.map((i: CartItem)=>({ price:Number(i.price||0), qty:Number(i.qty||0) }))
-  const totals = calc(lines)
+  const totals = calcTotals({
+    items: lines,
+    shippingMethod: 'COURIER', // Default (no COD in checkout UI currently)
+    baseShipping: 3.5,
+    codFee: 0,
+    taxRate: Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)
+  })
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault()
@@ -90,17 +96,17 @@ export default function CheckoutClient(){
               {items.map((it: CartItem)=>(
                 <li key={it.productId} style={{display:'flex',justifyContent:'space-between',gap:8,padding:'6px 0'}}>
                   <span>{it.title} × {it.qty}</span>
-                  <span>{fmt(Number(it.price)*Number(it.qty))}</span>
+                  <span>{fmtEUR(Number(it.price)*Number(it.qty))}</span>
                 </li>
               ))}
             </ul>
             <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'12px 0'}}/>
             <div style={{display:'grid',gap:8}}>
-              <div style={{display:'flex',justifyContent:'space-between'}}><span>Υποσύνολο</span><b>{fmt(totals.subtotal)}</b></div>
-              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>ΦΠΑ ({(totals.rate*100).toFixed(0)}%)</span><span>{fmt(totals.vat)}</span></div>
-              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>Μεταφορικά</span><span>{totals.shipping === 0 ? 'Δωρεάν' : fmt(totals.shipping)}</span></div>
+              <div style={{display:'flex',justifyContent:'space-between'}}><span>Υποσύνολο</span><b>{fmtEUR(totals.subtotal)}</b></div>
+              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>ΦΠΑ ({(Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)*100).toFixed(0)}%)</span><span>{fmtEUR(totals.tax)}</span></div>
+              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>Μεταφορικά</span><span>{totals.shipping === 0 ? 'Δωρεάν' : fmtEUR(totals.shipping)}</span></div>
               <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'8px 0'}}/>
-              <div style={{display:'flex',justifyContent:'space-between',fontSize:20,fontWeight:'bold'}}><span>Σύνολο</span><span>{fmt(totals.total)}</span></div>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:20,fontWeight:'bold'}}><span>Σύνολο</span><span>{fmtEUR(totals.grandTotal)}</span></div>
             </div>
           </aside>
         </div>
