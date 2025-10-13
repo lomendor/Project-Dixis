@@ -1,5 +1,8 @@
 // Totals/Taxes helper (EL-format)
 // Pass 174Q — Quick-Wins Triad
+// Pass 174R.4 — Money Contract Normalization (cents-first with branded types)
+
+import { Cents, toCents } from '@/types/money';
 
 /**
  * Format cents as EUR with Greek locale formatting
@@ -43,6 +46,12 @@ export interface TotalsOutput {
   codFee: number; // in cents
   tax: number; // in cents
   grandTotal: number; // in cents
+  // Cents-first projection (branded types for type safety) - Pass 174R.4
+  subtotalCents: Cents;
+  shippingCents: Cents;
+  codFeeCents: Cents;
+  taxCents: Cents;
+  grandTotalCents: Cents;
 }
 
 /**
@@ -81,11 +90,23 @@ export function calcTotals(input: TotalsInput): TotalsOutput {
   // Calculate grand total
   const grandTotal = taxableAmount + tax;
 
+  // Branded cents projection for type safety (Pass 174R.4)
+  const subtotalCents = toCents(subtotal);
+  const shippingCents = toCents(shipping);
+  const codFeeCents = toCents(codFeeAmount);
+  const taxCents = toCents(tax);
+  const grandTotalCents = toCents(grandTotal);
+
   return {
     subtotal,
     shipping,
     codFee: codFeeAmount,
     tax,
     grandTotal,
+    subtotalCents,
+    shippingCents,
+    codFeeCents,
+    taxCents,
+    grandTotalCents,
   };
 }
