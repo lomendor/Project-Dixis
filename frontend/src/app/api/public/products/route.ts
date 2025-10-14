@@ -15,9 +15,9 @@ export async function GET(req: Request) {
     const transformed = items.map(p => ({
       ...p,
       name: p.title,
-      images: [],  // Stub empty array - HomeClient will use placeholder
+      images: [] as string[],  // Stub empty array - HomeClient will use placeholder
       producer: { name: 'Demo Producer' },  // Stub producer
-      categories: []  // Stub categories
+      categories: [] as string[]  // Stub categories
     }))
     return NextResponse.json({ ok:true, count: items.length, data: transformed }, { headers:{ 'cache-control':'no-store' }})
   }catch(e:any){
