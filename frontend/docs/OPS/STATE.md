@@ -85,3 +85,15 @@ $(head -1607 docs/OPS/STATE.md)
 - Created 2 E2E tests: products-grid.spec.ts, product-page.spec.ts
 - Build passed successfully with Next.js 15.5.0
 - No business logic changes, UI/i18n/tests only
+
+## Pass STORE-05 — Minimal Cart & Checkout (EL-first) ✅
+**Date**: 2025-10-15
+- Enhanced cart/store.ts with shippingMethod state (PICKUP|COURIER|COURIER_COD) + localStorage persistence
+- Polished /cart page: shipping selector, totals with calcTotals helper (subtotal, shipping, COD fee, tax, grand total)
+- Updated /checkout page: uses cart shipping method, redirects to /order/[id], full i18n
+- Created /order/[id] confirmation page with success message and order ID display
+- Updated Add button: i18n, success feedback with role=status
+- Added i18n keys: cart.*, checkout.*, shipping.*, common.back/continue
+- No schema changes, no new dependencies (React Context + localStorage only)
+- Build passed successfully with Next.js 15.5.0 (cart: dynamic route, checkout: Suspense wrapper)
+- No backend/business logic changes, UI/state/i18n only
