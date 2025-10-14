@@ -56,3 +56,12 @@ $(head -1607 docs/OPS/STATE.md)
 - EL-first labels in nested JSON (products.filters.*, products.pagination.*)
 - Created 2 E2E tests: products.filters.spec.ts + products.pagination.spec.ts
 - No backend changes, graceful handling if API ignores params
+
+## Pass STORE-03A — i18n completeness + SSR/Hydration stability ✅
+**Date**: 2025-10-14
+- Added missing i18n keys: common.submit, common.cancel, nav.producers
+- Ensured all i18n messages use nested JSON structure (no flat keys with dots)
+- Added suppressHydrationWarning to layout.tsx html and body elements for SSR stability
+- Simplified Home.tsx API fetch to use apiUrl() helper instead of complex header logic
+- Created frontend/tests/i18n/i18n-loader.spec.ts unit test verifying nested structure
+- Verified no Date.now() or Math.random() in SSR branches for deterministic rendering
