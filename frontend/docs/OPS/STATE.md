@@ -29,3 +29,11 @@ $(head -1607 docs/OPS/STATE.md)
 - Προστέθηκε suppressHydrationWarning στο body
 - Μίνι /products λίστα από /api/public/products
 - Smoke tests: hydration/i18n + API JSON
+
+## Pass UI-FIX-02s — i18n unify (safe) + api base + sanity tests ✅
+**Date**: 2025-10-14
+- Unified messages in nested JSON (frontend/messages/el.json)
+- Created safe t() wrapper (frontend/src/lib/i18n/t.ts) - does NOT replace next-intl
+- Added apiBase() helper for stable URLs (frontend/src/lib/http/apiBase.ts)
+- Normalized .env.example to port 3000
+- Created 2 sanity tests: Home + Products (console error detection)

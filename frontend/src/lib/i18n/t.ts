@@ -1,7 +1,13 @@
-import el from './el.json';
+import messages from '../../../messages/el.json';
 
-export function t(key: string, vars?: Record<string, string | number>): string {
-  const raw = (el as any)[key] ?? key;
-  if (!vars) return raw;
-  return String(raw).replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+function dig(obj: any, path: string) {
+  return path.split('.').reduce((o, k) => (o && typeof o === 'object') ? o[k] : undefined, obj);
+}
+
+/** Server-safe getTranslations: t(key, fallback?) -> string */
+export async function getTranslations() {
+  return (key: string, fallback?: string) => {
+    const v = dig(messages as any, key);
+    return (v === undefined || v === null) ? (fallback ?? key) : String(v);
+  };
 }
