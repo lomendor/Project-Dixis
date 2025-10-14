@@ -2837,3 +2837,10 @@ unitLabel('pcs')   // "τεμ."
 - Consider adding English translations (en.json)
 - Extend unit tests for validation logic
 - Pass 202S: Checkout UI wired to unified totals helper (calcTotals/fmtEUR) + 1 E2E test. No schema changes.
+
+## Pass UX-EL03 — API fallback + dev stub + Home sanity test ✅
+**Date**: 2025-10-14
+- Created apiBase() helper with internal API fallback
+- API returns Prisma data when available
+- Home sanity test: no console errors + EL text visible
+- Updated .env.example with DIXIS_ENV + NEXT_PUBLIC_API_BASE_URL
