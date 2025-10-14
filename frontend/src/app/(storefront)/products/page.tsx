@@ -91,28 +91,70 @@ export default async function ProductsPage({
         </button>
       </form>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="products-grid">
         {items.map((p: any) => (
-          <div
+          <Link
             key={p.id || p.slug || p.title}
-            className="border rounded p-3 hover:shadow-sm transition"
+            href={`/products/${p.slug || p.id}`}
+            className="border rounded-lg overflow-hidden hover:shadow-md transition group"
+            data-testid="product-card"
           >
-            <div className="font-medium">{p.title || '—'}</div>
-            <div className="text-sm opacity-75">{p.category || '—'}</div>
-            <div className="mt-1">
-              {typeof p.price === 'number'
-                ? new Intl.NumberFormat('el-GR', {
-                    style: 'currency',
-                    currency: 'EUR',
-                  }).format(p.price)
-                : '—'}
+            {/* Product Image */}
+            <div className="aspect-square bg-gray-100 relative">
+              {p.image_url ? (
+                <img
+                  src={p.image_url}
+                  alt={p.title || t('product.title')}
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              )}
+
+              {/* Stock Badge */}
+              {p.stock !== undefined && (
+                <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${
+                  p.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                  {p.stock > 0 ? t('products.card.stock') : t('products.card.outOfStock')}
+                </div>
+              )}
             </div>
-          </div>
+
+            {/* Product Info */}
+            <div className="p-3">
+              <h3 className="font-medium text-sm mb-1 line-clamp-2">{p.title || '—'}</h3>
+              {p.category && (
+                <p className="text-xs text-gray-600 mb-2">{p.category}</p>
+              )}
+              <div className="flex items-baseline justify-between">
+                <span className="text-lg font-semibold">
+                  {typeof p.price === 'number'
+                    ? new Intl.NumberFormat('el-GR', {
+                        style: 'currency',
+                        currency: 'EUR',
+                      }).format(p.price)
+                    : '—'}
+                </span>
+                {p.producer_name && (
+                  <span className="text-xs text-gray-500">{p.producer_name}</span>
+                )}
+              </div>
+            </div>
+          </Link>
         ))}
 
         {items.length === 0 && (
-          <div className="col-span-full opacity-70 text-center py-8">
-            {t('products.empty')}
+          <div className="col-span-full text-center py-16" data-testid="empty-state">
+            <svg className="mx-auto w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p className="text-gray-500 text-lg">{t('products.empty')}</p>
           </div>
         )}
       </div>
