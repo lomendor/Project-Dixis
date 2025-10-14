@@ -1,17 +1,13 @@
 {
-  "nav.home": "Αρχική",
-  "nav.producers": "Παραγωγοί",
-  "home.title": "Dixis — Φρέσκα τοπικά προϊόντα",
-  "home.subtitle": "Ανακάλυψε τους καλύτερους τοπικούς παραγωγούς στην περιοχή σου",
-  "home.cta": "Ανακάλυψε παραγωγούς κοντά σου",
-  "producers.title": "Παραγωγοί",
-  "producers.search": "Αναζήτηση παραγωγού",
-  "producers.region": "Περιοχή",
-  "producers.category": "Κατηγορία",
-  "producers.filter": "Φίλτρα",
-  "producers.total": "Σύνολο: {count}",
-  "common.loading": "Φόρτωση...",
-  "common.error": "Σφάλμα",
-  "common.submit": "Υποβολή",
-  "common.cancel": "Ακύρωση"
+  "nav": { "home": "Αρχική", "products": "Προϊόντα", "login": "Είσοδος", "signup": "Εγγραφή" },
+  "home": {
+    "title": "Dixis — Φρέσκα τοπικά προϊόντα",
+    "subtitle": "Ανακάλυψε ποιοτικά ελληνικά προϊόντα απευθείας από παραγωγούς.",
+    "searchPlaceholder": "Αναζήτηση προϊόντων (π.χ. ελιές, πορτοκάλια…) "
+  },
+  "common": {
+    "loading": "Φόρτωση…",
+    "error": "Κάτι πήγε στραβά",
+    "tryAgain": "Δοκίμασε ξανά"
+  }
 }

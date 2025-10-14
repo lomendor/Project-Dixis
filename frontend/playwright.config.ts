@@ -133,3 +133,6 @@ export default defineConfig({
     stderr: 'pipe',
   },
 });
+// helper matcher
+import { expect } from '@playwright/test';
+expect.extend({ async toHaveCountGreaterThan(locator:any, min:number){ const n=await locator.count(); return { pass:n>min, message:()=>`Expected >${min} items, got ${n}` } } })
