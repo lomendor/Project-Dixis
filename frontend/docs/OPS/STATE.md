@@ -45,3 +45,14 @@ $(head -1607 docs/OPS/STATE.md)
 - Added products.* i18n keys (title, empty, note)
 - Created products.grid.spec.ts sanity test (console error detection)
 - SSR-safe implementation with next-intl getTranslations
+
+## Pass STORE-02 — Filters + URL state + Pagination (SSR-only) ✅
+**Date**: 2025-10-14
+- Added lightweight filters to /products: q, category, min, max, stock=in
+- SSR-only implementation (no Client Components, state in URL only)
+- Created frontend/src/lib/search/params.ts (ProductFilters type + parse/toQuery helpers)
+- Updated /products page with filters form and pagination controls
+- Pagination: ?page=1&per_page=20 (default 20 items per page)
+- EL-first labels in nested JSON (products.filters.*, products.pagination.*)
+- Created 2 E2E tests: products.filters.spec.ts + products.pagination.spec.ts
+- No backend changes, graceful handling if API ignores params
