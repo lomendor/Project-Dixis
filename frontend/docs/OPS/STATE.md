@@ -37,3 +37,11 @@ $(head -1607 docs/OPS/STATE.md)
 - Added apiBase() helper for stable URLs (frontend/src/lib/http/apiBase.ts)
 - Normalized .env.example to port 3000
 - Created 2 sanity tests: Home + Products (console error detection)
+
+## Pass STORE-01 — Minimal /products storefront (EL) + grid sanity test ✅
+**Date**: 2025-10-14
+- Simplified /products page: clean grid layout, no heavy filters
+- Uses apiUrl() helper for stable API endpoints
+- Added products.* i18n keys (title, empty, note)
+- Created products.grid.spec.ts sanity test (console error detection)
+- SSR-safe implementation with next-intl getTranslations
