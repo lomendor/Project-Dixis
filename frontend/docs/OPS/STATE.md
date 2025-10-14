@@ -22,3 +22,4 @@ $(head -1607 docs/OPS/STATE.md)
 - Nested i18n messages (EL/EN): nav, home, common
 - Home.tsx dynamic baseURL με headers() + ENV fallback
 - Dev server σταθερός στο :3000 (HOME/API 200)
+- Pass UX-EL02: i18n completeness + hydration guard + /products (minimal) + smoke tests
