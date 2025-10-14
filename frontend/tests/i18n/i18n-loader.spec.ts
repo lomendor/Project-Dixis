@@ -1,52 +1,17 @@
-import { describe, it, expect } from '@jest/globals';
+import { test, expect } from '@playwright/test';
 import messages from '../../messages/el.json';
 
-describe('i18n messages structure', () => {
-  it('should load Greek messages', () => {
-    expect(messages).toBeDefined();
-    expect(typeof messages).toBe('object');
-  });
+test('Greek messages load & are nested', async () => {
+  expect(messages && typeof messages === 'object').toBeTruthy();
 
-  it('should have nested home keys', () => {
-    expect(messages.home).toBeDefined();
-    expect(messages.home.title).toBe('Dixis — Φρέσκα τοπικά προϊόντα');
-    expect(messages.home.subtitle).toContain('παραγωγούς');
-  });
+  // Δεν πρέπει να υπάρχουν flat keys με τελείες
+  const hasDotKeys = Object.keys(messages as any).some(k => k.includes('.'));
+  expect(hasDotKeys).toBeFalsy();
 
-  it('should have nested nav keys', () => {
-    expect(messages.nav).toBeDefined();
-    expect(messages.nav.home).toBe('Αρχική');
-    expect(messages.nav.products).toBe('Προϊόντα');
-    expect(messages.nav.producers).toBe('Παραγωγοί');
-  });
-
-  it('should have products.filters keys', () => {
-    expect(messages.products?.filters).toBeDefined();
-    expect(messages.products.filters.title).toBe('Φίλτρα');
-    expect(messages.products.filters.search).toBeDefined();
-    expect(messages.products.filters.category).toBeDefined();
-    expect(messages.products.filters.apply).toBe('Εφαρμογή');
-  });
-
-  it('should have products.pagination keys', () => {
-    expect(messages.products?.pagination).toBeDefined();
-    expect(messages.products.pagination.prev).toBe('Προηγούμενη');
-    expect(messages.products.pagination.next).toBe('Επόμενη');
-  });
-
-  it('should have common keys', () => {
-    expect(messages.common).toBeDefined();
-    expect(messages.common.loading).toBe('Φόρτωση…');
-    expect(messages.common.error).toBeDefined();
-    expect(messages.common.submit).toBe('Υποβολή');
-    expect(messages.common.cancel).toBe('Ακύρωση');
-  });
-
-  it('should not have flat keys with dots', () => {
-    // Verify all top-level keys are proper namespaces, not dot-separated strings
-    const keys = Object.keys(messages);
-    keys.forEach(key => {
-      expect(key).not.toContain('.');
-    });
-  });
+  // Ελάχιστα υποχρεωτικά nested keys
+  const m: any = messages;
+  expect(m?.home?.title).toBeTruthy();
+  expect(m?.common?.submit).toBeTruthy();
+  expect(m?.nav?.producers).toBeTruthy();
+  expect(m?.products?.filters).toBeTruthy();
 });

@@ -4,9 +4,9 @@ export function apiBase() {
 }
 
 export function apiUrl(path: string) {
-  if (!path.startsWith('/')) {
-    path = '/' + path;
-  }
-  const base = apiBase();
-  return base ? (base + path) : path; // internal when empty
+  const base = process.env.NEXT_PUBLIC_SITE_URL
+    || (process.env.DIXIS_ENV === 'local' ? 'http://127.0.0.1:3001' : '');
+  if (!base) return path; // client-side θα το χειριστεί ο browser
+  if (path.startsWith('http')) return path;
+  return base.replace(/\/$/,'') + (path.startsWith('/')?path:('/'+path));
 }
