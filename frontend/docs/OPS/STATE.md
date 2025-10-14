@@ -1613,3 +1613,4 @@ export default function Page() { redirect('/my/orders'); }
 - Made seed idempotent (deleteMany before create)
 - Created E2E tests: products list load + search filter
 - Fixed Next.js 15 async searchParams requirement
+- Pass UX-EL01: i18n baseline (EL/EN) + dev server σταθερός στο :3000
