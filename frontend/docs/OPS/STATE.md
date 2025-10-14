@@ -75,3 +75,13 @@ $(head -1607 docs/OPS/STATE.md)
   - Test 2: Products page verifies Greek filter labels and console clean
 - Build passed successfully with Next.js 15.5.0
 - No MISSING_MESSAGE or INVALID_KEY errors in i18n implementation
+
+## Pass STORE-04 — Products polish + Product page + E2E ✅
+**Date**: 2025-10-15
+- Polished /products page: enhanced card layout with images, stock badges, hover effects
+- Added product.* i18n keys (price, stock, inStock, outOfStock, producer, description, addToCart, backToProducts)
+- Polished /products/[id] page: breadcrumb, image, price, stock status, description, back link
+- All Greek labels (EL-first): Τιμή, Απόθεμα, Διαθέσιμο, Επιστροφή στα προϊόντα
+- Created 2 E2E tests: products-grid.spec.ts, product-page.spec.ts
+- Build passed successfully with Next.js 15.5.0
+- No business logic changes, UI/i18n/tests only
