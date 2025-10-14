@@ -4,22 +4,30 @@ import { useState } from 'react'
 import { useCart } from '@/lib/cart/context'
 import type { CartItem } from '@/lib/cart/store'
 import { calcTotals, fmtEUR } from '@/lib/cart/totals'
+import { DEFAULT_OPTIONS } from '@/contracts/shipping'
+import { useTranslations } from 'next-intl'
 
 export default function CheckoutClient(){
   const router = useRouter()
   const searchParams = useSearchParams()
   const err = searchParams?.get('err') || null
   const cart = useCart()
-  const items: CartItem[] = cart.getCart().items
+  const t = useTranslations()
+  const state = cart.getCart()
+  const items: CartItem[] = state.items
+  const shippingMethod = state.shippingMethod
   const [loading, setLoading] = useState(false)
+
+  // Find shipping option details
+  const shippingOption = DEFAULT_OPTIONS.find(opt => opt.code === shippingMethod) || DEFAULT_OPTIONS[0]
 
   const lines = items.map((i: CartItem)=>({ price:Number(i.price||0), qty:Number(i.qty||0) }))
   const totals = calcTotals({
     items: lines,
-    shippingMethod: 'COURIER', // Default (no COD in checkout UI currently)
-    baseShipping: 3.5,
-    codFee: 0,
-    taxRate: Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)
+    shippingMethod,
+    baseShipping: shippingOption.baseCost * 100, // Convert to cents
+    codFee: (shippingOption.codFee || 0) * 100, // Convert to cents
+    taxRate: 0.24 // 24% VAT
   })
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
@@ -59,7 +67,7 @@ export default function CheckoutClient(){
       const body = await res.json()
       const orderId = body.orderId || body.id || ''
       cart.clear()
-      router.push(`/thank-you?orderId=${encodeURIComponent(orderId)}`)
+      router.push(`/order/${encodeURIComponent(orderId)}`)
     }catch(e){
       router.push('/checkout?err=submit')
     }finally{
@@ -68,45 +76,121 @@ export default function CheckoutClient(){
   }
 
   return (
-    <main style={{display:'grid',gap:16,padding:16,maxWidth:1200,margin:'0 auto'}}>
-      <h1>Ολοκλήρωση Παραγγελίας</h1>
+    <main className="container mx-auto px-4 py-8" data-testid="checkout-page">
+      <h1 className="text-3xl font-bold mb-6">{t('checkout.title')}</h1>
       {!items.length ? (
-        <div style={{opacity:.7}}>Το καλάθι είναι άδειο. <a href="/products">Δες προϊόντα</a></div>
+        <div className="text-gray-500">
+          {t('checkout.error.empty')} <a href="/products" className="text-blue-600 hover:underline">{t('cart.continue')}</a>
+        </div>
       ) : (
-        <div style={{display:'grid',gridTemplateColumns:'1fr 380px',gap:16,alignItems:'start'}}>
-          <form onSubmit={handleSubmit} style={{display:'grid',gap:12}}>
-            <h2>Στοιχεία Αποστολής</h2>
-            <input name="name" placeholder="Ονοματεπώνυμο" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
-            <input name="phone" placeholder="+30…" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
-            <input name="email" type="email" placeholder="email (προαιρετικό)" style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
-            <input name="line1" placeholder="Διεύθυνση" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
-            <div style={{display:'grid',gridTemplateColumns:'1fr 160px',gap:8}}>
-              <input name="city" placeholder="Πόλη" required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
-              <input name="postal" placeholder="Τ.Κ." required style={{padding:'8px 12px',border:'1px solid #ddd',borderRadius:4}} />
+        <div className="grid md:grid-cols-2 gap-8">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="checkout-form">
+            <div>
+              <label className="block text-sm font-medium mb-1">{t('checkout.name')}</label>
+              <input
+                name="name"
+                required
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-name"
+              />
             </div>
-            <button type="submit" disabled={loading} style={{padding:'12px 24px',backgroundColor:loading?'#ccc':'#0070f3',color:'white',border:'none',borderRadius:6,fontSize:16,fontWeight:'bold',cursor:loading?'not-allowed':'pointer'}}>
-              {loading ? 'Υποβολή...' : 'Ολοκλήρωση Παραγγελίας'}
+            <div>
+              <label className="block text-sm font-medium mb-1">{t('checkout.phone')}</label>
+              <input
+                name="phone"
+                required
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-phone"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">{t('checkout.email')}</label>
+              <input
+                name="email"
+                type="email"
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-email"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">{t('checkout.address')}</label>
+              <input
+                name="line1"
+                required
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-address"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('form.city')}</label>
+                <input
+                  name="city"
+                  required
+                  className="w-full px-3 py-2 border rounded-lg"
+                  data-testid="checkout-city"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t('form.postal')}</label>
+                <input
+                  name="postal"
+                  required
+                  className="w-full px-3 py-2 border rounded-lg"
+                  data-testid="checkout-postal"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-6 rounded-lg transition"
+              data-testid="checkout-submit"
+            >
+              {loading ? `${t('common.submit')}...` : t('checkout.submit')}
             </button>
-            {err && <p style={{color:'crimson',margin:0}}>Σφάλμα: {err === 'missing' ? 'Συμπληρώστε όλα τα πεδία' : 'Αποτυχία υποβολής'}</p>}
+            {err && (
+              <p className="text-red-600" data-testid="checkout-error">
+                {err === 'missing' ? t('checkout.error.empty') : t('checkout.error.generic')}
+              </p>
+            )}
           </form>
 
-          <aside style={{border:'1px solid #eee',borderRadius:8,padding:16,backgroundColor:'#f8f9fa'}}>
-            <h3 style={{margin:'0 0 12px 0'}}>Σύνοψη Παραγγελίας</h3>
-            <ul style={{listStyle:'none',padding:0,margin:'0 0 16px 0'}}>
+          <aside className="border rounded-lg p-6 bg-gray-50 h-fit" data-testid="checkout-summary">
+            <h3 className="font-semibold mb-4">{t('cart.items')}</h3>
+            <ul className="space-y-2 mb-4">
               {items.map((it: CartItem)=>(
-                <li key={it.productId} style={{display:'flex',justifyContent:'space-between',gap:8,padding:'6px 0'}}>
-                  <span>{it.title} × {it.qty}</span>
-                  <span>{fmtEUR(Number(it.price)*Number(it.qty))}</span>
+                <li key={it.productId} className="flex justify-between gap-4">
+                  <span className="text-sm">{it.title} × {it.qty}</span>
+                  <span className="text-sm font-medium">{fmtEUR(Number(it.price)*Number(it.qty))}</span>
                 </li>
               ))}
             </ul>
-            <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'12px 0'}}/>
-            <div style={{display:'grid',gap:8}}>
-              <div style={{display:'flex',justifyContent:'space-between'}}><span>Υποσύνολο</span><b>{fmtEUR(totals.subtotal)}</b></div>
-              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>ΦΠΑ ({(Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)*100).toFixed(0)}%)</span><span>{fmtEUR(totals.tax)}</span></div>
-              <div style={{display:'flex',justifyContent:'space-between',opacity:.8,fontSize:14}}><span>Μεταφορικά</span><span>{totals.shipping === 0 ? 'Δωρεάν' : fmtEUR(totals.shipping)}</span></div>
-              <hr style={{border:'none',borderTop:'1px solid #ddd',margin:'8px 0'}}/>
-              <div style={{display:'flex',justifyContent:'space-between',fontSize:20,fontWeight:'bold'}}><span>Σύνολο</span><span>{fmtEUR(totals.grandTotal)}</span></div>
+            <hr className="border-gray-200 my-4"/>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t('cart.subtotal')}</span>
+                <span className="font-medium">{fmtEUR(totals.subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t('cart.shipping')}</span>
+                <span>{totals.shipping === 0 ? t('shipping.PICKUP') : fmtEUR(totals.shipping)}</span>
+              </div>
+              {totals.codFee > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('cart.codFee')}</span>
+                  <span>{fmtEUR(totals.codFee)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t('cart.tax')}</span>
+                <span>{fmtEUR(totals.tax)}</span>
+              </div>
+              <hr className="border-gray-200 my-2"/>
+              <div className="flex justify-between text-lg font-bold">
+                <span>{t('cart.total')}</span>
+                <span data-testid="checkout-total">{fmtEUR(totals.grandTotal)}</span>
+              </div>
             </div>
           </aside>
         </div>
