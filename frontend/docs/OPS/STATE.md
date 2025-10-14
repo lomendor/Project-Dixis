@@ -65,3 +65,13 @@ $(head -1607 docs/OPS/STATE.md)
 - Simplified Home.tsx API fetch to use apiUrl() helper instead of complex header logic
 - Created frontend/tests/i18n/i18n-loader.spec.ts unit test verifying nested structure
 - Verified no Date.now() or Math.random() in SSR branches for deterministic rendering
+
+## Pass STORE-03B — Complete EL i18n + smoke tests ✅
+**Date**: 2025-10-15
+- Verified el.json has complete nested structure for Home & Products pages
+- Confirmed all i18n bindings use next-intl t() throughout Home.tsx and products page
+- Created smoke test: frontend/tests/storefront/home-products.spec.ts
+  - Test 1: Home page verifies Greek hero title (home.title) and no hydration errors
+  - Test 2: Products page verifies Greek filter labels and console clean
+- Build passed successfully with Next.js 15.5.0
+- No MISSING_MESSAGE or INVALID_KEY errors in i18n implementation
