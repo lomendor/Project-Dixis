@@ -21,6 +21,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: '1'
       SKIP_ENV_VALIDATION: '1'
       DATABASE_URL: 'file:./.ci/ci.sqlite'
+      OTP_BYPASS: '1'
     defaults:
       run:
         working-directory: frontend
@@ -87,6 +88,7 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: '1'
       SKIP_ENV_VALIDATION: '1'
+      OTP_BYPASS: '1'
     defaults:
       run:
         working-directory: frontend
