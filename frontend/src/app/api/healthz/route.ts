@@ -8,7 +8,7 @@ export async function GET() {
 
   // Lightweight smoke check - no heavy DB operations
   return NextResponse.json({
-    ok: true,
+    status: 'ok',
     basicAuth,
     devMailbox,
     ts: new Date().toISOString(),
