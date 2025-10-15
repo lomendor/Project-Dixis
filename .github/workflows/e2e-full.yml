@@ -17,6 +17,10 @@ jobs:
     if: ${{ !inputs.pg_e2e }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      SKIP_ENV_VALIDATION: '1'
+      DATABASE_URL: 'file:./.ci/ci.sqlite'
     defaults:
       run:
         working-directory: frontend
@@ -43,10 +47,17 @@ jobs:
       - name: Use CI env
         run: |
           if [ -f ".env.ci" ]; then cp .env.ci .env; fi
+          mkdir -p .ci
 
-      - name: Generate Prisma Client
+      - name: Prisma generate (SQLite)
         run: |
-          pnpm run ci:gen || echo "Prisma gen skipped"
+          SCHEMA='prisma/schema.prisma'; [ -f prisma/schema.ci.prisma ] && SCHEMA='prisma/schema.ci.prisma'
+          pnpm dlx prisma generate --schema "$SCHEMA"
+
+      - name: Prisma migrate deploy (SQLite)
+        run: |
+          SCHEMA='prisma/schema.prisma'; [ -f prisma/schema.ci.prisma ] && SCHEMA='prisma/schema.ci.prisma'
+          pnpm dlx prisma migrate deploy --schema "$SCHEMA"
 
       - name: Build Next.js app
         run: pnpm run build:ci || pnpm run build
@@ -78,6 +89,9 @@ jobs:
     if: ${{ inputs.pg_e2e }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      SKIP_ENV_VALIDATION: '1'
     defaults:
       run:
         working-directory: frontend
@@ -106,9 +120,16 @@ jobs:
         run: |
           echo "DATABASE_URL=postgres://app:app@localhost:5432/app" >> .env
           if [ -f ".env.ci.pg" ]; then cat .env.ci.pg >> .env; fi
-      - name: Generate Prisma Client
+
+      - name: Prisma generate (Postgres)
         run: |
-          pnpm run ci:gen || echo "Prisma gen skipped"
+          SCHEMA='prisma/schema.prisma'
+          pnpm dlx prisma generate --schema "$SCHEMA"
+
+      - name: Prisma migrate deploy (Postgres)
+        run: |
+          SCHEMA='prisma/schema.prisma'
+          pnpm dlx prisma migrate deploy --schema "$SCHEMA"
       - name: Build Next.js app
         run: pnpm run build:ci || pnpm run build
       - name: Start Next.js server
