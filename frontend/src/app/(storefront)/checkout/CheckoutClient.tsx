@@ -6,6 +6,7 @@ import type { CartItem } from '@/lib/cart/store'
 import { calcTotals, fmtEUR } from '@/lib/cart/totals'
 import { DEFAULT_OPTIONS } from '@/contracts/shipping'
 import { useTranslations } from 'next-intl'
+import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
 
 export default function CheckoutClient(){
   const router = useRouter()
@@ -191,6 +192,16 @@ export default function CheckoutClient(){
                 <span>{t('cart.total')}</span>
                 <span data-testid="checkout-total">{fmtEUR(totals.grandTotal)}</span>
               </div>
+            </div>
+
+            {/* AG7a: Shipping breakdown UI - shows detailed shipping calculation */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <ShippingBreakdown
+                initialPostalCode=""
+                initialMethod={shippingMethod as any || 'COURIER'}
+                initialItems={items.map(i => ({ weightGrams: 500 }))}
+                initialSubtotal={totals.subtotal / 100}
+              />
             </div>
           </aside>
         </div>
