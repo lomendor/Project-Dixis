@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('[i18n] Παραγωγοί σε ελληνικά', () => {
-  test.skip('should display Greek producers page content', async ({ page }) => {
+  test('should display Greek producers page content', async ({ page }) => {
     const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3001';
 
     await page.goto(`${baseUrl}/producers`, { waitUntil: 'domcontentloaded' });
