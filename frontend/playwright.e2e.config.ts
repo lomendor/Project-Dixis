@@ -10,7 +10,7 @@ export default defineConfig({
     ['junit', { outputFile: 'junit-e2e.xml' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
   },
   // Only start webServer if not in CI with manual server management
   webServer: process.env.SKIP_WEBSERVER
