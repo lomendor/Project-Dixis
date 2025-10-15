@@ -1,0 +1,98 @@
+name: e2e-full
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # Nightly 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      pg_e2e:
+        description: 'Run Postgres-backed E2E (optional, gated)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  e2e-sqlite:
+    name: E2E (SQLite, nightly/main)
+    if: ${{ !inputs.pg_e2e }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile
+
+      - name: Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Use CI env
+        run: |
+          if [ -f ".env.ci" ]; then cp .env.ci .env; fi
+
+      - name: Run E2E
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e.xml
+        run: npx playwright test --reporter=line,junit
+
+      - name: Upload JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-e2e
+          path: frontend/junit-e2e.xml
+
+  # Optional Postgres job — gated/manual; requires repo-specific env/secrets
+  e2e-postgres:
+    name: E2E (Postgres, manual/gated)
+    if: ${{ inputs.pg_e2e }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U app -d app"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm i --frozen-lockfile
+      - run: npx playwright install --with-deps chromium
+      - name: Prepare Postgres env
+        run: |
+          echo "DATABASE_URL=postgres://app:app@localhost:5432/app" >> .env
+          if [ -f ".env.ci.pg" ]; then cat .env.ci.pg >> .env; fi
+      - name: Run E2E (pg)
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e-pg.xml
+        run: npx playwright test --reporter=line,junit
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-e2e-pg
+          path: frontend/junit-e2e-pg.xml

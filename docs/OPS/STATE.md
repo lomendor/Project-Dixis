@@ -2844,3 +2844,10 @@ unitLabel('pcs')   // "τεμ."
 - API returns Prisma data when available
 - Home sanity test: no console errors + EL text visible
 - Updated .env.example with DIXIS_ENV + NEXT_PUBLIC_API_BASE_URL
+
+## Pass AG2 — e2e-full nightly & strict smoke
+**Date**: 2025-10-15 13:54 UTC
+- Added `.github/workflows/e2e-full.yml` (nightly @ 02:00 UTC + manual)
+- Added `frontend/tests/e2e/smoke-strict.spec.ts` (P0 gate)
+- Created `docs/reports/TESTS-SKIPPED.md` (38 skipped tests tracked)
+- **Impact**: CI/tests/docs only, no business logic changes
