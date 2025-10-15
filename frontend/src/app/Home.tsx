@@ -1,11 +1,11 @@
 import { Product } from '@/lib/api';
 import HomeClient from './HomeClient';
 import { getTranslations } from 'next-intl/server';
-import { apiUrl } from '@/lib/http/apiBase';
+import { apiPath } from '@/lib/runtime/urls';
 
 async function getInitialProducts(): Promise<Product[]> {
   try {
-    const url = apiUrl('/api/public/products?per_page=20&sort=created_at');
+    const url = apiPath('/api/public/products?per_page=20&sort=created_at');
     const res = await fetch(url, { cache: 'no-store' });
 
     if (!res.ok) {
