@@ -194,7 +194,7 @@ jobs:
 
       - name: Run Prisma migrations
         env:
-          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
         run: |
           npx prisma generate
           npx prisma migrate deploy
@@ -211,7 +211,7 @@ jobs:
       - name: Build and start Next.js app
         env:
           NODE_ENV: production
-          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
           BASIC_AUTH: "admin:dixis_ci_pass"
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
           API_BASE_URL: "http://127.0.0.1:8001"
@@ -226,7 +226,7 @@ jobs:
         run: bash scripts/ci/run-playwright.sh
         env:
           CI: true
-          DATABASE_URL: "postgresql://dixis:dixis_dev_pass@localhost:5432/dixis_dev?schema=public"
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
           BASIC_AUTH: "admin:dixis_ci_pass"
           BASE_URL: http://127.0.0.1:3000
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
