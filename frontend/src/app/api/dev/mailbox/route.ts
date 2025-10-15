@@ -1,10 +1,15 @@
-import { NextResponse } from 'next/server'
-import { list, first } from '@/lib/dev/mailbox'
+import { NextResponse } from 'next/server';
+import { listMail } from '../../../../lib/devMailboxStore';
 
-export async function GET(req: Request){
-  if (process.env.DIXIS_ENV === 'production') return NextResponse.json({ error:'not found' }, { status:404 })
-  const url = new URL(req.url)
-  const to = url.searchParams.get('to') || undefined
-  const payload = to ? { item: first(to) } : { items: list() }
-  return NextResponse.json(payload, { status:200 })
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
+  if (process.env.SMTP_DEV_MAILBOX !== '1') {
+    return new NextResponse('dev mailbox disabled', { status: 404 });
+  }
+
+  const url = new URL(req.url);
+  const to = url.searchParams.get('to') || undefined;
+
+  return NextResponse.json(listMail(to));
 }
