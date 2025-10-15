@@ -12,10 +12,13 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
   },
-  webServer: {
-    command: 'pnpm run build && pnpm run start',
-    port: 3000,
-    timeout: 120_000,
-    reuseExistingServer: !process.env.CI,
-  },
+  // Only start webServer if not in CI with manual server management
+  webServer: process.env.SKIP_WEBSERVER
+    ? undefined
+    : {
+        command: 'pnpm run build && pnpm run start',
+        port: 3000,
+        timeout: 120_000,
+        reuseExistingServer: !process.env.CI,
+      },
 });

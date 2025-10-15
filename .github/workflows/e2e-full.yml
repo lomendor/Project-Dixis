@@ -44,9 +44,20 @@ jobs:
         run: |
           if [ -f ".env.ci" ]; then cp .env.ci .env; fi
 
+      - name: Build Next.js app
+        run: pnpm run build
+
+      - name: Start Next.js server
+        run: pnpm run start &
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000 --timeout 60000 || (curl -I http://localhost:3000 && exit 1)
+
       - name: Run E2E
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e.xml
+          SKIP_WEBSERVER: 'true'
+          CI: 'true'
         run: npx playwright test -c playwright.e2e.config.ts --reporter=line,junit
 
       - name: Upload JUnit
@@ -90,9 +101,17 @@ jobs:
         run: |
           echo "DATABASE_URL=postgres://app:app@localhost:5432/app" >> .env
           if [ -f ".env.ci.pg" ]; then cat .env.ci.pg >> .env; fi
+      - name: Build Next.js app
+        run: pnpm run build
+      - name: Start Next.js server
+        run: pnpm run start &
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000 --timeout 60000 || (curl -I http://localhost:3000 && exit 1)
       - name: Run E2E (pg)
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e-pg.xml
+          SKIP_WEBSERVER: 'true'
+          CI: 'true'
         run: npx playwright test -c playwright.e2e.config.ts --reporter=line,junit
       - if: always()
         uses: actions/upload-artifact@v4
