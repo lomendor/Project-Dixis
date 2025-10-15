@@ -23,7 +23,12 @@ if (srcRates && fs.existsSync(srcRates)){
   console.log('⚠ fallback rates.json written');
 }
 if (srcZones && fs.existsSync(srcZones)){
-  const j=parseCSV(fs.readFileSync(srcZones,'utf8'));
+  const raw=parseCSV(fs.readFileSync(srcZones,'utf8'));
+  // Map CSV columns to TypeScript interface: postal_code→prefix, zone→zone_id
+  const j=raw.map((r:any)=>({
+    prefix: String(r.postal_code||r.prefix||'').substring(0,2),
+    zone_id: String(r.zone||r.zone_id||'')
+  }));
   fs.writeFileSync(path.join(outDir,'zones.json'), JSON.stringify(j,null,2));
   console.log('✔ zones.json written');
 } else {
