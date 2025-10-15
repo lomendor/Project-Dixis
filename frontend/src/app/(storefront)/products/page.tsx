@@ -1,12 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { apiUrl } from '@/lib/http/apiBase';
+import { apiPath } from '@/lib/runtime/urls';
 import { parse, toQuery, type ProductFilters } from '@/lib/search/params';
 
 async function getProducts(filters: ProductFilters) {
   try {
     const qs = toQuery({ per_page: 20, ...filters });
-    const url = apiUrl(`/api/public/products${qs ? `?${qs}` : ''}`);
+    const url = apiPath(`/api/public/products${qs ? `?${qs}` : ''}`);
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const j = await res.json();
