@@ -177,3 +177,7 @@ frontend/.lighthouseci/**
 frontend/public/uploads/
 frontend/playwright-report/
 frontend/test-results/
+
+# CI test artifacts
+junit-*.xml
+**/junit-*.xml

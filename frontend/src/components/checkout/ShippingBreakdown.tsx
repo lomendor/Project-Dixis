@@ -4,6 +4,7 @@ import { fetchQuote, type QuotePayload, type QuoteResponse, type QuoteItem } fro
 
 type Props = {
   baseURL?: string;                     // allow override in tests
+  onQuote?: (q: QuoteResponse | null) => void;  // callback when quote updates
   initialPostalCode?: string;
   initialMethod?: QuotePayload['method'];
   initialItems?: QuoteItem[];
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ShippingBreakdown({
   baseURL,
+  onQuote,
   initialPostalCode = '',
   initialMethod = 'COURIER',
   initialItems = [{ weightGrams: 500 }],
@@ -37,8 +39,11 @@ export default function ShippingBreakdown({
     try {
       const q = await fetchQuote(baseURL, payload);
       setData(q);
+      onQuote?.(q);  // AG7b: notify parent of quote update
     } catch (e:any) {
-      setError(e?.message ?? 'Quote error'); setData(null);
+      setError(e?.message ?? 'Quote error');
+      setData(null);
+      onQuote?.(null);  // AG7b: notify parent of error
     } finally {
       setLoading(false);
     }
@@ -80,8 +85,23 @@ export default function ShippingBreakdown({
         </label>
       </div>
 
-      {loading && <div data-testid="loading">Υπολογισμός…</div>}
-      {error && <div data-testid="error" style={{color:'#b91c1c'}}>Σφάλμα: {error}</div>}
+      {/* AG7b: Loading skeleton */}
+      {loading && (
+        <>
+          <div data-testid="skeleton" style={{background:'#f3f4f6',height:56,borderRadius:8,margin:'8px 0'}}></div>
+          <div data-testid="loading" style={{color:'#6b7280',fontSize:'0.875rem'}}>Υπολογισμός…</div>
+        </>
+      )}
+
+      {/* AG7b: Error toast */}
+      {error && (
+        <div
+          data-testid="toast-error"
+          style={{background:'#fef2f2',border:'1px solid #dc2626',padding:8,borderRadius:6,margin:'8px 0',color:'#991b1b',fontSize:'0.875rem'}}
+        >
+          Σφάλμα: {error}
+        </div>
+      )}
 
       {data && (
         <div data-testid="quote-results" style={{display:'grid', gap:6}}>
