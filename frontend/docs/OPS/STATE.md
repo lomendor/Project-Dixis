@@ -97,3 +97,18 @@ $(head -1607 docs/OPS/STATE.md)
 - No schema changes, no new dependencies (React Context + localStorage only)
 - Build passed successfully with Next.js 15.5.0 (cart: dynamic route, checkout: Suspense wrapper)
 - No backend/business logic changes, UI/state/i18n only
+
+## Pass STORE-05.1 — PR Hygiene + Lightweight E2E ✅
+**Date**: 2025-10-15
+- PR #552: added Summary/AC/Test Plan/Reports (Danger compliance)
+- Created 2 lightweight E2E tests (no DB dependency, localStorage preseed):
+  - cart-persist.spec.ts: verifies cart state persistence and Greek totals display
+  - checkout-validate.spec.ts: verifies EL-first labels and form structure
+- Created docs/AGENT/SUMMARY/Pass-STORE-05.1.md for QA hygiene documentation
+- No business logic changes, QA hygiene only
+
+## Pass SMOKE-TRIAGE-552 — Fix Smoke Tests DATABASE_URL mismatch ✅
+**Date**: 2025-10-15
+- Root cause: Prisma migrations failed due to DATABASE_URL using `dixis:dixis_dev_pass@localhost:5432/dixis_dev` while PostgreSQL service only creates `postgres:postgres@127.0.0.1:5432/dixis`
+- Fixed 3 DATABASE_URL references in .github/workflows/pr.yml to match service config
+- No application code changes, CI infrastructure fix only
