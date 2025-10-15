@@ -29,6 +29,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
       - name: Enable corepack
         run: corepack enable
 
@@ -80,6 +81,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
       - run: corepack enable
       - run: pnpm i --frozen-lockfile
       - run: npx playwright install --with-deps chromium
