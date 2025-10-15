@@ -47,7 +47,7 @@ jobs:
       - name: Run E2E
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e.xml
-        run: npx playwright test --reporter=line,junit
+        run: npx playwright test -c playwright.e2e.config.ts --reporter=line,junit
 
       - name: Upload JUnit
         if: always()
@@ -93,7 +93,7 @@ jobs:
       - name: Run E2E (pg)
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e-pg.xml
-        run: npx playwright test --reporter=line,junit
+        run: npx playwright test -c playwright.e2e.config.ts --reporter=line,junit
       - if: always()
         uses: actions/upload-artifact@v4
         with:

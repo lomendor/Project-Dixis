@@ -148,3 +148,12 @@ $(head -1607 docs/OPS/STATE.md)
 - Remaining test execution issue (0 tests run) identified as E2E config, not workflow problem
 - Created umbrella issue #558 for systematic skipped tests resolution
 - Created docs/AGENT/SUMMARY/Pass-AG2a.md with complete analysis and recommendations
+
+## Pass AG3 — Fix Playwright E2E discovery & execution ✅
+**Date**: 2025-10-15
+- Created explicit Playwright e2e config (frontend/playwright.e2e.config.ts) with deterministic test discovery
+- Config specifies: testDir './tests', testMatch '**/e2e/**/*.spec.ts', baseURL, webServer (build+start)
+- Patched e2e-full workflow to use explicit config: -c playwright.e2e.config.ts
+- Local verification: 100+ e2e tests discovered successfully, including smoke-strict.spec.ts
+- Resolves "0 tests run" issue from Pass AG2a run #18532029893
+- Created docs/AGENT/SUMMARY/Pass-AG3.md with complete analysis
