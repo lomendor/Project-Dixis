@@ -112,3 +112,12 @@ $(head -1607 docs/OPS/STATE.md)
 - Root cause: Prisma migrations failed due to DATABASE_URL using `dixis:dixis_dev_pass@localhost:5432/dixis_dev` while PostgreSQL service only creates `postgres:postgres@127.0.0.1:5432/dixis`
 - Fixed 3 DATABASE_URL references in .github/workflows/pr.yml to match service config
 - No application code changes, CI infrastructure fix only
+
+## Pass I18N-HOTFIX-02 — Idempotent dot-keys converter + test ✅
+**Date**: 2025-10-15
+- Created scripts/i18n/dotkeys-to-nested.ts - idempotent converter for dot-keys → nested JSON
+- Confirmed el.json & en.json already in proper nested structure (no conversion needed)
+- Home.tsx already uses apiUrl() helper with built-in fallback (no changes needed)
+- .env.example already has NEXT_PUBLIC_API_BASE_URL configured
+- Created frontend/tests/i18n/dotkeys.spec.ts - regression test for nested structure
+- No business logic changes, infrastructure/QA only
