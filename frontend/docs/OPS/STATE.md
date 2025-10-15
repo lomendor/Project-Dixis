@@ -176,3 +176,13 @@ $(head -1607 docs/OPS/STATE.md)
 - Created docs/reports/AG4-post-merge-status.md with detailed analysis
 - Created docs/AGENT/SUMMARY/Pass-AG4.md
 - Status: Infrastructure validated, nightly automation ready for 02:00 UTC runs
+
+## Pass AG5 — Add shipping-quote smoke & wire to CI ✅
+**Date**: 2025-10-15
+- Created frontend/tests/e2e/shipping-quote-smoke.spec.ts with 3 API smoke scenarios
+- Test coverage: Athens (10431), Thessaloniki (54622), Rhodes Island (85100)
+- Shipping methods tested: COURIER, COURIER_COD, PICKUP
+- Validates: zone detection, chargeableKg calculation, ruleTrace, shippingCost
+- Test discovery: 283 total tests (includes 3 new shipping-quote-smoke tests)
+- No business logic changes (tests/docs only)
+- Created docs/AGENT/SUMMARY/Pass-AG5.md
