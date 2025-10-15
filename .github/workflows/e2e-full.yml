@@ -24,14 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node & pnpm
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install deps
         run: pnpm i --frozen-lockfile
@@ -77,12 +78,12 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
-      - run: corepack enable
       - run: pnpm i --frozen-lockfile
       - run: npx playwright install --with-deps chromium
       - name: Prepare Postgres env
