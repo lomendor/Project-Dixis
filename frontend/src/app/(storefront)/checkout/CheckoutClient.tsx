@@ -7,6 +7,12 @@ import { calcTotals, fmtEUR } from '@/lib/cart/totals'
 import { DEFAULT_OPTIONS } from '@/contracts/shipping'
 import { useTranslations } from 'next-intl'
 import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
+import type { QuoteResponse } from '@/lib/quoteClient'
+
+// Helper to derive total from subtotal + shipping + cod
+function deriveTotal(subtotal: number, shipping: number, cod: number = 0) {
+  return Number((subtotal + shipping + cod).toFixed(2));
+}
 
 export default function CheckoutClient(){
   const router = useRouter()
@@ -19,6 +25,14 @@ export default function CheckoutClient(){
   const shippingMethod = state.shippingMethod
   const [loading, setLoading] = useState(false)
 
+  // Live totals state from ShippingBreakdown
+  const [liveTotals, setLiveTotals] = useState<{shipping:number; cod:number; total:number; free:boolean}>({
+    shipping: 0,
+    cod: 0,
+    total: 0,
+    free: false
+  })
+
   // Find shipping option details
   const shippingOption = DEFAULT_OPTIONS.find(opt => opt.code === shippingMethod) || DEFAULT_OPTIONS[0]
 
@@ -30,6 +44,21 @@ export default function CheckoutClient(){
     codFee: (shippingOption.codFee || 0) * 100, // Convert to cents
     taxRate: 0.24 // 24% VAT
   })
+
+  // Callback when ShippingBreakdown gets new quote
+  function onQuoteUpdate(q: QuoteResponse | null) {
+    try {
+      if (!q) return;
+      setLiveTotals({
+        shipping: q.shippingCost || 0,
+        cod: q.codFee || 0,
+        total: deriveTotal(totals.subtotal / 100, q.shippingCost || 0, q.codFee || 0),
+        free: !!q.freeShipping
+      });
+    } catch (e) {
+      // noop - graceful degradation
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault()
@@ -197,12 +226,33 @@ export default function CheckoutClient(){
             {/* AG7a: Shipping breakdown UI - shows detailed shipping calculation */}
             <div className="mt-6 pt-6 border-t border-gray-200">
               <ShippingBreakdown
+                onQuote={(q) => onQuoteUpdate(q)}
                 initialPostalCode=""
                 initialMethod={shippingMethod as any || 'COURIER'}
                 initialItems={items.map(i => ({ weightGrams: 500 }))}
                 initialSubtotal={totals.subtotal / 100}
               />
             </div>
+
+            {/* AG7b: Live totals from shipping quote */}
+            {liveTotals.total > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Σύνολο παραγγελίας:</span>
+                  <span data-testid="order-total">€{liveTotals.total.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* AG7b: Free shipping banner */}
+            {liveTotals.free && (
+              <div
+                data-testid="free-shipping-banner"
+                className="mt-4 bg-green-50 border border-green-500 text-green-800 px-4 py-2 rounded-lg text-sm font-medium"
+              >
+                ✓ Δωρεάν μεταφορικά
+              </div>
+            )}
           </aside>
         </div>
       )}
