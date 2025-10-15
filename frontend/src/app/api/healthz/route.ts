@@ -1,12 +1,16 @@
+import { NextResponse } from 'next/server';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  return new Response(
-    JSON.stringify({ status: 'ok', ts: new Date().toISOString() }),
-    { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } }
-  );
-}
+  const basicAuth = process.env.BASIC_AUTH === '1';
+  const devMailbox = process.env.SMTP_DEV_MAILBOX === '1';
 
-export async function HEAD() {
-  return new Response(null, { status: 200, headers: { 'cache-control': 'no-store' } });
+  // Lightweight smoke check - no heavy DB operations
+  return NextResponse.json({
+    status: 'ok',
+    basicAuth,
+    devMailbox,
+    ts: new Date().toISOString(),
+  });
 }
