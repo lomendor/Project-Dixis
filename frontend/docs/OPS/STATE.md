@@ -121,3 +121,11 @@ $(head -1607 docs/OPS/STATE.md)
 - .env.example already has NEXT_PUBLIC_API_BASE_URL configured
 - Created frontend/tests/i18n/dotkeys.spec.ts - regression test for nested structure
 - No business logic changes, infrastructure/QA only
+
+## Pass SHIP-V2 — CSV→JSON config, engine.v2 (zones/tiers/volumetric), upgraded quote API, tests ✅
+**Date**: 2025-10-15
+- Ported Marketplace shipping logic as config-based: zones (postal prefixes), weight tiers, volumetric (÷5000)
+- Engine V2: chargeable kg, tier selection, trace, COD fee, free >= 60€
+- API /api/checkout/quote upgraded for detailed breakdown
+- Tests: engine unit + quote e2e
+- Pass SHIP-V2: CSV→JSON config, engine.v2 (zones/tiers/volumetric), upgraded quote API, tests
