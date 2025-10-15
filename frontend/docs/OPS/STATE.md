@@ -186,3 +186,34 @@ $(head -1607 docs/OPS/STATE.md)
 - Test discovery: 283 total tests (includes 3 new shipping-quote-smoke tests)
 - No business logic changes (tests/docs only)
 - Created docs/AGENT/SUMMARY/Pass-AG5.md
+
+## Pass AG5b — Unskip 1 easy E2E test & update inventory ✅
+**Date**: 2025-10-15
+- Scanned 37 skipped tests across 23 files (comprehensive inventory analysis)
+- Found only 1 unconditionally skipped safe test: i18n/producers-el.spec.ts:4
+- Unskipped Greek producers page i18n test (simple UI text validation)
+- Updated docs/reports/TESTS-SKIPPED.md: 36 skipped (was 37), 22 files (was 23)
+- Remaining 36 skipped tests all have valid conditional skip reasons
+- No business logic changes (tests/docs only)
+- Created docs/AGENT/SUMMARY/Pass-AG5b.md
+
+## Pass AG6a — Enable OTP_BYPASS in CI E2E ✅
+**Date**: 2025-10-15
+- Added OTP_BYPASS: '1' to both e2e-sqlite and e2e-postgres jobs in .github/workflows/e2e-full.yml
+- Unlocks 11 auth-gated tests: 4 checkout, 2 security, 4 admin, 1 storefront
+- Coverage increase: +11 tests (~4.4% increase, from ~247 to ~258 active tests)
+- Remaining skipped tests: 25 (was 36, minus 11 auth-gated)
+- Zero application code changes (CI configuration only)
+- PR #566: MERGED successfully
+- Created docs/AGENT/SUMMARY/Pass-AG6a.md
+
+## Pass AG7a — Checkout: Shipping Breakdown UI (component + demo + tests) ✅
+**Date**: 2025-10-15
+- Created frontend/src/lib/quoteClient.ts: Typed API client for /api/checkout/quote
+- Created frontend/src/components/checkout/ShippingBreakdown.tsx: Interactive component with auto-refresh
+- Created frontend/src/app/dev/quote-demo/page.tsx: Demo page at /dev/quote-demo
+- Integrated component into frontend/src/app/(storefront)/checkout/CheckoutClient.tsx
+- Created frontend/tests/e2e/checkout-shipping-ui.spec.ts: 3 E2E scenarios (Athens/Thessaloniki/Island)
+- Component features: postal code input, shipping method selector, weight/subtotal inputs, "Γιατί?" tooltip
+- No backend business logic changes (frontend-only UI feature)
+- Created docs/AGENT/SUMMARY/Pass-AG7a.md
