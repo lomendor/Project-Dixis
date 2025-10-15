@@ -1,6 +1,12 @@
 'use client';
 import React from 'react';
 import { fetchQuote, type QuotePayload, type QuoteResponse, type QuoteItem } from '../../lib/quoteClient';
+import { Card, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { Select } from '../ui/select';
+import { Skeleton } from '../ui/skeleton';
+import { Tooltip } from '../ui/tooltip';
+import { useToast } from '../ui/toast';
 
 type Props = {
   baseURL?: string;                     // allow override in tests
@@ -27,6 +33,8 @@ export default function ShippingBreakdown({
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<QuoteResponse | null>(null);
 
+  const { toast, Toaster } = useToast();
+
   const payload = React.useMemo<QuotePayload>(() => ({
     postalCode,
     method,
@@ -41,8 +49,10 @@ export default function ShippingBreakdown({
       setData(q);
       onQuote?.(q);  // AG7b: notify parent of quote update
     } catch (e:any) {
-      setError(e?.message ?? 'Quote error');
+      const errorMsg = e?.message ?? 'Quote error';
+      setError(errorMsg);
       setData(null);
+      toast(`Σφάλμα: ${errorMsg}`);  // AG8: use toast instead of inline error
       onQuote?.(null);  // AG7b: notify parent of error
     } finally {
       setLoading(false);
@@ -55,70 +65,90 @@ export default function ShippingBreakdown({
   }, [postalCode, method, weightGrams, subtotal]);
 
   return (
-    <div data-testid="shipping-breakdown" style={{border:'1px solid #e5e7eb', borderRadius:8, padding:16}}>
-      <h3 style={{marginTop:0, marginBottom:8}}>Μεταφορικά</h3>
+    <Card data-testid="shipping-breakdown">
+      <Toaster />
+      <CardTitle className="mb-2">Μεταφορικά</CardTitle>
 
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:12}}>
-        <label>Τ.Κ.
-          <input data-testid="postal-input" value={postalCode}
-                 onChange={e=>setPostalCode(e.target.value)}
-                 placeholder="π.χ. 10431"
-                 style={{width:'100%', padding:8, marginTop:4}} />
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <label className="block">
+          <span className="text-sm text-neutral-700">Τ.Κ.</span>
+          <Input
+            data-testid="postal-input"
+            value={postalCode}
+            onChange={e => setPostalCode(e.target.value)}
+            placeholder="π.χ. 10431"
+            className="mt-1"
+          />
         </label>
-        <label>Μέθοδος
-          <select data-testid="method-select" value={method} onChange={e=>setMethod(e.target.value as any)}
-                  style={{width:'100%', padding:8, marginTop:4}}>
+        <label className="block">
+          <span className="text-sm text-neutral-700">Μέθοδος</span>
+          <Select
+            data-testid="method-select"
+            value={method}
+            onChange={e => setMethod(e.target.value as any)}
+            className="mt-1"
+          >
             <option value="COURIER">Courier</option>
             <option value="COURIER_COD">Courier + Αντικαταβολή</option>
             <option value="PICKUP">Παραλαβή</option>
-          </select>
+          </Select>
         </label>
-        <label>Βάρος (g)
-          <input data-testid="weight-input" type="number" min="1" value={weightGrams}
-                 onChange={e=>setWeightGrams(parseInt(e.target.value||'0',10))}
-                 style={{width:'100%', padding:8, marginTop:4}} />
+        <label className="block">
+          <span className="text-sm text-neutral-700">Βάρος (g)</span>
+          <Input
+            data-testid="weight-input"
+            type="number"
+            min="1"
+            value={weightGrams}
+            onChange={e => setWeightGrams(parseInt(e.target.value||'0',10))}
+            className="mt-1"
+          />
         </label>
-        <label>Subtotal (€)
-          <input data-testid="subtotal-input" type="number" step="0.01" min="0" value={subtotal}
-                 onChange={e=>setSubtotal(parseFloat(e.target.value||'0'))}
-                 style={{width:'100%', padding:8, marginTop:4}} />
+        <label className="block">
+          <span className="text-sm text-neutral-700">Subtotal (€)</span>
+          <Input
+            data-testid="subtotal-input"
+            type="number"
+            step="0.01"
+            min="0"
+            value={subtotal}
+            onChange={e => setSubtotal(parseFloat(e.target.value||'0'))}
+            className="mt-1"
+          />
         </label>
       </div>
 
-      {/* AG7b: Loading skeleton */}
+      {/* AG8: Use Skeleton component */}
       {loading && (
         <>
-          <div data-testid="skeleton" style={{background:'#f3f4f6',height:56,borderRadius:8,margin:'8px 0'}}></div>
-          <div data-testid="loading" style={{color:'#6b7280',fontSize:'0.875rem'}}>Υπολογισμός…</div>
+          <Skeleton data-testid="skeleton" className="h-14 w-full my-2" />
+          <div data-testid="loading" className="text-neutral-500 text-sm">Υπολογισμός…</div>
         </>
       )}
 
-      {/* AG7b: Error toast */}
-      {error && (
-        <div
-          data-testid="toast-error"
-          style={{background:'#fef2f2',border:'1px solid #dc2626',padding:8,borderRadius:6,margin:'8px 0',color:'#991b1b',fontSize:'0.875rem'}}
-        >
-          Σφάλμα: {error}
-        </div>
-      )}
+      {/* Keep toast-error testid for backward compatibility but hide it (toast shows instead) */}
+      {error && <div data-testid="toast-error" className="hidden">{error}</div>}
 
       {data && (
-        <div data-testid="quote-results" style={{display:'grid', gap:6}}>
+        <div data-testid="quote-results" className="grid gap-1.5 text-sm">
           <div>Ζώνη: <strong>{data.zone}</strong></div>
           <div>Χρέωση κιλών: <strong>{data.chargeableKg.toFixed(2)} kg</strong></div>
           <div>Κόστος μεταφορικών: <strong data-testid="shippingCost">€{data.shippingCost.toFixed(2)}</strong></div>
           {typeof data.codFee === 'number' && <div>Αντικαταβολή: <strong data-testid="codFee">€{data.codFee.toFixed(2)}</strong></div>}
           <div>Δωρεάν μεταφορικά: <strong data-testid="freeShipping">{data.freeShipping ? 'Ναι' : 'Όχι'}</strong></div>
 
-          <details data-testid="why-tooltip">
-            <summary>Γιατί;</summary>
-            <ul style={{marginTop:8}}>
-              {(data.ruleTrace?.slice(0,3) ?? ['—']).map((line, i) => <li key={i}>{line}</li>)}
-            </ul>
-          </details>
+          {/* AG8: Use Tooltip component */}
+          <div data-testid="why-tooltip">
+            <Tooltip>
+              <ul className="mt-1 list-disc pl-5">
+                {(data.ruleTrace?.slice(0,3) ?? ['—']).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </Tooltip>
+          </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
