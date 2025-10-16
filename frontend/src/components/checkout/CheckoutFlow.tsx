@@ -16,6 +16,7 @@ export default function CheckoutFlow() {
     city: '',
     postalCode: '',
     country: 'GR',
+    email: '',
   });
   const [addrValid, setAddrValid] = React.useState(false);
   const [method, setMethod] = React.useState<

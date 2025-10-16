@@ -29,11 +29,19 @@ export default function PaymentPage() {
     if (res.ok) {
       // Save order to database/memory before redirect
       try {
-        await fetch('/api/orders', {
+        const resp = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ summary: { ...json, paymentSessionId: session.id } }),
+          body: JSON.stringify({
+            summary: { ...json, paymentSessionId: session.id },
+          }),
         });
+        const created = await resp.json().catch((): null => null);
+        if (created && created.id) {
+          try {
+            localStorage.setItem('checkout_order_id', String(created.id));
+          } catch {}
+        }
       } catch {
         // Continue even if order save fails
       }

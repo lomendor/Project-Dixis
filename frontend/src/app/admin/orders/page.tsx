@@ -8,6 +8,7 @@ type Row = {
   method: string;
   total: number;
   paymentStatus?: string;
+  email?: string;
 };
 
 export default function AdminOrders() {
@@ -44,6 +45,7 @@ export default function AdminOrders() {
               <th>Μέθοδος</th>
               <th>Σύνολο</th>
               <th>Status</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
@@ -61,11 +63,12 @@ export default function AdminOrders() {
                     : String(r.total)}
                 </td>
                 <td>{r.paymentStatus ?? 'PAID'}</td>
+                <td className="pr-2">{r.email ?? '-'}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-neutral-600">
+                <td colSpan={7} className="text-neutral-600">
                   Καμία καταχώρηση.
                 </td>
               </tr>

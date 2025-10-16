@@ -5,6 +5,7 @@ test('Order receipt email is stored in dev mailbox', async ({ page, request }) =
   await page.goto('/checkout/flow').catch(() => test.skip(true, 'flow route not present'));
   await page.getByLabel('Οδός & αριθμός').fill('Panepistimiou 1');
   await page.getByLabel('Πόλη').fill('Athens');
+  await page.getByLabel('Email').fill('ci-recipient@dixis.dev');
   await page.getByLabel('Τ.Κ.').fill('10431');
   await page.getByTestId('flow-method').selectOption('COURIER');
   await page.getByTestId('flow-weight').fill('500');
@@ -24,7 +25,7 @@ test('Order receipt email is stored in dev mailbox', async ({ page, request }) =
   expect(Array.isArray(list)).toBeTruthy();
 
   // 3) Βρες email για τον default παραλήπτη
-  const to = 'test@dixis.dev';
+  const to = 'ci-recipient@dixis.dev';
   const found = list.find((m: any) =>
     (m?.to || '').toLowerCase().includes(to) &&
     String(m?.subject || '').toLowerCase().includes('dixis order')

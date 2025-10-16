@@ -4,6 +4,7 @@ import { Input } from '../ui/input';
 
 export type Address = {
   fullName?: string;
+  email?: string;
   street: string;
   city: string;
   region?: string;
@@ -19,6 +20,7 @@ type Props = {
 export default function AddressForm({ initial, onChange }: Props) {
   const [addr, setAddr] = React.useState<Address>({
     fullName: initial?.fullName ?? '',
+    email: initial?.email ?? '',
     street: initial?.street ?? '',
     city: initial?.city ?? '',
     region: initial?.region ?? '',
@@ -28,11 +30,12 @@ export default function AddressForm({ initial, onChange }: Props) {
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
 
   const errors = {
+    email: (addr.email || '').length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr.email || '') ? 'Μη έγκυρο email' : '',
     street: !addr.street ? 'Υποχρεωτικό' : '',
     city: !addr.city ? 'Υποχρεωτικό' : '',
     postalCode: !addr.postalCode || addr.postalCode.trim().length < 4 ? 'Ελάχιστο 4 ψηφία' : '',
   };
-  const valid = !errors.street && !errors.city && !errors.postalCode;
+  const valid = !errors.email && !errors.street && !errors.city && !errors.postalCode;
 
   React.useEffect(() => {
     onChange?.(addr, valid);
@@ -86,6 +89,13 @@ export default function AddressForm({ initial, onChange }: Props) {
         label="Ονοματεπώνυμο"
         value={addr.fullName ?? ''}
         onC={(v) => set('fullName', v)}
+      />
+      <Field
+        id="email"
+        label="Email"
+        value={addr.email ?? ''}
+        onC={(v) => set('email', v)}
+        error={errors.email}
       />
       <Field
         id="country"

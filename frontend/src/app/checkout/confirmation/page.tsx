@@ -5,12 +5,16 @@ import { formatEUR } from '../../../lib/money';
 
 export default function Confirmation() {
   const [json, setJson] = React.useState<any>(null);
+  const [orderId, setOrderId] = React.useState<string>('');
 
   React.useEffect(() => {
     try {
       setJson(
         JSON.parse(localStorage.getItem('checkout_last_summary') || 'null')
       );
+    } catch {}
+    try {
+      setOrderId(localStorage.getItem('checkout_order_id') || '');
     } catch {}
   }, []);
 
@@ -22,6 +26,11 @@ export default function Confirmation() {
       </p>
       <Card>
         <CardTitle>Σύνοψη</CardTitle>
+        {orderId && (
+          <div className="mt-1 text-sm text-neutral-700">
+            Order ID: <strong data-testid="order-id">{orderId}</strong>
+          </div>
+        )}
         <div className="mt-3 text-sm">
           {!json ? (
             'Δεν βρέθηκαν στοιχεία.'

@@ -25,6 +25,7 @@ export async function GET() {
           method: o.method,
           total: o.total,
           paymentStatus: o.paymentStatus,
+          email: (o as any).email,
         }))
       );
     } catch {
