@@ -144,10 +144,10 @@ model CheckoutOrder {
   postalCode    String
   method        String
   weightGrams   Int
-  subtotal      Real
-  shippingCost  Real
-  codFee        Real?
-  total         Real
+  subtotal      Float
+  shippingCost  Float
+  codFee        Float?
+  total         Float
   // Optional contact
   email         String?
   paymentStatus PaymentStatus @default(PAID)
