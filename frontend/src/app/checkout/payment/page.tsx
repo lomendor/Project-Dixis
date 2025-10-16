@@ -3,8 +3,10 @@ import React from 'react';
 import { Card, CardTitle } from '../../../components/ui/card';
 import { formatEUR } from '../../../lib/money';
 
-export default function PaymentStub() {
+export default function PaymentPage() {
   const [json, setJson] = React.useState<any>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState<string>('');
 
   React.useEffect(() => {
     try {
@@ -14,11 +16,28 @@ export default function PaymentStub() {
     } catch {}
   }, []);
 
+  async function pay() {
+    if (!json) return;
+    setBusy(true);
+    setMsg('');
+    const { createSession, confirmPayment } = await import(
+      '../../../lib/payments/mockProvider'
+    );
+    const session = await createSession(json.total ?? 0);
+    const res = await confirmPayment(session.id);
+    setBusy(false);
+    if (res.ok) {
+      window.location.href = '/checkout/confirmation';
+    } else {
+      setMsg('Η πληρωμή απέτυχε. Δοκίμασε ξανά.');
+    }
+  }
+
   return (
     <main style={{ maxWidth: 760, margin: '40px auto', padding: 16 }}>
-      <h2 style={{ margin: 0 }}>Πληρωμή (stub)</h2>
+      <h2 style={{ margin: 0 }}>Πληρωμή</h2>
       <p style={{ color: '#6b7280', marginTop: 6 }}>
-        Εδώ θα γίνει η πραγματική πληρωμή σε επόμενο pass.
+        Mock adapter για δοκιμή ροής.
       </p>
       <Card>
         <CardTitle>Σύνοψη παραγγελίας</CardTitle>
@@ -34,9 +53,6 @@ export default function PaymentStub() {
                 Μέθοδος: <strong>{json?.method}</strong>
               </li>
               <li>
-                Βάρος: <strong>{(json?.weight / 1000).toFixed(2)} kg</strong>
-              </li>
-              <li>
                 Subtotal: <strong>{formatEUR(json?.subtotal)}</strong>
               </li>
               <li>
@@ -50,10 +66,22 @@ export default function PaymentStub() {
                 </li>
               )}
               <li>
-                Σύνολο: <strong>{formatEUR(json?.total)}</strong>
+                Σύνολο:{' '}
+                <strong data-testid="pay-total">{formatEUR(json?.total)}</strong>
               </li>
             </ul>
           )}
+        </div>
+        <div className="mt-3">
+          <button
+            data-testid="pay-now"
+            onClick={pay}
+            disabled={!json || busy}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-3 h-9 text-primary-foreground"
+          >
+            {busy ? 'Γίνεται πληρωμή…' : 'Pay now'}
+          </button>
+          {msg && <div className="mt-2 text-sm text-red-600">{msg}</div>}
         </div>
       </Card>
     </main>
