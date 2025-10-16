@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { getPrisma } from '../../../lib/prismaSafe';
 import { memOrders } from '../../../lib/orderStore';
+import { rateLimit } from '../../../lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  // Rate-limit: 60 req/min (prod-only)
+  if (!(await rateLimit('orders-create', 60))) {
+    return new NextResponse('Too Many Requests', { status: 429 });
+  }
   let body: any = {};
   try {
     body = await req.json();

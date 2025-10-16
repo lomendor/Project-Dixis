@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getPrisma } from '../../../../lib/prismaSafe';
 import { memOrders } from '../../../../lib/orderStore';
+import { adminEnabled } from '../../../../lib/adminGuard';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  if (process.env.BASIC_AUTH !== '1') {
+  if (!adminEnabled()) {
     return new NextResponse('admin disabled', { status: 404 });
   }
 
