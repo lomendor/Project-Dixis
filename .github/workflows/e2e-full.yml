@@ -24,6 +24,7 @@ jobs:
       OTP_BYPASS: '1'
       BASIC_AUTH: '1'
       SMTP_DEV_MAILBOX: '1'
+      PAYMENT_FORCE: 'success'
     defaults:
       run:
         working-directory: frontend
@@ -93,6 +94,7 @@ jobs:
       OTP_BYPASS: '1'
       BASIC_AUTH: '1'
       SMTP_DEV_MAILBOX: '1'
+      PAYMENT_FORCE: 'success'
     defaults:
       run:
         working-directory: frontend
