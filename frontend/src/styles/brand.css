@@ -1,0 +1,11 @@
+:root {
+  --brand-primary: #0f5c2e;            /* cypress green */
+  --brand-primary-foreground: #ffffff;
+  --brand-accent: #0ea5e9;             /* secondary */
+}
+
+.dark {
+  --brand-primary: #0f5c2e;
+  --brand-primary-foreground: #ffffff;
+  --brand-accent: #38bdf8;
+}
