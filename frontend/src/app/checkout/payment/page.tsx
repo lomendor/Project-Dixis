@@ -27,6 +27,16 @@ export default function PaymentPage() {
     const res = await confirmPayment(session.id);
     setBusy(false);
     if (res.ok) {
+      // Save order to database/memory before redirect
+      try {
+        await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ summary: { ...json, paymentSessionId: session.id } }),
+        });
+      } catch {
+        // Continue even if order save fails
+      }
       window.location.href = '/checkout/confirmation';
     } else {
       setMsg('Η πληρωμή απέτυχε. Δοκίμασε ξανά.');

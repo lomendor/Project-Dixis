@@ -129,3 +129,27 @@ model RateLimit {
   @@unique([name, key, bucket])
   @@index([name, key, bucket])
 }
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model CheckoutOrder {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  // Checkout snapshot (denormalized για απλότητα)
+  postalCode    String
+  method        String
+  weightGrams   Int
+  subtotal      Decimal       @db.Decimal(10, 2)
+  shippingCost  Decimal       @db.Decimal(10, 2)
+  codFee        Decimal?      @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  // Optional contact
+  email         String?
+  paymentStatus PaymentStatus @default(PAID)
+  paymentRef    String?
+}
