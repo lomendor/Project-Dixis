@@ -1,0 +1,69 @@
+import { NextResponse } from 'next/server';
+import { getPrisma } from '../../../lib/prismaSafe';
+import { memOrders } from '../../../lib/orderStore';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: Request) {
+  let body: any = {};
+  try {
+    body = await req.json();
+  } catch {
+    return new NextResponse('bad json', { status: 400 });
+  }
+
+  // Allow either {summary} or raw fields
+  const summary = body && (body.summary || body);
+
+  const data = {
+    postalCode: String(summary?.address?.postalCode || summary?.postalCode || ''),
+    method: String(summary?.method || ''),
+    weightGrams: Number(summary?.weight ?? summary?.items?.[0]?.weightGrams ?? 0),
+    subtotal: Number(summary?.subtotal ?? 0),
+    shippingCost: Number(
+      summary?.quote?.shippingCost ?? summary?.shippingCost ?? 0
+    ),
+    codFee: summary?.quote?.codFee ?? summary?.codFee ?? null,
+    total: Number(summary?.total ?? 0),
+    email: summary?.email ?? null,
+    paymentRef: summary?.paymentSessionId ?? null,
+  };
+
+  if (!data.postalCode || !data.method || !data.total) {
+    return new NextResponse('missing fields', { status: 400 });
+  }
+
+  const prisma = getPrisma();
+  if (prisma) {
+    try {
+      const created = await prisma.checkoutOrder.create({
+        data: {
+          postalCode: data.postalCode,
+          method: data.method,
+          weightGrams: data.weightGrams,
+          subtotal: data.subtotal,
+          shippingCost: data.shippingCost,
+          codFee: data.codFee,
+          total: data.total,
+          email: data.email,
+          paymentRef: data.paymentRef,
+          paymentStatus: 'PAID',
+        },
+      });
+      return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
+    } catch (e) {
+      // Fallback to memory if DB fails
+      const created = memOrders.create(data);
+      return NextResponse.json(
+        { ok: true, id: created.id, mem: true },
+        { status: 201 }
+      );
+    }
+  } else {
+    const created = memOrders.create(data);
+    return NextResponse.json(
+      { ok: true, id: created.id, mem: true },
+      { status: 201 }
+    );
+  }
+}

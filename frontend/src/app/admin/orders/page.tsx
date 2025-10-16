@@ -1,71 +1,78 @@
-import Link from 'next/link'
-import StatusBadge from '@/components/admin/StatusBadge'
-import { Suspense } from 'react'
-import OrdersClient from './widget'
+'use client';
+import React from 'react';
 
-async function fetchOrders(params: URLSearchParams){
-  // Προσπάθησε να καλέσεις υπάρχον admin API
-  const q = params.toString()
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/admin/orders${q ? `?${q}`:''}`, { cache:'no-store' })
-  if (!res.ok) throw new Error('Failed to load orders')
-  const data = await res.json()
-  return data
-}
+type Row = {
+  id: string;
+  createdAt: string;
+  postalCode: string;
+  method: string;
+  total: number;
+  paymentStatus?: string;
+};
 
-export default async function OrdersPage({ searchParams }:{ searchParams: Record<string,string|undefined> }){
-  const sp = new URLSearchParams()
-  for (const k of ['q','status','page']) if (searchParams[k]) sp.set(k, String(searchParams[k]))
-  const data = await fetchOrders(sp)
-  const items = Array.isArray(data.items)? data.items : (Array.isArray(data)? data : [])
-  const page = Number(searchParams.page||1)||1
-  const total = Number(data.total||items.length)
-  const perPage = Number(data.perPage||20)
-  const pages = Math.max(1, Math.ceil(total/perPage))
+export default function AdminOrders() {
+  const [rows, setRows] = React.useState<Row[]>([]);
+  const [err, setErr] = React.useState<string>('');
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/admin/orders', { cache: 'no-store' });
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        setRows(Array.isArray(j) ? j : []);
+      } catch (e: any) {
+        setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
+      }
+    })();
+  }, []);
+
   return (
-    <div style={{padding:'16px 20px'}}>
-      <h1 style={{fontSize:20, marginBottom:12}}>Παραγγελίες</h1>
-      <OrdersClient />
-      <div style={{overflowX:'auto', marginTop:12}}>
-        <table style={{width:'100%',borderCollapse:'collapse'}}>
+    <main style={{ maxWidth: 960, margin: '40px auto', padding: 16 }}>
+      <h2 style={{ margin: 0 }}>Admin · Orders</h2>
+      <p style={{ color: '#6b7280', marginTop: 6 }}>
+        Τελευταίες παραγγελίες (CI/DEV).
+      </p>
+      {err && <div className="mt-2 text-sm text-red-600">{err}</div>}
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-sm">
           <thead>
-            <tr style={{textAlign:'left',borderBottom:'1px solid #eee'}}>
-              <th style={{padding:'8px'}}>ID</th>
-              <th style={{padding:'8px'}}>Ημ/νία</th>
-              <th style={{padding:'8px'}}>Πελάτης</th>
-              <th style={{padding:'8px'}}>Τηλέφωνο</th>
-              <th style={{padding:'8px'}}>Email</th>
-              <th style={{padding:'8px'}}>Status</th>
-              <th style={{padding:'8px'}}>Σύνολο</th>
+            <tr className="text-left">
+              <th>ID</th>
+              <th>Ημ/νία</th>
+              <th>Τ.Κ.</th>
+              <th>Μέθοδος</th>
+              <th>Σύνολο</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((o:any)=>(
-              <tr key={o.id} style={{borderBottom:'1px solid #f1f5f9'}}>
-                <td style={{padding:'8px'}}>
-                  <Link href={`/admin/orders/${o.id}`} style={{textDecoration:'underline'}}>{o.id}</Link>
+            {rows.map((r) => (
+              <tr key={r.id}>
+                <td className="pr-2">{r.id.slice(0, 8)}</td>
+                <td className="pr-2">
+                  {new Date(r.createdAt).toLocaleString()}
                 </td>
-                <td style={{padding:'8px'}}>{o.createdAt? new Date(o.createdAt).toLocaleString('el-GR') : '—'}</td>
-                <td style={{padding:'8px'}}>{o.buyerName||'—'}</td>
-                <td style={{padding:'8px'}}>{o.buyerPhone||'—'}</td>
-                <td style={{padding:'8px'}}>{o.buyerEmail||'—'}</td>
-                <td style={{padding:'8px'}}><StatusBadge status={o.status}/></td>
-                <td style={{padding:'8px'}}>{typeof o.total==='number' ? new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(o.total) : '—'}</td>
+                <td className="pr-2">{r.postalCode}</td>
+                <td className="pr-2">{r.method}</td>
+                <td className="pr-2">
+                  {typeof r.total === 'number'
+                    ? r.total.toFixed(2)
+                    : String(r.total)}
+                </td>
+                <td>{r.paymentStatus ?? 'PAID'}</td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-neutral-600">
+                  Καμία καταχώρηση.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      <div style={{marginTop:12,display:'flex',gap:8,alignItems:'center'}}>
-        <span>Σελίδα {page}/{pages}</span>
-        <div style={{marginLeft:'auto',display:'flex',gap:6}}>
-          {page>1 && <Link href={`/admin/orders?${new URLSearchParams({...Object.fromEntries(sp), page:String(page-1)})}`}>« Προηγούμενη</Link>}
-          {page<pages && <Link href={`/admin/orders?${new URLSearchParams({...Object.fromEntries(sp), page:String(page+1)})}`}>Επόμενη »</Link>}
-        </div>
-      </div>
-    </div>
-  )
+    </main>
+  );
 }
-
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
