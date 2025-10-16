@@ -36,7 +36,7 @@ export default function PaymentPage() {
             summary: { ...json, paymentSessionId: session.id },
           }),
         });
-        const created = await resp.json().catch(() => null);
+        const created = await resp.json().catch((): null => null);
         if (created && created.id) {
           try {
             localStorage.setItem('checkout_order_id', String(created.id));
