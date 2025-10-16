@@ -1,25 +1,28 @@
-import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-export const config = {
-  matcher: ['/admin/:path*', '/api/producers/:path*', '/api/uploads'],
-};
+import { NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const BA = process.env.BASIC_AUTH || '';
-  if (!BA) return NextResponse.next();
+  const url = req.nextUrl;
+  const res = NextResponse.next();
 
-  const hdr = req.headers.get('authorization') || '';
-  const expected = 'Basic ' + Buffer.from(BA).toString('base64');
+  // Security headers (lightweight, συμβατά)
+  res.headers.set('X-Content-Type-Options', 'nosniff');
+  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.headers.set('X-Frame-Options', 'DENY');
 
-  if (hdr !== expected) {
-    return new NextResponse('Authentication required', {
-      status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="Dixis Admin"',
-      },
-    });
+  // Admin guard μόνο σε production: απαιτεί BASIC_AUTH=1
+  if (
+    process.env.NODE_ENV === 'production' &&
+    url.pathname.startsWith('/admin')
+  ) {
+    if (process.env.BASIC_AUTH !== '1') {
+      return new NextResponse('Not Found', { status: 404 });
+    }
   }
 
-  return NextResponse.next();
+  return res;
 }
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+};
