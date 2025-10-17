@@ -1,13 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function OrderLookupPage() {
+function OrderLookupContent() {
+  const sp = useSearchParams();
   const [orderNo, setOrderNo] = React.useState('');
   const [email, setEmail] = React.useState('');
+  const emailRef = React.useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<any>(null);
   const [error, setError] = React.useState('');
+
+  // prefill from query & autofocus (prefill from ?ordNo= in URL)
+  React.useEffect(() => {
+    const q = sp?.get('ordNo') || '';
+    if (q && !orderNo) setOrderNo(q);
+    // autofocus email
+    try {
+      emailRef.current?.focus();
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +91,7 @@ export default function OrderLookupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="email@example.com"
+            ref={emailRef}
             className="w-full px-3 py-2 border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             data-testid="lookup-email"
             required
@@ -139,5 +154,13 @@ export default function OrderLookupPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function OrderLookupPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6">Loading...</div>}>
+      <OrderLookupContent />
+    </Suspense>
   );
 }
