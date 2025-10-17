@@ -7,6 +7,7 @@ export default function Confirmation() {
   const [json, setJson] = React.useState<any>(null);
   const [orderId, setOrderId] = React.useState<string>('');
   const [orderNo, setOrderNo] = React.useState<string>('');
+  const [copied, setCopied] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     try {
@@ -60,6 +61,49 @@ export default function Confirmation() {
             </ul>
           )}
         </div>
+        {orderNo && (
+          <div className="mt-4 p-3 border rounded bg-gray-50">
+            <div className="text-sm font-medium text-neutral-800 mb-2">
+              Customer Link
+            </div>
+            <div className="text-xs text-neutral-600 break-all mb-2">
+              <a
+                href={`/orders/lookup?ordNo=${orderNo}`}
+                className="underline"
+                data-testid="customer-link"
+              >
+                {typeof window !== 'undefined'
+                  ? `${window.location.origin}/orders/lookup?ordNo=${orderNo}`
+                  : `/orders/lookup?ordNo=${orderNo}`}
+              </a>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const link =
+                    typeof window !== 'undefined'
+                      ? `${window.location.origin}/orders/lookup?ordNo=${orderNo}`
+                      : `/orders/lookup?ordNo=${orderNo}`;
+                  await navigator.clipboard.writeText(link);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                } catch {}
+              }}
+              className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+              data-testid="copy-customer-link"
+            >
+              Copy link
+            </button>
+            {copied && (
+              <span
+                className="ml-2 text-xs text-green-600"
+                data-testid="copied-flag"
+              >
+                Copied!
+              </span>
+            )}
+          </div>
+        )}
       </Card>
     </main>
   );

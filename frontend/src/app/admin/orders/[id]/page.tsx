@@ -60,6 +60,15 @@ export default function AdminOrderDetail({
             Order ID:{' '}
             <strong data-testid="detail-order-id">{data.id}</strong>
           </div>
+          <div className="mb-2">
+            <a
+              href={`/orders/lookup?ordNo=${orderNumber(data.id, data.createdAt)}`}
+              className="text-blue-600 underline text-xs"
+              data-testid="customer-view-link"
+            >
+              Customer view →
+            </a>
+          </div>
           <table className="text-sm">
             <tbody>
               <tr>

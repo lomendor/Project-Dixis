@@ -36,4 +36,6 @@ test('Order receipt email is stored in dev mailbox', async ({ page, request }) =
   expect(found, 'receipt email should exist in dev mailbox').toBeTruthy();
   // body contains admin link
   expect(String(found?.text || '')).toContain('/admin/orders/');
+  // body contains customer link
+  expect(String(found?.text || '')).toContain('/orders/lookup?ordNo=');
 });
