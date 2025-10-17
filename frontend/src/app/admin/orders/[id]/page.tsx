@@ -1,265 +1,114 @@
-import { prisma } from '@/lib/db/client';
-import { requireAdmin } from '@/lib/auth/admin';
-import Link from 'next/link';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { CopyTrackingLink } from './CopyTrackingLink';
-import PrintButton from '@/components/PrintButton';
-import OrderActions from '@/components/admin/OrderActions';
-import { fmtEUR } from '@/lib/cart/totals';
-import { computeDisplayTotals } from '@/lib/admin/orders/totalsPresenter';
+'use client';
+import React from 'react';
 
-export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Παραγγελία (Admin) | Dixis' };
-
-const transitions: Record<string, string[]> = {
-  PENDING: ['PACKING', 'CANCELLED'],
-  PAID: ['PACKING', 'CANCELLED'],
-  PACKING: ['SHIPPED', 'CANCELLED'],
-  SHIPPED: ['DELIVERED'],
-  DELIVERED: [],
-  CANCELLED: []
+type Order = {
+  id: string;
+  createdAt: string;
+  postalCode: string;
+  method: string;
+  weightGrams?: number;
+  subtotal?: number;
+  shippingCost?: number;
+  codFee?: number | null;
+  total: number;
+  email?: string | null;
+  paymentStatus?: string;
+  paymentRef?: string | null;
 };
 
-async function changeStatusAction(orderId: string, newStatus: string) {
-  'use server';
-  
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-    const res = await fetch(`${baseUrl}/api/admin/orders/${orderId}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    });
-    
-    if (!res.ok) {
-      throw new Error('Status change failed');
-    }
-    
-    revalidatePath(`/admin/orders/${orderId}`);
-    revalidatePath('/admin/orders');
-  } catch (e) {
-    console.error('Status change error:', e);
-  }
-  
-  redirect(`/admin/orders/${orderId}`);
-}
-
-export default async function AdminOrderDetailPage({
-  params
+export default function AdminOrderDetail({
+  params,
 }: {
   params: { id: string };
 }) {
-  await requireAdmin?.();
+  const { id } = params;
+  const [data, setData] = React.useState<Order | null>(null);
+  const [err, setErr] = React.useState('');
 
-  const id = params.id;
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      items: {
-        select: {
-          id: true,
-          titleSnap: true,
-          qty: true,
-          price: true
-        }
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch(`/api/admin/orders/${id}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(String(r.status));
+        const j = await r.json();
+        setData(j);
+      } catch (e: any) {
+        setErr('Δεν είναι διαθέσιμο ή δεν βρέθηκε.');
       }
-    }
-  });
-
-  if (!order) {
-    return (
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Παραγγελία</h1>
-        <p>Δεν βρέθηκε.</p>
-        <Link href="/admin/orders" className="text-green-600 hover:text-green-700">
-          ← Πίσω στη λίστα
-        </Link>
-      </main>
-    );
-  }
-
-  const total = Number(
-    order.total || order.items.reduce((s, i) => s + Number(i.price || 0) * Number(i.qty || 0), 0)
-  );
-
-  // Compute totals via unified helper
-  const T = computeDisplayTotals(order);
-
-  const currentStatus = String(order.status || 'PENDING').toUpperCase();
-  const availableTransitions = transitions[currentStatus] || [];
+    })();
+  }, [id]);
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link
-          href="/admin/orders"
-          className="text-green-600 hover:text-green-700 flex items-center gap-2 mb-4"
-        >
-          ← Πίσω στη λίστα
-        </Link>
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Παραγγελία #{order.id.substring(0, 8)}</h1>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Order Info */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Πληροφορίες Παραγγελίας</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="text-sm text-gray-600">Ημερομηνία:</span>
-                <p className="font-medium">
-                  {new Date(order.createdAt).toLocaleString('el-GR')}
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Κατάσταση:</span>
-                <p className="font-medium">
-                  <span
-                    className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                      currentStatus === 'DELIVERED'
-                        ? 'bg-green-100 text-green-800'
-                        : currentStatus === 'CANCELLED'
-                        ? 'bg-red-100 text-red-800'
-                        : currentStatus === 'SHIPPED'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {currentStatus}
-                  </span>
-                </p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Πελάτης:</span>
-                <p className="font-medium">{order.buyerName || '-'}</p>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">Τηλέφωνο:</span>
-                <p className="font-medium">{order.buyerPhone || '-'}</p>
-              </div>
-            </div>
+    <main style={{ maxWidth: 960, margin: '40px auto', padding: 16 }}>
+      <h2 style={{ margin: 0 }}>Admin · Order Detail</h2>
+      <p style={{ color: '#6b7280', marginTop: 6 }}>
+        Πλήρης σύνοψη παραγγελίας.
+      </p>
+      {err && <div className="mt-2 text-sm text-red-600">{err}</div>}
+      {!data ? (
+        <div className="mt-4 text-sm">Φόρτωση…</div>
+      ) : (
+        <div className="mt-4 text-sm">
+          <div className="mb-2">
+            Order ID:{' '}
+            <strong data-testid="detail-order-id">{data.id}</strong>
           </div>
-
-          {/* Shipping Address */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Διεύθυνση Αποστολής</h2>
-            <p>{order.shippingLine1 || '-'}</p>
-            {order.shippingLine2 && <p>{order.shippingLine2}</p>}
-            <p>
-              {order.shippingCity || ''} {order.shippingPostal || ''}
-            </p>
-          </div>
-
-          {/* Order Items */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Προϊόντα</h2>
-            <div className="space-y-3">
-              {order.items.map(it => (
-                <div
-                  key={it.id}
-                  className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"
-                >
-                  <div>
-                    <p className="font-medium">{it.titleSnap}</p>
-                    <p className="text-sm text-gray-600">Ποσότητα: {it.qty}</p>
-                  </div>
-                  <p className="font-semibold">
-                    {new Intl.NumberFormat('el-GR', {
-                      style: 'currency',
-                      currency: 'EUR'
-                    }).format(Number(it.price || 0) * Number(it.qty || 0))}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">Σύνολο:</span>
-                <span className="text-xl font-bold text-green-600">
-                  {new Intl.NumberFormat('el-GR', {
-                    style: 'currency',
-                    currency: 'EUR'
-                  }).format(total)}
-                </span>
-              </div>
-              {/* Totals Breakdown (read-only, unified helper) */}
-              <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-gray-600 space-y-1" data-testid="totals-card">
-                <div className="flex justify-between">
-                  <span>Υποσύνολο:</span>
-                  <span>{T.fmt.subtotal}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Μεταφορικά:</span>
-                  <span>{T.shipping === 0 ? 'Δωρεάν' : T.fmt.shipping}</span>
-                </div>
-                {T.codFee > 0 && (
-                  <div className="flex justify-between">
-                    <span>Αντικαταβολή:</span>
-                    <span>{T.fmt.codFee}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>ΦΠΑ ({((Number(process.env.NEXT_PUBLIC_VAT_RATE || process.env.VAT_RATE || 0.13)) * 100).toFixed(0)}%):</span>
-                  <span>{T.fmt.tax}</span>
-                </div>
-              </div>
-            </div>
+          <table className="text-sm">
+            <tbody>
+              <tr>
+                <td className="pr-4">Ημ/νία</td>
+                <td>{new Date(data.createdAt).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Τ.Κ.</td>
+                <td data-testid="detail-pc">{data.postalCode}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Μέθοδος</td>
+                <td>{data.method}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Βάρος (g)</td>
+                <td>{data.weightGrams ?? '-'}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Subtotal</td>
+                <td>{String(data.subtotal ?? '-')}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Μεταφορικά</td>
+                <td>{String(data.shippingCost ?? '-')}</td>
+              </tr>
+              {data.codFee != null && (
+                <tr>
+                  <td className="pr-4">Αντικαταβολή</td>
+                  <td>{String(data.codFee)}</td>
+                </tr>
+              )}
+              <tr>
+                <td className="pr-4">Σύνολο</td>
+                <td data-testid="detail-total">{String(data.total)}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Email</td>
+                <td>{data.email ?? '-'}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">Payment</td>
+                <td>
+                  {data.paymentStatus ?? 'PAID'}{' '}
+                  {data.paymentRef ? `(${data.paymentRef})` : ''}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="mt-4">
+            <a href="/admin/orders" className="underline">
+              ← Πίσω στη λίστα
+            </a>
           </div>
         </div>
-
-        {/* Actions Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-            <h2 className="text-xl font-semibold mb-4">Ενέργειες</h2>
-
-            {/* Quick Actions */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <p className="text-sm text-gray-600 mb-3">Γρήγορες ενέργειες:</p>
-              <OrderActions id={order.id} status={currentStatus} />
-            </div>
-
-            {/* Tracking Link */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <p className="text-sm text-gray-600 mb-2">Tracking Link:</p>
-              <CopyTrackingLink publicToken={order.publicToken || ''} />
-            </div>
-
-            {availableTransitions.length > 0 ? (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-3">Αλλαγή κατάστασης:</p>
-                {availableTransitions.map(nextStatus => (
-                  <form
-                    key={nextStatus}
-                    action={async () => {
-                      'use server';
-                      await changeStatusAction(order.id, nextStatus);
-                    }}
-                  >
-                    <button
-                      type="submit"
-                      className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                        nextStatus === 'CANCELLED'
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
-                          : 'bg-green-600 hover:bg-green-700 text-white'
-                      }`}
-                    >
-                      Αλλαγή σε {nextStatus}
-                    </button>
-                  </form>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-600">
-                Δεν υπάρχουν διαθέσιμες ενέργειες για αυτήν την κατάσταση.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </main>
   );
 }

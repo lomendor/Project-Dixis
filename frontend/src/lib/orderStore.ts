@@ -20,6 +20,9 @@ type Order = OrderCreate & {
 const _mem: Order[] = [];
 
 export const memOrders = {
+  get(id: string): Order | null {
+    return _mem.find((o) => o.id === id) || null;
+  },
   create(data: OrderCreate): Order {
     const now = new Date().toISOString();
     const o: Order = {
