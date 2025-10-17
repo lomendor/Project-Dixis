@@ -22,6 +22,28 @@ export default function AdminOrders() {
   const [method, setMethod] = React.useState('');
   const [status, setStatus] = React.useState('');
   const [ordNo, setOrdNo] = React.useState('');
+  const [fromISO, setFromISO] = React.useState<string>('');
+  const [toISO, setToISO] = React.useState<string>('');
+
+  // Helper functions for quick date filters
+  const iso = (d: Date) => d.toISOString();
+  const startOfDay = (d: Date) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  };
+  const addDays = (d: Date, n: number) => {
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
+  };
+  const setQuickRange = (days: number) => {
+    const now = new Date();
+    const from = days === 0 ? startOfDay(now) : addDays(now, -days);
+    const to = addDays(startOfDay(now), 1); // exclusive end (tomorrow 00:00)
+    setFromISO(iso(from));
+    setToISO(iso(to));
+  };
 
   const fetchOrders = React.useCallback(async () => {
     try {
@@ -32,6 +54,8 @@ export default function AdminOrders() {
       if (method) params.set('method', method);
       if (status) params.set('status', status);
       if (ordNo) params.set('ordNo', ordNo);
+      if (fromISO) params.set('from', fromISO);
+      if (toISO) params.set('to', toISO);
 
       const query = params.toString();
       const url = query ? `/api/admin/orders?${query}` : '/api/admin/orders';
@@ -44,7 +68,7 @@ export default function AdminOrders() {
     } catch (e: any) {
       setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
     }
-  }, [q, pc, method, status, ordNo]);
+  }, [q, pc, method, status, ordNo, fromISO, toISO]);
 
   React.useEffect(() => {
     fetchOrders();
@@ -57,6 +81,8 @@ export default function AdminOrders() {
     if (method) params.set('method', method);
     if (status) params.set('status', status);
     if (ordNo) params.set('ordNo', ordNo);
+    if (fromISO) params.set('from', fromISO);
+    if (toISO) params.set('to', toISO);
     const query = params.toString();
     return query
       ? `/api/admin/orders/export?${query}`
@@ -71,9 +97,48 @@ export default function AdminOrders() {
       </p>
       {err && <div className="mt-2 text-sm text-red-600">{err}</div>}
 
+      {/* Quick Date Filters */}
+      <div className="mt-4 mb-2 flex gap-2 text-xs">
+        <button
+          type="button"
+          onClick={() => setQuickRange(0)}
+          className="border px-2 h-7 rounded hover:bg-gray-100"
+          data-testid="quick-range-today"
+        >
+          Today
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickRange(7)}
+          className="border px-2 h-7 rounded hover:bg-gray-100"
+          data-testid="quick-range-7d"
+        >
+          7d
+        </button>
+        <button
+          type="button"
+          onClick={() => setQuickRange(30)}
+          className="border px-2 h-7 rounded hover:bg-gray-100"
+          data-testid="quick-range-30d"
+        >
+          30d
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setFromISO('');
+            setToISO('');
+          }}
+          className="border px-2 h-7 rounded hover:bg-gray-100"
+          data-testid="quick-range-clear"
+        >
+          Clear Dates
+        </button>
+      </div>
+
       {/* Filter Controls */}
       <div
-        className="mt-4 mb-4 p-3 border rounded"
+        className="mb-4 p-3 border rounded"
         style={{ backgroundColor: '#f9fafb' }}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
