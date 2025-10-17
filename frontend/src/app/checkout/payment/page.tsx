@@ -41,6 +41,14 @@ export default function PaymentPage() {
           try {
             localStorage.setItem('checkout_order_id', String(created.id));
           } catch {}
+          if (created.orderNumber) {
+            try {
+              localStorage.setItem(
+                'checkout_order_no',
+                String(created.orderNumber)
+              );
+            } catch {}
+          }
         }
       } catch {
         // Continue even if order save fails

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getPrisma } from '../../../../../lib/prismaSafe';
 import { memOrders } from '../../../../../lib/orderStore';
 import { adminEnabled } from '../../../../../lib/adminGuard';
+import { orderNumber } from '../../../../../lib/orderNumber';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,10 +121,11 @@ export async function GET(req: Request) {
 
   // Generate CSV
   const header =
-    'Order ID,Created At,Postal Code,Method,Weight (g),Subtotal,Shipping Cost,COD Fee,Total,Email,Payment Status,Payment Ref\n';
+    'Order No,Order ID,Created At,Postal Code,Method,Weight (g),Subtotal,Shipping Cost,COD Fee,Total,Email,Payment Status,Payment Ref\n';
 
   const lines = rows.map((r) => {
     return [
+      escapeCSV(orderNumber(r.id, r.createdAt)),
       escapeCSV(r.id),
       escapeCSV(r.createdAt),
       escapeCSV(r.postalCode),

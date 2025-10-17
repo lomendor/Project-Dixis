@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getPrisma } from '../../../lib/prismaSafe';
 import { memOrders } from '../../../lib/orderStore';
 import { rateLimit } from '../../../lib/rateLimit';
+import { orderNumber } from '../../../lib/orderNumber';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +83,11 @@ export async function POST(req: Request) {
           }).catch(() => {});
         }
       } catch {}
-      return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
+      const ordNo = orderNumber(created.id, created.createdAt as any);
+      return NextResponse.json(
+        { ok: true, id: created.id, orderNumber: ordNo },
+        { status: 201 }
+      );
     } catch (e) {
       // Fallback to memory if DB fails
       const created = memOrders.create(data);
@@ -105,8 +110,9 @@ export async function POST(req: Request) {
           }).catch(() => {});
         }
       } catch {}
+      const ordNo = orderNumber(created.id, created.createdAt as any);
       return NextResponse.json(
-        { ok: true, id: created.id, mem: true },
+        { ok: true, id: created.id, orderNumber: ordNo, mem: true },
         { status: 201 }
       );
     }
@@ -131,8 +137,9 @@ export async function POST(req: Request) {
         }).catch(() => {});
       }
     } catch {}
+    const ordNo = orderNumber(created.id, created.createdAt as any);
     return NextResponse.json(
-      { ok: true, id: created.id, mem: true },
+      { ok: true, id: created.id, orderNumber: ordNo, mem: true },
       { status: 201 }
     );
   }
