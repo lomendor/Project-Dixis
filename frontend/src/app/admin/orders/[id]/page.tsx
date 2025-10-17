@@ -110,6 +110,20 @@ export default function AdminOrderDetail({
             </tbody>
           </table>
           <div className="mt-4">
+            <button
+              data-testid="resend-receipt"
+              onClick={async ()=>{
+                try {
+                  const r = await fetch(`/api/admin/orders/${data?.id}/resend`, { method:'POST' });
+                  alert(r.ok ? 'Το email στάλθηκε ξανά.' : 'Αποτυχία αποστολής.');
+                } catch {
+                  alert('Σφάλμα αποστολής.');
+                }
+              }}
+              className="border px-3 py-1 rounded"
+            >Resend receipt</button>
+          </div>
+          <div className="mt-4">
             <a href="/admin/orders" className="underline">
               ← Πίσω στη λίστα
             </a>
