@@ -21,6 +21,7 @@ export default function AdminOrders() {
   const [pc, setPc] = React.useState('');
   const [method, setMethod] = React.useState('');
   const [status, setStatus] = React.useState('');
+  const [ordNo, setOrdNo] = React.useState('');
 
   const fetchOrders = React.useCallback(async () => {
     try {
@@ -30,6 +31,7 @@ export default function AdminOrders() {
       if (pc) params.set('pc', pc);
       if (method) params.set('method', method);
       if (status) params.set('status', status);
+      if (ordNo) params.set('ordNo', ordNo);
 
       const query = params.toString();
       const url = query ? `/api/admin/orders?${query}` : '/api/admin/orders';
@@ -42,7 +44,7 @@ export default function AdminOrders() {
     } catch (e: any) {
       setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
     }
-  }, [q, pc, method, status]);
+  }, [q, pc, method, status, ordNo]);
 
   React.useEffect(() => {
     fetchOrders();
@@ -54,6 +56,7 @@ export default function AdminOrders() {
     if (pc) params.set('pc', pc);
     if (method) params.set('method', method);
     if (status) params.set('status', status);
+    if (ordNo) params.set('ordNo', ordNo);
     const query = params.toString();
     return query
       ? `/api/admin/orders/export?${query}`
@@ -125,6 +128,19 @@ export default function AdminOrders() {
               <option value="FAILED">FAILED</option>
             </select>
           </div>
+          <div>
+            <label className="block mb-1 text-xs font-medium">
+              Order No (DX-YYYYMMDD-####)
+            </label>
+            <input
+              type="text"
+              value={ordNo}
+              onChange={(e) => setOrdNo(e.target.value)}
+              placeholder="DX-20251017-A1B2"
+              className="w-full px-2 py-1 border rounded"
+              data-testid="filter-ordno"
+            />
+          </div>
         </div>
         <div className="mt-3 flex gap-2">
           <button
@@ -140,6 +156,7 @@ export default function AdminOrders() {
               setPc('');
               setMethod('');
               setStatus('');
+              setOrdNo('');
             }}
             className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
             data-testid="filter-clear"
