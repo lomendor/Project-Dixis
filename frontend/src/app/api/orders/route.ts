@@ -70,12 +70,14 @@ export async function POST(req: Request) {
           const to = String(
             summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
           );
-          const subject = `Dixis Order — ${data.postalCode} — Total: €${(
+          const ordNo = orderNumber(created.id, created.createdAt as any);
+          const subject = `Dixis Order ${ordNo} — Total: €${(
             data.total ?? 0
           ).toFixed(2)}`;
-          const body = `Ευχαριστούμε για την παραγγελία σας. Σύνολο: €${(
-            data.total ?? 0
-          ).toFixed(2)}. Τ.Κ.: ${data.postalCode}.`;
+          const link = `${origin}/admin/orders/${created.id}`;
+          const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
+            2
+          )}\nΤ.Κ.: ${data.postalCode}\n\nΠροβολή: ${link}`;
           await fetch(`${origin}/api/ci/devmail/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -97,12 +99,14 @@ export async function POST(req: Request) {
           const to = String(
             summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
           );
-          const subject = `Dixis Order — ${data.postalCode} — Total: €${(
+          const ordNo = orderNumber(created.id, created.createdAt as any);
+          const subject = `Dixis Order ${ordNo} — Total: €${(
             data.total ?? 0
           ).toFixed(2)}`;
-          const body = `Ευχαριστούμε για την παραγγελία σας. Σύνολο: €${(
-            data.total ?? 0
-          ).toFixed(2)}. Τ.Κ.: ${data.postalCode}.`;
+          const link = `${origin}/admin/orders/${created.id}`;
+          const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
+            2
+          )}\nΤ.Κ.: ${data.postalCode}\n\nΠροβολή: ${link}`;
           await fetch(`${origin}/api/ci/devmail/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

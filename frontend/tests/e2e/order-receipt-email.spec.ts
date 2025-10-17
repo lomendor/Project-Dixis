@@ -26,10 +26,14 @@ test('Order receipt email is stored in dev mailbox', async ({ page, request }) =
 
   // 3) Βρες email για τον default παραλήπτη
   const to = 'ci-recipient@dixis.dev';
-  const found = list.find((m: any) =>
-    (m?.to || '').toLowerCase().includes(to) &&
-    String(m?.subject || '').toLowerCase().includes('dixis order')
+  const found = list.find(
+    (m: any) =>
+      (m?.to || '').toLowerCase().includes(to) &&
+      String(m?.subject || '').includes('DX-') &&
+      String(m?.subject || '').toLowerCase().includes('dixis order')
   );
 
   expect(found, 'receipt email should exist in dev mailbox').toBeTruthy();
+  // body contains admin link
+  expect(String(found?.text || '')).toContain('/admin/orders/');
 });
