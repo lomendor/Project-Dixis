@@ -50,17 +50,27 @@ export default function AdminOrders() {
   const [pageSize, setPageSize] = React.useState(10);
   const [total, setTotal] = React.useState(0);
 
+  // Summary state
+  const [sumAmount, setSumAmount] = React.useState(0);
+  const [sumErr, setSumErr] = React.useState('');
+
+  // Helper to build filter params (no pagination)
+  const buildFilterParams = React.useCallback(() => {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (pc) params.set('pc', pc);
+    if (method) params.set('method', method);
+    if (status) params.set('status', status);
+    if (ordNo) params.set('ordNo', ordNo);
+    if (fromISO) params.set('from', fromISO);
+    if (toISO) params.set('to', toISO);
+    return params;
+  }, [q, pc, method, status, ordNo, fromISO, toISO]);
+
   const fetchOrders = React.useCallback(async () => {
     try {
       // Build query string
-      const params = new URLSearchParams();
-      if (q) params.set('q', q);
-      if (pc) params.set('pc', pc);
-      if (method) params.set('method', method);
-      if (status) params.set('status', status);
-      if (ordNo) params.set('ordNo', ordNo);
-      if (fromISO) params.set('from', fromISO);
-      if (toISO) params.set('to', toISO);
+      const params = buildFilterParams();
 
       // Pagination params
       const skip = page * pageSize;
@@ -90,11 +100,34 @@ export default function AdminOrders() {
     } catch (e: any) {
       setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
     }
-  }, [q, pc, method, status, ordNo, fromISO, toISO, page, pageSize]);
+  }, [buildFilterParams, page, pageSize]);
 
   React.useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // Fetch summary (independent of pagination)
+  React.useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const params = buildFilterParams();
+        const query = params.toString();
+        const url = query ? `/api/admin/orders/summary?${query}` : '/api/admin/orders/summary';
+
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) {
+          setSumErr('⚠️');
+          return;
+        }
+        const j = await r.json();
+        setSumAmount(Number(j.totalAmount ?? 0));
+        setSumErr('');
+      } catch {
+        setSumErr('⚠️');
+      }
+    };
+    fetchSummary();
+  }, [buildFilterParams]);
 
   const buildExportUrl = () => {
     const params = new URLSearchParams();
@@ -261,6 +294,13 @@ export default function AdminOrders() {
           </a>
         </div>
       </div>
+
+      {/* Summary Bar */}
+      <div className="mt-2 text-sm text-gray-700" data-testid="orders-summary">
+        Σύνοψη: {total.toLocaleString()} παραγγελίες · Σύνολο €{sumAmount.toFixed(2)}
+        {sumErr && <span className="text-red-600"> {sumErr}</span>}
+      </div>
+
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
