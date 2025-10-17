@@ -75,9 +75,10 @@ export async function POST(req: Request) {
             data.total ?? 0
           ).toFixed(2)}`;
           const link = `${origin}/admin/orders/${created.id}`;
+          const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
           const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
             2
-          )}\nΤ.Κ.: ${data.postalCode}\n\nΠροβολή: ${link}`;
+          )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
           await fetch(`${origin}/api/ci/devmail/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -104,9 +105,10 @@ export async function POST(req: Request) {
             data.total ?? 0
           ).toFixed(2)}`;
           const link = `${origin}/admin/orders/${created.id}`;
+          const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
           const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
             2
-          )}\nΤ.Κ.: ${data.postalCode}\n\nΠροβολή: ${link}`;
+          )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
           await fetch(`${origin}/api/ci/devmail/send`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
