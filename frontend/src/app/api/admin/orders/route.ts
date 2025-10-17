@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getPrisma } from '../../../../lib/prismaSafe';
 import { memOrders } from '../../../../lib/orderStore';
 import { adminEnabled } from '../../../../lib/adminGuard';
+import { parseOrderNo } from '../../../../lib/orderNumber';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,17 @@ export async function GET(req: Request) {
   const status = url.searchParams.get('status') || '';
   const from = url.searchParams.get('from') || '';
   const to = url.searchParams.get('to') || '';
+  const ordNo = url.searchParams.get('ordNo') || '';
   const takeParam = url.searchParams.get('take');
   const take = takeParam ? Math.min(Number(takeParam), 1000) : 50;
+
+  // Parse Order No for date range + suffix filter
+  const parsed = ordNo ? parseOrderNo(ordNo) : null;
+  const matchSuffix = (id: string) => {
+    if (!parsed) return true;
+    const safeId = (id || '').replace(/[^a-z0-9]/gi, '');
+    return safeId.slice(-4).toUpperCase() === parsed.suffix;
+  };
 
   const prisma = getPrisma();
   if (prisma) {
@@ -48,12 +58,21 @@ export async function GET(req: Request) {
       if (to) {
         where.createdAt = { ...where.createdAt, lte: new Date(to) };
       }
+      if (parsed) {
+        where.createdAt = { ...where.createdAt, gte: parsed.dateStart, lt: parsed.dateEnd };
+      }
 
-      const list = await prisma.checkoutOrder.findMany({
+      let list = await prisma.checkoutOrder.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take,
       });
+
+      // Apply suffix filter if ordNo provided
+      if (parsed) {
+        list = list.filter((o) => matchSuffix(o.id));
+      }
+
       return NextResponse.json(
         list.map((o) => ({
           id: o.id,
@@ -97,6 +116,12 @@ export async function GET(req: Request) {
   if (to) {
     const toDate = new Date(to);
     memList = memList.filter((o) => new Date(o.createdAt) <= toDate);
+  }
+  if (parsed) {
+    memList = memList.filter((o) => {
+      const oDate = new Date(o.createdAt);
+      return oDate >= parsed.dateStart && oDate < parsed.dateEnd && matchSuffix(o.id);
+    });
   }
 
   return NextResponse.json(memList.slice(0, take));
