@@ -38,7 +38,10 @@ test('CSV export contains header and order data', async ({ page }) => {
   const csv = fs.readFileSync(path as string, 'utf-8');
 
   // Έλεγχος header
-  expect(csv).toContain('Order ID,Created At,Postal Code');
+  expect(csv).toContain('Order No,Order ID,Created At,Postal Code');
+
+  // Έλεγχος ότι περιέχει orderNumber (DX-YYYYMMDD-####)
+  expect(/DX-\d{8}-[A-Z0-9]{4}/.test(csv)).toBeTruthy();
 
   // Έλεγχος ότι περιέχει την παραγγελία μας
   expect(csv).toContain(oid as string);

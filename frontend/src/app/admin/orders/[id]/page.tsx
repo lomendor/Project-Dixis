@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { orderNumber } from '../../../../lib/orderNumber';
 
 type Order = {
   id: string;
@@ -49,6 +50,12 @@ export default function AdminOrderDetail({
         <div className="mt-4 text-sm">Φόρτωση…</div>
       ) : (
         <div className="mt-4 text-sm">
+          <div className="mb-2">
+            Order No:{' '}
+            <strong data-testid="detail-order-no">
+              {orderNumber(data.id, data.createdAt)}
+            </strong>
+          </div>
           <div className="mb-2">
             Order ID:{' '}
             <strong data-testid="detail-order-id">{data.id}</strong>

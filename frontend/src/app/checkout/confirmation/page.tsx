@@ -6,6 +6,7 @@ import { formatEUR } from '../../../lib/money';
 export default function Confirmation() {
   const [json, setJson] = React.useState<any>(null);
   const [orderId, setOrderId] = React.useState<string>('');
+  const [orderNo, setOrderNo] = React.useState<string>('');
 
   React.useEffect(() => {
     try {
@@ -15,6 +16,9 @@ export default function Confirmation() {
     } catch {}
     try {
       setOrderId(localStorage.getItem('checkout_order_id') || '');
+    } catch {}
+    try {
+      setOrderNo(localStorage.getItem('checkout_order_no') || '');
     } catch {}
   }, []);
 
@@ -26,8 +30,13 @@ export default function Confirmation() {
       </p>
       <Card>
         <CardTitle>Σύνοψη</CardTitle>
+        {orderNo && (
+          <div className="mt-1 text-sm text-neutral-800">
+            Order No: <strong data-testid="order-no">{orderNo}</strong>
+          </div>
+        )}
         {orderId && (
-          <div className="mt-1 text-sm text-neutral-700">
+          <div className="mt-1 text-xs text-neutral-600">
             Order ID: <strong data-testid="order-id">{orderId}</strong>
           </div>
         )}

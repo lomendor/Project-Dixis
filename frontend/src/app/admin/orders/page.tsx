@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { orderNumber } from '../../../lib/orderNumber';
 
 type Row = {
   id: string;
@@ -159,6 +160,7 @@ export default function AdminOrders() {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left">
+              <th>Order #</th>
               <th>ID</th>
               <th>Ημ/νία</th>
               <th>Τ.Κ.</th>
@@ -171,6 +173,9 @@ export default function AdminOrders() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.id}>
+                <td className="pr-2">
+                  {orderNumber(r.id as any, r.createdAt as any)}
+                </td>
                 <td className="pr-2">
                   <a
                     href={`/admin/orders/${r.id}`}
@@ -196,7 +201,7 @@ export default function AdminOrders() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-neutral-600">
+                <td colSpan={8} className="text-neutral-600">
                   Καμία καταχώρηση.
                 </td>
               </tr>
