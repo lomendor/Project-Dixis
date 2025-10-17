@@ -54,6 +54,10 @@ export default function AdminOrders() {
   const [sumAmount, setSumAmount] = React.useState(0);
   const [sumErr, setSumErr] = React.useState('');
 
+  // Sorting state
+  const [sortKey, setSortKey] = React.useState<'createdAt' | 'total'>('createdAt');
+  const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('desc');
+
   // Helper to build filter params (no pagination)
   const buildFilterParams = React.useCallback(() => {
     const params = new URLSearchParams();
@@ -78,6 +82,10 @@ export default function AdminOrders() {
       params.set('take', String(pageSize));
       params.set('count', '1');
 
+      // Sorting params
+      params.set('sort', sortKey);
+      params.set('dir', sortDir);
+
       const query = params.toString();
       const url = query ? `/api/admin/orders?${query}` : '/api/admin/orders';
 
@@ -100,7 +108,7 @@ export default function AdminOrders() {
     } catch (e: any) {
       setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
     }
-  }, [buildFilterParams, page, pageSize]);
+  }, [buildFilterParams, page, pageSize, sortKey, sortDir]);
 
   React.useEffect(() => {
     fetchOrders();
@@ -307,10 +315,42 @@ export default function AdminOrders() {
             <tr className="text-left">
               <th>Order #</th>
               <th>ID</th>
-              <th>Ημ/νία</th>
+              <th>
+                <button
+                  onClick={() => {
+                    if (sortKey === 'createdAt') {
+                      setSortDir(sortDir === 'desc' ? 'asc' : 'desc');
+                    } else {
+                      setSortKey('createdAt');
+                      setSortDir('desc');
+                    }
+                    setPage(0);
+                  }}
+                  className="underline cursor-pointer"
+                  data-testid="th-date"
+                >
+                  Ημ/νία {sortKey === 'createdAt' && (sortDir === 'asc' ? '↑' : '↓')}
+                </button>
+              </th>
               <th>Τ.Κ.</th>
               <th>Μέθοδος</th>
-              <th>Σύνολο</th>
+              <th>
+                <button
+                  onClick={() => {
+                    if (sortKey === 'total') {
+                      setSortDir(sortDir === 'desc' ? 'asc' : 'desc');
+                    } else {
+                      setSortKey('total');
+                      setSortDir('desc');
+                    }
+                    setPage(0);
+                  }}
+                  className="underline cursor-pointer"
+                  data-testid="th-total"
+                >
+                  Σύνολο {sortKey === 'total' && (sortDir === 'asc' ? '↑' : '↓')}
+                </button>
+              </th>
               <th>Status</th>
               <th>Email</th>
             </tr>
@@ -335,8 +375,8 @@ export default function AdminOrders() {
                 </td>
                 <td className="pr-2">{r.postalCode}</td>
                 <td className="pr-2">{r.method}</td>
-                <td className="pr-2">
-                  {typeof r.total === 'number'
+                <td className="pr-2" data-testid="cell-total">
+                  €{typeof r.total === 'number'
                     ? r.total.toFixed(2)
                     : String(r.total)}
                 </td>

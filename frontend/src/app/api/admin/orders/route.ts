@@ -26,6 +26,12 @@ export async function GET(req: Request) {
   const skip = skipParam ? Math.max(0, Number(skipParam)) : 0;
   const countFlag = url.searchParams.get('count') === '1';
 
+  // Sorting parameters
+  const rawSort = (url.searchParams.get('sort') || 'createdAt').trim();
+  const rawDir = (url.searchParams.get('dir') || 'desc').trim().toLowerCase();
+  const sortKey: 'createdAt' | 'total' = ['createdAt', 'total'].includes(rawSort) ? rawSort as any : 'createdAt';
+  const sortDir: 'asc' | 'desc' = (rawDir === 'asc' || rawDir === 'desc') ? rawDir : 'desc';
+
   // Parse Order No for date range + suffix filter
   const parsed = ordNo ? parseOrderNo(ordNo) : null;
   const matchSuffix = (id: string) => {
@@ -67,7 +73,7 @@ export async function GET(req: Request) {
 
       let list = await prisma.checkoutOrder.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortKey]: sortDir },
         skip,
         take,
       });
@@ -133,6 +139,14 @@ export async function GET(req: Request) {
       return oDate >= parsed.dateStart && oDate < parsed.dateEnd && matchSuffix(o.id);
     });
   }
+
+  // Sort in-memory list
+  memList = memList.sort((a: any, b: any) => {
+    const av = sortKey === 'total' ? Number(a.total || 0) : new Date(a.createdAt).getTime();
+    const bv = sortKey === 'total' ? Number(b.total || 0) : new Date(b.createdAt).getTime();
+    const cmp = av === bv ? 0 : (av < bv ? -1 : 1);
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
 
   const totalCount = memList.length;
   const paged = memList.slice(skip, skip + take);
