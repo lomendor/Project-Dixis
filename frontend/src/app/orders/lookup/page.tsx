@@ -33,10 +33,17 @@ function OrderLookupContent() {
   const [errNo, setErrNo] = React.useState('');
   const [errEmail, setErrEmail] = React.useState('');
 
-  // prefill from ?ordNo= & autofocus email (AG30)
+  // prefill from ?ordNo= & autofocus email (AG30) + load saved email (AG32)
   React.useEffect(() => {
     const q = sp?.get('ordNo') || '';
     if (q && !orderNo) setOrderNo(q);
+
+    // Load saved email from localStorage (AG32)
+    try {
+      const saved = localStorage.getItem('dixis.lastEmail') || '';
+      if (saved && !email) setEmail(saved);
+    } catch {}
+
     try {
       emailRef.current?.focus();
     } catch {}
@@ -72,6 +79,10 @@ function OrderLookupContent() {
       if (r.ok) {
         const data = await r.json();
         setResult(data);
+        // Save email on successful lookup (AG32)
+        try {
+          localStorage.setItem('dixis.lastEmail', email);
+        } catch {}
       } else if (r.status === 404) {
         setErrorMessage('Δεν βρέθηκε παραγγελία με αυτά τα στοιχεία.');
       } else if (r.status === 429) {
@@ -122,8 +133,15 @@ function OrderLookupContent() {
             <input
               value={email}
               onChange={(e) => {
-                setEmail(e.target.value);
+                const val = e.target.value;
+                setEmail(val);
                 if (errEmail) setErrEmail('');
+                // Save valid emails to localStorage immediately (AG32)
+                if (isValidEmail(val)) {
+                  try {
+                    localStorage.setItem('dixis.lastEmail', val);
+                  } catch {}
+                }
               }}
               placeholder="Email"
               ref={emailRef}
