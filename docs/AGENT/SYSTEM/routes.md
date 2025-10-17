@@ -58,6 +58,8 @@
 ### Admin (BASIC_AUTH=1)
 - `GET /api/admin/orders`
   - Lists recent orders (Prisma + in-memory fallback)
+- `GET /api/admin/orders/[id]`
+  - Fetches single order by ID (Prisma + in-memory fallback)
 
 ### CI/Dev
 - `POST /api/ci/devmail/send` (rate-limited: 30/min in prod)

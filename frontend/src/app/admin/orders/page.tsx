@@ -51,7 +51,15 @@ export default function AdminOrders() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.id}>
-                <td className="pr-2">{r.id.slice(0, 8)}</td>
+                <td className="pr-2">
+                  <a
+                    href={`/admin/orders/${r.id}`}
+                    className="underline"
+                    data-testid="order-link"
+                  >
+                    {r.id.slice(0, 8)}
+                  </a>
+                </td>
                 <td className="pr-2">
                   {new Date(r.createdAt).toLocaleString()}
                 </td>
