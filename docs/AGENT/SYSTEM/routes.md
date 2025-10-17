@@ -58,13 +58,8 @@
 ### Admin (BASIC_AUTH=1)
 - `GET /api/admin/orders`
   - Lists recent orders (Prisma + in-memory fallback)
-  - Query params: q, pc, method, status, from, to, take (max 1000)
 - `GET /api/admin/orders/[id]`
   - Fetches single order by ID (Prisma + in-memory fallback)
-- `GET /api/admin/orders/export`
-  - Exports orders as CSV with same filter support
-  - Query params: q, pc, method, status, from, to, take (max 1000)
-  - Returns CSV file with proper Content-Disposition header
 
 ### CI/Dev
 - `POST /api/ci/devmail/send` (rate-limited: 30/min in prod)
