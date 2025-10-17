@@ -22,6 +22,9 @@ export async function GET(req: Request) {
   const ordNo = url.searchParams.get('ordNo') || '';
   const takeParam = url.searchParams.get('take');
   const take = takeParam ? Math.min(Number(takeParam), 1000) : 50;
+  const skipParam = url.searchParams.get('skip');
+  const skip = skipParam ? Math.max(0, Number(skipParam)) : 0;
+  const countFlag = url.searchParams.get('count') === '1';
 
   // Parse Order No for date range + suffix filter
   const parsed = ordNo ? parseOrderNo(ordNo) : null;
@@ -65,6 +68,7 @@ export async function GET(req: Request) {
       let list = await prisma.checkoutOrder.findMany({
         where,
         orderBy: { createdAt: 'desc' },
+        skip,
         take,
       });
 
@@ -73,17 +77,23 @@ export async function GET(req: Request) {
         list = list.filter((o) => matchSuffix(o.id));
       }
 
-      return NextResponse.json(
-        list.map((o) => ({
-          id: o.id,
-          createdAt: o.createdAt,
-          postalCode: o.postalCode,
-          method: o.method,
-          total: o.total,
-          paymentStatus: o.paymentStatus,
-          email: (o as any).email,
-        }))
-      );
+      const mapped = list.map((o) => ({
+        id: o.id,
+        createdAt: o.createdAt,
+        postalCode: o.postalCode,
+        method: o.method,
+        total: o.total,
+        paymentStatus: o.paymentStatus,
+        email: (o as any).email,
+      }));
+
+      // If count=1, return {items, total}; otherwise return array (backward compatible)
+      if (countFlag) {
+        const total = await prisma.checkoutOrder.count({ where });
+        return NextResponse.json({ items: mapped, total });
+      }
+
+      return NextResponse.json(mapped);
     } catch {
       // Fallthrough to memory
     }
@@ -124,5 +134,13 @@ export async function GET(req: Request) {
     });
   }
 
-  return NextResponse.json(memList.slice(0, take));
+  const totalCount = memList.length;
+  const paged = memList.slice(skip, skip + take);
+
+  // If count=1, return {items, total}; otherwise return array (backward compatible)
+  if (countFlag) {
+    return NextResponse.json({ items: paged, total: totalCount });
+  }
+
+  return NextResponse.json(paged);
 }

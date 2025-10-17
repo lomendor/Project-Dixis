@@ -45,6 +45,11 @@ export default function AdminOrders() {
     setToISO(iso(to));
   };
 
+  // Pagination state
+  const [page, setPage] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [total, setTotal] = React.useState(0);
+
   const fetchOrders = React.useCallback(async () => {
     try {
       // Build query string
@@ -57,18 +62,35 @@ export default function AdminOrders() {
       if (fromISO) params.set('from', fromISO);
       if (toISO) params.set('to', toISO);
 
+      // Pagination params
+      const skip = page * pageSize;
+      params.set('skip', String(skip));
+      params.set('take', String(pageSize));
+      params.set('count', '1');
+
       const query = params.toString();
       const url = query ? `/api/admin/orders?${query}` : '/api/admin/orders';
 
       const r = await fetch(url, { cache: 'no-store' });
       if (!r.ok) throw new Error(String(r.status));
       const j = await r.json();
-      setRows(Array.isArray(j) ? j : []);
+
+      // Handle both formats: array (old) or {items, total} (new with count=1)
+      if (Array.isArray(j)) {
+        setRows(j);
+        setTotal(j.length);
+      } else if (j.items && typeof j.total === 'number') {
+        setRows(j.items);
+        setTotal(j.total);
+      } else {
+        setRows([]);
+        setTotal(0);
+      }
       setErr('');
     } catch (e: any) {
       setErr('Δεν είναι διαθέσιμο (ίσως BASIC_AUTH=1 μόνο σε CI).');
     }
-  }, [q, pc, method, status, ordNo, fromISO, toISO]);
+  }, [q, pc, method, status, ordNo, fromISO, toISO, page, pageSize]);
 
   React.useEffect(() => {
     fetchOrders();
@@ -222,6 +244,7 @@ export default function AdminOrders() {
               setMethod('');
               setStatus('');
               setOrdNo('');
+              setPage(0);
             }}
             className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
             data-testid="filter-clear"
@@ -290,6 +313,51 @@ export default function AdminOrders() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex items-center justify-between text-sm">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium">Page Size:</label>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(0);
+            }}
+            className="px-2 py-1 border rounded text-xs"
+            data-testid="page-size-selector"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <div className="text-xs text-gray-600" data-testid="page-info">
+          {total === 0
+            ? 'No orders'
+            : `${page * pageSize + 1}–${Math.min((page + 1) * pageSize, total)} of ${total} orders`}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            data-testid="page-prev"
+          >
+            Prev
+          </button>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={(page + 1) * pageSize >= total}
+            className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            data-testid="page-next"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </main>
   );
