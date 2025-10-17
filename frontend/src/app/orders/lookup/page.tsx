@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function OrderLookupPage() {
+function OrderLookupContent() {
   const sp = useSearchParams();
   const [orderNo, setOrderNo] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -154,5 +154,13 @@ export default function OrderLookupPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function OrderLookupPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6">Loading...</div>}>
+      <OrderLookupContent />
+    </Suspense>
   );
 }
