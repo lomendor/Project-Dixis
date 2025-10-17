@@ -43,10 +43,7 @@ export async function POST(req: Request) {
             gte: dateStart,
             lt: dateEnd,
           },
-          email: {
-            equals: email,
-            mode: 'insensitive',
-          },
+          email,
         },
       });
 
