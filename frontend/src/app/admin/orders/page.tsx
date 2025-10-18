@@ -508,13 +508,14 @@ export default function AdminOrders() {
         {sumErr && <span className="text-red-600"> {sumErr}</span>}
       </div>
 
-      <div className="mt-3 overflow-x-auto">
+      {/* AG39: Scroll container with sticky header */}
+      <div className="mt-3 overflow-auto max-h-[70vh] border rounded" data-testid="orders-scroll">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10 bg-white">
             <tr className="text-left">
-              <th>Order #</th>
-              <th>ID</th>
-              <th>
+              <th className="bg-white border-b">Order #</th>
+              <th className="bg-white border-b">ID</th>
+              <th className="bg-white border-b">
                 <button
                   onClick={() => {
                     if (sortKey === 'createdAt') {
@@ -531,9 +532,9 @@ export default function AdminOrders() {
                   Ημ/νία {sortKey === 'createdAt' && (sortDir === 'asc' ? '↑' : '↓')}
                 </button>
               </th>
-              <th>Τ.Κ.</th>
-              <th>Μέθοδος</th>
-              <th>
+              <th className="bg-white border-b">Τ.Κ.</th>
+              <th className="bg-white border-b">Μέθοδος</th>
+              <th className="bg-white border-b">
                 <button
                   onClick={() => {
                     if (sortKey === 'total') {
@@ -550,8 +551,8 @@ export default function AdminOrders() {
                   Σύνολο {sortKey === 'total' && (sortDir === 'asc' ? '↑' : '↓')}
                 </button>
               </th>
-              <th>Status</th>
-              <th>Email</th>
+              <th className="bg-white border-b">Status</th>
+              <th className="bg-white border-b">Email</th>
             </tr>
           </thead>
           <tbody>
