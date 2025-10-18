@@ -15,6 +15,7 @@ type Row = {
 export default function AdminOrders() {
   const [rows, setRows] = React.useState<Row[]>([]);
   const [err, setErr] = React.useState<string>('');
+  const hydratedRef = React.useRef(false); // AG33: one-time hydration guard
 
   // Filter state
   const [q, setQ] = React.useState('');
@@ -57,6 +58,12 @@ export default function AdminOrders() {
   // Sorting state
   const [sortKey, setSortKey] = React.useState<'createdAt' | 'total'>('createdAt');
   const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('desc');
+
+  // AG33: Parse query string from current browser location
+  function parseQSFromLocation() {
+    if (typeof window === 'undefined') return new URLSearchParams('');
+    return new URLSearchParams(window.location.search || '');
+  }
 
   // Helper to build filter params (no pagination)
   const buildFilterParams = React.useCallback(() => {
@@ -110,6 +117,52 @@ export default function AdminOrders() {
     }
   }, [buildFilterParams, page, pageSize, sortKey, sortDir]);
 
+  // AG33: Hydrate filters from URL (priority) or localStorage on first load
+  React.useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+
+    try {
+      const sp = parseQSFromLocation();
+      const hasQS = Array.from(sp.keys()).length > 0;
+      let saved: any = null;
+
+      // Try to load from localStorage
+      try {
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('dixis.adminOrders.filters');
+          saved = stored ? JSON.parse(stored) : null;
+        }
+      } catch {}
+
+      // Helper: pick from URL (priority) or localStorage fallback
+      const pick = (key: string, def: any) => {
+        if (hasQS && sp.has(key)) {
+          return sp.get(key) ?? def;
+        }
+        return (saved && saved[key] !== undefined) ? saved[key] : def;
+      };
+
+      // Restore filter state
+      setQ(String(pick('q', '') || ''));
+      setPc(String(pick('pc', '') || ''));
+      setMethod(String(pick('method', '') || ''));
+      setStatus(String(pick('status', '') || ''));
+      setOrdNo(String(pick('ordNo', '') || ''));
+      setFromISO(String(pick('from', '') || ''));
+      setToISO(String(pick('to', '') || ''));
+      setSortKey(pick('sort', 'createdAt') as 'createdAt' | 'total');
+      setSortDir(pick('dir', 'desc') as 'asc' | 'desc');
+
+      // Restore pagination
+      const ps = parseInt(String(pick('take', '') || String((saved && saved.pageSize) || ''))) || 0;
+      if (ps) setPageSize(ps);
+
+      const p = parseInt(String(pick('page', '') || '')) || 0;
+      if (p > 0) setPage(p);
+    } catch {}
+  }, []);
+
   React.useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
@@ -137,6 +190,50 @@ export default function AdminOrders() {
     fetchSummary();
   }, [buildFilterParams]);
 
+  // AG33: Sync filters to URL and localStorage on change
+  React.useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+
+      // Build query string with all filters
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (pc) params.set('pc', pc);
+      if (method) params.set('method', method);
+      if (status) params.set('status', status);
+      if (ordNo) params.set('ordNo', ordNo);
+      if (fromISO) params.set('from', fromISO);
+      if (toISO) params.set('to', toISO);
+      params.set('sort', sortKey);
+      params.set('dir', sortDir);
+      params.set('take', String(pageSize));
+      params.set('page', String(page));
+
+      const base = '/admin/orders';
+      const qs = params.toString();
+      const url = qs ? `${base}?${qs}` : base;
+
+      // Update URL without page reload
+      window.history.replaceState(null, '', url);
+
+      // Save to localStorage
+      const payload = {
+        q,
+        pc,
+        method,
+        status,
+        ordNo,
+        from: fromISO,
+        to: toISO,
+        sort: sortKey,
+        dir: sortDir,
+        pageSize,
+        page,
+      };
+      localStorage.setItem('dixis.adminOrders.filters', JSON.stringify(payload));
+    } catch {}
+  }, [q, pc, method, status, ordNo, fromISO, toISO, sortKey, sortDir, pageSize, page]);
+
   const buildExportUrl = () => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
@@ -146,6 +243,8 @@ export default function AdminOrders() {
     if (ordNo) params.set('ordNo', ordNo);
     if (fromISO) params.set('from', fromISO);
     if (toISO) params.set('to', toISO);
+    params.set('sort', sortKey); // AG33: include sort
+    params.set('dir', sortDir); // AG33: include dir
     const query = params.toString();
     return query
       ? `/api/admin/orders/export?${query}`
@@ -264,7 +363,7 @@ export default function AdminOrders() {
               type="text"
               value={ordNo}
               onChange={(e) => setOrdNo(e.target.value)}
-              placeholder="DX-20251017-A1B2"
+              placeholder="Order No (DX-YYYYMMDD-####)"
               className="w-full px-2 py-1 border rounded"
               data-testid="filter-ordno"
             />
@@ -406,7 +505,7 @@ export default function AdminOrders() {
               setPage(0);
             }}
             className="px-2 py-1 border rounded text-xs"
-            data-testid="page-size-selector"
+            data-testid="page-size"
           >
             <option value="10">10</option>
             <option value="20">20</option>
