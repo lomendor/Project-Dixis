@@ -60,6 +60,9 @@ export default function AdminOrders() {
   const [sortKey, setSortKey] = React.useState<'createdAt' | 'total'>('createdAt');
   const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('desc');
 
+  // AG37: Download filename state
+  const [downloadName, setDownloadName] = React.useState('orders.csv');
+
   // AG33: Parse query string from current browser location
   function parseQSFromLocation() {
     if (typeof window === 'undefined') return new URLSearchParams('');
@@ -239,6 +242,52 @@ export default function AdminOrders() {
     };
     fetchSummary();
   }, [buildFilterParams]);
+
+  // AG37: Calculate download filename based on filters (mirrors server logic)
+  React.useEffect(() => {
+    try {
+      const safePart = (x: string) =>
+        String(x || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9._-]+/g, '-')
+          .slice(0, 60);
+
+      const parts: string[] = ['orders'];
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+      // Date range or ordNo suffix
+      if (ordNo && ordNo.includes('-')) {
+        const suffix = ordNo.split('-').pop()?.toLowerCase() || '';
+        if (suffix) {
+          parts.push(today, `ord-${suffix}`);
+        } else {
+          parts.push(today);
+        }
+      } else if (fromISO || toISO) {
+        const fromPart = fromISO ? safePart(fromISO.slice(0, 10)) : '';
+        const toPart = toISO ? safePart(toISO.slice(0, 10)) : '';
+        if (fromPart && toPart && fromPart === toPart) {
+          parts.push(fromPart);
+        } else {
+          if (fromPart) parts.push(`from-${fromPart}`);
+          if (toPart) parts.push(`to-${toPart}`);
+        }
+      } else {
+        parts.push(today);
+      }
+
+      // Other filters
+      if (method) parts.push(safePart(method));
+      if (status) parts.push(safePart(status));
+      if (q) parts.push(`q-${safePart(q)}`);
+      if (pc) parts.push(`pc-${safePart(pc)}`);
+
+      const filename = parts.join('_') + '.csv';
+      setDownloadName(filename);
+    } catch {
+      setDownloadName('orders.csv');
+    }
+  }, [ordNo, fromISO, toISO, method, status, q, pc]);
 
   // AG33: Sync filters to URL and localStorage on change
   React.useEffect(() => {
@@ -444,7 +493,7 @@ export default function AdminOrders() {
           </button>
           <a
             href={buildExportUrl()}
-            download="orders.csv"
+            download={downloadName}
             className="ml-auto px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
             data-testid="export-csv"
           >
