@@ -250,6 +250,13 @@ function OrderLookupContent() {
           </div>
         </div>
       )}
+
+      {/* AG38: Back to shop link */}
+      <div className="mt-6">
+        <a href="/" data-testid="back-to-shop-link" className="underline">
+          Πίσω στο κατάστημα
+        </a>
+      </div>
     </main>
   );
 }
