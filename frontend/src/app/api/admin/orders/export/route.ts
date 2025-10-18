@@ -15,6 +15,14 @@ function escapeCSV(val: any): string {
   return s;
 }
 
+// AG37: Helper for safe filename parts
+function safePart(x: string): string {
+  return String(x || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .slice(0, 60);
+}
+
 export async function GET(req: Request) {
   if (!adminEnabled()) {
     return new NextResponse('admin disabled', { status: 404 });
@@ -166,11 +174,40 @@ export async function GET(req: Request) {
 
   const csv = header + lines.join('\n');
 
+  // AG37: Build smart filename based on filters
+  const parts: string[] = ['orders'];
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+  // Date range or ordNo suffix
+  if (ordNo && parsed) {
+    const suffix = parsed.suffix.toLowerCase();
+    parts.push(today, `ord-${suffix}`);
+  } else if (from || to) {
+    const fromPart = from ? safePart(from.slice(0, 10)) : '';
+    const toPart = to ? safePart(to.slice(0, 10)) : '';
+    if (fromPart && toPart && fromPart === toPart) {
+      parts.push(fromPart);
+    } else {
+      if (fromPart) parts.push(`from-${fromPart}`);
+      if (toPart) parts.push(`to-${toPart}`);
+    }
+  } else {
+    parts.push(today);
+  }
+
+  // Other filters
+  if (method) parts.push(safePart(method));
+  if (status) parts.push(safePart(status));
+  if (q) parts.push(`q-${safePart(q)}`);
+  if (pc) parts.push(`pc-${safePart(pc)}`);
+
+  const filename = parts.join('_') + '.csv';
+
   return new NextResponse(csv, {
     status: 200,
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="orders.csv"',
+      'Content-Disposition': `attachment; filename="${filename}"`,
     },
   });
 }
