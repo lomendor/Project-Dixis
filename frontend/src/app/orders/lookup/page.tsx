@@ -33,6 +33,7 @@ function OrderLookupContent() {
 
   const [errNo, setErrNo] = React.useState('');
   const [errEmail, setErrEmail] = React.useState('');
+  const [fromStorage, setFromStorage] = React.useState(false); // AG35: track if email came from localStorage
 
   // prefill from ?ordNo= & autofocus email (AG30) + load saved email (AG32)
   React.useEffect(() => {
@@ -42,7 +43,10 @@ function OrderLookupContent() {
     // Load saved email from localStorage (AG32)
     try {
       const saved = localStorage.getItem('dixis.lastEmail') || '';
-      if (saved && !email) setEmail(saved);
+      if (saved && !email) {
+        setEmail(saved);
+        setFromStorage(true); // AG35: mark that email came from storage
+      }
     } catch {}
 
     try {
@@ -69,6 +73,7 @@ function OrderLookupContent() {
       localStorage.removeItem('dixis.lastEmail');
     } catch {}
     setEmail('');
+    setFromStorage(false); // AG35: hide hint when clearing
     setClearMsg('Καθαρίστηκε');
     setTimeout(() => setClearMsg(''), 1200);
   }
@@ -146,6 +151,7 @@ function OrderLookupContent() {
               onChange={(e) => {
                 const val = e.target.value;
                 setEmail(val);
+                setFromStorage(false); // AG35: hide hint when user types
                 if (errEmail) setErrEmail('');
                 // Save valid emails to localStorage immediately (AG32)
                 if (isValidEmail(val)) {
@@ -165,6 +171,19 @@ function OrderLookupContent() {
             {errEmail && (
               <div data-testid="error-email" className="text-xs text-red-600 mt-1">
                 {errEmail}
+              </div>
+            )}
+            {fromStorage && !busy && (
+              <div data-testid="saved-email-hint" className="text-xs text-neutral-600 mt-1">
+                Χρησιμοποιείται αποθηκευμένο email ·{' '}
+                <button
+                  type="button"
+                  data-testid="saved-email-clear"
+                  onClick={onClear}
+                  className="underline hover:text-neutral-800"
+                >
+                  Clear
+                </button>
               </div>
             )}
           </div>
