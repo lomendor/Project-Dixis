@@ -35,6 +35,7 @@ function OrderLookupContent() {
 
   // prefill from ?ordNo= & autofocus email (AG30) + load saved email (AG32)
   React.useEffect(() => {
+    // AG32: localStorage email persistence
     const q = sp?.get('ordNo') || '';
     if (q && !orderNo) setOrderNo(q);
 
