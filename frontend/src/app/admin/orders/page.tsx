@@ -47,8 +47,8 @@ export default function AdminOrders() {
     setToISO(iso(to));
   };
 
-  // Pagination state
-  const [page, setPage] = React.useState(0);
+  // Pagination state (AG36.1: 1-based)
+  const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [total, setTotal] = React.useState(0);
 
@@ -84,8 +84,8 @@ export default function AdminOrders() {
       // Build query string
       const params = buildFilterParams();
 
-      // Pagination params
-      const skip = page * pageSize;
+      // Pagination params (AG36.1: convert 1-based page to 0-based skip)
+      const skip = (page - 1) * pageSize;
       params.set('skip', String(skip));
       params.set('take', String(pageSize));
       params.set('count', '1');
@@ -185,7 +185,7 @@ export default function AdminOrders() {
         e.preventDefault();
         try {
           setQuickRange(0);
-          setPage(0);
+          setPage(1); // AG36.1: reset to page 1
         } catch {}
         return;
       }
@@ -194,7 +194,7 @@ export default function AdminOrders() {
       if (e.key === '[' && !isTypingTarget(tgt)) {
         e.preventDefault();
         try {
-          setPage((p: number) => Math.max(0, p - 1));
+          setPage((p: number) => Math.max(1, p - 1)); // AG36.1: min page is 1
         } catch {}
         return;
       }
@@ -313,7 +313,7 @@ export default function AdminOrders() {
       <div className="mt-4 mb-2 flex gap-2 text-xs">
         <button
           type="button"
-          onClick={() => setQuickRange(0)}
+          onClick={() => { setQuickRange(0); setPage(1); }}
           className="border px-2 h-7 rounded hover:bg-gray-100"
           data-testid="quick-range-today"
         >
@@ -321,7 +321,7 @@ export default function AdminOrders() {
         </button>
         <button
           type="button"
-          onClick={() => setQuickRange(7)}
+          onClick={() => { setQuickRange(7); setPage(1); }}
           className="border px-2 h-7 rounded hover:bg-gray-100"
           data-testid="quick-range-7d"
         >
@@ -329,7 +329,7 @@ export default function AdminOrders() {
         </button>
         <button
           type="button"
-          onClick={() => setQuickRange(30)}
+          onClick={() => { setQuickRange(30); setPage(1); }}
           className="border px-2 h-7 rounded hover:bg-gray-100"
           data-testid="quick-range-30d"
         >
@@ -435,7 +435,7 @@ export default function AdminOrders() {
               setMethod('');
               setStatus('');
               setOrdNo('');
-              setPage(0);
+              setPage(1); // AG36.1: reset to page 1
             }}
             className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
             data-testid="filter-clear"
@@ -474,7 +474,7 @@ export default function AdminOrders() {
                       setSortKey('createdAt');
                       setSortDir('desc');
                     }
-                    setPage(0);
+                    setPage(1); // AG36.1: reset to page 1
                   }}
                   className="underline cursor-pointer"
                   data-testid="th-date"
@@ -493,7 +493,7 @@ export default function AdminOrders() {
                       setSortKey('total');
                       setSortDir('desc');
                     }
-                    setPage(0);
+                    setPage(1); // AG36.1: reset to page 1
                   }}
                   className="underline cursor-pointer"
                   data-testid="th-total"
@@ -558,7 +558,7 @@ export default function AdminOrders() {
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
-              setPage(0);
+              setPage(1); // AG36.1: reset to page 1
             }}
             className="px-2 py-1 border rounded text-xs"
             data-testid="page-size"
@@ -572,13 +572,13 @@ export default function AdminOrders() {
         <div className="text-xs text-gray-600" data-testid="page-info">
           {total === 0
             ? 'No orders'
-            : `${page * pageSize + 1}–${Math.min((page + 1) * pageSize, total)} of ${total} orders`}
+            : `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)} of ${total} orders`}
         </div>
 
         <div className="flex gap-2">
           <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
             className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             data-testid="pager-prev"
           >
@@ -586,7 +586,7 @@ export default function AdminOrders() {
           </button>
           <button
             onClick={() => setPage((p) => p + 1)}
-            disabled={(page + 1) * pageSize >= total}
+            disabled={page * pageSize >= total}
             className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             data-testid="pager-next"
           >
