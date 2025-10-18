@@ -23,6 +23,7 @@ export default function AdminOrders() {
   const [method, setMethod] = React.useState('');
   const [status, setStatus] = React.useState('');
   const [ordNo, setOrdNo] = React.useState('');
+  const ordNoRef = React.useRef<HTMLInputElement | null>(null); // AG36: ref for keyboard focus
   const [fromISO, setFromISO] = React.useState<string>('');
   const [toISO, setToISO] = React.useState<string>('');
 
@@ -162,6 +163,55 @@ export default function AdminOrders() {
       if (p > 0) setPage(p);
     } catch {}
   }, []);
+
+  // AG36: Keyboard shortcuts
+  React.useEffect(() => {
+    function isTypingTarget(el: any) {
+      return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+    }
+
+    function onKey(e: KeyboardEvent) {
+      const tgt = e.target as any;
+
+      // '/' → focus Order No (unless already typing in an input)
+      if (e.key === '/' && !isTypingTarget(tgt)) {
+        e.preventDefault();
+        ordNoRef?.current?.focus();
+        return;
+      }
+
+      // 't' → Today range (unless typing in input)
+      if ((e.key === 't' || e.key === 'T') && !isTypingTarget(tgt)) {
+        e.preventDefault();
+        try {
+          setQuickRange(0);
+          setPage(0);
+        } catch {}
+        return;
+      }
+
+      // '[' → prev page
+      if (e.key === '[' && !isTypingTarget(tgt)) {
+        e.preventDefault();
+        try {
+          setPage((p: number) => Math.max(0, p - 1));
+        } catch {}
+        return;
+      }
+
+      // ']' → next page
+      if (e.key === ']' && !isTypingTarget(tgt)) {
+        e.preventDefault();
+        try {
+          setPage((p: number) => p + 1);
+        } catch {}
+        return;
+      }
+    }
+
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setPage, setQuickRange]);
 
   React.useEffect(() => {
     fetchOrders();
@@ -364,6 +414,7 @@ export default function AdminOrders() {
               value={ordNo}
               onChange={(e) => setOrdNo(e.target.value)}
               placeholder="Order No (DX-YYYYMMDD-####)"
+              ref={ordNoRef}
               className="w-full px-2 py-1 border rounded"
               data-testid="filter-ordno"
             />
@@ -494,8 +545,13 @@ export default function AdminOrders() {
         </table>
       </div>
 
+      {/* Keyboard Shortcuts Hint */}
+      <div className="text-xs text-neutral-500 mt-3" data-testid="kb-hints">
+        Shortcuts: / focus · t Today · [ Prev · ] Next
+      </div>
+
       {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between text-sm">
+      <div className="mt-2 flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <label className="text-xs font-medium">Page Size:</label>
           <select
@@ -524,7 +580,7 @@ export default function AdminOrders() {
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
             className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            data-testid="page-prev"
+            data-testid="pager-prev"
           >
             Prev
           </button>
@@ -532,7 +588,7 @@ export default function AdminOrders() {
             onClick={() => setPage((p) => p + 1)}
             disabled={(page + 1) * pageSize >= total}
             className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            data-testid="page-next"
+            data-testid="pager-next"
           >
             Next
           </button>
