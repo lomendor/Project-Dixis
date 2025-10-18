@@ -29,6 +29,7 @@ function OrderLookupContent() {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [result, setResult] = React.useState<OrderResult | null>(null);
   const [busy, setBusy] = React.useState(false);
+  const [clearMsg, setClearMsg] = React.useState(''); // AG34: clear success flag
 
   const [errNo, setErrNo] = React.useState('');
   const [errEmail, setErrEmail] = React.useState('');
@@ -60,6 +61,16 @@ function OrderLookupContent() {
     setErrEmail(eEmail);
     if (eNo || eEmail) ok = false;
     return ok;
+  }
+
+  // AG34: Clear remembered email from localStorage
+  function onClear() {
+    try {
+      localStorage.removeItem('dixis.lastEmail');
+    } catch {}
+    setEmail('');
+    setClearMsg('Καθαρίστηκε');
+    setTimeout(() => setClearMsg(''), 1200);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -167,9 +178,23 @@ function OrderLookupContent() {
             >
               {busy ? 'Αναζήτηση…' : 'Αναζήτηση'}
             </button>
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={disableAll}
+              className="border px-3 py-2 rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
+              data-testid="clear-remembered-email"
+            >
+              Clear remembered email
+            </button>
             {busy && (
               <span data-testid="lookup-busy" className="text-xs text-neutral-600">
                 Αναζήτηση…
+              </span>
+            )}
+            {clearMsg && (
+              <span data-testid="clear-flag" className="text-green-700 text-xs">
+                {clearMsg}
               </span>
             )}
           </div>
