@@ -30,6 +30,7 @@ function OrderLookupContent() {
   const [result, setResult] = React.useState<OrderResult | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [clearMsg, setClearMsg] = React.useState(''); // AG34: clear success flag
+  const [copyMsg, setCopyMsg] = React.useState(''); // AG40: copy toast message
 
   const [errNo, setErrNo] = React.useState('');
   const [errEmail, setErrEmail] = React.useState('');
@@ -76,6 +77,30 @@ function OrderLookupContent() {
     setFromStorage(false); // AG35: hide hint when clearing
     setClearMsg('Καθαρίστηκε');
     setTimeout(() => setClearMsg(''), 1200);
+  }
+
+  // AG40: Copy current order link handler
+  async function onCopyCurrent() {
+    try {
+      const ord = result?.orderNo;
+      if (!ord) return;
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const url = origin ? `${origin}/orders/lookup?ordNo=${encodeURIComponent(ord)}` : '';
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        // Fallback for older browsers
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      setCopyMsg('Αντιγράφηκε');
+      setTimeout(() => setCopyMsg(''), 1200);
+    } catch {}
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -228,6 +253,22 @@ function OrderLookupContent() {
 
       {result && (
         <div className="mt-5 text-sm border rounded p-3" data-testid="lookup-result">
+          {/* AG40: Copy order link button */}
+          <div className="mb-2 flex items-center gap-3">
+            <button
+              type="button"
+              data-testid="copy-order-link-lookup"
+              onClick={onCopyCurrent}
+              className="border px-3 py-2 rounded text-sm"
+            >
+              Αντιγραφή συνδέσμου
+            </button>
+            {copyMsg && (
+              <span data-testid="copy-toast-lookup" className="text-xs text-green-700">
+                {copyMsg}
+              </span>
+            )}
+          </div>
           <div>
             <strong>Order No:</strong>{' '}
             <span data-testid="result-order-no">{result.orderNo}</span>
