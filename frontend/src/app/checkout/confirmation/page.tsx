@@ -8,6 +8,8 @@ export default function Confirmation() {
   const [orderId, setOrderId] = React.useState<string>('');
   const [orderNo, setOrderNo] = React.useState<string>('');
   const [copied, setCopied] = React.useState<boolean>(false);
+  const [shareUrl, setShareUrl] = React.useState(''); // AG40: share URL state
+  const [copiedGreek, setCopiedGreek] = React.useState(false); // AG40: Greek toast state
 
   React.useEffect(() => {
     try {
@@ -22,6 +24,37 @@ export default function Confirmation() {
       setOrderNo(localStorage.getItem('checkout_order_no') || '');
     } catch {}
   }, []);
+
+  // AG40: Build share URL from orderNo
+  React.useEffect(() => {
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      if (orderNo && origin) {
+        setShareUrl(`${origin}/orders/lookup?ordNo=${encodeURIComponent(orderNo)}`);
+      }
+    } catch {}
+  }, [orderNo]);
+
+  // AG40: Greek copy link handler
+  async function onCopyLink() {
+    try {
+      if (shareUrl) {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+        } catch {
+          // Fallback for older browsers
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        setCopiedGreek(true);
+        setTimeout(() => setCopiedGreek(false), 1200);
+      }
+    } catch {}
+  }
 
   return (
     <main style={{ maxWidth: 760, margin: '40px auto', padding: 16 }}>
@@ -105,6 +138,27 @@ export default function Confirmation() {
           </div>
         )}
       </Card>
+
+      {/* AG40: Greek copy order link + toast */}
+      <div className="mt-3 flex items-center gap-3">
+        <button
+          type="button"
+          className="border px-3 py-2 rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
+          data-testid="copy-order-link"
+          onClick={onCopyLink}
+          disabled={!shareUrl}
+        >
+          Αντιγραφή συνδέσμου
+        </button>
+        {copiedGreek && (
+          <span data-testid="copy-toast" className="text-xs text-green-700">
+            Αντιγράφηκε
+          </span>
+        )}
+        <span data-testid="share-url" style={{ display: 'none' }}>
+          {shareUrl}
+        </span>
+      </div>
 
       {/* AG38: Back to shop link */}
       <div className="mt-6">
