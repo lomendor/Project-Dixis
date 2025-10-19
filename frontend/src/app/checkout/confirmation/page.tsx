@@ -165,6 +165,55 @@ export default function Confirmation() {
         </div>
       )}
 
+      {/* AG44 — Collapsible: Αποστολή & Σύνολα */}
+      {orderNo && json && (
+        <details data-testid="confirm-collapsible" className="mt-4 max-w-xl rounded border">
+          <summary className="cursor-pointer select-none px-4 py-2 text-sm font-semibold bg-neutral-50 border-b hover:bg-neutral-100">
+            Αποστολή &amp; Σύνολα
+          </summary>
+          <div className="p-4 space-y-3">
+            {/* Summary section */}
+            <div data-testid="confirm-collapsible-summary" className="rounded border shadow-sm p-3 bg-white">
+              <div className="text-xs uppercase tracking-wide text-neutral-500 mb-2">Περίληψη παραγγελίας</div>
+              <div className="text-sm mb-1">
+                Αρ. παραγγελίας:{' '}
+                <span data-testid="confirm-collapsible-ordno" className="font-mono">
+                  {orderNo}
+                </span>
+              </div>
+              <div className="text-sm">
+                <a
+                  data-testid="confirm-collapsible-share"
+                  href={shareUrl || '#'}
+                  className="underline text-blue-600 hover:text-blue-800"
+                  aria-disabled={!shareUrl}
+                >
+                  Προβολή παραγγελίας
+                </a>
+              </div>
+            </div>
+
+            {/* Shipping & Totals details */}
+            <div data-testid="confirm-collapsible-details" className="space-y-2">
+              <div className="text-sm">
+                <span className="text-neutral-600">Τ.Κ.:</span>{' '}
+                <strong>{json?.address?.postalCode || '—'}</strong>
+              </div>
+              <div className="text-sm">
+                <span className="text-neutral-600">Μέθοδος:</span>{' '}
+                <strong>{json?.method || '—'}</strong>
+              </div>
+              <div className="text-sm">
+                <span className="text-neutral-600">Σύνολο:</span>{' '}
+                <strong data-testid="confirm-collapsible-total">
+                  {formatEUR(json?.total)}
+                </strong>
+              </div>
+            </div>
+          </div>
+        </details>
+      )}
+
       {/* AG40: Greek copy order link + toast */}
       <div className="mt-3 flex items-center gap-3">
         <button
