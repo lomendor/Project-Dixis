@@ -51,6 +51,7 @@ export default function AdminOrders() {
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [total, setTotal] = React.useState(0);
+  const [resetMsg, setResetMsg] = React.useState(''); // AG41: reset toast flag
 
   // Summary state
   const [sumAmount, setSumAmount] = React.useState(0);
@@ -67,6 +68,38 @@ export default function AdminOrders() {
   function parseQSFromLocation() {
     if (typeof window === 'undefined') return new URLSearchParams('');
     return new URLSearchParams(window.location.search || '');
+  }
+
+  // AG41: Reset all filters to defaults
+  function onResetFilters() {
+    try {
+      // Clear localStorage
+      localStorage.removeItem('dixis.adminOrders.filters');
+    } catch {}
+
+    try {
+      // Reset all filter state to defaults
+      setQ('');
+      setPc('');
+      setMethod('');
+      setStatus('');
+      setOrdNo('');
+      setFromISO('');
+      setToISO('');
+      setSortKey('createdAt');
+      setSortDir('desc');
+      setPage(1);
+      // Note: pageSize is preserved (admin's choice)
+
+      // Clear URL
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/admin/orders');
+      }
+
+      // Show success toast
+      setResetMsg('Επαναφέρθηκαν');
+      setTimeout(() => setResetMsg(''), 1200);
+    } catch {}
   }
 
   // Helper to build filter params (no pagination)
@@ -508,8 +541,25 @@ export default function AdminOrders() {
         {sumErr && <span className="text-red-600"> {sumErr}</span>}
       </div>
 
+      {/* AG41: Filters toolbar with Reset button */}
+      <div className="mt-3 mb-2 flex items-center gap-3" data-testid="filters-toolbar">
+        <button
+          type="button"
+          className="border px-3 py-2 rounded hover:bg-gray-100"
+          data-testid="filters-reset"
+          onClick={onResetFilters}
+        >
+          Reset filters
+        </button>
+        {resetMsg && (
+          <span data-testid="filters-reset-flag" className="text-xs text-green-700">
+            {resetMsg}
+          </span>
+        )}
+      </div>
+
       {/* AG39: Scroll container with sticky header */}
-      <div className="mt-3 overflow-auto max-h-[70vh] border rounded" data-testid="orders-scroll">
+      <div className="overflow-auto max-h-[70vh] border rounded" data-testid="orders-scroll">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-white">
             <tr className="text-left">
