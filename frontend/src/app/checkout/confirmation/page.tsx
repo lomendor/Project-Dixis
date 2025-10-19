@@ -139,6 +139,32 @@ export default function Confirmation() {
         )}
       </Card>
 
+      {/* AG42 — Compact Order Summary card */}
+      {orderNo && (
+        <div
+          data-testid="order-summary-card"
+          className="mt-4 max-w-sm rounded border shadow-sm p-4 bg-white"
+        >
+          <div className="text-sm font-semibold mb-2">Περίληψη παραγγελίας</div>
+          <div className="text-sm mb-1">
+            Αρ. παραγγελίας:{' '}
+            <span data-testid="order-summary-ordno" className="font-mono">
+              {orderNo}
+            </span>
+          </div>
+          <div className="text-sm">
+            <a
+              data-testid="order-summary-share"
+              href={shareUrl || '#'}
+              className="underline text-blue-600 hover:text-blue-800"
+              aria-disabled={!shareUrl}
+            >
+              Προβολή παραγγελίας
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* AG40: Greek copy order link + toast */}
       <div className="mt-3 flex items-center gap-3">
         <button
