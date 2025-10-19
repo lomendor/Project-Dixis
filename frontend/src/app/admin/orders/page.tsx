@@ -373,7 +373,7 @@ export default function AdminOrders() {
 
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
-    function enhanceRow(tr: HTMLTableRowElement) {
+    function enhanceRow(tr: HTMLTableRowElement): void {
       if ((tr as any).__dixis_actions) return;
       const text = tr.innerText || '';
       const m = text.match(/DX-\d{8}-\d{4}/);
