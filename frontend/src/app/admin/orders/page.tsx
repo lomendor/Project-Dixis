@@ -366,6 +366,99 @@ export default function AdminOrders() {
     } catch {}
   }, [q, pc, method, status, ordNo, fromISO, toISO, sortKey, sortDir, pageSize, page]);
 
+  /* AG43-row-actions */
+  React.useEffect(() => {
+    const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
+    if (!table) return;
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+    function enhanceRow(tr: HTMLTableRowElement) {
+      if ((tr as any).__dixis_actions) return;
+      const text = tr.innerText || '';
+      const m = text.match(/DX-\d{8}-\d{4}/);
+      const ordNo = m ? m[0] : null;
+      if (!ordNo) return;
+
+      // Βρες κελί για να μπει το block (τελευταίο κελί)
+      const tds = tr.querySelectorAll('td');
+      if (!tds.length) return;
+      const host = tds[tds.length - 1];
+
+      // Αν υπάρχει ήδη, μην ξαναβάλεις
+      if (host.querySelector('[data-testid="row-actions"]')) return;
+
+      const wrap = document.createElement('div');
+      wrap.setAttribute('data-testid', 'row-actions');
+      wrap.style.display = 'flex';
+      wrap.style.gap = '6px';
+      wrap.style.alignItems = 'center';
+      wrap.style.flexWrap = 'wrap';
+
+      const btn1 = document.createElement('button');
+      btn1.type = 'button';
+      btn1.setAttribute('data-testid', 'row-copy-ordno');
+      btn1.textContent = 'Copy ordNo';
+      btn1.className = 'border px-2 py-1 rounded text-xs';
+
+      const btn2 = document.createElement('button');
+      btn2.type = 'button';
+      btn2.setAttribute('data-testid', 'row-copy-link');
+      btn2.textContent = 'Copy link';
+      btn2.className = 'border px-2 py-1 rounded text-xs';
+
+      const toast = document.createElement('span');
+      toast.setAttribute('data-testid', 'row-copy-toast');
+      toast.textContent = 'Αντιγράφηκε';
+      toast.className = 'text-xs text-green-700';
+      toast.style.display = 'none';
+
+      function showToast() {
+        toast.style.display = '';
+        setTimeout(() => { toast.style.display = 'none'; }, 1200);
+      }
+
+      btn1.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(ordNo!); } catch { }
+        showToast();
+      });
+
+      btn2.addEventListener('click', async () => {
+        const url = origin ? `${origin}/orders/lookup?ordNo=${encodeURIComponent(ordNo!)}` : ordNo!;
+        try { await navigator.clipboard.writeText(url); } catch { }
+        showToast();
+      });
+
+      wrap.appendChild(btn1);
+      wrap.appendChild(btn2);
+      wrap.appendChild(toast);
+
+      // Βάλε ένα separator αν το κελί έχει ήδη περιεχόμενο
+      if (host.childNodes.length) {
+        const sep = document.createElement('div');
+        sep.style.height = '4px';
+        host.appendChild(sep);
+      }
+      host.appendChild(wrap);
+      (tr as any).__dixis_actions = true;
+    }
+
+    const tbody = table.querySelector('tbody') || table;
+    Array.from(tbody.querySelectorAll('tr')).forEach(enhanceRow);
+
+    const mo = new MutationObserver((muts) => {
+      for (const m of muts) {
+        m.addedNodes.forEach((n) => {
+          if (n instanceof HTMLTableRowElement) enhanceRow(n);
+          if (n instanceof HTMLElement) n.querySelectorAll && n.querySelectorAll('tr').forEach((tr) => enhanceRow(tr as HTMLTableRowElement));
+        });
+      }
+    });
+    mo.observe(tbody, { childList: true, subtree: true });
+
+    return () => mo.disconnect();
+  }, []);
+
   const buildExportUrl = () => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
