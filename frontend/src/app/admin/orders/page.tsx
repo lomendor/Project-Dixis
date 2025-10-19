@@ -369,7 +369,7 @@ export default function AdminOrders() {
   /* AG43-row-actions */
   React.useEffect(() => {
     const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
-    if (!table) return;
+    if (!table) return undefined;
 
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
