@@ -366,6 +366,152 @@ export default function AdminOrders() {
     } catch {}
   }, [q, pc, method, status, ordNo, fromISO, toISO, sortKey, sortDir, pageSize, page]);
 
+  /* AG45-columns */
+  React.useEffect(() => {
+    const KEY = 'dixis.adminOrders.columns';
+    const scroll = document.querySelector('[data-testid="orders-scroll"]');
+    const table = scroll?.querySelector('table') || document.querySelector('table');
+    if (!table) return () => {};
+
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody') || table;
+    if (!thead || !tbody) return () => {};
+
+    // Extract current header keys
+    function headerKeys() {
+      const ths = Array.from(thead.querySelectorAll('th'));
+      return ths.map((th, i) => {
+        const k = (th.textContent || `col${i}`).trim().toLowerCase().replace(/\s+/g,' ');
+        return { i, key: k || `col${i}` };
+      });
+    }
+
+    // Load/Save visibility map
+    function loadMap(keys: {i:number, key:string}[]) {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return Object.fromEntries(keys.map(k => [k.key, true]));
+        const parsed = JSON.parse(raw);
+        const map = Object.fromEntries(keys.map(k => [k.key, parsed[k.key] !== false]));
+        return map;
+      } catch { return Object.fromEntries(keys.map(k => [k.key, true])); }
+    }
+    function saveMap(map: any) {
+      try { localStorage.setItem(KEY, JSON.stringify(map)); } catch {}
+    }
+
+    // Apply visibility to th/td
+    function apply(map: any, keys: {i:number, key:string}[]){
+      const ths = Array.from(thead!.querySelectorAll('th'));
+      keys.forEach(({i, key}) => {
+        const vis = map[key] !== false;
+        const disp = vis ? '' : 'none';
+        if (ths[i]) (ths[i] as HTMLElement).style.display = disp;
+      });
+      const rows = Array.from(tbody!.querySelectorAll('tr'));
+      rows.forEach(tr => {
+        const tds = Array.from(tr.querySelectorAll('td'));
+        keys.forEach(({i, key}) => {
+          const vis = map[key] !== false;
+          const disp = vis ? '' : 'none';
+          if (tds[i]) (tds[i] as HTMLElement).style.display = disp;
+        });
+      });
+    }
+
+    // Build/attach toolbar UI
+    const keys = headerKeys();
+    let map = loadMap(keys);
+
+    // Find toolbar host (reuse filters-toolbar if exists)
+    let host = document.querySelector('[data-testid="filters-toolbar"]') as HTMLElement | null;
+    const scrollDiv = document.querySelector('[data-testid="orders-scroll"]');
+    if (!host) {
+      host = document.createElement('div');
+      host.className = 'mb-2 flex items-center gap-3';
+      host.setAttribute('data-testid','filters-toolbar');
+      if (scrollDiv && scrollDiv.parentElement) {
+        scrollDiv.parentElement.insertBefore(host, scrollDiv);
+      } else {
+        table.parentElement?.insertBefore(host, table);
+      }
+    }
+
+    // Columns sub-toolbar
+    let bar = document.querySelector('[data-testid="columns-toolbar"]') as HTMLElement | null;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.setAttribute('data-testid','columns-toolbar');
+      bar.className = 'flex items-center gap-3 flex-wrap';
+      const label = document.createElement('span');
+      label.textContent = 'Columns:';
+      label.className = 'text-xs text-neutral-600';
+      bar.appendChild(label);
+
+      keys.forEach(({i, key}) => {
+        const pretty = key.charAt(0).toUpperCase() + key.slice(1);
+        const wrap = document.createElement('label');
+        wrap.className = 'text-xs flex items-center gap-1 border rounded px-2 py-1';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = map[key] !== false;
+        cb.setAttribute('data-testid', `col-toggle-${i}`);
+        cb.addEventListener('change', () => {
+          map[key] = cb.checked;
+          saveMap(map);
+          apply(map, keys);
+        });
+        const txt = document.createElement('span');
+        txt.textContent = pretty;
+        wrap.appendChild(cb); wrap.appendChild(txt);
+        bar!.appendChild(wrap);
+      });
+
+      host.appendChild(bar);
+    }
+
+    // First apply
+    apply(map, keys);
+
+    // Observe changes and re-apply (paging, filtering, etc.)
+    const mo = new MutationObserver(() => {
+      const newKeys = headerKeys();
+      // If headers changed, extend map and rebuild UI silently
+      if (newKeys.length !== keys.length || newKeys.some((k,idx)=>k.key!==keys[idx].key)) {
+        // merge defaults
+        newKeys.forEach(k => { if (!(k.key in map)) map[k.key] = true; });
+        saveMap(map);
+        // Rebuild checkboxes
+        const old = bar!.querySelectorAll('label');
+        old.forEach(el => el.remove());
+        newKeys.forEach(({i, key}) => {
+          const pretty = key.charAt(0).toUpperCase() + key.slice(1);
+          const wrap = document.createElement('label');
+          wrap.className = 'text-xs flex items-center gap-1 border rounded px-2 py-1';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = map[key] !== false;
+          cb.setAttribute('data-testid', `col-toggle-${i}`);
+          cb.addEventListener('change', () => {
+            map[key] = cb.checked;
+            saveMap(map);
+            apply(map, newKeys);
+          });
+          const txt = document.createElement('span');
+          txt.textContent = pretty;
+          wrap.appendChild(cb); wrap.appendChild(txt);
+          bar!.appendChild(wrap);
+        });
+        (keys as any).length = 0; newKeys.forEach(k=>keys.push(k));
+      }
+      apply(map, keys);
+    });
+    mo.observe(tbody, { childList: true, subtree: true });
+    mo.observe(thead, { childList: true, subtree: true });
+
+    return () => mo.disconnect();
+  }, []);
+
   /* AG43-row-actions */
   React.useEffect(() => {
     const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
