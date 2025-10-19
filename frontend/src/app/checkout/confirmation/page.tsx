@@ -193,21 +193,46 @@ export default function Confirmation() {
               </div>
             </div>
 
-            {/* Shipping & Totals details */}
-            <div data-testid="confirm-collapsible-details" className="space-y-2">
-              <div className="text-sm">
-                <span className="text-neutral-600">Τ.Κ.:</span>{' '}
-                <strong>{json?.address?.postalCode || '—'}</strong>
-              </div>
-              <div className="text-sm">
-                <span className="text-neutral-600">Μέθοδος:</span>{' '}
-                <strong>{json?.method || '—'}</strong>
-              </div>
-              <div className="text-sm">
-                <span className="text-neutral-600">Σύνολο:</span>{' '}
-                <strong data-testid="confirm-collapsible-total">
-                  {formatEUR(json?.total)}
-                </strong>
+            {/* AG46 — Shipping & Totals details (comprehensive) */}
+            <div data-testid="confirm-collapsible-details" className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              <div className="text-neutral-500">Διεύθυνση</div>
+              <div data-testid="cc-address">{json?.address?.street || '—'}</div>
+
+              <div className="text-neutral-500">Πόλη</div>
+              <div data-testid="cc-city">{json?.address?.city || '—'}</div>
+
+              <div className="text-neutral-500">Τ.Κ.</div>
+              <div data-testid="cc-zip">{json?.address?.postalCode || '—'}</div>
+
+              <div className="text-neutral-500">Μέθοδος αποστολής</div>
+              <div data-testid="cc-method">{json?.method || '—'}</div>
+
+              {json?.weight && (
+                <>
+                  <div className="text-neutral-500">Βάρος</div>
+                  <div data-testid="cc-weight">{json.weight}g</div>
+                </>
+              )}
+
+              <div className="col-span-2 h-px bg-neutral-200 my-1"></div>
+
+              {json?.subtotal !== undefined && (
+                <>
+                  <div className="text-neutral-500">Υποσύνολο</div>
+                  <div data-testid="cc-subtotal">{formatEUR(json.subtotal)}</div>
+                </>
+              )}
+
+              {json?.shippingCost !== undefined && (
+                <>
+                  <div className="text-neutral-500">Μεταφορικά</div>
+                  <div data-testid="cc-shipping">{formatEUR(json.shippingCost)}</div>
+                </>
+              )}
+
+              <div className="text-neutral-600 font-semibold">Σύνολο</div>
+              <div data-testid="cc-total" className="font-semibold">
+                {formatEUR(json?.total)}
               </div>
             </div>
           </div>
