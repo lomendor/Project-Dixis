@@ -17,6 +17,7 @@ jobs:
   danger:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]' }}
     
     permissions:
       contents: read
