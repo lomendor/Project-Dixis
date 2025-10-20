@@ -56,6 +56,13 @@ export default function Confirmation() {
     } catch {}
   }
 
+  // AG48: Print/Save PDF handler
+  function onPrint() {
+    try {
+      window.print?.();
+    } catch {}
+  }
+
   return (
     <main style={{ maxWidth: 760, margin: '40px auto', padding: 16 }}>
       <h2 style={{ margin: 0 }}>Επιβεβαίωση παραγγελίας</h2>
@@ -258,6 +265,18 @@ export default function Confirmation() {
         <span data-testid="share-url" style={{ display: 'none' }}>
           {shareUrl}
         </span>
+      </div>
+
+      {/* AG48 — Print/Save PDF CTA */}
+      <div className="mt-3 flex items-center gap-3" data-testid="print-toolbar">
+        <button
+          type="button"
+          className="border px-3 py-2 rounded hover:bg-gray-100"
+          data-testid="print-pdf"
+          onClick={onPrint}
+        >
+          Εκτύπωση / Αποθήκευση PDF
+        </button>
       </div>
 
       {/* AG38: Back to shop link */}
