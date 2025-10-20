@@ -512,6 +512,107 @@ export default function AdminOrders() {
     return () => mo.disconnect();
   }, []);
 
+  /* AG47-presets */
+  React.useEffect(() => {
+    const toolbar = document.querySelector('[data-testid="columns-toolbar"]') as HTMLElement | null;
+    if (!toolbar) return () => {};
+
+    // Helper to dispatch change event
+    function dispatchChange(cb: HTMLInputElement) {
+      cb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Helper to get all column toggles
+    function toggles() {
+      return Array.from(document.querySelectorAll('[data-testid="columns-toolbar"] input[type=checkbox]')) as HTMLInputElement[];
+    }
+
+    // Helper to create preset button
+    function mkBtn(testId: string, label: string, title: string) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-testid', testId);
+      btn.textContent = label;
+      btn.title = title;
+      btn.className = 'border px-2 py-1 rounded text-xs hover:bg-gray-100';
+      return btn;
+    }
+
+    // Create presets container if not exists
+    let presets = document.querySelector('[data-testid="columns-presets"]') as HTMLElement | null;
+    if (!presets) {
+      presets = document.createElement('div');
+      presets.setAttribute('data-testid', 'columns-presets');
+      presets.className = 'flex items-center gap-2 flex-wrap';
+
+      const label = document.createElement('span');
+      label.textContent = 'Presets:';
+      label.className = 'text-xs text-neutral-600';
+      presets.appendChild(label);
+
+      // Create 3 preset buttons
+      const btnAll = mkBtn('preset-all', 'All', 'Show all columns');
+      const btnMin = mkBtn('preset-minimal', 'Minimal', 'Keep first 3 columns');
+      const btnFin = mkBtn('preset-finance', 'Finance', 'Totals/Shipping/Amount-focused');
+
+      presets.appendChild(btnAll);
+      presets.appendChild(btnMin);
+      presets.appendChild(btnFin);
+
+      // Insert after columns-toolbar
+      toolbar.parentElement?.insertBefore(presets, toolbar.nextSibling);
+    }
+
+    // Wire up preset buttons
+    const allBtn = document.querySelector('[data-testid="preset-all"]');
+    const minBtn = document.querySelector('[data-testid="preset-minimal"]');
+    const finBtn = document.querySelector('[data-testid="preset-finance"]');
+
+    // All preset: check all columns
+    const onAll = () => {
+      toggles().forEach(cb => {
+        if (!cb.checked) {
+          cb.checked = true;
+          dispatchChange(cb);
+        }
+      });
+    };
+
+    // Minimal preset: first 3 columns only
+    const onMin = () => {
+      toggles().forEach((cb, idx) => {
+        const want = idx < 3;
+        if (cb.checked !== want) {
+          cb.checked = want;
+          dispatchChange(cb);
+        }
+      });
+    };
+
+    // Finance preset: first column + financial columns (regex match)
+    const onFin = () => {
+      toggles().forEach((cb, idx) => {
+        const label = (cb.parentElement?.textContent || '').toLowerCase();
+        const isFinance = /total|subtotal|σύνολο|υποσύνολο|shipping|μεταφορ|tax|φόρ|amount|ποσό/.test(label);
+        const want = idx === 0 || isFinance;
+        if (cb.checked !== want) {
+          cb.checked = want;
+          dispatchChange(cb);
+        }
+      });
+    };
+
+    allBtn?.addEventListener('click', onAll);
+    minBtn?.addEventListener('click', onMin);
+    finBtn?.addEventListener('click', onFin);
+
+    return () => {
+      allBtn?.removeEventListener('click', onAll);
+      minBtn?.removeEventListener('click', onMin);
+      finBtn?.removeEventListener('click', onFin);
+    };
+  }, []);
+
   /* AG43-row-actions */
   React.useEffect(() => {
     const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
