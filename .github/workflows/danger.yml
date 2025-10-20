@@ -16,6 +16,7 @@ jobs:
   danger:
     runs-on: ubuntu-latest
     continue-on-error: true  # Soft warnings, don't block
+    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]' }}
     
     steps:
       - uses: actions/checkout@v4
