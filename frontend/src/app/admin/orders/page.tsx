@@ -613,6 +613,146 @@ export default function AdminOrders() {
     };
   }, []);
 
+  /* AG50-filter-chips */
+  React.useEffect(() => {
+    // Helper to update URL params
+    function setParam(key: string, val: string) {
+      if (typeof window === 'undefined') return;
+      const sp = new URLSearchParams(window.location.search);
+      if (val) sp.set(key, val);
+      else sp.delete(key);
+      const qs = sp.toString();
+      const url = qs ? `/admin/orders?${qs}` : '/admin/orders';
+      window.history.replaceState(null, '', url);
+    }
+
+    // Helper to get current URL param
+    function getParam(key: string): string {
+      if (typeof window === 'undefined') return '';
+      const sp = new URLSearchParams(window.location.search);
+      return sp.get(key) || '';
+    }
+
+    // Helper to create chip button
+    function mkChip(testId: string, label: string, filterKey: string, filterVal: string) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-testid', testId);
+      btn.textContent = label;
+      btn.className = 'border px-2 py-1 rounded text-xs hover:bg-gray-200';
+
+      // Check if active
+      const currentVal = getParam(filterKey);
+      if (currentVal === filterVal) {
+        btn.style.backgroundColor = '#000';
+        btn.style.color = '#fff';
+      }
+
+      btn.addEventListener('click', () => {
+        const current = getParam(filterKey);
+        if (current === filterVal) {
+          // Deactivate
+          setParam(filterKey, '');
+          if (filterKey === 'status') setStatus('');
+          if (filterKey === 'method') setMethod('');
+        } else {
+          // Activate
+          setParam(filterKey, filterVal);
+          if (filterKey === 'status') setStatus(filterVal);
+          if (filterKey === 'method') setMethod(filterVal);
+        }
+        setPage(1); // Reset to page 1 on filter change
+      });
+
+      return btn;
+    }
+
+    // Find or create chips toolbar
+    let toolbar = document.querySelector('[data-testid="chips-toolbar"]') as HTMLElement | null;
+    if (!toolbar) {
+      toolbar = document.createElement('div');
+      toolbar.setAttribute('data-testid', 'chips-toolbar');
+      toolbar.className = 'mt-3 mb-2 flex items-center gap-2 flex-wrap';
+
+      const label = document.createElement('span');
+      label.textContent = 'Quick Filters:';
+      label.className = 'text-xs text-neutral-600';
+      toolbar.appendChild(label);
+
+      // Status chips
+      const statusLabel = document.createElement('span');
+      statusLabel.textContent = 'Status:';
+      statusLabel.className = 'text-xs text-neutral-500 ml-2';
+      toolbar.appendChild(statusLabel);
+      toolbar.appendChild(mkChip('chip-status-paid', 'PAID', 'status', 'PAID'));
+      toolbar.appendChild(mkChip('chip-status-pending', 'PENDING', 'status', 'PENDING'));
+      toolbar.appendChild(mkChip('chip-status-canceled', 'CANCELED', 'status', 'CANCELED'));
+
+      // Method chips
+      const methodLabel = document.createElement('span');
+      methodLabel.textContent = 'Method:';
+      methodLabel.className = 'text-xs text-neutral-500 ml-2';
+      toolbar.appendChild(methodLabel);
+      toolbar.appendChild(mkChip('chip-method-courier', 'COURIER', 'method', 'COURIER'));
+      toolbar.appendChild(mkChip('chip-method-pickup', 'PICKUP', 'method', 'PICKUP'));
+
+      // Clear-all button
+      const clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.setAttribute('data-testid', 'chip-clear');
+      clearBtn.textContent = 'Clear all';
+      clearBtn.className = 'border px-2 py-1 rounded text-xs hover:bg-gray-200 ml-2';
+      clearBtn.addEventListener('click', () => {
+        setParam('status', '');
+        setParam('method', '');
+        setStatus('');
+        setMethod('');
+        setPage(1);
+      });
+      toolbar.appendChild(clearBtn);
+
+      // Insert before orders-scroll
+      const scrollDiv = document.querySelector('[data-testid="orders-scroll"]');
+      if (scrollDiv && scrollDiv.parentElement) {
+        scrollDiv.parentElement.insertBefore(toolbar, scrollDiv);
+      }
+    }
+
+    // Sync visual state with URL changes (popstate)
+    function syncVisual() {
+      const chips = toolbar!.querySelectorAll('button[data-testid^="chip-"]');
+      chips.forEach((chip) => {
+        const btn = chip as HTMLButtonElement;
+        const testId = btn.getAttribute('data-testid') || '';
+
+        // Determine filter key and value from testId
+        let filterKey = '';
+        let filterVal = '';
+        if (testId.startsWith('chip-status-')) {
+          filterKey = 'status';
+          filterVal = testId.replace('chip-status-', '').toUpperCase();
+        } else if (testId.startsWith('chip-method-')) {
+          filterKey = 'method';
+          filterVal = testId.replace('chip-method-', '').toUpperCase();
+        }
+
+        if (filterKey && filterVal) {
+          const currentVal = getParam(filterKey);
+          if (currentVal === filterVal) {
+            btn.style.backgroundColor = '#000';
+            btn.style.color = '#fff';
+          } else {
+            btn.style.backgroundColor = '';
+            btn.style.color = '';
+          }
+        }
+      });
+    }
+
+    window.addEventListener('popstate', syncVisual);
+    return () => window.removeEventListener('popstate', syncVisual);
+  }, [setStatus, setMethod, setPage]);
+
   /* AG43-row-actions */
   React.useEffect(() => {
     const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
