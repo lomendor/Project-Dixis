@@ -753,6 +753,45 @@ export default function AdminOrders() {
     return () => window.removeEventListener('popstate', syncVisual);
   }, [setStatus, setMethod, setPage]);
 
+  /* AG53-filter-toast */
+  React.useEffect(() => {
+    // Create a tiny toast above chips when a filter is applied
+    const host = document.querySelector('[data-testid="chips-toolbar"]') as HTMLElement | null;
+    if (!host) return () => {};
+
+    let toast = document.querySelector('[data-testid="chips-toast"]') as HTMLElement | null;
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.setAttribute('data-testid', 'chips-toast');
+      toast.setAttribute('aria-live', 'polite');
+      toast.className = 'text-xs text-green-700';
+      toast.style.display = 'none';
+      toast.textContent = 'Εφαρμόστηκε';
+      host.parentElement?.insertBefore(toast, host); // above chips
+    }
+
+    // Listen to chip clicks to show toast
+    function onChipClick() {
+      if (!toast) return;
+      toast.style.display = '';
+      setTimeout(() => {
+        if (toast) toast.style.display = 'none';
+      }, 1200);
+    }
+
+    // Attach click listeners to all chip buttons
+    const chips = host.querySelectorAll('button[data-testid^="chip-"]');
+    chips.forEach((chip) => {
+      chip.addEventListener('click', onChipClick);
+    });
+
+    return () => {
+      chips.forEach((chip) => {
+        chip.removeEventListener('click', onChipClick);
+      });
+    };
+  }, []);
+
   /* AG43-row-actions */
   React.useEffect(() => {
     const table = document.querySelector('[data-testid="orders-scroll"] table') || document.querySelector('table');
