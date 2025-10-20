@@ -11,6 +11,42 @@ export default function Confirmation() {
   const [shareUrl, setShareUrl] = React.useState(''); // AG40: share URL state
   const [copiedGreek, setCopiedGreek] = React.useState(false); // AG40: Greek toast state
 
+  // AG51: Copy helpers
+  const [copiedAG51, setCopiedAG51] = React.useState<'' | 'ordno' | 'link'>('');
+
+  function showToast(kind: 'ordno' | 'link') {
+    setCopiedAG51(kind);
+    setTimeout(() => setCopiedAG51(''), 1200);
+  }
+
+  function getOrd() {
+    try {
+      return (document.querySelector('[data-testid="order-no"]') as HTMLElement)?.textContent?.trim() || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function copyOrd() {
+    try {
+      const v = getOrd();
+      if (v) navigator.clipboard?.writeText?.(v).catch(() => {});
+    } finally {
+      showToast('ordno');
+    }
+  }
+
+  function copyLink() {
+    try {
+      const v = getOrd();
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const url = (v && origin) ? `${origin}/orders/lookup?ordNo=${encodeURIComponent(v)}` : '';
+      if (url) navigator.clipboard?.writeText?.(url).catch(() => {});
+    } finally {
+      showToast('link');
+    }
+  }
+
   React.useEffect(() => {
     try {
       setJson(
@@ -277,6 +313,33 @@ export default function Confirmation() {
         >
           Εκτύπωση / Αποθήκευση PDF
         </button>
+      </div>
+
+      {/* AG51 — Copy actions */}
+      <div className="mt-2 flex items-center gap-3 flex-wrap" data-testid="confirm-copy-toolbar">
+        <button
+          type="button"
+          className="border px-3 py-2 rounded text-sm"
+          data-testid="copy-ordno"
+          onClick={copyOrd}
+        >
+          Copy ordNo
+        </button>
+        <button
+          type="button"
+          className="border px-3 py-2 rounded text-sm"
+          data-testid="copy-link"
+          onClick={copyLink}
+        >
+          Copy link
+        </button>
+        <span
+          data-testid="copy-toast"
+          className="text-xs text-green-700"
+          style={{ display: copiedAG51 ? '' : 'none' }}
+        >
+          {copiedAG51 === 'ordno' ? 'Αντιγράφηκε ο αριθμός' : copiedAG51 === 'link' ? 'Αντιγράφηκε ο σύνδεσμος' : ''}
+        </span>
       </div>
 
       {/* AG38: Back to shop link */}
