@@ -285,6 +285,30 @@ export default function Confirmation() {
           Πίσω στο κατάστημα
         </a>
       </div>
+
+      {/* AG49: print styles */}
+      <style>{`
+        @media print {
+          /* Hide toolbars/buttons */
+          [data-testid="print-toolbar"],
+          button,
+          [role="button"] {
+            display: none !important;
+          }
+          /* Clean shadows/borders for clean PDF */
+          .shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+          .border { border: 1px solid transparent !important; }
+          body { background: #fff !important; }
+          /* Avoid page-breaks in small blocks */
+          [data-testid="order-summary-card"],
+          [data-testid="confirm-collapsible"] {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          /* Larger margins for printing */
+          @page { margin: 16mm; }
+        }
+      `}</style>
     </main>
   );
 }
