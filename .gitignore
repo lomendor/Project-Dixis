@@ -181,3 +181,7 @@ frontend/test-results/
 # CI test artifacts
 junit-*.xml
 **/junit-*.xml
+
+# Dixis Skill artifacts (local-only)
+.dixis-skill/
+dixis-skill_v*.zip
