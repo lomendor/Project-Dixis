@@ -162,7 +162,7 @@ jobs:
           - 5432:5432
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public
+      DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
       DIXIS_SMS_DISABLE: '1'
       DIXIS_EMAIL_DISABLE: '1'
 
@@ -192,7 +192,16 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Prepare SQLite schema (ui-only)
+        if: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
+        run: |
+          mkdir -p tmp
+          export DATABASE_URL="file:./tmp/smoke.db"
+          npx prisma generate
+          npx prisma db push --force-reset --skip-generate
+
       - name: Run Prisma migrations
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         env:
           DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
         run: |
@@ -203,6 +212,7 @@ jobs:
       - name: Start Test API server
         env:
           TEST_API_PORT: 8001
+          DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
         run: |
           nohup npm run test:api > /tmp/test-api.log 2>&1 &
           npx --yes wait-on http://127.0.0.1:8001/health --timeout 120000
@@ -211,7 +221,7 @@ jobs:
       - name: Build and start Next.js app
         env:
           NODE_ENV: production
-          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
+          DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
           BASIC_AUTH: "admin:dixis_ci_pass"
           NEXT_PUBLIC_API_BASE_URL: "http://127.0.0.1:8001"
           API_BASE_URL: "http://127.0.0.1:8001"
@@ -226,7 +236,7 @@ jobs:
         run: bash scripts/ci/run-playwright.sh
         env:
           CI: true
-          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
+          DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
           BASIC_AUTH: "admin:dixis_ci_pass"
           BASE_URL: http://127.0.0.1:3000
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
