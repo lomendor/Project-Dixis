@@ -197,8 +197,8 @@ jobs:
         run: |
           mkdir -p tmp
           export DATABASE_URL="file:./tmp/smoke.db"
-          npx prisma generate
-          npx prisma db push --force-reset --skip-generate
+          npx prisma generate --schema prisma/schema.ci.prisma
+          npx prisma db push --force-reset --skip-generate --schema prisma/schema.ci.prisma
 
       - name: Run Prisma migrations
         if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
