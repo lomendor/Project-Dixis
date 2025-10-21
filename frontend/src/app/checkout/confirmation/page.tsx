@@ -372,6 +372,9 @@ export default function Confirmation() {
           @page { margin: 16mm; }
         }
       `}</style>
+
+      {/* AG56-Ops: UI-only fast path validation marker */}
+      <span data-testid="ui-fastpath-marker" style={{display:'none'}}>ok</span>
     </main>
   );
 }
