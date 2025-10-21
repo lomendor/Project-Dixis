@@ -234,6 +234,7 @@ jobs:
           cat > .env.ci <<'ENV'
           DATABASE_URL="file:./tmp/smoke.db"
           ENV
+          export DATABASE_URL="file:./tmp/smoke.db"
           npx prisma generate --schema prisma/schema.ci.prisma
           npx prisma db push --schema prisma/schema.ci.prisma --force-reset
           echo "DATABASE_URL=file:./tmp/smoke.db" >> $GITHUB_ENV
