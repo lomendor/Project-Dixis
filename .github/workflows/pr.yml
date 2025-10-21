@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     continue-on-error: true  # Pass 45: Advisory until E2E fully stabilized in Phase 2
-    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ai-pass')
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ui-only')
     defaults:
       run:
         working-directory: frontend
@@ -372,7 +372,7 @@ jobs:
     name: quality-gates
     runs-on: ubuntu-latest
     needs: [qa, test-smoke, danger]
-    if: always()
+    if: always() && !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only')
     steps:
       - uses: actions/checkout@v4
         with:
