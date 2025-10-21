@@ -233,7 +233,7 @@ jobs:
           echo "✅ Next.js app ready on port 3000"
 
       - name: Run smoke tests (auth-probe only)
-        run: bash scripts/ci/run-playwright.sh
+        run: bash ../scripts/ci/run-playwright.sh
         env:
           CI: true
           DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
