@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     continue-on-error: true  # Pass 45: Advisory until E2E fully stabilized in Phase 2
-    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ui-only')
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: frontend
@@ -170,15 +170,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Smoke fast-pass (ui-only)
+        if: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
+        run: echo 'ui-only PR detected - skipping Playwright smoke tests (fast path)'
+
       - name: Setup Node.js
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install dependencies
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         run: bash ../scripts/ci/install-deps.sh .
 
       - name: Install and build contracts dependencies
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         run: |
           if [ -d "../packages/contracts" ]; then
             cd ../packages/contracts
@@ -190,6 +197,7 @@ jobs:
           fi
 
       - name: Install Playwright browsers
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         run: npx playwright install --with-deps chromium
 
       - name: Prepare SQLite schema (ui-only)
@@ -210,6 +218,7 @@ jobs:
           npx tsx prisma/seed.ts
 
       - name: Start Test API server
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         env:
           TEST_API_PORT: 8001
           DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
@@ -219,6 +228,7 @@ jobs:
           echo "✅ Test API server ready on port 8001"
 
       - name: Build and start Next.js app
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') && 'file:./tmp/smoke.db' || 'postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public' }}
@@ -233,6 +243,7 @@ jobs:
           echo "✅ Next.js app ready on port 3000"
 
       - name: Run smoke tests (auth-probe only)
+        if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         run: npx playwright test --config=playwright.config.ts tests/e2e/smoke-ui.spec.ts
         env:
           CI: true
