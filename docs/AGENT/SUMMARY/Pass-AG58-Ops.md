@@ -1,0 +1,3 @@
+- 2025-10-21 17:34 UTC — Pass AG58-Ops: Auto-label `ui-only` (path-based)
+  - Adds workflow to auto-apply/remove `ui-only` on PRs that touch only frontend/public/docs.
+  - No product/runtime code changes.
