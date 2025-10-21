@@ -46,6 +46,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install minimal deps for fast path (ui-only | ops-only)
         if: \${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only') }}
         working-directory: frontend
@@ -189,6 +196,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install minimal deps for fast path (ui-only | ops-only)
         if: \${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only') }}
         working-directory: frontend
@@ -340,6 +354,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install minimal deps for fast path (ui-only | ops-only)
         if: \${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only') }}
         working-directory: frontend
