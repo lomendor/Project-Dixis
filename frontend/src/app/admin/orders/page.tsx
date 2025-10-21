@@ -1,5 +1,4 @@
 'use client';
-import { useSearchParams } from 'next/navigation';
 import EmptyState from '@/components/EmptyState';
 import React from 'react';
 import ToastSuccess from '@/components/ToastSuccess';
