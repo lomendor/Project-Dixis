@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import ToastSuccess from '@/components/ToastSuccess';
 import { orderNumber } from '../../../lib/orderNumber';
 
 type Row = {
@@ -177,7 +178,25 @@ export default function AdminOrders() {
         if (hasQS && sp.has(key)) {
           return sp.get(key) ?? def;
         }
-        return (saved && saved[key] !== undefined) ? saved[key] : def;
+      
+  /* AG57-unified-toast */
+  const [toast, setToast] = React.useState<{show:boolean,text:string}>({show:false,text:''});
+  const showToast = (msg:string='Εφαρμόστηκε') => { setToast({show:true,text:msg}); setTimeout(()=>setToast({show:false,text:''}), 1200); };
+  React.useEffect(()=>{
+    const host = document.querySelector('[data-testid="chips-toolbar"]');
+    if (!host) return;
+    const sel = '[data-testid^="chip-status-"],[data-testid^="chip-method-"],[data-testid="chip-clear"]';
+    const handler = (ev: Event) => {
+      const el = ev.target as HTMLElement | null;
+      if (!el) return;
+      const isChip = el.closest(sel);
+      if (isChip) showToast('Εφαρμόστηκε');
+    };
+    document.addEventListener('click', handler, true);
+    return ()=> document.removeEventListener('click', handler, true);
+  },[]);
+
+  return (saved && saved[key] !== undefined) ? saved[key] : def;
       };
 
       // Restore filter state
@@ -753,44 +772,7 @@ export default function AdminOrders() {
     return () => window.removeEventListener('popstate', syncVisual);
   }, [setStatus, setMethod, setPage]);
 
-  /* AG53-filter-toast */
-  React.useEffect(() => {
-    // Create a tiny toast above chips when a filter is applied
-    const host = document.querySelector('[data-testid="chips-toolbar"]') as HTMLElement | null;
-    if (!host) return () => {};
-
-    let toast = document.querySelector('[data-testid="chips-toast"]') as HTMLElement | null;
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.setAttribute('data-testid', 'chips-toast');
-      toast.setAttribute('aria-live', 'polite');
-      toast.className = 'text-xs text-green-700';
-      toast.style.display = 'none';
-      toast.textContent = 'Εφαρμόστηκε';
-      host.parentElement?.insertBefore(toast, host); // above chips
-    }
-
-    // Listen to chip clicks to show toast
-    function onChipClick() {
-      if (!toast) return;
-      toast.style.display = '';
-      setTimeout(() => {
-        if (toast) toast.style.display = 'none';
-      }, 1200);
-    }
-
-    // Attach click listeners to all chip buttons
-    const chips = host.querySelectorAll('button[data-testid^="chip-"]');
-    chips.forEach((chip) => {
-      chip.addEventListener('click', onChipClick);
-    });
-
-    return () => {
-      chips.forEach((chip) => {
-        chip.removeEventListener('click', onChipClick);
-      });
-    };
-  }, []);
+  /* AG57: remove AG53 DOM injection */
 
   /* AG43-row-actions */
   React.useEffect(() => {
@@ -1213,6 +1195,7 @@ export default function AdminOrders() {
           </button>
         </div>
       </div>
-    </main>
+          <ToastSuccess show={toast.show} text={toast.text} extraTestIds={['chips-toast']} />
+</main>
   );
 }
