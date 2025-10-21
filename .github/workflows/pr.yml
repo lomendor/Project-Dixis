@@ -174,8 +174,7 @@ jobs:
         if: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only') }}
         run: echo 'ui-only|ops-only PR detected - skipping Playwright smoke tests (fast path)'
 
-      - name: Setup Node.js
-        if: ${{ !(contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only')) }}
+      - name: Setup Node.js (all paths)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -199,6 +198,10 @@ jobs:
       - name: Install Playwright browsers
         if: ${{ !(contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only')) }}
         run: npx playwright install --with-deps chromium
+
+      - name: Install minimal deps for fast path (ui-only | ops-only)
+        if: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only') }}
+        run: bash ../scripts/ci/install-deps.sh .
 
       - name: Run Prisma migrations (PostgreSQL - full test)
         if: ${{ !(contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') || contains(join(github.event.pull_request.labels.*.name, ','), 'ops-only')) }}
