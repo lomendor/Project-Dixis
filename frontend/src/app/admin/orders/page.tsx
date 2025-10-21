@@ -1,4 +1,5 @@
 'use client';
+import EmptyState from '@/components/EmptyState';
 import React from 'react';
 import ToastSuccess from '@/components/ToastSuccess';
 import { orderNumber } from '../../../lib/orderNumber';
@@ -185,7 +186,19 @@ export default function AdminOrders() {
         if (hasQS && sp.has(key)) {
           return sp.get(key) ?? def;
         }
-        return (saved && saved[key] !== undefined) ? saved[key] : def;
+      
+  /* AG61-empty-demo */
+  const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
+  const isEmptyDemo = search?.get('empty') === '1';
+  if (isEmptyDemo) {
+    return (
+      <main style={{padding:16}}>
+        <EmptyState />
+      </main>
+    );
+  }
+
+  return (saved && saved[key] !== undefined) ? saved[key] : def;
       };
 
       // Restore filter state

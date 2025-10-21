@@ -1,0 +1,5 @@
+- 2025-10-21 20:47 UTC — Pass AG61: Admin Orders empty-state
+  - Component: `frontend/src/components/EmptyState.tsx`
+  - Integration: `frontend/src/app/admin/orders/page.tsx` (demo trigger via `?empty=1`)
+  - E2E: `frontend/tests/e2e/admin-empty-state.spec.ts`
+  - UI-only; no backend/schema changes.
