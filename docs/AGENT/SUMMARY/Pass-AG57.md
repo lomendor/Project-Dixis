@@ -1,0 +1,6 @@
+- 2025-10-21 14:51 UTC — Pass AG57: Unify success toasts (customer/admin)
+  - Shared component: `frontend/src/components/ToastSuccess.tsx`
+  - Customer confirmation: unified toast for copy actions
+  - Admin orders: unified toast for chips/clear actions
+  - E2E: `frontend/tests/e2e/unified-toasts.spec.ts` (soft assertions; safe on smoke)
+  - No backend/schema changes.

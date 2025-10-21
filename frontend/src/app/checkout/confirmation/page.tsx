@@ -2,21 +2,20 @@
 import React from 'react';
 import { Card, CardTitle } from '../../../components/ui/card';
 import { formatEUR } from '../../../lib/money';
+import ToastSuccess from '@/components/ToastSuccess';
 
 export default function Confirmation() {
   const [json, setJson] = React.useState<any>(null);
   const [orderId, setOrderId] = React.useState<string>('');
   const [orderNo, setOrderNo] = React.useState<string>('');
-  const [copied, setCopied] = React.useState<boolean>(false);
   const [shareUrl, setShareUrl] = React.useState(''); // AG40: share URL state
-  const [copiedGreek, setCopiedGreek] = React.useState(false); // AG40: Greek toast state
 
-  // AG51: Copy helpers
-  const [copiedAG51, setCopiedAG51] = React.useState<'' | 'ordno' | 'link'>('');
+  // AG57: Unified toast state (replaces copied, copiedGreek, copiedAG51)
+  const [toast, setToast] = React.useState<{show:boolean,text:string}>({show:false,text:''});
 
-  function showToast(kind: 'ordno' | 'link') {
-    setCopiedAG51(kind);
-    setTimeout(() => setCopiedAG51(''), 1200);
+  function showToast(msg:string) {
+    setToast({show:true,text:msg});
+    setTimeout(() => setToast({show:false,text:''}), 1200);
   }
 
   function getOrd() {
@@ -32,7 +31,7 @@ export default function Confirmation() {
       const v = getOrd();
       if (v) navigator.clipboard?.writeText?.(v).catch(() => {});
     } finally {
-      showToast('ordno');
+      showToast('Αντιγράφηκε');
     }
   }
 
@@ -43,7 +42,7 @@ export default function Confirmation() {
       const url = (v && origin) ? `${origin}/orders/lookup?ordNo=${encodeURIComponent(v)}` : '';
       if (url) navigator.clipboard?.writeText?.(url).catch(() => {});
     } finally {
-      showToast('link');
+      showToast('Αντιγράφηκε');
     }
   }
 
@@ -71,7 +70,7 @@ export default function Confirmation() {
     } catch {}
   }, [orderNo]);
 
-  // AG40: Greek copy link handler
+  // AG40: Greek copy link handler (AG57: unified toast)
   async function onCopyLink() {
     try {
       if (shareUrl) {
@@ -86,8 +85,7 @@ export default function Confirmation() {
           document.execCommand('copy');
           ta.remove();
         }
-        setCopiedGreek(true);
-        setTimeout(() => setCopiedGreek(false), 1200);
+        showToast('Αντιγράφηκε');
       }
     } catch {}
   }
@@ -161,8 +159,7 @@ export default function Confirmation() {
                       ? `${window.location.origin}/orders/lookup?ordNo=${orderNo}`
                       : `/orders/lookup?ordNo=${orderNo}`;
                   await navigator.clipboard.writeText(link);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
+                  showToast('Αντιγράφηκε');
                 } catch {}
               }}
               className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
@@ -170,14 +167,6 @@ export default function Confirmation() {
             >
               Copy link
             </button>
-            {copied && (
-              <span
-                className="ml-2 text-xs text-green-600"
-                data-testid="copied-flag"
-              >
-                Copied!
-              </span>
-            )}
           </div>
         )}
       </Card>
@@ -282,7 +271,7 @@ export default function Confirmation() {
         </details>
       )}
 
-      {/* AG40: Greek copy order link + toast */}
+      {/* AG40/AG57: Greek copy order link (unified toast below) */}
       <div className="mt-3 flex items-center gap-3">
         <button
           type="button"
@@ -293,11 +282,6 @@ export default function Confirmation() {
         >
           Αντιγραφή συνδέσμου
         </button>
-        {copiedGreek && (
-          <span data-testid="copy-toast" className="text-xs text-green-700">
-            Αντιγράφηκε
-          </span>
-        )}
         <span data-testid="share-url" style={{ display: 'none' }}>
           {shareUrl}
         </span>
@@ -315,7 +299,7 @@ export default function Confirmation() {
         </button>
       </div>
 
-      {/* AG51 — Copy actions */}
+      {/* AG51/AG57 — Copy actions (unified toast below) */}
       <div className="mt-2 flex items-center gap-3 flex-wrap" data-testid="confirm-copy-toolbar">
         <button
           type="button"
@@ -333,13 +317,6 @@ export default function Confirmation() {
         >
           Copy link
         </button>
-        <span
-          data-testid="copy-toast"
-          className="text-xs text-green-700"
-          style={{ display: copiedAG51 ? '' : 'none' }}
-        >
-          {copiedAG51 === 'ordno' ? 'Αντιγράφηκε ο αριθμός' : copiedAG51 === 'link' ? 'Αντιγράφηκε ο σύνδεσμος' : ''}
-        </span>
       </div>
 
       {/* AG38: Back to shop link */}
@@ -375,6 +352,9 @@ export default function Confirmation() {
 
       {/* AG56-Ops: UI-only fast path validation marker */}
       <span data-testid="ui-fastpath-marker" style={{display:'none'}}>ok</span>
+
+      {/* AG57: Unified success toast (replaces all old toasts) */}
+      <ToastSuccess show={toast.show} text={toast.text} extraTestIds={['copy-toast', 'copied-flag']} />
     </main>
   );
 }
