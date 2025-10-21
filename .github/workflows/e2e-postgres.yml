@@ -10,6 +10,7 @@ jobs:
   e2e:
     name: E2E (PostgreSQL)
     runs-on: ubuntu-latest
+    if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
 
     env:
       PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
