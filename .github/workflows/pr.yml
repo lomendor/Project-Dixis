@@ -162,7 +162,7 @@ jobs:
           - 5432:5432
 
     env:
-      DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
+      # DATABASE_URL set per-step (PostgreSQL for full test, SQLite for ui-only)
       DIXIS_SMS_DISABLE: '1'
       DIXIS_EMAIL_DISABLE: '1'
 
@@ -200,7 +200,7 @@ jobs:
         if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         run: npx playwright install --with-deps chromium
 
-      - name: Run Prisma migrations
+      - name: Run Prisma migrations (PostgreSQL - full test)
         if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
         env:
           DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/dixis?schema=public"
@@ -208,6 +208,17 @@ jobs:
           npx prisma generate
           npx prisma migrate deploy
           npx tsx prisma/seed.ts
+
+      - name: Prepare SQLite schema (ui-only fast path)
+        if: ${{ contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
+        run: |
+          mkdir -p tmp
+          cat > .env.ci <<'ENV'
+          DATABASE_URL="file:./tmp/smoke.db"
+          ENV
+          npx prisma generate --schema prisma/schema.ci.prisma
+          npx prisma db push --schema prisma/schema.ci.prisma --force-reset
+          echo "DATABASE_URL=file:./tmp/smoke.db" >> $GITHUB_ENV
 
       - name: Start Test API server
         if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
