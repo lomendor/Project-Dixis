@@ -1,0 +1,3 @@
+- 2025-10-21 20:35 UTC — Pass AG60-fix-cache: Ensure pnpm uses ~/.pnpm-store and create path pre-cache
+  - Adds a pre-cache step to create ~/.pnpm-store
+  - Sets pnpm store-dir to ~/.pnpm-store before pnpm install
