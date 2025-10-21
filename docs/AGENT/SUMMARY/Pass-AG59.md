@@ -1,0 +1,6 @@
+- 2025-10-21 19:45 UTC — Pass AG59: Admin orders loading skeletons
+  - Shared component: `frontend/src/components/Skeleton.tsx`
+  - CSS keyframes: `frontend/src/styles/skeleton.css` (imported in layout)
+  - Route fallback: `frontend/src/app/admin/orders/loading.tsx`
+  - E2E: `frontend/tests/e2e/admin-skeleton.spec.ts`
+  - No backend/schema changes (UI-only).
