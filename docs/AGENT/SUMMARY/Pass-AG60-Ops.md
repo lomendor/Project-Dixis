@@ -1,0 +1,3 @@
+- 2025-10-21 20:02 UTC — Pass AG60-Ops: Cache pnpm store in CI
+  - Adds actions/cache@v4 for ~/.pnpm-store keyed by **/pnpm-lock.yaml
+  - Speeds up both fast-path and full-path jobs.
