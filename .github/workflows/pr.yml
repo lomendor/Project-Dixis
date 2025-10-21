@@ -46,6 +46,8 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Prepare pnpm store dir
+        run: mkdir -p ~/.pnpm-store
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -59,6 +61,7 @@ jobs:
         run: |
           corepack enable
           corepack prepare pnpm@latest --activate
+          pnpm config set store-dir ~/.pnpm-store
           pnpm install --frozen-lockfile
 
 
@@ -196,6 +199,8 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Prepare pnpm store dir
+        run: mkdir -p ~/.pnpm-store
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -209,6 +214,7 @@ jobs:
         run: |
           corepack enable
           corepack prepare pnpm@latest --activate
+          pnpm config set store-dir ~/.pnpm-store
           pnpm install --frozen-lockfile
 
 
@@ -354,6 +360,8 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Prepare pnpm store dir
+        run: mkdir -p ~/.pnpm-store
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -367,6 +375,7 @@ jobs:
         run: |
           corepack enable
           corepack prepare pnpm@latest --activate
+          pnpm config set store-dir ~/.pnpm-store
           pnpm install --frozen-lockfile
 
 
