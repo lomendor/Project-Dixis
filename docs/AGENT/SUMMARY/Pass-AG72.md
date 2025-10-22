@@ -1,0 +1,3 @@
+- 2025-10-22 09:00 UTC — Pass AG72: Admin Orders filter polish (count + clear)
+  - UI-only: results counter & clear button in demo view.
+  - E2E: validates counter visibility and clear action.
