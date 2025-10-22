@@ -3,8 +3,10 @@ import EmptyState from '@/components/EmptyState';
 import StatusChip from '@/components/StatusChip';
 import FilterChips from '@/components/FilterChips';
 import React from 'react';
+import Link from 'next/link';
 import ToastSuccess from '@/components/ToastSuccess';
 import { orderNumber } from '../../../lib/orderNumber';
+import DemoOrdersView from '@/app/admin/orders/_components/DemoOrdersView';
 
 type Row = {
   id: string;
@@ -17,105 +19,29 @@ type Row = {
 };
 
 export default function AdminOrders() {
-  /* AG70-status-filter-demo */
-  try {
-    const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
-    const isDemo = search?.get('statusFilterDemo') === '1';
+  // AG73.1 — demo routing without conditional hooks
+  if (typeof window !== 'undefined') {
+    const search = new URLSearchParams(window.location.search);
+    const isDemo = search.get('statusFilterDemo') === '1';
     if (isDemo) {
-      const demo = [
-        { id: 'A-2001', customer: 'Μαρία',   total: '€42.00',  status: 'pending'  },
-        { id: 'A-2002', customer: 'Γιάννης', total: '€99.90',  status: 'paid'     },
-        { id: 'A-2003', customer: 'Ελένη',   total: '€12.00',  status: 'refunded' },
-        { id: 'A-2004', customer: 'Νίκος',   total: '€59.00',  status: 'cancelled'},
-        { id: 'A-2005', customer: 'Αννα',    total: '€19.50',  status: 'shipped'  },
-        { id: 'A-2006', customer: 'Κώστας',  total: '€31.70',  status: 'pending'  },
-      ];
-      const options = [
-        { key:'pending',   label:'Σε αναμονή' },
-        { key:'paid',      label:'Πληρωμή'    },
-        { key:'shipped',   label:'Απεστάλη'   },
-        { key:'cancelled', label:'Ακυρώθηκε'  },
-        { key:'refunded',  label:'Επιστροφή'  },
-      ];
-      const [active, setActive] = React.useState<string|null>(null);
-      const rows = demo.filter(o => !active || o.status===active);
+      return <DemoOrdersView />;
+    }
+  }
 
-  /* AG71-status-persist */
-  const allowedStatuses = ['pending','paid','shipped','cancelled','refunded'];
-  React.useEffect(() => {
-    try {
-      const url = new URL(window.location.href);
-      const v = url.searchParams.get('status');
-      if (v && allowedStatuses.includes(v)) {
-        // assumes setActive exists in AG70 demo block
-        setActive(v as any);
-      } else {
-        setActive(null);
-      }
-    } catch {}
-  }, []);
+  // AG61/AG67 demos (no hooks here, safe)
+  if (typeof window !== 'undefined') {
+    const search = new URLSearchParams(window.location.search);
 
-  const onChange = (v: any) => {
-    try {
-      setActive(v);
-      const url = new URL(window.location.href);
-      if (v) url.searchParams.set('status', String(v));
-      else   url.searchParams.delete('status');
-      // keep demo flag stable for E2E
-      url.searchParams.set('statusFilterDemo','1');
-      history.replaceState(null, '', url);
-    } catch {}
-  };
-
+    const isEmptyDemo = search.get('empty') === '1';
+    if (isEmptyDemo) {
       return (
         <main style={{padding:16}}>
-          <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες (demo status filter)</h2>
-          <div style={{margin:'8px 0 16px 0'}}>
-            <FilterChips options={options} active={active} onChange={onChange} />
-          </div>
-          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', margin:'8px 0 8px 0'}}>
-            <div data-testid="results-count" style={{fontSize:12,color:'#555'}}>Αποτελέσματα: {rows.length}</div>
-            {active && (
-              <button
-                type="button"
-                data-testid="clear-filter"
-                onClick={()=> onChange(null)}
-                style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}
-              >
-                Καθαρισμός
-              </button>
-            )}
-          </div>
-          <div role="table" style={{display:'grid', gap:8}}>
-            <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
-              <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
-            </div>
-            {rows.map(o=>(
-              <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
-                <div>{o.id}</div>
-                <div>{o.customer}</div>
-                <div>{o.total}</div>
-                <div><StatusChip status={o.status} /></div>
-              </div>
-            ))}
-            {rows.length===0 && (
-              <div data-testid="no-results" style={{padding:16, color:'#666'}}>Καμία παραγγελία για το επιλεγμένο φίλτρο.</div>
-            )}
-          </div>
+          <EmptyState />
         </main>
       );
     }
-  } catch {}
 
-  /* AG61-empty-demo */
-  const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
-  const isEmptyDemo = search?.get('empty') === '1';
-  if (isEmptyDemo) {
-
-  /* AG67-status-demo */
-  try {
-    const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
-    const isStatusDemo = search?.get('statusDemo') === '1';
+    const isStatusDemo = search.get('statusDemo') === '1';
     if (isStatusDemo) {
       const demo = [
         { id: 'A-1001', customer: 'Μαρία', total: '€42.00', status: 'pending' },
@@ -143,13 +69,6 @@ export default function AdminOrders() {
         </main>
       );
     }
-  } catch {}
-
-  return (
-      <main style={{padding:16}}>
-        <EmptyState />
-      </main>
-    );
   }
 
   const [rows, setRows] = React.useState<Row[]>([]);
