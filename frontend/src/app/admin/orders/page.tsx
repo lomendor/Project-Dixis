@@ -47,6 +47,7 @@ export default function AdminOrders() {
       const url = new URL(window.location.href);
       const v = url.searchParams.get('status');
       if (v && allowedStatuses.includes(v)) {
+        // assumes setActive exists in AG70 demo block
         setActive(v as any);
       } else {
         setActive(null);
@@ -60,7 +61,7 @@ export default function AdminOrders() {
       const url = new URL(window.location.href);
       if (v) url.searchParams.set('status', String(v));
       else   url.searchParams.delete('status');
-      // κρατάμε το demo flag για σταθερό E2E
+      // keep demo flag stable for E2E
       url.searchParams.set('statusFilterDemo','1');
       history.replaceState(null, '', url);
     } catch {}
