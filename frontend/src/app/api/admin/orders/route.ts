@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrdersRepo, type OrderStatus } from '@/lib/orders/providers';
+import { getOrdersRepo, type OrderStatus, type SortArg } from '@/lib/orders/providers';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const forceDemo = url.searchParams.get('demo') === '1';
   const status = url.searchParams.get('status');
+  const page = url.searchParams.get('page');
+  const pageSize = url.searchParams.get('pageSize');
+  const sort = url.searchParams.get('sort');
 
   const ALLOWED = new Set(['pending','paid','shipped','cancelled','refunded']);
   if (status && !ALLOWED.has(status)) {
@@ -15,7 +18,12 @@ export async function GET(req: NextRequest) {
   const repo = getOrdersRepo(mode);
 
   try {
-    const data = await repo.list({ status: status as OrderStatus | undefined });
+    const data = await repo.list({
+      status: status as OrderStatus | undefined,
+      page: page ? parseInt(page, 10) : undefined,
+      pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
+      sort: sort as SortArg | undefined,
+    });
     return NextResponse.json(data, { status: 200 });
   } catch (err:any) {
     if (err?.name === 'NOT_IMPLEMENTED') {

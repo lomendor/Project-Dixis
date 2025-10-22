@@ -1,4 +1,4 @@
-import type { OrdersRepo, OrderStatus } from './types';
+import type { OrdersRepo, OrderStatus, SortArg } from './types';
 import { demoRepo } from './demo';
 import { sqliteRepo } from './sqlite';
 import { pgRepo } from './pg';
@@ -11,4 +11,4 @@ export function getOrdersRepo(mode?: string): OrdersRepo {
     default: return demoRepo;
   }
 }
-export type { OrdersRepo, OrderStatus };
+export type { OrdersRepo, OrderStatus, SortArg };

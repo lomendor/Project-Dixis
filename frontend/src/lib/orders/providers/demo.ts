@@ -1,4 +1,5 @@
-import type { OrdersRepo, Order, OrderStatus } from './types';
+import type { OrdersRepo, Order, ListParams } from './types';
+import { parseSort, clamp } from './_map';
 
 const DEMO: Order[] = [
   { id:'A-2001', customer:'Μαρία',   total:'€42.00',  status:'pending'  },
@@ -10,8 +11,22 @@ const DEMO: Order[] = [
 ];
 
 export const demoRepo: OrdersRepo = {
-  async list(params?: { status?: OrderStatus }) {
-    const items = params?.status ? DEMO.filter(o=>o.status===params.status) : DEMO;
-    return { items, count: items.length };
+  async list(params?: ListParams) {
+    let arr = DEMO;
+    if (params?.status) arr = arr.filter(o=>o.status===params.status);
+
+    const { key, desc } = parseSort(params?.sort);
+    arr = [...arr].sort((a,b)=>{
+      let aVal: any = key === 'total' ? parseFloat(a.total.replace(/[^\d.]/g,'')) : a.id;
+      let bVal: any = key === 'total' ? parseFloat(b.total.replace(/[^\d.]/g,'')) : b.id;
+      return desc ? (bVal > aVal ? 1 : -1) : (aVal > bVal ? 1 : -1);
+    });
+
+    const pageSize = clamp(params?.pageSize ?? 10, 5, 100);
+    const page = Math.max(params?.page ?? 1, 1);
+    const skip = (page - 1) * pageSize;
+    const items = arr.slice(skip, skip + pageSize);
+
+    return { items, count: arr.length };
   }
 };
