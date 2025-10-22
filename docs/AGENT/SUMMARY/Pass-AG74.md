@@ -1,0 +1,5 @@
+- 2025-10-22 17:35 UTC — Pass AG74: Orders Repository abstraction (demo default)
+  - Repo layer: `frontend/src/lib/orders/providers/*`
+  - API provider select: `DIXIS_DATA_SRC=demo|pg|sqlite` (default: demo; CI→sqlite stub).
+  - `?demo=1` παραμένει για σταθερά E2E.
+  - Χωρίς schema/DB αλλαγές.
