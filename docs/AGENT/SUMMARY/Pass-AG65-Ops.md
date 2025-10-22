@@ -1,0 +1,4 @@
+- 2025-10-22 04:17 UTC — Pass AG65-Ops: Hygiene & Smoke fast-path hardening
+  - Added PR template with **### Reports** and **### Test Summary**.
+  - Commitlint allows `ops` type alongside conventional types.
+  - Hardened Smoke fast-path for `ui-only` and `ops-only` across all workflows (SQLite prep & heavy-step guards).

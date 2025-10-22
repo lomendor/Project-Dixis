@@ -1,14 +1,7 @@
-## Summary
-(Τί έκανες σε 3–6 bullets)
+### Reports
+- CODEMAP → (path)
+- TEST-REPORT → (link to Actions run)
+- RISKS-NEXT → (path)
 
-## Acceptance Criteria
-- [ ] 
-
-## Test Plan
-- Τι tests τρέχουν/πέρασαν (2–5 bullets)
-- Σύνδεσμος σε artifacts αν χρειάζεται
-
-## Reports
-- CODEMAP: docs/AGENT/SYSTEM/routes.md
-- TEST-REPORT: Actions → this PR run
-- RISKS-NEXT: frontend/docs/OPS/STATE.md
+### Test Summary
+- (Τι τρέξαμε / τι περιμένουμε να τρέξει στο CI)
