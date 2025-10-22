@@ -101,7 +101,11 @@
     "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1",
     "test:smoke": "playwright test -g @smoke --reporter=line",
     "test:ship": "playwright test tests/shipping --reporter=line",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push:ci": "prisma db push --schema=prisma/schema.ci.prisma",
+    "db:seed:ci": "node prisma/seed.ci.cjs",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed:dev": "node prisma/seed.dev.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",
@@ -166,5 +170,8 @@
       "prettier --write"
     ]
   },
-  "ciKey": "2025-09-19a"
+  "ciKey": "2025-09-19a",
+  "prisma": {
+    "seed": "node prisma/seed.dev.cjs"
+  }
 }
