@@ -1,6 +1,7 @@
 'use client';
 import EmptyState from '@/components/EmptyState';
 import StatusChip from '@/components/StatusChip';
+import FilterChips from '@/components/FilterChips';
 import React from 'react';
 import ToastSuccess from '@/components/ToastSuccess';
 import { orderNumber } from '../../../lib/orderNumber';
@@ -16,11 +17,61 @@ type Row = {
 };
 
 export default function AdminOrders() {
+  /* AG70-status-filter-demo */
+  try {
+    const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
+    const isDemo = search?.get('statusFilterDemo') === '1';
+    if (isDemo) {
+      const demo = [
+        { id: 'A-2001', customer: 'Μαρία',   total: '€42.00',  status: 'pending'  },
+        { id: 'A-2002', customer: 'Γιάννης', total: '€99.90',  status: 'paid'     },
+        { id: 'A-2003', customer: 'Ελένη',   total: '€12.00',  status: 'refunded' },
+        { id: 'A-2004', customer: 'Νίκος',   total: '€59.00',  status: 'cancelled'},
+        { id: 'A-2005', customer: 'Αννα',    total: '€19.50',  status: 'shipped'  },
+        { id: 'A-2006', customer: 'Κώστας',  total: '€31.70',  status: 'pending'  },
+      ];
+      const options = [
+        { key:'pending',   label:'Σε αναμονή' },
+        { key:'paid',      label:'Πληρωμή'    },
+        { key:'shipped',   label:'Απεστάλη'   },
+        { key:'cancelled', label:'Ακυρώθηκε'  },
+        { key:'refunded',  label:'Επιστροφή'  },
+      ];
+      const [active, setActive] = React.useState<string|null>(null);
+      const rows = demo.filter(o => !active || o.status===active);
+
+      return (
+        <main style={{padding:16}}>
+          <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες (demo status filter)</h2>
+          <div style={{margin:'8px 0 16px 0'}}>
+            <FilterChips options={options} active={active} onChange={setActive} />
+          </div>
+          <div role="table" style={{display:'grid', gap:8}}>
+            <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
+              <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
+            </div>
+            {rows.map(o=>(
+              <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+                <div>{o.id}</div>
+                <div>{o.customer}</div>
+                <div>{o.total}</div>
+                <div><StatusChip status={o.status} /></div>
+              </div>
+            ))}
+            {rows.length===0 && (
+              <div data-testid="no-results" style={{padding:16, color:'#666'}}>Καμία παραγγελία για το επιλεγμένο φίλτρο.</div>
+            )}
+          </div>
+        </main>
+      );
+    }
+  } catch {}
+
   /* AG61-empty-demo */
   const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
   const isEmptyDemo = search?.get('empty') === '1';
   if (isEmptyDemo) {
-  
+
   /* AG67-status-demo */
   try {
     const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
