@@ -1,0 +1,4 @@
+- 2025-10-22 08:45 UTC — Pass AG71: Persist status filter in URL
+  - Integration: `frontend/src/app/admin/orders/page.tsx` (AG71 sync state<->query)
+  - E2E: `frontend/tests/e2e/admin-status-persist.spec.ts`
+  - UI-only; fast path (no backend/schema changes).

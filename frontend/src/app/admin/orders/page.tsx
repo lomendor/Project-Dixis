@@ -40,11 +40,38 @@ export default function AdminOrders() {
       const [active, setActive] = React.useState<string|null>(null);
       const rows = demo.filter(o => !active || o.status===active);
 
+  /* AG71-status-persist */
+  const allowedStatuses = ['pending','paid','shipped','cancelled','refunded'];
+  React.useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const v = url.searchParams.get('status');
+      if (v && allowedStatuses.includes(v)) {
+        // assumes setActive exists in AG70 demo block
+        setActive(v as any);
+      } else {
+        setActive(null);
+      }
+    } catch {}
+  }, []);
+
+  const onChange = (v: any) => {
+    try {
+      setActive(v);
+      const url = new URL(window.location.href);
+      if (v) url.searchParams.set('status', String(v));
+      else   url.searchParams.delete('status');
+      // keep demo flag stable for E2E
+      url.searchParams.set('statusFilterDemo','1');
+      history.replaceState(null, '', url);
+    } catch {}
+  };
+
       return (
         <main style={{padding:16}}>
           <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες (demo status filter)</h2>
           <div style={{margin:'8px 0 16px 0'}}>
-            <FilterChips options={options} active={active} onChange={setActive} />
+            <FilterChips options={options} active={active} onChange={onChange} />
           </div>
           <div role="table" style={{display:'grid', gap:8}}>
             <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
