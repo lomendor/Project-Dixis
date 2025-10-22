@@ -1,0 +1,4 @@
+- 2025-10-22 07:12 UTC — Pass AG68-Ops: Add `gate-required` aggregator job in pr.yml
+  - New job depends on **all** other jobs in the workflow.
+  - Runs with `always()` and fails only if a dependency failed (ignores skipped).
+  - Goal: simplify branch protection to a single required check.
