@@ -1,0 +1,4 @@
+- 2025-10-22 18:12 UTC — Pass AG75: Wire Admin Orders UI to API (feature-flag)
+  - UI fetches **/api/admin/orders** when `?useApi=1`, with graceful fallback to local demo on 4xx/5xx.
+  - E2E: `frontend/tests/e2e/admin-orders-ui-uses-api.spec.ts`.
+  - Καμία αλλαγή DB/schema. Επόμενο: PG/SQLite providers.
