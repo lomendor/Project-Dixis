@@ -1,0 +1,5 @@
+- 2025-10-22 08:30 UTC — Pass AG70: Admin Orders status filter (UI-only)
+  - Component: `frontend/src/components/FilterChips.tsx`
+  - Integration: `frontend/src/app/admin/orders/page.tsx` (demo via `?statusFilterDemo=1`)
+  - E2E: `frontend/tests/e2e/admin-status-filter.spec.ts`
+  - No backend/schema changes; fast path (ui-only).
