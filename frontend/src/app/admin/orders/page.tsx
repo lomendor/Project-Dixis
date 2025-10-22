@@ -73,6 +73,19 @@ export default function AdminOrders() {
           <div style={{margin:'8px 0 16px 0'}}>
             <FilterChips options={options} active={active} onChange={onChange} />
           </div>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', margin:'8px 0 8px 0'}}>
+            <div data-testid="results-count" style={{fontSize:12,color:'#555'}}>Αποτελέσματα: {rows.length}</div>
+            {active && (
+              <button
+                type="button"
+                data-testid="clear-filter"
+                onClick={()=> onChange(null)}
+                style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}
+              >
+                Καθαρισμός
+              </button>
+            )}
+          </div>
           <div role="table" style={{display:'grid', gap:8}}>
             <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
               <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
