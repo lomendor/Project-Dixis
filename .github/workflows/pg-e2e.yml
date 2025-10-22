@@ -1,0 +1,65 @@
+name: PG E2E (label-gated)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  pg-e2e:
+    if: contains(github.event.pull_request.labels.*.name, 'pg-e2e')
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dixis_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dixis_e2e?schema=public
+      DIXIS_DATA_SRC: pg
+      PG_E2E: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack & pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.12.0 --activate
+
+      - name: Install deps (frontend)
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma migrate (PG)
+        working-directory: frontend
+        run: pnpm prisma migrate deploy
+
+      - name: Seed (dev seed works for PG too)
+        working-directory: frontend
+        run: pnpm run db:seed:dev
+
+      - name: Build
+        working-directory: frontend
+        run: pnpm build
+
+      - name: E2E (PG gated)
+        working-directory: frontend
+        run: pnpm exec playwright test tests/e2e/api-admin-orders-pg-e2e.spec.ts --reporter=line
