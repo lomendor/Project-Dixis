@@ -1,0 +1,3 @@
+- 2025-10-22 08:15 UTC — Pass AG69-Ops: Branch Protection (Gate only)
+  - Added doc: `docs/OPS/BRANCH_PROTECTION.md`
+  - Added helper: `scripts/branch-protection-gate.sh` (prints example gh api command; no side effects)
