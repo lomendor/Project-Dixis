@@ -15,6 +15,17 @@ type Row = {
 };
 
 export default function AdminOrders() {
+  /* AG61-empty-demo */
+  const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
+  const isEmptyDemo = search?.get('empty') === '1';
+  if (isEmptyDemo) {
+    return (
+      <main style={{padding:16}}>
+        <EmptyState />
+      </main>
+    );
+  }
+
   const [rows, setRows] = React.useState<Row[]>([]);
   const [err, setErr] = React.useState<string>('');
   const hydratedRef = React.useRef(false); // AG33: one-time hydration guard
@@ -186,19 +197,7 @@ export default function AdminOrders() {
         if (hasQS && sp.has(key)) {
           return sp.get(key) ?? def;
         }
-      
-  /* AG61-empty-demo */
-  const search = typeof window!=='undefined' ? new URLSearchParams(window.location.search) : null;
-  const isEmptyDemo = search?.get('empty') === '1';
-  if (isEmptyDemo) {
-    return (
-      <main style={{padding:16}}>
-        <EmptyState />
-      </main>
-    );
-  }
-
-  return (saved && saved[key] !== undefined) ? saved[key] : def;
+        return (saved && saved[key] !== undefined) ? saved[key] : def;
       };
 
       // Restore filter state
