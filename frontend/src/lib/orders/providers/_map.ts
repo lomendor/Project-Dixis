@@ -1,4 +1,4 @@
-import type { Order as DtoOrder, OrderStatus } from './types';
+import type { Order as DtoOrder, OrderStatus, SortArg, SortKey } from './types';
 
 const EURO = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' });
 const ALLOWED: ReadonlyArray<OrderStatus> = ['pending','paid','shipped','cancelled','refunded'];
@@ -15,4 +15,15 @@ export function toDto(row: any): DtoOrder {
     total: EURO.format(typeof row.total === 'number' ? row.total : Number(row.total ?? 0)),
     status: normalizeStatus(row.status),
   };
+}
+
+export function parseSort(s?: string): { key: SortKey; desc: boolean } {
+  const str = s ?? '-createdAt';
+  const desc = str.startsWith('-');
+  const key = (desc ? str.slice(1) : str) as SortKey;
+  return { key, desc };
+}
+
+export function clamp(n: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, n));
 }
