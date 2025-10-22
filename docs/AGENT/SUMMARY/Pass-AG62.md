@@ -1,0 +1,4 @@
+- 2025-10-21 21:22 UTC — Pass AG62: Fix HomeClient TS2322 & cleanup
+  - Replaces problematic empty-state JSX in `frontend/src/app/HomeClient.tsx` with inline markup (no custom props).
+  - Cleans unused import in `frontend/src/app/admin/orders/page.tsx` if present.
+  - Frontend-only (UI), no backend/schema changes.

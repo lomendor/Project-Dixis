@@ -539,21 +539,14 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
         )}
 
         {safeProducts.length === 0 && !loading && !error && (
-          <EmptyState
-            icon={
-              <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            }
-            title="No products found"
-            description={hasActiveFilters ? 
-              "We couldn't find any products matching your search criteria. Try adjusting your filters or search terms." :
-              "No products are currently available. Check back soon for fresh local produce!"
-            }
-            actionLabel={hasActiveFilters ? "Clear Filters" : undefined}
-            onAction={hasActiveFilters ? clearAllFilters : undefined}
-          />
-        )}
+  <div data-testid="home-empty" style={{padding:24, textAlign:'center'}}>
+    <h3 style={{fontWeight:600, fontSize:16, marginBottom:8}}>Δεν υπάρχουν προϊόντα</h3>
+    <p style={{color:'#666', fontSize:12, marginBottom:12}}>Προσθέστε προϊόντα ή αλλάξτε φίλτρα.</p>
+    <button type="button" onClick={()=>{ try { window.location.reload(); } catch(_) {} }} style={{padding:'6px 12px', border:'1px solid #ddd', borderRadius:6, background:'#fff', cursor:'pointer'}}>
+      Ανανέωση
+    </button>
+  </div>
+)}
       </main>
     </div>
   );
