@@ -1,0 +1,70 @@
+name: Auto-label OPS-only
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  label:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure label exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const name = 'ops-only';
+            const color = '5319E7';
+            try {
+              await github.rest.issues.getLabel({owner, repo, name});
+            } catch {
+              await github.rest.issues.createLabel({owner, repo, name, color, description: 'Workflows/docs-only fast path'});
+            }
+
+      - name: Evaluate changed files & apply/remove label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const {owner, repo} = context.repo;
+            const num = pr.number;
+            const files = await github.paginate(github.rest.pulls.listFiles, {owner, repo, pull_number: num, per_page: 100});
+            const names = files.map(f => f.filename);
+
+            const allowedPrefixes = ['.github/', 'docs/']; // strictly ops/docs
+            const disallowedPrefixes = [
+              'frontend/','backend/','prisma/','server/','packages/','infra/','database/','db/','api/','scripts/'
+            ];
+            const disallowedRootFiles = new Set([
+              'package.json','pnpm-lock.yaml','turbo.json','Dockerfile','docker-compose.yml','.nvmrc','.tool-versions'
+            ]);
+
+            const touchesOnlyAllowed = names.length > 0 && names.every(n => allowedPrefixes.some(p => n.startsWith(p)));
+            const touchesDisallowed =
+              names.some(n => disallowedPrefixes.some(p => n.startsWith(p))) ||
+              names.some(n => disallowedRootFiles.has(n)) ||
+              names.some(n => !n.includes('/')); // root-level file
+
+            const hasLabel = pr.labels.some(l => l.name === 'ops-only');
+
+            if (touchesOnlyAllowed && !touchesDisallowed) {
+              if (!hasLabel) {
+                await github.rest.issues.addLabels({owner, repo, issue_number: num, labels: ['ops-only']});
+                core.info("Added label 'ops-only'.");
+              } else {
+                core.info("Label 'ops-only' already present.");
+              }
+            } else {
+              if (hasLabel) {
+                await github.rest.issues.removeLabel({owner, repo, issue_number: num, name: 'ops-only'}).catch(()=>{});
+                core.info("Removed label 'ops-only' (non-ops changes detected).");
+              } else {
+                core.info("Not an ops-only PR — no label applied.");
+              }
+            }
