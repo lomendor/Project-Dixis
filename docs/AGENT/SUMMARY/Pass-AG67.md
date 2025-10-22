@@ -1,0 +1,5 @@
+- 2025-10-22 04:50 UTC — Pass AG67: Admin Orders status chips (UI-only)
+  - Component: `frontend/src/components/StatusChip.tsx`
+  - Integration: `frontend/src/app/admin/orders/page.tsx` (demo via `?statusDemo=1`)
+  - E2E: `frontend/tests/e2e/admin-status-chips.spec.ts`
+  - No backend/schema changes; fast path (ui-only).
