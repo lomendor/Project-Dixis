@@ -1,0 +1,3 @@
+- 2025-10-22 04:08 UTC — Pass AG64-Ops: Auto-label `ops-only` (path-based)
+  - Labels PRs touching only .github/ and docs/ with `ops-only`.
+  - Complements existing `ui-only` fast path.
