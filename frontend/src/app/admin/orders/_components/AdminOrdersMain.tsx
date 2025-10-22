@@ -1,226 +1,189 @@
 'use client';
 import React from 'react';
-import type { Order, OrderStatus, SortArg } from '@/lib/orders/providers/types';
+import StatusChip from '@/components/StatusChip';
+import FilterChips from '@/components/FilterChips';
+
+type Status = 'pending'|'paid'|'shipped'|'cancelled'|'refunded';
+type Row = { id: string; customer: string; total: string; status: Status };
+
+const LOCAL_DEMO: Row[] = [
+  { id:'A-2001', customer:'Μαρία',   total:'€42.00',  status:'pending'  },
+  { id:'A-2002', customer:'Γιάννης', total:'€99.90',  status:'paid'     },
+  { id:'A-2003', customer:'Ελένη',   total:'€12.00',  status:'refunded' },
+  { id:'A-2004', customer:'Νίκος',   total:'€59.00',  status:'cancelled'},
+  { id:'A-2005', customer:'Άννα',    total:'€19.50',  status:'shipped'  },
+  { id:'A-2006', customer:'Κώστας',  total:'€31.70',  status:'pending'  },
+];
 
 export default function AdminOrdersMain() {
-  const [orders, setOrders] = React.useState<Order[]>([]);
-  const [count, setCount] = React.useState(0);
-  const [err, setErr] = React.useState('');
+  const options = [
+    { key:'pending',   label:'Σε αναμονή' },
+    { key:'paid',      label:'Πληρωμή'    },
+    { key:'shipped',   label:'Απεστάλη'   },
+    { key:'cancelled', label:'Ακυρώθηκε'  },
+    { key:'refunded',  label:'Επιστροφή'  },
+  ] as const;
+  const allowed = options.map(o=>o.key) as ReadonlyArray<Status>;
 
-  // Pagination state
+  // URL state
+  const [active, setActive] = React.useState<Status|null>(null);
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
+  const [sort, setSort] = React.useState<'createdAt'|'-createdAt'>('-createdAt');
+  const [mode, setMode] = React.useState<'demo'|'pg'|'sqlite'|'auto'>('auto');
 
-  // Filter state
-  const [status, setStatus] = React.useState<OrderStatus | ''>('');
+  const [q, setQ] = React.useState('');
+  const [fromDate, setFromDate] = React.useState<string>('');
+  const [toDate, setToDate] = React.useState<string>('');
 
-  // Sorting state
-  const [sort, setSort] = React.useState<SortArg>('-createdAt');
-
-  const fetchOrders = React.useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (status) params.set('status', status);
-      params.set('page', String(page));
-      params.set('pageSize', String(pageSize));
-      params.set('sort', sort);
-
-      const res = await fetch(`/api/admin/orders?${params.toString()}`);
-      if (!res.ok) {
-        if (res.status === 501) {
-          setErr('Provider not implemented (demo mode active)');
-        } else {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return;
-      }
-
-      const data = await res.json();
-      setOrders(data.items || []);
-      setCount(data.count || 0);
-      setErr('');
-    } catch (e: any) {
-      setErr(e.message || 'Fetch error');
-      setOrders([]);
-      setCount(0);
-    }
-  }, [status, page, pageSize, sort]);
+  const [rows, setRows]   = React.useState<Row[]>(LOCAL_DEMO);
+  const [count, setCount] = React.useState<number>(LOCAL_DEMO.length);
+  const [usingApi, setUsingApi] = React.useState(false);
+  const [errNote, setErrNote]   = React.useState<string|null>(null);
 
   React.useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+    try {
+      const url = new URL(window.location.href);
+      const v = url.searchParams.get('status');
+      setActive(v && allowed.includes(v as Status) ? (v as Status) : null);
+      setPage(Math.max(1, parseInt(url.searchParams.get('page') || '1', 10)));
+      setPageSize(Math.max(1, Math.min(100, parseInt(url.searchParams.get('pageSize') || '10', 10))));
+      const s = (url.searchParams.get('sort') || '-createdAt') as ('createdAt'|'-createdAt');
+      setSort(s === 'createdAt' ? 'createdAt' : '-createdAt');
+      const m = (url.searchParams.get('mode') || 'auto') as any;
+      setMode(['demo','pg','sqlite'].includes(m) ? m : 'auto');
+      setQ(url.searchParams.get('q') || '');
+      setFromDate(url.searchParams.get('fromDate') || '');
+      setToDate(url.searchParams.get('toDate') || '');
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const totalPages = Math.ceil(count / pageSize);
-
-  const handlePrev = () => {
-    if (page > 1) setPage(page - 1);
+  const writeParam = (key: string, value: string|null) => {
+    const url = new URL(window.location.href);
+    if (value===null || value==='') url.searchParams.delete(key); else url.searchParams.set(key, value);
+    history.replaceState(null, '', url);
   };
 
-  const handleNext = () => {
-    if (page < totalPages) setPage(page + 1);
-  };
+  React.useEffect(() => {
+    const run = async () => {
+      try {
+        const url = new URL(window.location.href);
+        const useApi = url.searchParams.get('useApi') === '1';
+        setUsingApi(useApi);
+        setErrNote(null);
+        if (!useApi) {
+          let demo = LOCAL_DEMO.filter(o => !active || o.status===active);
+          if (q) {
+            const qq = q.toLowerCase();
+            demo = demo.filter(o => o.id.toLowerCase().includes(qq) || o.customer.toLowerCase().includes(qq));
+          }
+          // (τοπικό demo: αγνοούμε from/to για απλότητα δεδομένων)
+          const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
+          setRows(res); setCount(demo.length);
+          return;
+        }
+        const qs = new URLSearchParams();
+        if (active) qs.set('status', active);
+        if (q) qs.set('q', q);
+        if (fromDate) qs.set('fromDate', fromDate);
+        if (toDate) qs.set('toDate', toDate);
+        qs.set('page', String(page));
+        qs.set('pageSize', String(pageSize));
+        qs.set('sort', sort);
+        if (mode === 'demo' || mode === 'auto') qs.set('demo','1');
 
+        const res = await fetch(`/api/admin/orders?${qs.toString()}`, { cache:'no-store' });
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        const json = await res.json();
+        const items = Array.isArray(json.items) ? json.items as Row[] : [];
+        setRows(items);
+        setCount(typeof json.count==='number' ? json.count : items.length);
+      } catch (e:any) {
+        setErrNote(e?.message || 'API error'); setUsingApi(false);
+        let demo = LOCAL_DEMO.filter(o => !active || o.status===active);
+        if (q) {
+          const qq = q.toLowerCase();
+          demo = demo.filter(o => o.id.toLowerCase().includes(qq) || o.customer.toLowerCase().includes(qq));
+        }
+        const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
+        setRows(res); setCount(demo.length);
+      }
+    };
+    run();
+  }, [active, page, pageSize, sort, mode, q, fromDate, toDate]);
+
+  const onChangeStatus = (v: string | null) => {
+    writeParam('status', v); setActive(v as Status | null); setPage(1);
+  };
   const toggleSort = () => {
-    if (sort === '-createdAt') {
-      setSort('createdAt');
-    } else if (sort === 'createdAt') {
-      setSort('-total');
-    } else if (sort === '-total') {
-      setSort('total');
-    } else {
-      setSort('-createdAt');
-    }
+    const next = sort === '-createdAt' ? 'createdAt' : '-createdAt';
+    writeParam('sort', next); setSort(next);
+  };
+  const onPageSize = (n: number) => { writeParam('pageSize', String(n)); setPageSize(n); setPage(1); };
+  const go = (delta: number) => {
+    const maxPage = Math.max(1, Math.ceil(count / pageSize));
+    const next = Math.min(maxPage, Math.max(1, page + delta));
+    writeParam('page', String(next)); setPage(next);
+  };
+  const onSubmitFilters = (e: React.FormEvent) => {
+    e.preventDefault();
+    writeParam('q', q || null);
+    writeParam('fromDate', fromDate || null);
+    writeParam('toDate', toDate || null);
     setPage(1);
   };
 
-  const sortLabel = () => {
-    if (sort === '-createdAt') return 'Date ↓';
-    if (sort === 'createdAt') return 'Date ↑';
-    if (sort === '-total') return 'Total ↓';
-    if (sort === 'total') return 'Total ↑';
-    return 'Sort';
-  };
+  const maxPage = Math.max(1, Math.ceil(count / pageSize));
 
   return (
-    <main style={{ maxWidth: 800, margin: '40px auto', padding: 16 }}>
-      <h2>Admin · Orders (AG79 Pagination)</h2>
-      <p style={{ color: '#6b7280', marginTop: 6 }}>
-        Orders with pagination & sorting
-      </p>
+    <main style={{padding:16}}>
+      <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες {usingApi ? `(API${mode!=='auto'?':'+mode:''})` : '(τοπικό demo)'}</h2>
 
-      {err && (
-        <div className="mt-2 text-sm text-red-600" data-testid="error-message">
-          {err}
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="mt-4 mb-4 p-3 border rounded bg-gray-50">
-        <div className="flex items-center gap-3 text-sm">
-          <label className="font-medium">Status:</label>
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value as OrderStatus | '');
-              setPage(1);
-            }}
-            className="px-2 py-1 border rounded"
-            data-testid="filter-status"
-          >
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="shipped">Shipped</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
+      <form onSubmit={onSubmitFilters} style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', margin:'8px 0 12px 0'}}>
+        <FilterChips options={options as any} active={active} onChange={onChangeStatus} />
+        <input
+          value={q} onChange={e=>setQ(e.target.value)} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
+          style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', fontSize:12}}
+        />
+        <label style={{fontSize:12}}>Από:&nbsp;<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)} /></label>
+        <label style={{fontSize:12}}>Έως:&nbsp;<input type="date" value={toDate} onChange={e=>setToDate(e.target.value)} /></label>
+        <button type="submit" style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>Εφαρμογή</button>
+        <button type="button" onClick={()=>{ setQ(''); setFromDate(''); setToDate(''); writeParam('q',null); writeParam('fromDate',null); writeParam('toDate',null); setPage(1); }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12}}>Καθαρισμός</button>
+        <button type="button" onClick={toggleSort} data-testid="toggle-sort"
+          style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>
+          Ταξινόμηση: {sort==='-createdAt' ? 'Νεότερα πρώτα' : 'Παλαιότερα πρώτα'}
+        </button>
+        <label style={{fontSize:12}}>
+          Page size:&nbsp;
+          <select value={pageSize} onChange={e=>onPageSize(parseInt(e.target.value,10))} data-testid="page-size">
+            <option value={5}>5</option><option value={10}>10</option><option value={20}>20</option>
           </select>
+        </label>
+      </form>
 
-          <label className="ml-4 font-medium">Page Size:</label>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setPage(1);
-            }}
-            className="px-2 py-1 border rounded"
-            data-testid="page-size-select"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
-
-          <button
-            type="button"
-            onClick={toggleSort}
-            className="ml-4 px-3 py-1 border rounded hover:bg-gray-100"
-            data-testid="sort-toggle"
-          >
-            {sortLabel()}
-          </button>
+      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', margin:'8px 0'}}>
+        <div data-testid="results-count" style={{fontSize:12,color:'#555'}}>Σύνολο: {count} · Σελίδα {page}/{maxPage}</div>
+        <div style={{display:'flex', gap:8}}>
+          <button type="button" onClick={()=>go(-1)} disabled={page<=1}
+            style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12}}>« Προηγ.</button>
+          <button type="button" onClick={()=>go(+1)} disabled={page>=maxPage}
+            style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12}}>Επόμ. »</button>
         </div>
       </div>
 
-      {/* Results Summary */}
-      <div className="mb-2 text-sm text-gray-700" data-testid="results-count">
-        {count === 0
-          ? 'No orders'
-          : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, count)} of ${count} orders`}
-      </div>
+      {errNote && <div style={{fontSize:12,color:'#a33',margin:'6px 0'}}>Σημείωση: {errNote} — έγινε fallback.</div>}
 
-      {/* Orders Table */}
-      <div className="border rounded overflow-auto">
-        <table className="w-full text-sm" data-testid="orders-table">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="text-left p-2 border-b">ID</th>
-              <th className="text-left p-2 border-b">Customer</th>
-              <th className="text-left p-2 border-b">Total</th>
-              <th className="text-left p-2 border-b">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.length === 0 && !err && (
-              <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-500">
-                  No orders found
-                </td>
-              </tr>
-            )}
-            {orders.map((o) => (
-              <tr key={o.id} className="border-b hover:bg-gray-50">
-                <td className="p-2" data-testid="order-id">
-                  {o.id}
-                </td>
-                <td className="p-2" data-testid="order-customer">
-                  {o.customer}
-                </td>
-                <td className="p-2" data-testid="order-total">
-                  {o.total}
-                </td>
-                <td className="p-2" data-testid="order-status">
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    o.status === 'paid' ? 'bg-green-100 text-green-800' :
-                    o.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    o.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                    o.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {o.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-gray-600" data-testid="page-info">
-          Page {page} of {totalPages || 1}
+      <div role="table" style={{display:'grid', gap:8}}>
+        <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
+          <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
         </div>
-
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handlePrev}
-            disabled={page <= 1}
-            className="px-4 py-2 border rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            data-testid="page-prev"
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={page >= totalPages}
-            className="px-4 py-2 border rounded bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            data-testid="page-next"
-          >
-            Next
-          </button>
-        </div>
+        {rows.map(o=>(
+          <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+            <div>{o.id}</div><div>{o.customer}</div><div>{o.total}</div><div><StatusChip status={o.status} /></div>
+          </div>
+        ))}
+        {rows.length===0 && <div data-testid="no-results" style={{padding:16, color:'#666'}}>Καμία παραγγελία για τα επιλεγμένα φίλτρα.</div>}
       </div>
     </main>
   );

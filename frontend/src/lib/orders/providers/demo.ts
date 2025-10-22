@@ -1,32 +1,42 @@
-import type { OrdersRepo, Order, ListParams } from './types';
-import { parseSort, clamp } from './_map';
+import type { OrdersRepo, Order, OrderStatus, ListParams } from './types';
+import { parseSort, clamp, parseDateRange } from './_map';
 
-const DEMO: Order[] = [
-  { id:'A-2001', customer:'Μαρία',   total:'€42.00',  status:'pending'  },
-  { id:'A-2002', customer:'Γιάννης', total:'€99.90',  status:'paid'     },
-  { id:'A-2003', customer:'Ελένη',   total:'€12.00',  status:'refunded' },
-  { id:'A-2004', customer:'Νίκος',   total:'€59.00',  status:'cancelled'},
-  { id:'A-2005', customer:'Άννα',    total:'€19.50',  status:'shipped'  },
-  { id:'A-2006', customer:'Κώστας',  total:'€31.70',  status:'pending'  },
+const now = Date.now();
+const DEMO: (Order & { createdAt: Date; totalNum: number })[] = [
+  { id:'A-2001', customer:'Μαρία',   total:'€42.00',  status:'pending',   createdAt:new Date(now-5*864e5), totalNum:42.00 },
+  { id:'A-2002', customer:'Γιάννης', total:'€99.90',  status:'paid',      createdAt:new Date(now-4*864e5), totalNum:99.90 },
+  { id:'A-2003', customer:'Ελένη',   total:'€12.00',  status:'refunded',  createdAt:new Date(now-3*864e5), totalNum:12.00 },
+  { id:'A-2004', customer:'Νίκος',   total:'€59.00',  status:'cancelled', createdAt:new Date(now-2*864e5), totalNum:59.00 },
+  { id:'A-2005', customer:'Άννα',    total:'€19.50',  status:'shipped',   createdAt:new Date(now-1*864e5), totalNum:19.50 },
+  { id:'A-2006', customer:'Κώστας',  total:'€31.70',  status:'pending',   createdAt:new Date(now-0*864e5), totalNum:31.70 },
 ];
 
 export const demoRepo: OrdersRepo = {
   async list(params?: ListParams) {
-    let arr = DEMO;
-    if (params?.status) arr = arr.filter(o=>o.status===params.status);
+    const p = params || {};
+    const page = clamp(Math.floor(p.page || 1), 1, 9999);
+    const pageSize = clamp(Math.floor(p.pageSize || 10), 1, 100);
+    const { key, dir } = parseSort(p.sort);
+    const range = parseDateRange(p);
 
-    const { key, desc } = parseSort(params?.sort);
-    arr = [...arr].sort((a,b)=>{
-      let aVal: any = key === 'total' ? parseFloat(a.total.replace(/[^\d.]/g,'')) : a.id;
-      let bVal: any = key === 'total' ? parseFloat(b.total.replace(/[^\d.]/g,'')) : b.id;
-      return desc ? (bVal > aVal ? 1 : -1) : (aVal > bVal ? 1 : -1);
+    let rows = DEMO.slice();
+    if (p.status) rows = rows.filter(o=>o.status===p.status);
+    if (p.q) {
+      const q = p.q.toLowerCase();
+      rows = rows.filter(o => o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q));
+    }
+    if (range.gte) rows = rows.filter(o => o.createdAt >= range.gte!);
+    if (range.lte) rows = rows.filter(o => o.createdAt <= range.lte!);
+
+    rows.sort((a,b) => {
+      const av = key === 'createdAt' ? a.createdAt.getTime() : a.totalNum;
+      const bv = key === 'createdAt' ? b.createdAt.getTime() : b.totalNum;
+      return dir==='asc' ? av-bv : bv-av;
     });
 
-    const pageSize = clamp(params?.pageSize ?? 10, 5, 100);
-    const page = Math.max(params?.page ?? 1, 1);
-    const skip = (page - 1) * pageSize;
-    const items = arr.slice(skip, skip + pageSize);
-
-    return { items, count: arr.length };
+    const count = rows.length;
+    const start = (page-1)*pageSize;
+    const items = rows.slice(start, start+pageSize).map(o => ({ id:o.id, customer:o.customer, total:o.total, status:o.status }));
+    return { items, count };
   }
 };
