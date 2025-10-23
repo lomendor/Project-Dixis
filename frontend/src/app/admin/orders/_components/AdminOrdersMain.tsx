@@ -54,6 +54,22 @@ export default function AdminOrdersMain() {
 
   const [rows, setRows]   = React.useState<Row[]>(LOCAL_DEMO);
 
+  // Quick totals (per current page)
+  const statusOrder = React.useMemo(() => {
+    const seen = new Map<string, number>();
+    rows.forEach(r => { if (r?.status) seen.set(r.status, (seen.get(r.status)||0) + 1); });
+    // σταθερή διάταξη: φθίνουσα κατά count, αλφαβητικά ως δεύτερο κριτήριο
+    return Array.from(seen.entries()).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([k])=>k);
+  }, [rows]);
+
+  const pageTotals = React.useMemo(() => {
+    const acc = new Map<string, number>();
+    rows.forEach(r => acc.set(r.status, (acc.get(r.status)||0) + 1));
+    const total = rows.length;
+    return { acc, total };
+  }, [rows]);
+
+
   // Column visibility (persisted)
   type ColKey = 'id'|'customer'|'total'|'status';
   const DEFAULT_COLS: Record<ColKey, boolean> = { id:true, customer:true, total:true, status:true };
@@ -276,6 +292,21 @@ export default function AdminOrdersMain() {
       </div>
 
       {errNote && <div style={{fontSize:12,color:'#a33',margin:'6px 0'}}>Σημείωση: {errNote} — έγινε fallback.</div>}
+
+
+      {/* Quick totals (τρέχουσα σελίδα) */}
+      {pageTotals.total > 0 && (
+        <div data-testid="quick-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'6px 0 10px 0'}}>
+          {statusOrder.map(st => (
+            <div key={st} data-testid={`total-${st}`} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999}}>
+              <span style={{width:8, height:8, borderRadius:999, background:'#0ea5e9'}} aria-hidden />
+              <span style={{fontSize:12}}>{st}</span>
+              <strong style={{fontSize:12}}>{pageTotals.acc.get(st) || 0}</strong>
+            </div>
+          ))}
+          <div data-testid="total-all" style={{marginLeft:4, fontSize:12, color:'#555'}}>Σύνολο: <strong>{pageTotals.total}</strong></div>
+        </div>
+      )}
 
       <div role="table" style={{display:'grid', gap:8}}>
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
