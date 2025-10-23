@@ -157,10 +157,10 @@ jobs:
 
   test-smoke:
     name: Smoke Tests
+    if: ${{ github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'pg-e2e')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     continue-on-error: true  # Pass 45: Advisory until E2E fully stabilized in Phase 2
-    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: frontend
