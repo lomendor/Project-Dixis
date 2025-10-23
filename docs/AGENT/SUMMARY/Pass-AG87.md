@@ -1,0 +1,4 @@
+- 2025-10-23 17:20 UTC — Pass AG87: Orders quick totals (per current page, UI-only)
+  - Προστέθηκαν μετρητές κατάστασης πάνω από τον πίνακα (υπολογισμός από τα ορατά rows)
+  - E2E: admin-orders-ui-quick-totals.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB/CI.
