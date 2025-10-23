@@ -114,10 +114,8 @@ export default function AdminOrdersMain() {
           }
           // (τοπικό demo: αγνοούμε from/to για απλότητα δεδομένων)
           const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
-        setRows(res); setCount(demo.length);
-        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
-        setIsLoading(false);
-          const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+          setRows(res); setCount(demo.length);
+          const delay1=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay1));
           setIsLoading(false);
           return;
         }
@@ -136,7 +134,7 @@ export default function AdminOrdersMain() {
         const json = await res.json();
         const items = Array.isArray(json.items) ? json.items as Row[] : [];
         setRows(items); setCount(typeof json.count==='number' ? json.count : items.length);
-        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+        const delay2=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay2));
         setIsLoading(false);
       } catch (e:any) {
         setErrNote(e?.message || 'API error'); setUsingApi(false);
@@ -147,7 +145,7 @@ export default function AdminOrdersMain() {
         }
         const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
         setRows(res); setCount(demo.length);
-        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+        const delay3=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay3));
         setIsLoading(false);
       }
     };
