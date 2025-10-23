@@ -53,6 +53,9 @@ export default function AdminOrdersMain() {
   const [toDate, setToDate] = React.useState<string>('');
 
   const [rows, setRows]   = React.useState<Row[]>(LOCAL_DEMO);
+  const [facetTotals, setFacetTotals] = React.useState<Record<string, number> | null>(null);
+  const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
+  const [isFacetLoading, setIsFacetLoading] = React.useState(false);
 
   // Quick totals (per current page)
   const statusOrder = React.useMemo(() => {
@@ -98,6 +101,43 @@ export default function AdminOrdersMain() {
 
   const [count, setCount] = React.useState<number>(LOCAL_DEMO.length);
   const [usingApi, setUsingApi] = React.useState(false);
+
+  const fetchFacets = async () => {
+    try {
+      setIsFacetLoading(true);
+      const u = new URL(window.location.href);
+      const qs = new URLSearchParams();
+      const status = u.searchParams.get('status'); if (status) qs.set('status', status);
+      const q = u.searchParams.get('q'); if (q) qs.set('q', q);
+      const fromDate = u.searchParams.get('fromDate'); if (fromDate) qs.set('fromDate', fromDate);
+      const toDate = u.searchParams.get('toDate'); if (toDate) qs.set('toDate', toDate);
+      const sort = u.searchParams.get('sort') || '-createdAt'; qs.set('sort', sort);
+      // σε demo ή useApi=1, ζήτα demo=1 ώστε να μη χτυπήσει πραγματική DB
+      if (u.searchParams.get('mode')==='demo' || u.searchParams.get('useApi')==='1') qs.set('demo','1');
+      const res = await fetch(`/api/admin/orders/facets?${qs.toString()}`, { cache:'no-store' });
+      if (!res.ok) throw new Error('facets failed');
+      const json = await res.json();
+      setFacetTotals(json.totals || {});
+      setFacetTotalAll(typeof json.total === 'number' ? json.total : null);
+    } catch (e) {
+      setFacetTotals(null);
+      setFacetTotalAll(null);
+    } finally {
+      setIsFacetLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    // Όταν αλλάξουν τα query params στη σελίδα (π.χ. με το form), φέρε νέα facets.
+    fetchFacets();
+    // Παρατηρητής για αλλαγές στο URL (π.χ. pushState από χειρισμούς)
+    const obs = new MutationObserver(() => {});
+    // Δεν έχουμε router hook εδώ — βασιζόμαστε στις ενέργειες του χρήστη που πυροδοτούν reload/replace.
+    // Αν χρειαστεί, θα βάλουμε πιο "γερό" listener σε επόμενο pass.
+    return () => { obs.disconnect(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageSize, sort]); // proxies για re-run — τα πραγματικά φίλτρα είναι στο URL
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [errNote, setErrNote]   = React.useState<string|null>(null);
 
@@ -306,6 +346,24 @@ export default function AdminOrdersMain() {
           ))}
           <div data-testid="total-all" style={{marginLeft:4, fontSize:12, color:'#555'}}>Σύνολο: <strong>{pageTotals.total}</strong></div>
         </div>
+      )}
+
+
+      {/* Facet totals (ALL filtered results) */}
+      {facetTotals && facetTotalAll !== null && (
+        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0'}}>
+          {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
+            <div key={st} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999}}>
+              <span style={{width:8, height:8, borderRadius:999, background:'#10b981'}} aria-hidden />
+              <span style={{fontSize:12}}>{st}</span>
+              <strong style={{fontSize:12}}>{count}</strong>
+            </div>
+          ))}
+          <div data-testid="facet-total-all" style={{marginLeft:4, fontSize:12, color:'#444'}}>Σύνολο (όλα): <strong>{facetTotalAll}</strong></div>
+        </div>
+      )}
+      {isFacetLoading && (
+        <div data-testid="facet-loading" style={{fontSize:12, color:'#777', margin:'6px 0'}}>Φόρτωση συνόλων…</div>
       )}
 
       <div role="table" style={{display:'grid', gap:8}}>
