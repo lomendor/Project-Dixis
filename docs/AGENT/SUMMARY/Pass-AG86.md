@@ -1,0 +1,3 @@
+- 2025-10-23 16:50 UTC — Pass AG86: Gate PG Smoke (main or pg-e2e)
+  - Προστέθηκε job-level if: στο "Smoke Tests"
+  - SOP: docs/AGENT/SOPs/CI-SMOKE-GATING.md
