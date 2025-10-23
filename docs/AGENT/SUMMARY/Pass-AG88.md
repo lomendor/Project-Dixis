@@ -1,0 +1,5 @@
+- 2025-10-23 19:52 UTC — Pass AG88: Orders facet totals (ALL filtered results)
+  - API: `GET /api/admin/orders/facets` γυρίζει counts ανά status + συνολικό πλήθος
+  - UI: chips "Totals (ALL)" πάνω από τον πίνακα
+  - E2E: API + UI tests
+  - Καμία αλλαγή σε schema/DB.
