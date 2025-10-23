@@ -1,0 +1,4 @@
+- 2025-10-23 10:24 UTC — Pass AG84: Preflight typecheck (ops)
+  - Προστέθηκε scripts/preflight.sh
+  - SOP: docs/AGENT/SOPs/PRECHECKS.md
+  - Καμία αλλαγή σε schema/UI/CI.
