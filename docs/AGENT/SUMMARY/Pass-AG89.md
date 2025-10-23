@@ -1,0 +1,4 @@
+- 2025-10-23 21:26 UTC — Pass AG89: Quick filter chips (tap-to-apply status, UI-only)
+  - Τα πράσινα facet chips γίνονται clickable (apply/clear status στο URL)
+  - E2E: admin-orders-ui-filter-chips.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
