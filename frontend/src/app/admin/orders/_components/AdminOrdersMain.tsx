@@ -29,7 +29,11 @@ export default function AdminOrdersMain() {
   const [active, setActive] = React.useState<Status|null>(null);
   const [page, setPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
+  React.useEffect(()=>{try{const r=localStorage.getItem('orders.pageSize.v1'); if(r) setPageSize(Math.max(1,Math.min(100,parseInt(r,10)||10)));}catch{}},[]);
+  React.useEffect(()=>{try{localStorage.setItem('orders.pageSize.v1',String(pageSize));}catch{}},[pageSize]);
   const [sort, setSort] = React.useState<'createdAt'|'-createdAt'>('-createdAt');
+  React.useEffect(()=>{try{const r=localStorage.getItem('orders.sort.v1'); if(r==='createdAt'||r==='-createdAt') setSort(r as any);}catch{}},[]);
+  React.useEffect(()=>{try{localStorage.setItem('orders.sort.v1',sort);}catch{}},[sort]);
   const [mode, setMode] = React.useState<'demo'|'pg'|'sqlite'|'auto'>('auto');
 
   const [q, setQ] = React.useState('');
@@ -66,6 +70,7 @@ export default function AdminOrdersMain() {
 
   const [count, setCount] = React.useState<number>(LOCAL_DEMO.length);
   const [usingApi, setUsingApi] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [errNote, setErrNote]   = React.useState<string|null>(null);
 
   React.useEffect(() => {
@@ -94,6 +99,8 @@ export default function AdminOrdersMain() {
 
   React.useEffect(() => {
     const run = async () => {
+      setIsLoading(true);
+      const startTime=Date.now();
       try {
         const url = new URL(window.location.href);
         const useApi = url.searchParams.get('useApi') === '1';
@@ -107,7 +114,11 @@ export default function AdminOrdersMain() {
           }
           // (τοπικό demo: αγνοούμε from/to για απλότητα δεδομένων)
           const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
-          setRows(res); setCount(demo.length);
+        setRows(res); setCount(demo.length);
+        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+        setIsLoading(false);
+          const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+          setIsLoading(false);
           return;
         }
         const qs = new URLSearchParams();
@@ -124,8 +135,9 @@ export default function AdminOrdersMain() {
         if (!res.ok) throw new Error(`API ${res.status}`);
         const json = await res.json();
         const items = Array.isArray(json.items) ? json.items as Row[] : [];
-        setRows(items);
-        setCount(typeof json.count==='number' ? json.count : items.length);
+        setRows(items); setCount(typeof json.count==='number' ? json.count : items.length);
+        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+        setIsLoading(false);
       } catch (e:any) {
         setErrNote(e?.message || 'API error'); setUsingApi(false);
         let demo = LOCAL_DEMO.filter(o => !active || o.status===active);
@@ -135,6 +147,8 @@ export default function AdminOrdersMain() {
         }
         const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
         setRows(res); setCount(demo.length);
+        const d=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,d));
+        setIsLoading(false);
       }
     };
     run();
@@ -150,6 +164,12 @@ export default function AdminOrdersMain() {
   const onPageSize = (n: number) => { writeParam('pageSize', String(n)); setPageSize(n); setPage(1); };
   const go = (delta: number) => {
     const maxPage = Math.max(1, Math.ceil(count / pageSize));
+
+  const SkeletonRow: React.FC = () => (
+    <div role="row" aria-busy style={{display:'grid', gridTemplateColumns:grid, gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+      {visible.map(c=> <div key={String(c.key)} style={{height:12, borderRadius:6, background:'linear-gradient(90deg,#eee,#f5f5f5,#eee)', backgroundSize:'200% 100%', animation:'s 1.2s linear infinite'}} />)}
+    </div>
+  );
     const next = Math.min(maxPage, Math.max(1, page + delta));
     writeParam('page', String(next)); setPage(next);
   };
@@ -162,6 +182,12 @@ export default function AdminOrdersMain() {
   };
 
   const maxPage = Math.max(1, Math.ceil(count / pageSize));
+
+  const SkeletonRow: React.FC = () => (
+    <div role="row" aria-busy style={{display:'grid', gridTemplateColumns:grid, gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+      {visible.map(c=> <div key={String(c.key)} style={{height:12, borderRadius:6, background:'linear-gradient(90deg,#eee,#f5f5f5,#eee)', backgroundSize:'200% 100%', animation:'s 1.2s linear infinite'}} />)}
+    </div>
+  );
 
   return (
     <main style={{padding:16}}>
@@ -223,8 +249,10 @@ export default function AdminOrdersMain() {
             <div>{o.id}</div><div>{o.customer}</div><div>{o.total}</div><div><StatusChip status={o.status} /></div>
           </div>
         ))}
-        {rows.length===0 && <div data-testid="no-results" style={{padding:16, color:'#666'}}>Καμία παραγγελία για τα επιλεγμένα φίλτρα.</div>}
+        {rows.length===0 && <div data-testid="no-results" style={{padding:24, color:'#666', border:'1px dashed #ccc', borderRadius:8}}>Καμία παραγγελία για τα επιλεγμένα φίλτρα.</div>}
       </div>
+    
+      <style>{`@keyframes s{0%{background-position:0 0}100%{background-position:-200% 0}}`}</style>
     </main>
   );
 }

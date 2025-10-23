@@ -1,0 +1,6 @@
+- 2025-10-23 00:16 UTC — Pass AG82: Orders loading/empty states + persist pageSize/sort (UI-only)
+  - Loading skeleton με min 150ms για ομαλό UX
+  - Βελτιωμένο empty state (highlighted)
+  - Persist: pageSize & sort σε localStorage
+  - E2E: admin-orders-ui-loading-empty.spec.ts
+  - No schema/DB/CI changes.
