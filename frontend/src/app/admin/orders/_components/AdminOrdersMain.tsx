@@ -222,6 +222,28 @@ export default function AdminOrdersMain() {
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>
           Εξαγωγή CSV
         </button>
+        
+        <button
+          type="button"
+          onClick={()=>{
+            const url = new URL(window.location.href);
+            const qs = new URLSearchParams();
+            const status = url.searchParams.get('status'); if (status) qs.set('status', status);
+            const q = url.searchParams.get('q'); if (q) qs.set('q', q);
+            const fromDate = url.searchParams.get('fromDate'); if (fromDate) qs.set('fromDate', fromDate);
+            const toDate = url.searchParams.get('toDate'); if (toDate) qs.set('toDate', toDate);
+            const sort = url.searchParams.get('sort') || '-createdAt'; qs.set('sort', sort);
+            if (url.searchParams.get('mode')==='demo' || url.searchParams.get('useApi')==='1') qs.set('demo','1');
+            const a = document.createElement('a');
+            a.href = `/api/admin/orders/export?${qs.toString()}`;
+            a.rel = 'noopener';
+            document.body.appendChild(a); a.click(); a.remove();
+          }}
+          data-testid="export-csv-full"
+          style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}
+        >
+          Εξαγωγή CSV (Full)
+        </button>
         <label style={{fontSize:12}}>
           Page size:&nbsp;
           <select value={pageSize} onChange={e=>onPageSize(parseInt(e.target.value,10))} data-testid="page-size">
