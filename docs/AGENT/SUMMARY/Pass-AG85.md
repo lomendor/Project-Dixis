@@ -1,0 +1,5 @@
+- 2025-10-23 11:34 UTC — Pass AG85: Orders Full CSV export (filters-aware)
+  - API: `GET /api/admin/orders/export` επιστρέφει CSV με όλους τους filtered rows
+  - UI: κουμπί "Εξαγωγή CSV (Full)" στη σελίδα Παραγγελιών
+  - E2E: API + UI tests
+  - Καμία αλλαγή σε schema/DB.
