@@ -37,6 +37,33 @@ export default function AdminOrdersMain() {
   const [toDate, setToDate] = React.useState<string>('');
 
   const [rows, setRows]   = React.useState<Row[]>(LOCAL_DEMO);
+
+  // Column visibility (persisted)
+  type ColKey = 'id'|'customer'|'total'|'status';
+  const DEFAULT_COLS: Record<ColKey, boolean> = { id:true, customer:true, total:true, status:true };
+  const [cols, setCols] = React.useState<Record<ColKey, boolean>>(DEFAULT_COLS);
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('orders.visibleColumns.v1');
+      if (raw) setCols({ ...DEFAULT_COLS, ...JSON.parse(raw) });
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  React.useEffect(() => {
+    try { localStorage.setItem('orders.visibleColumns.v1', JSON.stringify(cols)); } catch {}
+  }, [cols]);
+
+  const COLS = [
+    { key:'id',       label:'Order',      width:'1.2fr' },
+    { key:'customer', label:'Πελάτης',    width:'2fr'   },
+    { key:'total',    label:'Σύνολο',     width:'1fr'   },
+    { key:'status',   label:'Κατάσταση',  width:'1.2fr' },
+  ] as const;
+
+  const visible = COLS.filter(c => cols[c.key as ColKey]);
+  const grid = visible.map(c=>c.width).join(' ');
+
   const [count, setCount] = React.useState<number>(LOCAL_DEMO.length);
   const [usingApi, setUsingApi] = React.useState(false);
   const [errNote, setErrNote]   = React.useState<string|null>(null);
@@ -161,6 +188,19 @@ export default function AdminOrdersMain() {
           </select>
         </label>
       </form>
+
+      <div style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap'}}>
+        {COLS.map(c=>(
+          <label key={c.key} style={{fontSize:12}}>
+            <input
+              type="checkbox"
+              checked={cols[c.key as ColKey]}
+              onChange={e=>setCols(v=>({ ...v, [c.key]: e.target.checked }))}
+              data-testid={`col-toggle-${c.key}`}
+            />&nbsp;{c.label}
+          </label>
+        ))}
+      </div>
 
       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', margin:'8px 0'}}>
         <div data-testid="results-count" style={{fontSize:12,color:'#555'}}>Σύνολο: {count} · Σελίδα {page}/{maxPage}</div>
