@@ -1,0 +1,4 @@
+- 2025-10-23 00:07 UTC — Pass AG81: Orders table column visibility (UI-only)
+  - Toggle columns (Order/Customer/Total/Status) με persistence (localStorage)
+  - E2E: admin-orders-ui-columns.spec.ts
+  - No schema/CI changes.
