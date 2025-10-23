@@ -351,9 +351,9 @@ export default function AdminOrdersMain() {
 
       {/* Facet totals (ALL filtered results) */}
       {facetTotals && facetTotalAll !== null && (
-        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0'}}>
+        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
-            <div key={st} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999}}>
+            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
               <span style={{width:8, height:8, borderRadius:999, background:'#10b981'}} aria-hidden />
               <span style={{fontSize:12}}>{st}</span>
               <strong style={{fontSize:12}}>{count}</strong>
