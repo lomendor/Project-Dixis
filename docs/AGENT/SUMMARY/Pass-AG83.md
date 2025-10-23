@@ -1,0 +1,5 @@
+- 2025-10-23 09:26 UTC — Pass AG83: Orders CSV export (current view, UI-only)
+  - Προστέθηκε κουμπί "Εξαγωγή CSV" που κατεβάζει το τρέχον αποτέλεσμα (όπως εμφανίζεται στη σελίδα)
+  - CSV headers: Order, Πελάτης, Σύνολο, Κατάσταση
+  - E2E: admin-orders-ui-csv.spec.ts (έλεγχος download ονόματος & περιεχομένου)
+  - Καμία αλλαγή σε schema/DB/CI.

@@ -16,6 +16,18 @@ const LOCAL_DEMO: Row[] = [
 ];
 
 export default function AdminOrdersMain() {
+  const toCSV = (rows: Row[]) => {
+    const esc = (v: any) => `"${String(v).replace(/"/g, '""')}"`;
+    const head = ['Order','Πελάτης','Σύνολο','Κατάσταση'];
+    const lines = [head, ...rows.map(r => [r.id, r.customer, r.total, r.status])].map(r => r.map(esc).join(','));
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const ts = new Date().toISOString().slice(0,10);
+    const a = document.createElement('a');
+    a.href = url; a.download = `orders_${ts}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  };
   const options = [
     { key:'pending',   label:'Σε αναμονή' },
     { key:'paid',      label:'Πληρωμή'    },
@@ -204,6 +216,11 @@ export default function AdminOrdersMain() {
         <button type="button" onClick={toggleSort} data-testid="toggle-sort"
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>
           Ταξινόμηση: {sort==='-createdAt' ? 'Νεότερα πρώτα' : 'Παλαιότερα πρώτα'}
+        </button>
+        
+        <button type="button" onClick={()=>toCSV(rows)} data-testid="export-csv"
+          style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>
+          Εξαγωγή CSV
         </button>
         <label style={{fontSize:12}}>
           Page size:&nbsp;
