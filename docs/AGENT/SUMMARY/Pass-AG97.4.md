@@ -1,0 +1,5 @@
+- 2025-10-24 20:15 UTC — Pass AG97.4: PG E2E CI fix
+  - Στο job **pg-e2e** τρέχουμε `prisma db push` αντί για `migrate deploy` (ephemeral DB)
+  - Προστέθηκε `DIXIS_AGG_PROVIDER=pg` στο env του job
+  - Διορθώθηκε το path του E2E test: `tests/pg-e2e/orders-facets-aggregation.spec.ts`
+  - Δεν αλλάζει τίποτα στα production/dev workflows (εκεί παραμένει migrate)
