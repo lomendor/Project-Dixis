@@ -56,6 +56,14 @@ export default function AdminOrdersMain() {
   const [facetTotals, setFacetTotals] = React.useState<Record<string, number> | null>(null);
   const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
   const [isFacetLoading, setIsFacetLoading] = React.useState(false);
+  const [density, setDensity] = React.useState<'normal'|'compact'>('normal');
+  React.useEffect(() => {
+    try { if (typeof window !== 'undefined') {
+      const v = window.localStorage.getItem('orders:ui:density');
+      if (v === 'compact' || v === 'normal') setDensity(v as any);
+    } } catch {}
+  }, []);
+
   const activeStatus = React.useMemo(() => {
     if (typeof window === 'undefined') return null;
     const u = new URL(window.location.href);
@@ -354,6 +362,20 @@ export default function AdminOrdersMain() {
       )}
 
 
+      {/* Density toggle */}
+      <div style={{display:'flex', gap:8, alignItems:'center', margin:'6px 0'}}>
+        <button type="button" data-testid="density-toggle"
+          onClick={()=>{
+            setDensity(d=>{ const nx = d==='compact' ? 'normal' : 'compact';
+              try { if (typeof window!=='undefined') window.localStorage.setItem('orders:ui:density', nx); } catch {}
+              return nx; });
+          }}
+          style={{fontSize:12, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:6, cursor:'pointer'}}
+        >
+          {density==='compact' ? 'Κανονική προβολή' : 'Συμπαγής πίνακας'}
+        </button>
+      </div>
+
       {/* Facet totals (ALL filtered results) */}
       {facetTotals && facetTotalAll !== null && (
         <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
@@ -378,7 +400,13 @@ export default function AdminOrdersMain() {
         <div data-testid="facet-loading" style={{fontSize:12, color:'#777', margin:'6px 0'}}>Φόρτωση συνόλων…</div>
       )}
 
-      <div role="table" style={{display:'grid', gap:8}}>
+      <div role="table" data-testid="density-wrap" data-density={density} style={{display:'grid', gap:(density===\'compact\'?4:8)}}>
+      {/* AG94 density styles */}
+      <style>{`
+        [data-density="compact"] [role="row"] { font-size: 12px; }
+        [data-density="normal"] [role="row"] { font-size: 14px; }
+      `}</style>
+
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
           <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
         </div>

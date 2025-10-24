@@ -1,0 +1,4 @@
+- 2025-10-24 08:46 UTC — Pass AG94: Compact row density toggle (UI-only)
+  - Προστέθηκε εναλλαγή κανονικής/συμπαγούς πυκνότητας στον πίνακα Orders (state + localStorage)
+  - E2E: admin-orders-ui-density.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
