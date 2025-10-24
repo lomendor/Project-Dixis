@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { performance } from 'node:perf_hooks';
 import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
@@ -26,7 +27,20 @@ export async function GET(req: NextRequest) {
         sort: url.searchParams.get('sort') || undefined,
       };
 
+      // AG105 — Performance timing (env-guarded)
+      const t0 = performance.now();
       const { totals, total } = await provider.getFacetTotals(q);
+      const t1 = performance.now();
+
+      if (process.env.DIXIS_METRICS === '1') {
+        const qLen = q.q ? q.q.length : 0;
+        const status = q.status || 'any';
+        const fromD = q.fromDate ? '1' : '0';
+        const toD = q.toDate ? '1' : '0';
+        // ΜΗΝ log-άρεις την q τιμή (PII). Μόνο μήκος & flags.
+        console.info(`[AG105][facets] provider=pg ms=${(t1-t0).toFixed(1)} total=${total} status=${status} qLen=${qLen} fromDate=${fromD} toDate=${toD}`);
+      }
+
       // Σημείωση: κρατάμε το ίδιο σχήμα απόκρισης
       return NextResponse.json({ totals, total, provider: 'pg' }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
     } catch (e) {
