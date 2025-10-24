@@ -400,12 +400,12 @@ export default function AdminOrdersMain() {
         <div data-testid="facet-loading" style={{fontSize:12, color:'#777', margin:'6px 0'}}>Φόρτωση συνόλων…</div>
       )}
 
-      <div role="table" data-testid="density-wrap" data-density={density} style={{display:'grid', gap:(density===\'compact\'?4:8)}}>
-      {/* AG94 density styles */}
-      <style>{`
-        [data-density="compact"] [role="row"] { font-size: 12px; }
-        [data-density="normal"] [role="row"] { font-size: 14px; }
-      `}</style>
+      <div role="table" data-testid="density-wrap" data-density={density} style={{display:'grid', gap:(density==='compact'?4:8)}}>
+        {/* AG94 density styles */}
+        <style>{`
+          [data-density="compact"] [role="row"] { font-size: 12px; }
+          [data-density="normal"] [role="row"] { font-size: 14px; }
+        `}</style>
 
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
           <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
