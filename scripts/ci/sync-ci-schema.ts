@@ -9,7 +9,12 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+// AG97.5 — ESM __dirname polyfill
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const REPO_ROOT = resolve(__dirname, '../..');
 const SCHEMA_PG = resolve(REPO_ROOT, 'frontend/prisma/schema.prisma');
@@ -53,8 +58,8 @@ function syncSchemas() {
   console.log('[sync-ci-schema] ✅ schema.ci.prisma synced successfully');
 }
 
-// Execute if run directly
-if (require.main === module) {
+// Execute if run directly (ESM-safe check)
+if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     syncSchemas();
     process.exit(0);
