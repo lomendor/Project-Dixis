@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useOrdersFilters } from '../_hooks/useOrdersFilters';
 import StatusChip from '@/components/StatusChip';
 import FilterChips from '@/components/FilterChips';
 
@@ -64,11 +65,9 @@ export default function AdminOrdersMain() {
     } } catch {}
   }, []);
 
-  const activeStatus = React.useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    const u = new URL(window.location.href);
-    return u.searchParams.get('status');
-  }, [pageSize, sort]);
+  // AG95: URL source of truth for filters via hook
+  const { filters, paramString, setFilter, clearFilter } = useOrdersFilters();
+  const activeStatus = filters.status || null;
 
   // Quick totals (per current page)
   const statusOrder = React.useMemo(() => {
@@ -118,14 +117,14 @@ export default function AdminOrdersMain() {
   const fetchFacets = async () => {
     try {
       setIsFacetLoading(true);
-      const u = new URL(window.location.href);
       const qs = new URLSearchParams();
-      const status = u.searchParams.get('status'); if (status) qs.set('status', status);
-      const q = u.searchParams.get('q'); if (q) qs.set('q', q);
-      const fromDate = u.searchParams.get('fromDate'); if (fromDate) qs.set('fromDate', fromDate);
-      const toDate = u.searchParams.get('toDate'); if (toDate) qs.set('toDate', toDate);
-      const sort = u.searchParams.get('sort') || '-createdAt'; qs.set('sort', sort);
+      if (filters.status) qs.set('status', filters.status);
+      if (filters.q) qs.set('q', filters.q);
+      if (filters.fromDate) qs.set('fromDate', filters.fromDate);
+      if (filters.toDate) qs.set('toDate', filters.toDate);
+      qs.set('sort', filters.sort || '-createdAt');
       // σε demo ή useApi=1, ζήτα demo=1 ώστε να μη χτυπήσει πραγματική DB
+      const u = new URL(window.location.href);
       if (u.searchParams.get('mode')==='demo' || u.searchParams.get('useApi')==='1') qs.set('demo','1');
       const res = await fetch(`/api/admin/orders/facets?${qs.toString()}`, { cache:'no-store' });
       if (!res.ok) throw new Error('facets failed');
@@ -141,15 +140,10 @@ export default function AdminOrdersMain() {
   };
 
   React.useEffect(() => {
-    // Όταν αλλάξουν τα query params στη σελίδα (π.χ. με το form), φέρε νέα facets.
+    // AG95: refetch facets when filters change (via paramString from hook)
     fetchFacets();
-    // Παρατηρητής για αλλαγές στο URL (π.χ. pushState από χειρισμούς)
-    const obs = new MutationObserver(() => {});
-    // Δεν έχουμε router hook εδώ — βασιζόμαστε στις ενέργειες του χρήστη που πυροδοτούν reload/replace.
-    // Αν χρειαστεί, θα βάλουμε πιο "γερό" listener σε επόμενο pass.
-    return () => { obs.disconnect(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageSize, sort]); // proxies για re-run — τα πραγματικά φίλτρα είναι στο URL
+  }, [paramString]); // paramString captures all filter changes from URL
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [errNote, setErrNote]   = React.useState<string|null>(null);
@@ -378,7 +372,7 @@ export default function AdminOrdersMain() {
 
       {/* Facet totals (ALL filtered results) */}
       {facetTotals && facetTotalAll !== null && (
-        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
+        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}} onClick={(e)=>{ const t=(e.target as HTMLElement); const clear=t.closest("[data-clear]") as HTMLElement|null; const chip=t.closest("[data-st]") as HTMLElement|null; if(clear){ clearFilter("status"); return; } if(!chip) return; const st=chip.getAttribute("data-st"); if(!st) return; if((filters.status||"")===st){ clearFilter("status"); } else { setFilter("status", st); } }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
             <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st}
           style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
