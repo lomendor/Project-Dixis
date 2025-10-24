@@ -66,7 +66,7 @@ export default function AdminOrdersMain() {
   }, []);
 
   // AG95: URL source of truth for filters via hook
-  const { filters, paramString, setFilter, clearFilter } = useOrdersFilters();
+  const { filters, paramString, setFilter, clearFilter, clearAll } = useOrdersFilters();
   const activeStatus = filters.status || null;
 
   // AG96: Local input state for debounced search
@@ -434,6 +434,28 @@ export default function AdminOrdersMain() {
         <style>{`/* AG99 shimmer */
           @keyframes ag99-shimmer{ 0%{background-position:0 0} 100%{background-position:-200% 0} }
         `}</style>
+        <style>{`/* AG100 empty-state styles */
+          .empty-wrap{border:1px dashed #e5e5e5;border-radius:12px;padding:18px;display:flex;gap:12px;align-items:flex-start;background:#fafafa}
+          .empty-title{font-weight:600;margin:0 0 6px 0}
+          .empty-desc{margin:0 0 12px 0;color:#666}
+          .empty-btn{border:1px solid #e5e5e5;border-radius:8px;padding:6px 10px;cursor:pointer;background:#fff}
+          .empty-btn:hover{border-color:#dcdcdc}
+        `}</style>
+
+        {/* AG100 — Empty State (zero results) */}
+        {(!isFacetLoading && facetTotalAll === 0) && (
+          <div data-testid="orders-empty-state" className="empty-wrap" role="status" aria-live="polite">
+            <div style={{fontSize:22}}>🗂️</div>
+            <div>
+              <p className="empty-title">Δεν βρέθηκαν αποτελέσματα</p>
+              <p className="empty-desc">Κανένα αποτέλεσμα για τα τρέχοντα φίλτρα. Μπορείς να αλλάξεις τα κριτήρια ή να τα καθαρίσεις.</p>
+              <button type="button" className="empty-btn" data-testid="orders-empty-clear"
+                onClick={()=>{ clearAll?.({ replace:true }); }}>
+                Καθαρισμός φίλτρων
+              </button>
+            </div>
+          </div>
+        )}
 
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
           <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
