@@ -1,0 +1,4 @@
+- 2025-10-25 00:30 UTC — Pass AG105: Facets timing metrics (env-guarded logs)
+  - Μετράμε χρόνους για PG aggregations στο /api/admin/orders/facets
+  - Ενεργοποιείται ΜΟΝΟ όταν: DIXIS_AGG_PROVIDER=pg ΚΑΙ DIXIS_METRICS=1 (εκτός demo)
+  - Δεν αλλάζει η απόκριση API· logs μόνο στο server (χωρίς PII)
