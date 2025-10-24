@@ -28,6 +28,7 @@ jobs:
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dixis_e2e?schema=public
       DIXIS_DATA_SRC: pg
+      DIXIS_AGG_PROVIDER: pg
       PG_E2E: "1"
 
     steps:
@@ -48,9 +49,9 @@ jobs:
         working-directory: frontend
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma migrate (PG)
+      - name: Prisma db push (PG ephemeral)
         working-directory: frontend
-        run: pnpm prisma migrate deploy
+        run: pnpm prisma db push --skip-generate --accept-data-loss
 
       - name: Seed (dev seed works for PG too)
         working-directory: frontend
@@ -62,4 +63,4 @@ jobs:
 
       - name: E2E (PG gated)
         working-directory: frontend
-        run: pnpm exec playwright test tests/e2e/api-admin-orders-pg-e2e.spec.ts --reporter=line
+        run: pnpm exec playwright test tests/pg-e2e/orders-facets-aggregation.spec.ts --reporter=line
