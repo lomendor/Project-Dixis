@@ -57,6 +57,7 @@ export default function AdminOrdersMain() {
   const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
   const [isFacetLoading, setIsFacetLoading] = React.useState(false);
   const activeStatus = React.useMemo(() => {
+    if (typeof window === 'undefined') return null;
     const u = new URL(window.location.href);
     return u.searchParams.get('status');
   }, [pageSize, sort]);
