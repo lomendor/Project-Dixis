@@ -1,0 +1,4 @@
+- 2025-10-24 17:45 UTC — Pass AG97.1: PG facet provider (Prisma groupBy), NOT wired
+  - Υλοποιήθηκαν: buildWhereClause, transformToFacetTotals, createPgFacetProvider(getPrisma)
+  - Το getFacetProvider() παραμένει DEMO (δεν αλλάζει runtime συμπεριφορά)
+  - Καμία επαφή με API/DB στο runtime — προετοιμασία για AG97.2 wiring & AG97.3 pg-e2e
