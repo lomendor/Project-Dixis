@@ -287,7 +287,7 @@ export default function AdminOrdersMain() {
       <form onSubmit={onSubmitFilters} style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', margin:'8px 0 12px 0'}}>
         <FilterChips options={options as any} active={active} onChange={onChangeStatus} />
         <input
-          value={qInput} onChange={e=>setQInput(e.target.value)} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
+          value={qInput} onChange={e=>setQInput(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFilter('q', qInput||undefined, { replace:true }); setFilter('page', 1, { replace:true }); } }} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', fontSize:12}}
         />
         <label style={{fontSize:12}}>Από:&nbsp;<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)} /></label>
@@ -390,10 +390,15 @@ export default function AdminOrdersMain() {
 
       {/* Facet totals (ALL filtered results) */}
       {facetTotals && facetTotalAll !== null && (
-        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}} onClick={(e)=>{ const t=(e.target as HTMLElement); const clear=t.closest("[data-clear]") as HTMLElement|null; const chip=t.closest("[data-st]") as HTMLElement|null; if(clear){ clearFilter("status"); return; } if(!chip) return; const st=chip.getAttribute("data-st"); if(!st) return; if((filters.status||"")===st){ clearFilter("status"); } else { setFilter("status", st); } }}>
+        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}}
+          /* AG98 chips keyboard */
+          onKeyDown={(e)=>{ const t=(e.target as HTMLElement).closest('[data-st]') as HTMLElement|null; if(!t) return;
+            if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const st=t.getAttribute('data-st'); if(!st) return;
+              if((filters.status||'')===st){ clearFilter('status'); } else { setFilter('status', st); } }}}
+          onClick={(e)=>{ const t=(e.target as HTMLElement); const clear=t.closest("[data-clear]") as HTMLElement|null; const chip=t.closest("[data-st]") as HTMLElement|null; if(clear){ clearFilter("status"); return; } if(!chip) return; const st=chip.getAttribute("data-st"); if(!st) return; if((filters.status||"")===st){ clearFilter("status"); } else { setFilter("status", st); } }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
-            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st}
-          style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
+            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st} role='button' tabIndex={0}
+          style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', outline:'none', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
               <span style={{width:8, height:8, borderRadius:999, background:'#10b981'}} aria-hidden />
               <span style={{fontSize:12}}>{st}</span>
               <strong style={{fontSize:12}}>{count}</strong>
@@ -417,6 +422,9 @@ export default function AdminOrdersMain() {
         <style>{`
           [data-density="compact"] [role="row"] { font-size: 12px; }
           [data-density="normal"] [role="row"] { font-size: 14px; }
+        `}</style>
+        <style>{`/* AG98 focus ring */
+          [data-st][role='button']:focus{ box-shadow: 0 0 0 3px rgba(16,185,129,0.35); }
         `}</style>
 
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
