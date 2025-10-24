@@ -1,0 +1,5 @@
+- 2025-10-24 09:15 UTC — Pass AG95: useOrdersFilters hook (URL source of truth & router sync)
+  - Νέο hook useOrdersFilters με set/clear & URL merge, back/forward-safe
+  - Refactor AdminOrdersMain να χρησιμοποιεί το hook (χωρίς window.assign)
+  - E2E: filters sync (chip apply/back) + q persistence
+  - Καμία αλλαγή σε backend/schema/DB.
