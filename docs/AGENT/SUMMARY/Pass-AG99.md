@@ -1,0 +1,6 @@
+- 2025-10-24 09:55 UTC — Pass AG99: Facet loading skeleton (UI-only)
+  - Shimmer skeleton (3 pills) κατά το facet refetch
+  - 120ms delay στο setIsFacetLoading(false) για ομαλό perceived performance
+  - Skeleton εμφανίζεται με data-testid="facet-skeleton"
+  - E2E: admin-orders-ui-facet-skeleton.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
