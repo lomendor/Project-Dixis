@@ -153,7 +153,8 @@ export default function AdminOrdersMain() {
       setFacetTotals(null);
       setFacetTotalAll(null);
     } finally {
-      setIsFacetLoading(false);
+      // AG99: 120ms delay για ομαλό UX
+      setTimeout(() => setIsFacetLoading(false), 120);
     }
   };
 
@@ -388,8 +389,15 @@ export default function AdminOrdersMain() {
         </button>
       </div>
 
+      {/* AG99 Facet skeleton */}
+      {isFacetLoading && (
+        <div data-testid="facet-skeleton" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', padding:'6px 0'}}>
+          {[1,2,3].map(i=> <div key={i} style={{height:24, width:80, borderRadius:999, background:'linear-gradient(90deg,#eee,#f5f5f5,#eee)', backgroundSize:'200% 100%', animation:'ag99-shimmer 1.2s linear infinite'}} />)}
+        </div>
+      )}
+
       {/* Facet totals (ALL filtered results) */}
-      {facetTotals && facetTotalAll !== null && (
+      {!isFacetLoading && facetTotals && facetTotalAll !== null && (
         <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}}
           /* AG98 chips keyboard */
           onKeyDown={(e)=>{ const t=(e.target as HTMLElement).closest('[data-st]') as HTMLElement|null; if(!t) return;
@@ -413,9 +421,6 @@ export default function AdminOrdersMain() {
           <div data-testid="facet-total-all" style={{marginLeft:4, fontSize:12, color:'#444'}}>Σύνολο (όλα): <strong>{facetTotalAll}</strong></div>
         </div>
       )}
-      {isFacetLoading && (
-        <div data-testid="facet-loading" style={{fontSize:12, color:'#777', margin:'6px 0'}}>Φόρτωση συνόλων…</div>
-      )}
 
       <div role="table" data-testid="density-wrap" data-density={density} style={{display:'grid', gap:(density==='compact'?4:8)}}>
         {/* AG94 density styles */}
@@ -425,6 +430,9 @@ export default function AdminOrdersMain() {
         `}</style>
         <style>{`/* AG98 focus ring */
           [data-st][role='button']:focus{ box-shadow: 0 0 0 3px rgba(16,185,129,0.35); }
+        `}</style>
+        <style>{`/* AG99 shimmer */
+          @keyframes ag99-shimmer{ 0%{background-position:0 0} 100%{background-position:-200% 0} }
         `}</style>
 
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
