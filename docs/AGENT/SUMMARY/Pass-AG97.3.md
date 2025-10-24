@@ -1,0 +1,4 @@
+- 2025-10-24 19:45 UTC — Pass AG97.3: PG E2E seeds + aggregation test
+  - CI-only seed route: `/api/ci/seed/orders` (guards: CI/TEST env ή header token)
+  - PG E2E test: `tests/pg-e2e/orders-facets-aggregation.spec.ts`
+  - Ελέγχει provider='pg' και ακριβή totals από το seeded dataset
