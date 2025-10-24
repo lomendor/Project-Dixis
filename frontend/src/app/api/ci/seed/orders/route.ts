@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await prisma.order.createMany({ data: rows, skipDuplicates: true });
+  await prisma.order.createMany({ data: rows });
 
   const total = await prisma.order.count();
   return Response.json({ ok:true, dataset, total }, { status: 200 });
