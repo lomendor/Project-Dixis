@@ -1,0 +1,5 @@
+- 2025-10-24 20:45 UTC — Pass AG97.7: Trigger pg-e2e validation (docs-only)
+  - Σκοπός: να εκτελεστεί το job **pg-e2e** μετά τις διορθώσεις AG97.3–97.6
+  - Καμία αλλαγή σε runtime/DB. Μόνο validation.
+  - Test: `admin-orders-facets-aggregation.pg-e2e.spec.ts`
+  - Expected: Green pg-e2e job validates full PG aggregation flow
