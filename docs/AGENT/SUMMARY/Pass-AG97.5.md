@@ -1,0 +1,5 @@
+- 2025-10-24 20:25 UTC — Pass AG97.5: Fix ESM in scripts/ci/sync-ci-schema.ts
+  - Πρόσθεση polyfill για __dirname με import.meta.url (Node ESM)
+  - Αντικατάσταση require.main με import.meta.url check (ESM-safe)
+  - Hardening imports: dirname από path
+  - Στόχος: να ξεκινά ο Playwright webServer στο pg-e2e
