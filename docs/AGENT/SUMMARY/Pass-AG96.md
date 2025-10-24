@@ -1,0 +1,5 @@
+- 2025-10-24 09:39 UTC — Pass AG96: Debounced search + router.replace (UI-only)
+  - Debounce 300ms στο πεδίο αναζήτησης και navigation με router.replace
+  - Μηδενισμός history spam, reset page=1 σε αλλαγή q
+  - E2E: admin-orders-ui-debounced-search.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.

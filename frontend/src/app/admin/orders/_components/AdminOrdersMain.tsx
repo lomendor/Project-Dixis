@@ -69,6 +69,24 @@ export default function AdminOrdersMain() {
   const { filters, paramString, setFilter, clearFilter } = useOrdersFilters();
   const activeStatus = filters.status || null;
 
+  // AG96: Local input state for debounced search
+  const [qInput, setQInput] = React.useState<string>('');
+  React.useEffect(()=>{ setQInput(filters.q || ''); }, [filters.q]);
+
+  /* AG96 debounce search */
+  React.useEffect(() => {
+    const h = setTimeout(() => {
+      // Μόνο αν αλλάζει η τιμή σε σχέση με το filters.q
+      if ((filters.q || '') !== qInput) {
+        // replace για να μην δημιουργούμε πολλά history entries
+        setFilter('q', qInput || undefined, { replace: true });
+        // reset page στην 1 όταν αλλάζει το query
+        setFilter('page', 1, { replace: true });
+      }
+    }, 300);
+    return () => clearTimeout(h);
+  }, [qInput, filters.q, setFilter]);
+
   // Quick totals (per current page)
   const statusOrder = React.useMemo(() => {
     const seen = new Map<string, number>();
@@ -269,13 +287,13 @@ export default function AdminOrdersMain() {
       <form onSubmit={onSubmitFilters} style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', margin:'8px 0 12px 0'}}>
         <FilterChips options={options as any} active={active} onChange={onChangeStatus} />
         <input
-          value={q} onChange={e=>setQ(e.target.value)} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
+          value={qInput} onChange={e=>setQInput(e.target.value)} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', fontSize:12}}
         />
         <label style={{fontSize:12}}>Από:&nbsp;<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)} /></label>
         <label style={{fontSize:12}}>Έως:&nbsp;<input type="date" value={toDate} onChange={e=>setToDate(e.target.value)} /></label>
         <button type="submit" style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>Εφαρμογή</button>
-        <button type="button" onClick={()=>{ setQ(''); setFromDate(''); setToDate(''); writeParam('q',null); writeParam('fromDate',null); writeParam('toDate',null); setPage(1); }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12}}>Καθαρισμός</button>
+        <button type="button" onClick={()=>{ setQInput(''); setQ(''); setFromDate(''); setToDate(''); writeParam('q',null); writeParam('fromDate',null); writeParam('toDate',null); setPage(1); }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12}}>Καθαρισμός</button>
         <button type="button" onClick={toggleSort} data-testid="toggle-sort"
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', background:'#fff', cursor:'pointer', fontSize:12, fontWeight:600}}>
           Ταξινόμηση: {sort==='-createdAt' ? 'Νεότερα πρώτα' : 'Παλαιότερα πρώτα'}
