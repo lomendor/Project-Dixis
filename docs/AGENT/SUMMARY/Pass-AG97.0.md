@@ -1,0 +1,4 @@
+- 2025-10-24 14:59 UTC — Pass AG97.0: Facet Aggregation Provider (skeleton, no behavior change)
+  - Προστέθηκε σκελετός provider με interface & demo fallback.
+  - Δεν έγινε wiring στο API route ακόμη — καμία αλλαγή σε runtime.
+  - Προετοιμασία για AG97.1 (Postgres aggregations με pg-e2e).
