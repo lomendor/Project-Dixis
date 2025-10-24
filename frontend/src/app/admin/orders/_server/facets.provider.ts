@@ -1,5 +1,3 @@
-'use server';
-
 export type FacetQuery = {
   status?: string;
   q?: string;
