@@ -1,0 +1,6 @@
+- 2025-10-24 09:48 UTC — Pass AG98: A11y & Keyboard UX (chips + Enter-to-search)
+  - Facet chips: πλήρης keyboard υποστήριξη (role=button, tabIndex, Enter/Space)
+  - Focus ring για ορατή εστίαση
+  - Enter-to-search: άμεσο router.replace & reset page=1
+  - E2E: keyboard toggle & Enter-to-search
+  - Καμία αλλαγή σε backend/schema/DB.
