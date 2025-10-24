@@ -49,9 +49,11 @@ jobs:
         working-directory: frontend
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma db push (PG ephemeral)
+      - name: Prisma generate & db push (PG ephemeral)
         working-directory: frontend
-        run: pnpm prisma db push --skip-generate --accept-data-loss
+        run: |
+          pnpm prisma generate
+          pnpm prisma db push --accept-data-loss
 
       - name: Seed (dev seed works for PG too)
         working-directory: frontend
