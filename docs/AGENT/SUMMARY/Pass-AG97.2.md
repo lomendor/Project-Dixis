@@ -1,0 +1,9 @@
+- 2025-10-24 18:15 UTC — Pass AG97.2: Wire PG provider to facets API (env-guarded)
+  - Modified: frontend/src/app/api/admin/orders/facets/route.ts
+  - Added import: createPgFacetProvider, FacetQuery
+  - Logic: if DIXIS_AGG_PROVIDER=pg AND NOT demo mode → try PG aggregation
+  - Dynamic import @prisma/client to avoid compile-time dependency
+  - Fallback: any error → continues with existing demo flow
+  - Response includes 'provider: pg' field for observability
+  - Zero risk: demo paths unchanged, PG only active when explicitly enabled
+  - Next: AG97.3 — pg-e2e label + CI seed data for E2E aggregation tests

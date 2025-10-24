@@ -1,10 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
+import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const forceDemo = url.searchParams.get('demo') === '1';
+
+  // AG97.2 — Env-guarded PG provider wiring (demo-safe)
+  const isDemo = forceDemo || url.searchParams.get('mode') === 'demo';
+  const wantPg = process.env.DIXIS_AGG_PROVIDER === 'pg';
+
+  // Μόνο όταν ΘΕΛΟΥΜΕ PG και ΔΕΝ είμαστε σε demo path, δοκίμασε PG aggregation.
+  if (wantPg && !isDemo) {
+    try {
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      const provider = createPgFacetProvider(() => prisma);
+
+      const q: FacetQuery = {
+        status: url.searchParams.get('status') || undefined,
+        q: url.searchParams.get('q') || undefined,
+        fromDate: url.searchParams.get('fromDate') || undefined,
+        toDate: url.searchParams.get('toDate') || undefined,
+        sort: url.searchParams.get('sort') || undefined,
+      };
+
+      const { totals, total } = await provider.getFacetTotals(q);
+      // Σημείωση: κρατάμε το ίδιο σχήμα απόκρισης
+      return NextResponse.json({ totals, total, provider: 'pg' }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    } catch (e) {
+      // Αν κάτι πάει στραβά (π.χ. δεν υπάρχει @prisma/client), συνεχίζουμε με το υφιστάμενο demo flow
+      console.warn('AG97.2 fallback to demo:', e);
+    }
+  }
   const status = url.searchParams.get('status') || undefined;
   const q = url.searchParams.get('q') || undefined;
   const fromDate = url.searchParams.get('fromDate') || undefined;
