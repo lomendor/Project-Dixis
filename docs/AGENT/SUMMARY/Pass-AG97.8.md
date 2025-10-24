@@ -1,0 +1,5 @@
+- 2025-10-24 21:00 UTC — Pass AG97.8: Add CI project for admin/API tests
+  - Προσθήκη `api-admin-ci` project στο Playwright config για CI mode
+  - testMatch: `['**/admin-*.spec.ts', '**/api-*.spec.ts']`
+  - Enables discovery of PG E2E test in CI environment
+  - Καμία αλλαγή σε runtime/DB, μόνο Playwright project configuration

@@ -81,6 +81,15 @@ export default defineConfig({
         // No storageState - forces UI login flow
       },
       testMatch: ['**/*@no-auth*.spec.ts', '**/auth-edge-cases.spec.ts']
+    },
+    // CI: API/Admin tests (AG97.8 - PG E2E support)
+    {
+      name: 'api-admin-ci',
+      use: {
+        ...devices['Desktop Chrome']
+        // No storageState - API tests use direct requests
+      },
+      testMatch: ['**/admin-*.spec.ts', '**/api-*.spec.ts']
     }
   ] : [
     // Local: Consumer project with API-first storageState (Phase-4)
