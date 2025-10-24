@@ -1,0 +1,5 @@
+- 2025-10-24 12:57 UTC — Pass AG100: Empty state (zero results) + Clear filters
+  - Εμφάνιση καθαρού μηνύματος όταν τα φιλτραρισμένα αποτελέσματα είναι 0
+  - Κουμπί "Καθαρισμός φίλτρων" που αφαιρεί q/status και κάνει replace
+  - E2E: admin-orders-ui-empty-state.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
