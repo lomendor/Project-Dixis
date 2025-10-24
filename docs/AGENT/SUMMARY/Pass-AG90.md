@@ -1,0 +1,4 @@
+- 2025-10-24 07:27 UTC — Pass AG90: Highlight active status chip & Clear (UI-only)
+  - Active highlight στα facet chips + κουμπί "Καθαρισμός"
+  - E2E: admin-orders-ui-filter-chips-active.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.

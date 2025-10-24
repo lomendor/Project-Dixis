@@ -56,6 +56,10 @@ export default function AdminOrdersMain() {
   const [facetTotals, setFacetTotals] = React.useState<Record<string, number> | null>(null);
   const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
   const [isFacetLoading, setIsFacetLoading] = React.useState(false);
+  const activeStatus = React.useMemo(() => {
+    const u = new URL(window.location.href);
+    return u.searchParams.get('status');
+  }, [pageSize, sort]);
 
   // Quick totals (per current page)
   const statusOrder = React.useMemo(() => {
@@ -353,12 +357,19 @@ export default function AdminOrdersMain() {
       {facetTotals && facetTotalAll !== null && (
         <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
-            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
+            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st}
+          style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
               <span style={{width:8, height:8, borderRadius:999, background:'#10b981'}} aria-hidden />
               <span style={{fontSize:12}}>{st}</span>
               <strong style={{fontSize:12}}>{count}</strong>
             </div>
           ))}
+          {activeStatus && (
+            <div data-clear="1" data-testid="facet-chip-clear"
+                 style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999, cursor:'pointer'}}>
+              Καθαρισμός ✕
+            </div>
+          )}
           <div data-testid="facet-total-all" style={{marginLeft:4, fontSize:12, color:'#444'}}>Σύνολο (όλα): <strong>{facetTotalAll}</strong></div>
         </div>
       )}
