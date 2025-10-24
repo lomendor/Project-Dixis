@@ -1,0 +1,4 @@
+- 2025-10-25 00:15 UTC — Pass AG104: Shared Prisma client & wire in facets API (env-guarded)
+  - Προστέθηκε singleton Prisma client στο `frontend/src/server/db/prisma.ts`
+  - Το facets API χρησιμοποιεί shared client όταν `DIXIS_AGG_PROVIDER=pg` (εκτός demo)
+  - Καμία αλλαγή σε schema/DB. Χαμηλό ρίσκο, μικρό perf/stability κέρδος

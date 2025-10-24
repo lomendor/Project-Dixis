@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
+import { prisma } from '@/server/db/prisma';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -14,8 +15,7 @@ export async function GET(req: NextRequest) {
   // Μόνο όταν ΘΕΛΟΥΜΕ PG και ΔΕΝ είμαστε σε demo path, δοκίμασε PG aggregation.
   if (wantPg && !isDemo) {
     try {
-      const { PrismaClient } = await import('@prisma/client');
-      const prisma = new PrismaClient();
+      // AG104 — Use shared Prisma client singleton
       const provider = createPgFacetProvider(() => prisma);
 
       const q: FacetQuery = {
