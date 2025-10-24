@@ -26,7 +26,16 @@ export async function POST(req: NextRequest) {
   if (dataset === 'facets-basic') {
     // 4 pending, 2 shipped, 1 cancelled, 3 processing
     const mk = (id: string, status: string, buyerName: string) => ({
-      id, status, buyerName, createdAt: new Date(), updatedAt: new Date()
+      id,
+      status,
+      buyerName,
+      buyerPhone: '6900000000',
+      shippingLine1: 'Test Address 1',
+      shippingCity: 'Athens',
+      shippingPostal: '10000',
+      total: 100.0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     rows.push(
       mk('P-101','pending','Alice'),
