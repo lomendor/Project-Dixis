@@ -1,0 +1,5 @@
+- 2025-10-24 13:59 UTC — Pass AG101: Filters helper text (UI-only)
+  - Εμφανίζει συνοπτικά τα ενεργά φίλτρα (status, q, date, sort) πάνω από τον πίνακα
+  - Κουμπί "Καθαρισμός" που κάνει replace και αφαιρεί όλα τα filters
+  - E2E: admin-orders-ui-filters-helper.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
