@@ -1,0 +1,6 @@
+- 2025-10-24 21:00 UTC — Pass AG97.8: Add CI project for admin/API tests + rename test
+  - Προσθήκη `api-admin-ci` project στο Playwright config για CI mode
+  - testMatch: `['**/admin-*.spec.ts', '**/api-*.spec.ts']`
+  - Μετονομασία test: `orders-facets-aggregation.pg-e2e.spec.ts` → `api-admin-orders-facets-aggregation.pg-e2e.spec.ts`
+  - Ενημέρωση pg-e2e workflow path
+  - Enables discovery of PG E2E test in CI environment (filename now matches api-* pattern)
