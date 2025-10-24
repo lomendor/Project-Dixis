@@ -441,6 +441,13 @@ export default function AdminOrdersMain() {
           .empty-btn{border:1px solid #e5e5e5;border-radius:8px;padding:6px 10px;cursor:pointer;background:#fff}
           .empty-btn:hover{border-color:#dcdcdc}
         `}</style>
+        <style>{`/* AG101 filters helper styles */
+          .filters-helper{font-size:12px;color:#6b7280;display:flex;gap:8px;align-items:center;margin:4px 0 8px}
+          .filters-helper strong{color:#374151}
+          .filters-helper .pill{border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;background:#fff}
+          .filters-helper .clear{border:1px solid #e5e7eb;border-radius:6px;padding:3px 8px;background:#fff;cursor:pointer}
+          .filters-helper .clear:hover{border-color:#d1d5db}
+        `}</style>
 
         {/* AG100 — Empty State (zero results) */}
         {(!isFacetLoading && facetTotalAll === 0) && (
@@ -456,6 +463,28 @@ export default function AdminOrdersMain() {
             </div>
           </div>
         )}
+
+        {/* AG101 — Filters helper */}
+        {(() => {
+          const parts: string[] = [];
+          if (filters.status) parts.push(`Κατάσταση: ${filters.status}`);
+          if (filters.q) parts.push(`Αναζήτηση: "${filters.q}"`);
+          if (filters.fromDate || filters.toDate) {
+            const a = filters.fromDate || '—';
+            const b = filters.toDate || '—';
+            parts.push(`Ημ/νίες: ${a} → ${b}`);
+          }
+          if (filters.sort) parts.push(`Ταξινόμηση: ${filters.sort}`);
+          const hasAny = parts.length > 0;
+          return hasAny ? (
+            <div data-testid="filters-helper" className="filters-helper" aria-live="polite">
+              <strong>Ενεργά φίλτρα:</strong>
+              {parts.map((t, i) => <span className="pill" key={i}>{t}</span>)}
+              <button type="button" className="clear" data-testid="filters-clear-all"
+                onClick={()=> clearAll?.({ replace:true })}>Καθαρισμός</button>
+            </div>
+          ) : null;
+        })()}
 
         <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
           <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
