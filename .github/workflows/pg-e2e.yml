@@ -65,4 +65,4 @@ jobs:
 
       - name: E2E (PG gated)
         working-directory: frontend
-        run: pnpm exec playwright test tests/pg-e2e/orders-facets-aggregation.spec.ts --reporter=line
+        run: pnpm exec playwright test tests/e2e/orders-facets-aggregation.pg-e2e.spec.ts --reporter=line

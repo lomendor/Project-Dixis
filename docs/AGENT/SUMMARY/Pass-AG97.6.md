@@ -1,0 +1,4 @@
+- 2025-10-24 20:35 UTC — Pass AG97.6: Fix Playwright test discovery for pg-e2e
+  - Μετακίνηση PG E2E spec από `tests/pg-e2e` σε `tests/e2e` (Playwright testDir)
+  - Ενημέρωση pg-e2e workflow για το νέο path
+  - Καμία άλλη αλλαγή σε runtime/DB/CI
