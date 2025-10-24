@@ -288,7 +288,7 @@ export default function AdminOrdersMain() {
       <form onSubmit={onSubmitFilters} style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', margin:'8px 0 12px 0'}}>
         <FilterChips options={options as any} active={active} onChange={onChangeStatus} />
         <input
-          value={qInput} onChange={e=>setQInput(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFilter('q', qInput||undefined, { replace:true }); setFilter('page', 1, { replace:true }); } }} placeholder="Αναζήτηση (Order ID ή Πελάτης)"
+          value={qInput} onChange={e=>setQInput(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFilter('q', qInput||undefined, { replace:true }); setFilter('page', 1, { replace:true }); } }} placeholder="Αναζήτηση (Order ID ή Πελάτης)" title="Πληκτρολόγησε και περίμενε ~0.3s για αυτόματη εφαρμογή, ή πάτα Enter για άμεση αναζήτηση"
           style={{padding:'6px 10px', borderRadius:8, border:'1px solid #ddd', fontSize:12}}
         />
         <label style={{fontSize:12}}>Από:&nbsp;<input type="date" value={fromDate} onChange={e=>setFromDate(e.target.value)} /></label>
@@ -377,6 +377,7 @@ export default function AdminOrdersMain() {
 
       {/* Density toggle */}
       <div style={{display:'flex', gap:8, alignItems:'center', margin:'6px 0'}}>
+        <span className="help-badge" data-testid="search-help" title="Debounced αναζήτηση 300ms. Το Enter κάνει άμεσο replace & μηδενίζει τη σελίδα.">i</span>
         <button type="button" data-testid="density-toggle"
           onClick={()=>{
             setDensity(d=>{ const nx = d==='compact' ? 'normal' : 'compact';
@@ -397,6 +398,10 @@ export default function AdminOrdersMain() {
       )}
 
       {/* Facet totals (ALL filtered results) */}
+      <div className="help-row" style={{margin:'4px 0'}}>
+        <span className="help-badge" data-testid="facet-chips-help" title="Κάνε κλικ ή Enter σε ένα chip για να φιλτράρεις. Κλικ ξανά για καθαρισμό.">?</span>
+        <span>Συμβουλή: τα chips ενεργοποιούν/απενεργοποιούν γρήγορα τα φίλτρα κατάστασης.</span>
+      </div>
       {!isFacetLoading && facetTotals && facetTotalAll !== null && (
         <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}}
           /* AG98 chips keyboard */
@@ -405,7 +410,7 @@ export default function AdminOrdersMain() {
               if((filters.status||'')===st){ clearFilter('status'); } else { setFilter('status', st); } }}}
           onClick={(e)=>{ const t=(e.target as HTMLElement); const clear=t.closest("[data-clear]") as HTMLElement|null; const chip=t.closest("[data-st]") as HTMLElement|null; if(clear){ clearFilter("status"); return; } if(!chip) return; const st=chip.getAttribute("data-st"); if(!st) return; if((filters.status||"")===st){ clearFilter("status"); } else { setFilter("status", st); } }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
-            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st} role='button' tabIndex={0}
+            <div key={st} data-st={st} data-testid={`facet-chip-${st}`} title="Κάνε κλικ/Enter για εναλλαγή αυτού του φίλτρου" data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st} role='button' tabIndex={0}
           style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', outline:'none', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
               <span style={{width:8, height:8, borderRadius:999, background:'#10b981'}} aria-hidden />
               <span style={{fontSize:12}}>{st}</span>
@@ -447,6 +452,10 @@ export default function AdminOrdersMain() {
           .filters-helper .pill{border:1px solid #e5e7eb;border-radius:999px;padding:2px 8px;background:#fff}
           .filters-helper .clear{border:1px solid #e5e7eb;border-radius:6px;padding:3px 8px;background:#fff;cursor:pointer}
           .filters-helper .clear:hover{border-color:#d1d5db}
+        `}</style>
+        <style>{`/* AG102 help styles */
+          .help-badge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:999px;border:1px solid #e5e7eb;font-size:10px;line-height:1;background:#fff;color:#6b7280;cursor:help}
+          .help-row{display:flex;align-items:center;gap:6px;color:#6b7280;font-size:12px}
         `}</style>
 
         {/* AG100 — Empty State (zero results) */}

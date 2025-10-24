@@ -1,0 +1,4 @@
+- 2025-10-24 14:22 UTC — Pass AG102: Help tooltips (chips & search)
+  - Προστέθηκαν help badges και title tooltips στα chips και στο πεδίο αναζήτησης
+  - E2E: admin-orders-ui-tooltips.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.
