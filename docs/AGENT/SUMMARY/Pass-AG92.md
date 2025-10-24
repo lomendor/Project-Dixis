@@ -1,0 +1,4 @@
+- 2025-10-24 07:56 UTC — Pass AG92: Sticky summary header (facet/quick totals)
+  - Τα blocks με σύνολα μένουν ορατά στο scroll (position: sticky)
+  - E2E: admin-orders-ui-sticky-summary.spec.ts
+  - Καμία αλλαγή σε backend/schema/DB.

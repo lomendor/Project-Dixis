@@ -341,7 +341,7 @@ export default function AdminOrdersMain() {
 
       {/* Quick totals (τρέχουσα σελίδα) */}
       {pageTotals.total > 0 && (
-        <div data-testid="quick-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'6px 0 10px 0'}}>
+        <div data-testid="quick-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'6px 0 10px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}}>
           {statusOrder.map(st => (
             <div key={st} data-testid={`total-${st}`} style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid #e5e5e5', borderRadius:999}}>
               <span style={{width:8, height:8, borderRadius:999, background:'#0ea5e9'}} aria-hidden />
@@ -356,7 +356,7 @@ export default function AdminOrdersMain() {
 
       {/* Facet totals (ALL filtered results) */}
       {facetTotals && facetTotalAll !== null && (
-        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
+        <div data-testid="facet-totals" style={{display:'flex', gap:8, flexWrap:'wrap', margin:'8px 0 4px 0', position:'sticky', top:0, zIndex:20, background:'#fff', padding:'6px 0', borderBottom:'1px solid #eee'}} onClick={(e)=>{ const t=(e.target as HTMLElement).closest("[data-st]") as HTMLElement|null; if(!t) return; const st=t.getAttribute("data-st"); if(!st) return; const u=new URL(window.location.href); const cur=u.searchParams.get("status"); if(cur===st){ u.searchParams.delete("status"); } else { u.searchParams.set("status", st); } window.location.assign(u.toString()); }}>
           {Object.entries(facetTotals).sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]))).map(([st,count])=>(
             <div key={st} data-st={st} data-testid={`facet-chip-${st}`} data-active={(activeStatus===st)?'1':'0'} aria-pressed={activeStatus===st}
           style={{display:'inline-flex', alignItems:'center', gap:6, padding:'4px 8px', border:'1px solid', borderColor:(activeStatus===st)?'#10b981':'#e5e5e5', background:(activeStatus===st)?'#ecfdf5':'#fff', borderRadius:999, cursor:'pointer', userSelect:'none'}}>
