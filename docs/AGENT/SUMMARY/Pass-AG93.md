@@ -1,0 +1,4 @@
+- 2025-10-24 08:36 UTC — Pass AG93: Quiet ESLint warnings in tests
+  - Προστέθηκαν ESLint overrides για αρχεία tests/e2e (ή fallback σε .eslintignore)
+  - Μείωση "θορύβου" στα CI logs ώστε να ξεχωρίζουν τα σημαντικά findings
+  - Καμία αλλαγή σε λειτουργικότητα ή schema/DB.
