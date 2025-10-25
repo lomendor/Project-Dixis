@@ -1,0 +1,4 @@
+- 2025-10-25 09:10 UTC — Pass AG112.3: Repair migration — injected CREATE TABLE "Product" & "Order"
+  - AG112.2 έβαλε OrderItem, αλλά OrderItem FK → Order & Product (που δεν υπήρχαν!)
+  - Inject πλήρες DDL για Product + Order στην `20251006000000_add_orderitem_snapshots`
+  - Σειρά δημιουργίας: Product (FK→Producer) → Order → OrderItem (FK→Order,Product)
