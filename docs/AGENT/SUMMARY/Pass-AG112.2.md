@@ -1,0 +1,4 @@
+- 2025-10-25 07:35 UTC — Pass AG112.2: Repair migration (inject CREATE TABLE "OrderItem")
+  - Η init migration δεν έχει OrderItem table → η 3η migration προσπαθεί ALTER χωρίς CREATE
+  - Inject πλήρες DDL (table + indexes + FKs) στην `20251006000000_add_orderitem_snapshots`
+  - Idempotent (IF NOT EXISTS) για ασφάλεια σε όλα τα περιβάλλοντα
