@@ -65,11 +65,11 @@ jobs:
       - name: Prisma generate
         run: pnpm prisma generate
 
-      - name: Prisma migrate status (prod schema)
-        run: pnpm prisma migrate status
-
       - name: Prisma migrate deploy (prod schema)
         run: pnpm prisma migrate deploy
+
+      - name: Prisma migrate status (post-deploy check)
+        run: pnpm prisma migrate status
 
       - name: Validate schema
         run: pnpm prisma db validate
