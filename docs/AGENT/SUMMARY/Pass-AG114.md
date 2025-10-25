@@ -1,0 +1,4 @@
+- 2025-10-25 15:40 UTC — Pass AG114: Staging Migration Dry-Run (workflow + docs)
+  - .github/workflows/staging-migration.yml (manual workflow με confirm gate)
+  - docs/OPS/RUNBOOKS/DB-MIGRATION-STAGING.md (comprehensive staging runbook)
+  - Ασφαλής testing των migrations πριν την production
