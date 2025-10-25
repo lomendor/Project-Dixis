@@ -24,8 +24,8 @@ export function makeKey(q: {
 
 export function get(key: string, now = Date.now()): CacheValue | undefined {
   const e = store.get(key)
-  if (!e) return
-  if (e.expiresAt <= now) { store.delete(key); return }
+  if (!e) return undefined
+  if (e.expiresAt <= now) { store.delete(key); return undefined }
   return e.value
 }
 
