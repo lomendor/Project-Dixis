@@ -1,0 +1,4 @@
+- 2025-10-25 05:14 UTC — Pass AG110: Migration Clinic (label-triggered CI)
+  - Νέο workflow: .github/workflows/migration-clinic.yml
+  - Τρέχει Postgres service, Prisma generate/status/deploy/validate πάνω σε καθαρή DB
+  - Trigger: label `migration-clinic` στο PR ή manual workflow_dispatch

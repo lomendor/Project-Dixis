@@ -1,0 +1,72 @@
+name: Migration Clinic
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+    branches: [ main ]
+
+jobs:
+  clinic:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       contains(join(fromJSON(toJSON(github.event.pull_request.labels)).*.name, ' '), 'migration-clinic'))
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dixis_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare DATABASE_URL / SHADOW_DATABASE_URL
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dixis_ci?schema=public" >> $GITHUB_ENV
+          echo "SHADOW_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dixis_ci_shadow?schema=shadow" >> $GITHUB_ENV
+          psql "postgresql://postgres:postgres@localhost:5432/postgres" -c 'CREATE DATABASE dixis_ci_shadow;'
+
+      - name: Prisma generate
+        run: pnpm prisma generate
+
+      - name: Prisma migrate status (prod schema)
+        run: pnpm prisma migrate status
+
+      - name: Prisma migrate deploy (prod schema)
+        run: pnpm prisma migrate deploy
+
+      - name: Validate schema
+        run: pnpm prisma db validate
+
+      - name: List migrations
+        run: ls -la prisma/migrations || true
+
+      - name: Upload migration artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-clinic-artifacts
+          path: |
+            prisma/migrations
