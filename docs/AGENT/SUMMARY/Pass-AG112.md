@@ -1,0 +1,4 @@
+- 2025-10-25 06:55 UTC — Pass AG112: Migration Clinic hardening
+  - Αφαιρέθηκε pnpm caching (πιθανή αιτία αρρυθμίας στο Setup Node)
+  - Explicit corepack/pnpm setup, diag workspace step
+  - Όλα τα Prisma βήματα παραμένουν στο frontend/
