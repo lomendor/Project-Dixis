@@ -14,6 +14,10 @@ jobs:
        contains(join(fromJSON(toJSON(github.event.pull_request.labels)).*.name, ' '), 'migration-clinic'))
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: frontend
+
     services:
       postgres:
         image: postgres:15
@@ -36,9 +40,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Enable corepack
         run: corepack enable
+
+      - name: PNPM version
+        run: pnpm -v
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
@@ -68,5 +76,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: migration-clinic-artifacts
-          path: |
-            prisma/migrations
+          path: frontend/prisma/migrations
