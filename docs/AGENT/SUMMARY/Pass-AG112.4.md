@@ -1,0 +1,5 @@
+- 2025-10-25 10:00 UTC — Pass AG112.4: Remove publicToken from CREATE TABLE "Order" in migration 3
+  - AG112.3 added Order table WITH publicToken column
+  - Migration 7 (`20251010000000_add_order_public_token`) tries to ADD publicToken → conflict!
+  - Removed publicToken column + indexes from AG112.3's CREATE TABLE "Order"
+  - Let migration 7 add publicToken as originally intended by migration history
