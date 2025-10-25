@@ -1,0 +1,3 @@
+- 2025-10-25 05:55 UTC — Pass AG111: Migration Clinic fix (frontend working-dir + pnpm cache)
+  - Το Clinic τρέχει πλέον από `frontend/`, με σωστό `cache-dependency-path: frontend/pnpm-lock.yaml`
+  - Prisma εντολές και artifacts paths ευθυγραμμισμένα με `frontend/prisma`
