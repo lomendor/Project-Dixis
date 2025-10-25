@@ -4,7 +4,7 @@ import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
 import { prisma } from '@/server/db/prisma';
-import { get as getCache, set as setCache, makeKey, DEFAULT_TTL_MS } from '../../../../server/cache/facets.cache';
+import { get as getCache, set as setCache, makeKey, DEFAULT_TTL_MS } from '@/server/cache/facets.cache';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
