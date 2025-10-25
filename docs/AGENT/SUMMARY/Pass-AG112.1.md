@@ -1,0 +1,4 @@
+- 2025-10-25 07:15 UTC — Pass AG112.1: Migration Clinic command order fix
+  - Swap migrate deploy/status: deploy ΠΡΙΝ status (clean DB = no _prisma_migrations table)
+  - AG112 έπεσε στο status → "relation does not exist"
+  - Τώρα: generate → deploy (δημιουργεί table) → status (επαλήθευση) → validate
