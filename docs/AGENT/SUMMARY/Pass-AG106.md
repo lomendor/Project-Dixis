@@ -1,0 +1,4 @@
+- 2025-10-25 00:45 UTC — Pass AG106: Facets 60s in-memory cache (env-guarded)
+  - Προστέθηκε απλό TTL cache (default 60s, παραμετρικό με DIXIS_CACHE_TTL_MS)
+  - Ενεργοποιείται μόνο όταν DIXIS_CACHE=1 και DIXIS_AGG_PROVIDER=pg (εκτός demo)
+  - Δεν αλλάζει το API contract· προαιρετικό debug header: X-Dixis-Cache=hit/miss

@@ -4,6 +4,7 @@ import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
 import { prisma } from '@/server/db/prisma';
+import { get as getCache, set as setCache, makeKey, DEFAULT_TTL_MS } from '@/server/cache/facets.cache';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -29,7 +30,20 @@ export async function GET(req: NextRequest) {
 
       // AG105 — Performance timing (env-guarded)
       const t0 = performance.now();
-      const { totals, total } = await provider.getFacetTotals(q);
+      let totals: Record<string, number>; let total: number; let cacheHdr = '';
+      // AG106 — In-memory cache (env-guarded)
+      if (process.env.DIXIS_CACHE === '1') {
+        const key = makeKey(q);
+        const hit = getCache(key);
+        if (hit) {
+          totals = hit.totals; total = hit.total; cacheHdr = 'hit';
+        } else {
+          const res = await provider.getFacetTotals(q); totals = res.totals; total = res.total; cacheHdr = 'miss';
+          setCache(key, { totals, total }, DEFAULT_TTL_MS);
+        }
+      } else {
+        const res = await provider.getFacetTotals(q); totals = res.totals; total = res.total;
+      }
       const t1 = performance.now();
 
       if (process.env.DIXIS_METRICS === '1') {
@@ -42,7 +56,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Σημείωση: κρατάμε το ίδιο σχήμα απόκρισης
-      return NextResponse.json({ totals, total, provider: 'pg' }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+      return NextResponse.json({ totals, total, provider: 'pg' }, { status: 200, headers: { 'Cache-Control': 'no-store', ...(process.env.DIXIS_CACHE==='1' ? { 'X-Dixis-Cache': cacheHdr || 'off' } : {}) } });
     } catch (e) {
       // Αν κάτι πάει στραβά (π.χ. δεν υπάρχει @prisma/client), συνεχίζουμε με το υφιστάμενο demo flow
       console.warn('AG97.2 fallback to demo:', e);
