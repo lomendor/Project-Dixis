@@ -32,9 +32,9 @@ DO $$ BEGIN
 END $$;
 
 -- CreateTable Order (injected by AG112.3 - missing from init migration)
+-- Note: publicToken column will be added by migration 20251010000000_add_order_public_token
 CREATE TABLE IF NOT EXISTS "Order" (
     "id" TEXT NOT NULL,
-    "publicToken" TEXT NOT NULL,
     "buyerPhone" TEXT NOT NULL,
     "buyerName" TEXT NOT NULL,
     "shippingLine1" TEXT NOT NULL,
@@ -49,11 +49,9 @@ CREATE TABLE IF NOT EXISTS "Order" (
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex for Order
-CREATE UNIQUE INDEX IF NOT EXISTS "Order_publicToken_key" ON "Order"("publicToken");
+-- CreateIndex for Order (publicToken indexes will be added by migration 7)
 CREATE INDEX IF NOT EXISTS "Order_buyerPhone_createdAt_idx" ON "Order"("buyerPhone", "createdAt");
 CREATE INDEX IF NOT EXISTS "Order_status_createdAt_idx" ON "Order"("status", "createdAt");
-CREATE INDEX IF NOT EXISTS "Order_publicToken_idx" ON "Order"("publicToken");
 
 -- CreateTable OrderItem (injected by AG112.2 - missing from init migration)
 CREATE TABLE IF NOT EXISTS "OrderItem" (
