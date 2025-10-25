@@ -33,20 +33,25 @@ jobs:
           --health-retries=10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node (no cache)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - name: Enable corepack
-        run: corepack enable
+      - name: Enable corepack & setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
 
-      - name: PNPM version
-        run: pnpm -v
+      - name: Diag workspace
+        run: |
+          echo "pwd=" && pwd
+          echo "ls -la (frontend)" && ls -la
+          echo "ls -la (repo root)" && ls -la ..
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
