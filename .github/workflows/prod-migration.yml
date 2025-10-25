@@ -1,0 +1,86 @@
+name: Production Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type EXACTLY: DIXIS-PROD-OK'
+        required: true
+        default: 'TYPE_HERE'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'DIXIS-PROD-OK' }}
+
+    concurrency:
+      group: prod-migration
+      cancel-in-progress: false
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable corepack & pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
+
+      - name: Verify secrets
+        env:
+          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          if [ -z "${DATABASE_URL_PROD:-}" ]; then
+            echo "❌ Missing secret: DATABASE_URL_PROD"
+            echo "Please add DATABASE_URL_PROD to repository secrets"
+            exit 1
+          fi
+          echo "✅ DATABASE_URL_PROD is set"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma generate
+
+      - name: Prisma migrate deploy (PRODUCTION)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma migrate deploy
+
+      - name: Prisma migrate status (post-deployment)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma migrate status
+
+      - name: Prisma validate (post-deployment)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma validate
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Production migration completed successfully!"
+          echo ""
+          echo "Next steps:"
+          echo "  1. Verify application health endpoints"
+          echo "  2. Check application logs for errors"
+          echo "  3. Test critical user flows"
+          echo "  4. Monitor database performance"

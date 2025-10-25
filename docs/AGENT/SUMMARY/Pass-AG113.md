@@ -1,0 +1,5 @@
+- 2025-10-25 12:51 UTC — Pass AG113: Production Migration Runbook (docs + safe script + manual CI)
+  - docs/OPS/RUNBOOKS/DB-MIGRATION-PROD.md (comprehensive runbook)
+  - scripts/db/migrate_prod.sh (διπλή επιβεβαίωση για safety)
+  - .github/workflows/prod-migration.yml (manual workflow με confirm gate)
+  - Τίποτα δεν τρέχει αυτόματα σε production — όλα χειροκίνητα με επιβεβαίωση
