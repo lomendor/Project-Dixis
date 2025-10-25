@@ -72,7 +72,7 @@ jobs:
         run: pnpm prisma migrate status
 
       - name: Validate schema
-        run: pnpm prisma db validate
+        run: pnpm prisma validate
 
       - name: List migrations
         run: ls -la prisma/migrations || true

@@ -1,0 +1,3 @@
+- 2025-10-25 10:26 UTC — Pass AG112.5: Fix Migration Clinic (use 'prisma validate' instead of 'prisma db validate')
+  - Διορθώθηκε το validation step ώστε να μη ρίχνει το job μετά την επιτυχή εφαρμογή migrations.
+  - AG112.4 migrations επιβεβαιώθηκαν 100% επιτυχείς (all 7 migrations passed).
