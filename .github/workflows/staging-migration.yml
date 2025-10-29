@@ -1,5 +1,4 @@
 name: Staging Migration
-
 on:
   workflow_dispatch:
     inputs:
@@ -7,35 +6,30 @@ on:
         description: 'Type EXACTLY: DIXIS-STAGING-OK'
         required: true
         default: 'TYPE_HERE'
-
 jobs:
   migrate:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.confirm == 'DIXIS-STAGING-OK' }}
-
     concurrency:
       group: staging-migration
       cancel-in-progress: false
-
     defaults:
       run:
         working-directory: frontend
-
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Enable corepack & pnpm
         run: |
           corepack enable
           corepack prepare pnpm@9 --activate
           pnpm -v
-
       - name: Verify staging secret
         env:
           DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
@@ -46,41 +40,47 @@ jobs:
             exit 1
           fi
           echo "✅ DATABASE_URL_STAGING is set"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
+      - name: Sanity: print target DB (sanitized)
+        run: |
+          node -e "const u=new URL(process.env.DATABASE_URL); const db=u.pathname.slice(1); console.log(`Host=${u.hostname} DB=${db} sslmode=${u.searchParams.get('sslmode')}`)"
+      - name: Wait for Neon (retry SELECT 1)
+        run: |
+          for i in {1..24}; do
+            pnpm prisma db execute --stdin <<<'SELECT 1;' && exit 0
+            echo '…retry ('"$i"') in 5s'
+            sleep 5
+          done
+          echo 'DB unreachable'
+          exit 1
       - name: Prisma generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma generate
-
       - name: Prisma migrate deploy (STAGING)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma migrate deploy
-
       - name: Prisma migrate status (post-deployment)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma migrate status
-
       - name: Prisma validate (post-deployment)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma validate
-
       - name: Summary
         if: success()
         run: |
           echo "✅ Staging migration completed successfully!"
           echo ""
           echo "Next steps:"
-          echo "  1. Test application on staging environment"
-          echo "  2. Run smoke tests on critical flows"
-          echo "  3. If all OK, proceed to production migration"
-          echo "  4. Follow production runbook: docs/OPS/RUNBOOKS/DB-MIGRATION-PROD.md"
+          echo " 1. Test application on staging environment"
+          echo " 2. Run smoke tests on critical flows"
+          echo " 3. If all OK, proceed to production migration"
+          echo " 4. Follow production runbook: docs/OPS/RUNBOOKS/DB-MIGRATION-PROD.md"
