@@ -56,6 +56,23 @@ jobs:
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma generate
 
+      - name: Sanity (print host/db)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          node -e "const u=new URL(process.env.DATABASE_URL); console.log('Host='+u.hostname,'DB='+u.pathname.slice(1),'sslmode='+u.searchParams.get('sslmode'))"
+
+      - name: Wait for Neon (prod)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          for i in {1..24}; do
+            echo "SELECT 1;" | pnpm prisma db execute --stdin --url "$DATABASE_URL" && exit 0
+            echo "Neon not ready yet ($i/24); retrying in 5s..."
+            sleep 5
+          done
+          echo "Neon didn't respond in time"; exit 1
+
       - name: Prisma migrate deploy (PRODUCTION)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
