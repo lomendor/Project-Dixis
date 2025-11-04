@@ -32,20 +32,62 @@ jobs:
 
       - name: Enable corepack & pnpm
         run: |
+          set -e
           corepack enable
           corepack prepare pnpm@9 --activate
           pnpm -v
 
-      - name: Verify secrets
+      - name: Verify secret presence
         env:
           DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
         run: |
           if [ -z "${DATABASE_URL_PROD:-}" ]; then
             echo "❌ Missing secret: DATABASE_URL_PROD"
-            echo "Please add DATABASE_URL_PROD to repository secrets"
             exit 1
           fi
-          echo "✅ DATABASE_URL_PROD is set"
+          echo "✅ DATABASE_URL_PROD exists"
+
+      - name: Sanity (print host/db)  # never prints password
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          set -e
+          node -e "const u=new URL(process.env.DATABASE_URL); console.log('Host='+u.hostname,'DB='+decodeURIComponent(u.pathname.slice(1)),'sslmode='+u.searchParams.get('sslmode'))"
+
+      - name: Install Postgres client (psql)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Wait & probe Neon (pg_isready, up to 10m)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          set -e
+          HOST="$(node -e "const u=new URL(process.env.DATABASE_URL); process.stdout.write(u.hostname)")"
+          DB="$(node -e "const u=new URL(process.env.DATABASE_URL); process.stdout.write(decodeURIComponent(u.pathname.slice(1)))")"
+          for i in $(seq 1 120); do
+            echo "[probe $i/120] pg_isready $HOST:5432 db=$DB ..."
+            if pg_isready -h "$HOST" -p 5432 -d "$DB" >/dev/null 2>&1; then
+              echo "Neon is ready ✅"
+              echo "Waiting 15s for Neon to fully stabilize..."
+              sleep 15
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Warm-up keep-awake (30s with psql SELECT 1)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          set -e
+          for i in $(seq 1 6); do
+            echo "[warmup $i/6] SELECT 1 ..."
+            psql "$DATABASE_URL" -c "SELECT 1" >/dev/null
+            sleep 5
+          done
+          echo "Warm-up done."
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -55,41 +97,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           PRISMA_HIDE_UPDATE_MESSAGE: 1
         run: pnpm prisma generate
-
-      - name: Sanity (print host/db)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-        run: |
-          node -e "const u=new URL(process.env.DATABASE_URL); console.log('Host='+u.hostname,'DB='+u.pathname.slice(1),'sslmode='+u.searchParams.get('sslmode'))"
-
-      - name: Install Postgres client (psql) + netcat
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y postgresql-client netcat-openbsd
-
-      - name: Network quick check (TCP 5432)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-        run: |
-          set -e
-          H=$(node -e "console.log(new URL(process.env.DATABASE_URL).hostname)")
-          echo "[nc] probing $H:5432 ..."
-          nc -zv "$H" 5432
-
-      - name: Wait & probe Neon (pg_isready, up to 10m)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-        run: |
-          set -e
-          echo "[probe] using pg_isready against full DATABASE_URL ..."
-          for i in $(seq 1 120); do
-            if pg_isready -d "$DATABASE_URL" >/dev/null 2>&1; then
-              echo "Neon is ready ✅"
-              break
-            fi
-            echo "[probe $i/120] waiting 5s..."
-            sleep 5
-          done
 
       - name: Prisma migrate deploy (PRODUCTION)
         env:
@@ -113,9 +120,4 @@ jobs:
         if: success()
         run: |
           echo "✅ Production migration completed successfully!"
-          echo ""
-          echo "Next steps:"
-          echo "  1. Verify application health endpoints"
-          echo "  2. Check application logs for errors"
-          echo "  3. Test critical user flows"
-          echo "  4. Monitor database performance"
+          echo "Next: verify health endpoints & run smoke."
