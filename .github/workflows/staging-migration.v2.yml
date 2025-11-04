@@ -1,0 +1,108 @@
+name: Staging Migration (v2)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type EXACTLY: DIXIS-STAGING-OK'
+        required: true
+        default: 'TYPE_HERE'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'DIXIS-STAGING-OK' }}
+
+    concurrency:
+      group: staging-migration-v2
+      cancel-in-progress: false
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable corepack & pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
+
+      - name: Verify staging secret
+        env:
+          DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          if [ -z "${DATABASE_URL_STAGING:-}" ]; then
+            echo "❌ Missing secret: DATABASE_URL_STAGING"; exit 1
+          fi
+          echo "✅ DATABASE_URL_STAGING is set"
+
+      - name: Install Postgres client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Sanity (print host/db)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          node -e "const u=new URL(process.env.DATABASE_URL); console.log('Host='+u.hostname,'DB='+u.pathname.slice(1),'sslmode='+u.searchParams.get('sslmode'))"
+
+      - name: Warm-up keep-awake (30s)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          for i in {1..6}; do
+            echo "SELECT 1;" | pnpm prisma db execute --stdin --url "$DATABASE_URL" || true
+            sleep 5
+          done
+
+      - name: Wait & probe with pg_isready (10m)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          set -e
+          HOST="$(node -e "console.log(new URL(process.env.DATABASE_URL).hostname)")"
+          DB="$(node -e "console.log(new URL(process.env.DATABASE_URL).pathname.slice(1))")"
+          for i in $(seq 1 120); do
+            if pg_isready -h "$HOST" -p 5432 -d "$DB" >/dev/null 2>&1; then
+              echo "Neon is ready ✅"; break
+            fi
+            echo "[probe $i/120] waiting 5s..."
+            sleep 5
+          done
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma generate
+
+      - name: Prisma migrate deploy (STAGING)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma migrate deploy
+
+      - name: Prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma migrate status
+
+      - name: Prisma validate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma validate
