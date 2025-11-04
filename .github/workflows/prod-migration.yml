@@ -62,16 +62,34 @@ jobs:
         run: |
           node -e "const u=new URL(process.env.DATABASE_URL); console.log('Host='+u.hostname,'DB='+u.pathname.slice(1),'sslmode='+u.searchParams.get('sslmode'))"
 
-      - name: Wait for Neon (prod)
+      - name: Install Postgres client (psql) + netcat
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client netcat-openbsd
+
+      - name: Network quick check (TCP 5432)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
         run: |
-          for i in {1..24}; do
-            echo "SELECT 1;" | pnpm prisma db execute --stdin --url "$DATABASE_URL" && exit 0
-            echo "Neon not ready yet ($i/24); retrying in 5s..."
+          set -e
+          H=$(node -e "console.log(new URL(process.env.DATABASE_URL).hostname)")
+          echo "[nc] probing $H:5432 ..."
+          nc -zv "$H" 5432
+
+      - name: Wait & probe Neon (pg_isready, up to 10m)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          set -e
+          echo "[probe] using pg_isready against full DATABASE_URL ..."
+          for i in $(seq 1 120); do
+            if pg_isready -d "$DATABASE_URL" >/dev/null 2>&1; then
+              echo "Neon is ready ✅"
+              break
+            fi
+            echo "[probe $i/120] waiting 5s..."
             sleep 5
           done
-          echo "Neon didn't respond in time"; exit 1
 
       - name: Prisma migrate deploy (PRODUCTION)
         env:
