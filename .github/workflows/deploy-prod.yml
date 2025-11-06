@@ -5,24 +5,22 @@ on:
       reason:
         description: Why deploying?
         required: false
-        default: "manual"
+        default: manual
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node & pnpm
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        with: { version: 9 }
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
@@ -42,36 +40,35 @@ jobs:
             ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/"
 
       - name: Remote deploy (install → migrate → build → pm2)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
         run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "export DATABASE_URL='${{ secrets.PROD_DATABASE_URL }}'; bash -lc '
             set -euo pipefail
             cd /var/www/dixis/current/frontend
+
             corepack enable >/dev/null 2>&1 || true
             corepack prepare pnpm@9.15.9 --activate
             export CI=true
 
-            # 1) Γράψε/διατήρησε env αρχεία από το secret (χωρίς echo της τιμής)
+            # Γράψε env αρχεία από το process env (χωρίς echo τιμών)
             mkdir -p prisma
-            for f in prisma/.env .env .env.production; do
-              if [ ! -f \"\$f\" ] || ! grep -q \"^DATABASE_URL=\" \"\$f\"; then
-                install -m 600 -D /dev/null \"\$f\"
-                printf '"'DATABASE_URL=\"%s\"\n'"' \"${DATABASE_URL}\" > \"\$f\"
-              fi
-            done
+            install -m 600 -D /dev/null prisma/.env
+            printf \"DATABASE_URL=\\\"%s\\\"\\n\" \"$DATABASE_URL\" > prisma/.env
+            install -m 600 -D /dev/null .env
+            install -m 600 -D /dev/null .env.production
+            printf \"DATABASE_URL=\\\"%s\\\"\\n\" \"$DATABASE_URL\" | tee .env > .env.production >/dev/null
 
-            # 2) Install + Prisma + build + restart
+            # Prisma CLI ΔΕΝ φορτώνει .env λόγω prisma.config.ts → θέλει process env
+            export DATABASE_URL=\"$DATABASE_URL\"
+
             pnpm install --frozen-lockfile
             pnpm prisma migrate deploy
             pnpm build
+
             pm2 restart dixis-frontend --update-env
-
-            # 3) Τοπικό health
             curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
-          "'
+          '"
 
-      - name: Smoke (external)
+      - name: Smoke
         run: |
           curl -sI https://dixis.io/api/healthz | head -n1
           curl -sI https://dixis.io | head -n1
