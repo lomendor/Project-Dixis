@@ -1,10 +1,14 @@
+// ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
+// Synced from schema.prisma by scripts/ci/sync-ci-schema.ts
+// Run: npm run ci:prisma:sync
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./ci.db"
 }
 
 model Producer {
