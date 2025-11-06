@@ -41,7 +41,7 @@ jobs:
 
       - name: Remote deploy (install → migrate → build → pm2)
         run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "export DATABASE_URL='${{ secrets.PROD_DATABASE_URL }}'; bash -lc '
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "export DATABASE_URL='${{ secrets.DATABASE_URL_PROD }}'; bash -lc '
             set -euo pipefail
             cd /var/www/dixis/current/frontend
 
