@@ -38,8 +38,7 @@ export async function GET(_: Request, ctx: { params: { token: string } }) {
     })
   } catch(e:any) {
     try {
-      // @ts-expect-error - fallback for different column name
-      order = await prisma.order.findFirst({ where: { public_token: token }, include:{ items:true } })
+      order = await prisma.order.findFirst({ where: { publicToken: token }, include:{ items:true } })
     } catch(_) {}
   }
 

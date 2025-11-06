@@ -19,16 +19,16 @@ export async function POST(request: NextRequest) {
     const ids = Array.from(new Set(want.map((w:any) => w.id).filter(Boolean))) as string[];
     if (!ids.length) return NextResponse.json({ error: 'Μη έγκυρα είδη' }, { status: 400 });
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Διαβάζουμε τα προϊόντα από DB
       const products = await tx.product.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, price: true, stock: true, isActive: true, producerId: true } });
       if (products.length !== ids.length) throw Object.assign(new Error('Κάποια προϊόντα δεν βρέθηκαν'), { code: 400 });
 
       // Map για lookup
-      const byId = new Map(products.map(p => [p.id, p]));
+      const byId = new Map(products.map((p: any) => [p.id, p]));
       // Συνθέτουμε order lines από DB (όχι client τιμές)
       const lines = want.map((w:any) => {
-        const p = byId.get(w.id);
+        const p = byId.get(w.id) as any;
         if (!p) throw Object.assign(new Error('Το προϊόν δεν βρέθηκε'), { code: 400 });
         if (!p.isActive) throw Object.assign(new Error(`Το προϊόν "${p.title}" δεν είναι διαθέσιμο`), { code: 400 });
         return { id: p.id, title: p.title, qty: w.qty, price: Number(p.price || 0), stock: Number(p.stock || 0), producerId: p.producerId };
@@ -149,18 +149,18 @@ export async function POST(request: NextRequest) {
           where: { id: { in: pids } },
           select: { id: true, title: true, stock: true }
         });
-        const low = products.filter((p) => Number(p.stock || 0) <= threshold);
+        const low = products.filter((p: any) => Number(p.stock || 0) <= threshold);
         if (low.length) {
           const to = process.env.DEV_MAIL_TO || 'dev@localhost';
           await sendMailSafe({
             to,
             subject: LowStockAdmin.subject(
-              low.map((l) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
+              low.map((l: any) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
               result.orderId
             ),
             text: LowStockAdmin.text({
               orderId: result.orderId,
-              items: low.map((l) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
+              items: low.map((l: any) => ({ title: String(l.title), stock: Number(l.stock || 0) })),
               threshold
             })
           });

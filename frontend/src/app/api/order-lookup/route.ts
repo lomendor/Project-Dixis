@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       });
 
       // Match suffix (last 4 chars of ID uppercased)
-      const matched = candidates.find((o) => {
+      const matched = candidates.find((o: any) => {
         const safeId = (o.id || '').replace(/[^a-z0-9]/gi, '');
         const orderSuffix = (safeId.slice(-4) || '0000').toUpperCase();
         return orderSuffix === suffix;
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
   // In-memory fallback
   const memList = memOrders.list();
-  const candidates = memList.filter((o) => {
+  const candidates = memList.filter((o: any) => {
     const oDate = new Date(o.createdAt);
     return (
       oDate >= dateStart &&
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     );
   });
 
-  const matched = candidates.find((o) => {
+  const matched = candidates.find((o: any) => {
     const safeId = (o.id || '').replace(/[^a-z0-9]/gi, '');
     const orderSuffix = (safeId.slice(-4) || '0000').toUpperCase();
     return orderSuffix === suffix;

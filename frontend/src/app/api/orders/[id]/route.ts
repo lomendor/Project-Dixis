@@ -55,7 +55,7 @@ export async function GET(
         postal: order.shippingPostal,
         phone: order.buyerPhone,
       },
-      items: order.items.map((item) => ({
+      items: order.items.map((item: any) => ({
         id: item.id,
         name: item.titleSnap,
         price: Number(item.priceSnap || 0),

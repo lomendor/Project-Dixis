@@ -170,7 +170,7 @@ export default async function Page() {
       <section>
         <h2>Top Templates (24h)</h2>
         <ul>
-          {tplTop.map((t) => (
+          {tplTop.map((t: any) => (
             <li key={t.template}>
               <strong>{t.template}</strong> — {Number(t.count)}
             </li>
@@ -179,7 +179,7 @@ export default async function Page() {
 
         <h2>Top Errors (24h)</h2>
         <ul>
-          {errTop.map((e, i) => (
+          {errTop.map((e: any, i: number) => (
             <li key={i}>
               {e.error || '—'} — {Number(e.count)}
             </li>
@@ -193,7 +193,7 @@ export default async function Page() {
           <div>
             <h3>24h</h3>
             <ul>
-              {e24.map((e) => (
+              {e24.map((e: any) => (
                 <li key={e.type}>
                   <strong>{e.type}</strong> — {Number(e.count)}
                 </li>
@@ -203,7 +203,7 @@ export default async function Page() {
           <div>
             <h3>7d</h3>
             <ul>
-              {e7.map((e) => (
+              {e7.map((e: any) => (
                 <li key={e.type}>
                   <strong>{e.type}</strong> — {Number(e.count)}
                 </li>
