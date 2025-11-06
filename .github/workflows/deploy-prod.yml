@@ -42,10 +42,8 @@ jobs:
             ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/"
 
       - name: Remote deploy (install → migrate → build → pm2)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
         run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "DATABASE_URL='${{ secrets.DATABASE_URL_PROD }}' bash -lc '
             set -euo pipefail
             cd /var/www/dixis/current/frontend
             corepack enable >/dev/null 2>&1 || true
@@ -57,7 +55,7 @@ jobs:
             for f in prisma/.env .env .env.production; do
               if [ ! -f \"\$f\" ] || ! grep -q \"^DATABASE_URL=\" \"\$f\"; then
                 install -m 600 -D /dev/null \"\$f\"
-                printf '"'DATABASE_URL=\"%s\"\n'"' \"${DATABASE_URL}\" > \"\$f\"
+                printf \"DATABASE_URL=\\\\\"%s\\\\\"\\n\" \"\$DATABASE_URL\" > \"\$f\"
               fi
             done
 
@@ -69,7 +67,7 @@ jobs:
 
             # 3) Τοπικό health
             curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
-          "'
+          '"
 
       - name: Smoke (external)
         run: |
