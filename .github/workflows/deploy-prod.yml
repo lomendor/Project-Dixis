@@ -25,10 +25,9 @@ jobs:
           version: 9
 
       - name: Build (optional, artifact not used)
-        working-directory: frontend
         run: |
           pnpm install --frozen-lockfile
-          pnpm --version || true
+          pnpm -w -s -C frontend --version || true
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
