@@ -25,9 +25,10 @@ jobs:
           version: 9
 
       - name: Build (optional, artifact not used)
+        working-directory: frontend
         run: |
           pnpm install --frozen-lockfile
-          pnpm -w -s -C frontend --version || true
+          pnpm --version || true
 
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
@@ -44,12 +45,21 @@ jobs:
           rsync -az --delete --exclude node_modules --exclude .next \
             ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/"
 
-      - name: Rsync deploy script to VPS
+      - name: Remote deploy (inline install → migrate → build → pm2)
         run: |
-          rsync -az ./scripts/deploy/prod_remote.sh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/"
-
-      - name: Remote deploy (install → migrate → build → pm2)
-        run: ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "/var/www/dixis/current/prod_remote.sh"'
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "
+            set -euo pipefail
+            cd /var/www/dixis/current/frontend
+            corepack enable >/dev/null 2>&1 || true
+            corepack prepare pnpm@9.15.9 --activate
+            export CI=true
+            grep -q ^DATABASE_URL= prisma/.env && grep -q ^DATABASE_URL= .env && grep -q ^DATABASE_URL= .env.production
+            pnpm install --frozen-lockfile
+            pnpm prisma migrate deploy
+            pnpm build
+            pm2 restart dixis-frontend --update-env
+            curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
+          "'
 
       - name: Smoke (external)
         run: |
