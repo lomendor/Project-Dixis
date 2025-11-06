@@ -1,0 +1,57 @@
+name: deploy-prod (dixis.io)
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why deploying?
+        required: false
+        default: "manual"
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Build (optional, artifact not used)
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm -w -s -C frontend --version || true
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync code to VPS (frontend only)
+        run: |
+          rsync -az --delete --exclude node_modules --exclude .next \
+            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/"
+
+      - name: Rsync deploy script to VPS
+        run: |
+          rsync -az ./scripts/deploy/prod_remote.sh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/"
+
+      - name: Remote deploy (install → migrate → build → pm2)
+        run: ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "/var/www/dixis/current/prod_remote.sh"'
+
+      - name: Smoke (external)
+        run: |
+          curl -sI https://dixis.io/api/healthz | head -n1
+          curl -sI https://dixis.io | head -n1
