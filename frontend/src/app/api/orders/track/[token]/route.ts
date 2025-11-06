@@ -49,7 +49,7 @@ export async function GET(
       total: Number(order.total || 0),
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
-      items: order.items.map(item => ({
+      items: order.items.map((item: any) => ({
         id: item.id,
         title: item.titleSnap ?? '',
         qty: Number(item.qty || 0),

@@ -75,7 +75,7 @@ export default async function Page({
       </nav>
 
       <ul className="space-y-4">
-        {rows.map((r) => (
+        {rows.map((r: any) => (
           <li
             key={r.id}
             className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"

@@ -32,7 +32,7 @@ export default async function Page(){
     }).catch(():any[]=>[])
   ]);
 
-  const revenue7 = orders7.reduce((s,o)=> s + Number((o as any).total||0), 0);
+  const revenue7 = orders7.reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
   const orders7Count = orders7.length;
 
   const fmtMoney = (n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
@@ -65,7 +65,7 @@ export default async function Page(){
         <table style={{width:'100%',borderCollapse:'collapse'}}>
           <thead><tr><th>#</th><th>Ημ/νία</th><th>Πελάτης</th><th>Σύνολο</th><th>Status</th></tr></thead>
           <tbody>
-            {latest.map(o=>(
+            {latest.map((o: any)=>(
               <tr key={o.id} style={{borderTop:'1px solid #eee'}}>
                 <td><Link href={`/admin/orders/${o.id}`}>#{o.id}</Link></td>
                 <td>{new Date(o.createdAt as any).toLocaleString('el-GR')}</td>

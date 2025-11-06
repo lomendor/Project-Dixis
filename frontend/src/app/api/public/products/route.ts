@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+
+// Type for Prisma select result
+type ProductSelectResult = {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  unit: string;
+  stock: number;
+  isActive: boolean;
+}
+
 export const dynamic = 'force-dynamic'
 export async function GET(req: Request) {
   try{
@@ -12,7 +24,7 @@ export async function GET(req: Request) {
       select:{ id:true,title:true,category:true,price:true,unit:true,stock:true,isActive:true }
     })
     // Transform to match Laravel API format expected by HomeClient
-    const transformed = items.map(p => ({
+    const transformed = items.map((p: ProductSelectResult) => ({
       ...p,
       name: p.title,
       images: [] as string[],  // Stub empty array - HomeClient will use placeholder

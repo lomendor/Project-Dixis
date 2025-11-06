@@ -43,7 +43,7 @@ export default async function Page({
   const fmt = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
 
-  const filtered = low ? items.filter((p) => Number(p.stock || 0) <= T) : items;
+  const filtered = low ? items.filter((p: any) => Number(p.stock || 0) <= T) : items;
 
   return (
     <main style={{ display: 'grid', gap: 12, padding: 16 }}>
@@ -77,7 +77,7 @@ export default async function Page({
           </tr>
         </thead>
         <tbody>
-          {filtered.map((p) => (
+          {filtered.map((p: any) => (
             <tr key={p.id} style={{ borderTop: '1px solid #eee' }}>
               <td>
                 <Link href={`/products/${p.id}`}>{p.title}</Link>

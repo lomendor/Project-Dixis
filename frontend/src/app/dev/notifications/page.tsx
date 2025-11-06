@@ -31,7 +31,7 @@ export default async function Page(){
           </tr>
         </thead>
         <tbody>
-          {rows.map(n=>(
+          {rows.map((n: any)=>(
             <tr key={n.id} style={{borderTop:'1px solid #eee'}}>
               <td style={{padding:'0.5rem'}}>{new Date(n.createdAt as any).toLocaleString()}</td>
               <td style={{padding:'0.5rem'}}>{n.channel}</td>

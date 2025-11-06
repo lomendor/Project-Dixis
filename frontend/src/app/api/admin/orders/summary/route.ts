@@ -69,11 +69,11 @@ export async function GET(req: Request) {
 
       // Apply suffix filter if ordNo provided
       if (parsed) {
-        list = list.filter((o) => matchSuffix(o.id));
+        list = list.filter((o: any) => matchSuffix(o.id));
       }
 
       const totalCount = list.length;
-      const totalAmount = list.reduce((acc, o) => acc + Number(o.total ?? 0), 0);
+      const totalAmount = list.reduce((acc: number, o: any) => acc + Number(o.total ?? 0), 0);
 
       return NextResponse.json({ totalCount, totalAmount });
     } catch {
