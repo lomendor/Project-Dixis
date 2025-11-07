@@ -2851,3 +2851,4 @@ unitLabel('pcs')   // "τεμ."
 - Added `frontend/tests/e2e/smoke-strict.spec.ts` (P0 gate)
 - Created `docs/reports/TESTS-SKIPPED.md` (38 skipped tests tracked)
 - **Impact**: CI/tests/docs only, no business logic changes
+- 2025-11-07: AG118 added e2e-full, uptime-healthz, deploy caches.
