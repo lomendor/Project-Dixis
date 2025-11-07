@@ -1,0 +1,44 @@
+name: Smoke (auth-probe)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PLAYWRIGHT_BASE_URL: https://dixis.io
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare .env.local (CI)
+        run: |
+          if [ -f .env.ci ]; then cp .env.ci .env.local; else echo 'PUBLIC_LANDING_MODE=true' > .env.local; fi
+
+      - name: Install Playwright
+        run: pnpm playwright install --with-deps
+
+      - name: Run smoke auth-probe
+        env:
+          SKIP_WEBSERVER: 'true'
+        run: pnpm playwright test tests/e2e/auth-probe.spec.ts --reporter=list
