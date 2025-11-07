@@ -39,4 +39,6 @@ jobs:
         run: pnpm playwright install --with-deps
 
       - name: Run smoke auth-probe
+        env:
+          SKIP_WEBSERVER: 'true'
         run: pnpm playwright test tests/e2e/auth-probe.spec.ts --reporter=list
