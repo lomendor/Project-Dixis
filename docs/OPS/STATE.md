@@ -2852,3 +2852,24 @@ unitLabel('pcs')   // "τεμ."
 - Created `docs/reports/TESTS-SKIPPED.md` (38 skipped tests tracked)
 - **Impact**: CI/tests/docs only, no business logic changes
 - 2025-11-07: AG118 added e2e-full, uptime-healthz, deploy caches.
+
+---
+
+# AG120 — Ops/Quality Hardening (2025-11-08)
+
+**Port Audit**: Completed (saved to VPS:~/ops/port-audit.txt)
+- ⚠️ Ports 8000, 8001, 19999 open to 0.0.0.0 (require firewall decision)
+- Port 3306 (MySQL), 6379 (Redis), 5432 (PostgreSQL) - expected services
+- Port 65529 localhost-only (monitoring?)
+
+**E2E Full**: Nightly workflow added (.github/workflows/e2e-full.yml)
+- Runs daily at 02:30 Europe/Athens
+- Manual dispatch available
+- Tests against https://dixis.io production
+
+**Branch Protection TODO**:
+- ⚠️ Make "Smoke (auth-probe)" a REQUIRED check on main branch (currently optional)
+- Keep "quality-gates" as required
+- This ensures no PR merges without smoke tests passing
+
+**Next**: AG121 fixes /api/products 404 errors
