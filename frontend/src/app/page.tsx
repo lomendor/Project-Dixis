@@ -3,6 +3,9 @@ import Home from './Home';
 import LandingPage from './Landing';
 import { LANDING_MODE, shouldNoIndex } from '@/lib/flags';
 
+// Force dynamic rendering to avoid static generation issues
+export const dynamic = 'force-dynamic';
+
 // Use ISR (Incremental Static Regeneration) for data fetching
 export const revalidate = 3600; // Revalidate every hour
 
