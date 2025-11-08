@@ -1,11 +1,10 @@
 import { Product } from '@/lib/api';
 import HomeClient from './HomeClient';
 import { getTranslations } from 'next-intl/server';
-import { apiPath } from '@/lib/runtime/urls';
 
 async function getInitialProducts(): Promise<Product[]> {
   try {
-    const url = apiPath('/api/public/products?per_page=20&sort=created_at');
+    const url = '/api/products?pageSize=20';
     const res = await fetch(url, { cache: 'no-store' });
 
     if (!res.ok) {
@@ -14,7 +13,7 @@ async function getInitialProducts(): Promise<Product[]> {
     }
 
     const data = await res.json();
-    return Array.isArray(data?.data) ? data.data : [];
+    return Array.isArray(data?.items) ? data.items : [];
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
