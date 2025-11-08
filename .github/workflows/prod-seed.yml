@@ -1,0 +1,39 @@
+name: Production Seed
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DIXIS-PROD-SEED to confirm'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.inputs.confirm == 'DIXIS-PROD-SEED'
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack
+        working-directory: frontend
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Run seed
+        working-directory: frontend
+        run: pnpm run db:seed
