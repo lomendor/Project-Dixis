@@ -2,24 +2,19 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Product page with add-to-cart functionality test
- * Validates that product page displays and add-to-cart button updates
+ * Fetches dynamic product ID from API and validates page render + button interaction
  */
-test('Product page displays and add-to-cart button updates status', async ({ page }) => {
-  // Visit products list
-  await page.goto('/products');
+test('Product page displays and add-to-cart button updates status', async ({ page, request }) => {
+  // Get a valid product ID from the API
+  const listRes = await request.get('/api/products');
+  const listData = await listRes.json();
+  const firstProduct = listData?.items?.[0] || listData?.[0];
 
-  // Check if products exist
-  const firstProduct = page.locator('article').first();
-  const hasProducts = await firstProduct.isVisible().catch(() => false);
+  // Skip if no products available
+  test.skip(!firstProduct, 'No products available to test');
 
-  if (!hasProducts) {
-    console.log('⚠️  No products available, skipping add-to-cart test');
-    return;
-  }
-
-  // Click first product to navigate to detail page
-  const firstLink = page.locator('a[href^="/products/"]').first();
-  await firstLink.click();
+  // Navigate to product detail page
+  await page.goto(`/products/${firstProduct.id}`);
 
   // Wait for product page to load
   await page.waitForSelector('h1', { timeout: 10000 });
@@ -32,7 +27,8 @@ test('Product page displays and add-to-cart button updates status', async ({ pag
 
   if (await addButton.isVisible()) {
     // Check initial status
-    expect(await addButton.getAttribute('data-cart-status')).toBe('idle');
+    const initialStatus = await addButton.getAttribute('data-cart-status');
+    expect(initialStatus).toBe('idle');
 
     // Click add-to-cart
     await addButton.click();
@@ -41,11 +37,11 @@ test('Product page displays and add-to-cart button updates status', async ({ pag
     await page.waitForTimeout(500);
 
     // Verify button status changed (either 'adding' or 'added')
-    const status = await addButton.getAttribute('data-cart-status');
-    expect(['adding', 'added']).toContain(status);
+    const newStatus = await addButton.getAttribute('data-cart-status');
+    expect(['adding', 'added']).toContain(newStatus);
 
-    console.log(`✅ Add-to-cart button status: ${status}`);
+    console.log(`✅ Add-to-cart button status changed: ${initialStatus} → ${newStatus}`);
   } else {
-    console.log('⚠️  Add-to-cart button not found');
+    console.log('⚠️  Add-to-cart button not found on page');
   }
 });

@@ -13,7 +13,7 @@ async function readCart(): Promise<CartItem[]> {
 }
 async function writeCart(items: CartItem[]) {
   const res = NextResponse.json({ ok: true, items });
-  res.cookies.set(CK, JSON.stringify(items), { httpOnly: true, sameSite: 'lax', secure: true, path: '/' });
+  res.cookies.set(CK, JSON.stringify(items), { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
   return res;
 }
 
@@ -43,6 +43,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true, items: [] });
-  res.cookies.set(CK, '[]', { httpOnly: true, sameSite: 'lax', secure: true, path: '/' });
+  res.cookies.set(CK, '[]', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
   return res;
 }
