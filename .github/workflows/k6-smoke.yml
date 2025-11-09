@@ -1,0 +1,24 @@
+name: k6 Smoke
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '15 1 * * *'   # 03:15 Europe/Athens
+jobs:
+  products:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: perf/k6/products-smoke.js
+        env:
+          BASE_URL: https://dixis.io
+  cart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: perf/k6/cart-smoke.js
+        env:
+          BASE_URL: https://dixis.io
