@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
     if: github.event.inputs.confirm == 'DIXIS-PROD-SEED'
     env:
-      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
       CI: 'true'
     steps:
       - name: Checkout
