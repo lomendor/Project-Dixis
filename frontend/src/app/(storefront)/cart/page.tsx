@@ -1,12 +1,21 @@
-import { Suspense } from 'react';
-import CartClient from './CartClient';
+import CartClient from '@/components/cart/CartClient';
+import { cookies } from 'next/headers';
 
-export const dynamic = 'force-dynamic';
+type CartItem = { slug: string; qty: number };
 
-export default function CartPage() {
+async function getCart(): Promise<CartItem[]> {
+  const cookieStore = await cookies();
+  const c = cookieStore.get('cart')?.value;
+  if (!c) return [];
+  try { return JSON.parse(c); } catch { return []; }
+}
+
+export default async function CartPage() {
+  const items = await getCart();
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Φόρτωση...</div>}>
-      <CartClient />
-    </Suspense>
+    <div>
+      <h1>Το Καλάθι μου</h1>
+      <CartClient items={items} />
+    </div>
   );
 }

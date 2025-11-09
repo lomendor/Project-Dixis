@@ -1,12 +1,8 @@
-import { Suspense } from 'react'
-import CheckoutClient from './CheckoutClient'
-
-export const dynamic = 'force-dynamic' // for router state / searchParams
-
-export default function Page(){
+export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div style={{padding:16}}>Φόρτωση…</div>}>
-      <CheckoutClient />
-    </Suspense>
-  )
+    <div>
+      <h1>Ολοκλήρωση παραγγελίας</h1>
+      <p>Σύντομα διαθέσιμο...</p>
+    </div>
+  );
 }
