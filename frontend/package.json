@@ -14,7 +14,7 @@
     "dev:restart": "npm run dev:stop && npm run dev:start",
     "clean": "rimraf .next && rimraf node_modules/.cache || true",
     "dev:clean": "npm run clean:cache && npm run dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "start:ci": "next start -p 3001",
     "mock:api": "node ../scripts/mock-api/lhci-mock.cjs",
