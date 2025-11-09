@@ -42,6 +42,7 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "vitest.config*.ts",
+    "prisma/seed.ts",
     // ρητά legacy directories
     "../GitHub-Dixis-Project-1/**",
     "../Dixis-Project-1/**",
