@@ -52,28 +52,40 @@ model Product {
 model Order {
   id             String      @id @default(cuid())
   publicToken    String      @unique @default(uuid())
-  buyerPhone     String
-  buyerName      String
-  shippingLine1  String
+  buyerPhone     String?
+  buyerName      String?
+  shippingLine1  String?
   shippingLine2  String?
-  shippingCity   String
-  shippingPostal String
+  shippingCity   String?
+  shippingPostal String?
   total          Float
   status         String      @default("pending")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   items          OrderItem[]
+  // AG130 checkout fields
+  email          String?
+  name           String?
+  phone          String?
+  address        String?
+  city           String?
+  zip            String?
+  zone           String?     @default("mainland")
+  subtotal       Float?
+  shipping       Float?
+  currency       String?     @default("EUR")
 
   @@index([buyerPhone, createdAt])
   @@index([status, createdAt])
   @@index([publicToken])
+  @@index([email])
 }
 
 model OrderItem {
   id         String   @id @default(cuid())
   orderId    String
-  productId  String
-  producerId String
+  productId  String?
+  producerId String?
   qty        Int
   price      Float
   titleSnap  String?
@@ -82,7 +94,10 @@ model OrderItem {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product    Product? @relation(fields: [productId], references: [id], onDelete: Restrict)
+  // AG130 checkout fields
+  slug       String?
+  currency   String?  @default("EUR")
 
   @@index([orderId])
   @@index([producerId, status])
