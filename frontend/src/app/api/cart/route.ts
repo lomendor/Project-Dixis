@@ -22,7 +22,37 @@ async function writeCart(items: CartItem[]) {
 
 export async function GET() {
   const items = await readCart();
-  return NextResponse.json({ items, totalItems: items.reduce((s,i)=>s+i.qty,0) });
+
+  // Hydrate pricing from DB
+  const slugs = items.map(i => i.slug);
+  const prods = slugs.length ? await prisma.product.findMany({
+    where: { id: { in: slugs } },
+    select: { id: true, title: true, price: true }
+  }) : [];
+
+  const map = new Map<string, any>();
+  for (const p of prods) map.set(p.id, p);
+
+  let subtotal = 0;
+  const enriched = items.map(i => {
+    const p = map.get(i.slug) || {};
+    const price = Number(p.price ?? 0);
+    subtotal += price * i.qty;
+    return {
+      slug: i.slug,
+      qty: i.qty,
+      name: p.title ?? i.slug,
+      price,
+      currency: 'EUR'
+    };
+  });
+
+  return NextResponse.json({
+    items: enriched,
+    totalItems: items.reduce((s,i)=>s+i.qty,0),
+    subtotal,
+    currency: (enriched[0]?.currency ?? 'EUR')
+  });
 }
 
 export async function POST(req: NextRequest) {
