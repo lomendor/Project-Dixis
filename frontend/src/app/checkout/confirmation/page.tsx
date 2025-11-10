@@ -1,10 +1,12 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardTitle } from '../../../components/ui/card';
 import { formatEUR } from '../../../lib/money';
 import ToastSuccess from '@/components/ToastSuccess';
 
-export default function Confirmation() {
+function ConfirmationContent() {
+  const searchParams = useSearchParams();
   const [json, setJson] = React.useState<any>(null);
   const [orderId, setOrderId] = React.useState<string>('');
   const [orderNo, setOrderNo] = React.useState<string>('');
@@ -53,12 +55,14 @@ export default function Confirmation() {
       );
     } catch {}
     try {
-      setOrderId(localStorage.getItem('checkout_order_id') || '');
+      // AG130b: Read from URL params first (orderId or order), fallback to localStorage
+      const urlOrderId = searchParams.get('orderId') || searchParams.get('order');
+      setOrderId(urlOrderId || localStorage.getItem('checkout_order_id') || '');
     } catch {}
     try {
       setOrderNo(localStorage.getItem('checkout_order_no') || '');
     } catch {}
-  }, []);
+  }, [searchParams]);
 
   // AG40: Build share URL from orderNo
   React.useEffect(() => {
@@ -356,5 +360,13 @@ export default function Confirmation() {
       {/* AG57: Unified success toast (replaces all old toasts) */}
       <ToastSuccess show={toast.show} text={toast.text} extraTestIds={['copy-toast', 'copied-flag']} />
     </main>
+  );
+}
+
+export default function Confirmation() {
+  return (
+    <Suspense fallback={<div className="max-w-3xl mx-auto px-4 py-8">Φόρτωση...</div>}>
+      <ConfirmationContent />
+    </Suspense>
   );
 }
