@@ -18,7 +18,7 @@ export default function CheckoutPage(){
       const r = await fetch('/api/checkout',{ method:'POST', headers:{'Content-Type':'application/json','x-idempotency-key':crypto.randomUUID()}, body: JSON.stringify({ customer:form, items, zone: form.zone })});
       if (!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j?.error || 'Αποτυχία παραγγελίας');}
       const { orderId } = await r.json();
-      router.push(`/checkout/success?order=${orderId}`);
+      router.push(`/checkout/confirmation?orderId=${orderId}`);
     } catch(e:any){ setErr(e.message || 'Σφάλμα'); }
     finally{ setBusy(false); }
   };
