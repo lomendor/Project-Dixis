@@ -1,44 +1,36 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export type AddToCartButtonProps = {
-  slug: string;
-};
+export default function AddToCartButton({ slug, qty = 1 }: { slug: string; qty?: number }) {
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
-export default function AddToCartButton({ slug }: AddToCartButtonProps) {
-  const [status, setStatus] = useState<'idle' | 'adding' | 'added'>('idle');
-
-  async function handleAdd() {
-    setStatus('adding');
+  const onClick = async () => {
     try {
-      const res = await fetch('/api/cart', {
+      setBusy(true);
+      await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, qty: 1 }),
+        body: JSON.stringify({ slug, qty })
       });
-      if (res.ok) {
-        setStatus('added');
-        setTimeout(() => setStatus('idle'), 2000);
-      } else {
-        setStatus('idle');
-        alert('Αποτυχία προσθήκης στο καλάθι');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('cart:updated'));
       }
-    } catch {
-      setStatus('idle');
-      alert('Σφάλμα δικτύου');
+      router.refresh();
+    } finally {
+      setBusy(false);
     }
-  }
+  };
 
   return (
     <button
-      onClick={handleAdd}
-      disabled={status === 'adding'}
-      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition"
-      data-cart-status={status}
+      data-testid="add-to-cart"
+      onClick={onClick}
+      disabled={busy}
+      className="mt-2 text-sm px-3 py-1 border rounded hover:bg-neutral-50 disabled:opacity-60"
     >
-      {status === 'adding' && 'Προσθήκη...'}
-      {status === 'added' && '✓ Προστέθηκε'}
-      {status === 'idle' && 'Προσθήκη στο καλάθι'}
+      {busy ? 'Προσθήκη…' : 'Προσθήκη στο καλάθι'}
     </button>
   );
 }

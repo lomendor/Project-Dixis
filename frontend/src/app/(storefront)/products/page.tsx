@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { apiPath } from '@/lib/runtime/urls';
 import { parse, toQuery, type ProductFilters } from '@/lib/search/params';
+import AddToCartButton from '@/components/cart/AddToCartButton';
 
 async function getProducts(filters: ProductFilters) {
   try {
@@ -145,6 +146,7 @@ export default async function ProductsPage({
                   <span className="text-xs text-gray-500">{p.producer_name}</span>
                 )}
               </div>
+              <AddToCartButton slug={p.slug || p.id} />
             </div>
           </Link>
         ))}
