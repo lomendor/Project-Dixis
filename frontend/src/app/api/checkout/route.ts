@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       items: {
         create: lines.map(l => ({
           productId: l.productId,
-          producerId: null,
+          producerId: null as string | null,
           slug: l.slug,
           qty: l.qty,
           price: l.price,
