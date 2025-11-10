@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calcShippingFromSummary, type Zone } from '@/lib/shipping';
 
 export const dynamic = 'force-dynamic';
 
 type Item = { slug: string; qty: number };
 type Customer = { email: string; name?: string; phone?: string; address?: string; city?: string; zip?: string };
-type Zone = 'mainland' | 'islands';
 
 function bad(msg: string, code=400){ return NextResponse.json({ error: msg }, { status: code }); }
-
-async function computeShipping(items: Item[], zone: Zone){
-  try{
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
-    const res = await fetch(`${baseUrl}/api/v1/shipping/quote`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ items, zone })
-    });
-    const data = await res.json().catch(()=>({ total:0, threshold:35 }));
-    return Number(data?.total ?? 0);
-  }catch{ return 0; }
-}
 
 export async function POST(req: NextRequest) {
   const idem = req.headers.get('x-idempotency-key') ?? '';
@@ -40,11 +27,13 @@ export async function POST(req: NextRequest) {
   for (const p of prods) bySlug.set(p.id, p);
 
   let subtotal = 0;
+  let qtyTotal = 0;
   const lines = items.map(i=>{
     const p = bySlug.get(i.slug);
     const price = Number(p?.price ?? 0);
     const qty = Math.max(0, Number(i.qty) || 0);
     subtotal += price * qty;
+    qtyTotal += qty;
     return {
       productId: p?.id ?? null,
       slug: i.slug,
@@ -54,7 +43,7 @@ export async function POST(req: NextRequest) {
     };
   });
 
-  const shipping = await computeShipping(items, zone);
+  const { total: shipping } = calcShippingFromSummary(subtotal, qtyTotal, zone as Zone);
   const total = Math.max(0, subtotal + shipping);
 
   if (idem) {
