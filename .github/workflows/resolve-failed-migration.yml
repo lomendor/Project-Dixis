@@ -1,0 +1,78 @@
+name: Resolve Failed Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type EXACTLY: RESOLVE-AG130'
+        required: true
+        default: 'TYPE_HERE'
+      migration_name:
+        description: 'Migration to resolve'
+        required: true
+        default: '20251110000000_ag130_checkout_fields'
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'RESOLVE-AG130' }}
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable corepack & pnpm
+        run: |
+          set -e
+          corepack enable
+          corepack prepare pnpm@9 --activate
+          pnpm -v
+
+      - name: Verify secret presence
+        env:
+          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          if [ -z "${DATABASE_URL_PROD:-}" ]; then
+            echo "❌ Missing secret: DATABASE_URL_PROD"
+            exit 1
+          fi
+          echo "✅ DATABASE_URL_PROD exists"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma generate
+
+      - name: Resolve failed migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: |
+          echo "Resolving migration: ${{ github.event.inputs.migration_name }}"
+          pnpm prisma migrate resolve --rolled-back ${{ github.event.inputs.migration_name }}
+
+      - name: Verify migration status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          PRISMA_HIDE_UPDATE_MESSAGE: 1
+        run: pnpm prisma migrate status
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Failed migration resolved successfully!"
+          echo "Migration: ${{ github.event.inputs.migration_name }}"
+          echo "Next: Run Production Migration workflow to apply the migration."
