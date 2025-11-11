@@ -12,6 +12,7 @@ const buckets = new Map<string, Bucket>(); // in-memory, per-process
 const API_GROUPS: { rx: RegExp; cost: number }[] = [
   { rx: /^\/api\/checkout$/, cost: 5 },         // πιο ακριβή
   { rx: /^\/api\/orders\/lookup$/, cost: 2 },
+  { rx: /^\/api\/orders\/track$/, cost: 2 },    // public tracking
   { rx: /^\/api\/cart(\/.*)?$/, cost: 1 },
 ];
 

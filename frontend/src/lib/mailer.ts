@@ -15,6 +15,7 @@ export async function sendOrderReceipt(params: {
   orderId: string;
   total: number;
   currency: string;
+  publicToken?: string;
   items: Array<{
     slug: string;
     qty: number;
@@ -25,14 +26,18 @@ export async function sendOrderReceipt(params: {
   const transport = getTransport();
   if (!transport) return { ok: false, reason: 'smtp-missing' };
 
-  const { to, orderId, total, currency, items } = params;
+  const { to, orderId, total, currency, publicToken, items } = params;
   const lines = items
     .map(
       (it) =>
         `• ${it.slug} × ${it.qty} — ${Number(it.price).toFixed(2)} ${it.currency}`
     )
     .join('\n');
-  const receiptUrl = `https://dixis.io/orders/receipt/${encodeURIComponent(orderId)}`;
+
+  // Prefer public tracking URL if token exists, fallback to receipt URL
+  const receiptUrl = publicToken
+    ? `https://dixis.io/orders/track/${publicToken}`
+    : `https://dixis.io/orders/receipt/${encodeURIComponent(orderId)}`;
 
   const text = [
     `Ευχαριστούμε για την παραγγελία σας!`,
