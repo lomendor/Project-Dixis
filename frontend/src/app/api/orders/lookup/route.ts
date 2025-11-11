@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -30,7 +31,10 @@ export async function POST(req: NextRequest) {
         id: it.id, slug: it.slug, qty: it.qty, price: Number(it.price), currency: it.currency
       })),
     });
-  } catch {
+  } catch (e) {
+    try {
+      Sentry.captureException(e);
+    } catch {}
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
