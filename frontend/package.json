@@ -171,8 +171,5 @@
       "prettier --write"
     ]
   },
-  "ciKey": "2025-09-19a",
-  "prisma": {
-    "seed": "node prisma/seed.dev.cjs"
-  }
+  "ciKey": "2025-09-19a"
 }
