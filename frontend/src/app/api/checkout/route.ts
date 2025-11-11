@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         }))
       }
     },
-    select: { id:true }
+    select: { id:true, publicToken:true }
   });
 
   // Fire-and-forget email receipt (don't block response)
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
       await sendOrderReceipt({
         to: customer.email,
         orderId: order.id,
+        publicToken: order.publicToken,
         total,
         currency: 'EUR',
         items: lines,
