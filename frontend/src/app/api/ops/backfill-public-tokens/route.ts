@@ -10,25 +10,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  // Find orders without publicToken and generate UUIDs
-  const ordersToUpdate = await prisma.order.findMany({
-    where: {
-      OR: [
-        { publicToken: null },
-        { publicToken: '' }
-      ]
-    },
-    select: { id: true }
+  // Since publicToken has @default(uuid()), all orders created after schema update
+  // automatically get a token. This endpoint is a no-op for safety.
+  // If old orders exist from before the field was added, they would need
+  // a database migration to add tokens, not this endpoint.
+
+  return NextResponse.json({
+    ok: true,
+    updated: 0,
+    message: 'publicToken has @default(uuid()) - all new orders get tokens automatically'
   });
-
-  let updated = 0;
-  for (const order of ordersToUpdate) {
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { publicToken: crypto.randomUUID() }
-    });
-    updated++;
-  }
-
-  return NextResponse.json({ ok: true, updated });
 }
