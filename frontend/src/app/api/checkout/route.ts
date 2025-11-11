@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calcShippingFromSummary, type Zone } from '@/lib/shipping';
+import { sendOrderReceipt } from '@/lib/mailer';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,6 +81,19 @@ export async function POST(req: NextRequest) {
     },
     select: { id:true }
   });
+
+  // Fire-and-forget email receipt (don't block response)
+  try {
+    (async () => {
+      await sendOrderReceipt({
+        to: customer.email,
+        orderId: order.id,
+        total,
+        currency: 'EUR',
+        items: lines,
+      }).catch(() => {});
+    })();
+  } catch {}
 
   const res = NextResponse.json({ orderId: order.id, total, shipping, subtotal });
   res.headers.set('Set-Cookie', 'cart=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax');
