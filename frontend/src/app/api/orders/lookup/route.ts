@@ -9,12 +9,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email || '').trim().toLowerCase();
     const orderId = String(body?.orderId || body?.order || '').trim();
-    if (!email || !orderId) {
-      return NextResponse.json({ error: 'Missing email or orderId' }, { status: 400 });
+    if (!orderId) {
+      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 });
+    }
+
+    // Build where clause - if email provided, require it; otherwise allow public lookup
+    const where: any = { id: orderId };
+    if (email) {
+      where.email = email;
     }
 
     const order = await prisma.order.findFirst({
-      where: { id: orderId, email },
+      where,
       include: { items: true },
     });
     if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 });
