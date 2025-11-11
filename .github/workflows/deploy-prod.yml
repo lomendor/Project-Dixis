@@ -42,6 +42,7 @@ jobs:
       - name: Remote deploy (install → migrate → build → pm2) with caches
         env:
           DBURL: ${{ secrets.DATABASE_URL_PROD }}
+          RUNTIME_DBURL: ${{ secrets.RUNTIME_DATABASE_URL_PROD || secrets.DATABASE_URL_PROD }}
         run: |
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "
             set -euo pipefail
@@ -53,7 +54,7 @@ jobs:
             NEXT_CACHE_DIR=\$REMOTE_CACHE_BASE/next
             mkdir -p \"\$PNPM_STORE_DIR\" \"\$NEXT_CACHE_DIR\"
 
-            # --- DATABASE_URL guard
+            # --- DATABASE_URL guard (raw/unpooled for migrations)
             if [ -n \"${DBURL:-}\" ]; then
               export DATABASE_URL=\"${DBURL}\"
             elif [ -f prisma/.env ]; then
@@ -63,19 +64,26 @@ jobs:
             fi
             [ -n \"\${DATABASE_URL:-}\" ] || { echo \"[ERR] DATABASE_URL empty (secret missing & no prisma/.env)\"; exit 1; }
 
+            # --- RUNTIME_DBURL (can be pooled, fallback to raw)
+            if [ -n \"${RUNTIME_DBURL:-}\" ]; then
+              export RUNTIME_DATABASE_URL=\"${RUNTIME_DBURL}\"
+            else
+              export RUNTIME_DATABASE_URL=\"\$DATABASE_URL\"
+            fi
+
             corepack enable >/dev/null 2>&1 || true
             corepack prepare pnpm@9.15.9 --activate
             export CI=true
             pnpm config set store-dir \"\$PNPM_STORE_DIR\"
 
-            # Γράψε env αρχεία μόνο όταν έχουμε τιμή
+            # Γράψε env αρχεία χωρίς quotes (Prisma P1012 fix)
             mkdir -p prisma
             install -m 600 -D /dev/null prisma/.env
-            printf \"DATABASE_URL=\\\"%s\\\"\\n\" \"\$DATABASE_URL\" > prisma/.env
-            printf \"DATABASE_URL=\\\"%s\\\"\\n\" \"\$DATABASE_URL\" | tee .env > .env.production >/dev/null
+            printf \"DATABASE_URL=%s\\n\" \"\$DATABASE_URL\" > prisma/.env
+            printf \"DATABASE_URL=%s\\n\" \"\$RUNTIME_DATABASE_URL\" | tee .env > .env.production >/dev/null
 
             pnpm install --frozen-lockfile
-            pnpm prisma migrate deploy
+            pnpm prisma migrate deploy || exit 21
             export NEXT_CACHE_DIR=\"\$NEXT_CACHE_DIR\"
             pnpm build
 
