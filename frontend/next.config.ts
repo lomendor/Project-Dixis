@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
 
   // Instrumentation is enabled by default in Next.js 15
 
+  // Hide Next.js version from X-Powered-By header (AG-SEC-01)
+  poweredByHeader: false,
+
   // Temporarily disable ESLint during build for hotfix
   eslint: {
     ignoreDuringBuilds: true,
@@ -32,6 +35,49 @@ const nextConfig: NextConfig = {
         pathname: '/storage/**',
       },
     ],
+  },
+
+  // Security headers (AG-SEC-01)
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://o4508541701652480.ingest.de.sentry.io",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), payment=()',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+        ],
+      },
+    ];
   },
 
   // Webpack configuration to handle module resolution
