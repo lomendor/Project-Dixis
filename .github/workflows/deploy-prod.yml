@@ -56,7 +56,9 @@ jobs:
 
             # --- DATABASE_URL guard (raw/unpooled for migrations)
             if [ -n \"${DBURL:-}\" ]; then
-              export DATABASE_URL=\"${DBURL}\"
+              # Strip quotes from secret value (Prisma P1012 fix)
+              DB_CLEAN=\"${DBURL}\"; DB_CLEAN=\"\${DB_CLEAN%\"\"}\"; DB_CLEAN=\"\${DB_CLEAN#\"\"}\"
+              export DATABASE_URL=\"\$DB_CLEAN\"
             elif [ -f prisma/.env ]; then
               DB_LINE=\$(grep -E \"^DATABASE_URL=\" prisma/.env || true)
               DB_VAL=\"\${DB_LINE#DATABASE_URL=}\"; DB_VAL=\"\${DB_VAL%\"\"}\"; DB_VAL=\"\${DB_VAL#\"\"}\"
@@ -66,7 +68,9 @@ jobs:
 
             # --- RUNTIME_DBURL (can be pooled, fallback to raw)
             if [ -n \"${RUNTIME_DBURL:-}\" ]; then
-              export RUNTIME_DATABASE_URL=\"${RUNTIME_DBURL}\"
+              # Strip quotes from secret value
+              RT_CLEAN=\"${RUNTIME_DBURL}\"; RT_CLEAN=\"\${RT_CLEAN%\"\"}\"; RT_CLEAN=\"\${RT_CLEAN#\"\"}\"
+              export RUNTIME_DATABASE_URL=\"\$RT_CLEAN\"
             else
               export RUNTIME_DATABASE_URL=\"\$DATABASE_URL\"
             fi
