@@ -1,12 +1,9 @@
 import type { MetadataRoute } from 'next';
-
 export default function robots(): MetadataRoute.Robots {
-  const isStaging = process.env.NEXT_PUBLIC_ENV === 'staging';
+  const host = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
   return {
-    rules: isStaging
-      ? [{ userAgent: '*', disallow: '/' }]
-      : [{ userAgent: '*', allow: '/' }],
-    sitemap: 'https://dixis.io/sitemap.xml',
-    host: 'https://dixis.io',
+    rules: [{ userAgent: '*', allow: '/' }],
+    sitemap: `${host}/sitemap.xml`,
+    host
   };
 }
