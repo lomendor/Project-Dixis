@@ -11,5 +11,5 @@ export async function register() {
 }
 
 export async function onRequestError(error: unknown, request: Request, context: Record<string, unknown>) {
-  Sentry.captureRequestError(error as Error, request, context);
+  Sentry.captureRequestError(error as Error, request as any, context as any);
 }
