@@ -195,7 +195,7 @@ export default function RootLayout({
                 <footer className="border-t border-gray-200 bg-gray-50">
                   <div className="container mx-auto px-4 py-6">
                     <p className="text-center text-sm text-gray-600">
-                      Dixis - Local Producer Marketplace
+                      © Dixis — τοπικοί παραγωγοί · <a className="underline hover:text-brand" href="/legal/privacy">Απόρρητο</a> · <a className="underline hover:text-brand" href="/legal/terms">Όροι</a>
                     </p>
                   </div>
                 </footer>
