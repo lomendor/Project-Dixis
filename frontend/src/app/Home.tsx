@@ -1,10 +1,11 @@
 import { Product } from '@/lib/api';
 import HomeClient from './HomeClient';
 import { getTranslations } from 'next-intl/server';
+import { abs } from '@/lib/url';
 
 async function getInitialProducts(): Promise<Product[]> {
   try {
-    const url = '/api/products?pageSize=20';
+    const url = abs('/api/products?pageSize=20');
     const res = await fetch(url, { cache: 'no-store' });
 
     if (!res.ok) {
