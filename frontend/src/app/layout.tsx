@@ -7,6 +7,8 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import ToastContainer from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -178,28 +180,13 @@ export default function RootLayout({
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
           <ToastProvider>
             <AuthProvider>
-              <div className="flex min-h-screen flex-col">
-                <header className="border-b border-gray-200 bg-white">
-                  <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="text-xl font-bold text-brand">Dixis</div>
-                      <nav className="flex gap-4">
-                        {/* Navigation placeholder */}
-                      </nav>
-                    </div>
-                  </div>
-                </header>
-                <main data-testid="page-root" className="flex-1">
+              <Header />
+              <div className="max-w-6xl mx-auto px-4 py-8">
+                <main data-testid="page-root">
                   {children}
                 </main>
-                <footer className="border-t border-gray-200 bg-gray-50">
-                  <div className="container mx-auto px-4 py-6">
-                    <p className="text-center text-sm text-gray-600">
-                      © Dixis — τοπικοί παραγωγοί · <a className="underline hover:text-brand" href="/legal/privacy">Απόρρητο</a> · <a className="underline hover:text-brand" href="/legal/terms">Όροι</a>
-                    </p>
-                  </div>
-                </footer>
               </div>
+              <Footer />
               <ToastContainer />
             </AuthProvider>
           </ToastProvider>
