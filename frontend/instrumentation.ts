@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/nextjs';
-import type { Instrumentation } from 'next';
 
 export async function register() {
   if (process.env.NEXT_PUBLIC_MSW === '1' && typeof window !== 'undefined') {
@@ -10,7 +9,6 @@ export async function register() {
   }
 }
 
-// Fix warning: provide onRequestError using captureRequestError
-export const onRequestError: Instrumentation.onRequestError = (...args) => {
-  try { Sentry.captureRequestError(...args); } catch { /* no-op */ }
-};
+export async function onRequestError(error: unknown, request: Request, context: Record<string, unknown>) {
+  Sentry.captureRequestError(error as Error, request, context);
+}
