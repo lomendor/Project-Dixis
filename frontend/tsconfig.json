@@ -41,6 +41,9 @@
     "tests/**/*",
     "**/*.test.ts",
     "**/*.spec.ts",
+    "**/*.stories.tsx",
+    "**/*.stories.ts",
+    ".storybook",
     "vitest.config*.ts",
     "prisma/seed.ts",
     // ρητά legacy directories
