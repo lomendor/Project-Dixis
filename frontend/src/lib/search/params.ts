@@ -4,11 +4,12 @@ export type ProductFilters = {
   min?: number;
   max?: number;
   stock?: 'in';
+  sort?: string;
   page?: number;
   per_page?: number;
 };
 
-const VALID_KEYS = ['q', 'category', 'min', 'max', 'stock', 'page', 'per_page'];
+const VALID_KEYS = ['q', 'category', 'min', 'max', 'stock', 'sort', 'page', 'per_page'];
 
 export function parse(searchParams: Record<string, string | string[] | undefined>): ProductFilters {
   const filters: ProductFilters = {};
@@ -20,6 +21,7 @@ export function parse(searchParams: Record<string, string | string[] | undefined
     switch (key) {
       case 'q':
       case 'category':
+      case 'sort':
         if (value.trim()) filters[key] = value.trim();
         break;
       case 'min':
@@ -46,6 +48,7 @@ export function toQuery(filters: ProductFilters): string {
   if (filters.min) params.set('min', String(filters.min));
   if (filters.max) params.set('max', String(filters.max));
   if (filters.stock) params.set('stock', filters.stock);
+  if (filters.sort) params.set('sort', filters.sort);
   if (filters.page) params.set('page', String(filters.page));
   if (filters.per_page) params.set('per_page', String(filters.per_page));
 
