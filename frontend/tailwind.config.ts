@@ -9,6 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          DEFAULT: 'hsl(var(--brand-primary))',
+          foreground: 'hsl(var(--brand-primary-foreground))'
+        },
         primary: { DEFAULT: '#0f5c2e', foreground: '#ffffff' },  /* cypress green */
         secondary: { DEFAULT: '#0ea5e9', foreground: '#ffffff' },
         neutral: {

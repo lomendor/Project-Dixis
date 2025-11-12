@@ -178,9 +178,28 @@ export default function RootLayout({
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
           <ToastProvider>
             <AuthProvider>
-              <main data-testid="page-root">
-                {children}
-              </main>
+              <div className="flex min-h-screen flex-col">
+                <header className="border-b border-gray-200 bg-white">
+                  <div className="container mx-auto px-4 py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xl font-bold text-brand">Dixis</div>
+                      <nav className="flex gap-4">
+                        {/* Navigation placeholder */}
+                      </nav>
+                    </div>
+                  </div>
+                </header>
+                <main data-testid="page-root" className="flex-1">
+                  {children}
+                </main>
+                <footer className="border-t border-gray-200 bg-gray-50">
+                  <div className="container mx-auto px-4 py-6">
+                    <p className="text-center text-sm text-gray-600">
+                      Dixis - Local Producer Marketplace
+                    </p>
+                  </div>
+                </footer>
+              </div>
               <ToastContainer />
             </AuthProvider>
           </ToastProvider>
