@@ -50,9 +50,13 @@ export async function POST(req: NextRequest) {
 
   if (idem) {
     const existing = await prisma.order.findFirst({
-      where: { email: customer.email, total: total }
+      where: { email: customer.email, total: total },
+      select: { id: true, publicToken: true }
     });
-    if (existing) return NextResponse.json({ orderId: existing.id, total, shipping, subtotal });
+    if (existing) {
+      const trackUrl = existing.publicToken ? `https://dixis.io/orders/track/${existing.publicToken}` : undefined;
+      return NextResponse.json({ orderId: existing.id, publicToken: existing.publicToken, trackUrl, total, shipping, subtotal });
+    }
   }
 
   const order = await prisma.order.create({
@@ -96,7 +100,8 @@ export async function POST(req: NextRequest) {
     })();
   } catch {}
 
-  const res = NextResponse.json({ orderId: order.id, total, shipping, subtotal });
+  const trackUrl = order.publicToken ? `https://dixis.io/orders/track/${order.publicToken}` : undefined;
+  const res = NextResponse.json({ orderId: order.id, publicToken: order.publicToken, trackUrl, total, shipping, subtotal });
   res.headers.set('Set-Cookie', 'cart=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax');
   return res;
 }
