@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs';
+
 export async function register() {
   // Φορτώνει τη σωστή config ανά runtime
   // Next θα καλέσει αυτόματα το register στο startup (App Router).
@@ -6,4 +8,8 @@ export async function register() {
   } else {
     await import('./sentry.client.config');
   }
+}
+
+export async function onRequestError(error: unknown, request: Request, context: Record<string, unknown>) {
+  Sentry.captureRequestError(error as Error, request as any, context as any);
 }
