@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Dev Check - Project Dixis',
   description: 'Development environment health check',
+  robots: { index: false, follow: false }
 };
 
 export default async function DevCheckPage() {

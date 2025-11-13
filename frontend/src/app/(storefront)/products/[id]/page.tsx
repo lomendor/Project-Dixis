@@ -2,10 +2,51 @@ import { prisma } from '@/lib/db/client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import Add from './ui/Add';
 import BuyBox from '@/components/cart/BuyBox';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const p = await prisma.product.findUnique({
+    where: { id: String(id || '') },
+    select: { id: true, title: true, description: true, price: true, imageUrl: true, category: true }
+  });
+
+  if (!p) {
+    return { title: 'Προϊόν μη διαθέσιμο' };
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+  const url = `${baseUrl}/products/${id}`;
+  const imageUrl = p.imageUrl || `${baseUrl}/og-default.png`;
+
+  return {
+    title: `${p.title} - Dixis`,
+    description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+    alternates: {
+      canonical: url
+    },
+    openGraph: {
+      title: p.title,
+      description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+      url,
+      siteName: 'Dixis',
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: p.title }],
+      locale: 'el_GR',
+      type: 'website'
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: p.title,
+      description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+      images: [imageUrl]
+    }
+  };
+}
 
 export default async function Page({ params }:{ params: Promise<{ id:string }> }){
   const t = await getTranslations();
@@ -29,8 +70,31 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
 
   const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
 
+  // JSON-LD Product Schema
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': p.title,
+    'description': p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+    'image': p.imageUrl || `${baseUrl}/og-default.png`,
+    'url': `${baseUrl}/products/${id}`,
+    'offers': {
+      '@type': 'Offer',
+      'price': Number(p.price || 0),
+      'priceCurrency': 'EUR',
+      'availability': Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      'url': `${baseUrl}/products/${id}`
+    }
+  };
+
   return (
-    <main className="container mx-auto px-4 py-6">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <main className="container mx-auto px-4 py-6">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2">
@@ -153,5 +217,6 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
         </Link>
       </div>
     </main>
+    </>
   );
 }
