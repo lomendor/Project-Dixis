@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { CartProvider } from '@/store/cart';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -180,13 +181,15 @@ export default function RootLayout({
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
           <ToastProvider>
             <AuthProvider>
-              <Header />
-              <div className="max-w-6xl mx-auto px-4 py-8">
-                <main data-testid="page-root">
-                  {children}
-                </main>
-              </div>
-              <Footer />
+              <CartProvider>
+                <Header />
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                  <main data-testid="page-root">
+                    {children}
+                  </main>
+                </div>
+                <Footer />
+              </CartProvider>
               <ToastContainer />
             </AuthProvider>
           </ToastProvider>
