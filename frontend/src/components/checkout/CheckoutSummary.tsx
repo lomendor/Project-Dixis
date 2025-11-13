@@ -31,6 +31,8 @@ export default function CheckoutSummary(){
     }
     try {
       sessionStorage.setItem('dixis:last-order', JSON.stringify(payload));
+      // Προσπάθεια αποστολής email (δεν μπλοκάρει την ολοκλήρωση)
+      try { fetch('/api/ops/email-order', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) }); } catch {}
       clear();
       window.location.href = '/checkout/confirmation';
     } catch (e) {
