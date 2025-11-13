@@ -46,6 +46,9 @@ export default async function CartPage() {
         <CartTotalsClient items={items} subtotal={subtotal} currency={currency}
                           initialZone={initialZone} threshold={threshold} />
       </section>
+      <div className="mt-6 text-right">
+        <a href="/checkout" className="inline-flex h-10 px-4 items-center rounded-md bg-brand text-white text-sm">Σε ταμείο →</a>
+      </div>
     </main>
   );
 }
