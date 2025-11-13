@@ -14,6 +14,7 @@ export default function WaitlistPage(){
       region:String(fd.get('region')||'').trim(),
       products:String(fd.get('products')||'').trim(),
       notes:String(fd.get('notes')||'').trim(),
+      website:String(fd.get('website')||'').trim(),
       ts:Date.now()
     };
     if(!payload.name||!payload.phone){ setErr('Συμπλήρωσε τουλάχιστον ονοματεπώνυμο & τηλέφωνο.'); return; }
@@ -28,6 +29,7 @@ export default function WaitlistPage(){
       {err ? <p className="text-sm text-red-600 mt-3">{err}</p> : null}
       {ok ? <p className="text-sm text-green-700 mt-3">Ελήφθη! Θα σε καλέσουμε σύντομα.</p> : null}
       <form onSubmit={onSubmit} className="mt-4 grid gap-3 max-w-2xl">
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
         <div className="grid sm:grid-cols-2 gap-3">
           <input name="name" placeholder="Ονοματεπώνυμο/Επωνυμία *" className="h-10 px-3 border rounded-md" required />
           <input name="phone" placeholder="Τηλέφωνο *" className="h-10 px-3 border rounded-md" required />
