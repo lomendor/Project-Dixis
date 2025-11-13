@@ -1,36 +1,20 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { useCart } from '@/store/cart';
 
-export default function AddToCartButton({ slug, qty = 1 }: { slug: string; qty?: number }) {
-  const [busy, setBusy] = useState(false);
-  const router = useRouter();
-
-  const onClick = async () => {
-    try {
-      setBusy(true);
-      await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, qty })
-      });
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('cart:updated'));
-      }
-      router.refresh();
-    } finally {
-      setBusy(false);
-    }
-  };
-
+export default function AddToCartButton(
+  { id, title, price, currency = 'EUR', qty = 1, className = '' }:
+  { id: string|number; title?: string; price?: number|string; currency?: string; qty?: number; className?: string }
+){
+  const { add } = useCart();
+  const [ok, setOk] = React.useState(false);
   return (
     <button
-      data-testid="add-to-cart"
-      onClick={onClick}
-      disabled={busy}
-      className="mt-2 text-sm px-3 py-1 border rounded hover:bg-neutral-50 disabled:opacity-60"
+      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); add({ id: String(id), title: String(title ?? 'Προϊόν'), price: Number(price ?? 0), currency }, qty); setOk(true); setTimeout(()=>setOk(false), 1200); }}
+      className={`h-10 px-4 rounded-md text-sm bg-brand text-white hover:opacity-90 ${className}`}
+      aria-live="polite"
     >
-      {busy ? 'Προσθήκη…' : 'Προσθήκη στο καλάθι'}
+      {ok ? '✅ Προστέθηκε' : 'Προσθήκη στο καλάθι'}
     </button>
   );
 }

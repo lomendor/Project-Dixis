@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import Add from './ui/Add';
+import BuyBox from '@/components/cart/BuyBox';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,6 +126,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           <div className="mt-auto">
             <Add product={p}/>
           </div>
+          <BuyBox product={{ id: p!.id as any, title: p!.title ?? p!.title, price: p!.price, currency: 'EUR' }} />
         </div>
       </div>
 
