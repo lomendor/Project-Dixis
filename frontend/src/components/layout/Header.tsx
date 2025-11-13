@@ -12,6 +12,7 @@ export default function Header(){
         <nav className="hidden sm:flex items-center gap-5 text-sm">
           <Link href="/products" className="hover:underline">Προϊόντα</Link>
           <Link href="/orders/lookup" className="hover:underline">Παραγγελία</Link>
+          <Link href="/producers" className="hover:underline">Για Παραγωγούς</Link>
           <Link href="/legal/terms" className="hover:underline">Όροι</Link>
         </nav>
         <a href="/cart" className="text-sm relative" aria-label="Καλάθι">
