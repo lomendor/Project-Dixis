@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
 import BuyBox from '@/components/cart/BuyBox';
+import { getBaseUrl } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     return { title: 'Προϊόν μη διαθέσιμο' };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+  const baseUrl = await getBaseUrl();
   const url = `${baseUrl}/products/${id}`;
   const imageUrl = p.imageUrl || `${baseUrl}/og-default.png`;
 
@@ -71,7 +72,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
   const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
 
   // JSON-LD Product Schema
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+  const baseUrl = await getBaseUrl();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',

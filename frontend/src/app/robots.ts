@@ -1,9 +1,18 @@
-import type { MetadataRoute } from 'next';
-export default function robots(): MetadataRoute.Robots {
-  const host = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
+import { MetadataRoute } from 'next';
+import { getBaseUrl } from '@/lib/site';
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const baseUrl = await getBaseUrl();
+
   return {
-    rules: [{ userAgent: '*', allow: '/' }],
-    sitemap: `${host}/sitemap.xml`,
-    host
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/test-error', '/dev-check', '/api/'],
+      },
+    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }
