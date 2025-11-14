@@ -100,7 +100,15 @@ export default function Navigation() {
               >
                 Products
               </Link>
-              
+
+              <Link
+                href="/contact"
+                className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                data-testid="nav-contact"
+              >
+                Επικοινωνία
+              </Link>
+
               <CartIcon />
               
               {isAuthenticated && isProducer && (
@@ -194,9 +202,17 @@ export default function Navigation() {
               >
                 Products
               </Link>
-              
-              <CartIcon 
-                className="block text-base font-medium" 
+
+              <Link
+                href="/contact"
+                className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                data-testid="mobile-nav-contact"
+              >
+                Επικοινωνία
+              </Link>
+
+              <CartIcon
+                className="block text-base font-medium"
                 isMobile={true}
               />
               
