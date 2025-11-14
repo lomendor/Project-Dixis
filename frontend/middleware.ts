@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export const config = {
-  matcher: ['/api/ci/:path*', '/api/dev/:path*', '/api/ops/test-error'],
+  matcher: ['/api/ci/:path*', '/api/dev/:path*', '/api/ops/test-error', '/api/ops/status'],
 };
 
 export default function middleware(req: NextRequest) {
