@@ -1,18 +1,14 @@
-import { MetadataRoute } from 'next';
-import { getBaseUrl } from '@/lib/site';
+import { MetadataRoute } from 'next'
 
-export default async function robots(): Promise<MetadataRoute.Robots> {
-  const baseUrl = await getBaseUrl();
-
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/test-error', '/dev-check', '/api/'],
+        disallow: ['/ops'],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl,
-  };
+    sitemap: 'https://dixis.io/sitemap.xml',
+  }
 }
