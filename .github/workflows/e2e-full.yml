@@ -18,6 +18,7 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
       - run: cd frontend && pnpm i --frozen-lockfile || pnpm i
+      - run: cd frontend && pnpm exec prisma generate
       - run: cd frontend && pnpm build
       - run: cd frontend && pnpm exec playwright install --with-deps
       - run: cd frontend && pnpm test:e2e || echo "ℹ️ nightly only"
