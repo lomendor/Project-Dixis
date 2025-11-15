@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
 
   // Image optimization for external sources
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'https',
@@ -34,8 +36,24 @@ const nextConfig: NextConfig = {
         port: '8001',
         pathname: '/storage/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'dixis.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.dixis.gr',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.hstgr.net',
+      },
     ],
   },
+
+  // Production optimization
+  output: 'standalone',
+  swcMinify: true,
 
   // Security headers (AG-SEC-01)
   async headers() {

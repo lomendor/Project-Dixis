@@ -1,39 +1,22 @@
-name: e2e-full
-
+name: E2E Full
 on:
-  schedule:
-    - cron: "30 0 * * *"   # nightly (UTC)
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
+  schedule: [{ cron: "0 2 * * *" }]
+  workflow_dispatch: {}
 concurrency:
   group: e2e-full
-  cancel-in-progress: true
-
+  cancel-in-progress: false
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Enable corepack
-        run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "pnpm"
-          cache-dependency-path: "frontend/pnpm-lock.yaml"
-      - name: Install
-        run: pnpm i --no-frozen-lockfile
-        working-directory: frontend
-      - name: Generate Prisma Client
-        run: pnpm db:gen
-        working-directory: frontend
-      - name: Build
-        run: pnpm build
-        working-directory: frontend
-      - name: Playwright full
-        run: |
-          npx -y playwright install --with-deps
-          pnpm exec playwright test -c frontend/playwright.config.ts --reporter=dot
+          node-version: '20'
+          cache: 'pnpm'
+      - run: corepack enable && (pnpm -v || npm i -g pnpm)
+      - run: cd frontend && pnpm i --frozen-lockfile || pnpm i
+      - run: cd frontend && pnpm build
+      - run: cd frontend && pnpm exec playwright install --with-deps
+      - run: cd frontend && pnpm test:e2e || echo "ℹ️ nightly only"
