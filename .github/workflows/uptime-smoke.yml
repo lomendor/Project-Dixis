@@ -6,13 +6,15 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe healthz on prod domains
+      - name: Probe healthz on prod domain
         run: |
           set -e
-          for URL in https://dixis.gr/api/healthz https://dixis.io/api/healthz; do
-            echo "Probing $URL"
-            if curl -fsS "$URL" | grep -qi healthy; then
-              echo "OK: $URL"; exit 0
-            fi
-          done
-          echo "❌ All probes failed"; exit 1
+          URL="https://dixis.io/api/healthz"
+          echo "Probing $URL"
+          RESPONSE=$(curl -fsS "$URL")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -qi '"status".*"ok"'; then
+            echo "✅ OK: $URL is healthy"
+            exit 0
+          fi
+          echo "❌ Health check failed"; exit 1
