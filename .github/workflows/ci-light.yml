@@ -16,10 +16,11 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
-      - run: corepack enable && (pnpm -v || npm i -g pnpm)
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
       - run: cd frontend && pnpm i --frozen-lockfile || pnpm i
       - run: cd frontend && pnpm lint && pnpm typecheck
