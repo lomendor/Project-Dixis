@@ -1,155 +1,45 @@
-name: Lighthouse Manual
-
+name: Lighthouse CI
 on:
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "0 3 * * *"  # καθημερινά 03:00 EET
 
 jobs:
-  dependabot-smoke:
+  lhci:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]' }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - name: Install minimal deps
-        working-directory: frontend
-        run: npm ci
-      - name: Type check only (dependabot)
-        working-directory: frontend
-        run: npm run type-check
+          node-version: '20'
 
-  lighthouse:
-    runs-on: ubuntu-latest
-    if: ${{ github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]' }}
-    continue-on-error: ${{ startsWith(github.head_ref, 'ci/') }}  # Non-blocking only for ci/* hotfix branches
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          version: 9
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Install contracts dependencies
-        run: |
-          if [ -d "packages/contracts" ]; then
-            cd packages/contracts && npm ci
-          else
-            echo "No contracts directory found"
-          fi
-
-      - name: Build contracts package
-        run: |
-          if [ -d "packages/contracts" ]; then
-            cd packages/contracts && npm run build
-          else
-            echo "No contracts directory found"
-          fi
-
-      - name: Build frontend (bind mock API)
-        working-directory: frontend
-        env:
-          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
-        run: npm run build
-
-      - name: Install wait-on utility
-        run: npm install -g wait-on
-
-      - name: Ensure ports free (3010, 4010)
-        run: |
-          if lsof -i :3010 -t >/dev/null 2>&1; then
-            kill -9 $(lsof -i :3010 -t) || true
-          fi
-          if lsof -i :4010 -t >/dev/null 2>&1; then
-            kill -9 $(lsof -i :4010 -t) || true
-          fi
-
-      - name: Start mock API (4010)
-        run: |
-          node scripts/lhci-mock-api.js &
-          npx wait-on http://localhost:4010/health
-
-      - name: Start Next server (3010)
+      - name: Install & Build (frontend)
         working-directory: frontend
         run: |
-          (npm run start -- -p 3010 &) && npx wait-on http://localhost:3010
-        env:
-          NODE_ENV: production
-          NEXT_TELEMETRY_DISABLED: '1'
-          NEXT_PUBLIC_API_BASE: "http://localhost:4010"
+          pnpm i --no-frozen-lockfile
+          pnpm build
 
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
-      - name: Run LHCI
-        env:
-          TEST_BASE_URL: http://localhost:3010
+      - name: Start app
+        working-directory: frontend
         run: |
-          curl -sf "http://localhost:3010/" || true
-          npx @lhci/cli autorun --collect.url=http://localhost:3010 --assert.preset=lighthouse:recommended
+          pnpm start -- -p 3000 &
+          n=0; until [ $n -ge 30 ]; do curl -fsS http://localhost:3000 >/dev/null 2>&1 && break; n=$((n+1)); sleep 1; done
 
-      - name: Upload Lighthouse artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
         with:
-          name: lighthouseci
-          path: frontend/.lighthouseci
-
-      - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: lighthouse-report
-          path: |
-            frontend/.lighthouseci/
-          retention-days: 7
-
-      - name: Create reports directory
-        run: |
-          mkdir -p docs/reports/$(date +%Y-%m-%d)
-
-      - name: Generate Lighthouse summary
-        if: always()
-        run: |
-          cd frontend
-          if [ -d ".lighthouseci" ]; then
-            echo "# 🏍️ Lighthouse CI Summary - $(date +%Y-%m-%d)" > ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "## 📊 Performance Metrics" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "*Analysis using mock API (ports 3010/4010) - no database dependencies*" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "- Next.js: http://localhost:3010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "- Mock API: http://localhost:4010" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-            echo "Generated on: $(date)" >> ../../docs/reports/$(date +%Y-%m-%d)/LHCI-SUMMARY.md
-          fi
-
-      - name: Upload Lighthouse summary
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: lighthouse-summary
-          path: docs/reports/*/LHCI-SUMMARY.md
-          retention-days: 7
-
-      - name: Cleanup background processes
-        if: always()
-        run: |
-          echo "Stopping background processes..."
-          # Kill any processes on the ports
-          lsof -ti:4010 | xargs -r kill 2>/dev/null || true
-          lsof -ti:3010 | xargs -r kill 2>/dev/null || true
+          urls: |
+            http://localhost:3000/
+          configPath: ./frontend/lhci.config.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
