@@ -1,0 +1,28 @@
+name: CI Light
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/**'
+concurrency:
+  group: ci-light-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quick:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
+      - run: cd frontend && pnpm i --frozen-lockfile || pnpm i
+      - run: cd frontend && pnpm exec prisma generate
+      - run: cd frontend && pnpm typecheck
+      - run: cd frontend && pnpm lint --max-warnings=999 || true
