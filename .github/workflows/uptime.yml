@@ -1,0 +1,33 @@
+name: Uptime
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # κάθε 10'
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check /api/healthz
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/api/healthz)
+          [ "$code" = "200" ] || { echo "healthz: $code"; exit 1; }
+
+      - name: Check robots.txt
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/robots.txt)
+          [ "$code" = "200" ] || { echo "robots: $code"; exit 1; }
+
+      - name: Check sitemap.xml
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/sitemap.xml)
+          [ "$code" = "200" ] || { echo "sitemap: $code"; exit 1; }
+
+      - name: Check homepage
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/)
+          [ "$code" = "200" ] || { echo "homepage: $code"; exit 1; }
