@@ -21,7 +21,7 @@ CUTOFF_DATE=$(date -d '60 days ago' '+%Y-%m-%d' 2>/dev/null || date -v -60d '+%Y
 echo -e "\n### 📅 Stale PRs (>60 days old)\n" >> "$REPORT_FILE"
 gh pr list --state open --search "updated:<$CUTOFF_DATE" --limit 100 \
   --json number,title,author,updatedAt \
-  --jq '.[] | "- PR #\(.number): \(.title) by @\(.author.login) (Last update: \(.updatedAt | split(\"T\")[0]))"' >> "$REPORT_FILE" || true
+  --jq '.[] | "- PR #\(.number): \(.title) by @\(.author.login) (Last update: \(.updatedAt | split("T")[0]))"' >> "$REPORT_FILE" || true
 
 echo -e "\n### ✅ Approved but Not Merged\n" >> "$REPORT_FILE"
 gh pr list --state open --search "review:approved" --limit 30 \

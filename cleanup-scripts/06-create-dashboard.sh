@@ -2,11 +2,11 @@
 set -euo pipefail
 mkdir -p pr-cleanup-reports
 DASH="pr-cleanup-reports/DASHBOARD.md"
-OPEN_PRS=$(gh pr list --state open --json number | jq '. | length')
-OPEN_ISSUES=$(gh issue list --state open --json number | jq '. | length')
-DRAFT_PRS=$(gh pr list --state open --draft --json number | jq '. | length')
-APPROVED_PRS=$(gh pr list --state open --search "review:approved" --json number | jq '. | length')
-DEPENDABOT_PRS=$(gh pr list --state open --author "dependabot[bot]" --json number | jq '. | length')
+OPEN_PRS=$(gh pr list --state open --limit 200 --json number | jq '. | length')
+OPEN_ISSUES=$(gh issue list --state open --limit 200 --json number | jq '. | length')
+DRAFT_PRS=$(gh pr list --state open --draft --limit 200 --json number | jq '. | length')
+APPROVED_PRS=$(gh pr list --state open --search "review:approved" --limit 200 --json number | jq '. | length')
+DEPENDABOT_PRS=$(gh pr list --state open --author "dependabot[bot]" --limit 200 --json number | jq '. | length')
 STALE_ISSUES=$(gh issue list --state open --search "updated:<$(date -d '90 days ago' '+%Y-%m-%d' 2>/dev/null || date -v -90d '+%Y-%m-%d')" --json number | jq '. | length')
 UNLABELED_ISSUES=$(gh issue list --state open --search "no:label" --json number | jq '. | length')
 
