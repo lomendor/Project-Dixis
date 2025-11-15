@@ -185,3 +185,4 @@ junit-*.xml
 # Dixis Skill artifacts (local-only)
 .dixis-skill/
 dixis-skill_v*.zip
+pr-cleanup-reports/
