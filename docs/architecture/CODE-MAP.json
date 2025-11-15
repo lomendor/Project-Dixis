@@ -1,0 +1,360 @@
+{
+  "generated": "2025-09-25",
+  "project": "Project-Dixis",
+  "summary": {
+    "total_domains": 8,
+    "total_commits_60d": 249,
+    "primary_contributors": 2,
+    "health_score": 6.4
+  },
+  "domains": [
+    {
+      "name": "auth",
+      "description": "User authentication, roles, session management",
+      "files": [
+        "frontend/src/contexts/AuthContext.tsx",
+        "frontend/src/hooks/useAuth.ts",
+        "frontend/src/hooks/useProducerAuth.ts",
+        "frontend/src/components/AuthGuard.tsx",
+        "frontend/src/lib/auth/helpers.ts",
+        "frontend/src/lib/auth-helpers.ts",
+        "frontend/src/app/auth/login/page.tsx",
+        "frontend/src/app/auth/register/page.tsx"
+      ],
+      "owners": ["Core Team"],
+      "proposed_owner": "Core Team",
+      "status": "active",
+      "dependencies": ["api", "validation", "models"],
+      "risk_level": "high",
+      "notes": "High dependency across all domains - needs senior oversight"
+    },
+    {
+      "name": "products",
+      "description": "Product catalog, display, search, filtering",
+      "files": [
+        "frontend/src/app/products/[id]/page.tsx",
+        "frontend/src/components/product/ProductImage.tsx",
+        "frontend/src/components/ProductDetailSkeleton.tsx",
+        "frontend/src/components/ProductImageFallback.tsx",
+        "frontend/src/lib/validation/productValidation.ts",
+        "frontend/src/utils/productValidation.ts"
+      ],
+      "owners": ["Frontend Team"],
+      "proposed_owner": "Frontend Team",
+      "status": "stable",
+      "dependencies": ["api", "greek-normalize", "validation"],
+      "risk_level": "low",
+      "notes": "Stable with low churn"
+    },
+    {
+      "name": "cart",
+      "description": "Shopping cart and checkout flow",
+      "files": [
+        "frontend/src/app/cart/page.tsx",
+        "frontend/src/app/checkout/page.tsx",
+        "frontend/src/components/cart/CartIcon.tsx",
+        "frontend/src/components/cart/CartMiniPanel.tsx",
+        "frontend/src/components/cart/CartSummary.tsx",
+        "frontend/src/hooks/useCheckout.ts",
+        "frontend/src/lib/api/checkout.ts",
+        "frontend/src/lib/validation/checkout.ts"
+      ],
+      "owners": ["Core Team"],
+      "proposed_owner": "Core Team",
+      "status": "high_churn",
+      "dependencies": ["auth", "products", "shipping", "payment"],
+      "risk_level": "high",
+      "notes": "Active development - 15 changes to cart page in 60 days"
+    },
+    {
+      "name": "shipping",
+      "description": "Delivery methods, courier integration, tracking",
+      "files": [
+        "frontend/src/components/shipping/DeliveryMethodSelector.tsx",
+        "frontend/src/components/shipping/LockerSearch.tsx",
+        "frontend/src/components/shipping/ShipmentTracking.tsx",
+        "frontend/src/components/shipping/ShippingLabelManager.tsx",
+        "frontend/src/components/shipping/ShippingQuote.tsx",
+        "frontend/src/lib/shipping-estimator.ts",
+        "backend/app/Http/Controllers/ShippingController.php",
+        "backend/app/Services/Couriers/AcsCourierProvider.php"
+      ],
+      "owners": ["Backend Team"],
+      "proposed_owner": "Backend Team",
+      "status": "active",
+      "dependencies": ["api", "models"],
+      "risk_level": "medium",
+      "notes": "Multiple courier integrations maintained"
+    },
+    {
+      "name": "payment",
+      "description": "Payment processing, Stripe integration, refunds",
+      "files": [
+        "frontend/src/components/payment/StripePaymentForm.tsx",
+        "frontend/src/components/payment/StripeProvider.tsx",
+        "frontend/src/lib/payment/paymentMethods.ts",
+        "frontend/src/lib/api/payment.ts",
+        "frontend/src/app/checkout/payment/[orderId]/page.tsx",
+        "backend/app/Http/Controllers/PaymentController.php",
+        "backend/app/Services/Payment/StripePaymentProvider.php"
+      ],
+      "owners": ["Backend Team"],
+      "proposed_owner": "Backend Team",
+      "status": "active",
+      "dependencies": ["api", "auth"],
+      "risk_level": "high",
+      "notes": "Security-critical domain"
+    },
+    {
+      "name": "producer",
+      "description": "Producer dashboard, inventory, analytics",
+      "files": [
+        "frontend/src/app/producer/dashboard/page.tsx",
+        "frontend/src/app/producer/products/page.tsx",
+        "frontend/src/app/producer/orders/page.tsx",
+        "frontend/src/app/producer/onboarding/page.tsx",
+        "frontend/src/components/producer/ProducerAnalyticsDashboard.tsx",
+        "backend/app/Http/Controllers/Api/V1/ProducerController.php"
+      ],
+      "owners": ["Product Team"],
+      "proposed_owner": "Product Team",
+      "status": "active",
+      "dependencies": ["auth", "analytics", "api"],
+      "risk_level": "medium",
+      "notes": "Feature-rich area with good separation"
+    },
+    {
+      "name": "admin",
+      "description": "Admin dashboard, platform oversight",
+      "files": [
+        "frontend/src/app/admin/analytics/page.tsx",
+        "frontend/src/app/admin/orders/page.tsx",
+        "frontend/src/app/admin/producers/page.tsx",
+        "frontend/src/app/admin/components/PriceStockEditor.tsx",
+        "frontend/src/lib/admin/adminApi.ts",
+        "backend/app/Http/Controllers/Admin/AnalyticsController.php"
+      ],
+      "owners": [],
+      "proposed_owner": "TBD",
+      "status": "needs_owner",
+      "dependencies": ["auth", "analytics", "api"],
+      "risk_level": "medium",
+      "notes": "Requires dedicated maintainer"
+    },
+    {
+      "name": "analytics",
+      "description": "Business metrics, performance tracking",
+      "files": [
+        "frontend/src/components/analytics/AnalyticsDashboard.tsx",
+        "frontend/src/lib/analytics.ts",
+        "frontend/src/hooks/useAnalytics.ts",
+        "backend/app/Services/AnalyticsService.php",
+        "backend/app/Services/ProducerAnalyticsService.php"
+      ],
+      "owners": [],
+      "proposed_owner": "TBD",
+      "status": "needs_owner",
+      "dependencies": ["api", "models"],
+      "risk_level": "low",
+      "notes": "Growing importance - needs ownership"
+    }
+  ],
+  "high_churn_files": [
+    {
+      "file": "frontend/package.json",
+      "changes": 34,
+      "domain": "build",
+      "risk": "high"
+    },
+    {
+      "file": "backend/routes/api.php",
+      "changes": 24,
+      "domain": "api",
+      "risk": "high"
+    },
+    {
+      "file": "backend/database/seeders/DatabaseSeeder.php",
+      "changes": 22,
+      "domain": "data",
+      "risk": "medium"
+    },
+    {
+      "file": "backend/database/migrations/2025_08_31_112928_update_order_status_enums.php",
+      "changes": 20,
+      "domain": "orders",
+      "risk": "medium"
+    },
+    {
+      "file": "frontend/tests/e2e/smoke.spec.ts",
+      "changes": 16,
+      "domain": "testing",
+      "risk": "medium"
+    },
+    {
+      "file": "frontend/playwright.config.ts",
+      "changes": 16,
+      "domain": "testing",
+      "risk": "medium"
+    },
+    {
+      "file": "frontend/src/app/cart/page.tsx",
+      "changes": 15,
+      "domain": "cart",
+      "risk": "high"
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "changes": 13,
+      "domain": "build",
+      "risk": "low"
+    },
+    {
+      "file": "frontend/tests/global-setup.ts",
+      "changes": 11,
+      "domain": "testing",
+      "risk": "medium"
+    },
+    {
+      "file": ".github/workflows/lighthouse.yml",
+      "changes": 11,
+      "domain": "ci-cd",
+      "risk": "high"
+    }
+  ],
+  "dead_code": [
+    {
+      "type": "duplicate",
+      "files": [
+        "frontend/src/components/CartSummary.tsx",
+        "frontend/src/components/cart/CartSummary.tsx"
+      ],
+      "action": "Remove root version, keep /cart/ subdirectory version"
+    },
+    {
+      "type": "duplicate",
+      "files": [
+        "frontend/src/utils/greekNormalize.ts",
+        "frontend/src/lib/utils/greekNormalize.ts"
+      ],
+      "action": "Consolidate to /lib/utils/ version"
+    },
+    {
+      "type": "duplicate",
+      "files": [
+        "frontend/src/utils/productValidation.ts",
+        "frontend/src/lib/validation/productValidation.ts"
+      ],
+      "action": "Merge to /lib/validation/ version"
+    },
+    {
+      "type": "duplicate",
+      "files": [
+        "frontend/src/lib/auth-helpers.ts",
+        "frontend/src/lib/auth/helpers.ts"
+      ],
+      "action": "Audit functionality and merge"
+    },
+    {
+      "type": "misplaced",
+      "files": [
+        "backend/frontend/tests/e2e/happy.spec.ts"
+      ],
+      "action": "Remove - incorrect path"
+    }
+  ],
+  "owners": [
+    {
+      "domain": "auth",
+      "proposed_owner": "Core Team",
+      "current_owner": "Core Team",
+      "notes": "Critical dependency - senior oversight required"
+    },
+    {
+      "domain": "products",
+      "proposed_owner": "Frontend Team",
+      "current_owner": "Frontend Team",
+      "notes": "Stable domain with clear boundaries"
+    },
+    {
+      "domain": "cart",
+      "proposed_owner": "Core Team",
+      "current_owner": "Core Team",
+      "notes": "High churn - needs dedicated focus"
+    },
+    {
+      "domain": "shipping",
+      "proposed_owner": "Backend Team",
+      "current_owner": "Backend Team",
+      "notes": "Multiple integrations to maintain"
+    },
+    {
+      "domain": "payment",
+      "proposed_owner": "Backend Team",
+      "current_owner": "Backend Team",
+      "notes": "Security-critical - experienced team required"
+    },
+    {
+      "domain": "producer",
+      "proposed_owner": "Product Team",
+      "current_owner": "Product Team",
+      "notes": "Feature-rich area with good separation"
+    },
+    {
+      "domain": "admin",
+      "proposed_owner": "TBD",
+      "current_owner": null,
+      "notes": "Needs dedicated maintainer assignment"
+    },
+    {
+      "domain": "analytics",
+      "proposed_owner": "TBD",
+      "current_owner": null,
+      "notes": "Growing importance - assign owner soon"
+    }
+  ],
+  "risks": [
+    {
+      "level": "high",
+      "description": "No clear ownership for Admin and Analytics domains",
+      "impact": "Features may degrade without dedicated maintenance",
+      "mitigation": "Assign dedicated team members or create rotation schedule"
+    },
+    {
+      "level": "high",
+      "description": "High churn in core files (package.json, api.php, cart/page.tsx)",
+      "impact": "Instability in critical paths, potential for regressions",
+      "mitigation": "Code freeze on stable features, focused stabilization sprint"
+    },
+    {
+      "level": "medium",
+      "description": "4 duplicate code implementations creating confusion",
+      "impact": "Maintenance overhead, potential for inconsistent behavior",
+      "mitigation": "Immediate cleanup PR to remove duplicates"
+    }
+  ],
+  "metrics": {
+    "domain_separation_score": 8,
+    "code_duplication_score": 5,
+    "test_coverage_score": 7,
+    "ownership_clarity_score": 6,
+    "documentation_score": 6,
+    "overall_health_score": 6.4
+  },
+  "contributors": [
+    {
+      "name": "Panagiotis Kourkoutis",
+      "commits_60d": 155,
+      "percentage": 62
+    },
+    {
+      "name": "lomendor",
+      "commits_60d": 89,
+      "percentage": 36
+    },
+    {
+      "name": "dependabot[bot]",
+      "commits_60d": 5,
+      "percentage": 2
+    }
+  ]
+}
