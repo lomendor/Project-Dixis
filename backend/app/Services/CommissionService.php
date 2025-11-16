@@ -2,47 +2,66 @@
 
 namespace App\Services;
 
-use App\Models\Commission;
-use App\Models\Order;
+use App\Models\CommissionRule;
+use Laravel\Pennant\Feature;
 
 class CommissionService
 {
-    public function __construct(
-        private FeeResolver $fees = new FeeResolver()
-    ) {}
-
-    /**
-     * Calculate and persist commission for an order.
-     *
-     * @param Order $order
-     * @param string $channel 'b2c' or 'b2b'
-     * @return Commission
-     */
-    public function settleForOrder(Order $order, string $channel = 'b2c'): Commission
+    /** $itemCtx: (object){ channel, producer_id, category_ids:[], line_total_cents:int } */
+    public function resolveRule(object $itemCtx): ?CommissionRule
     {
-        // Get producer_id from order items (first item for simplicity)
-        // In multi-producer orders, you'd loop per item or aggregate
-        $producerId = $order->orderItems()->first()?->producer_id;
-        $categoryId = null; // TODO: derive from items if product categories exist
+        if (!Feature::active('commission_engine_v1')) return null;
 
-        $resolved = $this->fees->resolve($producerId, $categoryId, $channel);
+        return CommissionRule::active()
+            ->forContext((object)[
+                'channel' => $itemCtx->channel,
+                'producer_id' => $itemCtx->producer_id ?? null,
+                'category_ids' => $itemCtx->category_ids ?? [],
+            ])
+            ->where('tier_min_amount_cents','<=',$itemCtx->line_total_cents)
+            ->where(function($q) use ($itemCtx){
+                $q->whereNull('tier_max_amount_cents')
+                  ->orWhere('tier_max_amount_cents','>=',$itemCtx->line_total_cents);
+            })
+            ->orderByDesc('priority')
+            ->orderByDesc('scope_producer_id')
+            ->orderByDesc('scope_category_id')
+            ->orderByDesc('scope_channel')
+            ->first();
+    }
 
-        // Use order total (supports both 'total' and legacy 'total_amount')
-        $gross = (float)($order->total ?? $order->total_amount ?? 0);
-        $platformFee = round($gross * (float)$resolved['rate'], 2);
-        $platformFeeVat = round($platformFee * (float)$resolved['fee_vat_rate'], 2);
-        $producerPayout = round($gross - $platformFee - $platformFeeVat, 2);
+    public function calculate(object $itemCtx): array
+    {
+        if (!Feature::active('commission_engine_v1'))
+            return ['cents'=>0,'rule_id'=>null,'meta'=>'flag_off'];
 
-        return Commission::updateOrCreate(
-            ['order_id' => $order->id, 'producer_id' => $producerId],
-            [
-                'channel' => $channel,
-                'order_gross' => $gross,
-                'platform_fee' => $platformFee,
-                'platform_fee_vat' => $platformFeeVat,
-                'producer_payout' => $producerPayout,
-                'currency' => $order->currency ?? 'EUR',
-            ]
-        );
+        $rule = $this->resolveRule($itemCtx);
+        if (!$rule) return ['cents'=>0,'rule_id'=>null,'meta'=>'no_rule'];
+
+        $base = 0;
+        if ($rule->percent > 0) $base += ($itemCtx->line_total_cents * (float)$rule->percent) / 100.0;
+        if (!is_null($rule->fixed_fee_cents)) $base += (int)$rule->fixed_fee_cents;
+
+        $base = $this->applyVat($base, $rule->vat_mode);
+        $base = $this->round($base, $rule->rounding_mode);
+
+        return ['cents'=>(int)$base, 'rule_id'=>$rule->id, 'meta'=>[
+            'percent'=>$rule->percent, 'fixed_fee_cents'=>$rule->fixed_fee_cents,
+            'vat_mode'=>$rule->vat_mode,'rounding'=>$rule->rounding_mode
+        ]];
+    }
+
+    private function applyVat(float $amt, string $mode): float {
+        return match($mode){
+            'INCLUDE' => $amt * 1.24, // TODO: pull from config/table in TAX-01
+            default => $amt,
+        };
+    }
+    private function round(float $amt, string $mode): float {
+        return match($mode){
+            'UP' => ceil($amt),
+            'DOWN' => floor($amt),
+            default => round($amt),
+        };
     }
 }

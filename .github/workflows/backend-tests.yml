@@ -1,0 +1,44 @@
+name: Backend Unit Tests (commission)
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports: ["5432:5432"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, pdo_pgsql
+      - name: Install deps & migrate
+        working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+        run: |
+          composer install --prefer-dist --no-progress
+          cp .env.example .env || true
+          php artisan key:generate
+          php artisan migrate
+      - name: Run commission tests
+        working-directory: backend
+        run: php artisan test --filter=CommissionServiceTest
