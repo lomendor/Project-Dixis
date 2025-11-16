@@ -25,6 +25,9 @@ jobs:
         with:
           php-version: '8.2'
           extensions: mbstring, pdo, pdo_pgsql
+      - name: Create test database
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -c "CREATE DATABASE dixis_test;"
       - name: Install deps & migrate
         working-directory: backend
         env:
@@ -41,4 +44,11 @@ jobs:
           php artisan migrate
       - name: Run commission tests
         working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
         run: php artisan test --filter=CommissionServiceTest
