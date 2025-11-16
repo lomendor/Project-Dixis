@@ -41,6 +41,7 @@ jobs:
           composer install --prefer-dist --no-progress
           cp .env.example .env || true
           php artisan key:generate
+          php artisan vendor:publish --tag=pennant-migrations
           php artisan migrate
       - name: Run commission tests
         working-directory: backend
