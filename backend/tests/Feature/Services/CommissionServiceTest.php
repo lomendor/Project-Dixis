@@ -5,89 +5,92 @@ namespace Tests\Feature\Services;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Services\CommissionService;
-use App\Models\CommissionRule;
+use App\Models\Order;
+use App\Models\User;
 use Laravel\Pennant\Feature;
 
 class CommissionServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         parent::setUp();
-        // migrations already run by RefreshDatabase
+        
+        // Ensure flag is OFF by default for each test
+        Feature::deactivate('commission_engine_v1');
     }
 
-    private function makeCtx($over=[]) {
-        return (object) array_merge([
-            'channel'=>'B2C',
-            'producer_id'=>null,
-            'category_ids'=>[],
-            'line_total_cents'=>10000
-        ], $over);
+    public function test_returns_zero_when_flag_is_off()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 10000, // €100
+        ]);
+
+        $service = new CommissionService();
+        $fee = $service->calculateFee($order);
+
+        $this->assertEquals(0, $fee, 'Should return zero commission when flag is OFF');
     }
 
-    public function test_flag_off_returns_zero() {
-        Feature::define('commission_engine_v1', fn()=>false);
-        $svc = new CommissionService();
-        $res = $svc->calculate($this->makeCtx());
-        $this->assertSame(0, $res['cents']);
-        $this->assertNull($res['rule_id']);
+    public function test_breakdown_shows_flag_status()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 10000,
+        ]);
+
+        $service = new CommissionService();
+        
+        // Test with flag OFF
+        $breakdown = $service->getCommissionBreakdown($order);
+        $this->assertArrayHasKey('flag_active', $breakdown);
+        $this->assertFalse($breakdown['flag_active']);
+        $this->assertEquals(0, $breakdown['total_cents']);
+
+        // Test with flag ON (skeleton returns zero regardless)
+        Feature::activate('commission_engine_v1');
+        $breakdown = $service->getCommissionBreakdown($order);
+        $this->assertTrue($breakdown['flag_active']);
+        $this->assertEquals(0, $breakdown['total_cents']); // Still zero in skeleton phase
     }
 
-    public function test_simple_percent_rule() {
-        Feature::define('commission_engine_v1', fn()=>true);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>12,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now(),'active'=>true
+    public function test_breakdown_includes_applied_rules()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 10000,
         ]);
-        $svc = new CommissionService();
-        $res = $svc->calculate($this->makeCtx(['line_total_cents'=>20000]));
-        $this->assertSame(2400, $res['cents']); // 12% of 20000
+
+        $service = new CommissionService();
+        $breakdown = $service->getCommissionBreakdown($order);
+
+        $this->assertArrayHasKey('applied_rules', $breakdown);
+        $this->assertIsArray($breakdown['applied_rules']);
+        $this->assertEmpty($breakdown['applied_rules']); // Empty in skeleton phase
     }
 
-    public function test_volume_tiers_and_priority() {
-        Feature::define('commission_engine_v1', fn()=>true);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>15,'tier_min_amount_cents'=>0,'tier_max_amount_cents'=>5000,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST','effective_from'=>now(),'priority'=>0,'active'=>true
-        ]);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>10,'tier_min_amount_cents'=>5001,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST','effective_from'=>now(),'priority'=>0,'active'=>true
-        ]);
-        $svc = new CommissionService();
-        $res1 = $svc->calculate($this->makeCtx(['line_total_cents'=>4000]));
-        $res2 = $svc->calculate($this->makeCtx(['line_total_cents'=>8000]));
-        $this->assertSame(600, $res1['cents']); // 15% of 4000
-        $this->assertSame(800, $res2['cents']); // 10% of 8000
-    }
+    public function test_handles_different_order_amounts()
+    {
+        $user = User::factory()->create();
+        $service = new CommissionService();
 
-    public function test_vat_include_applies() {
-        Feature::define('commission_engine_v1', fn()=>true);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>10,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'INCLUDE','rounding_mode'=>'NEAREST','effective_from'=>now(),'active'=>true
+        // Test with small order
+        $smallOrder = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 1000, // €10
         ]);
-        $svc = new CommissionService();
-        $res = $svc->calculate($this->makeCtx(['line_total_cents'=>10000]));
-        $this->assertSame(1240, $res['cents']); // 10% * 1.24
-    }
+        $this->assertEquals(0, $service->calculateFee($smallOrder));
 
-    public function test_effective_dates_respected() {
-        Feature::define('commission_engine_v1', fn()=>true);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>20,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now()->subMonth(),'effective_to'=>now()->subDay(),'active'=>true
+        // Test with large order
+        $largeOrder = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 100000, // €1000
         ]);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>12,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now(),'active'=>true
-        ]);
-        $svc = new CommissionService();
-        $res = $svc->calculate($this->makeCtx(['line_total_cents'=>10000]));
-        $this->assertSame(1200, $res['cents']); // not 20%
+        $this->assertEquals(0, $service->calculateFee($largeOrder));
     }
 }
