@@ -105,7 +105,8 @@
     "db:push:ci": "prisma db push --schema=prisma/schema.ci.prisma",
     "db:seed:ci": "node prisma/seed.ci.cjs",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed:dev": "node prisma/seed.dev.cjs"
+    "db:seed:dev": "node prisma/seed.dev.cjs",
+    "test:e2e:remote": "playwright test -c playwright.remote.config.ts -g \"smoke\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.901.0",

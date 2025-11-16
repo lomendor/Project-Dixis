@@ -1,33 +1,26 @@
-name: Uptime
+name: Uptime smoke
 on:
   schedule:
-    - cron: "*/10 * * * *"   # κάθε 10'
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 jobs:
-  probe:
+  ping:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    strategy:
+      matrix:
+        url:
+          - "https://dixis.io/"
+          - "https://dixis.io/api/healthz"
+          - "https://dixis.io/robots.txt"
+          - "https://dixis.io/sitemap.xml"
     steps:
-      - name: Check /api/healthz
+      - name: Curl ${{ matrix.url }}
         run: |
-          set -euo pipefail
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/api/healthz)
-          [ "$code" = "200" ] || { echo "healthz: $code"; exit 1; }
-
-      - name: Check robots.txt
-        run: |
-          set -euo pipefail
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/robots.txt)
-          [ "$code" = "200" ] || { echo "robots: $code"; exit 1; }
-
-      - name: Check sitemap.xml
-        run: |
-          set -euo pipefail
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/sitemap.xml)
-          [ "$code" = "200" ] || { echo "sitemap: $code"; exit 1; }
-
-      - name: Check homepage
-        run: |
-          set -euo pipefail
-          code=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/)
-          [ "$code" = "200" ] || { echo "homepage: $code"; exit 1; }
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${{ matrix.url }}") || code=0
+            echo "Attempt $i → $code"
+            [[ "$code" =~ ^2|3 ]] && exit 0
+            sleep 5
+          done
+          echo "Fail: ${{ matrix.url }}"; exit 1

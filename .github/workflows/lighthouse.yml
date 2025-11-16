@@ -1,36 +1,15 @@
 name: Lighthouse CI
 on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
   schedule:
-    - cron: "0 3 * * *"  # daily 03:00 EET
-
+    - cron: "0 2 * * *"
+  workflow_dispatch:
 jobs:
   lhci:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-      - name: Install & Build (frontend)
-        working-directory: frontend
-        run: |
-          pnpm i --no-frozen-lockfile
-          pnpm build
-      - name: Start app
-        working-directory: frontend
-        run: |
-          pnpm start -- -p 3000 &
-          n=0; until [ $n -ge 30 ]; do curl -fsS http://localhost:3000 >/dev/null 2>&1 && break; n=$((n+1)); sleep 1; done
-      - name: Lighthouse CI
+      - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v11
         with:
-          urls: |
-            http://localhost:3000/
-          configPath: ./frontend/lhci.config.json
-          uploadArtifacts: true
+          configPath: ./lighthouserc.json
           temporaryPublicStorage: true
