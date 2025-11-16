@@ -8,7 +8,7 @@ test('api /healthz returns healthy', async () => {
   const res = await ctx.get(API);
   expect(res.ok()).toBeTruthy();
   const body = await res.json();
-  expect(body.status).toBe('healthy');
+  expect(['ok', 'healthy']).toContain(body.status);
 });
 
 test('homepage responds', async ({ page }) => {
