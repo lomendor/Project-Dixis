@@ -788,3 +788,67 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
             ->middleware('throttle:60,1'); // 60 requests per minute
     });
 });
+
+// === OPS: Commission preview (simple JSON) ===
+Route::get('/ops/commission/preview', function (Illuminate\Http\Request $request) {
+    // Simple token auth
+    if ($request->header('x-ops-token') !== env('OPS_TOKEN')) {
+        abort(404);
+    }
+
+    $channel = $request->query('channel', 'b2c') === 'b2b' ? 'b2b' : 'b2c';
+    $producerId = $request->integer('producerId') ?: null;
+    $categoryId = $request->integer('categoryId') ?: null;
+
+    // Option 1: By orderId
+    if ($request->has('orderId')) {
+        $orderId = (int)$request->query('orderId');
+        $order = \App\Models\Order::find($orderId);
+        
+        if (!$order) {
+            return response()->json(['error' => 'order not found'], 404);
+        }
+
+        $service = app(\App\Services\CommissionService::class);
+        $commission = $service->settleForOrder($order, $channel);
+
+        return response()->json([
+            'orderId' => $orderId,
+            'calc' => [
+                'channel' => $commission->channel,
+                'order_gross' => $commission->order_gross,
+                'platform_fee' => $commission->platform_fee,
+                'platform_fee_vat' => $commission->platform_fee_vat,
+                'producer_payout' => $commission->producer_payout,
+                'currency' => $commission->currency,
+            ],
+        ]);
+    }
+
+    // Option 2: By amount
+    if ($request->has('amount')) {
+        $amount = (float)$request->query('amount');
+        
+        $resolver = app(\App\Services\FeeResolver::class);
+        $resolved = $resolver->resolve($producerId, $categoryId, $channel);
+
+        $platformFee = round($amount * (float)$resolved['rate'], 2);
+        $platformFeeVat = round($platformFee * (float)$resolved['fee_vat_rate'], 2);
+        $producerPayout = round($amount - $platformFee - $platformFeeVat, 2);
+
+        return response()->json([
+            'amount' => $amount,
+            'calc' => [
+                'channel' => $channel,
+                'rate' => $resolved['rate'],
+                'fee_vat_rate' => $resolved['fee_vat_rate'],
+                'platform_fee' => $platformFee,
+                'platform_fee_vat' => $platformFeeVat,
+                'producer_payout' => $producerPayout,
+                'source' => $resolved['source'],
+            ],
+        ]);
+    }
+
+    return response()->json(['error' => 'provide orderId or amount'], 400);
+});
