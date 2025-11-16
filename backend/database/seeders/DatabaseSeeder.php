@@ -69,6 +69,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             ProductSeeder::class,
             OrderSeeder::class, // New structured order seeder
+            FeeDefaultsSeeder::class, // FINANCE-02: Global fee defaults
+            FeeRulesSeeder::class, // FINANCE-04: DB-driven fee rules
         ]);
 
         // E2E deterministic data for testing and local environments
