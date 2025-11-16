@@ -9,45 +9,56 @@ class CommissionRuleSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('commission_rules')->truncate();
+        // Idempotent upserts (όχι truncate) για ασφάλεια στα CI/prod
+        $now = now();
 
-        // Default B2C: 12%
-        DB::table('commission_rules')->insert([
-            'scope_channel' => 'B2C',
-            'percent' => 12.00,
-            'tier_min_amount_cents' => 0,
-            'vat_mode' => 'EXCLUDE',
-            'rounding_mode' => 'NEAREST',
-            'effective_from' => now(),
-            'priority' => 0,
-            'active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
+        $rows = [
+            [
+                'scope_channel' => 'B2C',
+                'percent' => 12.00,
+                'tier_min_amount_cents' => 0,
+                'vat_mode' => 'EXCLUDE',
+                'rounding_mode' => 'NEAREST',
+                'priority' => 0, 'active' => true,
+            ],
+            [
+                'scope_channel' => 'B2B',
+                'percent' => 7.00,
+                'tier_min_amount_cents' => 0,
+                'vat_mode' => 'EXCLUDE',
+                'rounding_mode' => 'NEAREST',
+                'priority' => 0, 'active' => true,
+            ],
+            [
+                'scope_channel' => 'B2C',
+                'percent' => 10.00,
+                'tier_min_amount_cents' => 10000, // > €100
+                'vat_mode' => 'EXCLUDE',
+                'rounding_mode' => 'NEAREST',
+                'priority' => 1, 'active' => true,
+            ],
+        ];
 
-        // Default B2B: 7%
-        DB::table('commission_rules')->insert([
-            'scope_channel' => 'B2B',
-            'percent' => 7.00,
-            'tier_min_amount_cents' => 0,
-            'vat_mode' => 'EXCLUDE',
-            'rounding_mode' => 'NEAREST',
-            'effective_from' => now(),
-            'priority' => 0,
-            'active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
+        foreach ($rows as $r) {
+            $exists = DB::table('commission_rules')
+                ->where('scope_channel', $r['scope_channel'])
+                ->where('tier_min_amount_cents', $r['tier_min_amount_cents'])
+                ->where('priority', $r['priority'])
+                ->exists();
 
-        // Volume για B2C: >100€ -> 10%
-        DB::table('commission_rules')->insert([
-            'scope_channel' => 'B2C',
-            'percent' => 10.00,
-            'tier_min_amount_cents' => 10000, // 100€
-            'vat_mode' => 'EXCLUDE',
-            'rounding_mode' => 'NEAREST',
-            'effective_from' => now(),
-            'priority' => 1,
-            'active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
+            if (!$exists) {
+                DB::table('commission_rules')->insert(array_merge($r, [
+                    'effective_from' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]));
+            } else {
+                DB::table('commission_rules')
+                  ->where('scope_channel', $r['scope_channel'])
+                  ->where('tier_min_amount_cents', $r['tier_min_amount_cents'])
+                  ->where('priority', $r['priority'])
+                  ->update(array_merge($r, ['updated_at' => $now]));
+            }
+        }
     }
 }
