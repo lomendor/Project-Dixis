@@ -3,26 +3,51 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\CommissionRule;
+use Illuminate\Support\Facades\DB;
 
 class CommissionRuleSeeder extends Seeder
 {
     public function run(): void
     {
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>12,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now(),'priority'=>0,'active'=>true
+        DB::table('commission_rules')->truncate();
+
+        // Default B2C: 12%
+        DB::table('commission_rules')->insert([
+            'scope_channel' => 'B2C',
+            'percent' => 12.00,
+            'tier_min_amount_cents' => 0,
+            'vat_mode' => 'EXCLUDE',
+            'rounding_mode' => 'NEAREST',
+            'effective_from' => now(),
+            'priority' => 0,
+            'active' => true,
+            'created_at' => now(), 'updated_at' => now(),
         ]);
-        CommissionRule::create([
-            'scope_channel'=>'B2B','percent'=>7,'tier_min_amount_cents'=>0,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now(),'priority'=>0,'active'=>true
+
+        // Default B2B: 7%
+        DB::table('commission_rules')->insert([
+            'scope_channel' => 'B2B',
+            'percent' => 7.00,
+            'tier_min_amount_cents' => 0,
+            'vat_mode' => 'EXCLUDE',
+            'rounding_mode' => 'NEAREST',
+            'effective_from' => now(),
+            'priority' => 0,
+            'active' => true,
+            'created_at' => now(), 'updated_at' => now(),
         ]);
-        CommissionRule::create([
-            'scope_channel'=>'B2C','percent'=>10,'tier_min_amount_cents'=>10000,
-            'vat_mode'=>'EXCLUDE','rounding_mode'=>'NEAREST',
-            'effective_from'=>now(),'priority'=>1,'active'=>true
+
+        // Volume για B2C: >100€ -> 10%
+        DB::table('commission_rules')->insert([
+            'scope_channel' => 'B2C',
+            'percent' => 10.00,
+            'tier_min_amount_cents' => 10000, // 100€
+            'vat_mode' => 'EXCLUDE',
+            'rounding_mode' => 'NEAREST',
+            'effective_from' => now(),
+            'priority' => 1,
+            'active' => true,
+            'created_at' => now(), 'updated_at' => now(),
         ]);
     }
 }
