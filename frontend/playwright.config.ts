@@ -70,7 +70,7 @@ export default defineConfig({
         ...devices['Desktop Chrome']
         // storageState disabled in CI - tests handle auth via UI or route stubs
       },
-      testMatch: ['**/smoke.spec.ts', '**/e3-docs-smoke.spec.ts', '**/auth-probe.spec.ts', '**/shipping-*.spec.ts', '**/checkout*.spec.ts'],
+      testMatch: ['**/smoke*.spec.ts', '**/e3-docs-smoke.spec.ts', '**/auth-probe.spec.ts', '**/shipping-*.spec.ts', '**/checkout*.spec.ts'],
       testIgnore: ['**/*@no-auth*.spec.ts']
     },
     // CI: Pure UI login tests (no storageState) - Phase-4.1
@@ -119,10 +119,10 @@ export default defineConfig({
       testMatch: ['**/auth-*.spec.ts', '**/admin-*.spec.ts']
     },
     // Unauthenticated tests (smoke, registration, etc.)
-    { 
+    {
       name: 'guest',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: ['**/smoke.spec.ts', '**/register.spec.ts', '**/e3-docs-smoke.spec.ts']
+      testMatch: ['**/smoke*.spec.ts', '**/register.spec.ts', '**/e3-docs-smoke.spec.ts']
     }
   ],
 
