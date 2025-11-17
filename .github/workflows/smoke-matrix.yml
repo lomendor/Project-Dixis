@@ -1,0 +1,62 @@
+name: Smoke Matrix (prod+staging)
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-matrix-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-matrix:
+    name: smoke (${{ matrix.env.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - name: prod
+            BASE_URL: ${{ vars.PROD_BASE_URL }}
+            FLAG_COMMISSION_V1: "false"  # ΠΑΡΑΓΩΓΗ OFF
+          - name: staging
+            BASE_URL: ${{ vars.STAGING_BASE_URL }}
+            FLAG_COMMISSION_V1: "false"  # Θα το κάνουμε ON σε επόμενο PR
+    env:
+      BASE_URL: ${{ matrix.env.BASE_URL }}
+      PLAYWRIGHT_BASE_URL: ${{ matrix.env.BASE_URL }}
+      FLAG_COMMISSION_V1: ${{ matrix.env.FLAG_COMMISSION_V1 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable corepack & install deps
+        run: |
+          cd frontend
+          corepack enable
+          if command -v pnpm >/dev/null 2>&1; then
+            pnpm install --frozen-lockfile || pnpm install
+          else
+            npm ci || npm i
+          fi
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+
+      - name: Run smoke (healthz + commission-preview)
+        run: |
+          cd frontend
+          npx playwright test \
+            tests/e2e/smoke-healthz.spec.ts \
+            tests/e2e/smoke-commission-preview.spec.ts
