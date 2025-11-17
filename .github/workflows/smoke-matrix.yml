@@ -48,11 +48,21 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Enable corepack
+        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        run: corepack enable
+
       - name: Install deps
         if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
         run: |
           cd frontend
-          npm ci
+          pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        run: |
+          cd frontend
+          npx playwright install --with-deps
 
       - name: Run smoke tests
         if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
