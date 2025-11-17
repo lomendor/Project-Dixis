@@ -852,3 +852,7 @@ Route::get('/ops/commission/preview', function (Illuminate\Http\Request $request
 
     return response()->json(['error' => 'provide orderId or amount'], 400);
 });
+
+// Dixis: Commission preview (read-only; feature-flagged)
+use App\Http\Controllers\Api\OrderCommissionPreviewController;
+Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewController::class, 'show']);
