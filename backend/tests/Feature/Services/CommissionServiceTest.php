@@ -30,12 +30,16 @@ class CommissionServiceTest extends TestCase
         ]);
 
         $service = new CommissionService();
-        $fee = $service->calculateFee($order);
+        $result = $service->calculateFee($order);
 
-        $this->assertEquals(0, $fee, 'Should return zero commission when flag is OFF');
+        $this->assertIsArray($result, 'calculateFee should return an array');
+        $this->assertArrayHasKey('commission_cents', $result);
+        $this->assertEquals(0, $result['commission_cents'], 'Should return zero commission when flag is OFF');
+        $this->assertNull($result['rule_id']);
+        $this->assertEquals('Feature flag OFF', $result['breakdown']);
     }
 
-    public function test_breakdown_shows_flag_status()
+    public function test_returns_structured_response()
     {
         $user = User::factory()->create();
         $order = Order::factory()->create([
@@ -46,32 +50,19 @@ class CommissionServiceTest extends TestCase
         $service = new CommissionService();
         
         // Test with flag OFF
-        $breakdown = $service->getCommissionBreakdown($order);
-        $this->assertArrayHasKey('flag_active', $breakdown);
-        $this->assertFalse($breakdown['flag_active']);
-        $this->assertEquals(0, $breakdown['total_cents']);
+        $result = $service->calculateFee($order);
+        $this->assertArrayHasKey('commission_cents', $result);
+        $this->assertArrayHasKey('rule_id', $result);
+        $this->assertArrayHasKey('breakdown', $result);
+        $this->assertEquals(0, $result['commission_cents']);
+        $this->assertNull($result['rule_id']);
 
-        // Test with flag ON (skeleton returns zero regardless)
+        // Test with flag ON (no rules match, should still return zero)
         Feature::activate('commission_engine_v1');
-        $breakdown = $service->getCommissionBreakdown($order);
-        $this->assertTrue($breakdown['flag_active']);
-        $this->assertEquals(0, $breakdown['total_cents']); // Still zero in skeleton phase
-    }
-
-    public function test_breakdown_includes_applied_rules()
-    {
-        $user = User::factory()->create();
-        $order = Order::factory()->create([
-            'user_id' => $user->id,
-            'total' => 10000,
-        ]);
-
-        $service = new CommissionService();
-        $breakdown = $service->getCommissionBreakdown($order);
-
-        $this->assertArrayHasKey('applied_rules', $breakdown);
-        $this->assertIsArray($breakdown['applied_rules']);
-        $this->assertEmpty($breakdown['applied_rules']); // Empty in skeleton phase
+        $result = $service->calculateFee($order);
+        $this->assertEquals(0, $result['commission_cents']);
+        $this->assertNull($result['rule_id']);
+        $this->assertEquals('No applicable rule', $result['breakdown']);
     }
 
     public function test_handles_different_order_amounts()
@@ -84,13 +75,29 @@ class CommissionServiceTest extends TestCase
             'user_id' => $user->id,
             'total' => 1000, // €10
         ]);
-        $this->assertEquals(0, $service->calculateFee($smallOrder));
+        $smallResult = $service->calculateFee($smallOrder);
+        $this->assertEquals(0, $smallResult['commission_cents']);
 
         // Test with large order
         $largeOrder = Order::factory()->create([
             'user_id' => $user->id,
             'total' => 100000, // €1000
         ]);
-        $this->assertEquals(0, $service->calculateFee($largeOrder));
+        $largeResult = $service->calculateFee($largeOrder);
+        $this->assertEquals(0, $largeResult['commission_cents']);
+    }
+
+    public function test_resolve_rule_returns_null_when_flag_off()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create([
+            'user_id' => $user->id,
+            'total' => 10000,
+        ]);
+
+        $service = new CommissionService();
+        $rule = $service->resolveRuleFor($order);
+
+        $this->assertNull($rule, 'resolveRuleFor should return null when flag is OFF');
     }
 }
