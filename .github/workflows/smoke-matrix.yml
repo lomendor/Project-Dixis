@@ -25,11 +25,12 @@ jobs:
             FLAG_COMMISSION_V1: "false"  # ΠΑΡΑΓΩΓΗ OFF
           - name: staging
             BASE_URL: ${{ vars.STAGING_BASE_URL }}
-            FLAG_COMMISSION_V1: "false"  # Θα το κάνουμε ON σε επόμενο PR
+            FLAG_COMMISSION_V1: "true"  # Commission engine enabled on staging
     env:
       BASE_URL: ${{ matrix.env.BASE_URL }}
       PLAYWRIGHT_BASE_URL: ${{ matrix.env.BASE_URL }}
       FLAG_COMMISSION_V1: ${{ matrix.env.FLAG_COMMISSION_V1 }}
+      SKIP_WEBSERVER: "true"  # Smoke tests hit external URLs, no local server needed
 
     steps:
       - uses: actions/checkout@v4
