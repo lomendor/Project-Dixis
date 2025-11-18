@@ -1,0 +1,76 @@
+name: E2E Prod Smoke (dixis.io)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 3 * * *"   # κάθε μέρα 03:07 EET περίπου
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/e2e-prod-smoke.yml"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: corepack enable
+
+      - name: Install deps (frontend)
+        working-directory: frontend
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm dlx playwright install --with-deps chromium
+
+      - name: Run smoke tests against https://dixis.io
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: "report.json"
+        run: |
+          pnpm dlx playwright test tests/e2e/reload-and-css.smoke.spec.ts --config=playwright.smoke.config.ts --reporter=list
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-artifacts
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            const title = `❌ E2E Prod Smoke failed — run #${{ github.run_id }}`;
+            const body = [
+              "The scheduled E2E smoke on **https://dixis.io** failed.",
+              "",
+              `**Run:** ${runUrl}`,
+              "",
+              "Artifacts: check the Playwright report in the run artifacts.",
+              "",
+              "Please investigate reload loops, CSS/network failures, or console errors on homepage/products."
+            ].join("\n");
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ["testing", "ops", "P1-high"]
+            });

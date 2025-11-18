@@ -22,7 +22,7 @@ export default defineConfig({
     {
       name: 'production-smoke',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: ['**/reload-and-css.smoke.spec.ts']
+      testMatch: ['**/reload-and-css.smoke.spec.ts', '**/diag-*.spec.ts']
     }
   ],
 
