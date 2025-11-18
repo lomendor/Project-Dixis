@@ -20,9 +20,9 @@ jobs:
           URL="https://dixis.io/api/healthz"
           CODE=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 10 "$URL" || echo "000")
           echo "status=$CODE" >> $GITHUB_OUTPUT
-          printf "body<<'EOF'\n" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
           (cat /tmp/body 2>/dev/null || true) >> $GITHUB_OUTPUT
-          printf "\nEOF\n" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create issue on failure
         if: steps.ping.outputs.status != '200'
