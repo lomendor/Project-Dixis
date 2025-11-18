@@ -4,6 +4,9 @@
 [![policy-gate](https://github.com/lomendor/Project-Dixis/actions/workflows/policy-gate.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/policy-gate.yml)
 [![e2e-postgres](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-postgres.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-postgres.yml)
 [![CodeQL](https://github.com/lomendor/Project-Dixis/actions/workflows/codeql.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/codeql.yml)
+[![Quality Gates](https://github.com/lomendor/Project-Dixis/actions/workflows/quality-gates.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/quality-gates.yml)
+[![Uptime Monitoring](https://github.com/lomendor/Project-Dixis/actions/workflows/uptime-ping.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/uptime-ping.yml)
+[![E2E Prod Smoke](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-prod-smoke.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-prod-smoke.yml)
 
 **Modern Laravel 11 API** for agricultural marketplace connecting producers and consumers.
 
