@@ -13,6 +13,9 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
 
     steps:
       - name: Checkout
@@ -35,7 +38,7 @@ jobs:
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: "report.json"
         run: |
-          pnpm dlx playwright test tests/e2e/reload-and-css.smoke.spec.ts --reporter=list
+          pnpm dlx playwright test tests/e2e/reload-and-css.smoke.spec.ts --config=playwright.smoke.config.ts --reporter=list
 
       - name: Upload Playwright artifacts
         if: always()
