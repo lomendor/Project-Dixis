@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OpsDbController;
 
 Route::get('/health', function () {
     try {
@@ -856,3 +857,7 @@ Route::get('/ops/commission/preview', function (Illuminate\Http\Request $request
 // Dixis: Commission preview (read-only; feature-flagged)
 use App\Http\Controllers\Api\OrderCommissionPreviewController;
 Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewController::class, 'show']);
+
+// Ops: DB slow queries endpoint (guarded by X-Ops-Key in production)
+Route::get('/ops/db/slow-queries', [OpsDbController::class, 'slow'])
+    ->name('ops.db.slow');
