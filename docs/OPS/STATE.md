@@ -9,6 +9,13 @@
 - Health: https://staging.dixis.io/api/healthz → 200 OK
 - Removed deprecated swcMinify από Next config
 
-### 2025-11-18 — AG116.4 Complete & AG116.5 Init
+### 2025-11-18 16:10 EET — AG116.5 Complete (PR #869 merged)
+- ✅ E2E prod smoke workflow (.github/workflows/e2e-prod-smoke.yml) ACTIVE
+- Cron: daily 03:07 EET → tests https://dixis.io homepage + CSS loading
+- Auto-creates P1-high issue on failure with run artifacts
+- Minimal config (playwright.prod-smoke.config.ts) — no globalSetup/webServer
+- Runbook: docs/OPS/RUNBOOKS/PROD-WATCHDOG.md
+
+### 2025-11-18 09:15 EET — AG116.4 Complete
 - Deployed watchdog on VPS (orphan cleanup + health restart)
-- Adding scheduled E2E smoke workflow for https://dixis.io
+- PM2 systemd autostart configured
