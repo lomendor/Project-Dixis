@@ -37,9 +37,8 @@ jobs:
         working-directory: frontend
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: "report.json"
-          SKIP_WEBSERVER: "1"
         run: |
-          pnpm dlx playwright test tests/e2e/reload-and-css.smoke.spec.ts --project=consumer-ci --reporter=list
+          pnpm dlx playwright test --config=playwright.prod-smoke.config.ts --reporter=list
 
       - name: Upload Playwright artifacts
         if: always()
