@@ -31,7 +31,7 @@ jobs:
         working-directory: frontend
         run: |
           pnpm install --no-frozen-lockfile
-          pnpm dlx playwright install --with-deps chromium
+          pnpm exec playwright install --with-deps chromium
 
       - name: Run smoke tests against https://dixis.io
         working-directory: frontend
