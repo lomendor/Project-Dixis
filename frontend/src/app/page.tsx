@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
 // SEO metadata for homepage
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://projectdixis.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.io";
 
 export const metadata: Metadata = {
   title: LANDING_MODE

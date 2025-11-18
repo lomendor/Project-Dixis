@@ -19,3 +19,13 @@ jobs:
           cat /tmp/hz.json || true
           test "$CODE" = "200"
           grep -q '"status":"ok"' /tmp/hz.json
+
+  homepage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Homepage HEAD
+        run: |
+          set -euo pipefail
+          CODE=$(curl -skI -o /dev/null -w "%{http_code}" https://dixis.io/)
+          echo "HTTP $CODE"
+          test "$CODE" = "200"

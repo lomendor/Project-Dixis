@@ -1,5 +1,5 @@
 export function GET(): Response {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
   
   const robotsTxt = `User-agent: *
 Allow: /
