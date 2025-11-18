@@ -1,0 +1,21 @@
+name: Production Smoke
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # κάθε 15'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Healthz (prod)
+        run: |
+          set -euo pipefail
+          URL="https://dixis.gr/api/healthz"
+          echo "GET $URL"
+          CODE="$(curl -sk -o /tmp/hz.json -w '%{http_code}' "$URL")"
+          echo "HTTP $CODE"
+          cat /tmp/hz.json || true
+          test "$CODE" = "200"
+          grep -q '"status":"ok"' /tmp/hz.json
