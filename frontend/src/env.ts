@@ -20,7 +20,7 @@ export const API_BASE_URL = getEnvVar(
 
 export const SITE_URL = getEnvVar(
   'NEXT_PUBLIC_SITE_URL',
-  'https://projectdixis.com'
+  'https://dixis.io'
 );
 
 // Locale and Currency Configuration (Greek Defaults)

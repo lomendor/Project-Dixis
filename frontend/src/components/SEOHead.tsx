@@ -24,7 +24,7 @@ export default function SEOHead({
   jsonLd,
   noIndex = false,
 }: SEOHeadProps): null {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://projectdixis.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
   
   useEffect(() => {
     // Update document title

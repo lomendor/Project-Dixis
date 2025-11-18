@@ -1,0 +1,23 @@
+name: Lighthouse CI (dixis.io)
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # κάθε Δευτέρα 06:00
+  workflow_dispatch:
+
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Lighthouse on prod
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://dixis.io/
+            https://dixis.io/products
+            https://dixis.io/api/healthz
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: .github/lhci-config.json
+      - name: Print short scores
+        run: |
+          echo "ℹ️ Δες artifacts για λεπτομέρειες Lighthouse."
