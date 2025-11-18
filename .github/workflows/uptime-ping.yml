@@ -1,0 +1,55 @@
+name: Uptime Ping (prod)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # Every 15 minutes
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Ping /api/healthz
+        id: ping
+        run: |
+          URL="https://dixis.io/api/healthz"
+          CODE=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 10 "$URL" || echo "000")
+          echo "status=$CODE" >> $GITHUB_OUTPUT
+          printf "body<<'EOF'\n" >> $GITHUB_OUTPUT
+          (cat /tmp/body 2>/dev/null || true) >> $GITHUB_OUTPUT
+          printf "\nEOF\n" >> $GITHUB_OUTPUT
+
+      - name: Create issue on failure
+        if: steps.ping.outputs.status != '200'
+        uses: actions/github-script@v7
+        env:
+          STATUS: ${{ steps.ping.outputs.status }}
+          BODY: ${{ steps.ping.outputs.body }}
+        with:
+          script: |
+            const status = process.env.STATUS || '000';
+            const body = process.env.BODY || '(no body)';
+            const title = `❌ Uptime failure (${status}) on https://dixis.io/api/healthz`;
+            const description = [
+              'Automated uptime check failed.',
+              '',
+              '**Status:** ' + status,
+              '',
+              '```json',
+              body.substring(0, 4000),
+              '```',
+              '',
+              `**Time:** ${new Date().toISOString()}`
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: description,
+              labels: ['P1-high','ops','uptime']
+            });
