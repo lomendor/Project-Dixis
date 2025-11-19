@@ -246,3 +246,13 @@ textarea:focus {
 }
 html, body { height: 100%; }
 body { overscroll-behavior-y: none; }
+
+/* AG116.4 iOS viewport hardening */
+html, body { height: -webkit-fill-available; }
+@supports (height: 100dvh) {
+  main, .min-h-screen { min-height: 100dvh !important; }
+}
+@supports (height: 100svh) {
+  main, .min-h-screen { min-height: 100svh !important; }
+}
+body { overscroll-behavior-y: none; }
