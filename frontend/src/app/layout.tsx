@@ -10,6 +10,7 @@ import SkipLink from "@/components/SkipLink";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CartProvider } from '@/store/cart';
+import IOSGuard from './IOSGuard';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -119,6 +120,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <IOSGuard />
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
