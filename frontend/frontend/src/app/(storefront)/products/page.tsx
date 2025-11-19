@@ -1,5 +1,8 @@
 import { getTranslations } from 'next-intl/server'
 
+// AG116.7: ISR with 60s revalidation
+export const revalidate = 60;
+
 async function getProducts(){
   try{
     const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000'

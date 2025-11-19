@@ -256,3 +256,12 @@ html, body { height: -webkit-fill-available; }
   main, .min-h-screen { min-height: 100svh !important; }
 }
 body { overscroll-behavior-y: none; }
+
+/* AG116.7: iOS Safe-Mode v2 */
+.ios-products-safe {
+  min-height: 100svh;
+  overflow-x: hidden;
+}
+@supports (-webkit-touch-callout: none) {
+  .ios-products-safe { position: relative; }
+}
