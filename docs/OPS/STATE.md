@@ -16,6 +16,22 @@
 - Workflow: runs every 15 min, auto-creates issues on failure
 - Merged PRs: #877 (permissions), #878 (EOF fix), #879 (timestamp), #880 (base64)
 
+### 2025-11-19 00:00 EET — AG116.7 Complete (README Status Badges)
+- Added CI/uptime/e2e status badges to README.md
+- Badges: quality-gates, uptime-ping, e2e-prod-smoke workflows
+- Improved at-a-glance visibility of production health
+- Merged PR: #882
+
+### 2025-11-19 02:30 EET — AG116.8 CODE COMPLETE (DB Observability)
+- Implemented pg_stat_statements monitoring infrastructure
+- Protected API endpoint: /api/ops/db/slow-queries (X-Ops-Key authentication)
+- CLI command: php artisan db:slow-queries --limit=N
+- Safe migration (non-fatal if extension unavailable)
+- Files: migration, OpsDbController, DbSlowQueries command, config/ops.php
+- Merged PR: #883 (+135 lines, 6 files)
+- **DEPLOYMENT PENDING**: Awaiting VPS deployment (scripts ready in /tmp/)
+- Handoff doc: /tmp/AG116_8_DEPLOYMENT_HANDOFF.md
+
 ### 2025-11-18 09:15 EET — AG116.4 Complete & AG116.5 Complete
 - Deployed watchdog on VPS (orphan cleanup + health restart)
 - E2E smoke workflow scheduled daily at 03:07 EET for https://dixis.io (PR #869)
