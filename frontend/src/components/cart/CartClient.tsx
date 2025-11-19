@@ -1,12 +1,21 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useTransition, useRef } from 'react';
 
 type CartItem = { slug: string; qty: number; name?: string; price?: number; currency?: string };
 
 export default function CartClient({ items }: { items: CartItem[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  // AG116.3: One-shot guard to prevent mobile refresh loops
+  const refreshingRef = useRef(false);
+  const safeRefresh = () => {
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
+    router.refresh();
+    setTimeout(() => { refreshingRef.current = false; }, 500);
+  };
 
   const updateQty = (slug: string, qty: number) => {
     startTransition(async () => {
@@ -15,21 +24,21 @@ export default function CartClient({ items }: { items: CartItem[] }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, qty }),
       });
-      router.refresh();
+      safeRefresh();
     });
   };
 
   const removeItem = (slug: string) => {
     startTransition(async () => {
       await fetch(`/api/cart?slug=${slug}`, { method: 'DELETE' });
-      router.refresh();
+      safeRefresh();
     });
   };
 
   const clearCart = () => {
     startTransition(async () => {
       await fetch('/api/cart', { method: 'DELETE' });
-      router.refresh();
+      safeRefresh();
     });
   };
 
