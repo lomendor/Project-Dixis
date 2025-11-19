@@ -53,7 +53,6 @@ const nextConfig: NextConfig = {
 
   // Production optimization
   output: 'standalone',
-  swcMinify: true,
 
   // Security headers (AG-SEC-01)
   async headers() {
