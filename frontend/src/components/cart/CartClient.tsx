@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useTransition, useRef } from 'react';
+import { useTransition } from 'react';
+import { safeRefreshMobileAware } from '@/lib/refreshGate';
 
 type CartItem = { slug: string; qty: number; name?: string; price?: number; currency?: string };
 
@@ -8,14 +9,8 @@ export default function CartClient({ items }: { items: CartItem[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // AG116.3: One-shot guard to prevent mobile refresh loops
-  const refreshingRef = useRef(false);
-  const safeRefresh = () => {
-    if (refreshingRef.current) return;
-    refreshingRef.current = true;
-    router.refresh();
-    setTimeout(() => { refreshingRef.current = false; }, 500);
-  };
+  // AG116.4: Global refresh gate (blocks refresh on iOS entirely)
+  const safeRefresh = () => safeRefreshMobileAware(router);
 
   const updateQty = (slug: string, qty: number) => {
     startTransition(async () => {
