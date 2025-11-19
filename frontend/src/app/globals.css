@@ -236,3 +236,13 @@ textarea:focus {
   a { text-decoration: none !important; color: black !important; }
   body { background: white !important; }
 }
+
+/* AG116.3: Mobile iOS viewport + overscroll fixes */
+@supports (height: 100svh) {
+  main, .min-h-screen { min-height: 100svh !important; }
+}
+@supports not (height: 100svh) {
+  main, .min-h-screen { min-height: -webkit-fill-available !important; }
+}
+html, body { height: 100%; }
+body { overscroll-behavior-y: none; }
