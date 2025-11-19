@@ -1,7 +1,0 @@
-{
-  "nav": { "home": "Home", "producers": "Producers", "products": "Products" },
-  "home": { "title": "Welcome to Dixis", "subtitle": "Greek products directly from producers", "cta": "View products" },
-  "producers": { "title": "Producers", "search": "Search", "region": "Region", "category": "Category", "filter": "Filter", "total": "Total" },
-  "products": { "title": "Products", "empty": "No products found." },
-  "common": { "loading": "Loading…", "error": "Error", "submit": "Submit", "cancel": "Cancel" }
-}
