@@ -4,10 +4,27 @@ import { readCart, writeCart, addItem, removeItem, totalCents } from '@/lib/cart
 // Feature flag μέσω env (default ON για τώρα)
 const CART_ENABLED = process.env.CART_V1 !== 'off'
 
+// Disable caching for cart API
+export const revalidate = 0
+
 export async function GET() {
-  if (!CART_ENABLED) return NextResponse.json({ enabled:false, items:[], totalCents:0 }, { status:200 })
+  if (!CART_ENABLED) {
+    return NextResponse.json(
+      { enabled:false, items:[], totalCents:0 },
+      {
+        status:200,
+        headers: { 'Cache-Control': 'no-store, must-revalidate' }
+      }
+    )
+  }
   const cart = await readCart()
-  return NextResponse.json({ enabled:true, items: cart.items, totalCents: totalCents(cart) }, { status:200 })
+  return NextResponse.json(
+    { enabled:true, items: cart.items, totalCents: totalCents(cart) },
+    {
+      status:200,
+      headers: { 'Cache-Control': 'no-store, must-revalidate' }
+    }
+  )
 }
 
 export async function POST(req: Request) {

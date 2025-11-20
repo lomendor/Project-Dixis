@@ -1,6 +1,15 @@
 'use client';
 import React from 'react';
 
+/**
+ * @deprecated This localStorage-based CartProvider is DEPRECATED as of AG118.2
+ * Use /api/cart cookie-based API instead.
+ * This provider is kept for backward compatibility only.
+ *
+ * New cart system: /api/cart (cookie-based, server-side)
+ * Components: CartBadge, CartIcon (use /api/cart directly)
+ */
+
 export type CartItem = { id: string; title: string; price: number; currency: string; qty: number };
 type CartCtx = {
   items: CartItem[];
@@ -13,6 +22,10 @@ type CartCtx = {
 };
 const Ctx = React.createContext<CartCtx | null>(null);
 const KEY = 'dixis:cart:v1';
+
+if (typeof window !== 'undefined') {
+  console.warn('[DEPRECATED] CartProvider (store/cart.tsx) uses localStorage - migrate to /api/cart');
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<CartItem[]>([]);
