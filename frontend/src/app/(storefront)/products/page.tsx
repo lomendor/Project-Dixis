@@ -14,22 +14,22 @@ export const revalidate = 30
 async function getData() {
   const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.io'
   try {
-    const res = await fetch(`${base}/api/demo-products`, { cache: 'no-store' })
-    if (!res.ok) return { items: [] }
+    const res = await fetch(`${base}/api/products`, { cache: 'no-store' })
+    if (!res.ok) return { source: 'demo', items: [] }
     return res.json()
   } catch {
-    return { items: [] }
+    return { source: 'demo', items: [] }
   }
 }
 
 export default async function Page() {
-  const { items }: { items: any[] } = await getData()
+  const { source, items }: { source?: 'db' | 'demo'; items: any[] } = await getData()
 
   return (
     <main className="container mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-2">Προϊόντα</h1>
       <p className="text-sm text-neutral-600 mb-6">
-        Προσωρινή λίστα από demo feed. Θα αντικατασταθεί από Neon DB.
+        {source === 'db' ? 'Δεδομένα από Neon DB' : 'Προσωρινή λίστα από demo feed'}
       </p>
 
       {(!items || items.length === 0) ? (
