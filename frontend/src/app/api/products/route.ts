@@ -22,12 +22,12 @@ async function fetchFromDB(): Promise<{ source: 'db'; items: any[] } | null> {
 
   try {
     const sql = neon(dbUrl)
-    const rows = await sql<Product[]>`
+    const rows = await sql`
       SELECT id, title, price_cents, image_url, producer_name
       FROM products
       ORDER BY id
       LIMIT 50
-    `
+    ` as Product[]
 
     if (!rows || rows.length === 0) {
       console.log('[/api/products] DB returned 0 products, falling back')
