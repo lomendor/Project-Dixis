@@ -10,10 +10,10 @@ jobs:
         run: sudo apt-get update -y && sudo apt-get install -y postgresql-client
       - name: Run SQL seed
         env:
-          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "NEON_DATABASE_URL secret missing"; exit 1
+            echo "DATABASE_URL_PROD secret missing"; exit 1
           fi
           echo "Seeding catalog_demo_products..."
           echo "$(cat .github/sql/seed_catalog_demo_products.sql)" | psql "$DATABASE_URL"
