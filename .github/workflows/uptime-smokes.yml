@@ -1,0 +1,43 @@
+name: Uptime Smokes
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  smokes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: uptime-smokes
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        url:
+          - "https://dixis.io/"
+          - "https://dixis.io/products"
+          - "https://dixis.io/api/healthz"
+    steps:
+      - name: Curl ${{ matrix.url }}
+        run: |
+          URL="${{ matrix.url }}"
+          read -r CODE TIME <<<"$(curl -sS -o /dev/null -w "%{http_code} %{time_total}" "$URL")"
+          echo "GET $URL -> $CODE in ${TIME}s"
+
+          # Status must be 200
+          if [ "$CODE" != "200" ]; then
+            echo "::error title=Bad status::$URL → $CODE"
+            echo "- $URL → $CODE" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          # Latency guard: ≤ 2.5s
+          awk -v t="$TIME" 'BEGIN{ if (t>2.5) exit 1 }' || {
+            echo "::error title=Slow response::$URL took ${TIME}s (>2.5s)"
+            echo "- SLOW: $URL → ${TIME}s" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
+
+          echo "- OK: $URL → $CODE in ${TIME}s" >> "$GITHUB_STEP_SUMMARY"
