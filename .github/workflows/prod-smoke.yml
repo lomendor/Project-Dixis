@@ -17,7 +17,7 @@ jobs:
           set -e
           OUT="$(curl -sS https://dixis.io/api/healthz || true)"
           echo "$OUT"
-          echo "$OUT" | jq -e 'has("ok")' >/dev/null
+          echo "$OUT" | jq -e '.status == "ok"' >/dev/null
 
       - name: Check /api/products shape
         run: |
