@@ -5,8 +5,8 @@ export type Cart = { items: CartItem[] }
 
 const NAME = 'dixis_cart'
 
-export function readCart(): Cart {
-  const jar = cookies()
+export async function readCart(): Promise<Cart> {
+  const jar = await cookies()
   const raw = jar.get(NAME)?.value
   if (!raw) return { items: [] }
   try {
@@ -16,8 +16,8 @@ export function readCart(): Cart {
   } catch { return { items: [] } }
 }
 
-export function writeCart(cart: Cart) {
-  const jar = cookies()
+export async function writeCart(cart: Cart) {
+  const jar = await cookies()
   jar.set(NAME, JSON.stringify(cart), {
     httpOnly: true,
     sameSite: 'lax',
