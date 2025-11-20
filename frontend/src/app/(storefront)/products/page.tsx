@@ -1,3 +1,4 @@
+import AddToCartButton from '@/src/components/AddToCartButton'
 export const revalidate = 30
 
 async function getData() {
@@ -30,7 +31,7 @@ export default async function Page() {
                   <div className="font-semibold">
                     {typeof p.priceCents === 'number' ? (p.priceCents/100).toFixed(2)+'€' : (p.price || '—')}
                   </div>
-                  <button className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">Προσθήκη</button>
+                  <AddToCartButton id={p.id} title={p.title} priceCents={p.priceCents} />
                 </div>
               </div>
             </div>
