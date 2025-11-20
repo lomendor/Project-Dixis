@@ -1,5 +1,14 @@
 import { getTranslations } from 'next-intl/server'
 import ProductsDiagOverlay from '@/components/products/ProductsDiagOverlay'
+import type { Metadata } from 'next'
+
+// AG116.13: Correct canonical URL for /products
+export const metadata: Metadata = {
+  title: 'Προϊόντα | Dixis',
+  alternates: {
+    canonical: 'https://dixis.io/products',
+  },
+}
 
 // AG116.7: ISR with 60s revalidation
 export const revalidate = 60;
