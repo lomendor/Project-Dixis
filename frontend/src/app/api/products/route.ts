@@ -1,81 +1,50 @@
 import { NextResponse } from 'next/server'
-import { neon } from '@neondatabase/serverless'
+import path from 'node:path'
+import { promises as fs } from 'node:fs'
 
 export const revalidate = 30
 
-interface Product {
-  id: number
-  title: string
-  price_cents: number | null
-  image_url: string | null
-  producer_name: string | null
-}
-
-async function fetchFromDB(): Promise<{ source: 'db'; items: any[] } | null> {
-  const useDB = process.env.USE_DB_PRODUCTS === '1'
-  const dbUrl = process.env.DATABASE_URL
-
-  if (!useDB || !dbUrl) {
-    console.log('[/api/products] DB disabled or DATABASE_URL missing')
-    return null
-  }
-
+async function fromDemo() {
   try {
-    const sql = neon(dbUrl)
-    const rows = await sql`
-      SELECT id, title, price_cents, image_url, producer_name
-      FROM products
-      ORDER BY id
-      LIMIT 50
-    ` as Product[]
-
-    if (!rows || rows.length === 0) {
-      console.log('[/api/products] DB returned 0 products, falling back')
-      return null
-    }
-
-    const items = rows.map((p) => ({
-      id: p.id,
-      title: p.title || 'Προϊόν',
-      priceCents: p.price_cents ?? 0,
-      image: p.image_url || '/demo/placeholder.jpg',
-      producer: p.producer_name || 'Παραγωγός',
-    }))
-
-    console.log(`[/api/products] DB returned ${items.length} products`)
-    return { source: 'db', items }
-  } catch (err) {
-    console.error('[/api/products] DB query failed:', err)
-    return null
-  }
-}
-
-async function fetchFromDemoFeed(): Promise<{ source: 'demo'; items: any[] }> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
-    const res = await fetch(`${baseUrl}/api/demo-products`, { cache: 'no-store' })
-    if (!res.ok) throw new Error(`Demo feed returned ${res.status}`)
-    const data = await res.json()
-    console.log('[/api/products] Using demo feed fallback')
-    return { source: 'demo', items: data.items || [] }
-  } catch (err) {
-    console.error('[/api/products] Demo feed failed:', err)
+    const file = path.join(process.cwd(), 'public', 'demo', 'products.json')
+    const raw = await fs.readFile(file, 'utf8')
+    const data = JSON.parse(raw)
+    return { source: 'demo', items: data }
+  } catch {
     return { source: 'demo', items: [] }
   }
 }
 
-export async function GET() {
-  // Try DB first
-  const dbResult = await fetchFromDB()
-  if (dbResult) {
-    const res = NextResponse.json(dbResult, { status: 200 })
-    res.headers.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120')
-    return res
+async function fromDb() {
+  const url = process.env.DATABASE_URL
+  if (!url) return { source: 'db', items: [] }
+  // lazy import για να μη βαραίνει το edge
+  const { Client } = await import('pg')
+  const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } })
+  await client.connect()
+  try {
+    // Πίνακας-safe για demo, δεν ακουμπά υπάρχον schema
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS catalog_demo_products (
+        id text primary key,
+        title text not null,
+        price_cents int not null,
+        producer text,
+        image text
+      )
+    `)
+    const res = await client.query('SELECT id, title, price_cents AS "priceCents", producer, image FROM catalog_demo_products ORDER BY title LIMIT 60;')
+    return { source: 'db', items: res.rows }
+  } finally {
+    await client.end()
   }
+}
 
-  // Fallback to demo feed
-  const demoResult = await fetchFromDemoFeed()
-  const res = NextResponse.json(demoResult, { status: 200 })
-  res.headers.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120')
+export async function GET() {
+  const mode = (process.env.PRODUCTS_MODE || 'demo').toLowerCase()
+  const data = mode === 'db' ? await fromDb() : await fromDemo()
+  const body = { source: data.source, count: data.items.length, items: data.items }
+  const res = NextResponse.json(body, { status: 200 })
+  res.headers.set('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60')
   return res
 }
