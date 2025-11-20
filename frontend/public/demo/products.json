@@ -1,10 +1,58 @@
 [
-  {"id":"p1","title":"Θυμαρίσιο Μέλι Λήμνου 450g","priceCents":780,"image":"https://picsum.photos/seed/honey1/600/400","producer":"Μέλισσες του Αιγαίου"},
-  {"id":"p2","title":"Εξαιρετικό Παρθένο Ελαιόλαδο 1L","priceCents":1150,"image":"https://picsum.photos/seed/olive1/600/400","producer":"Ελαιώνας Μάνης"},
-  {"id":"p3","title":"Παξιμάδια Κριθαρένια 700g","priceCents":520,"image":"https://picsum.photos/seed/rusk1/600/400","producer":"Φούρνος Νήσου"},
-  {"id":"p4","title":"Τυρί Γραβιέρα 300g","priceCents":690,"image":"https://picsum.photos/seed/cheese1/600/400","producer":"Γαλακτοκομική Ορεινών"},
-  {"id":"p5","title":"Ρίγανη Βουνού 40g","priceCents":240,"image":"https://picsum.photos/seed/oreg1/600/400","producer":"Βότανα Πίνδου"},
-  {"id":"p6","title":"Παστέλι Σουσάμι-Μέλι 60g","priceCents":180,"image":"https://picsum.photos/seed/pasteli1/600/400","producer":"Γλυκά Παραδοσιακά"},
-  {"id":"p7","title":"Κρασί Λευκό Ξηρό 750ml","priceCents":890,"image":"https://picsum.photos/seed/wine1/600/400","producer":"Οινοποιείο Ακτής"},
-  {"id":"p8","title":"Χειροποίητες Μαρμελάδες 250g","priceCents":450,"image":"https://picsum.photos/seed/jam1/600/400","producer":"Κτήμα Οικολογικό"}
+  {
+    "id": "p1",
+    "title": "Θυμαρίσιο Μέλι Λήμνου 450g",
+    "priceCents": 780,
+    "producer": "Μέλισσες του Αιγαίου",
+    "image": "/demo/honey.jpg"
+  },
+  {
+    "id": "p2",
+    "title": "Μαρμελάδα Σύκο 250g",
+    "priceCents": 520,
+    "producer": "Λημνια Γη",
+    "image": "/demo/jam.jpg"
+  },
+  {
+    "id": "p3",
+    "title": "Ελαιόλαδο Εξαιρετικό Παρθένο 750ml",
+    "priceCents": 1290,
+    "producer": "Ελαιοτρόπιο",
+    "image": "/demo/olive.jpg"
+  },
+  {
+    "id": "p4",
+    "title": "Γραβιέρα 300g",
+    "priceCents": 690,
+    "producer": "Τυροκομείο Ορος",
+    "image": "/demo/cheese.jpg"
+  },
+  {
+    "id": "p5",
+    "title": "Ρίγανη 50g",
+    "priceCents": 290,
+    "producer": "Αρωματικά Αιγαίου",
+    "image": "/demo/oregano.jpg"
+  },
+  {
+    "id": "p6",
+    "title": "Κρασί Μοσχάτο 750ml",
+    "priceCents": 980,
+    "producer": "Κτήμα Βοριάς",
+    "image": "/demo/wine.jpg"
+  },
+  {
+    "id": "p7",
+    "title": "Τραχανάς Ξινός 500g",
+    "priceCents": 450,
+    "producer": "Παραδοσιακά Προϊόντα",
+    "image": "/demo/trahanas.jpg"
+  },
+  {
+    "id": "p8",
+    "title": "Φυστίκι Αιγίνης 200g",
+    "priceCents": 890,
+    "producer": "Καρποί Αιγίνης",
+    "image": "/demo/pistachios.jpg"
+  }
 ]
