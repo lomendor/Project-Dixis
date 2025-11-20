@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import ProductsDiagOverlay from '@/components/products/ProductsDiagOverlay'
+import EmptyState from '@/components/EmptyState'
 
 // AG116.7: ISR with 60s revalidation
 export const revalidate = 60;
@@ -25,7 +26,12 @@ export default async function ProductsPage(){
       <main className="container mx-auto p-6">
         <h1 className="text-2xl font-semibold mb-4">{t('products.title')}</h1>
         {items.length === 0 ? (
-          <p>{t('products.empty')}</p>
+          <EmptyState
+            title="Δεν υπάρχουν προϊόντα ακόμη"
+            message="Όταν προστεθούν προϊόντα, θα εμφανιστούν εδώ."
+            actionLabel="Αρχική"
+            actionHref="/"
+          />
         ) : (
           <ul className="grid gap-4 md:grid-cols-3">
             {items.map((p:any)=>(
