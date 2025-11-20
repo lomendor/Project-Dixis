@@ -1,4 +1,4 @@
-import AddToCartButton from '@/src/components/AddToCartButton'
+import AddToCartButton from '@/components/AddToCartButton'
 export const revalidate = 30
 
 async function getData() {

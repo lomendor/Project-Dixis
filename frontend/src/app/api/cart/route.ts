@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { readCart, writeCart, addItem, removeItem, totalCents } from '@/src/lib/cart'
+import { readCart, writeCart, addItem, removeItem, totalCents } from '@/lib/cart'
 
 // Feature flag μέσω env (default ON για τώρα)
 const CART_ENABLED = process.env.CART_V1 !== 'off'

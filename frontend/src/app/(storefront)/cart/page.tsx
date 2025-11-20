@@ -1,4 +1,4 @@
-import CartBadge from '@/src/components/CartBadge'
+import CartBadge from '@/components/CartBadge'
 
 async function getCart() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/cart`, { cache:'no-store' })
