@@ -1,0 +1,34 @@
+name: prod-smoke-alert
+on:
+  workflow_run:
+    workflows: ["prod-smoke"]
+    types: [completed]
+
+jobs:
+  alert:
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build failure report
+        run: |
+          set -e
+          echo "## PROD-SMOKE FAILED" > fail-report.md
+          echo "- Run: ${{ github.event.workflow_run.html_url }}" >> fail-report.md
+          echo "- Conclusion: ${{ github.event.workflow_run.conclusion }}" >> fail-report.md
+          echo "" >> fail-report.md
+          echo "### Live checks" >> fail-report.md
+          echo '#### /api/healthz' >> fail-report.md
+          curl -sS -i https://dixis.io/api/healthz | sed -n '1,5p' >> fail-report.md || true
+          echo '' >> fail-report.md
+          echo '#### /api/products (first 200 chars)' >> fail-report.md
+          curl -sS https://dixis.io/api/products | head -c 200 >> fail-report.md || true
+          echo '' >> fail-report.md
+          echo '#### /products 200?' >> fail-report.md
+          curl -sS -o /dev/null -w "HTTP %{http_code}\n" https://dixis.io/products >> fail-report.md || true
+
+      - name: Open issue
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: "PROD-SMOKE FAILED — ${{ github.event.workflow_run.id }}"
+          content-filepath: fail-report.md
+          labels: prod, smoke, alert
