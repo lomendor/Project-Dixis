@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getCartMessage } from '@/lib/auth/helpers';
 
@@ -11,9 +12,29 @@ interface CartIconProps {
 
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
   const { isGuest, isConsumer, isProducer, user } = useAuth();
-  
-  // Mock cart item count (in real app, this would come from cart context)
-  const cartItemCount = 3; // TODO: Replace with real cart state
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+
+  // Fetch cart count from API
+  useEffect(() => {
+    if (!isConsumer) return undefined;
+
+    async function fetchCartCount() {
+      try {
+        const res = await fetch('/api/cart', { cache: 'no-store' });
+        const data = await res.json();
+        setCartItemCount((data?.items?.length) || 0);
+      } catch {
+        setCartItemCount(0);
+      }
+    }
+
+    fetchCartCount();
+
+    // Listen for cart updates
+    const handleUpdate = () => fetchCartCount();
+    window.addEventListener('cart:updated', handleUpdate);
+    return () => window.removeEventListener('cart:updated', handleUpdate);
+  }, [isConsumer]);
 
   // Guest users - show login prompt
   if (isGuest) {
@@ -41,10 +62,10 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
         <span className="flex items-center">
           Cart
           {cartItemCount > 0 && (
-            <span 
+            <span
               className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
               data-testid="cart-item-count"
-              aria-label={`${cartItemCount} items in cart`}
+              aria-label="cart-count"
             >
               {cartItemCount}
             </span>
