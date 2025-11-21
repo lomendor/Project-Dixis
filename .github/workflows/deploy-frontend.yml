@@ -1,0 +1,50 @@
+name: Deploy Frontend (VPS)
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (shallow)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: SSH Deploy (build & restart via PM2)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            APP_DIR="$(pm2 jlist | jq -r '.[] | select(.name=="dixis-frontend") | .pm2_env.pm_cwd')"
+            [ -d "$APP_DIR" ] || { echo "APP_DIR not found"; exit 1; }
+            cd "$APP_DIR"
+
+            echo "→ Sync main"
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "→ Ensure env for demo build (NO secrets leak)"
+            export NEXT_PUBLIC_BASE_URL="https://dixis.io"
+            export PRODUCTS_MODE="demo"
+
+            echo "→ Build"
+            rm -rf node_modules .next
+            pnpm install --frozen-lockfile
+            pnpm build
+
+            echo "→ Restart"
+            pm2 restart dixis-frontend --update-env
+
+            echo "→ Smoke"
+            curl -sI http://127.0.0.1:3000 | head -1
+            curl -s https://dixis.io/api/healthz | head -1
