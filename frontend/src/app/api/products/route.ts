@@ -4,7 +4,7 @@ const FLAG_ON = (process.env.PRODUCTS_DB_V1 || '').toLowerCase() === 'on'
 
 // lazy import για να μη "σκάει" build/CI αν δεν υπάρχει ακόμη η table
 async function dbList() {
-  const { prisma } = await import('@/src/lib/prisma')
+  const { prisma } = await import('@/lib/prisma')
   // Αν η table δεν υπάρχει ακόμα (πριν migration) γυρνάμε απλώς κενό
   try {
     const rows = await prisma.product.findMany({
@@ -12,7 +12,7 @@ async function dbList() {
       orderBy: { created_at: 'desc' },
       take: 40,
     })
-    return rows.map(r => ({
+    return rows.map((r: any) => ({
       id: r.id,
       title: r.title,
       price: r.price_cents != null ? (r.price_cents/100).toLocaleString('el-GR',{style:'currency',currency:'EUR'}) : '—',
