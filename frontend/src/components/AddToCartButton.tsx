@@ -1,26 +1,33 @@
 'use client'
 import { useState } from 'react'
+import { useCart } from '@/components/cart/CartContext'
 
 export default function AddToCartButton(props: { id:string; title:string; priceCents:number }) {
-  const [busy, setBusy] = useState(false)
   const [ok, setOk] = useState<null|boolean>(null)
-  async function add() {
-    setBusy(true); setOk(null)
+  const { add: addToCart } = useCart()
+
+  function add() {
     try {
-      const res = await fetch('/api/cart', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(props)
+      const price = typeof props.priceCents === 'number' ? (props.priceCents / 100).toFixed(2) + '€' : '—'
+      addToCart({
+        id: props.id,
+        title: props.title,
+        price,
+        imageUrl: undefined
       })
-      setOk(res.ok)
+      setOk(true)
       window.dispatchEvent(new CustomEvent('cart:updated'))
-    } catch { setOk(false) }
-    setBusy(false)
+      setTimeout(() => setOk(null), 2000)
+    } catch {
+      setOk(false)
+      setTimeout(() => setOk(null), 2000)
+    }
   }
+
   return (
     <div className="flex items-center gap-2">
-      <button disabled={busy} onClick={add} className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">
-        {busy ? '...' : 'Προσθήκη'}
+      <button onClick={add} className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">
+        Προσθήκη
       </button>
       {ok === true && <span className="text-xs text-green-700">✓</span>}
       {ok === false && <span className="text-xs text-red-700">✗</span>}
