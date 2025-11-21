@@ -1,24 +1,20 @@
-name: E2E Full
+name: E2E Full (nightly & manual)
+
 on:
-  schedule: [{ cron: "0 2 * * *" }]
-  workflow_dispatch: {}
-concurrency:
-  group: e2e-full
-  cancel-in-progress: false
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
 jobs:
-  e2e:
+  e2e-full:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: 'frontend/pnpm-lock.yaml'
-      - run: cd frontend && pnpm i --frozen-lockfile || pnpm i
-      - run: cd frontend && pnpm exec prisma generate
-      - run: cd frontend && pnpm build
+          node-version: 20
+      - run: corepack enable
+      - run: cd frontend && pnpm install
       - run: cd frontend && pnpm exec playwright install --with-deps
-      - run: cd frontend && pnpm test:e2e || echo "ℹ️ nightly only"
+      - name: Run full e2e
+        run: cd frontend && pnpm exec playwright test --reporter=line
