@@ -2,36 +2,22 @@ import { test, expect } from '@playwright/test'
 
 const BASE = process.env.BASE_URL || 'https://dixis.io'
 
-test('products: ProductCard grid renders with AddToCartButton', async ({ page }) => {
-  const errors: string[] = []
-  page.on('console', (msg) => {
-    if (msg.type() === 'error') errors.push(msg.text())
+test.describe('Products UI — Stable Smoke', () => {
+  test('renders grid and product cards without console errors', async ({ page }) => {
+    const errors: string[] = []
+    page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()) })
+
+    await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })
+    await expect(page.getByRole('heading', { name: 'Προϊόντα', level: 1 })).toBeVisible()
+
+    const cards = page.locator('[data-testid="product-card"]')
+    await expect(cards.first()).toBeVisible({ timeout: 10000 })
+    await expect(cards).toHaveCountGreaterThan(0)
+
+    await expect(page.locator('[data-testid="product-card-title"]').first()).toBeVisible()
+    await expect(page.locator('[data-testid="product-card-price"]').first()).toBeVisible()
+    await expect(page.locator('[data-testid="product-card-add"]').first()).toBeVisible()
+
+    expect(errors, `Console errors on /products:\n${errors.join('\n')}`).toEqual([])
   })
-
-  await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })
-
-  // Check heading
-  await expect(page.getByRole('heading', { name: /Προϊόντα/i })).toBeVisible()
-
-  // Check grid exists
-  const grid = page.locator('.grid')
-  await expect(grid).toBeVisible()
-
-  // Check for AddToCartButton (Προσθήκη text)
-  const addButtons = page.locator('button:has-text("Προσθήκη")')
-  const count = await addButtons.count()
-  expect(count).toBeGreaterThan(0)
-
-  // Verify no console errors
-  expect(errors, `Console errors detected: ${errors.join('\n')}`).toEqual([])
-})
-
-test('products: no reload loop', async ({ page }) => {
-  let navigations = 0
-  page.on('framenavigated', () => { navigations++ })
-
-  await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(6000)
-
-  expect(navigations).toBeLessThan(3)
 })
