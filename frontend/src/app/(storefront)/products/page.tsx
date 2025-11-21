@@ -1,4 +1,4 @@
-import AddToCartButton from '@/components/AddToCartButton'
+import { ProductCard } from '@/components/ProductCard'
 export const revalidate = 30
 
 async function getData() {
@@ -17,24 +17,20 @@ export default async function Page() {
         Πηγή: <span className="font-medium">{source}</span> • {count} αντικείμενα
       </p>
       {(!items || items.length === 0) ? (
-        <div className="text-sm text-neutral-600">Δεν υπάρχουν διαθέσιμα προϊόντα.</div>
+        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+          <p className="text-gray-500 text-lg">Δεν υπάρχουν διαθέσιμα προϊόντα αυτή τη στιγμή.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {items.map((p: any) => (
-            <div key={p.id} className="border rounded-lg overflow-hidden bg-white">
-              <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                <span className="text-xs px-2 text-center">image: {p.image || '/demo/placeholder.jpg'}</span>
-              </div>
-              <div className="p-4 space-y-2">
-                <div className="text-base font-medium line-clamp-2">{p.title}</div>
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">
-                    {typeof p.priceCents === 'number' ? (p.priceCents/100).toFixed(2)+'€' : (p.price || '—')}
-                  </div>
-                  <AddToCartButton id={p.id} title={p.title} priceCents={p.priceCents} />
-                </div>
-              </div>
-            </div>
+            <ProductCard
+              key={p.id}
+              id={p.id}
+              title={p.title}
+              producer={p.producer}
+              priceCents={p.priceCents}
+              image={p.image}
+            />
           ))}
         </div>
       )}
