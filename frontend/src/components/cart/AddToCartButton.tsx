@@ -8,9 +8,26 @@ export default function AddToCartButton(
 ){
   const { add } = useCart();
   const [ok, setOk] = React.useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const priceNum = Number(price ?? 0);
+    const priceFormatted = currency === 'EUR' ? `€${priceNum.toFixed(2)}` : `${priceNum.toFixed(2)} ${currency}`;
+    add({
+      id: String(id),
+      title: String(title ?? 'Προϊόν'),
+      priceFormatted,
+      price: priceNum,
+      currency
+    }, qty);
+    setOk(true);
+    setTimeout(() => setOk(false), 1200);
+  };
+
   return (
     <button
-      onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); add({ id: String(id), title: String(title ?? 'Προϊόν'), price: Number(price ?? 0), currency }, qty); setOk(true); setTimeout(()=>setOk(false), 1200); }}
+      onClick={handleClick}
       className={`h-10 px-4 rounded-md text-sm bg-brand text-white hover:opacity-90 ${className}`}
       aria-live="polite"
     >

@@ -1,29 +1,32 @@
 'use client'
-import { useState } from 'react'
+import { useCart } from '@/store/cart'
 
-export default function AddToCartButton(props: { id:string; title:string; priceCents:number }) {
-  const [busy, setBusy] = useState(false)
-  const [ok, setOk] = useState<null|boolean>(null)
-  async function add() {
-    setBusy(true); setOk(null)
-    try {
-      const res = await fetch('/api/cart', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(props)
-      })
-      setOk(res.ok)
-      window.dispatchEvent(new CustomEvent('cart:updated'))
-    } catch { setOk(false) }
-    setBusy(false)
-  }
+export default function AddToCartButton(props: {
+  id: string | number
+  title: string
+  priceCents: number
+  imageUrl?: string
+  producer?: string
+}) {
+  const { add } = useCart()
+  const priceNum = props.priceCents / 100
+  const priceFormatted = `€${priceNum.toFixed(2)}`
+
   return (
-    <div className="flex items-center gap-2">
-      <button disabled={busy} onClick={add} className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">
-        {busy ? '...' : 'Προσθήκη'}
-      </button>
-      {ok === true && <span className="text-xs text-green-700">✓</span>}
-      {ok === false && <span className="text-xs text-red-700">✗</span>}
-    </div>
+    <button
+      className="h-9 px-3 rounded bg-neutral-900 text-white text-sm"
+      onClick={() => add({
+        id: String(props.id),
+        title: props.title,
+        priceFormatted,
+        price: priceNum,
+        currency: 'EUR',
+        imageUrl: props.imageUrl,
+        producer: props.producer
+      }, 1)}
+      aria-label={`Προσθήκη ${props.title} στο καλάθι`}
+    >
+      Προσθήκη
+    </button>
   )
 }
