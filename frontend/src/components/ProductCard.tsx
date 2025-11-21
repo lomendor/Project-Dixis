@@ -37,7 +37,7 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
           <span className="text-lg font-bold text-gray-900">{price}</span>
-          <AddToCartButton id={id} title={title} priceCents={priceCents} />
+          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} />
         </div>
       </div>
     </div>
