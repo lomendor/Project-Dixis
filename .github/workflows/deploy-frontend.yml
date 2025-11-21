@@ -45,6 +45,9 @@ jobs:
             echo "→ Restart"
             pm2 restart dixis-frontend --update-env
 
+            echo "→ Wait for startup"
+            sleep 15
+
             echo "→ Smoke"
             curl -sI http://127.0.0.1:3000 | head -1
             curl -s https://dixis.io/api/healthz | head -1
