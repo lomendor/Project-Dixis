@@ -1,4 +1,6 @@
 import { cache } from 'react';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 
 export interface Product {
   id: string | number;
@@ -34,27 +36,35 @@ function getImageUrl(item: any): string {
 /**
  * Δοκιμάζει σειρά endpoints:
  * 1) NEXT_PUBLIC_API_BASE_URL/products (αν υπάρχει)
- * 2) /api/demo-products (το demo feed μας)
+ * 2) demo/products.json file (build-time compatible)
  * 3) MOCK_PRODUCTS (τελική δικλείδα)
  */
 async function fetchCandidates(): Promise<any[]> {
-  const candidates: (string | null)[] = [
-    process.env.NEXT_PUBLIC_API_BASE_URL ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/products` : null,
-    '/api/demo-products',
-  ].filter(Boolean) as string[];
-
-  for (const url of candidates) {
+  // 1) Δοκίμασε εξωτερικό API
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
     try {
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/products`;
       const res = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' as const });
-      if (!res.ok) continue;
-      const data = await res.json();
-      // Μπορεί να είναι είτε array είτε { items: [...] } είτε { data: [...] }
-      const arr = Array.isArray(data) ? data : (data?.items ?? data?.data ?? []);
-      if (Array.isArray(arr)) return arr;
+      if (res.ok) {
+        const data = await res.json();
+        const arr = Array.isArray(data) ? data : (data?.items ?? data?.data ?? []);
+        if (Array.isArray(arr) && arr.length > 0) return arr;
+      }
     } catch (_e) {
-      // συνέχισε στον επόμενο candidate
+      // continue
     }
   }
+
+  // 2) Διάβασε demo/products.json file (works at build time)
+  try {
+    const demoPath = path.join(process.cwd(), 'public', 'demo', 'products.json');
+    const raw = await fs.readFile(demoPath, 'utf8');
+    const data = JSON.parse(raw);
+    if (Array.isArray(data) && data.length > 0) return data;
+  } catch (_e) {
+    // continue
+  }
+
   return [];
 }
 
