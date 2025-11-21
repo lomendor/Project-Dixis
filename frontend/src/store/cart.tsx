@@ -51,4 +51,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }
-export function useCart(){ const v=React.useContext(Ctx); if(!v) throw new Error('useCart outside provider'); return v; }
+export function useCart(){
+  const v=React.useContext(Ctx);
+  if(!v) {
+    // SSR-safe: return stub instead of throwing
+    return { items: [], count: 0, total: 0, add: ()=>{}, setQty: ()=>{}, remove: ()=>{}, clear: ()=>{} };
+  }
+  return v;
+}
