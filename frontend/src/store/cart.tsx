@@ -17,7 +17,11 @@ type CartState = {
   count: number
   total: number  // numeric total for calculations
   totalText: string
+  subtotal: { formatted: string; value: number }
   add: (item: Omit<CartItem,'qty'>, qty?: number) => void
+  remove: (id: string | number) => void
+  increase: (id: string | number) => void
+  decrease: (id: string | number) => void
   clear: () => void
 }
 
@@ -51,16 +55,54 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return next
     })
   }
+
+  const remove = (id: string | number) => {
+    setItems(prev => prev.filter(item => item.id !== id))
+  }
+
+  const increase = (id: string | number) => {
+    setItems(prev => {
+      const next = [...prev]
+      const idx = next.findIndex(p => p.id === id)
+      if (idx >= 0) next[idx] = { ...next[idx], qty: next[idx].qty + 1 }
+      return next
+    })
+  }
+
+  const decrease = (id: string | number) => {
+    setItems(prev => {
+      const next = [...prev]
+      const idx = next.findIndex(p => p.id === id)
+      if (idx >= 0) {
+        if (next[idx].qty <= 1) return next.filter(item => item.id !== id)
+        next[idx] = { ...next[idx], qty: next[idx].qty - 1 }
+      }
+      return next
+    })
+  }
+
   const clear = () => setItems([])
 
   const { count, total, totalText } = sumTotalText(items)
-  const value: CartState = { items, count, total, totalText, add, clear }
+  const subtotal = { formatted: `€${total.toFixed(2)}`, value: total }
+  const value: CartState = { items, count, total, totalText, subtotal, add, remove, increase, decrease, clear }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
 // SSR-safe hook: σε server render γυρνάει stub για να μη σκάει τίποτα
 export function useCart(): CartState {
   const v = React.useContext(Ctx)
-  if (!v) return { items: [], count: 0, total: 0, totalText: '0 τεμ.', add: ()=>{}, clear: ()=>{} }
+  if (!v) return {
+    items: [],
+    count: 0,
+    total: 0,
+    totalText: '0 τεμ.',
+    subtotal: { formatted: '€0.00', value: 0 },
+    add: ()=>{},
+    remove: ()=>{},
+    increase: ()=>{},
+    decrease: ()=>{},
+    clear: ()=>{}
+  }
   return v
 }
