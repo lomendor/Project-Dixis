@@ -9,7 +9,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { CartProvider } from '@/store/cart';
+import { CartProvider } from '@/components/cart/CartContext';
+import CartFab from '@/components/cart/CartFab';
 import IOSGuard from './IOSGuard';
 
 const geistSans = Geist({
@@ -191,6 +192,7 @@ export default function RootLayout({
                   </main>
                 </div>
                 <Footer />
+                <CartFab />
               </CartProvider>
               <ToastContainer />
             </AuthProvider>
