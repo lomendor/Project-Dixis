@@ -31,14 +31,14 @@ jobs:
         working-directory: frontend
         run: |
           pnpm install --no-frozen-lockfile
-          pnpm dlx playwright install --with-deps chromium
+          pnpm exec playwright install --with-deps chromium
 
       - name: Run smoke tests against https://dixis.io
         working-directory: frontend
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: "report.json"
         run: |
-          pnpm dlx playwright test tests/e2e/reload-and-css.smoke.spec.ts --config=playwright.smoke.config.ts --reporter=list
+          pnpm exec playwright test tests/e2e/reload-and-css.smoke.spec.ts --config=playwright.smoke.config.ts --reporter=list
 
       - name: Upload Playwright artifacts
         if: always()
