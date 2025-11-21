@@ -1,58 +1,7 @@
 [
-  {
-    "id": "p1",
-    "title": "Θυμαρίσιο Μέλι Λήμνου 450g",
-    "priceCents": 780,
-    "producer": "Μέλισσες του Αιγαίου",
-    "image": "/demo/honey.jpg"
-  },
-  {
-    "id": "p2",
-    "title": "Μαρμελάδα Σύκο 250g",
-    "priceCents": 520,
-    "producer": "Λημνια Γη",
-    "image": "/demo/jam.jpg"
-  },
-  {
-    "id": "p3",
-    "title": "Ελαιόλαδο Εξαιρετικό Παρθένο 750ml",
-    "priceCents": 1290,
-    "producer": "Ελαιοτρόπιο",
-    "image": "/demo/olive.jpg"
-  },
-  {
-    "id": "p4",
-    "title": "Γραβιέρα 300g",
-    "priceCents": 690,
-    "producer": "Τυροκομείο Ορος",
-    "image": "/demo/cheese.jpg"
-  },
-  {
-    "id": "p5",
-    "title": "Ρίγανη 50g",
-    "priceCents": 290,
-    "producer": "Αρωματικά Αιγαίου",
-    "image": "/demo/oregano.jpg"
-  },
-  {
-    "id": "p6",
-    "title": "Κρασί Μοσχάτο 750ml",
-    "priceCents": 980,
-    "producer": "Κτήμα Βοριάς",
-    "image": "/demo/wine.jpg"
-  },
-  {
-    "id": "p7",
-    "title": "Τραχανάς Ξινός 500g",
-    "priceCents": 450,
-    "producer": "Παραδοσιακά Προϊόντα",
-    "image": "/demo/trahanas.jpg"
-  },
-  {
-    "id": "p8",
-    "title": "Φυστίκι Αιγίνης 200g",
-    "priceCents": 890,
-    "producer": "Καρποί Αιγίνης",
-    "image": "/demo/pistachios.jpg"
-  }
+  { "id": 101, "title": "Φρέσκες Τομάτες Βιολογικές", "producer_name": "Κτήμα Παπαδόπουλου", "price_text": "2,80€ / kg", "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&h=800&fit=crop" },
+  { "id": 102, "title": "Πατάτες Νάξου Α΄", "producer_name": "Αγρόκτημα Νάξου", "price_text": "1,90€ / kg", "image": "https://images.unsplash.com/photo-1560807707-8cc77767d783?w=800&h=800&fit=crop" },
+  { "id": 103, "title": "Ελαιόλαδο Εξαιρετικό Παρθένο 750ml", "producer_name": "Ελαιώνες Μεσσηνίας", "price_text": "10,90€", "image": "https://images.unsplash.com/photo-1546549039-49fae046cd54?w=800&h=800&fit=crop" },
+  { "id": 104, "title": "Μέλι Θυμαρίσιο 450g", "producer_name": "Μελισσόκηπος Αιγαίου", "price_text": "8,50€", "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=800&fit=crop" },
+  { "id": 105, "title": "Αυγά Ελευθέρας Βοσκής 6τμχ", "producer_name": "Φάρμα Πιερίας", "price_text": "3,20€", "image": "https://images.unsplash.com/photo-1517959105821-eaf2591984dd?w=800&h=800&fit=crop" }
 ]
