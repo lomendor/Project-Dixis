@@ -1,39 +1,39 @@
-import { ProductCard } from '@/components/ProductCard'
+import React from 'react'
+import { getProducts } from '../../../lib/products'
+
 export const revalidate = 30
 
-async function getData() {
-  const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.io'
-  const res = await fetch(`${base}/api/products`, { cache: 'no-store' })
-  if (!res.ok) return { source:'unknown', count:0, items:[] }
-  return res.json()
-}
+export default async function ProductsPage() {
+  const items = await getProducts()
 
-export default async function Page() {
-  const { source, count, items } = await getData()
   return (
-    <main className="container mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-2">Προϊόντα</h1>
-      <p className="text-sm text-neutral-600 mb-4">
-        Πηγή: <span className="font-medium">{source}</span> • {count} αντικείμενα
-      </p>
-      {(!items || items.length === 0) ? (
-        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-500 text-lg">Δεν υπάρχουν διαθέσιμα προϊόντα αυτή τη στιγμή.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {items.map((p: any) => (
-            <ProductCard
-              key={p.id}
-              id={p.id}
-              title={p.title}
-              producer={p.producer}
-              priceCents={p.priceCents}
-              image={p.image}
-            />
-          ))}
-        </div>
-      )}
+    <main className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-2">Προϊόντα</h1>
+        <p className="text-sm text-neutral-600 mb-8">Λίστα από API ή demo/mocks (fallback).</p>
+
+        {(!items || items.length === 0) ? (
+          <div className="text-neutral-600">Δεν υπάρχουν διαθέσιμα προϊόντα.</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {items.map((p: any) => (
+              <div key={p.id} className="border rounded-xl bg-white overflow-hidden">
+                <div className="aspect-square bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                  εικόνα
+                </div>
+                <div className="p-4 space-y-2">
+                  <div className="text-base font-semibold line-clamp-2">{p.title}</div>
+                  <div className="text-xs text-neutral-600">{p.producer || p.producer_name || 'Παραγωγός'}</div>
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="font-semibold">{p.priceFormatted || p.price_text || '—'}</div>
+                    <button className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">Προσθήκη</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }
