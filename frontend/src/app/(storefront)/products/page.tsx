@@ -1,5 +1,6 @@
 import React from 'react'
 import { getProducts } from '../../../lib/products'
+import { ProductCard } from '@/components/ProductCard'
 
 export const revalidate = 30
 
@@ -16,20 +17,15 @@ export default async function ProductsPage() {
           <div className="text-neutral-600">Δεν υπάρχουν διαθέσιμα προϊόντα.</div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {items.map((p: any) => (
-              <div key={p.id} className="border rounded-xl bg-white overflow-hidden">
-                <div className="aspect-square bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                  εικόνα
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="text-base font-semibold line-clamp-2">{p.title}</div>
-                  <div className="text-xs text-neutral-600">{p.producer || p.producer_name || 'Παραγωγός'}</div>
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="font-semibold">{p.priceFormatted || p.price_text || '—'}</div>
-                    <button className="h-9 px-3 rounded bg-neutral-900 text-white text-sm">Προσθήκη</button>
-                  </div>
-                </div>
-              </div>
+            {items.map((p) => (
+              <ProductCard
+                key={p.id}
+                id={p.id}
+                title={p.title}
+                producer={p.producer}
+                priceCents={p.priceCents ?? 0}
+                image={p.imageUrl}
+              />
             ))}
           </div>
         )}
