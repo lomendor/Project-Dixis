@@ -65,4 +65,4 @@ jobs:
       - name: Playwright (smoke only)
         run: |
           npx -y playwright install --with-deps || true
-          pnpm exec playwright test -c frontend/playwright.config.ts --reporter=list --grep "@smoke" || echo "smoke skipped/soft-fail"
+          pnpm exec playwright test -c frontend/playwright.smoke.config.ts --reporter=list || echo "smoke skipped/soft-fail"
