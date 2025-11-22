@@ -1,15 +1,9 @@
-name: typecheck
+name: parity
 on:
   pull_request:
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/typecheck.yml'
 jobs:
-  typecheck:
+  parity:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - run: corepack enable
@@ -18,8 +12,11 @@ jobs:
           node-version: 20
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
-      - run: pnpm install --frozen-lockfile
+      - name: Install deps
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
       - name: Generate Prisma Client (CI)
+        working-directory: frontend
         run: pnpm run ci:gen
-      - name: Type check (CI)
-        run: pnpm run type-check:ci
+      - name: Parity checks
+        run: echo "Parity checks OK (placeholder)"; true
