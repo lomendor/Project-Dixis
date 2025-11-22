@@ -1,9 +1,9 @@
-name: quality-gates
+name: build-and-test
 on:
   pull_request:
     branches: [ main, develop ]
 jobs:
-  quality-gates:
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,9 +19,7 @@ jobs:
         run: corepack enable
       - name: Install deps (pnpm)
         run: pnpm install --frozen-lockfile
-      - name: Lint (if defined)
-        run: pnpm run lint --if-present
-      - name: Typecheck (dup as gate)
-        run: pnpm run type-check
-      - name: Build sanity (no emit)
+      - name: Build
         run: pnpm run build
+      - name: Unit tests (if defined)
+        run: pnpm run test --if-present

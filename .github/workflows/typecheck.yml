@@ -1,48 +1,23 @@
 name: typecheck
-
 on:
   pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
-
+    branches: [ main, develop ]
 jobs:
-  tsc:
-    name: typecheck
+  typecheck:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Enable corepack
-        run: corepack enable
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: 'frontend/.nvmrc'
           cache: 'pnpm'
           cache-dependency-path: 'frontend/pnpm-lock.yaml'
-
-      - name: pnpm version
-        run: pnpm --version
-
-      - name: Install dependencies
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install deps (pnpm)
         run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm run ci:gen || echo "Prisma gen skipped"
-
-      - name: Run typecheck
-        run: |
-          if pnpm exec tsc -v >/dev/null 2>&1; then
-            echo "Running TypeScript compiler..."
-            pnpm exec tsc -p tsconfig.json --noEmit
-          else
-            echo "tsc not found → fallback to Next typecheck via build:ci"
-            pnpm run build:ci
-          fi
+      - name: Type check
+        run: pnpm run type-check
