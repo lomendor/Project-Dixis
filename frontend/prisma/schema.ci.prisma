@@ -30,10 +30,12 @@ model Producer {
 
 model Product {
   id          String      @id @default(cuid())
+  slug        String      @unique
   producerId  String
   title       String
   category    String
   price       Float
+  priceCents  Int
   unit        String
   stock       Int         @default(0)
   description String?
@@ -47,6 +49,7 @@ model Product {
   @@index([producerId, createdAt])
   @@index([category])
   @@index([isActive])
+  @@index([slug])
 }
 
 model Order {

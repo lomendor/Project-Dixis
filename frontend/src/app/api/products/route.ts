@@ -1,50 +1,53 @@
 import { NextResponse } from 'next/server'
-import path from 'node:path'
-import { promises as fs } from 'node:fs'
+import { PrismaClient } from '@prisma/client'
 
-export const revalidate = 30
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-async function fromDemo() {
+const g: any = globalThis as any
+const prisma: PrismaClient = g.__prisma__ ?? new PrismaClient()
+if (!g.__prisma__) g.__prisma__ = prisma
+
+export async function GET(req: Request) {
   try {
-    const file = path.join(process.cwd(), 'public', 'demo', 'products.json')
-    const raw = await fs.readFile(file, 'utf8')
-    const data = JSON.parse(raw)
-    return { source: 'demo', items: data }
-  } catch {
-    return { source: 'demo', items: [] }
-  }
-}
+    const { searchParams } = new URL(req.url)
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
+    const pageSize = Math.min(Math.max(parseInt(searchParams.get('pageSize') || '12', 10), 1), 48)
+    const skip = (page - 1) * pageSize
 
-async function fromDb() {
-  const url = process.env.DATABASE_URL
-  if (!url) return { source: 'db', items: [] }
-  // lazy import για να μη βαραίνει το edge
-  const { Client } = await import('pg')
-  const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } })
-  await client.connect()
-  try {
-    // Πίνακας-safe για demo, δεν ακουμπά υπάρχον schema
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS catalog_demo_products (
-        id text primary key,
-        title text not null,
-        price_cents int not null,
-        producer text,
-        image text
-      )
-    `)
-    const res = await client.query('SELECT id, title, price_cents AS "priceCents", producer, image FROM catalog_demo_products ORDER BY title LIMIT 60;')
-    return { source: 'db', items: res.rows }
-  } finally {
-    await client.end()
-  }
-}
+    const [total, rows] = await Promise.all([
+      prisma.product.count({ where: { isActive: true } }),
+      prisma.product.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          priceCents: true,
+          imageUrl: true,
+          producer: { select: { name: true } },
+        },
+      }),
+    ])
 
-export async function GET() {
-  const mode = (process.env.PRODUCTS_MODE || 'demo').toLowerCase()
-  const data = mode === 'db' ? await fromDb() : await fromDemo()
-  const body = { source: data.source, count: data.items.length, items: data.items }
-  const res = NextResponse.json(body, { status: 200 })
-  res.headers.set('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=60')
-  return res
+    const fmt = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
+    const items = rows.map((r) => ({
+      id: r.id,
+      title: r.title ?? 'Άγνωστο προϊόν',
+      producerName: r.producer?.name ?? 'Παραγωγός',
+      priceCents: r.priceCents,
+      priceFormatted: typeof r.priceCents === 'number' ? fmt.format(r.priceCents / 100) : '—',
+      imageUrl: r.imageUrl || 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&h=800&fit=crop',
+    }))
+
+    const res = NextResponse.json({ items, total, page, pageSize })
+    res.headers.set('Cache-Control', 'public, max-age=10, s-maxage=20, stale-while-revalidate=60')
+    return res
+  } catch (_e) {
+    // Δεν αποκαλύπτουμε error/secrets· UI να μη σπάει
+    return NextResponse.json({ items: [], total: 0, page: 1, pageSize: 12 }, { status: 200 })
+  }
 }
