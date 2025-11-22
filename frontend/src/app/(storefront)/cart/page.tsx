@@ -23,27 +23,31 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white border rounded-xl divide-y">
               {items.map((it) => (
-                <div key={it.id} className="p-4 flex gap-4 items-center">
-                  <div className="w-20 h-20 bg-gray-100 overflow-hidden rounded">
-                    {it.imageUrl ? (
-                      <img src={it.imageUrl} alt={it.title} className="w-full h-full object-cover"/>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        📦
+                <div key={it.id} className="p-4 flex gap-4 items-start justify-between overflow-visible">
+                  <div className="flex gap-4 items-center flex-1 min-w-0">
+                    <div className="w-20 h-20 bg-gray-100 overflow-hidden rounded shrink-0">
+                      {it.imageUrl ? (
+                        <img src={it.imageUrl} alt={it.title} className="w-full h-full object-cover"/>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          📦
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold leading-tight line-clamp-2">{it.title}</div>
+                      <div className="text-sm text-gray-500">{it.producer || 'Παραγωγός'}</div>
+                      <div className="mt-2 flex items-center gap-3 flex-wrap">
+                        <button onClick={() => decrease(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">−</button>
+                        <span className="min-w-8 text-center">{it.qty ?? 1}</span>
+                        <button onClick={() => increase(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">+</button>
+                        <button onClick={() => remove(it.id)} className="ml-4 text-sm text-red-600 hover:underline">Αφαίρεση</button>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold leading-tight line-clamp-2">{it.title}</div>
-                    <div className="text-sm text-gray-500">{it.producer || 'Παραγωγός'}</div>
-                    <div className="mt-2 flex items-center gap-3">
-                      <button onClick={() => decrease(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">−</button>
-                      <span className="min-w-8 text-center">{it.qty ?? 1}</span>
-                      <button onClick={() => increase(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">+</button>
-                      <button onClick={() => remove(it.id)} className="ml-4 text-sm text-red-600 hover:underline">Αφαίρεση</button>
                     </div>
                   </div>
-                  <div className="font-semibold whitespace-nowrap">{it.priceFormatted ?? '—'}</div>
+                  <div className="shrink-0 text-right font-semibold text-lg whitespace-nowrap ml-4 mt-1" style={{fontVariantNumeric: 'tabular-nums'}}>
+                    {it.priceFormatted ?? '—'}
+                  </div>
                 </div>
               ))}
             </div>
