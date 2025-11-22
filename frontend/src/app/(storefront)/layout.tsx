@@ -1,7 +1,7 @@
 'use client';
-import { CartProvider } from '@/lib/cart/context';
+import { CartProvider } from '@/store/cart';
 import Link from 'next/link';
-import CartBadge from '@/components/cart/CartBadge';
+import { CartBadge } from '@/components/CartBadge';
 
 export default function Layout({ children }:{ children: React.ReactNode }){
   return <CartProvider><div style={{padding:12,display:'grid',gap:12}}>
