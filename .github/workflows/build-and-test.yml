@@ -1,9 +1,9 @@
-name: typecheck
+name: build-and-test
 on:
   pull_request:
     branches: [ main, develop ]
 jobs:
-  typecheck:
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -17,5 +17,7 @@ jobs:
           node-version-file: 'frontend/.nvmrc'
       - name: Install deps (pnpm)
         run: pnpm install --frozen-lockfile
-      - name: Type check
-        run: pnpm run type-check
+      - name: Build
+        run: pnpm run build
+      - name: Unit tests (if defined)
+        run: pnpm run test --if-present
