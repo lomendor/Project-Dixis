@@ -1,8 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useCart } from '@/store/cart';
-
-function CartCount(){ const { count } = useCart(); return <span className="ml-1 inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-neutral-900 text-white text-[11px] px-1">{count}</span>; }
+import { CartBadge } from '@/components/CartBadge';
 
 export default function Header(){
   return (
@@ -15,10 +13,7 @@ export default function Header(){
           <Link href="/producers" className="hover:underline">Για Παραγωγούς</Link>
           <Link href="/legal/terms" className="hover:underline">Όροι</Link>
         </nav>
-        <a href="/cart" className="text-sm relative" aria-label="Καλάθι">
-          Καλάθι
-          <CartCount />
-        </a>
+        <CartBadge />
       </div>
     </header>
   );
