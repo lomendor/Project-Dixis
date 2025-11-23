@@ -1,6 +1,5 @@
 'use client';
 import * as React from 'react';
-import { useCart } from '@/store/cart';
 import AddToCartButton from './AddToCartButton';
 
 export default function BuyBox({ product }:{ product: { id: string|number; title?: string; name?: string; price?: number|string; currency?: string } }){

@@ -78,7 +78,7 @@ export default function CheckoutSummary(){
         <div className="border rounded-md p-3 bg-white">
           <h2 className="text-sm font-semibold">Σύνοψη</h2>
           <ul className="divide-y mt-2">
-            {items.map((it)=>(
+            {items.map((it: any)=>(
               <li key={it.id} className="py-2 flex justify-between text-sm">
                 <span className="text-neutral-700">{it.title} × {it.qty}</span>
                 <span className="font-medium">{(it.price*it.qty).toFixed(2)} {it.currency}</span>
