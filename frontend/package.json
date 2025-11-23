@@ -24,6 +24,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force && tsx prisma/seed.ts",
     "db:seed": "tsx prisma/seed.ts",
+    "seed:products": "tsx scripts/seed/products.ts",
     "ops:backfill:publicToken": "tsx ../scripts/backfill-public-token.ts",
     "notify:deliver": "curl -s -X POST http://127.0.0.1:3000/api/dev/notifications/deliver || true",
     "lint": "next lint",
