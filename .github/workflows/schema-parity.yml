@@ -1,53 +1,56 @@
-name: Schema Parity Gate
+name: schema-parity
 
 on:
   pull_request:
     paths:
-      - 'frontend/prisma/schema.prisma'
-      - 'frontend/prisma/schema.ci.prisma'
+      - 'frontend/prisma/**'
+      - 'scripts/ci/sync-ci-schema.ts'
+      - '.github/workflows/schema-parity.yml'
   push:
     branches:
       - main
     paths:
-      - 'frontend/prisma/schema.prisma'
-      - 'frontend/prisma/schema.ci.prisma'
+      - 'frontend/prisma/**'
+      - 'scripts/ci/sync-ci-schema.ts'
+      - '.github/workflows/schema-parity.yml'
 
 jobs:
-  check-parity:
+  schema-parity:
     name: Verify schema.ci.prisma ↔ schema.prisma parity
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Setup Node.js (pnpm)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Install deps (frontend)
         working-directory: frontend
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - name: Run schema sync script
+      - name: Sync CI schema (SQLite from PG)
         working-directory: frontend
-        run: npm run ci:prisma:sync
+        run: pnpm run ci:prisma:sync
 
-      - name: Check for schema divergence
-        working-directory: frontend
+      - name: Verify parity (no diff after sync)
         run: |
-          if git diff --exit-code prisma/schema.ci.prisma; then
-            echo "✅ schema.ci.prisma is in sync with schema.prisma"
-          else
-            echo "❌ schema.ci.prisma is out of sync with schema.prisma"
-            echo ""
-            echo "Detected changes:"
-            git diff prisma/schema.ci.prisma
-            echo ""
-            echo "To fix this, run: npm run ci:prisma:sync"
+          git config user.email "ci@dixis.local"
+          git config user.name "dixis-ci"
+          git add -A
+          if ! git diff --cached --quiet -- frontend/prisma/schema.ci.prisma; then
+            echo "::error::schema.ci.prisma changed. Commit those changes locally and re-run."
+            git diff --cached -- frontend/prisma/schema.ci.prisma | sed -n '1,200p'
             exit 1
           fi
+          echo "✅ Parity OK"
 
       - name: Validation summary
         if: success()
