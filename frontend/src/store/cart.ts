@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import React from 'react'
 
 export interface CartItem {
   id: string | number
@@ -116,8 +117,6 @@ if (typeof window !== 'undefined') {
 // Legacy useCart hook for existing components
 // Wraps the new zustand store with the old API
 
-import React from 'react'
-
 export function useCart() {
   const items = useCartStore((s) => s.items)
   const addToStore = useCartStore((s) => s.add)
@@ -182,6 +181,6 @@ export function useCart() {
 }
 
 // Legacy CartProvider component (no-op since zustand doesn't need provider)
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  return children as React.ReactElement
+export function CartProvider({ children }: { children: React.ReactNode }): React.ReactElement {
+  return React.createElement(React.Fragment, {}, children)
 }
