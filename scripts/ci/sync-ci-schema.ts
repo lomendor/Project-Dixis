@@ -1,72 +1,33 @@
-#!/usr/bin/env tsx
-/**
- * CI Schema Sync - Pass CI-SYNC-01
- *
- * Keeps schema.ci.prisma (SQLite for E2E) in sync with schema.prisma (PostgreSQL)
- * Converts provider and datasource URL for CI environment.
- *
- * Usage: npm run ci:prisma:sync
- */
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
 
-import { readFileSync, writeFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-// AG97.5 — ESM __dirname polyfill
-import { fileURLToPath } from 'url';
+const SRC = path.join(process.cwd(), 'frontend', 'prisma', 'schema.prisma')
+const DEST = path.join(process.cwd(), 'frontend', 'prisma', 'schema.ci.prisma')
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+async function main() {
+  const src = await fs.readFile(SRC, 'utf8')
 
-const REPO_ROOT = resolve(__dirname, '../..');
-const SCHEMA_PG = resolve(REPO_ROOT, 'frontend/prisma/schema.prisma');
-const SCHEMA_CI = resolve(REPO_ROOT, 'frontend/prisma/schema.ci.prisma');
+  // Μετασχηματισμός datasource db → sqlite/file:./ci.db
+  const updated = src.replace(/datasource\s+db\s*{[\s\S]*?}/m, (block) => {
+    let b = block
+    b = b.replace(/provider\s*=\s*".*?"/, 'provider = "sqlite"')
+    b = b.replace(/url\s*=\s*.*$/m, 'url      = "file:./ci.db"')
+    return b
+  })
+  // uuid() → cuid() (sqlite-συμβατό default)
+  .replace(/\@default\(\s*uuid\s*\(\s*\)\s*\)/g, '@default(cuid())')
+  // Αφαίρεση PostgreSQL-specific @db attributes (Decimal, VarChar, etc.)
+  .replace(/\s*@db\.\w+(\([^)]*\))?/g, '')
 
-function syncSchemas() {
-  console.log('[sync-ci-schema] Reading PostgreSQL schema...');
-  const pgSchema = readFileSync(SCHEMA_PG, 'utf-8');
-
-  console.log('[sync-ci-schema] Converting to SQLite...');
-
-  // Step 1: Replace datasource block
-  const ciSchema = pgSchema
-    .replace(
-      /datasource\s+db\s*\{[^}]+\}/,
-      `datasource db {
-  provider = "sqlite"
-  url      = "file:./ci.db"
-}`
-    )
-    // Step 2: Remove PostgreSQL-specific annotations
-    .replace(/@db\.Text/g, '')
-    .replace(/@db\.Decimal\([^)]+\)/g, '')
-    .replace(/@db\.VarChar\([^)]+\)/g, '')
-    .replace(/@db\.Uuid/g, '')
-    // Step 3: Convert uuid() default to cuid() (SQLite compatible)
-    .replace(/@default\(uuid\(\)\)/g, '@default(cuid())')
-    // Step 4: Add CI schema header comment
-    .replace(
-      /^/,
-      `// ⚠️ AUTO-GENERATED - DO NOT EDIT MANUALLY
-// Synced from schema.prisma by scripts/ci/sync-ci-schema.ts
-// Run: npm run ci:prisma:sync
-
+  const header = `/// AUTO-GENERATED FILE — DO NOT EDIT.
+/// Source: frontend/prisma/schema.prisma
+/// Transforms: provider(postgresql→sqlite), url(env→"file:./ci.db"), default(uuid()→cuid()), @db.*→removed
 `
-    );
 
-  console.log('[sync-ci-schema] Writing SQLite schema...');
-  writeFileSync(SCHEMA_CI, ciSchema, 'utf-8');
-
-  console.log('[sync-ci-schema] ✅ schema.ci.prisma synced successfully');
+  await fs.writeFile(DEST, header + '\n' + updated, 'utf8')
 }
 
-// Execute if run directly (ESM-safe check)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  try {
-    syncSchemas();
-    process.exit(0);
-  } catch (error) {
-    console.error('[sync-ci-schema] ❌ Sync failed:', error);
-    process.exit(1);
-  }
-}
-
-export { syncSchemas };
+main().catch((e) => {
+  console.error('sync-ci-schema failed:', e)
+  process.exit(1)
+})
