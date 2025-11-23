@@ -1,10 +1,16 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { useCart } from '@/store/cart'
+import { useCartStore } from '@/store/cart'
+import { formatCentsEUR } from '@/lib/money'
 
 export default function CartPage() {
-  const { items, subtotal, remove, increase, decrease } = useCart()
+  const items = useCartStore((s) => s.items)
+  const subtotalCents = useCartStore((s) => s.subtotalCents())
+  const remove = useCartStore((s) => s.remove)
+  const inc = useCartStore((s) => s.inc)
+  const dec = useCartStore((s) => s.dec)
+  const clear = useCartStore((s) => s.clear)
 
   const empty = !items || items.length === 0
   return (
@@ -38,15 +44,15 @@ export default function CartPage() {
                       <div className="font-semibold leading-tight line-clamp-2">{it.title}</div>
                       <div className="text-sm text-gray-500">{it.producer || 'Παραγωγός'}</div>
                       <div className="mt-2 flex items-center gap-3 flex-wrap">
-                        <button onClick={() => decrease(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">−</button>
+                        <button onClick={() => dec(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-minus">−</button>
                         <span className="min-w-8 text-center">{it.qty ?? 1}</span>
-                        <button onClick={() => increase(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center">+</button>
+                        <button onClick={() => inc(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-plus">+</button>
                         <button onClick={() => remove(it.id)} className="ml-4 text-sm text-red-600 hover:underline">Αφαίρεση</button>
                       </div>
                     </div>
                   </div>
                   <div className="shrink-0 text-right font-semibold text-lg whitespace-nowrap ml-4 mt-1" style={{fontVariantNumeric: 'tabular-nums'}}>
-                    {it.priceFormatted ?? '—'}
+                    {formatCentsEUR(it.priceCents * it.qty)}
                   </div>
                 </div>
               ))}
@@ -55,9 +61,12 @@ export default function CartPage() {
             <aside className="bg-white border rounded-xl p-6 h-fit">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Υποσύνολο</span>
-                <span className="text-lg font-bold">{subtotal?.formatted ?? '—'}</span>
+                <span className="text-lg font-bold">{formatCentsEUR(subtotalCents)}</span>
               </div>
               <p className="text-xs text-gray-500 mt-2">Οι τελικές χρεώσεις (μεταφορικά/ΦΠΑ) υπολογίζονται στο checkout.</p>
+              <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">
+                Καθαρισμός
+              </button>
               <Link href="/checkout" className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
                 Συνέχεια στο checkout
               </Link>

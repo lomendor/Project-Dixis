@@ -25,6 +25,7 @@ export async function GET(req: Request) {
       id: p.id,
       title: p.title,
       producerName: p.producer?.name ?? 'Παραγωγός',
+      priceCents: Number.isFinite(p.price) ? Math.round(p.price * 100) : 0,
       priceFormatted: Number.isFinite(p.price) ? fmt.format(p.price) : '—',
       imageUrl: p.imageUrl ?? '',
     }))
