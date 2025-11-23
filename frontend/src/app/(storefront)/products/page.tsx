@@ -1,4 +1,4 @@
-export const revalidate = 20
+export const revalidate = 30
 
 type ApiItem = {
   id: string | number

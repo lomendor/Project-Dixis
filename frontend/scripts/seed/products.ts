@@ -1,225 +1,204 @@
-#!/usr/bin/env tsx
-/**
- * AG119.1 Seed Script: Products (Idempotent)
- *
- * Seeds ≥10 products into Neon DB using upsert by slug.
- * Safe to run multiple times - will not create duplicates.
- */
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
-
-const SEED_PRODUCTS = [
-  {
-    slug: 'extra-virgin-olive-oil-1l',
-    title: 'Ελαιόλαδο Εξαιρετικά Παρθένο 1L',
-    category: 'Έλαια',
-    priceCents: 1250,
-    unit: '1L',
-    stock: 50,
-    description: 'Κρητικό εξαιρετικά παρθένο ελαιόλαδο από οικογενειακούς ελαιώνες.',
-    imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'mountain-honey-500g',
-    title: 'Μέλι Βουνού 500g',
-    category: 'Μέλι',
-    priceCents: 890,
-    unit: '500g',
-    stock: 30,
-    description: 'Φυσικό μέλι από τα βουνά της Πελοποννήσου, χωρίς πρόσθετα.',
-    imageUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784110?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'feta-cheese-400g',
-    title: 'Φέτα ΠΟΠ 400g',
-    category: 'Τυροκομικά',
-    priceCents: 650,
-    unit: '400g',
-    stock: 40,
-    description: 'Παραδοσιακή φέτα με προστατευόμενη ονομασία προέλευσης.',
-    imageUrl: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'organic-tomatoes-1kg',
-    title: 'Βιολογικές Ντομάτες 1kg',
-    category: 'Λαχανικά',
-    priceCents: 340,
-    unit: '1kg',
-    stock: 60,
-    description: 'Φρέσκες βιολογικές ντομάτες από τη Μεσσηνία.',
-    imageUrl: 'https://images.unsplash.com/photo-1546470427-227d8c71c1c8?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'graviera-cheese-500g',
-    title: 'Γραβιέρα Κρήτης 500g',
-    category: 'Τυροκομικά',
-    priceCents: 780,
-    unit: '500g',
-    stock: 25,
-    description: 'Κρητική γραβιέρα με πλούσια γεύση και αρώματα.',
-    imageUrl: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'thyme-honey-250g',
-    title: 'Μέλι Θυμαρίσιο 250g',
-    category: 'Μέλι',
-    priceCents: 550,
-    unit: '250g',
-    stock: 35,
-    description: 'Αρωματικό θυμαρίσιο μέλι από τις Κυκλάδες.',
-    imageUrl: 'https://images.unsplash.com/photo-1558640044-3205a4d5d1c3?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'kalamata-olives-500g',
-    title: 'Ελιές Καλαμάτας 500g',
-    category: 'Ελιές',
-    priceCents: 490,
-    unit: '500g',
-    stock: 45,
-    description: 'Καλαμών ελιές σε άρμη, με πλούσια γεύση.',
-    imageUrl: 'https://images.unsplash.com/photo-1583770291066-35b8f648f922?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'oregano-dried-50g',
-    title: 'Ρίγανη Ξερή 50g',
-    category: 'Μπαχαρικά',
-    priceCents: 280,
-    unit: '50g',
-    stock: 70,
-    description: 'Αρωματική ρίγανη από ορεινές περιοχές της Κρήτης.',
-    imageUrl: 'https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'grape-raki-500ml',
-    title: 'Ρακί Σταφυλιού 500ml',
-    category: 'Ποτά',
-    priceCents: 1150,
-    unit: '500ml',
-    stock: 20,
-    description: 'Παραδοσιακό κρητικό ρακί από απόσταξη σταφυλιού.',
-    imageUrl: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'orange-marmalade-450g',
-    title: 'Μαρμελάδα Πορτοκάλι 450g',
-    category: 'Γλυκά',
-    priceCents: 590,
-    unit: '450g',
-    stock: 30,
-    description: 'Σπιτική μαρμελάδα πορτοκάλι χωρίς συντηρητικά.',
-    imageUrl: 'https://images.unsplash.com/photo-1562020286-d28634c64d98?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'lemon-olive-oil-250ml',
-    title: 'Ελαιόλαδο με Λεμόνι 250ml',
-    category: 'Έλαια',
-    priceCents: 690,
-    unit: '250ml',
-    stock: 40,
-    description: 'Παρθένο ελαιόλαδο εμποτισμένο με φρέσκο λεμόνι.',
-    imageUrl: 'https://images.unsplash.com/photo-1608478876706-00f7e4da2458?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-  {
-    slug: 'wild-mountain-tea-100g',
-    title: 'Τσάι του Βουνού 100g',
-    category: 'Ροφήματα',
-    priceCents: 450,
-    unit: '100g',
-    stock: 50,
-    description: 'Φυσικό τσάι του βουνού από την Ολυμπία.',
-    imageUrl: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&h=800&fit=crop',
-    isActive: true,
-  },
-]
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 AG119.1 Seed: Products (Idempotent)')
+  console.log('→ Seeding products (idempotent upsert by slug)');
 
-  // Ensure we have at least one producer to assign products to
-  let producer = await prisma.producer.findFirst({ where: { isActive: true } })
+  // First, ensure we have a producer
+  const producer = await prisma.producer.upsert({
+    where: { slug: 'local-farm-demo' },
+    update: {},
+    create: {
+      slug: 'local-farm-demo',
+      name: 'Τοπική Φάρμα Demo',
+      region: 'Αττική',
+      category: 'Λαχανικά & Φρούτα',
+      description: 'Βιολογικά προϊόντα από τοπική φάρμα',
+      email: 'info@local-farm.gr',
+      phone: '+30 210 1234567',
+      isActive: true,
+    },
+  });
 
-  if (!producer) {
-    console.log('  → Creating default producer...')
-    producer = await prisma.producer.create({
-      data: {
-        slug: 'demo-producer',
-        name: 'Ελληνικοί Παραγωγοί',
-        region: 'Κρήτη',
-        category: 'Γενική',
-        description: 'Συνεργασίες με τοπικούς παραγωγούς σε όλη την Ελλάδα.',
-        products: 0,
-        isActive: true,
-      },
-    })
-    console.log(`  ✓ Created producer: ${producer.name} (${producer.id})`)
-  } else {
-    console.log(`  ✓ Using existing producer: ${producer.name} (${producer.id})`)
-  }
+  const products = [
+    {
+      slug: 'tomatoes-organic',
+      title: 'Βιολογικές Ντομάτες',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Λαχανικά',
+      price: 3.50,
+      priceCents: 350,
+      unit: 'κιλό',
+      stock: 50,
+      imageUrl: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337',
+      isActive: true,
+    },
+    {
+      slug: 'olives-kalamata',
+      title: 'Ελιές Καλαμάτας',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Ελιές & Λάδι',
+      price: 8.90,
+      priceCents: 890,
+      unit: 'κιλό',
+      stock: 30,
+      imageUrl: 'https://images.unsplash.com/photo-1605665187398-f6021e0cb6c0',
+      isActive: true,
+    },
+    {
+      slug: 'honey-thyme',
+      title: 'Μέλι Θυμαρίσιο',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Μέλι & Γλυκά',
+      price: 12.00,
+      priceCents: 1200,
+      unit: 'κιλό',
+      stock: 20,
+      imageUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784963',
+      isActive: true,
+    },
+    {
+      slug: 'feta-cheese',
+      title: 'Φέτα ΠΟΠ',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Τυριά',
+      price: 15.50,
+      priceCents: 1550,
+      unit: 'κιλό',
+      stock: 15,
+      imageUrl: 'https://images.unsplash.com/photo-1618164436241-4473940d1f5c',
+      isActive: true,
+    },
+    {
+      slug: 'olive-oil-extra-virgin',
+      title: 'Εξαιρετικό Παρθένο Ελαιόλαδο',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Ελιές & Λάδι',
+      price: 25.00,
+      priceCents: 2500,
+      unit: 'λίτρο',
+      stock: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5',
+      isActive: true,
+    },
+    {
+      slug: 'spinach-fresh',
+      title: 'Φρέσκο Σπανάκι',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Λαχανικά',
+      price: 2.80,
+      priceCents: 280,
+      unit: 'κιλό',
+      stock: 40,
+      imageUrl: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb',
+      isActive: true,
+    },
+    {
+      slug: 'potatoes-local',
+      title: 'Πατάτες Τοπικές',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Λαχανικά',
+      price: 1.50,
+      priceCents: 150,
+      unit: 'κιλό',
+      stock: 100,
+      imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655',
+      isActive: true,
+    },
+    {
+      slug: 'eggs-organic',
+      title: 'Βιολογικά Αυγά',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Αυγά & Γαλακτοκομικά',
+      price: 4.50,
+      priceCents: 450,
+      unit: '6 τεμάχια',
+      stock: 60,
+      imageUrl: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f',
+      isActive: true,
+    },
+    {
+      slug: 'grapes-red',
+      title: 'Κόκκινα Σταφύλια',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Φρούτα',
+      price: 3.20,
+      priceCents: 320,
+      unit: 'κιλό',
+      stock: 35,
+      imageUrl: 'https://images.unsplash.com/photo-1601275868399-45bec4f4cd9d',
+      isActive: true,
+    },
+    {
+      slug: 'yogurt-greek',
+      title: 'Ελληνικό Γιαούρτι',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Αυγά & Γαλακτοκομικά',
+      price: 5.80,
+      priceCents: 580,
+      unit: '500g',
+      stock: 45,
+      imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777',
+      isActive: true,
+    },
+    {
+      slug: 'oranges-fresh',
+      title: 'Φρέσκα Πορτοκάλια',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Φρούτα',
+      price: 2.40,
+      priceCents: 240,
+      unit: 'κιλό',
+      stock: 70,
+      imageUrl: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9',
+      isActive: true,
+    },
+    {
+      slug: 'basil-fresh',
+      title: 'Φρέσκος Βασιλικός',
+      producerName: 'Τοπική Φάρμα Demo',
+      category: 'Βότανα',
+      price: 1.80,
+      priceCents: 180,
+      unit: 'μάτσο',
+      stock: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1618375569909-3c8616cf7733',
+      isActive: true,
+    },
+  ];
 
-  // Upsert products (idempotent)
-  let created = 0
-  let updated = 0
-
-  for (const product of SEED_PRODUCTS) {
-    const result = await prisma.product.upsert({
+  let count = 0;
+  for (const product of products) {
+    await prisma.product.upsert({
       where: { slug: product.slug },
-      create: {
-        ...product,
-        producerId: producer.id,
-        price: product.priceCents / 100, // Convert to Float for backwards compat
-      },
       update: {
         title: product.title,
+        producerName: product.producerName,
         category: product.category,
+        price: product.price,
         priceCents: product.priceCents,
-        price: product.priceCents / 100,
         unit: product.unit,
         stock: product.stock,
-        description: product.description,
         imageUrl: product.imageUrl,
         isActive: product.isActive,
       },
-    })
-
-    // Check if this was a create or update by comparing createdAt/updatedAt
-    const wasCreated = result.createdAt.getTime() === result.updatedAt.getTime()
-    if (wasCreated) {
-      created++
-      console.log(`  + Created: ${product.slug}`)
-    } else {
-      updated++
-      console.log(`  ↻ Updated: ${product.slug}`)
-    }
+      create: {
+        ...product,
+        producerId: producer.id,
+      },
+    });
+    count++;
   }
 
-  console.log(`\n✓ Seed complete: ${created} created, ${updated} updated, ${SEED_PRODUCTS.length} total`)
-
-  // Update producer product count
-  const productCount = await prisma.product.count({ where: { producerId: producer.id } })
-  await prisma.producer.update({
-    where: { id: producer.id },
-    data: { products: productCount },
-  })
-  console.log(`✓ Updated producer product count: ${productCount}`)
+  console.log(`✓ Seeded ${count} products successfully`);
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed failed:', e)
-    process.exit(1)
+    console.error('✗ Seed error:', e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

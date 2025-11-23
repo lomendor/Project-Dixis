@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
-    const pageSize = Math.min(Math.max(parseInt(searchParams.get('pageSize') || '12', 10), 1), 48)
+    const pageSize = Math.min(Math.max(parseInt(searchParams.get('pageSize') || '12', 10), 1), 60)
     const skip = (page - 1) * pageSize
 
     const [total, rows] = await Promise.all([
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
     }))
 
     const res = NextResponse.json({ items, total, page, pageSize })
-    res.headers.set('Cache-Control', 'public, max-age=10, s-maxage=20, stale-while-revalidate=60')
+    res.headers.set('Cache-Control', 'public, max-age=10, s-maxage=30, stale-while-revalidate=60')
     return res
   } catch (_e) {
     // Δεν αποκαλύπτουμε error/secrets· UI να μη σπάει
