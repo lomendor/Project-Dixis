@@ -34,18 +34,18 @@ model Product {
   producerId   String
   producerName String?
   title        String
-  category    String
-  price       Float
-  priceCents  Int
-  unit        String
-  stock       Int         @default(0)
-  description String?
-  imageUrl    String?
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  producer    Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  OrderItem   OrderItem[]
+  category     String
+  price        Float
+  priceCents   Int
+  unit         String
+  stock        Int         @default(0)
+  description  String?
+  imageUrl     String?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  producer     Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  OrderItem    OrderItem[]
 
   @@index([producerId, createdAt])
   @@index([category])
