@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-const SRC = path.join(process.cwd(), 'frontend', 'prisma', 'schema.prisma')
-const DEST = path.join(process.cwd(), 'frontend', 'prisma', 'schema.ci.prisma')
+const SRC = path.join(process.cwd(), 'prisma', 'schema.prisma')
+const DEST = path.join(process.cwd(), 'prisma', 'schema.ci.prisma')
 
 async function main() {
   const src = await fs.readFile(SRC, 'utf8')
