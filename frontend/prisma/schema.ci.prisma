@@ -29,22 +29,23 @@ model Producer {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  slug        String      @unique
-  producerId  String
-  title       String
-  category    String
-  price       Float
-  priceCents  Int
-  unit        String
-  stock       Int         @default(0)
-  description String?
-  imageUrl    String?
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  producer    Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  OrderItem   OrderItem[]
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  producerId   String
+  producerName String?
+  title        String
+  category     String
+  price        Float
+  priceCents   Int
+  unit         String
+  stock        Int         @default(0)
+  description  String?
+  imageUrl     String?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  producer     Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  OrderItem    OrderItem[]
 
   @@index([producerId, createdAt])
   @@index([category])
