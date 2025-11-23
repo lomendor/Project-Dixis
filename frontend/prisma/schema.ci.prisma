@@ -1,10 +1,14 @@
+/// AUTO-GENERATED FILE — DO NOT EDIT.
+/// Source: frontend/prisma/schema.prisma
+/// Transforms: provider(postgresql→sqlite), url(env→"file:./ci.db"), default(uuid()→cuid()), @db.*→removed
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./ci.db"
 }
 
 model Producer {
@@ -51,7 +55,7 @@ model Product {
 
 model Order {
   id             String      @id @default(cuid())
-  publicToken    String      @unique @default(uuid())
+  publicToken    String      @unique @default(cuid())
   buyerPhone     String?
   buyerName      String?
   shippingLine1  String?
@@ -71,8 +75,8 @@ model Order {
   city           String?
   zip            String?
   zone           String?     @default("mainland")
-  subtotal       Float?
-  shipping       Float?
+  subtotal       Decimal?
+  shipping       Decimal?
   currency       String?     @default("EUR")
 
   @@index([buyerPhone, createdAt])
@@ -159,10 +163,10 @@ model CheckoutOrder {
   postalCode    String
   method        String
   weightGrams   Int
-  subtotal      Float
-  shippingCost  Float
-  codFee        Float?
-  total         Float
+  subtotal      Decimal
+  shippingCost  Decimal
+  codFee        Decimal?
+  total         Decimal
   // Optional contact
   email         String?
   paymentStatus PaymentStatus @default(PAID)
