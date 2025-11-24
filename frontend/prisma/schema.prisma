@@ -30,6 +30,7 @@ model Producer {
 
 model Product {
   id          String      @id @default(cuid())
+  slug        String      @unique
   producerId  String
   title       String
   category    String

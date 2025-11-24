@@ -24,6 +24,7 @@ export async function POST(req: Request) {
 
   // 2) Create Product
   const data = {
+    slug: String(body.slug || `test-product-${Date.now()}`),
     title: String(body.title || 'Δοκιμαστικό Προϊόν'),
     category: String(body.category || 'Δοκιμή'),
     price: Number(body.price ?? 5.0),
