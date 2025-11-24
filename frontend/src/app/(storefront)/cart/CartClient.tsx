@@ -1,17 +1,18 @@
 'use client';
 import Link from 'next/link';
-import { useCart } from '@/lib/cart/context';
+import { useCart } from '@/store/cart';
 import { useTranslations } from 'next-intl';
 import { calcTotals, fmtEUR } from '@/lib/cart/totals';
-import { DEFAULT_OPTIONS } from '@/contracts/shipping';
+import { DEFAULT_OPTIONS, type ShippingMethod } from '@/contracts/shipping';
 import { useEffect, useState } from 'react';
 
 export const dynamic = 'force-dynamic';
 
 export default function CartPage() {
-  const cart = useCart();
+  const { items, increase, decrease, remove } = useCart();
   const t = useTranslations();
   const [mounted, setMounted] = useState(false);
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>('PICKUP');
 
   // Hydration guard
   useEffect(() => {
@@ -26,10 +27,6 @@ export default function CartPage() {
       </main>
     );
   }
-
-  const state = cart.getCart();
-  const items = state.items;
-  const shippingMethod = state.shippingMethod;
 
   if (items.length === 0) {
     return (
@@ -51,28 +48,17 @@ export default function CartPage() {
   // Find shipping option details
   const shippingOption = DEFAULT_OPTIONS.find(opt => opt.code === shippingMethod) || DEFAULT_OPTIONS[0];
 
-  // Calculate totals
+  // Calculate totals - @/store/cart uses price directly (EUR), convert to cents for calcTotals
   const totals = calcTotals({
-    items: items.map(item => ({ price: item.price, qty: item.qty })),
+    items: items.map(item => ({ price: item.price * 100, qty: item.qty })),
     shippingMethod,
     baseShipping: shippingOption.baseCost * 100, // Convert to cents
     codFee: (shippingOption.codFee || 0) * 100, // Convert to cents
     taxRate: 0.24, // 24% VAT
   });
 
-  const handleQtyChange = (productId: string, qty: number) => {
-    cart.setQty(productId, qty);
-    cart.force();
-  };
-
-  const handleRemove = (productId: string) => {
-    cart.removeItem(productId);
-    cart.force();
-  };
-
   const handleShippingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    cart.setShippingMethod(e.target.value as typeof shippingMethod);
-    cart.force();
+    setShippingMethod(e.target.value as ShippingMethod);
   };
 
   return (
@@ -83,26 +69,40 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="md:col-span-2 space-y-4" data-testid="cart-items">
           {items.map((item) => (
-            <div key={item.productId} className="flex gap-4 p-4 border rounded-lg" data-testid="cart-item">
+            <div key={item.id} className="flex gap-4 p-4 border rounded-lg" data-testid="cart-item">
               <div className="flex-1">
                 <h3 className="font-medium mb-2">{item.title}</h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  {fmtEUR(item.price)}
+                  {item.priceFormatted || fmtEUR(item.price * 100)}
                 </p>
                 <div className="flex items-center gap-4">
-                  <label className="text-sm text-gray-600">
-                    {t('cart.qty')}:
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.qty}
-                      onChange={(e) => handleQtyChange(item.productId, parseInt(e.target.value) || 1)}
-                      className="ml-2 w-16 px-2 py-1 border rounded"
-                      data-testid="cart-qty-input"
-                    />
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">{t('cart.qty')}:</span>
+                    <button
+                      onClick={() => decrease(item.id)}
+                      className="w-8 h-8 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-lg font-medium"
+                      data-testid="qty-minus"
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <span
+                      className="w-8 text-center font-medium"
+                      data-testid="qty-value"
+                    >
+                      {item.qty}
+                    </span>
+                    <button
+                      onClick={() => increase(item.id)}
+                      className="w-8 h-8 flex items-center justify-center border rounded bg-gray-100 hover:bg-gray-200 text-lg font-medium"
+                      data-testid="qty-plus"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    onClick={() => handleRemove(item.productId)}
+                    onClick={() => remove(item.id)}
                     className="text-red-600 hover:underline text-sm"
                     data-testid="cart-remove"
                   >
@@ -112,7 +112,7 @@ export default function CartPage() {
               </div>
               <div className="text-right">
                 <p className="font-medium" data-testid="cart-item-total">
-                  {fmtEUR(item.price * item.qty)}
+                  {fmtEUR(item.price * item.qty * 100)}
                 </p>
               </div>
             </div>

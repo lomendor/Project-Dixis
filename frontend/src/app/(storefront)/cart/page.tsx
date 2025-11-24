@@ -21,7 +21,7 @@ export default function CartPage() {
         <h1 className="text-2xl font-bold mb-4">Καλάθι</h1>
 
         {list.length === 0 ? (
-          <div className="bg-white border rounded-xl p-10 text-center">
+          <div className="bg-white border rounded-xl p-10 text-center" data-testid="empty-cart">
             <p className="text-gray-600 mb-4">Το καλάθι σας είναι άδειο.</p>
             <Link href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
               Συνέχεια αγορών

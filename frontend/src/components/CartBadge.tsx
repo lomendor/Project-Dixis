@@ -9,6 +9,7 @@ export function CartBadge() {
 
   React.useEffect(() => { setMounted(true) }, [])
 
+  // @/lib/cart (Zustand) - use cartCount helper
   const displayCount = mounted ? cartCount(items) : 0
 
   return (
