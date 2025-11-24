@@ -1,5 +1,3 @@
-'use client'
-
 import { create } from 'zustand'
 import React from 'react'
 
@@ -121,6 +119,8 @@ export function useCart() {
   const items = useCartStore((s) => s.items)
   const addToStore = useCartStore((s) => s.add)
   const removeFromStore = useCartStore((s) => s.remove)
+  const incStore = useCartStore((s) => s.inc)
+  const decStore = useCartStore((s) => s.dec)
   const clearStore = useCartStore((s) => s.clear)
   const count = useCartStore((s) => s.count())
 
@@ -135,6 +135,8 @@ export function useCart() {
       style: 'currency',
       currency: 'EUR',
     }).format(item.priceCents / 100),
+    imageUrl: item.imageUrl,
+    producer: item.producer,
   }))
 
   const total = legacyItems.reduce((sum, item) => sum + item.price * item.qty, 0)
@@ -166,6 +168,14 @@ export function useCart() {
     removeFromStore(id)
   }
 
+  const inc = (id: string | number) => {
+    incStore(id)
+  }
+
+  const dec = (id: string | number) => {
+    decStore(id)
+  }
+
   const clear = () => {
     clearStore()
   }
@@ -176,6 +186,8 @@ export function useCart() {
     count,
     add,
     remove,
+    inc,
+    dec,
     clear,
   }
 }

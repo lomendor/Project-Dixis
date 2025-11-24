@@ -1,16 +1,14 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { useCartStore } from '@/store/cart'
+import { useCart } from '@/store/cart'
 import { formatCentsEUR } from '@/lib/money'
 
 export default function CartPage() {
-  const items = useCartStore((s) => s.items)
-  const subtotalCents = useCartStore((s) => s.subtotalCents())
-  const remove = useCartStore((s) => s.remove)
-  const inc = useCartStore((s) => s.inc)
-  const dec = useCartStore((s) => s.dec)
-  const clear = useCartStore((s) => s.clear)
+  const { items, total, remove, inc, dec, clear } = useCart()
+
+  // Calculate subtotal in cents from EUR total
+  const subtotalCents = Math.round(total * 100)
 
   const empty = !items || items.length === 0
   return (
@@ -52,7 +50,7 @@ export default function CartPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right font-semibold text-lg whitespace-nowrap ml-4 mt-1" style={{fontVariantNumeric: 'tabular-nums'}}>
-                    {formatCentsEUR(it.priceCents * it.qty)}
+                    {formatCentsEUR(Math.round(it.price * it.qty * 100))}
                   </div>
                 </div>
               ))}

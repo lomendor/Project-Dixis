@@ -1,10 +1,10 @@
 'use client'
 import * as React from 'react'
-import { useCartStore } from '@/store/cart'
+import { useCart } from '@/store/cart'
 import Link from 'next/link'
 
 export function CartBadge() {
-  const count = useCartStore((s) => s.count())
+  const { count } = useCart()
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => { setMounted(true) }, [])

@@ -1,5 +1,5 @@
 'use client'
-import { useCartStore } from '@/store/cart'
+import { useCart } from '@/store/cart'
 import { useState } from 'react'
 
 export default function AddToCartButton(props: {
@@ -9,17 +9,17 @@ export default function AddToCartButton(props: {
   imageUrl?: string
   producer?: string
 }) {
-  const add = useCartStore((s) => s.add)
+  const { add } = useCart()
   const [isAdded, setIsAdded] = useState(false)
 
   const handleClick = () => {
+    // useCart expects price in EUR, not cents
     add({
       id: props.id,
       title: props.title,
-      producer: props.producer || 'Παραγωγός',
-      priceCents: props.priceCents,
-      imageUrl: props.imageUrl,
-    })
+      price: props.priceCents / 100,
+      currency: 'EUR',
+    }, 1)
 
     setIsAdded(true)
     setTimeout(() => setIsAdded(false), 900)
