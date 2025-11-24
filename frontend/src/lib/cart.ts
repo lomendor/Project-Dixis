@@ -1,45 +1,59 @@
-import { cookies } from 'next/headers'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-export type CartItem = { id: string; title: string; priceCents: number; qty: number }
-export type Cart = { items: CartItem[] }
-
-const NAME = 'dixis_cart'
-
-export async function readCart(): Promise<Cart> {
-  const jar = await cookies()
-  const raw = jar.get(NAME)?.value
-  if (!raw) return { items: [] }
-  try {
-    const data = JSON.parse(raw) as Cart
-    if (!Array.isArray(data.items)) return { items: [] }
-    return { items: data.items.map(i => ({ ...i, qty: Number(i.qty||1) })) }
-  } catch { return { items: [] } }
+export type CartItem = {
+  id: string
+  title: string
+  priceCents: number
+  imageUrl?: string
+  qty: number
 }
 
-export async function writeCart(cart: Cart) {
-  const jar = await cookies()
-  jar.set(NAME, JSON.stringify(cart), {
-    httpOnly: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60*60*24*7
-  })
+type State = {
+  items: Record<string, CartItem>
+  add: (item: Omit<CartItem,'qty'>) => void
+  inc: (id: string) => void
+  dec: (id: string) => void
+  clear: () => void
 }
 
-export function addItem(cart: Cart, item: Omit<CartItem, 'qty'>, qty=1): Cart {
-  const idx = cart.items.findIndex(i => i.id === item.id)
-  if (idx >= 0) {
-    cart.items[idx].qty += qty
-  } else {
-    cart.items.push({ ...item, qty })
-  }
-  return cart
-}
+export const useCart = create<State>()(
+  persist(
+    (set, get) => ({
+      items: {},
+      add: (p) => {
+        const items = { ...get().items }
+        const cur = items[p.id]
+        items[p.id] = cur ? { ...cur, qty: cur.qty + 1 } : { ...p, qty: 1 }
+        set({ items })
+      },
+      inc: (id) => {
+        const items = { ...get().items }
+        const cur = items[id]
+        if (!cur) return
+        items[id] = { ...cur, qty: cur.qty + 1 }
+        set({ items })
+      },
+      dec: (id) => {
+        const items = { ...get().items }
+        const cur = items[id]
+        if (!cur) return
+        const nextQty = cur.qty - 1
+        if (nextQty <= 0) {
+          delete items[id]
+        } else {
+          items[id] = { ...cur, qty: nextQty }
+        }
+        set({ items })
+      },
+      clear: () => set({ items: {} }),
+    }),
+    { name: 'dixis:cart:v1' }
+  )
+)
 
-export function removeItem(cart: Cart, id: string): Cart {
-  return { items: cart.items.filter(i => i.id !== id) }
-}
+export const cartCount = (items: Record<string, CartItem>) =>
+  Object.values(items).reduce((n, it) => n + it.qty, 0)
 
-export function totalCents(cart: Cart): number {
-  return cart.items.reduce((s, i) => s + i.priceCents * i.qty, 0)
-}
+export const cartTotalCents = (items: Record<string, CartItem>) =>
+  Object.values(items).reduce((sum, it) => sum + it.priceCents * it.qty, 0)
