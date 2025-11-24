@@ -68,7 +68,7 @@ export default function CartPage() {
               <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">
                 Καθαρισμός
               </button>
-              <Link href="/checkout" className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+              <Link href="/checkout" className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700" data-testid="go-checkout">
                 Συνέχεια στο checkout
               </Link>
               <Link href="/products" className="mt-2 w-full inline-flex justify-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">
