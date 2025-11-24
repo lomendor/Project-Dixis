@@ -27,7 +27,7 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white border rounded-xl divide-y">
               {items.map((it) => (
-                <div key={it.id} className="p-4 flex gap-4 items-start justify-between overflow-visible">
+                <div key={it.id} className="p-4 flex gap-4 items-start justify-between overflow-visible" data-cart-row>
                   <div className="flex gap-4 items-center flex-1 min-w-0">
                     <div className="w-20 h-20 bg-gray-100 overflow-hidden rounded shrink-0">
                       {it.imageUrl ? (
@@ -42,10 +42,10 @@ export default function CartPage() {
                       <div className="font-semibold leading-tight line-clamp-2">{it.title}</div>
                       <div className="text-sm text-gray-500">{it.producer || 'Παραγωγός'}</div>
                       <div className="mt-2 flex items-center gap-3 flex-wrap">
-                        <button onClick={() => dec(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-minus">−</button>
-                        <span className="min-w-8 text-center">{it.qty ?? 1}</span>
-                        <button onClick={() => inc(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-plus">+</button>
-                        <button onClick={() => remove(it.id)} className="ml-4 text-sm text-red-600 hover:underline">Αφαίρεση</button>
+                        <button type="button" onClick={() => dec(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-minus">−</button>
+                        <span className="min-w-8 text-center" data-testid="qty">{it.qty ?? 1}</span>
+                        <button type="button" onClick={() => inc(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-plus">+</button>
+                        <button type="button" onClick={() => remove(it.id)} className="ml-4 text-sm text-red-600 hover:underline">Αφαίρεση</button>
                       </div>
                     </div>
                   </div>
