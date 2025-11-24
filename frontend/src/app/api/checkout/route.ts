@@ -1,107 +1,30 @@
-import * as Sentry from '@sentry/nextjs';
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { calcShippingFromSummary, type Zone } from '@/lib/shipping';
-import { sendOrderReceipt } from '@/lib/mailer';
+import { NextRequest, NextResponse } from 'next/server'
 
-export const dynamic = 'force-dynamic';
-
-type Item = { slug: string; qty: number };
-type Customer = { email: string; name?: string; phone?: string; address?: string; city?: string; zip?: string };
-
-function bad(msg: string, code=400){ return NextResponse.json({ error: msg }, { status: code }); }
-
-export async function POST(req: NextRequest) {
-  const idem = req.headers.get('x-idempotency-key') ?? '';
-  const body = await req.json().catch(()=> ({}));
-  const items: Item[] = Array.isArray(body?.items) ? body.items : [];
-  const zone: Zone = (body?.zone === 'islands' ? 'islands' : 'mainland');
-  const customer: Customer = body?.customer ?? {};
-
-  if (!customer?.email || !items.length) return bad('Missing email or items');
-
-  const slugs = items.map(i => i.slug);
-  const prods = await prisma.product.findMany({
-    where: { id: { in: slugs } },
-    select: { id:true, title:true, price:true }
-  });
-  const bySlug = new Map<string, any>();
-  for (const p of prods) bySlug.set(p.id, p);
-
-  let subtotal = 0;
-  let qtyTotal = 0;
-  const lines = items.map(i=>{
-    const p = bySlug.get(i.slug);
-    const price = Number(p?.price ?? 0);
-    const qty = Math.max(0, Number(i.qty) || 0);
-    subtotal += price * qty;
-    qtyTotal += qty;
-    return {
-      productId: p?.id ?? null,
-      slug: i.slug,
-      qty,
-      price,
-      currency: 'EUR'
-    };
-  });
-
-  const { total: shipping } = calcShippingFromSummary(subtotal, qtyTotal, zone as Zone);
-  const total = Math.max(0, subtotal + shipping);
-
-  if (idem) {
-    const existing = await prisma.order.findFirst({
-      where: { email: customer.email, total: total },
-      select: { id: true, publicToken: true }
-    });
-    if (existing) {
-      const trackUrl = existing.publicToken ? `https://dixis.io/orders/track/${existing.publicToken}` : undefined;
-      return NextResponse.json({ orderId: existing.id, publicToken: existing.publicToken, trackUrl, total, shipping, subtotal });
-    }
-  }
-
-  const order = await prisma.order.create({
-    data: {
-      email: customer.email,
-      name: customer.name ?? null,
-      phone: customer.phone ?? null,
-      address: customer.address ?? null,
-      city: customer.city ?? null,
-      zip: customer.zip ?? null,
-      zone,
-      subtotal: subtotal.toFixed(2) as any,
-      shipping: shipping.toFixed(2) as any,
-      total: total,
-      currency: 'EUR',
-      items: {
-        create: lines.map(l => ({
-          productId: l.productId,
-          producerId: null as string | null,
-          slug: l.slug,
-          qty: l.qty,
-          price: l.price,
-          currency: l.currency
-        }))
-      }
-    },
-    select: { id:true, publicToken:true }
-  });
-
-  // Fire-and-forget email receipt (don't block response)
+export async function POST(request: NextRequest) {
   try {
-    (async () => {
-      await sendOrderReceipt({
-        to: customer.email,
-        orderId: order.id,
-        publicToken: order.publicToken,
-        total,
-        currency: 'EUR',
-        items: lines,
-      }).catch(() => {});
-    })();
-  } catch {}
+    const body = await request.json()
 
-  const trackUrl = order.publicToken ? `https://dixis.io/orders/track/${order.publicToken}` : undefined;
-  const res = NextResponse.json({ orderId: order.id, publicToken: order.publicToken, trackUrl, total, shipping, subtotal });
-  res.headers.set('Set-Cookie', 'cart=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax');
-  return res;
+    // Basic validation
+    if (!body.name || !body.email || !body.address) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
+    // M0 Stub: Generate mock order ID
+    const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9)
+
+    // Return success without real backend processing
+    return NextResponse.json({
+      success: true,
+      orderId,
+      message: 'Order created successfully'
+    })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Invalid request' },
+      { status: 400 }
+    )
+  }
 }
