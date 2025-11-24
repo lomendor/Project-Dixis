@@ -4,6 +4,7 @@ const useExternal =
   !!process.env.BASE_URL || !!process.env.E2E_EXTERNAL || !!process.env.CI;
 
 export default defineConfig({
+  testDir: './tests/e2e',
   timeout: 120_000,
   expect: { timeout: 10_000 },
   use: {
