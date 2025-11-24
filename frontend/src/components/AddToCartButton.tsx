@@ -11,18 +11,14 @@ export default function AddToCartButton(props: {
 }) {
   const { add } = useCart()
   const [isAdded, setIsAdded] = useState(false)
-  const priceNum = props.priceCents / 100
-  const priceFormatted = `€${priceNum.toFixed(2)}`
 
   const handleClick = () => {
+    // useCart expects price in EUR, not cents
     add({
-      id: String(props.id),
+      id: props.id,
       title: props.title,
-      priceFormatted,
-      price: priceNum,
+      price: props.priceCents / 100,
       currency: 'EUR',
-      imageUrl: props.imageUrl,
-      producer: props.producer
     }, 1)
 
     setIsAdded(true)

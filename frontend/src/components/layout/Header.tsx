@@ -1,6 +1,11 @@
 'use client';
 import Link from 'next/link';
-import { CartBadge } from '@/components/CartBadge';
+import dynamic from 'next/dynamic';
+
+const CartBadge = dynamic(
+  () => import('@/components/CartBadge').then(m => ({ default: m.CartBadge })),
+  { ssr: false }
+);
 
 export default function Header(){
   return (
