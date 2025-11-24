@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
     const producer = await requireProducer();
     const body = await request.json();
 
-    const { title, category, price, unit, stock, description, imageUrl, isActive } = body;
+    const { slug, title, category, price, unit, stock, description, imageUrl, isActive } = body;
 
     // Validate required fields
-    if (!title || !category || price === undefined || !unit || stock === undefined) {
+    if (!slug || !title || !category || price === undefined || !unit || stock === undefined) {
       return NextResponse.json(
         { error: 'Υποχρεωτικά πεδία λείπουν' },
         { status: 400 }
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     // Create product scoped to this producer (ignore any producerId in body)
     const product = await prisma.product.create({
       data: {
+        slug: String(slug).trim(),
         producerId: producer.id, // Force producer scoping
         title: String(title).trim(),
         category: String(category).trim(),
