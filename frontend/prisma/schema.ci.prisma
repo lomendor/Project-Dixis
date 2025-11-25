@@ -78,6 +78,7 @@ model Order {
   zone           String?     @default("mainland")
   subtotal       Decimal?
   shipping       Decimal?
+  vat            Decimal?
   currency       String?     @default("EUR")
 
   @@index([buyerPhone, createdAt])
