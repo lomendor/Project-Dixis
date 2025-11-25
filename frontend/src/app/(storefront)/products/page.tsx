@@ -12,9 +12,9 @@ type ApiItem = {
 }
 
 async function getData() {
-  // For local dev: use localhost:3001 (project standard port)
+  // For local dev: use localhost:3000 (Next.js default port)
   // For CI/production: use NEXT_PUBLIC_BASE_URL env var
-  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3001'
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3000'
   try {
     const res = await fetch(`${base}/api/products?pageSize=12`, { cache: 'no-store' })
     if (!res.ok) return { items: [], total: 0 }
