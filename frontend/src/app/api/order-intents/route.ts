@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     })
 
     // Calculate totals (cart uses priceCents, DB uses price Float)
-    let totalFloat = 0
+    let subtotalFloat = 0
     const orderItems = items.map((cartItem: any) => {
       const product = products.find(p => p.id === String(cartItem.id))
       if (!product) {
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
       const priceFloat = product.price
       const lineTotal = priceFloat * cartItem.qty
-      totalFloat += lineTotal
+      subtotalFloat += lineTotal
 
       return {
         productId: product.id,
@@ -40,12 +40,34 @@ export async function POST(req: Request) {
       }
     })
 
-    // Create draft order
+    // Calculate breakdown (all in Decimal for precision)
+    const subtotal = new Prisma.Decimal(subtotalFloat).toDecimalPlaces(2)
+
+    // Zone-based shipping (default: mainland)
+    const zone = 'mainland'
+    const shippingRates: Record<string, number> = {
+      mainland: 4.50,
+      islands: 8.00
+    }
+    const shipping = new Prisma.Decimal(shippingRates[zone]).toDecimalPlaces(2)
+
+    // VAT 24% on subtotal
+    const vatRate = new Prisma.Decimal(0.24)
+    const vat = subtotal.mul(vatRate).toDecimalPlaces(2)
+
+    // Grand total
+    const totalDecimal = subtotal.add(shipping).add(vat)
+    const total = totalDecimal.toNumber()
+
+    // Create draft order with full breakdown
     const order = await prisma.order.create({
       data: {
         status: 'pending',
-        total: totalFloat,
-        subtotal: new Prisma.Decimal(totalFloat),
+        zone,
+        subtotal,
+        shipping,
+        vat,
+        total,
         items: { create: orderItems }
       },
       include: { items: true }
@@ -53,7 +75,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       orderId: order.id,
+      subtotal: subtotal.toNumber(),
+      shipping: shipping.toNumber(),
+      vat: vat.toNumber(),
       total: order.total,
+      zone,
       items: order.items
     })
   } catch (error) {

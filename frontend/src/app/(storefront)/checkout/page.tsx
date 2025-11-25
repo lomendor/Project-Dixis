@@ -15,6 +15,10 @@ interface Order {
   id: string
   status: string
   total: number
+  subtotal?: number
+  shipping?: number
+  vat?: number
+  zone?: string
   items: OrderItem[]
 }
 
@@ -140,8 +144,24 @@ function CheckoutContent() {
               </div>
             ))}
           </div>
-          <div className="border-t pt-2">
-            <div className="flex justify-between font-bold">
+
+          <div className="border-t pt-3 space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Υποσύνολο:</span>
+              <span>{fmt.format(order.subtotal || 0)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Αποστολή ({order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):</span>
+              <span>{fmt.format(order.shipping || 0)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>ΦΠΑ (24%):</span>
+              <span>{fmt.format(order.vat || 0)}</span>
+            </div>
+          </div>
+
+          <div className="border-t mt-3 pt-3">
+            <div className="flex justify-between font-bold text-lg">
               <span>Σύνολο:</span>
               <span>{fmt.format(order.total)}</span>
             </div>
