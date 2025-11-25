@@ -1,19 +1,49 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCart, cartCount, cartTotalCents } from '@/lib/cart'
 
 export default function CartPage() {
+  const router = useRouter()
   const items = useCart(s => s.items)
   const inc = useCart(s => s.inc)
   const dec = useCart(s => s.dec)
   const clear = useCart(s => s.clear)
+  const [loading, setLoading] = useState(false)
 
   const count = cartCount(items)
   const totalCents = cartTotalCents(items)
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
   const list = Object.values(items)
+
+  const handleCheckout = async () => {
+    setLoading(true)
+    try {
+      const cartItems = list.map(item => ({
+        id: item.id,
+        qty: item.qty
+      }))
+
+      const res = await fetch('/api/order-intents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems })
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to create order')
+      }
+
+      const data = await res.json()
+      router.push(`/checkout?orderId=${data.orderId}`)
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -68,9 +98,14 @@ export default function CartPage() {
               <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">
                 Καθαρισμός
               </button>
-              <Link href="/checkout" className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700" data-testid="go-checkout">
-                Συνέχεια στο checkout
-              </Link>
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                data-testid="go-checkout"
+              >
+                {loading ? 'Παρακαλώ περιμένετε...' : 'Συνέχεια στο checkout'}
+              </button>
               <Link href="/products" className="mt-2 w-full inline-flex justify-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">
                 Συνέχεια αγορών
               </Link>

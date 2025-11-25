@@ -1,33 +1,81 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useCart, cartTotalCents } from '@/lib/cart'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCart } from '@/lib/cart'
+
+interface OrderItem {
+  id: string
+  productId: string
+  qty: number
+  price: number
+  titleSnap: string
+}
+
+interface Order {
+  id: string
+  status: string
+  total: number
+  items: OrderItem[]
+}
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const items = useCart(s => s.items)
+  const searchParams = useSearchParams()
+  const orderId = searchParams.get('orderId')
   const clear = useCart(s => s.clear)
+
+  const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fetchError, setFetchError] = useState('')
 
-  const totalCents = cartTotalCents(items)
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
+
+  useEffect(() => {
+    if (!orderId) {
+      setFetchError('Δεν βρέθηκε κωδικός παραγγελίας')
+      return
+    }
+
+    async function fetchOrder() {
+      try {
+        const res = await fetch(`/api/order-intents/${orderId}`)
+        if (!res.ok) {
+          throw new Error('Failed to fetch order')
+        }
+        const data = await res.json()
+        setOrder(data)
+      } catch (err) {
+        console.error('Fetch order error:', err)
+        setFetchError('Αποτυχία φόρτωσης παραγγελίας')
+      }
+    }
+
+    fetchOrder()
+  }, [orderId])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
+    if (!orderId) {
+      setError('Δεν βρέθηκε κωδικός παραγγελίας')
+      setLoading(false)
+      return
+    }
+
     const formData = new FormData(e.currentTarget)
     const body = {
       name: formData.get('name'),
       email: formData.get('email'),
       address: formData.get('address'),
+      phone: formData.get('phone') || ''
     }
 
     try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
+      const res = await fetch(`/api/order-intents/${orderId}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
@@ -39,24 +87,35 @@ export default function CheckoutPage() {
         return
       }
 
-      // Clear cart and redirect to success
+      // Clear cart and redirect to thank-you
       clear()
-      router.push(`/checkout/success?orderId=${data.orderId}`)
+      router.push(`/thank-you?id=${data.id}`)
     } catch (err) {
-      setError('An error occurred')
+      console.error('Submit error:', err)
+      setError('Παρουσιάστηκε σφάλμα')
     } finally {
       setLoading(false)
     }
   }
 
-  if (Object.keys(items).length === 0) {
+  if (fetchError) {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600 mb-4">Το καλάθι σας είναι άδειο.</p>
-          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
-            Συνέχεια αγορών
+          <p className="text-red-600 mb-4">{fetchError}</p>
+          <a href="/cart" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+            Επιστροφή στο καλάθι
           </a>
+        </div>
+      </main>
+    )
+  }
+
+  if (!order) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
+          <p className="text-gray-600">Φόρτωση παραγγελίας...</p>
         </div>
       </main>
     )
@@ -69,9 +128,24 @@ export default function CheckoutPage() {
 
         <div className="bg-white border rounded-xl p-6 mb-6">
           <h2 className="font-semibold mb-4">Στοιχεία Παραγγελίας</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Σύνολο: <span className="font-bold">{fmt.format(totalCents / 100)}</span>
-          </p>
+          <div className="space-y-2 mb-4">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex justify-between text-sm">
+                <span>
+                  {item.titleSnap} x {item.qty}
+                </span>
+                <span className="font-medium">
+                  {fmt.format(item.price * item.qty)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="border-t pt-2">
+            <div className="flex justify-between font-bold">
+              <span>Σύνολο:</span>
+              <span>{fmt.format(order.total)}</span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6" data-testid="checkout-form">
