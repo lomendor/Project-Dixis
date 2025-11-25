@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCart } from '@/lib/cart'
 
@@ -18,7 +18,7 @@ interface Order {
   items: OrderItem[]
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const orderId = searchParams.get('orderId')
@@ -201,5 +201,19 @@ export default function CheckoutPage() {
         </form>
       </div>
     </main>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
+          <p className="text-gray-600">Φόρτωση...</p>
+        </div>
+      </main>
+    }>
+      <CheckoutContent />
+    </Suspense>
   )
 }
