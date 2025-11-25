@@ -16,7 +16,7 @@ async function getData() {
   // For CI/production: use NEXT_PUBLIC_BASE_URL env var
   const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3001'
   try {
-    const res = await fetch(`${base}/api/products`, { cache: 'no-store' })
+    const res = await fetch(`${base}/api/products?pageSize=12`, { cache: 'no-store' })
     if (!res.ok) return { items: [], total: 0 }
     return res.json()
   } catch {
