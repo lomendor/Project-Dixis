@@ -12,7 +12,9 @@ type ApiItem = {
 }
 
 async function getData() {
-  const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.io'
+  // For local dev: use localhost:3001 (project standard port)
+  // For CI/production: use NEXT_PUBLIC_BASE_URL env var
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3001'
   try {
     const res = await fetch(`${base}/api/products`, { cache: 'no-store' })
     if (!res.ok) return { items: [], total: 0 }

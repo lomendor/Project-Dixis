@@ -50,9 +50,9 @@ async function main() {
 
   console.log(`✅ Producers: ${producer1.name}, ${producer2.name}`);
 
-  // Idempotent product upserts
+  // Idempotent product upserts using slug
   const product1 = await prisma.product.upsert({
-    where: { id: 'seed-product-honey' },
+    where: { slug: 'thymarisio-meli-450g' },
     update: {
       title: 'Θυμαρίσιο Μέλι 450g',
       category: 'Honey & Sweets',
@@ -64,7 +64,7 @@ async function main() {
       producerId: producer2.id,
     },
     create: {
-      id: 'seed-product-honey',
+      slug: 'thymarisio-meli-450g',
       title: 'Θυμαρίσιο Μέλι 450g',
       category: 'Honey & Sweets',
       price: 7.9,
@@ -77,7 +77,7 @@ async function main() {
   });
 
   const product2 = await prisma.product.upsert({
-    where: { id: 'seed-product-olive-oil' },
+    where: { slug: 'exairetiko-partheno-elaiolado-1l' },
     update: {
       title: 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
       category: 'Olive Oil',
@@ -89,7 +89,7 @@ async function main() {
       producerId: producer1.id,
     },
     create: {
-      id: 'seed-product-olive-oil',
+      slug: 'exairetiko-partheno-elaiolado-1l',
       title: 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
       category: 'Olive Oil',
       price: 10.9,
@@ -102,7 +102,7 @@ async function main() {
   });
 
   const product3 = await prisma.product.upsert({
-    where: { id: 'seed-product-fig-sweet' },
+    where: { slug: 'glyko-koutaliou-syko-380g' },
     update: {
       title: 'Γλυκό Κουταλιού Σύκο 380g',
       category: 'Honey & Sweets',
@@ -114,7 +114,7 @@ async function main() {
       producerId: producer1.id,
     },
     create: {
-      id: 'seed-product-fig-sweet',
+      slug: 'glyko-koutaliou-syko-380g',
       title: 'Γλυκό Κουταλιού Σύκο 380g',
       category: 'Honey & Sweets',
       price: 4.5,
@@ -126,7 +126,199 @@ async function main() {
     },
   });
 
-  console.log(`✅ Products: ${product1.title}, ${product2.title}, ${product3.title}`);
+  // Product 4 - Feta cheese
+  const product4 = await prisma.product.upsert({
+    where: { slug: 'feta-pop-mytilinis' },
+    update: {
+      title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
+      category: 'Dairy',
+      price: 6.5,
+      unit: 'pack',
+      stock: 25,
+      description: 'Authentic PDO feta cheese from Mytilini',
+      isActive: true,
+      producerId: producer1.id,
+    },
+    create: {
+      slug: 'feta-pop-mytilinis',
+      title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
+      category: 'Dairy',
+      price: 6.5,
+      unit: 'pack',
+      stock: 25,
+      description: 'Authentic PDO feta cheese from Mytilini',
+      isActive: true,
+      producerId: producer1.id,
+    },
+  });
+
+  // Product 5 - Tsipouro
+  const product5 = await prisma.product.upsert({
+    where: { slug: 'tsipouro-paradosiako' },
+    update: {
+      title: 'Τσίπουρο Παραδοσιακό 700ml',
+      category: 'Beverages',
+      price: 12.9,
+      unit: 'bottle',
+      stock: 15,
+      description: 'Traditional Greek tsipouro spirit',
+      isActive: true,
+      producerId: producer2.id,
+    },
+    create: {
+      slug: 'tsipouro-paradosiako',
+      title: 'Τσίπουρο Παραδοσιακό 700ml',
+      category: 'Beverages',
+      price: 12.9,
+      unit: 'bottle',
+      stock: 15,
+      description: 'Traditional Greek tsipouro spirit',
+      isActive: true,
+      producerId: producer2.id,
+    },
+  });
+
+  // Product 6 - Organic Oranges
+  const product6 = await prisma.product.upsert({
+    where: { slug: 'portokalia-viologika' },
+    update: {
+      title: 'Πορτοκάλια Βιολογικά 5kg',
+      category: 'Fruits & Vegetables',
+      price: 8.9,
+      unit: 'box',
+      stock: 20,
+      description: 'Organic oranges from Argolida',
+      isActive: true,
+      producerId: producer1.id,
+    },
+    create: {
+      slug: 'portokalia-viologika',
+      title: 'Πορτοκάλια Βιολογικά 5kg',
+      category: 'Fruits & Vegetables',
+      price: 8.9,
+      unit: 'box',
+      stock: 20,
+      description: 'Organic oranges from Argolida',
+      isActive: true,
+      producerId: producer1.id,
+    },
+  });
+
+  // Product 7 - Mountain Oregano
+  const product7 = await prisma.product.upsert({
+    where: { slug: 'rigani-vounou' },
+    update: {
+      title: 'Ρίγανη Βουνού 100g',
+      category: 'Herbs & Spices',
+      price: 3.5,
+      unit: 'pack',
+      stock: 60,
+      description: 'Wild mountain oregano from Epirus',
+      isActive: true,
+      producerId: producer2.id,
+    },
+    create: {
+      slug: 'rigani-vounou',
+      title: 'Ρίγανη Βουνού 100g',
+      category: 'Herbs & Spices',
+      price: 3.5,
+      unit: 'pack',
+      stock: 60,
+      description: 'Wild mountain oregano from Epirus',
+      isActive: true,
+      producerId: producer2.id,
+    },
+  });
+
+  // Product 8 - Naxos Potatoes
+  const product8 = await prisma.product.upsert({
+    where: { slug: 'patates-naxou' },
+    update: {
+      title: 'Πατάτες Νάξου 3kg',
+      category: 'Fruits & Vegetables',
+      price: 4.9,
+      unit: 'bag',
+      stock: 35,
+      description: 'Famous potatoes from Naxos island',
+      isActive: true,
+      producerId: producer1.id,
+    },
+    create: {
+      slug: 'patates-naxou',
+      title: 'Πατάτες Νάξου 3kg',
+      category: 'Fruits & Vegetables',
+      price: 4.9,
+      unit: 'bag',
+      stock: 35,
+      description: 'Famous potatoes from Naxos island',
+      isActive: true,
+      producerId: producer1.id,
+    },
+  });
+
+  // Product 9 - Lemnos Red Wine
+  const product9 = await prisma.product.upsert({
+    where: { slug: 'krasi-limnou-erythro' },
+    update: {
+      title: 'Κρασί Λήμνου Ερυθρό 750ml',
+      category: 'Beverages',
+      price: 9.9,
+      unit: 'bottle',
+      stock: 18,
+      description: 'Red wine from Lemnos vineyards',
+      isActive: true,
+      producerId: producer2.id,
+    },
+    create: {
+      slug: 'krasi-limnou-erythro',
+      title: 'Κρασί Λήμνου Ερυθρό 750ml',
+      category: 'Beverages',
+      price: 9.9,
+      unit: 'bottle',
+      stock: 18,
+      description: 'Red wine from Lemnos vineyards',
+      isActive: true,
+      producerId: producer2.id,
+    },
+  });
+
+  // Product 10 - Homemade Trahanas
+  const product10 = await prisma.product.upsert({
+    where: { slug: 'trachanas-spitikos' },
+    update: {
+      title: 'Τραχανάς Σπιτικός 500g',
+      category: 'Pasta & Grains',
+      price: 5.5,
+      unit: 'pack',
+      stock: 40,
+      description: 'Traditional homemade trahanas',
+      isActive: true,
+      producerId: producer1.id,
+    },
+    create: {
+      slug: 'trachanas-spitikos',
+      title: 'Τραχανάς Σπιτικός 500g',
+      category: 'Pasta & Grains',
+      price: 5.5,
+      unit: 'pack',
+      stock: 40,
+      description: 'Traditional homemade trahanas',
+      isActive: true,
+      producerId: producer1.id,
+    },
+  });
+
+  console.log(`✅ Products seeded: 10 items total`);
+  console.log(`   - ${product1.title}`);
+  console.log(`   - ${product2.title}`);
+  console.log(`   - ${product3.title}`);
+  console.log(`   - ${product4.title}`);
+  console.log(`   - ${product5.title}`);
+  console.log(`   - ${product6.title}`);
+  console.log(`   - ${product7.title}`);
+  console.log(`   - ${product8.title}`);
+  console.log(`   - ${product9.title}`);
+  console.log(`   - ${product10.title}`);
   console.log('🌱 Seed complete!');
 }
 

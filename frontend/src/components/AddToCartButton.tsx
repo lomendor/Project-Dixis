@@ -13,6 +13,7 @@ export default function AddToCartButton(props: {
   const [isAdded, setIsAdded] = useState(false)
 
   const handleClick = () => {
+    // @/lib/cart (Zustand) uses priceCents
     add({
       id: String(props.id),
       title: props.title,
