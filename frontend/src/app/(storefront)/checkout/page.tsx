@@ -1,85 +1,50 @@
 'use client'
-import { Suspense, useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useCart } from '@/lib/cart'
-
-interface OrderItem {
-  id: string
-  productId: string
-  qty: number
-  price: number
-  titleSnap: string
-}
-
-interface Order {
-  id: string
-  status: string
-  total: number
-  subtotal?: number
-  shipping?: number
-  vat?: number
-  zone?: string
-  items: OrderItem[]
-}
+import { Suspense, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCart, cartTotalCents } from '@/lib/cart'
 
 function CheckoutContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const orderId = searchParams.get('orderId')
+  const cartItems = useCart(s => s.items)
   const clear = useCart(s => s.clear)
 
-  const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [fetchError, setFetchError] = useState('')
 
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
-  useEffect(() => {
-    if (!orderId) {
-      setFetchError('Δεν βρέθηκε κωδικός παραγγελίας')
-      return
-    }
-
-    async function fetchOrder() {
-      try {
-        const res = await fetch(`/api/order-intents/${orderId}`)
-        if (!res.ok) {
-          throw new Error('Failed to fetch order')
-        }
-        const data = await res.json()
-        setOrder(data)
-      } catch (err) {
-        console.error('Fetch order error:', err)
-        setFetchError('Αποτυχία φόρτωσης παραγγελίας')
-      }
-    }
-
-    fetchOrder()
-  }, [orderId])
+  // Calculate subtotal from cart items (for display only)
+  const subtotalCents = cartTotalCents(cartItems)
+  const subtotal = subtotalCents / 100
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    if (!orderId) {
-      setError('Δεν βρέθηκε κωδικός παραγγελίας')
-      setLoading(false)
-      return
-    }
-
     const formData = new FormData(e.currentTarget)
+
+    // Convert cart items to API format
+    const items = Object.values(cartItems).map(item => ({
+      id: item.id,
+      qty: item.qty
+    }))
+
     const body = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      address: formData.get('address'),
-      phone: formData.get('phone') || ''
+      customer: {
+        name: formData.get('name') as string,
+        phone: formData.get('phone') as string,
+        email: (formData.get('email') as string) || undefined,
+        address: formData.get('address') as string,
+        city: formData.get('city') as string,
+        postcode: formData.get('postcode') as string
+      },
+      items
     }
 
     try {
-      const res = await fetch(`/api/order-intents/${orderId}`, {
-        method: 'PATCH',
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
@@ -93,7 +58,7 @@ function CheckoutContent() {
 
       // Clear cart and redirect to thank-you
       clear()
-      router.push(`/thank-you?id=${data.id}`)
+      router.push(`/thank-you?id=${data.orderId}`)
     } catch (err) {
       console.error('Submit error:', err)
       setError('Παρουσιάστηκε σφάλμα')
@@ -102,24 +67,15 @@ function CheckoutContent() {
     }
   }
 
-  if (fetchError) {
+  // If cart is empty, show message
+  if (Object.keys(cartItems).length === 0) {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-red-600 mb-4">{fetchError}</p>
-          <a href="/cart" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
-            Επιστροφή στο καλάθι
+          <p className="text-gray-600 mb-4">Το καλάθι σας είναι κενό</p>
+          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+            Προβολή Προϊόντων
           </a>
-        </div>
-      </main>
-    )
-  }
-
-  if (!order) {
-    return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">Φόρτωση παραγγελίας...</p>
         </div>
       </main>
     )
@@ -133,38 +89,26 @@ function CheckoutContent() {
         <div className="bg-white border rounded-xl p-6 mb-6">
           <h2 className="font-semibold mb-4">Στοιχεία Παραγγελίας</h2>
           <div className="space-y-2 mb-4">
-            {order.items.map((item) => (
+            {Object.values(cartItems).map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span>
-                  {item.titleSnap} x {item.qty}
+                  {item.title} x {item.qty}
                 </span>
                 <span className="font-medium">
-                  {fmt.format(item.price * item.qty)}
+                  {fmt.format((item.priceCents / 100) * item.qty)}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="border-t pt-3 space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="border-t pt-3">
+            <div className="flex justify-between font-medium">
               <span>Υποσύνολο:</span>
-              <span>{fmt.format(order.subtotal || 0)}</span>
+              <span>{fmt.format(subtotal)}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Αποστολή ({order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):</span>
-              <span>{fmt.format(order.shipping || 0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>ΦΠΑ (24%):</span>
-              <span>{fmt.format(order.vat || 0)}</span>
-            </div>
-          </div>
-
-          <div className="border-t mt-3 pt-3">
-            <div className="flex justify-between font-bold text-lg">
-              <span>Σύνολο:</span>
-              <span>{fmt.format(order.total)}</span>
-            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Τα μεταφορικά και ο ΦΠΑ θα υπολογιστούν στο επόμενο βήμα
+            </p>
           </div>
         </div>
 
@@ -183,11 +127,22 @@ function CheckoutContent() {
             </div>
 
             <div>
+              <label className="block text-sm font-medium mb-1">Τηλέφωνο</label>
+              <input
+                name="phone"
+                type="tel"
+                required
+                placeholder="+30 210 1234567"
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-phone"
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
                 name="email"
                 type="email"
-                required
                 className="w-full px-3 py-2 border rounded-lg"
                 data-testid="checkout-email"
               />
@@ -200,6 +155,28 @@ function CheckoutContent() {
                 required
                 className="w-full px-3 py-2 border rounded-lg"
                 data-testid="checkout-address"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Πόλη</label>
+              <input
+                name="city"
+                required
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-city"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
+              <input
+                name="postcode"
+                required
+                pattern="[0-9]{5}"
+                placeholder="10671"
+                className="w-full px-3 py-2 border rounded-lg"
+                data-testid="checkout-postcode"
               />
             </div>
 
