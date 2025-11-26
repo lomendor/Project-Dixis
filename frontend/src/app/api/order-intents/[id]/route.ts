@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         items: {
           include: {
@@ -26,6 +27,9 @@ export async function GET(
       status: order.status,
       total: order.total,
       subtotal: order.subtotal,
+      shipping: order.shipping,
+      vat: order.vat,
+      zone: order.zone,
       email: order.email,
       name: order.name,
       address: order.address,
@@ -51,9 +55,10 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await req.json()
     const { email, name, address, phone } = body
 
@@ -67,7 +72,7 @@ export async function PATCH(
 
     // Update order with contact info and mark as submitted
     const order = await prisma.order.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         email,
         name,
