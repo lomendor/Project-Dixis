@@ -2,6 +2,7 @@ import { prisma } from '@/server/db/prisma'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
+import { sendOrderConfirmation } from '@/lib/email'
 
 // Zod schema with Greek validation messages
 const CheckoutSchema = z.object({
@@ -108,6 +109,39 @@ export async function POST(req: Request) {
       include: { items: true }
     })
 
+    // AG125: Send confirmation email (non-blocking)
+    let emailSent = false
+    if (customer.email) {
+      const emailResult = await sendOrderConfirmation({
+        order: {
+          id: order.id,
+          total: order.total,
+          subtotal: subtotal.toNumber(),
+          shipping: shipping.toNumber(),
+          vat: vat.toNumber(),
+          name: customer.name,
+          items: order.items.map(item => ({
+            titleSnap: item.titleSnap,
+            qty: item.qty,
+            priceSnap: item.priceSnap
+          }))
+        },
+        toEmail: customer.email
+      })
+
+      // Log result but don't fail checkout
+      if (emailResult.ok) {
+        emailSent = true
+        if (emailResult.dryRun) {
+          console.log(`[CHECKOUT] Email dry-run successful for order ${order.id}`)
+        } else {
+          console.log(`[CHECKOUT] Email sent successfully for order ${order.id} (ID: ${emailResult.messageId})`)
+        }
+      } else {
+        console.warn(`[CHECKOUT] Email send failed for order ${order.id}:`, emailResult.error)
+      }
+    }
+
     return NextResponse.json({
       orderId: order.id,
       totals: {
@@ -115,7 +149,8 @@ export async function POST(req: Request) {
         shipping: shipping.toNumber(),
         vat: vat.toNumber(),
         total: order.total
-      }
+      },
+      emailSent
     })
 
   } catch (error) {
