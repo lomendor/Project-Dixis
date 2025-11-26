@@ -788,6 +788,14 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
         Route::get('products', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'products'])
             ->middleware('throttle:60,1'); // 60 requests per minute
     });
+
+    // Producer Order Management (AG126.1)
+    Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'index'])
+        ->middleware('throttle:60,1'); // 60 requests per minute
+    Route::get('orders/{id}', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'show'])
+        ->middleware('throttle:60,1'); // 60 requests per minute
+    Route::patch('orders/{id}/status', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'updateStatus'])
+        ->middleware('throttle:30,1'); // 30 status updates per minute
 });
 
 // === OPS: Commission preview (simple JSON) ===
