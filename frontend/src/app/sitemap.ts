@@ -4,8 +4,8 @@ export default async function sitemap() {
     if (process.env.DATABASE_URL) {
       // placeholder για dynamic sitemap (π.χ. products, categories)
       return [
-        { url: 'https://dixis.io/' },
-        { url: 'https://dixis.io/products' }
+        { url: 'https://dixis.gr/' },
+        { url: 'https://dixis.gr/products' }
       ]
     }
   } catch (_) {
@@ -13,7 +13,7 @@ export default async function sitemap() {
   }
   // Safe fallback χωρίς DB
   return [
-    { url: 'https://dixis.io/' },
-    { url: 'https://dixis.io/products' }
+    { url: 'https://dixis.gr/' },
+    { url: 'https://dixis.gr/products' }
   ]
 }

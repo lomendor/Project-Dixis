@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { greekNormalize, greekTextContains } from '@/lib/utils/greekNormalize';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.io";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
 
 interface Filters {
   search: string;

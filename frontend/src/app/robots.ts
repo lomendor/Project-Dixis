@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/ops'],
       },
     ],
-    sitemap: 'https://dixis.io/sitemap.xml',
+    sitemap: 'https://dixis.gr/sitemap.xml',
   }
 }
