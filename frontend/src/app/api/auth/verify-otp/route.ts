@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setSessionCookie } from '@/lib/auth/cookies';
-import { isAuthBypassAllowed, isProduction } from '@/lib/env';
+import { verifyOtp } from '@/lib/auth/otp-store';
+import { isAuthBypassAllowed } from '@/lib/env';
 
 /**
  * POST /api/auth/verify-otp
  * Verifies OTP code and sets secure session cookie
  *
- * Production guards:
- * - Admin bypass only works in non-production
- * - Session type reflects admin vs user
+ * Features:
+ * - In-memory OTP validation (5 min expiry, 3 max attempts)
+ * - Production guards (admin bypass only in non-production)
+ * - Secure session with 7-day expiry
  */
 export async function POST(req: NextRequest) {
   try {
@@ -27,39 +29,43 @@ export async function POST(req: NextRequest) {
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
 
-    // Admin bypass - only allowed in non-production
+    let isValid = false;
+    let errorMessage: string | undefined;
+
     if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed()) {
+      // Admin bypass - only in dev/staging
       console.log(`[Auth] Admin login bypass for ${phone} (non-production)`);
-
-      const sessionToken = `admin_${phone}_${Date.now()}`;
-
-      const response = NextResponse.json({
-        success: true,
-        message: 'Επιτυχής σύνδεση',
-        phone
-      });
-
-      setSessionCookie(response, sessionToken);
-      return response;
+      isValid = true;
+    } else {
+      // Normal OTP verification
+      const result = verifyOtp(phone, code);
+      isValid = result.valid;
+      errorMessage = result.error;
     }
 
-    // Production mode - reject if admin bypass attempted
-    if (isAdmin && bypassCode && code === bypassCode && isProduction()) {
-      console.warn(`[Auth] Admin bypass attempted in PRODUCTION for ${phone} - REJECTED`);
+    if (!isValid) {
       return NextResponse.json(
-        { error: 'Λανθασμένος κωδικός OTP' },
+        { error: errorMessage || 'Λανθασμένος κωδικός OTP' },
         { status: 401 }
       );
     }
 
-    // TODO: Implement real OTP verification (database/cache)
-    // For now, only admin bypass works in non-production
-    console.log(`[Auth] OTP verification for ${phone} - awaiting real implementation`);
+    // Success - create session
+    const sessionType = isAdmin ? 'admin' : 'user';
+    const sessionToken = `${sessionType}_${phone}_${Date.now()}`;
 
-    return NextResponse.json(
-      { error: 'Λανθασμένος κωδικός OTP' },
-      { status: 401 }
-    );
+    console.log(`[Auth] Successful ${sessionType} login for ${phone}`);
+
+    const response = NextResponse.json({
+      success: true,
+      message: 'Επιτυχής σύνδεση',
+      phone
+    });
+
+    // Set secure session cookie
+    setSessionCookie(response, sessionToken);
+
+    return response;
 
   } catch (error) {
     console.error('[Auth] Verify OTP error:', error);

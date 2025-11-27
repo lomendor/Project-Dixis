@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { storeOtp, hasPendingOtp, getRemainingTime } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed, isDevEchoAllowed } from '@/lib/env';
 
 /**
  * POST /api/auth/request-otp
- * Sends OTP code to user's phone
+ * Generates and stores OTP for phone verification
  *
- * Production guards:
- * - Admin bypass only works in non-production
- * - OTP echo only works in non-production with OTP_DEV_ECHO=1
+ * Features:
+ * - Rate limiting (429 if OTP pending)
+ * - In-memory OTP storage with 5 min expiry
+ * - Production guards (bypass only in non-production)
+ * - Dev echo mode (OTP_DEV_ECHO=1)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -21,36 +24,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Rate limiting - don't generate new OTP if one exists
+    if (hasPendingOtp(phone)) {
+      const remaining = getRemainingTime(phone);
+      return NextResponse.json(
+        { error: `Έχει ήδη σταλεί κωδικός. Περιμένετε ${remaining} δευτερόλεπτα.` },
+        { status: 429 }
+      );
+    }
+
     // Check if admin bypass is enabled (non-production only)
     const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
     const isAdmin = adminPhones.includes(phone);
+    const bypassCode = process.env.OTP_BYPASS;
 
-    if (isAdmin && isAuthBypassAllowed()) {
+    if (isAdmin && bypassCode && isAuthBypassAllowed()) {
       // Admin bypass - only in dev/staging
       console.log(`[Auth] Admin OTP request for ${phone} - bypass enabled (non-production)`);
       return NextResponse.json({
         success: true,
         message: 'Κωδικός OTP εστάλη επιτυχώς',
         // Echo bypass code in dev mode
-        ...(isDevEchoAllowed() && { devCode: process.env.OTP_BYPASS })
+        ...(isDevEchoAllowed() && { devCode: bypassCode })
       });
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate and store OTP
+    const code = storeOtp(phone);
 
-    // TODO: Store OTP and send via SMS provider (Twilio/Vonage)
-    console.log(`[Auth] OTP request for ${phone}`);
-
-    // Dev echo - only in non-production
+    // Dev echo - only in non-production with OTP_DEV_ECHO=1
     if (isDevEchoAllowed()) {
-      console.log(`[Auth] DEV MODE - OTP for ${phone}: ${otp}`);
+      console.log(`[Auth] DEV MODE - OTP for ${phone}: ${code}`);
       return NextResponse.json({
         success: true,
         message: 'Κωδικός OTP εστάλη επιτυχώς',
-        devCode: otp // Only in dev mode with OTP_DEV_ECHO=1
+        devCode: code // Only in dev mode!
       });
     }
+
+    // Production: Send OTP via SMS provider
+    // TODO: Integrate with Twilio/Vonage/Greek SMS provider
+    console.log(`[Auth] OTP generated for ${phone} - SMS sending not implemented`);
 
     return NextResponse.json({
       success: true,
