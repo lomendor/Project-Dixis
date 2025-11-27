@@ -1,11 +1,40 @@
+/**
+ * Dixis Brand Color System
+ *
+ * Primary: Cypress Green - Trust, freshness, nature
+ * Accent: Warm Amber - Energy, warmth, Greek sun
+ */
+
 :root {
-  --brand-primary: #0f5c2e;            /* cypress green */
+  /* Primary - Cypress Green palette */
+  --brand-primary: #0f5c2e;
+  --brand-primary-light: #16a34a;
+  --brand-primary-dark: #0a4421;
   --brand-primary-foreground: #ffffff;
-  --brand-accent: #0ea5e9;             /* secondary */
+
+  /* Accent - Warm Amber palette */
+  --brand-accent: #f59e0b;
+  --brand-accent-light: #fbbf24;
+  --brand-accent-dark: #d97706;
+
+  /* Semantic colors */
+  --brand-success: #10b981;
+  --brand-warning: #f59e0b;
+  --brand-error: #ef4444;
+  --brand-info: #0ea5e9;
+
+  /* Gradients */
+  --brand-gradient-primary: linear-gradient(135deg, #0f5c2e 0%, #16a34a 100%);
+  --brand-gradient-hero: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
 }
 
 .dark {
-  --brand-primary: #0f5c2e;
+  --brand-primary: #16a34a;
+  --brand-primary-light: #22c55e;
+  --brand-primary-dark: #0f5c2e;
   --brand-primary-foreground: #ffffff;
-  --brand-accent: #38bdf8;
+
+  --brand-accent: #fbbf24;
+  --brand-accent-light: #fcd34d;
+  --brand-accent-dark: #f59e0b;
 }
