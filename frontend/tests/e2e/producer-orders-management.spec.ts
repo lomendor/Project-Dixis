@@ -455,4 +455,114 @@ test.describe('Producer Orders Management - AG126', () => {
     // Status update section should not be visible
     await expect(page.getByText('Ενημέρωση Κατάστασης')).not.toBeVisible();
   });
+
+  test('shows email sent status after status update', async ({ page }) => {
+    let currentStatus = 'pending';
+
+    // Mock single order details
+    await page.route('**/api/v1/producer/orders/101', async route => {
+      const order = { ...mockOrders[0], status: currentStatus };
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, order })
+      });
+    });
+
+    // Mock status update API
+    await page.route('**/api/v1/producer/orders/101/status', async route => {
+      if (route.request().method() === 'PATCH') {
+        currentStatus = 'processing';
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            message: 'Status updated',
+            order: { ...mockOrders[0], status: currentStatus }
+          })
+        });
+      }
+    });
+
+    // Mock email notification API - success
+    await page.route('**/api/producer/orders/101/status', async route => {
+      if (route.request().method() === 'POST') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            dryRun: false,
+            message: 'Email sent successfully'
+          })
+        });
+      }
+    });
+
+    await authHelper.loginAsProducer();
+    await page.goto('/producer/orders/101');
+
+    // Click status update button
+    await page.getByRole('button', { name: 'Ξεκίνησε Επεξεργασία' }).click();
+
+    // Verify email sent status appears
+    await expect(page.getByText('Email ειδοποίησης στάλθηκε')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('shows email failed status with retry button', async ({ page }) => {
+    let currentStatus = 'pending';
+
+    // Mock single order details
+    await page.route('**/api/v1/producer/orders/101', async route => {
+      const order = { ...mockOrders[0], status: currentStatus };
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, order })
+      });
+    });
+
+    // Mock status update API
+    await page.route('**/api/v1/producer/orders/101/status', async route => {
+      if (route.request().method() === 'PATCH') {
+        currentStatus = 'processing';
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            message: 'Status updated',
+            order: { ...mockOrders[0], status: currentStatus }
+          })
+        });
+      }
+    });
+
+    // Mock email notification API - failure
+    await page.route('**/api/producer/orders/101/status', async route => {
+      if (route.request().method() === 'POST') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: false,
+            error: 'Email service unavailable'
+          })
+        });
+      }
+    });
+
+    await authHelper.loginAsProducer();
+    await page.goto('/producer/orders/101');
+
+    // Click status update button
+    await page.getByRole('button', { name: 'Ξεκίνησε Επεξεργασία' }).click();
+
+    // Verify email failed status appears
+    await expect(page.getByText('Αποτυχία αποστολής email')).toBeVisible({ timeout: 5000 });
+
+    // Verify retry button is visible
+    await expect(page.getByRole('button', { name: 'Επανάληψη' })).toBeVisible();
+  });
 });
