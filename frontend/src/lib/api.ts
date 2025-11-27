@@ -92,6 +92,38 @@ export interface OrderItem {
   product: Product;
 }
 
+export interface ProducerOrder {
+  id: number;
+  user_id: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  payment_status: string;
+  payment_method: string;
+  subtotal: string;
+  shipping_cost: string;
+  total: string;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  orderItems: OrderItem[];
+}
+
+export interface ProducerOrdersResponse {
+  success: boolean;
+  orders: ProducerOrder[];
+  meta: {
+    total: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+  };
+}
+
 export interface User {
   id: number;
   name: string;
@@ -515,6 +547,16 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify({ stock }),
     });
+  }
+
+  // Producer order management methods
+  async getProducerOrders(status?: 'pending' | 'processing' | 'shipped' | 'delivered'): Promise<ProducerOrdersResponse> {
+    const endpoint = `producer/orders${status ? `?status=${status}` : ''}`;
+    return this.request<ProducerOrdersResponse>(endpoint);
+  }
+
+  async getProducerOrder(orderId: number): Promise<{ success: boolean; order: ProducerOrder }> {
+    return this.request<{ success: boolean; order: ProducerOrder }>(`producer/orders/${orderId}`);
   }
 }
 
