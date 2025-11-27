@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { storeOtp, hasPendingOtp, getRemainingTime } from '@/lib/auth/otp-store';
 
 /**
  * POST /api/auth/request-otp
- * Αποστέλλει OTP κωδικό στο τηλέφωνο χρήστη
+ * Generates and stores OTP for phone verification
+ *
+ * In development: OTP is echoed back in response (OTP_DEV_ECHO=1)
+ * In production: OTP should be sent via SMS provider
  */
 export async function POST(req: NextRequest) {
   try {
@@ -16,21 +20,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Έλεγχος αν το τηλέφωνο είναι admin (για bypass)
-    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim());
-    const isAdmin = adminPhones.includes(phone);
+    // Rate limiting - don't generate new OTP if one exists
+    if (hasPendingOtp(phone)) {
+      const remaining = getRemainingTime(phone);
+      return NextResponse.json(
+        { error: `Έχει ήδη σταλεί κωδικός. Περιμένετε ${remaining} δευτερόλεπτα.` },
+        { status: 429 }
+      );
+    }
 
-    if (isAdmin) {
-      // Για admin phones, bypass OTP send (dev mode)
+    // Check if admin bypass is enabled
+    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
+    const isAdmin = adminPhones.includes(phone);
+    const bypassCode = process.env.OTP_BYPASS;
+
+    if (isAdmin && bypassCode) {
+      // Admin bypass - don't generate real OTP, use bypass code
       console.log(`[Auth] Admin OTP request for ${phone} - bypass enabled`);
       return NextResponse.json({
         success: true,
-        message: 'Κωδικός OTP εστάλη επιτυχώς'
+        message: 'Κωδικός OTP εστάλη επιτυχώς',
+        // In dev mode with bypass, hint the code
+        ...(process.env.OTP_DEV_ECHO === '1' && { devCode: bypassCode })
       });
     }
 
-    // TODO: Πραγματική αποστολή OTP μέσω SMS provider (Twilio/Vonage)
-    console.log(`[Auth] OTP request for ${phone}`);
+    // Generate and store OTP
+    const code = storeOtp(phone);
+
+    // In development, echo OTP for testing (DO NOT use in production!)
+    if (process.env.OTP_DEV_ECHO === '1') {
+      console.log(`[Auth] DEV MODE - OTP for ${phone}: ${code}`);
+      return NextResponse.json({
+        success: true,
+        message: 'Κωδικός OTP εστάλη επιτυχώς',
+        devCode: code // Only in dev mode!
+      });
+    }
+
+    // Production: Send OTP via SMS provider
+    // TODO: Integrate with Twilio/Vonage/Greek SMS provider
+    console.log(`[Auth] OTP generated for ${phone} - SMS sending not implemented`);
 
     return NextResponse.json({
       success: true,
