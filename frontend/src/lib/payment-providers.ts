@@ -107,23 +107,133 @@ export class FakePaymentProvider implements PaymentProvider {
 }
 
 /**
- * Viva Wallet Payment Provider (placeholder for future implementation)
+ * Viva Wallet Payment Provider
+ * Uses Viva Wallet Smart Checkout (hosted payment page)
  */
 export class VivaWalletProvider implements PaymentProvider {
   name = 'VivaWallet';
 
-  async initPayment(orderId: string, amountCents: number, currency: string): Promise<PaymentInitResult> {
-    // TODO: Implement Viva Wallet API integration
-    throw new Error('Viva Wallet provider not yet implemented');
+  /**
+   * Initialize a payment by creating a Viva order and returning the redirect URL
+   */
+  async initPayment(
+    orderId: string,
+    amountCents: number,
+    _currency: string = 'EUR'
+  ): Promise<PaymentInitResult> {
+    // Dynamic import to avoid loading Viva client when not needed
+    const { getVivaWalletClient, isVivaWalletConfigured } = await import('./viva-wallet');
+
+    if (!isVivaWalletConfigured()) {
+      throw new Error('Viva Wallet is not configured');
+    }
+
+    const client = getVivaWalletClient();
+
+    // Create order in Viva Wallet
+    const response = await client.createOrder(
+      amountCents,
+      orderId,
+      `Παραγγελία #${orderId}`
+    );
+
+    // Get checkout redirect URL
+    const checkout = client.getCheckoutUrl(response.orderCode);
+
+    return {
+      redirectUrl: checkout.redirectUrl,
+      metadata: {
+        provider: this.name,
+        orderId,
+        vivaOrderCode: response.orderCode,
+        amountCents,
+        createdAt: new Date().toISOString(),
+      },
+    };
   }
 
+  /**
+   * Confirm a payment by checking Viva order status
+   * @param orderId Our internal order ID
+   * @param token The Viva orderCode (passed back after redirect)
+   */
   async confirmPayment(orderId: string, token?: string): Promise<PaymentResult> {
-    // TODO: Implement Viva Wallet confirmation
-    throw new Error('Viva Wallet provider not yet implemented');
+    const { getVivaWalletClient, isVivaWalletConfigured } = await import('./viva-wallet');
+
+    if (!isVivaWalletConfigured()) {
+      return {
+        success: false,
+        error: 'Viva Wallet is not configured',
+      };
+    }
+
+    if (!token) {
+      return {
+        success: false,
+        error: 'Missing Viva orderCode token',
+      };
+    }
+
+    const orderCode = parseInt(token, 10);
+    if (isNaN(orderCode)) {
+      return {
+        success: false,
+        error: 'Invalid Viva orderCode format',
+      };
+    }
+
+    const client = getVivaWalletClient();
+
+    try {
+      const orderDetails = await client.getOrderDetails(orderCode);
+
+      // Check for successful transaction (status 'F' = Fulfilled)
+      const successfulTransaction = orderDetails.transactions?.find(t => t.statusId === 'F');
+
+      if (successfulTransaction) {
+        // Use paymentId from order details or orderCode as transaction reference
+        const txnId = orderDetails.paymentId || `viva-${orderCode}`;
+        return {
+          success: true,
+          transactionId: txnId,
+          metadata: {
+            provider: this.name,
+            orderId,
+            vivaOrderCode: orderCode,
+            vivaPaymentId: orderDetails.paymentId,
+            amount: successfulTransaction.amount,
+            processedAt: new Date().toISOString(),
+          },
+        };
+      }
+
+      // Check for pending or failed status
+      const latestTransaction = orderDetails.transactions?.[orderDetails.transactions.length - 1];
+      return {
+        success: false,
+        error: latestTransaction
+          ? `Η πληρωμή δεν ολοκληρώθηκε (status: ${latestTransaction.statusId})`
+          : 'Δεν βρέθηκε συναλλαγή για αυτή την παραγγελία',
+        metadata: {
+          vivaOrderCode: orderCode,
+          status: latestTransaction?.statusId,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Σφάλμα ελέγχου πληρωμής: ${error instanceof Error ? error.message : 'Άγνωστο σφάλμα'}`,
+      };
+    }
   }
 
+  /**
+   * Check if Viva Wallet is configured and enabled
+   * Note: Full config validation happens in initPayment()
+   */
   isSupported(): boolean {
-    return false; // Not implemented yet
+    const provider = process.env.PAYMENT_PROVIDER?.toLowerCase();
+    return provider === 'viva' || provider === 'vivawallet';
   }
 }
 
