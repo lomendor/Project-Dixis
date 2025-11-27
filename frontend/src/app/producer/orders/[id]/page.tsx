@@ -38,6 +38,8 @@ const nextStatusLabels: Record<OrderStatus, string> = {
   delivered: '',
 };
 
+type EmailStatus = 'idle' | 'sending' | 'sent' | 'failed' | 'skipped';
+
 export default function ProducerOrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -47,6 +49,13 @@ export default function ProducerOrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
+  const [lastEmailData, setLastEmailData] = useState<{
+    status: 'processing' | 'shipped' | 'delivered';
+    customerEmail: string;
+    customerName: string;
+    total: string;
+  } | null>(null);
 
   useEffect(() => {
     if (orderId) {
@@ -78,26 +87,54 @@ export default function ProducerOrderDetailsPage() {
       );
       setOrder(response.order);
 
-      // Send email notification (fire-and-forget, don't block UI)
+      // Send email notification with status tracking
       if (order.user?.email) {
-        fetch(`/api/producer/orders/${orderId}/status`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            status: newStatus,
-            customerName: order.user?.name,
-            customerEmail: order.user?.email,
-            total: order.total,
-          }),
-        }).catch((emailErr) => {
-          console.error('Email notification failed:', emailErr);
-        });
+        const emailData = {
+          status: newStatus as 'processing' | 'shipped' | 'delivered',
+          customerName: order.user?.name || 'Πελάτη',
+          customerEmail: order.user.email,
+          total: order.total,
+        };
+        setLastEmailData(emailData);
+        await sendEmailNotification(emailData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
     } finally {
       setUpdating(false);
     }
+  };
+
+  const sendEmailNotification = async (data: {
+    status: 'processing' | 'shipped' | 'delivered';
+    customerEmail: string;
+    customerName: string;
+    total: string;
+  }) => {
+    setEmailStatus('sending');
+    try {
+      const res = await fetch(`/api/producer/orders/${orderId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        setEmailStatus(result.dryRun ? 'skipped' : 'sent');
+      } else {
+        setEmailStatus('failed');
+        console.error('Email notification failed:', result.error);
+      }
+    } catch (err) {
+      setEmailStatus('failed');
+      console.error('Email notification error:', err);
+    }
+  };
+
+  const handleRetryEmail = async () => {
+    if (!lastEmailData) return;
+    await sendEmailNotification(lastEmailData);
   };
 
   const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null => {
@@ -240,6 +277,60 @@ export default function ProducerOrderDetailsPage() {
                       {statusLabels[getNextStatus(order.status)!]}
                     </p>
                   </div>
+                </div>
+              )}
+
+              {/* Email Notification Status */}
+              {emailStatus !== 'idle' && (
+                <div className={`rounded-lg shadow-md p-4 flex items-center justify-between ${
+                  emailStatus === 'sent' ? 'bg-green-50 border border-green-200' :
+                  emailStatus === 'skipped' ? 'bg-yellow-50 border border-yellow-200' :
+                  emailStatus === 'failed' ? 'bg-red-50 border border-red-200' :
+                  'bg-blue-50 border border-blue-200'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {emailStatus === 'sending' && (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span className="text-blue-800 font-medium">Αποστολή email...</span>
+                      </>
+                    )}
+                    {emailStatus === 'sent' && (
+                      <>
+                        <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-green-800 font-medium">Email ειδοποίησης στάλθηκε</span>
+                      </>
+                    )}
+                    {emailStatus === 'skipped' && (
+                      <>
+                        <svg className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span className="text-yellow-800 font-medium">Email παραλείφθηκε (dev mode)</span>
+                      </>
+                    )}
+                    {emailStatus === 'failed' && (
+                      <>
+                        <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span className="text-red-800 font-medium">Αποτυχία αποστολής email</span>
+                      </>
+                    )}
+                  </div>
+                  {emailStatus === 'failed' && lastEmailData && (
+                    <button
+                      onClick={handleRetryEmail}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Επανάληψη
+                    </button>
+                  )}
                 </div>
               )}
 

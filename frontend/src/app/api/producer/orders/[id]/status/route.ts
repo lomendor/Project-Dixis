@@ -55,6 +55,9 @@ export async function POST(
       success: emailResult.ok,
       dryRun: emailResult.dryRun,
       error: emailResult.error,
+      message: emailResult.ok
+        ? (emailResult.dryRun ? 'Email skipped (dry-run mode)' : 'Email sent successfully')
+        : 'Email failed to send',
     })
 
   } catch (error) {
