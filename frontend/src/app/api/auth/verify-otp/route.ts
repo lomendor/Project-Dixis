@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setSessionCookie } from '@/lib/auth/cookies';
+import { verifyOtp } from '@/lib/auth/otp-store';
 
 /**
  * POST /api/auth/verify-otp
- * Επαληθεύει OTP κωδικό και ορίζει session cookie με ασφαλή attributes
+ * Verifies OTP code and sets secure session cookie
  */
 export async function POST(req: NextRequest) {
   try {
@@ -17,38 +18,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Έλεγχος αν το τηλέφωνο είναι admin (για bypass)
-    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim());
+    // Check admin bypass first
+    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
 
+    let isValid = false;
+    let errorMessage: string | undefined;
+
     if (isAdmin && bypassCode && code === bypassCode) {
-      // Bypass για admin phones με τον bypass code
+      // Admin bypass - skip OTP verification
       console.log(`[Auth] Admin login bypass for ${phone}`);
-
-      // Δημιουργία session token
-      const sessionToken = `admin_${phone}_${Date.now()}`;
-
-      const response = NextResponse.json({
-        success: true,
-        message: 'Επιτυχής σύνδεση',
-        phone
-      });
-
-      // Ορισμός secure session cookie
-      setSessionCookie(response, sessionToken);
-
-      return response;
+      isValid = true;
+    } else {
+      // Normal OTP verification
+      const result = verifyOtp(phone, code);
+      isValid = result.valid;
+      errorMessage = result.error;
     }
 
-    // TODO: Πραγματική επαλήθευση OTP (με database ή cache)
-    // Προς το παρόν, απλή επαλήθευση μόνο για admin
-    console.log(`[Auth] OTP verification for ${phone}`);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: errorMessage || 'Λανθασμένος κωδικός OTP' },
+        { status: 401 }
+      );
+    }
 
-    return NextResponse.json(
-      { error: 'Λανθασμένος κωδικός OTP' },
-      { status: 401 }
-    );
+    // Success - create session
+    const sessionType = isAdmin ? 'admin' : 'user';
+    const sessionToken = `${sessionType}_${phone}_${Date.now()}`;
+
+    console.log(`[Auth] Successful ${sessionType} login for ${phone}`);
+
+    const response = NextResponse.json({
+      success: true,
+      message: 'Επιτυχής σύνδεση',
+      phone
+    });
+
+    // Set secure session cookie
+    setSessionCookie(response, sessionToken);
+
+    return response;
 
   } catch (error) {
     console.error('[Auth] Verify OTP error:', error);
