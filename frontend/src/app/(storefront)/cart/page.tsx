@@ -76,9 +76,9 @@ export default function CartPage() {
                       <div className="font-semibold leading-tight line-clamp-2">{it.title}</div>
                       <div className="text-sm text-gray-500">{fmt.format(it.priceCents / 100)}</div>
                       <div className="mt-2 flex items-center gap-3 flex-wrap">
-                        <button type="button" onClick={() => dec(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-minus">−</button>
+                        <button type="button" onClick={() => dec(it.id)} className="h-11 w-11 rounded border hover:bg-gray-50 flex items-center justify-center text-lg" data-testid="qty-minus">−</button>
                         <span className="min-w-8 text-center" data-testid="qty">{it.qty}</span>
-                        <button type="button" onClick={() => inc(it.id)} className="h-8 w-8 rounded border hover:bg-gray-50 flex items-center justify-center" data-testid="qty-plus">+</button>
+                        <button type="button" onClick={() => inc(it.id)} className="h-11 w-11 rounded border hover:bg-gray-50 flex items-center justify-center text-lg" data-testid="qty-plus">+</button>
                       </div>
                     </div>
                   </div>
