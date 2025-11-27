@@ -28,7 +28,7 @@ export default function AddToCartButton(
   return (
     <button
       onClick={handleClick}
-      className={`h-10 px-4 rounded-md text-sm bg-brand text-white hover:opacity-90 ${className}`}
+      className={`h-11 px-4 rounded-md text-sm bg-brand text-white hover:opacity-90 ${className}`}
       aria-live="polite"
     >
       {ok ? '✅ Προστέθηκε' : 'Προσθήκη στο καλάθι'}

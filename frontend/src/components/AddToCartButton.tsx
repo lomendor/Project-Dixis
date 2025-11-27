@@ -27,7 +27,7 @@ export default function AddToCartButton(props: {
 
   return (
     <button
-      className={`h-9 px-3 rounded text-sm transition-colors ${
+      className={`h-11 px-4 rounded text-sm transition-colors ${
         isAdded
           ? 'bg-emerald-600 text-white'
           : 'bg-neutral-900 text-white hover:bg-neutral-800'
