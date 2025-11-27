@@ -10,10 +10,10 @@ jobs:
     strategy:
       matrix:
         url:
-          - "https://dixis.io/"
-          - "https://dixis.io/api/healthz"
-          - "https://dixis.io/robots.txt"
-          - "https://dixis.io/sitemap.xml"
+          - "https://dixis.gr/"
+          - "https://dixis.gr/api/healthz"
+          - "https://dixis.gr/robots.txt"
+          - "https://dixis.gr/sitemap.xml"
     steps:
       - name: Curl ${{ matrix.url }}
         run: |

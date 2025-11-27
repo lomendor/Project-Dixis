@@ -15,11 +15,11 @@
 export const LANDING_MODE = process.env.PUBLIC_LANDING_MODE === 'true';
 
 /**
- * Check if current environment is production (dixis.io)
+ * Check if current environment is production (dixis.gr)
  */
 export function isProductionHost(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.location.hostname.endsWith('dixis.io');
+  return window.location.hostname.endsWith('dixis.gr');
 }
 
 /**

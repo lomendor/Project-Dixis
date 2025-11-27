@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://dixis.io/", "https://dixis.io/products"],
+      "url": ["https://dixis.gr/", "https://dixis.gr/products"],
       "numberOfRuns": 1,
       "settings": { "preset": "desktop" }
     },

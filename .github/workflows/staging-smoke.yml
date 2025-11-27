@@ -17,7 +17,7 @@ jobs:
       - name: Healthz
         run: |
           set -euo pipefail
-          URL="https://staging.dixis.io/api/healthz"
+          URL="https://staging.dixis.gr/api/healthz"
           echo "GET $URL"
           CODE="$(curl -sk -o /tmp/hz.json -w '%{http_code}' "$URL")"
           echo "HTTP $CODE"

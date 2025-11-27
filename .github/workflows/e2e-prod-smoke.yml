@@ -1,4 +1,4 @@
-name: E2E Prod Smoke (dixis.io)
+name: E2E Prod Smoke (dixis.gr)
 
 on:
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
           pnpm install --no-frozen-lockfile
           pnpm exec playwright install --with-deps chromium
 
-      - name: Run smoke tests against https://dixis.io
+      - name: Run smoke tests against https://dixis.gr
         working-directory: frontend
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: "report.json"
@@ -59,7 +59,7 @@ jobs:
             const runUrl = `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
             const title = `❌ E2E Prod Smoke failed — run #${{ github.run_id }}`;
             const body = [
-              "The scheduled E2E smoke on **https://dixis.io** failed.",
+              "The scheduled E2E smoke on **https://dixis.gr** failed.",
               "",
               `**Run:** ${runUrl}`,
               "",

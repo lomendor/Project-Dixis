@@ -15,20 +15,20 @@ jobs:
       - name: Check /api/healthz
         run: |
           set -e
-          OUT="$(curl -sS https://dixis.io/api/healthz || true)"
+          OUT="$(curl -sS https://dixis.gr/api/healthz || true)"
           echo "$OUT"
           echo "$OUT" | jq -e '.status == "ok"' >/dev/null
 
       - name: Check /api/products shape
         run: |
           set -e
-          OUT="$(curl -sS https://dixis.io/api/products || true)"
+          OUT="$(curl -sS https://dixis.gr/api/products || true)"
           echo "$OUT"
           echo "$OUT" | jq -e 'has("source") and has("items") and (.items | type=="array")' >/dev/null
 
       - name: Check /products HTTP 200
         run: |
           set -e
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.io/products)
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/products)
           echo "status=$CODE"
           [ "$CODE" -eq 200 ]

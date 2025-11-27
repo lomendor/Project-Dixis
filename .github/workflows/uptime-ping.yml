@@ -17,7 +17,7 @@ jobs:
       - name: Ping /api/healthz
         id: ping
         run: |
-          URL="https://dixis.io/api/healthz"
+          URL="https://dixis.gr/api/healthz"
           CODE=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 10 "$URL" || echo "000")
           echo "status=$CODE" >> $GITHUB_OUTPUT
           BODY_B64=$(cat /tmp/body 2>/dev/null | base64 -w0 || echo "")
@@ -34,7 +34,7 @@ jobs:
             const status = process.env.STATUS || '000';
             const bodyB64 = process.env.BODY_B64 || '';
             const body = bodyB64 ? Buffer.from(bodyB64, 'base64').toString('utf-8') : '(no body)';
-            const title = `❌ Uptime failure (${status}) on https://dixis.io/api/healthz`;
+            const title = `❌ Uptime failure (${status}) on https://dixis.gr/api/healthz`;
             const description = [
               'Automated uptime check failed.',
               '',

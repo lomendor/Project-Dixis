@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 10_000 },
   use: {
-    baseURL: process.env.BASE_URL || 'https://dixis.io',
+    baseURL: process.env.BASE_URL || 'https://dixis.gr',
     trace: 'off',
   },
   webServer: undefined, // ΚΑΝΕΝΑΣ τοπικός server — τρέχουμε απέναντι στο production

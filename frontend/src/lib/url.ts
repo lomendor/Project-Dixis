@@ -1,4 +1,4 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
 
 export function abs(path: string): string {
   if (!path) return SITE_URL;

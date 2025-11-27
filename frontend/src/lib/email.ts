@@ -65,8 +65,8 @@ export async function sendOrderConfirmation({
   }
 
   // Email config
-  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.io>'
-  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.io'
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.gr'
 
   try {
     const html = renderOrderConfirmationHTML(order)
@@ -132,8 +132,8 @@ export async function sendOrderStatusUpdate({
   }
 
   // Email config
-  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.io>'
-  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.io'
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.gr'
 
   const statusLabels: Record<string, string> = {
     processing: 'Σε Επεξεργασία',
@@ -339,9 +339,9 @@ function renderOrderConfirmationHTML(order: OrderEmailData): string {
         Μπορείτε να δείτε τα στοιχεία της παραγγελίας σας στο:
       </p>
       <p style="margin: 0;">
-        <a href="https://dixis.io/thank-you?id=${order.id}"
+        <a href="https://dixis.gr/thank-you?id=${order.id}"
            style="color: #059669; text-decoration: none; font-weight: bold; font-size: 14px;">
-          https://dixis.io/thank-you?id=${order.id}
+          https://dixis.gr/thank-you?id=${order.id}
         </a>
       </p>
     </div>

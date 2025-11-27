@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         url:
-          - "https://dixis.io/"
-          - "https://dixis.io/products"
-          - "https://dixis.io/api/healthz"
+          - "https://dixis.gr/"
+          - "https://dixis.gr/products"
+          - "https://dixis.gr/api/healthz"
     steps:
       - name: Curl ${{ matrix.url }}
         run: |

@@ -34,7 +34,7 @@ jobs:
             git reset --hard origin/main
 
             echo "→ Ensure env for demo build (NO secrets leak)"
-            export NEXT_PUBLIC_BASE_URL="https://dixis.io"
+            export NEXT_PUBLIC_BASE_URL="https://dixis.gr"
             export PRODUCTS_MODE="demo"
 
             echo "→ Build"
@@ -50,4 +50,4 @@ jobs:
 
             echo "→ Smoke"
             curl -sI http://127.0.0.1:3000 | head -1
-            curl -s https://dixis.io/api/healthz | head -1
+            curl -s https://dixis.gr/api/healthz | head -1

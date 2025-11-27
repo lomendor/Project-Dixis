@@ -1,4 +1,4 @@
-name: deploy-prod (dixis.io)
+name: deploy-prod (dixis.gr)
 on:
   workflow_dispatch:
     inputs:
@@ -97,5 +97,5 @@ jobs:
 
       - name: Smoke
         run: |
-          curl -sI https://dixis.io/api/healthz | head -n1
-          curl -sI https://dixis.io | head -n1
+          curl -sI https://dixis.gr/api/healthz | head -n1
+          curl -sI https://dixis.gr | head -n1
