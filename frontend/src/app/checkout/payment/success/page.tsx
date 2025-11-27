@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardTitle } from '@/components/ui/card';
 
@@ -9,7 +9,8 @@ import { Card, CardTitle } from '@/components/ui/card';
  * Viva redirects here after successful payment
  * Query params: t (transactionId), s (orderCode), lang
  */
-export default function PaymentSuccessPage() {
+
+function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
@@ -59,7 +60,7 @@ export default function PaymentSuccessPage() {
           setStatus('error');
           setError(result.error || 'Αποτυχία επιβεβαίωσης πληρωμής');
         }
-      } catch (err) {
+      } catch {
         setStatus('error');
         setError('Σφάλμα επικοινωνίας με τον server');
       }
@@ -70,48 +71,58 @@ export default function PaymentSuccessPage() {
 
   if (status === 'verifying') {
     return (
-      <main className="max-w-xl mx-auto mt-10 p-4">
-        <Card className="p-6 text-center">
-          <div className="animate-pulse">
-            <p className="text-lg">Επαλήθευση πληρωμής...</p>
-            <p className="text-sm text-gray-500 mt-2">Παρακαλώ περιμένετε</p>
-          </div>
-        </Card>
-      </main>
+      <Card className="p-6 text-center">
+        <div className="animate-pulse">
+          <p className="text-lg">Επαλήθευση πληρωμής...</p>
+          <p className="text-sm text-gray-500 mt-2">Παρακαλώ περιμένετε</p>
+        </div>
+      </Card>
     );
   }
 
   if (status === 'error') {
     return (
-      <main className="max-w-xl mx-auto mt-10 p-4">
-        <Card className="p-6">
-          <CardTitle className="text-red-600">Πρόβλημα με την πληρωμή</CardTitle>
-          <p className="mt-4">{error}</p>
-          <button
-            onClick={() => router.push('/checkout/payment')}
-            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded"
-          >
-            Δοκιμάστε ξανά
-          </button>
-        </Card>
-      </main>
+      <Card className="p-6">
+        <CardTitle className="text-red-600">Πρόβλημα με την πληρωμή</CardTitle>
+        <p className="mt-4">{error}</p>
+        <button
+          onClick={() => router.push('/checkout/payment')}
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded"
+        >
+          Δοκιμάστε ξανά
+        </button>
+      </Card>
     );
   }
 
   return (
+    <Card className="p-6">
+      <CardTitle className="text-green-600">Η πληρωμή ολοκληρώθηκε!</CardTitle>
+      <p className="mt-4">
+        Η παραγγελία σας {orderId && <strong>#{orderId}</strong>} καταχωρήθηκε επιτυχώς.
+      </p>
+      <button
+        onClick={() => router.push('/checkout/confirmation')}
+        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded"
+      >
+        Δείτε την παραγγελία
+      </button>
+    </Card>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
     <main className="max-w-xl mx-auto mt-10 p-4">
-      <Card className="p-6">
-        <CardTitle className="text-green-600">Η πληρωμή ολοκληρώθηκε!</CardTitle>
-        <p className="mt-4">
-          Η παραγγελία σας {orderId && <strong>#{orderId}</strong>} καταχωρήθηκε επιτυχώς.
-        </p>
-        <button
-          onClick={() => router.push('/checkout/confirmation')}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded"
-        >
-          Δείτε την παραγγελία
-        </button>
-      </Card>
+      <Suspense fallback={
+        <Card className="p-6 text-center">
+          <div className="animate-pulse">
+            <p className="text-lg">Φόρτωση...</p>
+          </div>
+        </Card>
+      }>
+        <SuccessContent />
+      </Suspense>
     </main>
   );
 }
