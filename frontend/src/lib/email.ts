@@ -22,6 +22,13 @@ export interface OrderEmailData {
   }>
 }
 
+export interface StatusUpdateEmailData {
+  orderId: number
+  customerName: string
+  newStatus: 'processing' | 'shipped' | 'delivered'
+  total: number
+}
+
 export interface EmailResult {
   ok: boolean
   dryRun?: boolean
@@ -94,6 +101,157 @@ export async function sendOrderConfirmation({
     console.error('[EMAIL] Send failed:', error)
     return { ok: false, error: String(error) }
   }
+}
+
+/**
+ * Send order status update email
+ *
+ * @param data - Status update data
+ * @param toEmail - Recipient email address
+ * @returns Result object (never throws)
+ */
+export async function sendOrderStatusUpdate({
+  data,
+  toEmail
+}: {
+  data: StatusUpdateEmailData
+  toEmail: string
+}): Promise<EmailResult> {
+
+  // Dry-run mode (CI/dev) - logs but doesn't send
+  if (process.env.EMAIL_DRY_RUN === 'true') {
+    console.log(`[EMAIL DRY-RUN] Would send status update to ${toEmail} for order ${data.orderId} -> ${data.newStatus}`)
+    return { ok: true, dryRun: true }
+  }
+
+  // Validate API key
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.error('[EMAIL] RESEND_API_KEY not configured')
+    return { ok: false, error: 'API key missing' }
+  }
+
+  // Email config
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.io>'
+  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.io'
+
+  const statusLabels: Record<string, string> = {
+    processing: 'Σε Επεξεργασία',
+    shipped: 'Απεσταλμένη',
+    delivered: 'Παραδομένη'
+  }
+
+  try {
+    const html = renderStatusUpdateHTML(data, statusLabels[data.newStatus])
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-v1`
+      },
+      body: JSON.stringify({
+        from,
+        to: toEmail,
+        reply_to: replyTo,
+        subject: `Ενημέρωση παραγγελίας #${data.orderId} - ${statusLabels[data.newStatus]}`,
+        html
+      })
+    })
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`[EMAIL] Resend API error ${response.status}:`, errorBody)
+      return { ok: false, error: `HTTP ${response.status}` }
+    }
+
+    const result = await response.json()
+    console.log(`[EMAIL] Sent status update for order ${data.orderId} to ${toEmail}`, result)
+    return { ok: true, messageId: result.id }
+
+  } catch (error) {
+    console.error('[EMAIL] Send failed:', error)
+    return { ok: false, error: String(error) }
+  }
+}
+
+/**
+ * Render status update email HTML
+ */
+function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string): string {
+  const fmt = (amount: number) => `€${amount.toFixed(2)}`
+
+  const statusMessages: Record<string, string> = {
+    processing: 'Η παραγγελία σας ετοιμάζεται από τον παραγωγό.',
+    shipped: 'Η παραγγελία σας έχει αποσταλεί και είναι καθ\' οδόν!',
+    delivered: 'Η παραγγελία σας έχει παραδοθεί. Ευχαριστούμε!'
+  }
+
+  return `
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ενημέρωση Παραγγελίας</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+
+  <!-- Header -->
+  <div style="background-color: #3b82f6; color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold;">
+      Ενημέρωση Παραγγελίας
+    </h1>
+  </div>
+
+  <!-- Main Content -->
+  <div style="background-color: white; padding: 30px 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+
+    <p style="margin: 0 0 10px 0; font-size: 16px; color: #374151;">
+      Γεια σας <strong>${data.customerName}</strong>,
+    </p>
+
+    <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151;">
+      ${statusMessages[data.newStatus]}
+    </p>
+
+    <!-- Status Badge -->
+    <div style="text-align: center; margin: 30px 0;">
+      <span style="display: inline-block; padding: 12px 24px; background-color: #dbeafe; color: #1d4ed8; font-size: 18px; font-weight: bold; border-radius: 8px;">
+        ${statusLabel}
+      </span>
+    </div>
+
+    <!-- Order Summary -->
+    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-top: 20px;">
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #6b7280;">
+        Αριθμός Παραγγελίας:
+      </p>
+      <p style="margin: 0; font-size: 18px; color: #111827; font-weight: bold;">
+        #${data.orderId}
+      </p>
+      <p style="margin: 15px 0 0 0; font-size: 14px; color: #6b7280;">
+        Σύνολο: <strong style="color: #059669;">${fmt(data.total)}</strong>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
+        Για οποιαδήποτε απορία, απαντήστε σε αυτό το email ή επικοινωνήστε μαζί μας.
+      </p>
+      <p style="margin: 0; color: #6b7280; font-size: 13px;">
+        Ευχαριστούμε,<br>
+        <strong style="color: #374151;">Η ομάδα του Dixis</strong>
+      </p>
+    </div>
+
+  </div>
+
+</body>
+</html>
+  `.trim()
 }
 
 /**
