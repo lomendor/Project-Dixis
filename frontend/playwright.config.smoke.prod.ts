@@ -6,7 +6,7 @@ export default defineConfig({
   webServer: undefined, // ΔΕΝ σηκώνουμε local server
   workers: 1,
   use: {
-    baseURL: 'https://dixis.io',
+    baseURL: 'https://dixis.gr',
     headless: true,
   },
   projects: [

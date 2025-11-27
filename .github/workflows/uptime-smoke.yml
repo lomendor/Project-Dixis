@@ -9,7 +9,7 @@ jobs:
       - name: Probe healthz on prod domain
         run: |
           set -e
-          URL="https://dixis.io/api/healthz"
+          URL="https://dixis.gr/api/healthz"
           echo "Probing $URL"
           RESPONSE=$(curl -fsS "$URL")
           echo "Response: $RESPONSE"

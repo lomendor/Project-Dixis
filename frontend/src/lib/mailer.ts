@@ -36,8 +36,8 @@ export async function sendOrderReceipt(params: {
 
   // Prefer public tracking URL if token exists, fallback to receipt URL
   const receiptUrl = publicToken
-    ? `https://dixis.io/orders/track/${publicToken}`
-    : `https://dixis.io/orders/receipt/${encodeURIComponent(orderId)}`;
+    ? `https://dixis.gr/orders/track/${publicToken}`
+    : `https://dixis.gr/orders/receipt/${encodeURIComponent(orderId)}`;
 
   const text = [
     `Ευχαριστούμε για την παραγγελία σας!`,
@@ -51,7 +51,7 @@ export async function sendOrderReceipt(params: {
     `Δείτε την απόδειξη: ${receiptUrl}`,
   ].join('\n');
 
-  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.io>';
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>';
   await transport.sendMail({
     from,
     to,

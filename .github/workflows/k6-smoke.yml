@@ -12,7 +12,7 @@ jobs:
         with:
           filename: perf/k6/products-smoke.js
         env:
-          BASE_URL: https://dixis.io
+          BASE_URL: https://dixis.gr
   cart:
     runs-on: ubuntu-latest
     steps:
@@ -21,4 +21,4 @@ jobs:
         with:
           filename: perf/k6/cart-smoke.js
         env:
-          BASE_URL: https://dixis.io
+          BASE_URL: https://dixis.gr

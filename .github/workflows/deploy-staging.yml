@@ -66,5 +66,5 @@ jobs:
       - name: Health check (HTTP via IP)
         run: |
           echo "🩺 Health check..."
-          curl -fsS -H "Host: staging.dixis.io" "http://${STAGING_HOST}/api/healthz"
+          curl -fsS -H "Host: staging.dixis.gr" "http://${STAGING_HOST}/api/healthz"
           echo "✅ Staging deployment successful!"
