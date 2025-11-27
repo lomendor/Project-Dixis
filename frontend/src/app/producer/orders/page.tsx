@@ -1,5 +1,265 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function Page() {
-  redirect('/my/orders');
+import { useState, useEffect } from 'react';
+import { apiClient, ProducerOrder } from '@/lib/api';
+import Navigation from '@/components/Navigation';
+import AuthGuard from '@/components/AuthGuard';
+import { formatCurrency } from '@/env';
+
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
+
+const statusLabels: Record<OrderStatus, string> = {
+  pending: 'Σε Εκκρεμότητα',
+  processing: 'Σε Επεξεργασία',
+  shipped: 'Απεσταλμένη',
+  delivered: 'Παραδομένη',
+};
+
+const statusColors: Record<OrderStatus, string> = {
+  pending: 'bg-yellow-100 text-yellow-800',
+  processing: 'bg-blue-100 text-blue-800',
+  shipped: 'bg-purple-100 text-purple-800',
+  delivered: 'bg-green-100 text-green-800',
+};
+
+interface OrderCounts {
+  total: number;
+  pending: number;
+  processing: number;
+  shipped: number;
+  delivered: number;
+}
+
+export default function ProducerOrdersPage() {
+  const [orders, setOrders] = useState<ProducerOrder[]>([]);
+  const [counts, setCounts] = useState<OrderCounts>({
+    total: 0,
+    pending: 0,
+    processing: 0,
+    shipped: 0,
+    delivered: 0,
+  });
+  const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadOrders();
+  }, [activeFilter]);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.getProducerOrders(
+        activeFilter === 'all' ? undefined : activeFilter
+      );
+      setOrders(response.orders);
+      setCounts(response.meta);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const FilterTab = ({
+    status,
+    label,
+    count,
+  }: {
+    status: OrderStatus | 'all';
+    label: string;
+    count: number;
+  }) => {
+    const isActive = activeFilter === status;
+    return (
+      <button
+        onClick={() => setActiveFilter(status)}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          isActive
+            ? 'bg-green-600 text-white'
+            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+        }`}
+      >
+        {label} ({count})
+      </button>
+    );
+  };
+
+  const OrderCard = ({ order }: { order: ProducerOrder }) => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Παραγγελία #{order.id}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              {order.user?.name || 'Επισκέπτης'}
+            </p>
+            <p className="text-sm text-gray-500">
+              {new Date(order.created_at).toLocaleDateString('el-GR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+          </div>
+          <div className="text-right">
+            <span
+              className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                statusColors[order.status]
+              }`}
+            >
+              {statusLabels[order.status]}
+            </span>
+            <p className="text-xl font-bold text-gray-900 mt-2">
+              {formatCurrency(parseFloat(order.total))}
+            </p>
+          </div>
+        </div>
+
+        {/* Order Items */}
+        <div className="border-t pt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
+            Προϊόντα ({order.orderItems.length})
+          </h4>
+          <div className="space-y-2">
+            {order.orderItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center text-sm"
+              >
+                <span className="text-gray-700">
+                  {item.product_name || item.product?.name}
+                </span>
+                <span className="text-gray-600">
+                  {item.quantity} × {formatCurrency(parseFloat(item.unit_price))}
+                  {' = '}
+                  <span className="font-medium text-gray-900">
+                    {formatCurrency(parseFloat(item.total_price))}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <AuthGuard requireAuth={true} requireRole="producer">
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Παραγγελίες</h1>
+            <p className="text-gray-600 mt-2">
+              Διαχείριση παραγγελιών που περιέχουν τα προϊόντα σας
+            </p>
+          </div>
+
+          {/* Status Filter Tabs */}
+          <nav className="flex flex-wrap gap-2 mb-6">
+            <FilterTab status="all" label="Όλες" count={counts.total} />
+            <FilterTab
+              status="pending"
+              label="Σε Εκκρεμότητα"
+              count={counts.pending}
+            />
+            <FilterTab
+              status="processing"
+              label="Σε Επεξεργασία"
+              count={counts.processing}
+            />
+            <FilterTab
+              status="shipped"
+              label="Απεσταλμένες"
+              count={counts.shipped}
+            />
+            <FilterTab
+              status="delivered"
+              label="Παραδομένες"
+              count={counts.delivered}
+            />
+          </nav>
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            </div>
+          ) : error ? (
+            /* Error State */
+            <div className="text-center py-12">
+              <div className="text-red-600 mb-4">
+                <svg
+                  className="mx-auto h-12 w-12"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <p className="text-red-600 mb-4">{error}</p>
+              <button
+                onClick={loadOrders}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Δοκιμάστε Ξανά
+              </button>
+            </div>
+          ) : orders.length === 0 ? (
+            /* Empty State */
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="mx-auto h-12 w-12"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Δεν υπάρχουν παραγγελίες
+              </h3>
+              <p className="text-gray-600">
+                {activeFilter === 'all'
+                  ? 'Δεν έχετε λάβει ακόμη παραγγελίες για τα προϊόντα σας.'
+                  : `Δεν υπάρχουν παραγγελίες με κατάσταση "${
+                      statusLabels[activeFilter as OrderStatus]
+                    }".`}
+              </p>
+            </div>
+          ) : (
+            /* Order Cards */
+            <div className="space-y-4">
+              {orders.map((order) => (
+                <OrderCard key={order.id} order={order} />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+    </AuthGuard>
+  );
 }
