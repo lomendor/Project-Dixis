@@ -143,20 +143,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               {/* Error Message */}
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Oops! Something went wrong
+                  Ωχ! Κάτι πήγε στραβά
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  We&apos;re sorry, but something unexpected happened. Our team has been notified and is working to fix this issue.
+                  Λυπούμαστε, αλλά προέκυψε ένα απρόσμενο σφάλμα. Η ομάδα μας έχει ειδοποιηθεί και εργάζεται για την επίλυσή του.
                 </p>
 
                 {/* Error ID for Support */}
                 {this.state.errorId && (
                   <div className="bg-gray-50 rounded-lg p-3 mb-6">
                     <p className="text-xs text-gray-600">
-                      Error ID: <span className="font-mono font-medium">{this.state.errorId}</span>
+                      Κωδικός Σφάλματος: <span className="font-mono font-medium">{this.state.errorId}</span>
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      Please include this ID when contacting support
+                      Συμπεριλάβετε αυτόν τον κωδικό όταν επικοινωνείτε με την υποστήριξη
                     </p>
                   </div>
                 )}
@@ -168,21 +168,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                     onClick={this.handleRetry}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                   >
-                    Try Again
+                    Δοκιμάστε Ξανά
                   </button>
-                  
+
                   <button
                     onClick={this.handleReload}
                     className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                   >
-                    Reload Page
+                    Ανανέωση Σελίδας
                   </button>
 
                   <button
                     onClick={() => window.location.href = '/'}
                     className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                   >
-                    Go Home
+                    Αρχική Σελίδα
                   </button>
                 </div>
 
