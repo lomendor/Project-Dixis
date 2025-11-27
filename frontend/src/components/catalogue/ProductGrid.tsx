@@ -19,6 +19,7 @@ export default function ProductGrid({ items }: ProductGridProps) {
           price={p.price}
           currency={p.currency}
           producer={p.producer}
+          imageUrl={p.imageUrl}
         />
       ))}
     </div>
