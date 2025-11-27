@@ -117,65 +117,80 @@ function CheckoutContent() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Ονοματεπώνυμο</label>
+              <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">Ονοματεπώνυμο</label>
               <input
+                id="checkout-name"
                 name="name"
                 required
-                className="w-full px-3 py-2 border rounded-lg"
+                autoComplete="name"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Τηλέφωνο</label>
+              <label htmlFor="checkout-phone" className="block text-sm font-medium mb-1">Τηλέφωνο</label>
               <input
+                id="checkout-phone"
                 name="phone"
                 type="tel"
+                inputMode="tel"
                 required
+                autoComplete="tel"
                 placeholder="+30 210 1234567"
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-phone"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
+              <label htmlFor="checkout-email" className="block text-sm font-medium mb-1">Email</label>
               <input
+                id="checkout-email"
                 name="email"
                 type="email"
-                className="w-full px-3 py-2 border rounded-lg"
+                inputMode="email"
+                autoComplete="email"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-email"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Διεύθυνση</label>
+              <label htmlFor="checkout-address" className="block text-sm font-medium mb-1">Διεύθυνση</label>
               <input
+                id="checkout-address"
                 name="address"
                 required
-                className="w-full px-3 py-2 border rounded-lg"
+                autoComplete="street-address"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-address"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Πόλη</label>
+              <label htmlFor="checkout-city" className="block text-sm font-medium mb-1">Πόλη</label>
               <input
+                id="checkout-city"
                 name="city"
                 required
-                className="w-full px-3 py-2 border rounded-lg"
+                autoComplete="address-level2"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-city"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
+              <label htmlFor="checkout-postcode" className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
               <input
+                id="checkout-postcode"
                 name="postcode"
                 required
+                inputMode="numeric"
                 pattern="[0-9]{5}"
+                autoComplete="postal-code"
                 placeholder="10671"
-                className="w-full px-3 py-2 border rounded-lg"
+                className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-postcode"
               />
             </div>
@@ -189,7 +204,7 @@ function CheckoutContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium py-3 rounded-lg"
+              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base"
               data-testid="checkout-submit"
             >
               {loading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
