@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'https://dixis.io'
+const BASE = process.env.BASE_URL || 'https://dixis.gr'
 
 /**
  * AG119.2.1: Cart qty +/- controls E2E test

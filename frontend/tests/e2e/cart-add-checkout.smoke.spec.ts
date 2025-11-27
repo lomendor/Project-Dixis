@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE = process.env.BASE_URL || 'https://dixis.io';
+const BASE = process.env.BASE_URL || 'https://dixis.gr';
 
 test.describe('Cart add → badge → cart page', () => {
   test('add two items updates cart badge and /cart loads cleanly', async ({ page }) => {

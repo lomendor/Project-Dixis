@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'https://dixis.io'
+const BASE = process.env.BASE_URL || 'https://dixis.gr'
 
 test('/products page renders without errors', async ({ page }) => {
   await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })

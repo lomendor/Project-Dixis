@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.use({ viewport: { width: 390, height: 844 } }); // iPhone-ish
 
-const BASE = 'https://dixis.io';
+const BASE = 'https://dixis.gr';
 
 test('products-demo renders cards and no console errors', async ({ page }) => {
   const errors: string[] = [];

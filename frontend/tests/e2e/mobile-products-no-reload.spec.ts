@@ -2,7 +2,7 @@ import { test, expect, devices } from '@playwright/test';
 
 test.use(devices['iPhone 12']);
 
-const BASE = 'https://dixis.io';
+const BASE = 'https://dixis.gr';
 
 test('products (mobile): no reload loop, no console errors, empty-state visible', async ({ page }) => {
   const errors: string[] = [];

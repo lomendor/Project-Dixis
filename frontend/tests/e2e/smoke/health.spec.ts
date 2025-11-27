@@ -1,7 +1,7 @@
 import { test, expect, request } from '@playwright/test';
 
-const API = process.env.E2E_BASE_URL ?? 'https://dixis.io/api/healthz';
-const SITE = process.env.E2E_SITE_URL ?? 'https://dixis.io';
+const API = process.env.E2E_BASE_URL ?? 'https://dixis.gr/api/healthz';
+const SITE = process.env.E2E_SITE_URL ?? 'https://dixis.gr';
 
 test('api /healthz returns healthy', async () => {
   const ctx = await request.newContext();
