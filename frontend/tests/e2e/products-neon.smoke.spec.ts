@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-const BASE = process.env.BASE_URL || 'https://dixis.io'
+const BASE = process.env.BASE_URL || 'https://dixis.gr'
 
 test('products: grid renders and no console errors', async ({ page }) => {
   const errors: string[] = []

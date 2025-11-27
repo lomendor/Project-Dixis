@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 
-const BASE = 'https://dixis.io';
+const BASE = 'https://dixis.gr';
 
 // Διαγνωστικό μόνο: δεν κάνει asserts, απλώς γράφει λεπτομερή logs για 12s
 test('AG116.3 diag: /products reload loop — collect logs for 12s', async ({ page }) => {

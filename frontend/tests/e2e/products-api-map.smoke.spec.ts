@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-const BASE = process.env.BASE_URL || 'https://dixis.io'
+const BASE = process.env.BASE_URL || 'https://dixis.gr'
 
 test('products page renders and API responds', async ({ page, request }) => {
   const res = await request.get(`${BASE}/api/products`)

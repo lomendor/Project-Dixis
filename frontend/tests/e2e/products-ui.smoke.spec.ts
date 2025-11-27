@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'https://dixis.io'
+const BASE = process.env.BASE_URL || 'https://dixis.gr'
 
 test.skip('flaky: products page renders grid', async ({ page }) => {
   await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })
