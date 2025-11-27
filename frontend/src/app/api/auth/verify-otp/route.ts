@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setSessionCookie } from '@/lib/auth/cookies';
+import { isAuthBypassAllowed, isProduction } from '@/lib/env';
 
 /**
  * POST /api/auth/verify-otp
- * Επαληθεύει OTP κωδικό και ορίζει session cookie με ασφαλή attributes
+ * Verifies OTP code and sets secure session cookie
+ *
+ * Production guards:
+ * - Admin bypass only works in non-production
+ * - Session type reflects admin vs user
  */
 export async function POST(req: NextRequest) {
   try {
@@ -17,16 +22,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Έλεγχος αν το τηλέφωνο είναι admin (για bypass)
-    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim());
+    // Check admin bypass (non-production only)
+    const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
 
-    if (isAdmin && bypassCode && code === bypassCode) {
-      // Bypass για admin phones με τον bypass code
-      console.log(`[Auth] Admin login bypass for ${phone}`);
+    // Admin bypass - only allowed in non-production
+    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed()) {
+      console.log(`[Auth] Admin login bypass for ${phone} (non-production)`);
 
-      // Δημιουργία session token
       const sessionToken = `admin_${phone}_${Date.now()}`;
 
       const response = NextResponse.json({
@@ -35,15 +39,22 @@ export async function POST(req: NextRequest) {
         phone
       });
 
-      // Ορισμός secure session cookie
       setSessionCookie(response, sessionToken);
-
       return response;
     }
 
-    // TODO: Πραγματική επαλήθευση OTP (με database ή cache)
-    // Προς το παρόν, απλή επαλήθευση μόνο για admin
-    console.log(`[Auth] OTP verification for ${phone}`);
+    // Production mode - reject if admin bypass attempted
+    if (isAdmin && bypassCode && code === bypassCode && isProduction()) {
+      console.warn(`[Auth] Admin bypass attempted in PRODUCTION for ${phone} - REJECTED`);
+      return NextResponse.json(
+        { error: 'Λανθασμένος κωδικός OTP' },
+        { status: 401 }
+      );
+    }
+
+    // TODO: Implement real OTP verification (database/cache)
+    // For now, only admin bypass works in non-production
+    console.log(`[Auth] OTP verification for ${phone} - awaiting real implementation`);
 
     return NextResponse.json(
       { error: 'Λανθασμένος κωδικός OTP' },
