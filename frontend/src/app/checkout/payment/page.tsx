@@ -20,6 +20,51 @@ export default function PaymentPage() {
     if (!json) return;
     setBusy(true);
     setMsg('');
+
+    // Check if we should use Viva Wallet (redirect-based)
+    const useViva = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER === 'viva';
+
+    if (useViva) {
+      await payWithViva();
+    } else {
+      await payWithMock();
+    }
+  }
+
+  async function payWithViva() {
+    try {
+      // Generate order ID
+      const orderId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const totalCents = Math.round((json.total ?? 0) * 100);
+
+      // Call init payment API
+      const response = await fetch('/api/checkout/init-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, amountCents: totalCents }),
+      });
+
+      const result = await response.json();
+
+      if (result.redirectUrl) {
+        // Store order info for confirmation
+        localStorage.setItem('checkout_pending_order_id', orderId);
+        if (result.vivaOrderCode) {
+          localStorage.setItem('checkout_viva_order_code', String(result.vivaOrderCode));
+        }
+        // Redirect to Viva payment page
+        window.location.href = result.redirectUrl;
+      } else {
+        setBusy(false);
+        setMsg(result.error || 'Αδυναμία σύνδεσης με πάροχο πληρωμών');
+      }
+    } catch (err) {
+      setBusy(false);
+      setMsg('Σφάλμα κατά την αρχικοποίηση πληρωμής');
+    }
+  }
+
+  async function payWithMock() {
     const { createSession, confirmPayment } = await import(
       '../../../lib/payments/mockProvider'
     );
