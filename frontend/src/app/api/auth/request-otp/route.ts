@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { storeOtp, hasPendingOtp, getRemainingTime } from '@/lib/auth/otp-store';
+import { isAuthBypassAllowed, isDevEchoAllowed } from '@/lib/env';
 
 /**
  * POST /api/auth/request-otp
  * Generates and stores OTP for phone verification
  *
- * In development: OTP is echoed back in response (OTP_DEV_ECHO=1)
- * In production: OTP should be sent via SMS provider
+ * Features:
+ * - Rate limiting (429 if OTP pending)
+ * - In-memory OTP storage with 5 min expiry
+ * - Production guards (bypass only in non-production)
+ * - Dev echo mode (OTP_DEV_ECHO=1)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -29,27 +33,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if admin bypass is enabled
+    // Check if admin bypass is enabled (non-production only)
     const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
 
-    if (isAdmin && bypassCode) {
-      // Admin bypass - don't generate real OTP, use bypass code
-      console.log(`[Auth] Admin OTP request for ${phone} - bypass enabled`);
+    if (isAdmin && bypassCode && isAuthBypassAllowed()) {
+      // Admin bypass - only in dev/staging
+      console.log(`[Auth] Admin OTP request for ${phone} - bypass enabled (non-production)`);
       return NextResponse.json({
         success: true,
         message: 'Κωδικός OTP εστάλη επιτυχώς',
-        // In dev mode with bypass, hint the code
-        ...(process.env.OTP_DEV_ECHO === '1' && { devCode: bypassCode })
+        // Echo bypass code in dev mode
+        ...(isDevEchoAllowed() && { devCode: bypassCode })
       });
     }
 
     // Generate and store OTP
     const code = storeOtp(phone);
 
-    // In development, echo OTP for testing (DO NOT use in production!)
-    if (process.env.OTP_DEV_ECHO === '1') {
+    // Dev echo - only in non-production with OTP_DEV_ECHO=1
+    if (isDevEchoAllowed()) {
       console.log(`[Auth] DEV MODE - OTP for ${phone}: ${code}`);
       return NextResponse.json({
         success: true,

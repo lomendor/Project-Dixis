@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setSessionCookie } from '@/lib/auth/cookies';
 import { verifyOtp } from '@/lib/auth/otp-store';
+import { isAuthBypassAllowed } from '@/lib/env';
 
 /**
  * POST /api/auth/verify-otp
  * Verifies OTP code and sets secure session cookie
+ *
+ * Features:
+ * - In-memory OTP validation (5 min expiry, 3 max attempts)
+ * - Production guards (admin bypass only in non-production)
+ * - Secure session with 7-day expiry
  */
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check admin bypass first
+    // Check admin bypass (non-production only)
     const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
@@ -26,9 +32,9 @@ export async function POST(req: NextRequest) {
     let isValid = false;
     let errorMessage: string | undefined;
 
-    if (isAdmin && bypassCode && code === bypassCode) {
-      // Admin bypass - skip OTP verification
-      console.log(`[Auth] Admin login bypass for ${phone}`);
+    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed()) {
+      // Admin bypass - only in dev/staging
+      console.log(`[Auth] Admin login bypass for ${phone} (non-production)`);
       isValid = true;
     } else {
       // Normal OTP verification
