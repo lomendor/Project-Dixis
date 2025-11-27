@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import AuthGuard from '@/components/AuthGuard';
@@ -89,7 +90,8 @@ export default function ProducerOrdersPage() {
 
   const OrderCard = ({ order }: { order: ProducerOrder }) => {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+      <Link href={`/producer/orders/${order.id}`} className="block">
+        <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
@@ -147,7 +149,8 @@ export default function ProducerOrdersPage() {
             ))}
           </div>
         </div>
-      </div>
+        </div>
+      </Link>
     );
   };
 

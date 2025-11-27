@@ -558,6 +558,19 @@ class ApiClient {
   async getProducerOrder(orderId: number): Promise<{ success: boolean; order: ProducerOrder }> {
     return this.request<{ success: boolean; order: ProducerOrder }>(`producer/orders/${orderId}`);
   }
+
+  async updateProducerOrderStatus(
+    orderId: number,
+    status: 'processing' | 'shipped' | 'delivered'
+  ): Promise<{ success: boolean; message: string; order: ProducerOrder }> {
+    return this.request<{ success: boolean; message: string; order: ProducerOrder }>(
+      `producer/orders/${orderId}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }
+    );
+  }
 }
 
 export const apiClient = new ApiClient();
