@@ -81,10 +81,10 @@ jobs:
             pnpm config set store-dir \"\$PNPM_STORE_DIR\"
 
             # Γράψε env αρχεία χωρίς quotes (Prisma P1012 fix)
-            mkdir -p prisma
-            install -m 600 -D /dev/null prisma/.env
-            printf \"DATABASE_URL=%s\\n\" \"\$DATABASE_URL\" > prisma/.env
-            printf \"DATABASE_URL=%s\\n\" \"\$RUNTIME_DATABASE_URL\" | tee .env > .env.production >/dev/null
+            # Remove prisma/.env to avoid conflict - Prisma will read from .env
+            rm -f prisma/.env
+            printf \"DATABASE_URL=%s\\n\" \"\$DATABASE_URL\" > .env
+            cp .env .env.production
 
             pnpm install --frozen-lockfile
             pnpm prisma migrate deploy || exit 21
