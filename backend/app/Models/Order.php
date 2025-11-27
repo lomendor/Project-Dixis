@@ -68,4 +68,29 @@ class Order extends Model
     {
         return $this->hasOne(Shipment::class);
     }
+
+    /**
+     * Scope orders to include only those with items from a specific producer.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $producerId
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForProducer($query, $producerId)
+    {
+        return $query->whereHas('orderItems', function ($q) use ($producerId) {
+            $q->where('producer_id', $producerId);
+        });
+    }
+
+    /**
+     * Get only the order items belonging to a specific producer.
+     *
+     * @param int $producerId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getProducerItems($producerId)
+    {
+        return $this->orderItems()->where('producer_id', $producerId)->get();
+    }
 }
