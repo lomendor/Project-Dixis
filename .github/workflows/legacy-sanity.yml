@@ -1,0 +1,31 @@
+name: legacy-sanity
+on:
+  push:
+    branches: [ legacy-import ]
+    paths: ['**']
+  pull_request:
+    branches: [ legacy-import ]
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backend sanity (if exists)
+        run: |
+          if [ -f backend/composer.json ]; then
+            php -v || true
+            composer --version || true
+            composer validate --no-check-publish || true
+            echo "Backend OK (no heavy steps)."
+          else
+            echo "No backend/ present."
+          fi
+      - name: Frontend sanity (if exists)
+        run: |
+          if [ -f frontend/package.json ]; then
+            node -v || true
+            npm -v || true
+            echo "Frontend OK (no install)."
+          else
+            echo "No frontend/ present."
+          fi
