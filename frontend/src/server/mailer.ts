@@ -12,7 +12,7 @@ export function makeTransport(){
 }
 
 export async function sendMail(opts: { to: string, subject: string, text?: string, html?: string }){
-  const from = process.env.MAIL_FROM || `Dixis <no-reply@${(process.env.NEXT_PUBLIC_SITE_URL||'https://dixis.io').replace(/^https?:\/\//,'')}>`;
+  const from = process.env.MAIL_FROM || `Dixis <no-reply@${(process.env.NEXT_PUBLIC_SITE_URL||'https://dixis.gr').replace(/^https?:\/\//,'')}>`;
   const tx = makeTransport();
   return tx.sendMail({ from, ...opts });
 }

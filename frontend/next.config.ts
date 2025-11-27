@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'dixis.io',
+        hostname: 'dixis.gr',
       },
       {
         protocol: 'https',
