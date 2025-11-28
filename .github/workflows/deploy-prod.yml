@@ -37,16 +37,14 @@ jobs:
           rsync -az --delete \
             --exclude node_modules --exclude .next \
             --exclude ".env" --exclude ".env.production" --exclude "prisma/.env" \
-            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/"
+            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis-marketplace/frontend/"
 
       - name: Remote deploy (install → migrate → build → pm2) with caches
-        env:
-          DBURL: ${{ secrets.DATABASE_URL_PROD }}
-          RUNTIME_DBURL: ${{ secrets.RUNTIME_DATABASE_URL_PROD || secrets.DATABASE_URL_PROD }}
         run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc "
+          # Pass DATABASE_URL directly via SSH environment
+          ssh -o SendEnv=DATABASE_URL -o SendEnv=RUNTIME_DATABASE_URL "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "DATABASE_URL='${{ secrets.DATABASE_URL_PROD }}' RUNTIME_DATABASE_URL='${{ secrets.RUNTIME_DATABASE_URL_PROD || secrets.DATABASE_URL_PROD }}' bash -lc '
             set -euo pipefail
-            cd /var/www/dixis/current/frontend
+            cd /var/www/dixis-marketplace/frontend
 
             # --- Remote caches
             REMOTE_CACHE_BASE=\$HOME/.cache/dixis
@@ -54,34 +52,15 @@ jobs:
             NEXT_CACHE_DIR=\$REMOTE_CACHE_BASE/next
             mkdir -p \"\$PNPM_STORE_DIR\" \"\$NEXT_CACHE_DIR\"
 
-            # --- DATABASE_URL guard (raw/unpooled for migrations)
-            if [ -n \"${DBURL:-}\" ]; then
-              # Strip quotes from secret value (Prisma P1012 fix)
-              DB_CLEAN=\"${DBURL}\"; DB_CLEAN=\"\${DB_CLEAN%\"\"}\"; DB_CLEAN=\"\${DB_CLEAN#\"\"}\"
-              export DATABASE_URL=\"\$DB_CLEAN\"
-            elif [ -f prisma/.env ]; then
-              DB_LINE=\$(grep -E \"^DATABASE_URL=\" prisma/.env || true)
-              DB_VAL=\"\${DB_LINE#DATABASE_URL=}\"; DB_VAL=\"\${DB_VAL%\"\"}\"; DB_VAL=\"\${DB_VAL#\"\"}\"
-              export DATABASE_URL=\"\$DB_VAL\"
-            fi
-            [ -n \"\${DATABASE_URL:-}\" ] || { echo \"[ERR] DATABASE_URL empty (secret missing & no prisma/.env)\"; exit 1; }
-
-            # --- RUNTIME_DBURL (can be pooled, fallback to raw)
-            if [ -n \"${RUNTIME_DBURL:-}\" ]; then
-              # Strip quotes from secret value
-              RT_CLEAN=\"${RUNTIME_DBURL}\"; RT_CLEAN=\"\${RT_CLEAN%\"\"}\"; RT_CLEAN=\"\${RT_CLEAN#\"\"}\"
-              export RUNTIME_DATABASE_URL=\"\$RT_CLEAN\"
-            else
-              export RUNTIME_DATABASE_URL=\"\$DATABASE_URL\"
-            fi
+            # --- DATABASE_URL guard
+            [ -n \"\${DATABASE_URL:-}\" ] || { echo \"[ERR] DATABASE_URL empty\"; exit 1; }
 
             corepack enable >/dev/null 2>&1 || true
             corepack prepare pnpm@9.15.9 --activate
             export CI=true
             pnpm config set store-dir \"\$PNPM_STORE_DIR\"
 
-            # Γράψε env αρχεία χωρίς quotes (Prisma P1012 fix)
-            # Remove prisma/.env to avoid conflict - Prisma will read from .env
+            # Write env files
             rm -f prisma/.env
             printf \"DATABASE_URL=%s\\n\" \"\$DATABASE_URL\" > .env
             cp .env .env.production
@@ -91,9 +70,12 @@ jobs:
             export NEXT_CACHE_DIR=\"\$NEXT_CACHE_DIR\"
             pnpm build
 
-            pm2 restart dixis-frontend --update-env
+            # Kill any existing process on port 3000 and restart
+            pkill -f \"next start\" || true
+            sleep 2
+            pm2 restart dixis-frontend --update-env || pm2 start npm --name dixis-frontend -- start
             curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
-          "'
+          '"
 
       - name: Smoke
         run: |
