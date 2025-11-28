@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import Logo from '@/components/brand/Logo';
 
 const CartBadge = dynamic(
   () => import('@/components/CartBadge').then(m => ({ default: m.CartBadge })),
@@ -19,26 +20,33 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="font-extrabold tracking-tight text-xl">Dixis</Link>
+    <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo - touch-friendly */}
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80">
+          <Logo height={28} title="Dixis" />
+        </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden sm:flex items-center gap-5 text-sm">
+        <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:underline">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <CartBadge />
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - 44px touch target */}
           <button
             type="button"
-            className="sm:hidden p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="md:hidden p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}
@@ -56,15 +64,15 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - generous tap targets */}
       {mobileMenuOpen && (
-        <nav className="sm:hidden border-t bg-white">
+        <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg">
           <div className="max-w-6xl mx-auto px-4 py-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block py-3 text-base hover:bg-gray-50 -mx-4 px-4"
+                className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
