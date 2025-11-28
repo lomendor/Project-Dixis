@@ -32,6 +32,18 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Prepare VPS directory (fix permissions)
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            cd /var/www/dixis-marketplace/frontend || exit 0
+            # Remove immutable flags if any
+            sudo chattr -R -i -a /var/www/dixis-marketplace/ 2>/dev/null || true
+            # Fix ownership
+            sudo chown -R deploy:deploy /var/www/dixis-marketplace/
+            sudo chmod -R 775 /var/www/dixis-marketplace/
+            echo \"Permissions fixed\"
+          "'
+
       - name: Rsync frontend (exclude cache/node_modules)
         run: |
           rsync -rlpgoDz --omit-dir-times \
