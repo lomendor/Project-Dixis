@@ -156,6 +156,12 @@ traces/
 *.webm
 *.mp4
 *.png
+# But keep logo/icon assets
+!frontend/public/icon-*.png
+!frontend/public/apple-touch-icon.png
+!frontend/public/og-image.png
+!frontend/public/logo-mark-*.png
+!frontend/public/images/*.png
 *.zip
 
 # Keep test files accessible
