@@ -14,6 +14,14 @@ export async function GET(
         id: true,
         status: true,
         total: true,
+        // AG130 checkout fields
+        email: true,
+        name: true,
+        subtotal: true,
+        shipping: true,
+        vat: true,
+        zone: true,
+        // Legacy fields
         buyerName: true,
         buyerPhone: true,
         shippingLine1: true,
@@ -27,6 +35,7 @@ export async function GET(
             id: true,
             titleSnap: true,
             priceSnap: true,
+            price: true,
             qty: true,
             status: true,
           }
@@ -41,25 +50,27 @@ export async function GET(
       );
     }
 
+    // Return format compatible with thank-you page
     return NextResponse.json({
       id: order.id,
       status: order.status,
       total: Number(order.total || 0),
+      // AG130 checkout fields (used by thank-you page)
+      subtotal: order.subtotal ? Number(order.subtotal) : undefined,
+      shipping: order.shipping ? Number(order.shipping) : undefined,
+      vat: order.vat ? Number(order.vat) : undefined,
+      zone: order.zone || 'mainland',
+      email: order.email || null,
+      name: order.name || order.buyerName || null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
-      shipping: {
-        name: order.buyerName,
-        line1: order.shippingLine1,
-        line2: order.shippingLine2 || '',
-        city: order.shippingCity,
-        postal: order.shippingPostal,
-        phone: order.buyerPhone,
-      },
+      // Items with format expected by thank-you page
       items: order.items.map((item: any) => ({
         id: item.id,
-        name: item.titleSnap,
-        price: Number(item.priceSnap || 0),
-        quantity: item.qty,
+        titleSnap: item.titleSnap,
+        price: Number(item.priceSnap || item.price || 0),
+        qty: item.qty,
+        status: item.status,
       }))
     });
   } catch (e: any) {
