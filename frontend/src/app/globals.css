@@ -1,36 +1,18 @@
 @import "tailwindcss";
 @import '../styles/brand.css';
 
+/* =============================================================================
+   DIXIS GLOBAL STYLES
+   Premium Agricultural Marketplace
+   ============================================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--neutral-50);
+  --foreground: var(--neutral-900);
 
-  /* Brand tokens (cypress/Rolex-style green) */
-  --brand-primary: 152 45% 24%;
-  --brand-primary-foreground: 0 0% 100%;
-
-  /* Design tokens for Greek-first UI */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Arial, sans-serif;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-8: 48px;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --bg: #ffffff;
-  --bg-subtle: #f9fafb;
-  --accent: #1f9d55;
-  --accent-hover: #16803d;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Legacy compatibility (for Tailwind theme) */
+  --brand-primary-hsl: 152 45% 24%;
+  --brand-primary-foreground-hsl: 0 0% 100%;
 }
 
 @theme inline {
@@ -40,181 +22,360 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --brand-primary: 152 45% 28%;
-    --brand-primary-foreground: 0 0% 100%;
-  }
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
-/* Improve text contrast for better accessibility */
-.text-gray-600 {
-  color: #4b5563 !important; /* Darker than default gray-600 (#6b7280) */
-}
-
-.text-gray-500 {
-  color: #6b7280 !important; /* Darker than default gray-500 (#9ca3af) */
-}
-
-/* pass88-lcp: Desktop LCP via raw PNG + overlay prevention */
-.hero {
-  min-height: 55vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 16px;
-  margin: 0;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
-
-.lcp-hero-title {
-  font-size: clamp(28px, 5vw, 52px);
-  line-height: 1.15;
-  margin: 12px 0 0;
-  font-weight: 700;
-  color: #111827;
-  max-width: 1200px;
-  text-align: center;
-}
-
-/* Prevent overlays/skeletons from hiding LCP */
-#overlay,
-.overlay,
-.loading,
-.splash,
-.skeleton,
-[data-overlay] {
-  display: none !important;
-}
-
-/* Ensure hero visibility for LCP */
-.hero,
-.lcp-hero-title {
-  content-visibility: visible !important;
-  contain-intrinsic-size: auto 480px;
-}
-
-/* Design token utility classes */
-* {
-  box-sizing: border-box;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-button,
-.btn {
-  padding: 12px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.15s ease;
-  min-height: 44px; /* Touch target */
-}
-
-button:hover,
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-
-.grid {
-  display: grid;
-  gap: var(--space-5);
-}
-
-.card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  background: var(--bg);
-  box-shadow: var(--shadow-sm);
-}
+/* =============================================================================
+   TYPOGRAPHY
+   ============================================================================= */
 
 h1 {
-  font-size: clamp(24px, 4vw, 34px);
-  margin: var(--space-5) 0 var(--space-3);
-  font-weight: 700;
+  font-size: var(--text-heading);
+  font-weight: var(--font-weight-bold);
   line-height: 1.2;
+  color: var(--neutral-900);
+  margin: var(--space-6) 0 var(--space-4);
 }
 
 h2 {
-  font-size: clamp(20px, 3vw, 28px);
-  margin: var(--space-4) 0 var(--space-3);
-  font-weight: 600;
+  font-size: var(--text-subheading);
+  font-weight: var(--font-weight-semibold);
   line-height: 1.3;
+  color: var(--neutral-900);
+  margin: var(--space-5) 0 var(--space-3);
+}
+
+h3 {
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+  color: var(--neutral-800);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+p {
+  margin-bottom: var(--space-4);
+  color: var(--neutral-700);
 }
 
 a {
-  color: inherit;
+  color: var(--brand-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--brand-primary-light);
+}
+
+/* =============================================================================
+   BUTTONS
+   ============================================================================= */
+
+button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  transition: all var(--transition-normal);
+  min-height: 44px; /* Touch target */
   text-decoration: none;
 }
 
-@media (hover: hover) {
-  a:hover {
-    text-decoration: underline;
-  }
+button:disabled,
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
+
+/* Primary Button */
+.btn-primary {
+  background: var(--brand-primary);
+  color: var(--brand-primary-foreground);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--brand-primary-light);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: var(--neutral-0);
+  color: var(--brand-primary);
+  border: 2px solid var(--brand-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--brand-primary-pale);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--neutral-700);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--neutral-100);
+  color: var(--neutral-900);
+}
+
+/* =============================================================================
+   CARDS
+   ============================================================================= */
+
+.card {
+  background: var(--neutral-0);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.card-flat {
+  background: var(--neutral-0);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  border: 1px solid var(--neutral-200);
+}
+
+/* =============================================================================
+   FORMS
+   ============================================================================= */
 
 label {
   display: block;
   margin-bottom: var(--space-2);
-  font-weight: 500;
-  color: var(--text);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-small);
+  color: var(--neutral-700);
 }
 
 input,
 select,
 textarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--neutral-300);
   border-radius: var(--radius-sm);
-  background: var(--bg);
-  color: var(--text);
+  background: var(--neutral-0);
+  color: var(--neutral-900);
+  font-family: inherit;
+  font-size: var(--text-body);
+  transition: all var(--transition-fast);
   min-height: 44px; /* Touch target */
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-color: var(--accent);
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-primary-pale);
 }
 
-/* Responsive spacing utilities */
-.space-y-4 > * + * {
-  margin-top: var(--space-4);
+input::placeholder,
+textarea::placeholder {
+  color: var(--neutral-500);
 }
 
-.space-y-5 > * + * {
-  margin-top: var(--space-5);
+/* =============================================================================
+   HERO SECTION
+   ============================================================================= */
+
+.hero {
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  background: linear-gradient(
+    135deg,
+    var(--brand-primary-pale) 0%,
+    var(--accent-cream) 50%,
+    var(--accent-beige) 100%
+  );
+  text-align: center;
 }
+
+.lcp-hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  color: var(--neutral-900);
+  max-width: 800px;
+  margin: 0 auto var(--space-4);
+}
+
+.hero-subtitle {
+  font-size: var(--text-title);
+  color: var(--neutral-600);
+  max-width: 600px;
+  margin: 0 auto var(--space-8);
+}
+
+/* =============================================================================
+   CATEGORY CARDS (Wolt-style)
+   ============================================================================= */
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  min-height: 140px;
+}
+
+.category-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+.category-card-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-3);
+}
+
+.category-card-label {
+  font-size: var(--text-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-800);
+}
+
+/* Category background colors */
+.category-vegetables { background: var(--category-vegetables); }
+.category-fruits { background: var(--category-fruits); }
+.category-dairy { background: var(--category-dairy); }
+.category-meat { background: var(--category-meat); }
+.category-bakery { background: var(--category-bakery); }
+.category-honey { background: var(--category-honey); }
+.category-wine { background: var(--category-wine); }
+.category-olive { background: var(--category-olive); }
+
+/* =============================================================================
+   PRODUCT CARDS
+   ============================================================================= */
+
+.product-card {
+  background: var(--neutral-0);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-normal);
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-4px);
+}
+
+.product-card-image {
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  width: 100%;
+  background: var(--neutral-100);
+}
+
+.product-card-content {
+  padding: var(--space-4);
+}
+
+.product-card-title {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-900);
+  margin-bottom: var(--space-1);
+}
+
+.product-card-producer {
+  font-size: var(--text-small);
+  color: var(--neutral-600);
+  margin-bottom: var(--space-3);
+}
+
+.product-card-price {
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-primary);
+}
+
+/* =============================================================================
+   BADGES
+   ============================================================================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-semibold);
+}
+
+.badge-primary {
+  background: var(--brand-primary-pale);
+  color: var(--brand-primary);
+}
+
+.badge-gold {
+  background: var(--warning-light);
+  color: var(--accent-gold);
+}
+
+.badge-success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+/* =============================================================================
+   LAYOUT UTILITIES
+   ============================================================================= */
 
 .container {
   max-width: 1200px;
@@ -224,44 +385,141 @@ textarea:focus {
 
 @media (min-width: 768px) {
   .container {
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
   }
 }
 
-/* --- Dixis Print Rules --- */
-@media print {
-  .no-print, nav, [data-testid="print-button"] {
-    display: none !important;
-  }
-  a { text-decoration: none !important; color: black !important; }
-  body { background: white !important; }
+.section {
+  padding: var(--space-12) 0;
 }
 
-/* AG116.3: Mobile iOS viewport + overscroll fixes */
+.section-title {
+  font-size: var(--text-subheading);
+  font-weight: var(--font-weight-bold);
+  color: var(--neutral-900);
+  margin-bottom: var(--space-8);
+}
+
+/* Grid layouts */
+.grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* =============================================================================
+   ACCESSIBILITY & PERFORMANCE
+   ============================================================================= */
+
+/* Ensure hero visibility for LCP */
+.hero,
+.lcp-hero-title {
+  content-visibility: visible !important;
+  contain-intrinsic-size: auto 480px;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--brand-primary);
+  color: var(--brand-primary-foreground);
+  padding: var(--space-2) var(--space-4);
+  z-index: 1000;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =============================================================================
+   IOS FIXES
+   ============================================================================= */
+
 @supports (height: 100svh) {
   main, .min-h-screen { min-height: 100svh !important; }
 }
+
 @supports not (height: 100svh) {
   main, .min-h-screen { min-height: -webkit-fill-available !important; }
 }
-html, body { height: 100%; }
-body { overscroll-behavior-y: none; }
 
-/* AG116.4 iOS viewport hardening */
-html, body { height: -webkit-fill-available; }
+html, body {
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
 @supports (height: 100dvh) {
   main, .min-h-screen { min-height: 100dvh !important; }
 }
-@supports (height: 100svh) {
-  main, .min-h-screen { min-height: 100svh !important; }
-}
-body { overscroll-behavior-y: none; }
 
-/* AG116.7: iOS Safe-Mode v2 */
 .ios-products-safe {
   min-height: 100svh;
   overflow-x: hidden;
 }
+
 @supports (-webkit-touch-callout: none) {
   .ios-products-safe { position: relative; }
+}
+
+/* =============================================================================
+   PRINT STYLES
+   ============================================================================= */
+
+@media print {
+  .no-print, nav, [data-testid="print-button"] {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
 }

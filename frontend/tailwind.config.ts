@@ -9,26 +9,81 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Brand colors
         brand: {
           DEFAULT: 'hsl(var(--brand-primary))',
           foreground: 'hsl(var(--brand-primary-foreground))'
         },
-        primary: { DEFAULT: '#0f5c2e', foreground: '#ffffff' },  /* cypress green */
-        secondary: { DEFAULT: '#0ea5e9', foreground: '#ffffff' },
-        neutral: {
-          0:'#ffffff', 50:'#fafafa', 100:'#f5f5f5', 200:'#e5e5e5', 300:'#d4d4d4',
-          600:'#525252', 700:'#404040', 800:'#262626', 900:'#171717'
+        // Primary - Cyprus Green (agricultural, trust, freshness)
+        primary: {
+          DEFAULT: '#0f5c2e',
+          light: '#1a7a3e',
+          pale: '#e8f5ed',
+          foreground: '#ffffff'
         },
-        success: { DEFAULT:'#10b981' },
-        warning: { DEFAULT:'#f59e0b' },
-        info: { DEFAULT:'#0ea5e9' },
-        danger: { DEFAULT:'#ef4444' }
+        // Accent - Warm tones
+        accent: {
+          gold: '#c9a227',
+          beige: '#f5f0e6',
+          cream: '#faf8f3'
+        },
+        // Neutrals
+        neutral: {
+          0: '#ffffff',
+          50: '#f8f9fa',
+          100: '#f1f3f5',
+          200: '#e9ecef',
+          300: '#dee2e6',
+          400: '#ced4da',
+          500: '#adb5bd',
+          600: '#6b7280',
+          700: '#495057',
+          800: '#343a40',
+          900: '#1a1a1a'
+        },
+        // Semantic colors
+        success: { DEFAULT: '#10b981', light: '#d1fae5' },
+        warning: { DEFAULT: '#f59e0b', light: '#fef3c7' },
+        info: { DEFAULT: '#0ea5e9', light: '#e0f2fe' },
+        danger: { DEFAULT: '#ef4444', light: '#fee2e2' },
+        // Category pastel backgrounds (Wolt-style)
+        category: {
+          vegetables: '#e8f5ed',
+          fruits: '#fef3c7',
+          dairy: '#e0f2fe',
+          meat: '#fee2e2',
+          bakery: '#f5f0e6',
+          honey: '#fef9c3',
+          wine: '#fce7f3',
+          olive: '#ecfccb'
+        }
       },
       boxShadow: {
-        'surface-sm': '0 1px 1px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.06)',
-        'surface-md': '0 2px 2px rgba(0,0,0,.05), 0 6px 12px rgba(0,0,0,.08)',
-        'surface-lg': '0 8px 8px rgba(0,0,0,.06), 0 16px 24px rgba(0,0,0,.10)'
+        'sm': '0 1px 2px rgba(0,0,0,0.05)',
+        'md': '0 4px 12px rgba(0,0,0,0.08)',
+        'lg': '0 8px 24px rgba(0,0,0,0.12)',
+        'glow': '0 0 20px rgba(15,92,46,0.15)',
+        'card': '0 2px 8px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.04)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.08)'
       },
+      borderRadius: {
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px'
+      },
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem'
+      },
+      fontSize: {
+        'display': ['3rem', { lineHeight: '1.1', fontWeight: '700' }],
+        'heading': ['2rem', { lineHeight: '1.2', fontWeight: '600' }],
+        'subheading': ['1.25rem', { lineHeight: '1.4', fontWeight: '600' }]
+      },
+      transitionTimingFunction: {
+        'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+      }
     },
   },
   plugins: [],
