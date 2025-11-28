@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 const CartBadge = dynamic(
@@ -12,16 +13,28 @@ const navLinks = [
   { href: '/products', label: 'Προϊόντα' },
   { href: '/orders/lookup', label: 'Παραγγελία' },
   { href: '/producers', label: 'Για Παραγωγούς' },
-  { href: '/legal/terms', label: 'Όροι' },
 ];
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="font-extrabold tracking-tight text-xl">Dixis</Link>
+    <header className="border-b border-gray-100 bg-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40 shadow-sm">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <Image
+            src="/images/logo-mark.png"
+            alt="Dixis"
+            width={36}
+            height={36}
+            className="group-hover:scale-105 transition-transform"
+            priority
+          />
+          <span className="font-extrabold tracking-tight text-xl text-gray-900 group-hover:text-emerald-700 transition-colors">
+            Dixis
+          </span>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden sm:flex items-center gap-5 text-sm">

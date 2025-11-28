@@ -27,10 +27,20 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Project Dixis - Local Producer Marketplace",
-    template: "%s | Project Dixis"
+    default: "Dixis - Τοπικά Προϊόντα από Έλληνες Παραγωγούς",
+    template: "%s | Dixis"
   },
-  description: "Connect with local producers and discover fresh, quality products in your area. Support local farmers and enjoy premium organic produce delivered fresh.",
+  description: "Ανακαλύψτε φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς. Υποστηρίξτε τους τοπικούς αγρότες και απολαύστε ποιοτικά βιολογικά προϊόντα.",
+  icons: {
+    icon: [
+      { url: '/logo-mark-64.png', sizes: '64x64', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   keywords: [
     "local producers",
     "fresh products", 
@@ -63,31 +73,25 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'el_GR',
     url: siteUrl,
-    siteName: 'Project Dixis',
-    title: 'Project Dixis - Local Producer Marketplace',
-    description: 'Connect with local producers and discover fresh, quality products in your area. Support local farmers and enjoy premium organic produce.',
+    siteName: 'Dixis',
+    title: 'Dixis - Τοπικά Προϊόντα από Έλληνες Παραγωγούς',
+    description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς. Υποστηρίξτε τους τοπικούς αγρότες.',
     images: [
       {
-        url: `${siteUrl}/og-image.jpg`,
+        url: `${siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'Project Dixis - Fresh Local Products',
-      },
-      {
-        url: `${siteUrl}/og-image-square.jpg`,
-        width: 1200,
-        height: 1200,
-        alt: 'Project Dixis Logo',
+        alt: 'Dixis - Τοπικά Προϊόντα',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@projectdixis',
-    creator: '@projectdixis',
-    title: 'Project Dixis - Local Producer Marketplace',
-    description: 'Connect with local producers and discover fresh, quality products in your area.',
-    images: [`${siteUrl}/twitter-image.jpg`],
+    site: '@dixis_gr',
+    creator: '@dixis_gr',
+    title: 'Dixis - Τοπικά Προϊόντα από Έλληνες Παραγωγούς',
+    description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς.',
+    images: [`${siteUrl}/og-image.png`],
   },
   alternates: {
     canonical: siteUrl,
@@ -128,8 +132,8 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Project Dixis',
-              description: 'Local Producer Marketplace connecting farmers with consumers',
+              name: 'Dixis',
+              description: 'Τοπική αγορά που συνδέει Έλληνες παραγωγούς με καταναλωτές',
               url: siteUrl,
               potentialAction: {
                 '@type': 'SearchAction',
@@ -141,13 +145,13 @@ export default function RootLayout({
               },
               publisher: {
                 '@type': 'Organization',
-                name: 'Project Dixis',
+                name: 'Dixis',
                 url: siteUrl,
                 logo: {
                   '@type': 'ImageObject',
-                  url: `${siteUrl}/logo.png`,
-                  width: 400,
-                  height: 400,
+                  url: `${siteUrl}/images/logo.png`,
+                  width: 512,
+                  height: 512,
                 },
               },
             }),
@@ -161,10 +165,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
-              name: 'Project Dixis',
+              name: 'Dixis',
               url: siteUrl,
-              logo: `${siteUrl}/logo.png`,
-              description: 'Local Producer Marketplace supporting sustainable agriculture',
+              logo: `${siteUrl}/images/logo.png`,
+              description: 'Τοπική αγορά που συνδέει Έλληνες παραγωγούς με καταναλωτές',
               address: {
                 '@type': 'PostalAddress',
                 addressCountry: 'GR',
