@@ -38,7 +38,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
     async function fetchOrder() {
       try {
-        const res = await fetch(`/api/order-intents/${orderId}`)
+        const res = await fetch(`/api/orders/${orderId}`)
         if (!res.ok) {
           throw new Error('Failed to fetch order')
         }

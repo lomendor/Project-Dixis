@@ -12,7 +12,7 @@ test('Debug cart + button on production', async ({ page }) => {
   })
 
   console.log('1️⃣ Going to products page...')
-  await page.goto('https://dixis.io/products', { waitUntil: 'domcontentloaded' })
+  await page.goto('https://dixis.gr/products', { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('[data-testid="add-to-cart-button"]', { timeout: 10000 })
 
   console.log('2️⃣ Clicking first "Προσθήκη" button...')
@@ -20,7 +20,7 @@ test('Debug cart + button on production', async ({ page }) => {
   await page.waitForTimeout(2000)
 
   console.log('3️⃣ Going to cart page...')
-  await page.goto('https://dixis.io/cart', { waitUntil: 'domcontentloaded' })
+  await page.goto('https://dixis.gr/cart', { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('[data-testid="qty"]', { timeout: 10000 })
 
   console.log('4️⃣ Getting initial state...')

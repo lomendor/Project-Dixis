@@ -1,5 +1,5 @@
 import { test, expect, request } from '@playwright/test';
-const candidates = ['https://dixis.gr','https://dixis.io'];
+const candidates = ['https://dixis.gr'];
 test('healthz is healthy', async () => {
   const api = await request.newContext();
   let ok=false;
