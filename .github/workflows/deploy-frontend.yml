@@ -42,6 +42,12 @@ jobs:
             git config --global --add safe.directory "$REAL_APP_DIR"
             echo "→ Added safe.directory for: $REPO_ROOT and $REAL_APP_DIR"
 
+            # Fix .git permissions if needed (repo may be owned by different user)
+            if [ -d "$REPO_ROOT/.git" ]; then
+              chmod -R u+w "$REPO_ROOT/.git" 2>/dev/null || sudo chmod -R a+w "$REPO_ROOT/.git" || true
+              echo "→ Fixed .git permissions"
+            fi
+
             echo "→ Sync main"
             git fetch origin
             git reset --hard origin/main
