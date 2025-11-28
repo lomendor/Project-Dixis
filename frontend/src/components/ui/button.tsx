@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Primary - Cyprus Green with glow hover
-        default: 'bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-glow active:scale-[0.98]',
+        default: 'bg-primary text-white hover:bg-primary-light hover:shadow-glow active:scale-[0.98]',
         // Secondary - Outlined
         secondary: 'bg-white text-primary border-2 border-primary hover:bg-primary-pale active:scale-[0.98]',
         // Ghost - Subtle
