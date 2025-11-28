@@ -34,7 +34,7 @@ jobs:
 
       - name: Rsync frontend (exclude cache/node_modules)
         run: |
-          rsync -az --delete \
+          rsync -rlpgoDz --omit-dir-times \
             --exclude node_modules --exclude .next \
             --exclude ".env" --exclude ".env.production" --exclude "prisma/.env" \
             ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis-marketplace/frontend/"
