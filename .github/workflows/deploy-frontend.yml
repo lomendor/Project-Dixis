@@ -105,26 +105,17 @@ jobs:
 
             # Stop ALL PM2 processes completely
             pm2 kill 2>/dev/null || true
-            sleep 2
+            sleep 3
 
-            # Kill node processes using absolute path pattern (avoid killing SSH session)
-            pgrep -f "/var/www/dixis.*server.js" | xargs kill -9 2>/dev/null || true
-
-            # Kill any process using port 3000 using multiple methods
+            # Kill any process using port 3000
             sudo fuser -k 3000/tcp 2>/dev/null || true
+            sleep 2
             fuser -k 3000/tcp 2>/dev/null || true
-            lsof -t -i:3000 | xargs kill -9 2>/dev/null || true
+            sleep 3
 
-            # Wait for port to be released
-            sleep 5
-
-            # Verify port is free
-            echo "Checking if port 3000 is free..."
-            if lsof -i:3000 >/dev/null 2>&1; then
-              echo "WARNING: Port 3000 still in use! Force killing..."
-              lsof -t -i:3000 | xargs kill -9 2>/dev/null || true
-              sleep 3
-            fi
+            # Final check - verify port is free
+            echo "Port 3000 status after cleanup:"
+            lsof -i:3000 2>/dev/null || echo "Port 3000 is free"
 
             # Start PM2 with FULL absolute path (prevents using old cached paths)
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
