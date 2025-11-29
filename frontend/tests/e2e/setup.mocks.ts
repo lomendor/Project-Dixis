@@ -45,12 +45,11 @@ test.beforeEach(async ({ page }) => {
       });
     }
 
-    // Cart endpoints - role-based access control
+    // Cart endpoints - return mock data without auth check
+    // (Auth is validated by AuthContext MSW Bridge based on localStorage)
     if (url.includes('/cart')) {
-      if (!authToken) {
-        return route.fulfill({ status: 401, body: JSON.stringify({ message: 'Auth required' }) });
-      }
-      // Return cart with 3 items for authenticated users
+      // For E2E tests, always return mock cart data
+      // The CartIcon component uses isConsumer from AuthContext to decide rendering
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
