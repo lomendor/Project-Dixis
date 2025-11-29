@@ -107,9 +107,8 @@ jobs:
             pm2 kill 2>/dev/null || true
             sleep 2
 
-            # Kill all node processes related to dixis (be specific to avoid killing other apps)
-            pkill -9 -f "dixis-frontend" 2>/dev/null || true
-            pkill -9 -f "server.js" 2>/dev/null || true
+            # Kill node processes using absolute path pattern (avoid killing SSH session)
+            pgrep -f "/var/www/dixis.*server.js" | xargs kill -9 2>/dev/null || true
 
             # Kill any process using port 3000 using multiple methods
             sudo fuser -k 3000/tcp 2>/dev/null || true
