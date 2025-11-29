@@ -135,11 +135,6 @@ jobs:
             pm2 flush 2>/dev/null || true
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Also kill any orphaned node processes (from crashed PM2 instances)
-            echo "Killing any orphaned node processes..."
-            pkill -f "server.js" 2>/dev/null || true
-            sleep 2
-
             # Start PM2 with memory limit and restart controls
             # --max-memory-restart 400M: Restart if memory exceeds 400MB (prevents OOM)
             # --max-restarts 5: Limit restart attempts to prevent infinite loops
