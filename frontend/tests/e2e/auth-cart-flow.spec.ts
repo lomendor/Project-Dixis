@@ -3,11 +3,11 @@ import { expectAuthedOrLogin } from './helpers/auth-mode';
 import './setup.mocks';
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await Promise.race([page.getByTestId('page-root').waitFor().catch(() => {}), page.getByTestId('error-boundary').waitFor().catch(() => {})]);
+  await page.getByTestId('page-root').or(page.getByTestId('error-boundary')).first().waitFor({ timeout: 15000 });
 };
 const setupAuthState = async (page: any, context: any, role: 'consumer' | 'producer') => {
-  await context.addCookies([{ name: 'auth_token', value: `${role}_token`, domain: '127.0.0.1', path: '/' }]);
-  await page.addInitScript((r: string) => { localStorage.setItem('auth_token', `${r}_token`); localStorage.setItem('user_role', r); }, role);
+  await context.addCookies([{ name: 'auth_token', value: 'mock_token', domain: '127.0.0.1', path: '/' }]);
+  await page.addInitScript((r: string) => { localStorage.setItem('auth_token', 'mock_token'); localStorage.setItem('user_role', r); }, role);
 };
 test.describe('Auth-Cart Flow Tests', () => {
   test('Guest users see login prompt for cart access', async ({ page }) => {
@@ -43,7 +43,10 @@ test.describe('Auth-Cart Flow Tests', () => {
     await setupPage(page);
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
     await mobileMenuButton.click();
-    await page.waitForSelector('[data-testid="mobile-menu"]');
+    // Wait for button state change before checking menu
+    await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 });
+    const mobileMenu = page.getByTestId('mobile-menu');
+    await expect(mobileMenu).toBeVisible();
     const mobileCartPrompt = page.getByTestId('cart-login-prompt');
     await expect(mobileCartPrompt).toBeVisible();
     await expect(mobileCartPrompt).toHaveText('Login to Add to Cart');
@@ -51,7 +54,7 @@ test.describe('Auth-Cart Flow Tests', () => {
   test('Role transition updates cart display correctly', async ({ page, context }) => {
     await setupPage(page);
     await expect(page.getByTestId('cart-login-prompt')).toBeVisible();
-    await page.addInitScript(() => { localStorage.setItem('auth_token', 'consumer_token'); localStorage.setItem('user_role', 'consumer'); });
+    await page.addInitScript(() => { localStorage.setItem('auth_token', 'mock_token'); localStorage.setItem('user_role', 'consumer'); });
     await page.reload();
     await page.waitForSelector('[data-testid="page-root"]', { timeout: 15000 });
     await expect(page.getByTestId('cart-icon-active')).toBeVisible();

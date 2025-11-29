@@ -78,7 +78,7 @@ export async function waitForAuthState(page: Page): Promise<void> {
 
   if (isPreAuthed) {
     // For pre-authenticated users, wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for authenticated UI elements
     try {

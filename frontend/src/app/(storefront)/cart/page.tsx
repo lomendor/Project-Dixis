@@ -52,7 +52,7 @@ export default function CartPage() {
 
         {list.length === 0 ? (
           <div className="bg-white border rounded-xl p-10 text-center" data-testid="empty-cart">
-            <p className="text-gray-600 mb-4">Το καλάθι σας είναι άδειο.</p>
+            <p className="text-gray-600 mb-4" data-testid="empty-cart-message">Το καλάθι σας είναι άδειο.</p>
             <Link href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
               Συνέχεια αγορών
             </Link>

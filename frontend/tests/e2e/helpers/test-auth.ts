@@ -56,7 +56,7 @@ export class TestAuthHelper {
 
     // Force page reload to ensure auth state is recognized by components
     await this.page.reload();
-    await this.page.waitForLoadState('networkidle'); // Wait for API calls to complete
+    await this.page.waitForLoadState('domcontentloaded');
 
     // Navigate to home page after login
     await this.page.goto('/');
