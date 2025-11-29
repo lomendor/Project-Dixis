@@ -89,25 +89,29 @@ jobs:
             cd /var/www/dixis/current/frontend
 
             # Create .env file with production secrets
-            cat > .env << ENVEOF
-            DATABASE_URL=${DATABASE_URL}
-            RESEND_API_KEY=${RESEND_API_KEY}
-            NODE_ENV=production
-            PORT=3000
-            HOSTNAME=0.0.0.0
-            ENVEOF
+            echo "NODE_ENV=production" > .env
+            echo "PORT=3000" >> .env
+            echo "HOSTNAME=0.0.0.0" >> .env
+            echo "DATABASE_URL=${DATABASE_URL}" >> .env
+            echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
+            cat .env | head -3
 
-            # Stop existing process if any
+            # Stop ALL existing frontend processes to avoid port conflicts
             pm2 delete dixis-frontend 2>/dev/null || true
+            pm2 delete dixis-frontend-stg 2>/dev/null || true
 
-            # Start standalone server with node (not npm)
-            pm2 start server.js --name "dixis-frontend" --update-env
+            # Start with explicit env vars (Next.js standalone needs these at startup)
+            PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
+              pm2 start server.js --name "dixis-frontend"
             pm2 save
 
-            # Verify app started
-            sleep 15
-            pm2 status dixis-frontend
-            curl -sI http://127.0.0.1:3000 | head -3
+            # Wait for app to start and show logs if it failed
+            sleep 20
+            pm2 status
+            echo "--- PM2 Logs (last 30 lines) ---"
+            pm2 logs dixis-frontend --nostream --lines 30 || true
+            echo "--- Health Check ---"
+            curl -sI http://127.0.0.1:3000 | head -5 || echo "Health check failed"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
