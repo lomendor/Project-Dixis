@@ -125,23 +125,19 @@ jobs:
               sleep 2
             done
 
-            # Start PM2 with single instance (no cluster mode)
+            # Start PM2 in fork mode (not cluster - Next.js standalone doesn't support cluster)
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js \
-              --name "dixis-frontend" \
-              -i 1 \
-              --wait-ready \
-              --listen-timeout 30000
+              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend"
 
             pm2 save
 
-            # Wait for app to fully start
-            sleep 15
+            # Wait for app to start (Next.js takes ~20s to be ready)
+            sleep 25
             pm2 status
-            echo "--- PM2 Logs (last 20 lines) ---"
-            pm2 logs dixis-frontend --nostream --lines 20 || true
-            echo "--- Health Check ---"
-            curl -sI http://127.0.0.1:3000 | head -5 || echo "Health check failed"
+            echo "--- PM2 Logs (last 15 lines) ---"
+            pm2 logs dixis-frontend --nostream --lines 15 || true
+            echo "--- Health Check (5s timeout) ---"
+            curl -sI --max-time 5 http://127.0.0.1:3000 | head -5 || echo "Health check failed"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
