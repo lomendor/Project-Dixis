@@ -12,7 +12,9 @@ test.beforeEach(async ({ page }) => {
     const url = route.request().url();
     const method = route.request().method();
     const authHeader = route.request().headers()['authorization'];
-    const authToken = authHeader?.replace('Bearer ', '') || '';
+    const cookieHeader = route.request().headers()['cookie'] || '';
+    const authCookie = cookieHeader.match(/auth_token=([^;]+)/)?.[1] || '';
+    const authToken = authHeader?.replace('Bearer ', '') || authCookie;
 
     // Products endpoints
     if (url.includes('/products')) {
@@ -48,10 +50,34 @@ test.beforeEach(async ({ page }) => {
       if (!authToken) {
         return route.fulfill({ status: 401, body: JSON.stringify({ message: 'Auth required' }) });
       }
+      // Return cart with 3 items for authenticated users
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ items: [], total_items: 0, total_amount: '0.00' })
+        body: JSON.stringify({
+          items: [
+            {
+              id: 1,
+              product: { id: 1, name: 'Mock Product 1', price: '10.00', producer: { name: 'Test Producer' } },
+              quantity: 1,
+              subtotal: '10.00'
+            },
+            {
+              id: 2,
+              product: { id: 2, name: 'Mock Product 2', price: '15.00', producer: { name: 'Test Producer' } },
+              quantity: 1,
+              subtotal: '15.00'
+            },
+            {
+              id: 3,
+              product: { id: 3, name: 'Mock Product 3', price: '5.00', producer: { name: 'Test Producer' } },
+              quantity: 1,
+              subtotal: '5.00'
+            }
+          ],
+          total_items: 3,
+          total_amount: '30.00'
+        })
       });
     }
 
