@@ -78,21 +78,36 @@ jobs:
           TARGET: "/var/www/dixis/current/frontend/"
           ARGS: "-rlvz --delete --omit-dir-times --exclude='.env*'"
 
-      - name: Start app with PM2
+      - name: Configure and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
+          envs: DATABASE_URL,RESEND_API_KEY
           script: |
             cd /var/www/dixis/current/frontend
+
+            # Create .env file with production secrets
+            cat > .env << ENVEOF
+            DATABASE_URL=${DATABASE_URL}
+            RESEND_API_KEY=${RESEND_API_KEY}
+            NODE_ENV=production
+            PORT=3000
+            HOSTNAME=0.0.0.0
+            ENVEOF
 
             # Stop existing process if any
             pm2 delete dixis-frontend 2>/dev/null || true
 
             # Start standalone server with node (not npm)
-            PORT=3000 pm2 start server.js --name "dixis-frontend"
+            pm2 start server.js --name "dixis-frontend" --update-env
             pm2 save
 
-            sleep 10
-            curl -sI http://127.0.0.1:3000 | head -1
+            # Verify app started
+            sleep 15
+            pm2 status dixis-frontend
+            curl -sI http://127.0.0.1:3000 | head -3
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
