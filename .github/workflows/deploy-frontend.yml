@@ -128,16 +128,17 @@ jobs:
             # Clear old PM2 logs to avoid confusion with previous restarts
             pm2 flush 2>/dev/null || true
 
-            # Start PM2 in fork mode with restart protection
-            # --min-uptime 30s: must run 30s before considered "stable"
-            # --max-restarts 3: max 3 restarts before giving up
-            # --restart-delay 5000: wait 5s between restarts (allow port release)
+            # Start PM2 in fork mode (simple command, no complex flags)
+            echo "Starting PM2 with: pm2 start server.js --name dixis-frontend"
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js \
-              --name "dixis-frontend" \
-              --min-uptime 30000 \
-              --max-restarts 3 \
-              --restart-delay 5000
+              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend" 2>&1 || {
+                echo "PM2 start failed! Exit code: $?"
+                echo "Checking if server.js exists..."
+                ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
+              }
+
+            # Verify PM2 started something
+            pm2 list
 
             pm2 save
 
