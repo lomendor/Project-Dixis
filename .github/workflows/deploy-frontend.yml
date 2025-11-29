@@ -105,14 +105,27 @@ jobs:
 
             # Stop ALL PM2 processes completely
             pm2 kill 2>/dev/null || true
-
-            # Kill any process using port 3000 (with sudo for extra permission)
-            sudo fuser -k 3000/tcp 2>/dev/null || fuser -k 3000/tcp 2>/dev/null || true
-
-            # Wait for port to be released and double-check
-            sleep 3
-            sudo fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
+
+            # Kill all node processes related to dixis (be specific to avoid killing other apps)
+            pkill -9 -f "dixis-frontend" 2>/dev/null || true
+            pkill -9 -f "server.js" 2>/dev/null || true
+
+            # Kill any process using port 3000 using multiple methods
+            sudo fuser -k 3000/tcp 2>/dev/null || true
+            fuser -k 3000/tcp 2>/dev/null || true
+            lsof -t -i:3000 | xargs kill -9 2>/dev/null || true
+
+            # Wait for port to be released
+            sleep 5
+
+            # Verify port is free
+            echo "Checking if port 3000 is free..."
+            if lsof -i:3000 >/dev/null 2>&1; then
+              echo "WARNING: Port 3000 still in use! Force killing..."
+              lsof -t -i:3000 | xargs kill -9 2>/dev/null || true
+              sleep 3
+            fi
 
             # Start PM2 with FULL absolute path (prevents using old cached paths)
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
