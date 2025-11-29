@@ -96,13 +96,16 @@ jobs:
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
             cat .env | head -3
 
-            # Stop ALL existing frontend processes to avoid port conflicts
-            pm2 delete dixis-frontend 2>/dev/null || true
-            pm2 delete dixis-frontend-stg 2>/dev/null || true
+            # Stop ALL PM2 processes completely
+            pm2 kill 2>/dev/null || true
 
-            # Start with explicit env vars (Next.js standalone needs these at startup)
+            # Kill any process using port 3000
+            fuser -k 3000/tcp 2>/dev/null || true
+            sleep 2
+
+            # Start PM2 with FULL absolute path (prevents using old cached paths)
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start server.js --name "dixis-frontend"
+              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend"
             pm2 save
 
             # Wait for app to start and show logs if it failed
