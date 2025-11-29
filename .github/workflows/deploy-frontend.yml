@@ -88,6 +88,12 @@ jobs:
           script: |
             cd /var/www/dixis/current/frontend
 
+            # === PRE-DEPLOY DIAGNOSTICS ===
+            echo "=== CURRENT STATE BEFORE CLEANUP ==="
+            pm2 status 2>/dev/null || echo "PM2 not running"
+            pm2 logs dixis-frontend --err --nostream --lines 10 2>/dev/null || true
+            lsof -i:3000 2>/dev/null || echo "Nothing on port 3000"
+
             # Remove ALL old .env files using sudo (they have wrong permissions from old deploys)
             sudo rm -f .env .env.local .env.production .env.production.local 2>/dev/null || true
 
@@ -106,13 +112,13 @@ jobs:
             # AGGRESSIVE CLEANUP: Delete all PM2 processes and their configs
             pm2 delete all 2>/dev/null || true
             pm2 kill 2>/dev/null || true
-            sleep 2
+            sleep 3
 
             # Kill any process using port 3000 (multiple attempts)
             sudo fuser -k 3000/tcp 2>/dev/null || true
-            sleep 1
-            fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
+            fuser -k 3000/tcp 2>/dev/null || true
+            sleep 3
 
             # Verify port is free (loop until free or timeout)
             for i in 1 2 3 4 5; do
@@ -122,17 +128,17 @@ jobs:
               fi
               echo "Port 3000 still in use, killing again (attempt $i)..."
               sudo fuser -k 3000/tcp 2>/dev/null || true
-              sleep 2
+              sleep 3
             done
 
             # Clear old PM2 logs - both flush AND truncate the actual log files
             pm2 flush 2>/dev/null || true
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Start PM2 with exp-backoff restart delay to avoid EADDRINUSE on rapid restarts
-            echo "Starting PM2 with: pm2 start server.js --name dixis-frontend --exp-backoff-restart-delay=100"
+            # Start PM2 with 1s exp-backoff restart delay to avoid EADDRINUSE
+            echo "Starting PM2 with: pm2 start server.js --name dixis-frontend --exp-backoff-restart-delay=1000"
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend" --exp-backoff-restart-delay=100 2>&1 || {
+              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend" --exp-backoff-restart-delay=1000 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
@@ -140,26 +146,33 @@ jobs:
 
             # Verify PM2 started something
             pm2 list
-
             pm2 save
 
-            # Wait for Next.js to become ready
-            echo "Waiting 35s for Next.js to start..."
-            sleep 35
+            # Poll until app is ready or timeout (max 60s)
+            echo "Waiting for Next.js to become ready..."
+            for i in $(seq 1 12); do
+              sleep 5
+              if curl -s --max-time 3 http://127.0.0.1:3000/api/healthz | grep -q '"status":"ok"'; then
+                echo "App is ready after $((i*5))s!"
+                break
+              fi
+              echo "Attempt $i/12: Not ready yet, waiting..."
+              pm2 status 2>/dev/null | grep dixis || true
+            done
 
-            echo "=== DIAGNOSTICS ==="
+            echo "=== FINAL DIAGNOSTICS ==="
             pm2 status
 
             echo "--- Port 3000 Status ---"
             lsof -i:3000 2>/dev/null || echo "Nothing listening on port 3000!"
 
             echo "--- PM2 Error Logs (fresh from this deploy) ---"
-            pm2 logs dixis-frontend --err --nostream --lines 30 || true
+            pm2 logs dixis-frontend --err --nostream --lines 50 || true
 
             echo "--- PM2 Output Logs ---"
-            pm2 logs dixis-frontend --out --nostream --lines 15 || true
+            pm2 logs dixis-frontend --out --nostream --lines 50 || true
 
-            echo "--- Health Check ---"
+            echo "--- Final Health Check ---"
             curl -v --max-time 10 http://127.0.0.1:3000/api/healthz 2>&1 | head -30 || echo "Health check failed"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
