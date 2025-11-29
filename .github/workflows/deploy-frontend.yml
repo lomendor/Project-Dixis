@@ -88,8 +88,12 @@ jobs:
           script: |
             cd /var/www/dixis/current/frontend
 
-            # Remove ALL old .env files (they have wrong permissions from old deploys)
-            rm -f .env .env.local .env.production .env.production.local 2>/dev/null || true
+            # Remove ALL old .env files using sudo (they have wrong permissions from old deploys)
+            sudo rm -f .env .env.local .env.production .env.production.local 2>/dev/null || true
+
+            # Also remove from the actual symlink target directory
+            ACTUAL_DIR=$(readlink -f /var/www/dixis/current/frontend)
+            sudo rm -f "$ACTUAL_DIR/.env.production" 2>/dev/null || true
 
             # Create fresh .env file with production secrets
             echo "NODE_ENV=production" > .env
@@ -102,8 +106,12 @@ jobs:
             # Stop ALL PM2 processes completely
             pm2 kill 2>/dev/null || true
 
-            # Kill any process using port 3000
-            fuser -k 3000/tcp 2>/dev/null || true
+            # Kill any process using port 3000 (with sudo for extra permission)
+            sudo fuser -k 3000/tcp 2>/dev/null || fuser -k 3000/tcp 2>/dev/null || true
+
+            # Wait for port to be released and double-check
+            sleep 3
+            sudo fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
 
             # Start PM2 with FULL absolute path (prevents using old cached paths)
