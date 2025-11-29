@@ -7,8 +7,8 @@ import { Page, expect } from '@playwright/test';
  * Handles both empty and populated cart states with resilient waits.
  */
 export async function waitForCartReady(page: Page) {
-  // Wait for page to settle
-  await page.waitForLoadState('networkidle');
+  // Wait for page to settle (domcontentloaded for reliability)
+  await page.waitForLoadState('domcontentloaded');
 
   // Ensure cart root container is present
   await page.waitForSelector('[data-testid="cart-root"]', {
@@ -44,7 +44,7 @@ export async function waitForCartReady(page: Page) {
  * Enhanced cart ready helper with custom timeout
  */
 export async function waitForCartReadyWithTimeout(page: Page, timeout: number = 10000) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
 
   try {
     // Wait for cart container
