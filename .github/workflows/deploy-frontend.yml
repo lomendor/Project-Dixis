@@ -76,7 +76,7 @@ jobs:
           REMOTE_USER: ${{ secrets.VPS_USER }}
           SOURCE: "frontend/.next/standalone/"
           TARGET: "/var/www/dixis/current/frontend/"
-          ARGS: "-rlvz --delete --omit-dir-times --exclude='.env*'"
+          ARGS: "-rlvz --delete --omit-dir-times"
 
       - name: Configure and start app
         uses: appleboy/ssh-action@v1.0.3
