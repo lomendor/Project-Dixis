@@ -107,7 +107,11 @@ jobs:
             echo "HOSTNAME=0.0.0.0" >> .env
             echo "DATABASE_URL=${DATABASE_URL}" >> .env
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
-            cat .env | head -3
+            # Memory limit for Node.js (VPS has limited RAM)
+            echo "NODE_OPTIONS=--max-old-space-size=384" >> .env
+            # Internal URL for SSR - prevents deadlock through nginx
+            echo "INTERNAL_API_URL=http://localhost:3000" >> .env
+            cat .env | head -5
 
             # AGGRESSIVE CLEANUP: Delete all PM2 processes and their configs
             pm2 delete all 2>/dev/null || true
@@ -136,17 +140,15 @@ jobs:
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
             # Start PM2 with memory limit and restart controls
-            # --max-memory-restart 400M: Restart if memory exceeds 400MB (prevents OOM)
-            # --max-restarts 5: Limit restart attempts to prevent infinite loops
-            # --exp-backoff-restart-delay 1000: Wait 1s before restart to release port
-            echo "Starting PM2 with memory limit (400M) and max 5 restarts..."
-            NODE_OPTIONS="--max-old-space-size=512" \
-            PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js \
+            # --max-memory-restart 300M: Restart if memory exceeds 300MB (VPS has limited RAM)
+            # --max-restarts 10: Allow more restarts for stability
+            # --exp-backoff-restart-delay 2000: Wait 2s before restart to release port
+            echo "Starting PM2 with memory limit (300M) and max 10 restarts..."
+            pm2 start /var/www/dixis/current/frontend/server.js \
                 --name "dixis-frontend" \
-                --max-memory-restart 400M \
-                --max-restarts 5 \
-                --exp-backoff-restart-delay=1000 2>&1 || {
+                --max-memory-restart 300M \
+                --max-restarts 10 \
+                --exp-backoff-restart-delay=2000 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
