@@ -103,30 +103,43 @@ jobs:
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
             cat .env | head -3
 
-            # Stop ALL PM2 processes completely
+            # AGGRESSIVE CLEANUP: Delete all PM2 processes and their configs
+            pm2 delete all 2>/dev/null || true
             pm2 kill 2>/dev/null || true
-            sleep 3
-
-            # Kill any process using port 3000
-            sudo fuser -k 3000/tcp 2>/dev/null || true
             sleep 2
+
+            # Kill any process using port 3000 (multiple attempts)
+            sudo fuser -k 3000/tcp 2>/dev/null || true
+            sleep 1
             fuser -k 3000/tcp 2>/dev/null || true
-            sleep 3
+            sleep 2
 
-            # Final check - verify port is free
-            echo "Port 3000 status after cleanup:"
-            lsof -i:3000 2>/dev/null || echo "Port 3000 is free"
+            # Verify port is free (loop until free or timeout)
+            for i in 1 2 3 4 5; do
+              if ! lsof -i:3000 2>/dev/null | grep -q LISTEN; then
+                echo "Port 3000 is free (attempt $i)"
+                break
+              fi
+              echo "Port 3000 still in use, killing again (attempt $i)..."
+              sudo fuser -k 3000/tcp 2>/dev/null || true
+              sleep 2
+            done
 
-            # Start PM2 with FULL absolute path (prevents using old cached paths)
+            # Start PM2 with single instance (no cluster mode)
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend"
+              pm2 start /var/www/dixis/current/frontend/server.js \
+              --name "dixis-frontend" \
+              -i 1 \
+              --wait-ready \
+              --listen-timeout 30000
+
             pm2 save
 
-            # Wait for app to start and show logs if it failed
-            sleep 20
+            # Wait for app to fully start
+            sleep 15
             pm2 status
-            echo "--- PM2 Logs (last 30 lines) ---"
-            pm2 logs dixis-frontend --nostream --lines 30 || true
+            echo "--- PM2 Logs (last 20 lines) ---"
+            pm2 logs dixis-frontend --nostream --lines 20 || true
             echo "--- Health Check ---"
             curl -sI http://127.0.0.1:3000 | head -5 || echo "Health check failed"
         env:
