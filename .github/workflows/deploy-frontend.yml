@@ -107,8 +107,8 @@ jobs:
             echo "HOSTNAME=0.0.0.0" >> .env
             echo "DATABASE_URL=${DATABASE_URL}" >> .env
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
-            # Memory limit for Node.js (VPS has limited RAM - balanced for stability)
-            echo "NODE_OPTIONS=--max-old-space-size=256" >> .env
+            # Memory limit for Node.js (VPS has limited RAM - stability-focused)
+            echo "NODE_OPTIONS=--max-old-space-size=320" >> .env
             # Internal URL for SSR - prevents deadlock through nginx
             echo "INTERNAL_API_URL=http://localhost:3000" >> .env
             cat .env | head -5
@@ -139,22 +139,25 @@ jobs:
             pm2 flush 2>/dev/null || true
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Start PM2 with BALANCED memory limits for low-RAM VPS
+            # Start PM2 with STABILITY-FOCUSED config for low-RAM VPS
             # Environment variables must be passed inline - Next.js standalone doesn't load .env
-            # --max-memory-restart 200M: Balance between stability (150M too aggressive) and VPS limits
-            # --max-restarts 15: Enough restarts for resilience
-            # --exp-backoff-restart-delay 1500: Balanced recovery time (1.5s delay)
-            echo "Starting PM2 with balanced memory limits (200M) for low-RAM VPS..."
-            NODE_OPTIONS="--max-old-space-size=256" \
+            # Analysis: App peaks at ~175MB during startup, settles ~150MB after warmup
+            # --max-memory-restart 256M: Above startup peak (175MB) to allow initialization
+            # --kill-timeout 5000: Clean process shutdown to prevent EADDRINUSE on restart
+            # --max-restarts 10: Fewer restarts - focus on stability not resilience
+            # --exp-backoff-restart-delay 3000: Longer delay (3s) to ensure port is released
+            echo "Starting PM2 with stability-focused config (256M limit, 5s kill timeout)..."
+            NODE_OPTIONS="--max-old-space-size=320" \
             PORT=3000 HOSTNAME=0.0.0.0 \
             DATABASE_URL="${DATABASE_URL}" \
             RESEND_API_KEY="${RESEND_API_KEY}" \
             INTERNAL_API_URL="http://localhost:3000" \
             pm2 start /var/www/dixis/current/frontend/server.js \
                 --name "dixis-frontend" \
-                --max-memory-restart 200M \
-                --max-restarts 15 \
-                --exp-backoff-restart-delay=1500 2>&1 || {
+                --max-memory-restart 256M \
+                --kill-timeout 5000 \
+                --max-restarts 10 \
+                --exp-backoff-restart-delay=3000 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
