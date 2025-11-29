@@ -125,13 +125,14 @@ jobs:
               sleep 2
             done
 
-            # Clear old PM2 logs to avoid confusion with previous restarts
+            # Clear old PM2 logs - both flush AND truncate the actual log files
             pm2 flush 2>/dev/null || true
+            rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Start PM2 in fork mode with restart delay to avoid EADDRINUSE
-            echo "Starting PM2 with: pm2 start server.js --name dixis-frontend"
+            # Start PM2 with exp-backoff restart delay to avoid EADDRINUSE on rapid restarts
+            echo "Starting PM2 with: pm2 start server.js --name dixis-frontend --exp-backoff-restart-delay=100"
             PORT=3000 HOSTNAME=0.0.0.0 DATABASE_URL="${DATABASE_URL}" RESEND_API_KEY="${RESEND_API_KEY}" \
-              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend" --no-autorestart 2>&1 || {
+              pm2 start /var/www/dixis/current/frontend/server.js --name "dixis-frontend" --exp-backoff-restart-delay=100 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
@@ -142,30 +143,24 @@ jobs:
 
             pm2 save
 
-            # Wait for Next.js to become ready (~35s based on logs)
-            echo "Waiting 40s for Next.js to start..."
-            sleep 40
+            # Wait for Next.js to become ready
+            echo "Waiting 35s for Next.js to start..."
+            sleep 35
 
-            echo "=== DIAGNOSTICS AFTER 40s ==="
+            echo "=== DIAGNOSTICS ==="
             pm2 status
 
             echo "--- Port 3000 Status ---"
             lsof -i:3000 2>/dev/null || echo "Nothing listening on port 3000!"
 
-            echo "--- Memory Info ---"
-            free -m || true
+            echo "--- PM2 Error Logs (fresh from this deploy) ---"
+            pm2 logs dixis-frontend --err --nostream --lines 30 || true
 
-            echo "--- PM2 Error Logs (FULL) ---"
-            pm2 logs dixis-frontend --err --nostream --lines 50 || true
+            echo "--- PM2 Output Logs ---"
+            pm2 logs dixis-frontend --out --nostream --lines 15 || true
 
-            echo "--- PM2 Output Logs (FULL) ---"
-            pm2 logs dixis-frontend --out --nostream --lines 50 || true
-
-            echo "--- Node.js Version ---"
-            node --version || true
-
-            echo "--- Health Check with extended timeout ---"
-            curl -v --max-time 15 http://127.0.0.1:3000/api/healthz 2>&1 || echo "Health check failed"
+            echo "--- Health Check ---"
+            curl -v --max-time 10 http://127.0.0.1:3000/api/healthz 2>&1 | head -30 || echo "Health check failed"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
