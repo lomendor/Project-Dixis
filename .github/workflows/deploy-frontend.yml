@@ -57,9 +57,16 @@ jobs:
           # Next.js standalone mode requires copying static assets
           cp -r .next/static .next/standalone/.next/static
           cp -r public .next/standalone/public
-          # Copy prisma client for database access
-          mkdir -p .next/standalone/node_modules/.prisma
-          cp -r node_modules/.prisma/client .next/standalone/node_modules/.prisma/
+
+          # Copy prisma client (pnpm puts it in a different location)
+          PRISMA_CLIENT=$(find node_modules/.pnpm -type d -name ".prisma" -path "*@prisma+client*" | head -1)
+          if [ -n "$PRISMA_CLIENT" ]; then
+            mkdir -p .next/standalone/node_modules/.prisma
+            cp -r "$PRISMA_CLIENT/client" .next/standalone/node_modules/.prisma/
+            echo "Copied prisma client from: $PRISMA_CLIENT"
+          else
+            echo "Warning: Prisma client not found, Next.js standalone should include it"
+          fi
 
       - name: Deploy standalone to VPS
         uses: easingthemes/ssh-deploy@main
