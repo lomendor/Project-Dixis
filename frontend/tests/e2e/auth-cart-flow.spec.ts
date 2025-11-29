@@ -6,8 +6,8 @@ const setupPage = async (page: any) => {
   await page.getByTestId('page-root').or(page.getByTestId('error-boundary')).first().waitFor({ timeout: 15000 });
 };
 const setupAuthState = async (page: any, context: any, role: 'consumer' | 'producer') => {
-  await context.addCookies([{ name: 'auth_token', value: `${role}_token`, domain: '127.0.0.1', path: '/' }]);
-  await page.addInitScript((r: string) => { localStorage.setItem('auth_token', `${r}_token`); localStorage.setItem('user_role', r); }, role);
+  await context.addCookies([{ name: 'auth_token', value: 'mock_token', domain: '127.0.0.1', path: '/' }]);
+  await page.addInitScript((r: string) => { localStorage.setItem('auth_token', 'mock_token'); localStorage.setItem('user_role', r); }, role);
 };
 test.describe('Auth-Cart Flow Tests', () => {
   test('Guest users see login prompt for cart access', async ({ page }) => {

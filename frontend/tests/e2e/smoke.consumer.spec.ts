@@ -26,19 +26,14 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     
     // Inject consumer authentication after hydration
     await page.evaluate(() => {
-      localStorage.setItem('auth_token', 'mock_consumer_token');
-      localStorage.setItem('user_role', 'consumer'); 
+      localStorage.setItem('auth_token', 'mock_token');
+      localStorage.setItem('user_role', 'consumer');
       localStorage.setItem('user_email', 'consumer@dixis.local');
-      
-      // Trigger a storage event to simulate auth change
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'auth_token',
-        newValue: 'mock_consumer_token'
-      }));
     });
-    
-    // Wait for AuthContext to process the change and re-render
-    await page.waitForTimeout(1000);
+
+    // Reload page to trigger AuthContext re-initialization with new localStorage
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
     
     // Look for mobile menu button
     const mobileMenuButton = page.getByTestId('mobile-menu-button');
@@ -76,19 +71,14 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     
     // Inject consumer authentication after hydration
     await page.evaluate(() => {
-      localStorage.setItem('auth_token', 'mock_consumer_token');
-      localStorage.setItem('user_role', 'consumer'); 
+      localStorage.setItem('auth_token', 'mock_token');
+      localStorage.setItem('user_role', 'consumer');
       localStorage.setItem('user_email', 'consumer@dixis.local');
-      
-      // Trigger storage event
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'auth_token',
-        newValue: 'mock_consumer_token'
-      }));
     });
-    
-    // Wait for auth context to process
-    await page.waitForTimeout(1000);
+
+    // Reload page to trigger AuthContext re-initialization
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
     
     // Check for authenticated consumer interface elements
     // Either user menu (desktop) or nav cart should be visible for authenticated users
@@ -124,19 +114,14 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     
     // Inject authentication before checking cart functionality
     await page.evaluate(() => {
-      localStorage.setItem('auth_token', 'mock_consumer_token');
-      localStorage.setItem('user_role', 'consumer'); 
+      localStorage.setItem('auth_token', 'mock_token');
+      localStorage.setItem('user_role', 'consumer');
       localStorage.setItem('user_email', 'consumer@dixis.local');
-      
-      // Trigger storage event
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'auth_token',
-        newValue: 'mock_consumer_token'
-      }));
     });
-    
-    // Wait for auth processing and page stability
-    await page.waitForTimeout(1000);
+
+    // Reload page to trigger AuthContext re-initialization
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
     
     // Authenticated users should see either cart items or empty cart message
     // (depending on MSW mock data)
