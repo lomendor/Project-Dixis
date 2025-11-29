@@ -88,7 +88,10 @@ jobs:
           script: |
             cd /var/www/dixis/current/frontend
 
-            # Create .env file with production secrets
+            # Remove ALL old .env files (they have wrong permissions from old deploys)
+            rm -f .env .env.local .env.production .env.production.local 2>/dev/null || true
+
+            # Create fresh .env file with production secrets
             echo "NODE_ENV=production" > .env
             echo "PORT=3000" >> .env
             echo "HOSTNAME=0.0.0.0" >> .env
