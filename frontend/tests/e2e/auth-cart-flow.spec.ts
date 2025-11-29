@@ -3,7 +3,7 @@ import { expectAuthedOrLogin } from './helpers/auth-mode';
 import './setup.mocks';
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await Promise.race([page.getByTestId('page-root').waitFor().catch(() => {}), page.getByTestId('error-boundary').waitFor().catch(() => {})]);
+  await page.getByTestId('page-root').or(page.getByTestId('error-boundary')).first().waitFor({ timeout: 15000 });
 };
 const setupAuthState = async (page: any, context: any, role: 'consumer' | 'producer') => {
   await context.addCookies([{ name: 'auth_token', value: `${role}_token`, domain: '127.0.0.1', path: '/' }]);

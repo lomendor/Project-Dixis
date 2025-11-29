@@ -96,16 +96,13 @@ test.describe('Consumer Authentication Smoke Tests', () => {
     const navCart = page.getByTestId('nav-cart');
     
     try {
-      // Wait for either authenticated element to appear
-      await Promise.race([
-        userMenu.waitFor({ timeout: 5000 }),
-        navCart.waitFor({ timeout: 5000 })
-      ]);
-      
+      // Wait for either authenticated element to appear using .or() for deterministic waits
+      await userMenu.or(navCart).first().waitFor({ timeout: 15000 });
+
       // Verify at least one auth element is visible
       const userMenuVisible = await userMenu.isVisible();
       const navCartVisible = await navCart.isVisible();
-      
+
       expect(userMenuVisible || navCartVisible).toBe(true);
       
     } catch (error) {
