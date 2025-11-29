@@ -17,7 +17,7 @@ export function CartBadge() {
       href="/cart"
       className="relative inline-flex items-center gap-2 rounded-lg px-3 py-2 border border-gray-200 bg-white hover:shadow-md transition-shadow"
       aria-label="Μετάβαση στο καλάθι"
-      data-testid="cart-badge"
+      data-testid="nav-cart cart-icon-active"
     >
       <svg
         className="w-5 h-5"
@@ -39,6 +39,7 @@ export function CartBadge() {
           className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs font-bold text-white"
           aria-live="polite"
           aria-atomic="true"
+          data-testid="cart-item-count"
         >
           {displayCount}
         </span>

@@ -42,7 +42,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       <Link
         href="/auth/login"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart cart-login-prompt" : "nav-cart cart-login-prompt"}
+        data-testid="cart-login-prompt"
         aria-label="Login to access cart"
       >
         {getCartMessage('guest')}
@@ -56,10 +56,10 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       <Link
         href="/cart"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart" : "nav-cart cart-icon-active"}
+        data-testid={isMobile ? "mobile-nav-cart" : "nav-cart"}
         aria-label={`View cart with ${cartItemCount} items`}
       >
-        <span className="flex items-center">
+        <span className="flex items-center" data-testid="cart-icon-active">
           Cart
           {cartItemCount > 0 && (
             <span
@@ -78,9 +78,9 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
   // Producer users - limited cart access with message
   if (isProducer) {
     return (
-      <div 
+      <div
         className={`text-gray-500 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart cart-producer-mode" : "nav-cart cart-producer-mode"}
+        data-testid="cart-producer-mode"
       >
         <span data-testid="cart-producer-message" title="Producers have limited cart access">
           {getCartMessage('producer')}

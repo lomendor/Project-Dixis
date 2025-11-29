@@ -1,13 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import Logo from '@/components/brand/Logo';
-
-const CartBadge = dynamic(
-  () => import('@/components/CartBadge').then(m => ({ default: m.CartBadge })),
-  { ssr: false }
-);
+import CartIcon from '@/components/cart/CartIcon';
 
 const navLinks = [
   { href: '/products', label: 'Προϊόντα' },
@@ -41,7 +36,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <CartBadge />
+          <CartIcon />
 
           {/* Mobile Menu Button - 44px touch target */}
           <button
@@ -50,6 +45,7 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}
+            data-testid="mobile-menu-button"
           >
             {mobileMenuOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,7 +62,7 @@ export default function Header() {
 
       {/* Mobile Menu - generous tap targets */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg">
+        <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg" data-testid="mobile-menu">
           <div className="max-w-6xl mx-auto px-4 py-2">
             {navLinks.map((link) => (
               <Link
