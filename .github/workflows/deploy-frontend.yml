@@ -140,10 +140,16 @@ jobs:
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
             # Start PM2 with memory limit and restart controls
+            # Environment variables must be passed inline - Next.js standalone doesn't load .env
             # --max-memory-restart 300M: Restart if memory exceeds 300MB (VPS has limited RAM)
             # --max-restarts 10: Allow more restarts for stability
             # --exp-backoff-restart-delay 2000: Wait 2s before restart to release port
             echo "Starting PM2 with memory limit (300M) and max 10 restarts..."
+            NODE_OPTIONS="--max-old-space-size=384" \
+            PORT=3000 HOSTNAME=0.0.0.0 \
+            DATABASE_URL="${DATABASE_URL}" \
+            RESEND_API_KEY="${RESEND_API_KEY}" \
+            INTERNAL_API_URL="http://localhost:3000" \
             pm2 start /var/www/dixis/current/frontend/server.js \
                 --name "dixis-frontend" \
                 --max-memory-restart 300M \
