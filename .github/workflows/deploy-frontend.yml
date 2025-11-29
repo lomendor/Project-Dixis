@@ -107,8 +107,8 @@ jobs:
             echo "HOSTNAME=0.0.0.0" >> .env
             echo "DATABASE_URL=${DATABASE_URL}" >> .env
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
-            # Memory limit for Node.js (VPS has very limited RAM - aggressive limit)
-            echo "NODE_OPTIONS=--max-old-space-size=192" >> .env
+            # Memory limit for Node.js (VPS has limited RAM - balanced for stability)
+            echo "NODE_OPTIONS=--max-old-space-size=256" >> .env
             # Internal URL for SSR - prevents deadlock through nginx
             echo "INTERNAL_API_URL=http://localhost:3000" >> .env
             cat .env | head -5
@@ -139,22 +139,22 @@ jobs:
             pm2 flush 2>/dev/null || true
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Start PM2 with AGGRESSIVE memory limits for low-RAM VPS
+            # Start PM2 with BALANCED memory limits for low-RAM VPS
             # Environment variables must be passed inline - Next.js standalone doesn't load .env
-            # --max-memory-restart 150M: Restart before OOM killer intervenes (~170MB crash point)
-            # --max-restarts 20: More restarts allowed for resilience
-            # --exp-backoff-restart-delay 1000: Faster recovery (1s delay)
-            echo "Starting PM2 with AGGRESSIVE memory limits (150M) for low-RAM VPS..."
-            NODE_OPTIONS="--max-old-space-size=192" \
+            # --max-memory-restart 200M: Balance between stability (150M too aggressive) and VPS limits
+            # --max-restarts 15: Enough restarts for resilience
+            # --exp-backoff-restart-delay 1500: Balanced recovery time (1.5s delay)
+            echo "Starting PM2 with balanced memory limits (200M) for low-RAM VPS..."
+            NODE_OPTIONS="--max-old-space-size=256" \
             PORT=3000 HOSTNAME=0.0.0.0 \
             DATABASE_URL="${DATABASE_URL}" \
             RESEND_API_KEY="${RESEND_API_KEY}" \
             INTERNAL_API_URL="http://localhost:3000" \
             pm2 start /var/www/dixis/current/frontend/server.js \
                 --name "dixis-frontend" \
-                --max-memory-restart 150M \
-                --max-restarts 20 \
-                --exp-backoff-restart-delay=1000 2>&1 || {
+                --max-memory-restart 200M \
+                --max-restarts 15 \
+                --exp-backoff-restart-delay=1500 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
