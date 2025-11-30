@@ -90,7 +90,7 @@ export class AuthHelper {
     const currentUrl = this.page.url();
     if (currentUrl === 'about:blank' || !currentUrl.startsWith('http')) {
       // Navigate to a safe page within our origin
-      const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3001';
+      const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:3000';
       await this.page.goto(`${baseUrl}/auth/login`, { 
         waitUntil: 'domcontentloaded' 
       });

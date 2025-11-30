@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'http://127.0.0.1:3001'
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000'
 
 test('checkout M0: happy path from cart to success', async ({ page }) => {
   // Start fresh

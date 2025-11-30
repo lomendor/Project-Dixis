@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
+
 test.describe('PR-PP03-B: Search/Filter Greek Normalization Evidence', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to products page for better search testing
-    await page.goto('http://127.0.0.1:3001');
+    await page.goto(BASE);
     await page.waitForLoadState('networkidle');
-    
+
     // Wait for products to load
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
   });

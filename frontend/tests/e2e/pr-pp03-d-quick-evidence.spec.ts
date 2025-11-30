@@ -7,6 +7,7 @@ import { promises as fs } from 'fs';
  */
 
 const EVIDENCE_DIR = 'test-results/pr-pp03-d-evidence';
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 test.beforeAll(async () => {
   // Ensure evidence directory exists
@@ -22,7 +23,7 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
     console.log('🎬 Starting quick evidence capture...');
     
     // Navigate directly to cart page
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto(`${BASE}/cart`);
     await page.waitForTimeout(3000);
     
     // Take initial screenshot
@@ -161,9 +162,9 @@ test.describe('PR-PP03-D: Quick Checkout Evidence', () => {
   test('Network Failure Simulation', async ({ page }) => {
     console.log('🌐 Testing network failure scenarios...');
     
-    await page.goto('http://127.0.0.1:3001/cart');
+    await page.goto(`${BASE}/cart`);
     await page.waitForTimeout(2000);
-    
+
     // Simulate shipping API failure
     await page.route('**/api/v1/shipping/quote', route => {
       route.fulfill({

@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
+
 test.describe('PR-PP03-B Evidence Collection - Greek Normalization', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE);
     await page.waitForLoadState('networkidle');
   });
 

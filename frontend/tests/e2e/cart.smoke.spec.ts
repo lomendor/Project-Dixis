@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'http://localhost:3001'
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000'
 
 test.describe('Cart v0 Smoke Test', () => {
   test('should add product to cart and view cart page', async ({ page }) => {
