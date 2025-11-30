@@ -269,16 +269,39 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
       
       <Navigation />
       
-      <main id="main-content" data-testid="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 data-testid="page-title" className="text-3xl font-bold text-gray-900 mb-4">
-            Fresh Products from Local Producers
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Discover premium organic vegetables, artisanal products, and fresh fruits directly from passionate Greek producers. 
-            Support sustainable agriculture while enjoying the finest quality produce delivered fresh to your door.
-          </p>
+      <main id="main-content" data-testid="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero Section - Mobile First */}
+        <section className="py-12 md:py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-green-50 via-emerald-50/30 to-white mb-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1
+              data-testid="page-title"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-green-800 via-emerald-700 to-green-600 bg-clip-text text-transparent leading-tight"
+            >
+              Φρέσκα Προϊόντα από Τοπικούς Παραγωγούς
+            </h1>
+            <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed px-4">
+              Ανακαλύψτε βιολογικά λαχανικά, τοπικά προϊόντα και φρέσκα φρούτα απευθείας από Έλληνες παραγωγούς.
+              Υποστηρίξτε τη βιώσιμη γεωργία και απολαύστε την καλύτερη ποιότητα.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a
+                href="#products"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-gradient-to-r from-green-700 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:from-green-800 hover:to-emerald-700 transition-all duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
+              >
+                Εξερεύνησε Προϊόντα
+              </a>
+              <Link
+                href="/producers"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white text-green-700 font-semibold rounded-lg border-2 border-green-700 hover:bg-green-50 transition-colors duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
+              >
+                Γίνε Παραγωγός
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Search & Filters Section */}
+        <div className="py-6">
           
           {/* Enhanced Search and Filters */}
           <div className="space-y-4">
@@ -458,7 +481,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
             onRetry={loadProducts}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div id="products" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 scroll-mt-20">
             {safeProducts.map((product) => (
               <div key={product.id} data-testid="product-card" className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <ProductImage
