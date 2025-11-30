@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
 import { sendOrderConfirmation } from '@/lib/email'
+import { getVivaWalletClient } from '@/lib/viva-wallet/client'
+import { isVivaWalletConfigured } from '@/lib/viva-wallet/config'
 
 // Zod schema with Greek validation messages
 const CheckoutSchema = z.object({
@@ -17,7 +19,8 @@ const CheckoutSchema = z.object({
   items: z.array(z.object({
     id: z.string().cuid(),
     qty: z.number().int().positive()
-  })).min(1, 'Το καλάθι είναι κενό')
+  })).min(1, 'Το καλάθι είναι κενό'),
+  paymentMethod: z.enum(['cod', 'viva']).default('cod')
 })
 
 export async function POST(req: Request) {
@@ -33,7 +36,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { customer, items } = parsed.data
+    const { customer, items, paymentMethod } = parsed.data
 
     // Fetch products (reuse order-intents logic)
     const productIds = items.map(i => i.id)
@@ -142,6 +145,36 @@ export async function POST(req: Request) {
       }
     }
 
+    // Handle Viva Wallet payment if selected
+    let vivaCheckoutUrl: string | undefined
+
+    if (paymentMethod === 'viva') {
+      if (!isVivaWalletConfigured()) {
+        return NextResponse.json(
+          { error: 'Η πληρωμή με κάρτα δεν είναι διαθέσιμη αυτή τη στιγμή' },
+          { status: 503 }
+        )
+      }
+
+      try {
+        const vivaClient = getVivaWalletClient()
+        // Amount in cents (Viva requires amount in smallest currency unit)
+        const amountCents = Math.round(totalDecimal.toNumber() * 100)
+        const vivaOrder = await vivaClient.createOrder(
+          amountCents,
+          `DIXIS-${order.id}`,
+          `Παραγγελία #${order.id} - ${customer.name}`
+        )
+        vivaCheckoutUrl = vivaClient.getCheckoutUrl(vivaOrder.orderCode).redirectUrl
+      } catch (vivaError) {
+        console.error('Viva Wallet error:', vivaError)
+        return NextResponse.json(
+          { error: 'Αποτυχία δημιουργίας πληρωμής με κάρτα' },
+          { status: 502 }
+        )
+      }
+    }
+
     return NextResponse.json({
       orderId: order.id,
       totals: {
@@ -150,7 +183,8 @@ export async function POST(req: Request) {
         vat: vat.toNumber(),
         total: order.total
       },
-      emailSent
+      emailSent,
+      vivaCheckoutUrl
     })
 
   } catch (error) {

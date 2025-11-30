@@ -2,6 +2,7 @@
 import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
+import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 
 function CheckoutContent() {
   const router = useRouter()
@@ -10,6 +11,7 @@ function CheckoutContent() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod')
 
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
@@ -39,7 +41,8 @@ function CheckoutContent() {
         city: formData.get('city') as string,
         postcode: formData.get('postcode') as string
       },
-      items
+      items,
+      paymentMethod
     }
 
     try {
@@ -56,9 +59,17 @@ function CheckoutContent() {
         return
       }
 
-      // Clear cart and redirect to thank-you
+      // Clear cart
       clear()
-      router.push(`/thank-you?id=${data.orderId}`)
+
+      // Redirect based on payment method
+      if (data.vivaCheckoutUrl) {
+        // Viva Wallet: redirect to external payment page
+        window.location.href = data.vivaCheckoutUrl
+      } else {
+        // COD: redirect to thank-you page
+        router.push(`/thank-you?id=${data.orderId}`)
+      }
     } catch (err) {
       console.error('Submit error:', err)
       setError('Παρουσιάστηκε σφάλμα')
@@ -192,6 +203,15 @@ function CheckoutContent() {
                 placeholder="10671"
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-postcode"
+              />
+            </div>
+
+            {/* Payment Method Selection */}
+            <div className="pt-4 border-t">
+              <PaymentMethodSelector
+                value={paymentMethod}
+                onChange={setPaymentMethod}
+                disabled={loading}
               />
             </div>
 
