@@ -11,6 +11,8 @@ import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { greekNormalize, greekTextContains } from '@/lib/utils/greekNormalize';
+import SearchBar from '@/components/ui/SearchBar';
+import CategoryPills from '@/components/catalogue/CategoryPills';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
 
@@ -300,7 +302,20 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           </div>
         </section>
 
-        {/* Search & Filters Section */}
+        {/* Mobile-First Search & Category Pills */}
+        <section className="py-4 space-y-4">
+          <SearchBar
+            value={filters.search}
+            onChange={(query) => updateFilter('search', query)}
+            placeholder="Αναζήτηση σε μέλι, λάδι, βότανα..."
+          />
+          <CategoryPills
+            selected={filters.category}
+            onChange={(categoryId) => updateFilter('category', categoryId)}
+          />
+        </section>
+
+        {/* Advanced Filters Section */}
         <div className="py-6">
           
           {/* Enhanced Search and Filters */}
