@@ -26,7 +26,7 @@ test.describe('Cart quantity controls', () => {
     await page.waitForTimeout(1000)
 
     // 2) Verify badge shows count of 1
-    const badge = page.getByTestId('cart-badge')
+    const badge = page.getByTestId('cart-item-count')
     await expect(badge).toBeVisible()
     let badgeText = await badge.innerText()
     expect(badgeText).toContain('1')

@@ -36,7 +36,7 @@ test.describe('AddToCart Button Visual Feedback', () => {
     await page.goto('/products')
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     const firstButton = page.locator('[data-testid="add-to-cart-button"]').first()
 
     // Add product to cart
@@ -58,7 +58,7 @@ test.describe('AddToCart Button Visual Feedback', () => {
     await page.goto('/products')
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     const firstButton = page.locator('[data-testid="add-to-cart-button"]').first()
 
     // Click button
@@ -83,7 +83,7 @@ test.describe('AddToCart Button Visual Feedback', () => {
     await page.goto('/products')
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     const buttons = page.locator('[data-testid="add-to-cart-button"]')
 
     // Click first button

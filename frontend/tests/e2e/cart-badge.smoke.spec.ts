@@ -9,7 +9,7 @@ test.describe('CartBadge Smoke Test', () => {
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
     // Verify CartBadge is visible in header
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     await expect(cartBadge).toBeVisible()
 
     // Initially should show "Καλάθι" text without count
@@ -47,7 +47,7 @@ test.describe('CartBadge Smoke Test', () => {
     await page.locator('button:has-text("Προσθήκη")').first().click()
 
     // Verify count shows "1"
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     await expect(cartBadge.locator('span:has-text("1")')).toBeVisible({ timeout: 5000 })
 
     // Reload page

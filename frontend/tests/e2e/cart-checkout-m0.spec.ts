@@ -12,7 +12,7 @@ test.describe('Cart & Checkout M0 (prod)', () => {
     await addButtons.nth(1).click();
 
     // Badge should be >= 2
-    const badge = page.locator('[data-testid="cart-badge"]');
+    const badge = page.locator('[data-testid="cart-item-count"]');
     await expect(badge).toBeVisible();
     const badgeText = await badge.innerText();
     const count = parseInt(badgeText.replace(/\D/g, ''), 10);
@@ -46,7 +46,7 @@ test.describe('Cart & Checkout M0 (prod)', () => {
 
     // Cart should be cleared
     await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' });
-    const badgeAfter = page.locator('[data-testid="cart-badge"]');
+    const badgeAfter = page.locator('[data-testid="cart-item-count"]');
     // Badge might be hidden or show 0 - check if it's not visible or shows 0
     const badgeCount = await badgeAfter.count();
     if (badgeCount > 0) {
