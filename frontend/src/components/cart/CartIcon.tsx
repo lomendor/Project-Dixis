@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getCartMessage } from '@/lib/auth/helpers';
+import { getCart } from '@/lib/cart/store';
 
 interface CartIconProps {
   className?: string;
@@ -14,8 +15,27 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
   const { isGuest, isConsumer, isProducer, user } = useAuth();
   const [cartItemCount, setCartItemCount] = useState<number>(0);
 
-  // Fetch cart count from API
+  // Fetch cart count from API (for authenticated users) or localStorage (for guests)
   useEffect(() => {
+    // Guest users: get cart from localStorage
+    if (isGuest) {
+      const updateGuestCart = () => {
+        const cart = getCart();
+        setCartItemCount(cart.items.length);
+      };
+
+      updateGuestCart();
+
+      // Listen for cart updates
+      window.addEventListener('storage', updateGuestCart);
+      window.addEventListener('cart:updated', updateGuestCart);
+      return () => {
+        window.removeEventListener('storage', updateGuestCart);
+        window.removeEventListener('cart:updated', updateGuestCart);
+      };
+    }
+
+    // Consumer users: fetch from API
     if (!isConsumer) return undefined;
 
     async function fetchCartCount() {
@@ -34,18 +54,29 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
     const handleUpdate = () => fetchCartCount();
     window.addEventListener('cart:updated', handleUpdate);
     return () => window.removeEventListener('cart:updated', handleUpdate);
-  }, [isConsumer]);
+  }, [isGuest, isConsumer]);
 
-  // Guest users - show login prompt
+  // Guest users - show cart link (guest checkout supported)
   if (isGuest) {
     return (
       <Link
-        href="/auth/login"
-        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid="cart-login-prompt"
-        aria-label="Login to access cart"
+        href="/cart"
+        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
+        data-testid={isMobile ? "mobile-nav-cart-guest" : "nav-cart-guest"}
+        aria-label={`View cart with ${cartItemCount} items`}
       >
-        {getCartMessage('guest')}
+        <span className="flex items-center" data-testid="cart-icon-guest">
+          🛒 Καλάθι
+          {cartItemCount > 0 && (
+            <span
+              className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
+              data-testid="cart-item-count-guest"
+              aria-label="cart-count"
+            >
+              {cartItemCount}
+            </span>
+          )}
+        </span>
       </Link>
     );
   }
