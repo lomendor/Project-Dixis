@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const BASE = process.env.BASE_URL || 'https://dixis.gr'
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000'
 
 test.describe('Products UI — Stable Smoke', () => {
   test('renders grid and product cards without console errors', async ({ page }) => {

@@ -5,7 +5,7 @@ test.use({
   ...devices['iPhone 13'],
 });
 
-const BASE = process.env.BASE_URL || 'https://dixis.gr';
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 test('products mobile: no reload loop & no console errors', async ({ page }) => {
   const errors: string[] = [];

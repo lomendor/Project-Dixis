@@ -10,7 +10,7 @@ test.use({
   hasTouch: true,
 });
 
-const BASE = process.env.BASE_URL || 'https://dixis.gr';
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 test('products (WebKit iOS emu): no reload loop/jitter', async ({ page }) => {
   let navigations = 0;
