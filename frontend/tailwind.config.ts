@@ -14,6 +14,16 @@ const config: Config = {
           DEFAULT: 'hsl(var(--brand-primary))',
           foreground: 'hsl(var(--brand-primary-foreground))'
         },
+        // Dixis Brand Palette (from Gemini mockup)
+        dixis: {
+          green: '#163A30',      // Deep Cypress Green (primary brand color)
+          light: '#2C5E50',      // Lighter green (hover state)
+          gold: '#C5A065',       // Premium gold accents
+          paper: '#FDFBF7',      // Warm paper background
+          text: '#2D2D2D',       // Primary text
+          muted: '#666666',      // Secondary text
+          border: '#E5E5E5',     // Border color
+        },
         // Primary - Cyprus Green (agricultural, trust, freshness)
         primary: {
           DEFAULT: '#0f5c2e',
@@ -64,7 +74,11 @@ const config: Config = {
         'lg': '0 8px 24px rgba(0,0,0,0.12)',
         'glow': '0 0 20px rgba(15,92,46,0.15)',
         'card': '0 2px 8px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.04)',
-        'card-hover': '0 4px 12px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.08)'
+        'card-hover': '0 4px 12px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.08)',
+        // Dixis shadows (from Gemini mockup)
+        'dixis-card': '0 2px 4px rgba(0,0,0,0.08)',
+        'dixis-hover': '0 4px 12px rgba(0,0,0,0.15)',
+        'dixis-nav': '0 2px 8px rgba(0,0,0,0.1)',
       },
       borderRadius: {
         'sm': '8px',
@@ -75,6 +89,10 @@ const config: Config = {
       spacing: {
         '18': '4.5rem',
         '22': '5.5rem'
+      },
+      fontFamily: {
+        heading: ['var(--font-playfair)', 'serif'],
+        body: ['var(--font-manrope)', 'sans-serif'],
       },
       fontSize: {
         'display': ['3rem', { lineHeight: '1.1', fontWeight: '700' }],
