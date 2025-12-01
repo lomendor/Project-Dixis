@@ -68,6 +68,27 @@ jobs:
             echo "Warning: Prisma client not found, Next.js standalone should include it"
           fi
 
+      - name: Prepare VPS directory (fix permissions)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            # Target directory for deploy-frontend
+            TARGET_DIR="/var/www/dixis/current/frontend"
+
+            # Create directory if it doesn't exist
+            mkdir -p "$TARGET_DIR"
+
+            # Fix ownership (deploy user needs write access for rsync --delete)
+            sudo chown -R deploy:deploy "$TARGET_DIR"
+
+            # Fix permissions (rwX for owner/group)
+            sudo chmod -R u+rwX,g+rwX "$TARGET_DIR"
+
+            echo "✅ Permissions fixed for $TARGET_DIR"
+
       - name: Deploy standalone to VPS
         uses: easingthemes/ssh-deploy@main
         with:
