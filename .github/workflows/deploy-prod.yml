@@ -86,7 +86,12 @@ jobs:
 
             # Write env files
             rm -f prisma/.env
-            printf "DATABASE_URL=%s\n" "$DATABASE_URL" > .env
+            cat > .env << 'ENVEOF'
+DATABASE_URL=$DATABASE_URL
+NEXT_PUBLIC_API_BASE_URL=https://dixis.gr/api/v1
+ENVEOF
+            # Replace the DATABASE_URL placeholder with actual value
+            sed -i "s|DATABASE_URL=\$DATABASE_URL|DATABASE_URL=$DATABASE_URL|g" .env
             cp .env .env.production
 
             pnpm install --frozen-lockfile
@@ -94,10 +99,19 @@ jobs:
             export NEXT_CACHE_DIR="$NEXT_CACHE_DIR"
             pnpm build
 
-            # Kill any existing process on port 3000 and restart
-            pkill -f "next start" || true
+            # Copy .env and static assets to standalone directory
+            mkdir -p .next/standalone
+            cp .env .next/standalone/.env
+            cp -r public .next/standalone/ 2>/dev/null || true
+            cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
+
+            # Kill any existing process and restart with standalone server
+            pkill -f "node.*server.js" || pkill -f "next start" || true
             sleep 2
-            pm2 restart dixis-frontend --update-env || pm2 start npm --name dixis-frontend -- start
+            cd .next/standalone
+            pm2 restart dixis-frontend --update-env || pm2 start server.js --name dixis-frontend
+            cd ../..
+            sleep 3
             curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
           '\'''
 
