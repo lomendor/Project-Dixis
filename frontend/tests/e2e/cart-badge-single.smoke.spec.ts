@@ -8,8 +8,8 @@ test.describe('Single CartBadge Smoke Test', () => {
     // Wait for products to load
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
-    // Count all cart badges with data-testid="cart-badge"
-    const cartBadges = page.locator('[data-testid="cart-badge"]')
+    // Count all cart badges with data-testid="cart-item-count"
+    const cartBadges = page.locator('[data-testid="cart-item-count"]')
     await expect(cartBadges).toHaveCount(1)
 
     // Verify the single badge is visible
@@ -25,7 +25,7 @@ test.describe('Single CartBadge Smoke Test', () => {
     await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 })
 
     // Get the single cart badge
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
 
     // Verify exactly one badge exists
     await expect(cartBadge).toHaveCount(1)
@@ -61,7 +61,7 @@ test.describe('Single CartBadge Smoke Test', () => {
     await page.locator('button:has-text("Προσθήκη")').first().click()
 
     // Wait for cart to update
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     await expect(cartBadge.locator('span:has-text("1")')).toBeVisible({ timeout: 5000 })
 
     // Navigate to cart page
@@ -71,7 +71,7 @@ test.describe('Single CartBadge Smoke Test', () => {
     await expect(page.locator('h1:has-text("Καλάθι")')).toBeVisible()
 
     // Verify still exactly ONE cart badge exists (in header)
-    await expect(page.locator('[data-testid="cart-badge"]')).toHaveCount(1)
+    await expect(page.locator('[data-testid="cart-item-count"]')).toHaveCount(1)
   })
 
   test('cart badge persists across navigation', async ({ page }) => {
@@ -83,21 +83,21 @@ test.describe('Single CartBadge Smoke Test', () => {
     await page.locator('button:has-text("Προσθήκη")').nth(1).click()
 
     // Wait for badge to show "2"
-    const cartBadge = page.locator('[data-testid="cart-badge"]')
+    const cartBadge = page.locator('[data-testid="cart-item-count"]')
     await expect(cartBadge.locator('span:has-text("2")')).toBeVisible({ timeout: 5000 })
 
     // Navigate to home
     await page.goto('/')
 
     // Badge should still show "2" and be exactly one
-    await expect(page.locator('[data-testid="cart-badge"]')).toHaveCount(1)
-    await expect(page.locator('[data-testid="cart-badge"]').locator('span:has-text("2")')).toBeVisible()
+    await expect(page.locator('[data-testid="cart-item-count"]')).toHaveCount(1)
+    await expect(page.locator('[data-testid="cart-item-count"]').locator('span:has-text("2")')).toBeVisible()
 
     // Navigate to cart page
     await page.goto('/cart')
 
     // Badge should still show "2" and be exactly one
-    await expect(page.locator('[data-testid="cart-badge"]')).toHaveCount(1)
-    await expect(page.locator('[data-testid="cart-badge"]').locator('span:has-text("2")')).toBeVisible()
+    await expect(page.locator('[data-testid="cart-item-count"]')).toHaveCount(1)
+    await expect(page.locator('[data-testid="cart-item-count"]').locator('span:has-text("2")')).toBeVisible()
   })
 })

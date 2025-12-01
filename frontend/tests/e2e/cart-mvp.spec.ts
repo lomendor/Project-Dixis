@@ -24,7 +24,7 @@ test.describe('Cart MVP', () => {
     await page.waitForTimeout(1000)
 
     // 3) Badge should show "1"
-    const badge = page.getByTestId('cart-badge')
+    const badge = page.getByTestId('cart-item-count')
     await expect(badge).toBeVisible()
     const badgeText = await badge.innerText()
     expect(badgeText).toContain('1')

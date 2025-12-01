@@ -29,7 +29,7 @@ test.describe('Cart add → badge → cart page', () => {
 
     // 3) Badge count (εύκαμπτοι selectors)
     // Προσπαθούμε πρώτα με [data-testid], αλλιώς text-based fallback
-    const candidateBadges = page.locator('[data-testid="cart-badge"], .cart-badge, a[href="/cart"] .badge, header .badge');
+    const candidateBadges = page.locator('[data-testid="cart-item-count"], .cart-item-count, a[href="/cart"] .badge, header .badge');
     // Αρκεί να υπάρχει κάποιο badge που περιέχει 2
     const badgeTextCandidates = await candidateBadges.allInnerTexts().catch(() => []);
     const anyShowsTwo = badgeTextCandidates.some(t => /\b2\b/.test(t.trim()));

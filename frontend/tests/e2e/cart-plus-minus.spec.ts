@@ -23,7 +23,7 @@ test.describe('Cart +/- buttons (AG119.2)', () => {
     console.log('LocalStorage after add:', storageAfterAdd)
 
     // Badge auto-updates with Zustand (no reload needed)
-    const badge = page.getByTestId('cart-badge')
+    const badge = page.getByTestId('cart-item-count')
     await expect(badge).toBeVisible({ timeout: 5000 })
 
     // Πήγαινε στο καλάθι
@@ -109,7 +109,7 @@ test.describe('Cart +/- buttons (AG119.2)', () => {
     await page.waitForTimeout(500)
 
     // Badge should show 1 (auto-updates with @/store/cart context)
-    const badge = page.getByTestId('cart-badge')
+    const badge = page.getByTestId('cart-item-count')
     await expect(badge).toContainText('1', { timeout: 5000 })
 
     // Add same product again
