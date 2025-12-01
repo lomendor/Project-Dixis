@@ -42,10 +42,13 @@ test.describe('AG121: MVP Checkout (Order Intent)', () => {
     await expect(page.locator('[data-testid="checkout-page"]')).toBeVisible()
     await expect(page.locator('[data-testid="checkout-form"]')).toBeVisible()
 
-    // 7. Fill checkout form
+    // 7. Fill checkout form (all required fields)
     await page.locator('[data-testid="checkout-name"]').fill('Test User')
+    await page.locator('[data-testid="checkout-phone"]').fill('+30 210 1234567')
     await page.locator('[data-testid="checkout-email"]').fill('test@example.com')
     await page.locator('[data-testid="checkout-address"]').fill('Test Address 123')
+    await page.locator('[data-testid="checkout-city"]').fill('Αθήνα')
+    await page.locator('[data-testid="checkout-postcode"]').fill('10671')
 
     // 8. Submit order
     await page.locator('[data-testid="checkout-submit"]').click()
