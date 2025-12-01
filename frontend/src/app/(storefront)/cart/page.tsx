@@ -48,12 +48,12 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Καλάθι</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-4">Καλάθι</h1>
 
         {list.length === 0 ? (
           <div className="bg-white border rounded-xl p-10 text-center" data-testid="empty-cart">
             <p className="text-gray-600 mb-4" data-testid="empty-cart-message">Το καλάθι σας είναι άδειο.</p>
-            <Link href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+            <Link href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation">
               Συνέχεια αγορών
             </Link>
           </div>
@@ -95,18 +95,18 @@ export default function CartPage() {
                 <span className="text-lg font-bold" data-testid="total">Σύνολο: {fmt.format(totalCents / 100)}</span>
               </div>
               <p className="text-xs text-gray-500 mt-2">Οι τελικές χρεώσεις (μεταφορικά/ΦΠΑ) υπολογίζονται στο checkout.</p>
-              <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">
+              <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 active:bg-red-100 touch-manipulation">
                 Καθαρισμός
               </button>
               <button
                 onClick={handleCheckout}
                 disabled={loading}
-                className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 w-full inline-flex justify-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation active:opacity-90"
                 data-testid="go-checkout"
               >
                 {loading ? 'Παρακαλώ περιμένετε...' : 'Συνέχεια στο checkout'}
               </button>
-              <Link href="/products" className="mt-2 w-full inline-flex justify-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">
+              <Link href="/products" className="mt-2 w-full inline-flex justify-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 touch-manipulation">
                 Συνέχεια αγορών
               </Link>
             </aside>

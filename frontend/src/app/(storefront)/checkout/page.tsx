@@ -73,7 +73,7 @@ function CheckoutContent() {
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
           <p className="text-gray-600 mb-4">Το καλάθι σας είναι κενό</p>
-          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+          <a href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation">
             Προβολή Προϊόντων
           </a>
         </div>
@@ -84,7 +84,7 @@ function CheckoutContent() {
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-6">Checkout</h1>
 
         <div className="bg-white border rounded-xl p-6 mb-6">
           <h2 className="font-semibold mb-4">Στοιχεία Παραγγελίας</h2>
@@ -204,7 +204,7 @@ function CheckoutContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base"
+              className="w-full h-12 bg-primary hover:bg-primary-light disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
               data-testid="checkout-submit"
             >
               {loading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
