@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     if (!isPaid) {
       return NextResponse.json({
         success: false,
-        error: '≈ ю╩╥аи╪╝ ╢╣╫ ©╩©╨╩╥ан╦╥╨╣'
+        error: 'н≈ о─н╩н╥о│о┴н╪н╝ н╢н╣н╫ н©н╩н©н╨н╩н╥о│о▌н╦н╥н╨н╣'
       })
     }
 

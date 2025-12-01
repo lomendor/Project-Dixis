@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function VivaReturnPage() {
+function VivaReturnContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -15,7 +15,7 @@ export default function VivaReturnPage() {
 
       if (!orderCode) {
         setStatus('error')
-        setMessage('”µ½ ²Á­¸·º±½ ÃÄ¿¹Çµ¯± À»·ÁÉ¼®Â')
+        setMessage('Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎ±Î½ ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚')
         return
       }
 
@@ -25,18 +25,18 @@ export default function VivaReturnPage() {
 
         if (res.ok && data.success) {
           setStatus('success')
-          setMessage('— À»·ÁÉ¼® ¿»¿º»·ÁÎ¸·ºµ!')
+          setMessage('Î— Ï€Î»Î·ÏÏ‰Î¼Î® Î¿Î»Î¿ÎºÎ»Î·ÏÏÎ¸Î·ÎºÎµ!')
           // Redirect to thank-you after brief delay
           setTimeout(() => {
             router.push(`/thank-you?id=${data.orderId}`)
           }, 1500)
         } else {
           setStatus('error')
-          setMessage(data.error || '— À»·ÁÉ¼® ±À­ÄÅÇµ ® ±ºÅÁÎ¸·ºµ')
+          setMessage(data.error || 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® Î±Ï€Î­Ï„Ï…Ï‡Îµ Î® Î±ÎºÏ…ÏÏÎ¸Î·ÎºÎµ')
         }
       } catch {
         setStatus('error')
-        setMessage('£Æ¬»¼± µÀ±»®¸µÅÃ·Â À»·ÁÉ¼®Â')
+        setMessage('Î£Ï†Î¬Î»Î¼Î± ÎµÏ€Î±Î»Î®Î¸ÎµÏ…ÏƒÎ·Ï‚ Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚')
       }
     }
 
@@ -44,44 +44,61 @@ export default function VivaReturnPage() {
   }, [searchParams, router])
 
   return (
+    <div className="max-w-md mx-auto bg-white border rounded-xl p-8 text-center">
+      {status === 'loading' && (
+        <>
+          <div className="animate-spin w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-600">Î•Ï€Î±Î»Î®Î¸ÎµÏ…ÏƒÎ· Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚...</p>
+        </>
+      )}
+
+      {status === 'success' && (
+        <>
+          <div className="text-5xl mb-4">âœ…</div>
+          <h1 className="text-2xl font-bold text-emerald-600 mb-2">{message}</h1>
+          <p className="text-gray-600">Î‘Î½Î±ÎºÎ±Ï„ÎµÏÎ¸Ï…Î½ÏƒÎ·...</p>
+        </>
+      )}
+
+      {status === 'error' && (
+        <>
+          <div className="text-5xl mb-4">âŒ</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{message}</h1>
+          <div className="flex gap-3 justify-center">
+            <a
+              href="/checkout"
+              className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 font-medium"
+            >
+              Î”Î¿ÎºÎ¹Î¼Î¬ÏƒÏ„Îµ Î¾Î±Î½Î¬
+            </a>
+            <a
+              href="/products"
+              className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
+            >
+              Î ÏÎ¿ÏŠÏŒÎ½Ï„Î±
+            </a>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="max-w-md mx-auto bg-white border rounded-xl p-8 text-center">
+      <div className="animate-spin w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4" />
+      <p className="text-gray-600">Î¦ÏŒÏÏ„Ï‰ÏƒÎ·...</p>
+    </div>
+  )
+}
+
+export default function VivaReturnPage() {
+  return (
     <main className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-md mx-auto bg-white border rounded-xl p-8 text-center">
-        {status === 'loading' && (
-          <>
-            <div className="animate-spin w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-gray-600">•À±»®¸µÅÃ· À»·ÁÉ¼®Â...</p>
-          </>
-        )}
-
-        {status === 'success' && (
-          <>
-            <div className="text-5xl mb-4"></div>
-            <h1 className="text-2xl font-bold text-emerald-600 mb-2">{message}</h1>
-            <p className="text-gray-600">‘½±º±ÄµÍ¸Å½Ã·...</p>
-          </>
-        )}
-
-        {status === 'error' && (
-          <>
-            <div className="text-5xl mb-4"></div>
-            <h1 className="text-2xl font-bold text-red-600 mb-4">{message}</h1>
-            <div className="flex gap-3 justify-center">
-              <a
-                href="/checkout"
-                className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 font-medium"
-              >
-                ”¿º¹¼¬ÃÄµ ¾±½¬
-              </a>
-              <a
-                href="/products"
-                className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
-              >
-                 Á¿ÊÌ½Ä±
-              </a>
-            </div>
-          </>
-        )}
-      </div>
+      <Suspense fallback={<LoadingFallback />}>
+        <VivaReturnContent />
+      </Suspense>
     </main>
   )
 }
