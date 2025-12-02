@@ -8,24 +8,28 @@ datasource db {
 }
 
 model Producer {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  name        String
-  region      String
-  category    String
-  description String?
-  phone       String?
-  email       String?
-  products    Int       @default(0)
-  rating      Float?    @default(0)
-  imageUrl    String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  Product     Product[]
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  name            String
+  region          String
+  category        String
+  description     String?
+  phone           String?
+  email           String?
+  products        Int       @default(0)
+  rating          Float?    @default(0)
+  imageUrl        String?
+  isActive        Boolean   @default(true)
+  // Admin approval fields
+  approvalStatus  String    @default("pending") // "pending" | "approved" | "rejected"
+  rejectionReason String?                       // Only set when rejected
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  Product         Product[]
 
   @@index([region, category])
   @@index([name])
+  @@index([approvalStatus])
 }
 
 model Product {
