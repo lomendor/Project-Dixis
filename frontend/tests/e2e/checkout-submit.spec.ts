@@ -285,4 +285,37 @@ test.describe('AG124: Checkout Submit → Order in Neon', () => {
 
     console.log(`✅ S6: Order created without email: ${orderId}`)
   })
+
+  test('S7: Checkout submit button is visible with proper styling', async ({ page }) => {
+    const helper = new CheckoutTestHelper(page)
+
+    console.log('🧪 S7: Testing checkout submit button visibility (regression)...')
+
+    // Step 1: Add product to cart
+    await helper.addProductsToCart(1)
+
+    // Step 2: Navigate to checkout
+    await helper.goToCheckout()
+
+    // Step 3: Verify submit button is visible
+    const submitButton = page.locator('[data-testid="checkout-submit"]')
+    await expect(submitButton).toBeVisible()
+
+    // Step 4: Verify button has correct background color (bg-emerald-600 = rgb(5, 150, 105))
+    // This catches regressions where custom Tailwind colors don't render
+    const bgColor = await submitButton.evaluate(el => {
+      return window.getComputedStyle(el).backgroundColor
+    })
+    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)') // Not transparent
+    expect(bgColor).not.toBe('transparent')
+    expect(bgColor).not.toBe('rgb(255, 255, 255)') // Not white (invisible)
+
+    // Step 5: Verify button text is visible (has white text on colored bg)
+    const textColor = await submitButton.evaluate(el => {
+      return window.getComputedStyle(el).color
+    })
+    expect(textColor).toBe('rgb(255, 255, 255)') // White text
+
+    console.log(`✅ S7: Button visible with bg=${bgColor}, text=${textColor}`)
+  })
 })

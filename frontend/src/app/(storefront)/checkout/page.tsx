@@ -84,7 +84,7 @@ function CheckoutContent() {
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
           <p className="text-gray-600 mb-4">Το καλάθι σας είναι κενό</p>
-          <a href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation">
+          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
             Προβολή Προϊόντων
           </a>
         </div>
@@ -224,7 +224,7 @@ function CheckoutContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary-light disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
+              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
               data-testid="checkout-submit"
             >
               {loading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
