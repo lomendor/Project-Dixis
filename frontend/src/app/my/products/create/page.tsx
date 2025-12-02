@@ -18,9 +18,28 @@ function CreateProductContent() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>('');
 
+  // Greek categories
+  const categories = [
+    'Φρούτα',
+    'Λαχανικά',
+    'Γαλακτοκομικά',
+    'Κρέατα',
+    'Ψάρια',
+    'Αρτοσκευάσματα',
+    'Γλυκά',
+    'Ελαιόλαδα',
+    'Τυροκομικά'
+  ];
+
+  // Units
+  const units = ['kg', 'g', 'L', 'ml', 'τεμ'];
+
   // Form state
   const [title, setTitle] = useState('');
-  const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+  const [category, setCategory] = useState('');
+  const [unit, setUnit] = useState('');
+  const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -36,13 +55,15 @@ function CreateProductContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          slug,
           title,
-          name,
+          category,
           price: parseFloat(price),
+          unit,
           stock: parseInt(stock),
-          image_url: imageUrl,
-          is_active: isActive,
-          currency: 'EUR',
+          description: description || undefined,
+          imageUrl,
+          isActive,
         }),
       });
 
@@ -96,22 +117,81 @@ function CreateProductContent() {
             </div>
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
                 Όνομα (slug) *
               </label>
               <input
-                id="name"
+                id="slug"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="π.χ. biologikes-tomates"
-                data-testid="name-input"
+                data-testid="slug-input"
               />
               <p className="mt-1 text-sm text-gray-500">
                 Χρησιμοποιείται στο URL (μόνο λατινικά, παύλες)
               </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                  Κατηγορία *
+                </label>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  data-testid="category-select"
+                >
+                  <option value="">Επιλέξτε κατηγορία</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-1">
+                  Μονάδα Μέτρησης *
+                </label>
+                <select
+                  id="unit"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  data-testid="unit-select"
+                >
+                  <option value="">Επιλέξτε μονάδα</option>
+                  {units.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Περιγραφή
+              </label>
+              <textarea
+                id="description"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Περιγραφή προϊόντος..."
+                data-testid="description-textarea"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
