@@ -32,13 +32,13 @@ export default async function Page() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Προϊόντα</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Προϊόντα</h1>
             <p className="mt-2 text-sm text-gray-600">Απευθείας από παραγωγούς — {total} συνολικά.</p>
           </div>
         </div>
 
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {items.map((p: ApiItem) => (
               <ProductCard
                 key={p.id}

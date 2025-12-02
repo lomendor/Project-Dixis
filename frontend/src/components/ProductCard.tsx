@@ -15,8 +15,8 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
   const hasImage = image && image.length > 0
 
   return (
-    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">
-      <div data-testid="product-card-image" className="relative h-48 w-full bg-gray-100 overflow-hidden">
+    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 touch-manipulation active:scale-[0.99]">
+      <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-gray-100 overflow-hidden">
         {hasImage ? (
           <img
             src={image}
@@ -35,7 +35,7 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
 
       <div className="flex flex-col flex-grow p-4">
         <div className="mb-2">
-          <span data-testid="product-card-producer" className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider">
             {producer || 'Παραγωγός'}
           </span>
           <h3 data-testid="product-card-title" className="text-base font-bold text-gray-900 line-clamp-2 mt-1 leading-tight">
