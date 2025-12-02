@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/contexts/ToastContext';
 import AuthGuard from '@/components/AuthGuard';
 
 interface ProducerProduct {
@@ -35,6 +36,7 @@ export default function ProducerProductsPage() {
 function ProducerProductsContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const { showSuccess, showError } = useToast();
 
   const [products, setProducts] = useState<ProducerProduct[]>([]);
   const [producerStatus, setProducerStatus] = useState<ProducerStatus>({
@@ -44,6 +46,11 @@ function ProducerProductsContent() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -89,6 +96,39 @@ function ProducerProductsContent() {
       }
     } catch {
       setError('Σφάλμα φόρτωσης προϊόντων');
+    }
+  };
+
+  const handleDeleteClick = (product: { id: number; name: string }) => {
+    setProductToDelete(product);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/me/products/${productToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Αποτυχία διαγραφής προϊόντος');
+      }
+
+      showSuccess('Το προϊόν διαγράφηκε επιτυχώς');
+
+      // Refresh product list
+      await loadProducts();
+
+      // Close modal
+      setDeleteModalOpen(false);
+      setProductToDelete(null);
+    } catch (err: any) {
+      showError(err.message || 'Σφάλμα κατά τη διαγραφή');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -336,6 +376,13 @@ function ProducerProductsContent() {
                           >
                             Προβολή
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick({ id: product.id, name: product.title || product.name })}
+                            className="text-red-600 hover:text-red-900"
+                            data-testid={`delete-product-${product.id}`}
+                          >
+                            Διαγραφή
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -345,6 +392,41 @@ function ProducerProductsContent() {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-modal">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+              <h3 className="text-xl font-bold text-gray-900 mb-4" data-testid="delete-modal-title">
+                Επιβεβαίωση Διαγραφής
+              </h3>
+              <p className="text-gray-600 mb-6" data-testid="delete-modal-message">
+                Είστε σίγουροι ότι θέλετε να διαγράψετε το προϊόν{' '}
+                <strong className="text-gray-900">&quot;{productToDelete?.name}&quot;</strong>;
+                <br />
+                Η ενέργεια αυτή δεν μπορεί να αναιρεθεί.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  disabled={deleting}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  data-testid="delete-modal-cancel"
+                >
+                  Ακύρωση
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={deleting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  data-testid="delete-modal-confirm"
+                >
+                  {deleting ? 'Διαγραφή...' : 'Διαγραφή'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
