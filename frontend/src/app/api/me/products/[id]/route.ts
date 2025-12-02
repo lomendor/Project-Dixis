@@ -22,6 +22,7 @@ export async function GET(
       },
       select: {
         id: true,
+        slug: true,
         title: true,
         category: true,
         price: true,
