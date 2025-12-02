@@ -36,3 +36,15 @@
 - Deployed watchdog on VPS (orphan cleanup + health restart)
 - E2E smoke workflow scheduled daily at 03:07 EET for https://dixis.io (PR #869)
 - Uptime watchdog workflow active (PR #877)
+
+### 2025-11-30 — PASS PAYMENT-A Complete (Viva Wallet Checkout Integration)
+**Branch**: `feat/payment-viva-checkout` | **LOC**: ~135
+
+**Deliverables**:
+- ✅ `PaymentMethodSelector.tsx` - COD/Viva radio selector (75 LOC)
+- ✅ `checkout/page.tsx` - Payment method state + redirect logic (+20 LOC)
+- ✅ `api/checkout/route.ts` - Viva order creation + checkout URL (+40 LOC)
+
+**Flow**: User selects payment → API creates order → Viva redirect for cards, thank-you for COD
+
+**Next**: Pass UI-Search (SearchBar + CategoryPills ~200 LOC)
