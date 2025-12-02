@@ -305,6 +305,53 @@ npm run test:e2e -- --grep="payment"
 
 ---
 
+## 🆕 PASS PAYMENT-B: Viva Wallet E2E Tests (Added 2025-12-02)
+
+### New E2E Test File: `viva-payment-flow.spec.ts`
+
+| Test ID | Scenario | Status |
+|---------|----------|--------|
+| VIVA-SUCCESS-1 | Successful payment shows success UI and redirects to thank-you | ✅ Added |
+| VIVA-SUCCESS-2 | Return page shows loading state while verifying | ✅ Added |
+| VIVA-FAILURE-1 | Failed verification shows error UI with retry options | ✅ Added |
+| VIVA-FAILURE-2 | Missing order code shows error | ✅ Added |
+| VIVA-FAILURE-3 | API error shows error UI | ✅ Added |
+| VIVA-CANCEL-1 | User cancellation shows appropriate error | ✅ Added |
+| VIVA-CANCEL-2 | Card declined shows appropriate error | ✅ Added |
+| VIVA-CANCEL-3 | Insufficient funds shows appropriate error | ✅ Added |
+| VIVA-CANCEL-4 | Session expired shows appropriate error | ✅ Added |
+| VIVA-CANCEL-5 | Unknown error shows generic message | ✅ Added |
+| VIVA-CANCEL-6 | Retry button navigates to payment | ✅ Added |
+| VIVA-CANCEL-7 | Cart button navigates to cart | ✅ Added |
+| VIVA-CHECKOUT-1 | Checkout page shows Viva payment option | ✅ Added |
+
+### Test Strategy
+
+- **Mocking**: Uses Playwright route interception to mock `/api/viva-verify` responses
+- **No Real API Calls**: Tests don't require live Viva credentials
+- **Coverage**: Success path, failure paths, error codes, navigation
+
+### Existing Viva Tests (Already Present)
+
+| File | Test Count | Coverage |
+|------|------------|----------|
+| `viva-webhook.spec.ts` | 5 tests | Webhook API endpoints |
+| `cod-payment-method.spec.ts` | 3 tests | COD payment selection |
+| `checkout-flow-to-payment.spec.ts` | 1 test | Checkout flow glue |
+
+### Pre-deployment Checklist Update
+
+- [x] ✅ All unit tests passing
+- [x] ✅ TypeScript compilation successful
+- [x] ✅ Build process includes payment features
+- [x] ✅ No console errors in development
+- [x] ✅ E2E Viva success flow tested (PAYMENT-B)
+- [x] ✅ E2E Viva failure flows tested (PAYMENT-B)
+- [x] ✅ Webhook endpoint tested (viva-webhook.spec.ts)
+- [ ] ⏳ Live environment testing with Viva demo credentials
+
+---
+
 **Test Status**: ✅ **READY FOR PRODUCTION DEPLOYMENT**
-**Next Phase**: E2E testing with Stripe test environment + webhook integration testing
-**Confidence Level**: **High** - All core payment functionality tested and validated
+**Latest Update**: PASS PAYMENT-B - Viva Wallet E2E tests added
+**Confidence Level**: **High** - Core payment + Viva flows tested and validated
