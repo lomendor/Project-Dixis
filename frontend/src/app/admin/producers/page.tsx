@@ -1,114 +1,296 @@
-import React from 'react'
+'use client'
+
+import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useToast } from '@/contexts/ToastContext'
 
-function FIcon({dir}:{dir:'asc'|'desc'}){
-  return <span aria-hidden>{dir==='asc' ? '↑' : '↓'}</span>
+interface Producer {
+  id: string
+  name: string
+  region: string
+  category: string
+  isActive: boolean
+  approvalStatus: string
+  rejectionReason: string | null
 }
 
-async function fetchProducers(q:string, active:string, sort:string){
-  const params = new URLSearchParams()
-  if(q) params.set('q', q)
-  if(active) params.set('active', active)
-  if(sort) params.set('sort', sort)
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    pending: 'background-color: #fef3c7; color: #92400e;',
+    approved: 'background-color: #d1fae5; color: #065f46;',
+    rejected: 'background-color: #fee2e2; color: #991b1b;'
+  }
+  const labels: Record<string, string> = {
+    pending: 'Σε αναμονή',
+    approved: 'Εγκεκριμένος',
+    rejected: 'Απορρίφθηκε'
+  }
+  return (
+    <span
+      style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 500, ...parseStyle(styles[status] || '') }}
+      data-testid={`producer-status-${status}`}
+    >
+      {labels[status] || status}
+    </span>
+  )
+}
 
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:3001'
-  const res = await fetch(`${url}/api/admin/producers?${params.toString()}`, {
-    cache: 'no-store',
-    headers: { 'Content-Type': 'application/json' }
+function parseStyle(s: string): React.CSSProperties {
+  const obj: any = {}
+  s.split(';').forEach(p => {
+    const [k, v] = p.split(':').map(x => x.trim())
+    if (k && v) obj[k.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v
   })
-
-  if(!res.ok) throw new Error('Failed to load producers')
-  return res.json()
+  return obj
 }
 
-export default async function Page({ searchParams }: {
-  searchParams: Promise<{ q?:string; active?:string; sort?:string }>
-}){
-  const params = await searchParams
-  const q = params?.q || ''
-  const active = params?.active || ''
-  const sort = params?.sort || 'name-asc'
+export default function AdminProducersPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 32, textAlign: 'center' }}>Φόρτωση...</div>}>
+      <AdminProducersContent />
+    </Suspense>
+  )
+}
 
-  const data = await fetchProducers(q, active, sort)
-  const list = data?.items || data || []
+function AdminProducersContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { showSuccess, showError } = useToast()
+
+  const [producers, setProducers] = useState<Producer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
+
+  // Rejection modal state
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [producerToReject, setProducerToReject] = useState<{ id: string; name: string } | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  // Filters
+  const q = searchParams.get('q') || ''
+  const active = searchParams.get('active') || ''
+  const sort = searchParams.get('sort') || 'name-asc'
+
+  useEffect(() => {
+    loadProducers()
+  }, [q, active, sort])
+
+  async function loadProducers() {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (q) params.set('q', q)
+      if (active) params.set('active', active)
+      if (sort) params.set('sort', sort)
+
+      const res = await fetch(`/api/admin/producers?${params.toString()}`)
+      if (!res.ok) throw new Error('Failed to load')
+      const data = await res.json()
+      setProducers(data?.items || data || [])
+    } catch {
+      showError('Αποτυχία φόρτωσης παραγωγών')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleApprove(producerId: string) {
+    setProcessingIds(prev => new Set([...prev, producerId]))
+    try {
+      const res = await fetch(`/api/admin/producers/${producerId}/approve`, { method: 'POST' })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Ο παραγωγός εγκρίθηκε επιτυχώς')
+      await loadProducers()
+    } catch (err: any) {
+      showError(err.message || 'Αποτυχία έγκρισης παραγωγού')
+    } finally {
+      setProcessingIds(prev => { const s = new Set(prev); s.delete(producerId); return s })
+    }
+  }
+
+  function handleRejectClick(producer: { id: string; name: string }) {
+    setProducerToReject(producer)
+    setRejectionReason('')
+    setRejectModalOpen(true)
+  }
+
+  async function handleRejectConfirm() {
+    if (!producerToReject || rejectionReason.length < 5) return
+    setSubmitting(true)
+    setProcessingIds(prev => new Set([...prev, producerToReject.id]))
+    try {
+      const res = await fetch(`/api/admin/producers/${producerToReject.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejectionReason })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Ο παραγωγός απορρίφθηκε')
+      setRejectModalOpen(false)
+      setProducerToReject(null)
+      await loadProducers()
+    } catch (err: any) {
+      showError(err.message || 'Αποτυχία απόρριψης παραγωγού')
+    } finally {
+      setSubmitting(false)
+      if (producerToReject) {
+        setProcessingIds(prev => { const s = new Set(prev); s.delete(producerToReject.id); return s })
+      }
+    }
+  }
+
+  function handleFilterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const fd = new FormData(e.currentTarget)
+    const params = new URLSearchParams()
+    const newQ = fd.get('q') as string
+    const newActive = fd.get('active') as string
+    const newSort = fd.get('sort') as string
+    if (newQ) params.set('q', newQ)
+    if (newActive) params.set('active', newActive)
+    if (newSort) params.set('sort', newSort)
+    router.push(`/admin/producers?${params.toString()}`)
+  }
 
   return (
-    <main style={{padding:'16px', maxWidth:960, margin:'0 auto'}}>
+    <main style={{ padding: 16, maxWidth: 960, margin: '0 auto' }}>
       <h1>Παραγωγοί</h1>
 
-      <form action="/admin/producers" method="get" style={{
-        display:'grid',
-        gridTemplateColumns:'1fr 160px 160px',
-        gap:8,
-        marginBottom:16
-      }}>
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Αναζήτηση ονόματος…"
-          style={{padding:'8px'}}
-        />
-        <select name="active" defaultValue={active} style={{padding:'8px'}}>
+      <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 160px', gap: 8, marginBottom: 16 }}>
+        <input name="q" defaultValue={q} placeholder="Αναζήτηση ονόματος…" style={{ padding: 8 }} />
+        <select name="active" defaultValue={active} style={{ padding: 8 }}>
           <option value="">Όλοι</option>
           <option value="only">Μόνο ενεργοί</option>
         </select>
-        <select name="sort" defaultValue={sort} style={{padding:'8px'}}>
+        <select name="sort" defaultValue={sort} style={{ padding: 8 }}>
           <option value="name-asc">Όνομα ↑</option>
           <option value="name-desc">Όνομα ↓</option>
         </select>
-        <button
-          type="submit"
-          style={{
-            gridColumn:'1 / -1',
-            padding:'8px',
-            cursor:'pointer',
-            backgroundColor:'#0070f3',
-            color:'white',
-            border:'none',
-            borderRadius:'4px'
-          }}
-        >
+        <button type="submit" style={{ gridColumn: '1 / -1', padding: 8, cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}>
           Εφαρμογή
         </button>
       </form>
 
-      <table width="100%" cellPadding={8} style={{borderCollapse:'collapse'}}>
-        <thead>
-          <tr style={{textAlign:'left', borderBottom:'2px solid #ddd', backgroundColor:'#f5f5f5'}}>
-            <th>
-              Όνομα {sort.startsWith('name-') && <FIcon dir={sort.endsWith('asc')?'asc':'desc'} />}
-            </th>
-            <th>Περιοχή</th>
-            <th>Κατηγορία</th>
-            <th>Ενεργός</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map((p:any)=>(
-            <tr key={p.id} style={{borderBottom:'1px solid #f0f0f0'}}>
-              <td>{p.name||'—'}</td>
-              <td>{p.region||'—'}</td>
-              <td>{p.category||'—'}</td>
-              <td style={{color: p.isActive ? 'green' : '#999'}}>
-                {p.isActive ? 'Ναι' : 'Όχι'}
-              </td>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>
+      ) : (
+        <table width="100%" cellPadding={8} style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd', backgroundColor: '#f5f5f5' }}>
+              <th>Όνομα</th>
+              <th>Περιοχή</th>
+              <th>Κατηγορία</th>
+              <th>Κατάσταση</th>
+              <th>Ενέργειες</th>
             </tr>
-          ))}
-          {list.length===0 && (
-            <tr>
-              <td colSpan={4} style={{opacity:0.7, textAlign:'center', padding:16}}>
-                Δεν βρέθηκαν αποτελέσματα.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {producers.map(p => (
+              <tr key={p.id} style={{ borderBottom: '1px solid #f0f0f0' }} data-testid={`producer-row-${p.id}`}>
+                <td>{p.name || '—'}</td>
+                <td>{p.region || '—'}</td>
+                <td>{p.category || '—'}</td>
+                <td><StatusBadge status={p.approvalStatus} /></td>
+                <td>
+                  {p.approvalStatus === 'pending' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => handleApprove(p.id)}
+                        disabled={processingIds.has(p.id)}
+                        style={{ padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                        data-testid={`approve-btn-${p.id}`}
+                      >
+                        {processingIds.has(p.id) ? '...' : 'Έγκριση'}
+                      </button>
+                      <button
+                        onClick={() => handleRejectClick({ id: p.id, name: p.name })}
+                        disabled={processingIds.has(p.id)}
+                        style={{ padding: '6px 12px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                        data-testid={`reject-btn-${p.id}`}
+                      >
+                        Απόρριψη
+                      </button>
+                    </div>
+                  )}
+                  {p.approvalStatus === 'rejected' && p.rejectionReason && (
+                    <span style={{ fontSize: 12, color: '#666' }} title={p.rejectionReason}>
+                      Λόγος: {p.rejectionReason.slice(0, 20)}...
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {producers.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
+                  Δεν βρέθηκαν αποτελέσματα.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
 
-      <div style={{marginTop:16}}>
-        <Link href="/admin" style={{color:'#0070f3', textDecoration:'none'}}>
+      <div style={{ marginTop: 16 }}>
+        <Link href="/admin" style={{ color: '#0070f3', textDecoration: 'none' }}>
           ← Επιστροφή στο Admin
         </Link>
       </div>
+
+      {/* Rejection Modal */}
+      {rejectModalOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setRejectModalOpen(false)}
+          data-testid="rejection-modal"
+        >
+          <div
+            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 400, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }} data-testid="rejection-modal-title">
+              Απόρριψη Παραγωγού
+            </h3>
+            <p style={{ color: '#666', marginBottom: 16 }}>
+              Παραγωγός: <strong>{producerToReject?.name}</strong>
+            </p>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+              Λόγος Απόρριψης *
+            </label>
+            <textarea
+              value={rejectionReason}
+              onChange={e => setRejectionReason(e.target.value)}
+              rows={4}
+              placeholder="Εξηγήστε γιατί απορρίπτεται ο παραγωγός..."
+              style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }}
+              data-testid="rejection-reason-input"
+            />
+            {rejectionReason.length > 0 && rejectionReason.length < 5 && (
+              <p style={{ color: '#dc2626', fontSize: 14, marginTop: 4 }}>Τουλάχιστον 5 χαρακτήρες</p>
+            )}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button
+                onClick={() => { setRejectModalOpen(false); setRejectionReason('') }}
+                disabled={submitting}
+                style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                data-testid="rejection-modal-cancel"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={submitting || rejectionReason.length < 5}
+                style={{ padding: '10px 16px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: (submitting || rejectionReason.length < 5) ? 0.5 : 1 }}
+                data-testid="rejection-modal-confirm"
+              >
+                {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
