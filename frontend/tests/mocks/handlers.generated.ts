@@ -69,11 +69,6 @@ export const generatedHandlers = [
     total: 0
   })),
   
-  http.post('/api/producer/orders/:orderId/ship', () => HttpResponse.json({
-    success: true,
-    tracking_number: 'TRACK123456'
-  })),
-  
   http.get('/api/admin/producers', () => HttpResponse.json({
     data: [],
     total: 0
