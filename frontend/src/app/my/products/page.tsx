@@ -33,6 +33,19 @@ export default function ProducerProductsPage() {
   );
 }
 
+// Greek categories (same as create form)
+const categories = [
+  'Φρούτα',
+  'Λαχανικά',
+  'Γαλακτοκομικά',
+  'Κρέατα',
+  'Ψάρια',
+  'Αρτοσκευάσματα',
+  'Γλυκά',
+  'Ελαιόλαδα',
+  'Τυροκομικά'
+];
+
 function ProducerProductsContent() {
   const { user } = useAuth();
   const router = useRouter();
@@ -46,6 +59,10 @@ function ProducerProductsContent() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  // Search/filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -85,9 +102,14 @@ function ProducerProductsContent() {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (q = '', category = '') => {
     try {
-      const response = await fetch('/api/me/products');
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (category) params.set('category', category);
+      const url = `/api/me/products${params.toString() ? `?${params}` : ''}`;
+
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -98,6 +120,17 @@ function ProducerProductsContent() {
       setError('Σφάλμα φόρτωσης προϊόντων');
     }
   };
+
+  // Reload products when filters change (debounced for search)
+  useEffect(() => {
+    if (!producerStatus.isApproved) return undefined;
+
+    const timeoutId = setTimeout(() => {
+      loadProducts(searchQuery, categoryFilter);
+    }, 300); // 300ms debounce for search
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, categoryFilter, producerStatus.isApproved]);
 
   const handleDeleteClick = (product: { id: number; name: string }) => {
     setProductToDelete(product);
@@ -278,25 +311,75 @@ function ProducerProductsContent() {
             </div>
           )}
 
+          {/* Search and Filter */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Αναζήτηση προϊόντος..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  data-testid="search-input"
+                />
+              </div>
+              <div className="sm:w-48">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  data-testid="category-filter"
+                >
+                  <option value="">Όλες οι κατηγορίες</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              {(searchQuery || categoryFilter) && (
+                <button
+                  onClick={() => { setSearchQuery(''); setCategoryFilter(''); }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  data-testid="clear-filters-btn"
+                >
+                  Καθαρισμός
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="p-6" data-testid="products-section">
             {products.length === 0 ? (
               <div className="text-center py-12" data-testid="no-products-state">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">📦</span>
+                  <span className="text-2xl">{searchQuery || categoryFilter ? '🔍' : '📦'}</span>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Κανένα προϊόν ακόμα
+                  {searchQuery || categoryFilter ? 'Δεν βρέθηκαν προϊόντα' : 'Κανένα προϊόν ακόμα'}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Ξεκινήστε προσθέτοντας το πρώτο σας προϊόν για να το δουν οι πελάτες.
+                  {searchQuery || categoryFilter
+                    ? 'Δοκιμάστε διαφορετικούς όρους αναζήτησης ή φίλτρα.'
+                    : 'Ξεκινήστε προσθέτοντας το πρώτο σας προϊόν για να το δουν οι πελάτες.'}
                 </p>
-                <button
-                  onClick={() => router.push('/producer/products/create')}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-                  data-testid="add-first-product-btn"
-                >
-                  Προσθήκη Πρώτου Προϊόντος
-                </button>
+                {searchQuery || categoryFilter ? (
+                  <button
+                    onClick={() => { setSearchQuery(''); setCategoryFilter(''); }}
+                    className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+                    data-testid="clear-filters-empty-btn"
+                  >
+                    Καθαρισμός Φίλτρων
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push('/producer/products/create')}
+                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                    data-testid="add-first-product-btn"
+                  >
+                    Προσθήκη Πρώτου Προϊόντος
+                  </button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
