@@ -1,134 +1,291 @@
-import { prisma } from '@/lib/db/client';
-import { requireAdmin } from '@/lib/auth/admin';
-import Link from 'next/link';
+'use client'
 
-export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Admin — Προϊόντα | Dixis' };
+import { useState, useEffect, Suspense } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-function thr() {
-  return Number.parseInt(process.env.LOW_STOCK_THRESHOLD || '3') || 3;
+interface Product {
+  id: string
+  title: string
+  price: number
+  unit: string
+  stock: number
+  isActive: boolean
+  approvalStatus: string
+  rejectionReason: string | null
 }
 
-export default async function Page({
-  searchParams
-}: {
-  searchParams?: { q?: string; active?: string; low?: string; page?: string };
-}) {
-  try {
-    await requireAdmin?.();
-
-  const q = (searchParams?.q || '').trim();
-  const active = searchParams?.active || '';
-  const low = searchParams?.low === '1';
-  const page = Math.max(1, parseInt(String(searchParams?.page || '1')) || 1);
-  const take = 25;
-
-  const where: any = {};
-  if (q) {
-    where.title = { contains: q };
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    pending: 'background-color: #fef3c7; color: #92400e;',
+    approved: 'background-color: #d1fae5; color: #065f46;',
+    rejected: 'background-color: #fee2e2; color: #991b1b;'
   }
-  if (active === '1') where.isActive = true;
-  if (active === '0') where.isActive = false;
+  const labels: Record<string, string> = {
+    pending: 'Σε αναμονή',
+    approved: 'Εγκεκριμένο',
+    rejected: 'Απορρίφθηκε'
+  }
+  const parseStyle = (s: string): React.CSSProperties => {
+    const obj: Record<string, string> = {}
+    s.split(';').forEach(p => {
+      const [k, v] = p.split(':').map(x => x.trim())
+      if (k && v) obj[k.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v
+    })
+    return obj
+  }
+  return (
+    <span
+      style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 500, ...parseStyle(styles[status] || '') }}
+      data-testid={`product-status-${status}`}
+    >
+      {labels[status] || status}
+    </span>
+  )
+}
 
-  const total = await prisma.product.count({ where });
-  const items = await prisma.product.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    skip: (page - 1) * take,
-    take,
-    select: { id: true, title: true, stock: true, isActive: true, price: true, unit: true }
-  });
+function AdminProductsContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const T = thr();
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
+
+  // Rejection modal state
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [productToReject, setProductToReject] = useState<{ id: string; title: string } | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const q = searchParams.get('q') || ''
+  const approval = searchParams.get('approval') || ''
+
+  useEffect(() => {
+    loadProducts()
+  }, [q, approval])
+
+  async function loadProducts() {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (q) params.set('q', q)
+      if (approval) params.set('approval', approval)
+
+      const res = await fetch(`/api/admin/products?${params.toString()}`)
+      if (!res.ok) throw new Error('Failed to load')
+      const data = await res.json()
+      setProducts(data?.items || data || [])
+    } catch {
+      console.error('Failed to load products')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleApprove(productId: string) {
+    setProcessingIds(prev => new Set([...prev, productId]))
+    try {
+      const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST' })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία έγκρισης προϊόντος'
+      alert(message)
+    } finally {
+      setProcessingIds(prev => { const s = new Set(prev); s.delete(productId); return s })
+    }
+  }
+
+  function handleRejectClick(product: { id: string; title: string }) {
+    setProductToReject(product)
+    setRejectionReason('')
+    setRejectModalOpen(true)
+  }
+
+  async function handleRejectConfirm() {
+    if (!productToReject || rejectionReason.length < 5) return
+    setSubmitting(true)
+    setProcessingIds(prev => new Set([...prev, productToReject.id]))
+    try {
+      const res = await fetch(`/api/admin/products/${productToReject.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejectionReason })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      setRejectModalOpen(false)
+      setProductToReject(null)
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία απόρριψης προϊόντος'
+      alert(message)
+    } finally {
+      setSubmitting(false)
+      if (productToReject) {
+        setProcessingIds(prev => { const s = new Set(prev); s.delete(productToReject.id); return s })
+      }
+    }
+  }
+
+  function handleFilterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const fd = new FormData(e.currentTarget)
+    const params = new URLSearchParams()
+    const newQ = fd.get('q') as string
+    const newApproval = fd.get('approval') as string
+    if (newQ) params.set('q', newQ)
+    if (newApproval) params.set('approval', newApproval)
+    router.push(`/admin/products?${params.toString()}`)
+  }
+
   const fmt = (n: number) =>
-    new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
-
-  const filtered = low ? items.filter((p: any) => Number(p.stock || 0) <= T) : items;
+    new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
 
   return (
-    <main style={{ display: 'grid', gap: 12, padding: 16 }}>
-      <h1>Προϊόντα</h1>
-      <form
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 8
-        }}
-      >
-        <input name="q" placeholder="Αναζήτηση τίτλου" defaultValue={q} />
-        <select name="active" defaultValue={active}>
+    <>
+      <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 8, marginBottom: 16 }}>
+        <input name="q" defaultValue={q} placeholder="Αναζήτηση τίτλου…" style={{ padding: 8 }} />
+        <select name="approval" defaultValue={approval} style={{ padding: 8 }}>
           <option value="">Όλα</option>
-          <option value="1">Ενεργά</option>
-          <option value="0">Ανενεργά</option>
+          <option value="pending">Σε αναμονή</option>
+          <option value="approved">Εγκεκριμένα</option>
+          <option value="rejected">Απορριφθέντα</option>
         </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <input type="checkbox" name="low" value="1" defaultChecked={low} /> Μόνο Low Stock
-        </label>
-        <button type="submit">Φίλτρα</button>
+        <button type="submit" style={{ gridColumn: '1 / -1', padding: 8, cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}>
+          Εφαρμογή
+        </button>
       </form>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th>Τίτλος</th>
-            <th>Τιμή</th>
-            <th>Απόθεμα</th>
-            <th>Κατάσταση</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((p: any) => (
-            <tr key={p.id} style={{ borderTop: '1px solid #eee' }}>
-              <td>
-                <Link href={`/products/${p.id}`}>{p.title}</Link>
-              </td>
-              <td>
-                {fmt(Number(p.price || 0))} / {p.unit}
-              </td>
-              <td>
-                {String(p.stock || 0)}
-                {Number(p.stock || 0) <= T && (
-                  <span
-                    style={{
-                      marginLeft: 8,
-                      padding: '2px 6px',
-                      border: '1px solid #f59e0b',
-                      borderRadius: 6,
-                      color: '#92400e'
-                    }}
-                  >
-                    Low
-                  </span>
-                )}
-              </td>
-              <td>{p.isActive ? 'Ενεργό' : 'Ανενεργό'}</td>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>
+      ) : (
+        <table width="100%" cellPadding={8} style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd', backgroundColor: '#f5f5f5' }}>
+              <th>Τίτλος</th>
+              <th>Τιμή</th>
+              <th>Απόθεμα</th>
+              <th>Έγκριση</th>
+              <th>Ενέργειες</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {products.map(p => (
+              <tr key={p.id} style={{ borderBottom: '1px solid #f0f0f0' }} data-testid={`product-row-${p.id}`}>
+                <td><Link href={`/products/${p.id}`}>{p.title}</Link></td>
+                <td>{fmt(Number(p.price || 0))} / {p.unit}</td>
+                <td>{String(p.stock || 0)}</td>
+                <td><StatusBadge status={p.approvalStatus} /></td>
+                <td>
+                  {p.approvalStatus === 'pending' && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => handleApprove(p.id)}
+                        disabled={processingIds.has(p.id)}
+                        style={{ padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                        data-testid={`approve-btn-${p.id}`}
+                      >
+                        {processingIds.has(p.id) ? '...' : 'Έγκριση'}
+                      </button>
+                      <button
+                        onClick={() => handleRejectClick({ id: p.id, title: p.title })}
+                        disabled={processingIds.has(p.id)}
+                        style={{ padding: '6px 12px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                        data-testid={`reject-btn-${p.id}`}
+                      >
+                        Απόρριψη
+                      </button>
+                    </div>
+                  )}
+                  {p.approvalStatus === 'rejected' && p.rejectionReason && (
+                    <span style={{ fontSize: 12, color: '#666' }} title={p.rejectionReason}>
+                      Λόγος: {p.rejectionReason.slice(0, 20)}...
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {products.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
+                  Δεν βρέθηκαν προϊόντα.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
 
-      <nav style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <a
-          href={`?q=${encodeURIComponent(q)}&active=${encodeURIComponent(active)}&low=${low ? '1' : ''}&page=${Math.max(1, page - 1)}`}
-          aria-disabled={page <= 1}
+      <div style={{ marginTop: 16 }}>
+        <Link href="/admin" style={{ color: '#0070f3', textDecoration: 'none' }}>
+          ← Επιστροφή στο Admin
+        </Link>
+      </div>
+
+      {/* Rejection Modal */}
+      {rejectModalOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setRejectModalOpen(false)}
+          data-testid="rejection-modal"
         >
-          « Προηγ.
-        </a>
-        <span>Σελίδα {page}</span>
-        <a
-          href={`?q=${encodeURIComponent(q)}&active=${encodeURIComponent(active)}&low=${low ? '1' : ''}&page=${page + 1}`}
-        >
-          Επόμ.»
-        </a>
-      </nav>
+          <div
+            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 400, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }} data-testid="rejection-modal-title">
+              Απόρριψη Προϊόντος
+            </h3>
+            <p style={{ color: '#666', marginBottom: 16 }}>
+              Προϊόν: <strong>{productToReject?.title}</strong>
+            </p>
+            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+              Λόγος Απόρριψης *
+            </label>
+            <textarea
+              value={rejectionReason}
+              onChange={e => setRejectionReason(e.target.value)}
+              rows={4}
+              placeholder="Εξηγήστε γιατί απορρίπτεται το προϊόν..."
+              style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }}
+              data-testid="rejection-reason-input"
+            />
+            {rejectionReason.length > 0 && rejectionReason.length < 5 && (
+              <p style={{ color: '#dc2626', fontSize: 14, marginTop: 4 }}>Τουλάχιστον 5 χαρακτήρες</p>
+            )}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button
+                onClick={() => { setRejectModalOpen(false); setRejectionReason('') }}
+                disabled={submitting}
+                style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                data-testid="rejection-modal-cancel"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={submitting || rejectionReason.length < 5}
+                style={{ padding: '10px 16px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: (submitting || rejectionReason.length < 5) ? 0.5 : 1 }}
+                data-testid="rejection-modal-confirm"
+              >
+                {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+export default function AdminProductsPage() {
+  return (
+    <main style={{ padding: 16, maxWidth: 1200, margin: '0 auto' }}>
+      <h1>Προϊόντα</h1>
+      <Suspense fallback={<div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>}>
+        <AdminProductsContent />
+      </Suspense>
     </main>
-  );
-  } catch {
-    return (
-      <main style={{ padding: 16 }}>
-        <h1>Δεν επιτρέπεται</h1>
-        <p>Απαιτείται σύνδεση διαχειριστή.</p>
-      </main>
-    );
-  }
+  )
 }
