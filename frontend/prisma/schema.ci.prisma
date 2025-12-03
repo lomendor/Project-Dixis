@@ -37,25 +37,29 @@ model Producer {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  slug        String      @unique
-  producerId  String
-  title       String
-  category    String
-  price       Float
-  unit        String
-  stock       Int         @default(0)
-  description String?
-  imageUrl    String?
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  producer    Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
-  OrderItem   OrderItem[]
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  producerId      String
+  title           String
+  category        String
+  price           Float
+  unit            String
+  stock           Int         @default(0)
+  description     String?
+  imageUrl        String?
+  isActive        Boolean     @default(true)
+  // Admin approval fields
+  approvalStatus  String      @default("pending") // "pending" | "approved" | "rejected"
+  rejectionReason String?                         // Only set when rejected
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  producer        Producer    @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  OrderItem       OrderItem[]
 
   @@index([producerId, createdAt])
   @@index([category])
   @@index([isActive])
+  @@index([approvalStatus])
 }
 
 model Order {
