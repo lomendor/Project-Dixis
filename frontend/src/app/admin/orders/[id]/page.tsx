@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { orderNumber } from '../../../../lib/orderNumber';
+import { useToast } from '@/contexts/ToastContext';
 
 type Order = {
   id: string;
@@ -23,6 +24,7 @@ export default function AdminOrderDetail({
   params: { id: string };
 }) {
   const { id } = params;
+  const { showSuccess, showError } = useToast();
   const [data, setData] = React.useState<Order | null>(null);
   const [err, setErr] = React.useState('');
 
@@ -124,9 +126,13 @@ export default function AdminOrderDetail({
               onClick={async ()=>{
                 try {
                   const r = await fetch(`/api/admin/orders/${data?.id}/resend`, { method:'POST' });
-                  alert(r.ok ? 'Το email στάλθηκε ξανά.' : 'Αποτυχία αποστολής.');
+                  if (r.ok) {
+                    showSuccess('Το email στάλθηκε ξανά.');
+                  } else {
+                    showError('Αποτυχία αποστολής.');
+                  }
                 } catch {
-                  alert('Σφάλμα αποστολής.');
+                  showError('Σφάλμα αποστολής.');
                 }
               }}
               className="border px-3 py-1 rounded"
