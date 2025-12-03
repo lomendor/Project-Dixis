@@ -186,3 +186,4 @@ junit-*.xml
 .dixis-skill/
 dixis-skill_v*.zip
 pr-cleanup-reports/
+frontend/prisma/ci.db

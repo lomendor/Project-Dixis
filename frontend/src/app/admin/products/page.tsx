@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -27,7 +27,7 @@ function StatusBadge({ status }: { status: string }) {
     rejected: 'Απορρίφθηκε'
   }
   const parseStyle = (s: string): React.CSSProperties => {
-    const obj: any = {}
+    const obj: Record<string, string> = {}
     s.split(';').forEach(p => {
       const [k, v] = p.split(':').map(x => x.trim())
       if (k && v) obj[k.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v
@@ -44,7 +44,7 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-export default function AdminProductsPage() {
+function AdminProductsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -89,8 +89,9 @@ export default function AdminProductsPage() {
       const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST' })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       await loadProducts()
-    } catch (err: any) {
-      alert(err.message || 'Αποτυχία έγκρισης προϊόντος')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία έγκρισης προϊόντος'
+      alert(message)
     } finally {
       setProcessingIds(prev => { const s = new Set(prev); s.delete(productId); return s })
     }
@@ -116,8 +117,9 @@ export default function AdminProductsPage() {
       setRejectModalOpen(false)
       setProductToReject(null)
       await loadProducts()
-    } catch (err: any) {
-      alert(err.message || 'Αποτυχία απόρριψης προϊόντος')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία απόρριψης προϊόντος'
+      alert(message)
     } finally {
       setSubmitting(false)
       if (productToReject) {
@@ -141,9 +143,7 @@ export default function AdminProductsPage() {
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
 
   return (
-    <main style={{ padding: 16, maxWidth: 1200, margin: '0 auto' }}>
-      <h1>Προϊόντα</h1>
-
+    <>
       <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 8, marginBottom: 16 }}>
         <input name="q" defaultValue={q} placeholder="Αναζήτηση τίτλου…" style={{ padding: 8 }} />
         <select name="approval" defaultValue={approval} style={{ padding: 8 }}>
@@ -275,6 +275,17 @@ export default function AdminProductsPage() {
           </div>
         </div>
       )}
+    </>
+  )
+}
+
+export default function AdminProductsPage() {
+  return (
+    <main style={{ padding: 16, maxWidth: 1200, margin: '0 auto' }}>
+      <h1>Προϊόντα</h1>
+      <Suspense fallback={<div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>}>
+        <AdminProductsContent />
+      </Suspense>
     </main>
   )
 }

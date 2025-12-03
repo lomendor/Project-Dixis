@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const items = await prisma.product.findMany({
     where: {
       AND: [
-        q ? { title: { contains: q, mode: 'insensitive' } } : {},
+        q ? { title: { contains: q } } : {},
         approval ? { approvalStatus: approval } : {}
       ]
     },
