@@ -30,6 +30,15 @@ export async function GET(req: Request) {
         active === 'only' ? { isActive: true } : {}
       ]
     },
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      category: true,
+      isActive: true,
+      approvalStatus: true,
+      rejectionReason: true
+    },
     orderBy: { name: sort === 'name-desc' ? 'desc' : 'asc' },
     take: 100
   })
