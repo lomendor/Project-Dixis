@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 import { z } from 'zod'
 import { getRequestId, logWithId } from '@/lib/observability/request'
+import { requireAdmin } from '@/lib/auth/admin'
 
 const CreateSchema = z.object({
   name: z.string().min(2),
@@ -16,7 +17,13 @@ const CreateSchema = z.object({
 
 export async function GET(req: Request) {
   const rid = getRequestId(req.headers)
-  // TODO: Add admin session check (assume middleware/guard exists)
+
+  try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
+
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
   const active = searchParams.get('active') || ''
@@ -51,7 +58,13 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const rid = getRequestId(req.headers)
-  // TODO: Add admin session check
+
+  try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
+
   const data = await req.json().catch(() => ({}))
   const parsed = CreateSchema.safeParse(data)
 
