@@ -4,10 +4,17 @@
 
 ## ⚡ Guardrails & Standards
 - **CI/CD**: NO changes to `.github/workflows/**`
-- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED  
+- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED
 - **Next.js**: 15.5.0 - LOCKED
 - **PR Size**: ≤300 LOC per PR
 - **Artifacts**: playwright-report/**, test-results/** required
+
+## 🗄️ Database Policy
+- **Primary DB**: PostgreSQL (Neon) - used in production, staging, local dev
+- **CI DB**: SQLite - ONLY for fast CI tests via `schema.ci.prisma`
+- **Constraint**: Don't use PostgreSQL-specific features that break SQLite CI
+  - Example: `mode: 'insensitive'` removed from Prisma queries
+- **Schema sync**: `schema.ci.prisma` auto-generated from main schema
 
 ## 🔧 Workspace Anchors  
 - **Repo (root)**: Project-Dixis (where frontend/ & backend/ exist)
