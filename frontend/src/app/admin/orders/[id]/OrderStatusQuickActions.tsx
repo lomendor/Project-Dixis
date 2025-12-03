@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Props {
   orderId: string
@@ -17,6 +18,7 @@ const statusLabels: Record<string, string> = {
 }
 
 export function OrderStatusQuickActions({ orderId, currentStatus }: Props) {
+  const { showError } = useToast()
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(currentStatus)
 
@@ -39,7 +41,7 @@ export function OrderStatusQuickActions({ orderId, currentStatus }: Props) {
       window.location.reload()
     } catch (e) {
       console.error('Status change error:', e)
-      alert('Σφάλμα κατά την αλλαγή κατάστασης')
+      showError('Σφάλμα κατά την αλλαγή κατάστασης')
     } finally {
       setLoading(false)
     }

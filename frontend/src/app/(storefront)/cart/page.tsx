@@ -3,9 +3,11 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart, cartCount, cartTotalCents } from '@/lib/cart'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function CartPage() {
   const router = useRouter()
+  const { showError } = useToast()
   const items = useCart(s => s.items)
   const inc = useCart(s => s.inc)
   const dec = useCart(s => s.dec)
@@ -40,7 +42,7 @@ export default function CartPage() {
       router.push(`/checkout?orderId=${data.orderId}`)
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
+      showError('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
       setLoading(false)
     }
   }
