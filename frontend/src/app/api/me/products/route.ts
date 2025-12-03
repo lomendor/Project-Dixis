@@ -5,16 +5,35 @@ import { requireProducer } from '@/lib/auth/requireProducer';
 /**
  * GET /api/me/products
  * Returns products for the authenticated producer (scoped to producer's phone/session)
+ * Query params: ?q=searchterm&category=xyz
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const producer = await requireProducer();
 
+    // Parse query params for search/filter
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get('q')?.trim() || '';
+    const category = searchParams.get('category')?.trim() || '';
+
+    // Build where clause
+    const where: Record<string, unknown> = {
+      producerId: producer.id
+    };
+
+    // Add search filter (search in title)
+    if (q) {
+      where.title = { contains: q, mode: 'insensitive' };
+    }
+
+    // Add category filter
+    if (category) {
+      where.category = category;
+    }
+
     // Fetch products scoped to this producer only
     const products = await prisma.product.findMany({
-      where: {
-        producerId: producer.id
-      },
+      where,
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
