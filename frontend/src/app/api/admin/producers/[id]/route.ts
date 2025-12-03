@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 import { z } from 'zod'
 import { getRequestId, logWithId } from '@/lib/observability/request'
+import { requireAdmin } from '@/lib/auth/admin'
 
 const UpdateSchema = z.object({
   name: z.string().min(2).optional(),
@@ -20,6 +21,13 @@ export async function PATCH(
   ctx: { params: Promise<{ id: string }> }
 ) {
   const rid = getRequestId(_req.headers)
+
+  try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
+
   const params = await ctx.params
   const id = params.id
   const body = await _req.json().catch(() => ({}))
@@ -74,6 +82,13 @@ export async function DELETE(
   ctx: { params: Promise<{ id: string }> }
 ) {
   const rid = getRequestId(_req.headers)
+
+  try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
+
   const params = await ctx.params
   const id = params.id
   await prisma.producer.delete({ where: { id } })

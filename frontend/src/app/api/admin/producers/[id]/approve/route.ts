@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
+import { requireAdmin } from '@/lib/auth/admin'
 
 /**
  * POST /api/admin/producers/[id]/approve
@@ -10,13 +11,17 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
+
+  try {
     const { id: producerId } = await params
 
     if (!producerId) {
       return NextResponse.json({ error: 'Invalid producer ID' }, { status: 400 })
     }
-
-    // TODO: Add admin session check (assume middleware/guard exists)
 
     const producer = await prisma.producer.update({
       where: { id: producerId },
