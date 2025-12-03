@@ -3,6 +3,25 @@ import { prisma } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 
+// Type definitions for dashboard data
+interface OrderSummary {
+  id: string;
+  total: number | null;
+}
+
+interface RecentOrder {
+  id: string;
+  createdAt: Date;
+  buyerName: string | null;
+  total: number | null;
+  status: string | null;
+}
+
+interface TopProduct {
+  titleSnap: string | null;
+  _sum: { qty: number | null };
+}
+
 function thr(){ return Number.parseInt(process.env.LOW_STOCK_THRESHOLD||'3') || 3; }
 const T7 = 1000*60*60*24*7;
 const T30 = 1000*60*60*24*30;
@@ -16,8 +35,8 @@ export default async function Page(){
 
   const [orders7, pendingCount, lowStockCount, latest, topItems] = await Promise.all([
     prisma.order.findMany({ where:{ createdAt:{ gte: from7 }}, select:{ id:true, total:true } }),
-    prisma.order.count({ where:{ status:'PENDING' as any } }),
-    prisma.product.count({ where:{ stock:{ lte: thr() as any } } }),
+    prisma.order.count({ where:{ status:'PENDING' } }),
+    prisma.product.count({ where:{ stock:{ lte: thr() } } }),
     prisma.order.findMany({
       orderBy:{ createdAt:'desc' },
       take:10,
@@ -25,14 +44,14 @@ export default async function Page(){
     }),
     prisma.orderItem.groupBy({
       by:['titleSnap'],
-      where:{ createdAt:{ gte: from30 } as any },
+      where:{ createdAt:{ gte: from30 } },
       _sum:{ qty:true },
       orderBy:{ _sum:{ qty:'desc' } },
       take:10
-    }).catch(():any[]=>[])
+    }).catch((): TopProduct[] => [])
   ]);
 
-  const revenue7 = orders7.reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
+  const revenue7 = orders7.reduce((s: number, o: OrderSummary) => s + Number(o.total ?? 0), 0);
   const orders7Count = orders7.length;
 
   const fmtMoney = (n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
@@ -65,10 +84,10 @@ export default async function Page(){
         <table style={{width:'100%',borderCollapse:'collapse'}}>
           <thead><tr><th>#</th><th>Ημ/νία</th><th>Πελάτης</th><th>Σύνολο</th><th>Status</th></tr></thead>
           <tbody>
-            {latest.map((o: any)=>(
+            {latest.map((o: RecentOrder)=>(
               <tr key={o.id} style={{borderTop:'1px solid #eee'}}>
                 <td><Link href={`/admin/orders/${o.id}`}>#{o.id}</Link></td>
-                <td>{new Date(o.createdAt as any).toLocaleString('el-GR')}</td>
+                <td>{new Date(o.createdAt).toLocaleString('el-GR')}</td>
                 <td>{o.buyerName||'—'}</td>
                 <td>{fmtMoney(Number(o.total||0))}</td>
                 <td>{String(o.status)}</td>
@@ -83,7 +102,7 @@ export default async function Page(){
         <table style={{width:'100%',borderCollapse:'collapse'}}>
           <thead><tr><th>Προϊόν</th><th>Τεμάχια</th></tr></thead>
           <tbody>
-            {Array.isArray(topItems) && topItems.map((t:any, i:number)=>(
+            {Array.isArray(topItems) && topItems.map((t: TopProduct, i: number)=>(
               <tr key={i} style={{borderTop:'1px solid #eee'}}>
                 <td>{String(t.titleSnap||'—')}</td>
                 <td>{Number(t._sum?.qty||0)}</td>
