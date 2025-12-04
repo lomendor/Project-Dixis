@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
+import { requireAdmin } from '@/lib/auth/admin'
 
 /**
  * POST /api/admin/products/[id]/approve
@@ -10,6 +11,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin()
     const { id: productId } = await params
 
     if (!productId) {
