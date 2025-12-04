@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
+import { useAuth } from '@/hooks/useAuth';
 
 const navLinks = [
   { href: '/products', label: 'Προϊόντα' },
@@ -13,6 +14,15 @@ const navLinks = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
@@ -33,6 +43,57 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+
+          {/* Desktop Auth Section */}
+          {isAuthenticated ? (
+            <>
+              {isProducer && (
+                <Link
+                  href="/producer/dashboard"
+                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+                  data-testid="nav-producer-dashboard"
+                >
+                  Πίνακας Παραγωγού
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+                  data-testid="nav-admin"
+                >
+                  Admin
+                </Link>
+              )}
+              <span className="text-sm text-neutral-500">
+                {user?.name}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+                data-testid="logout-btn"
+              >
+                Αποσύνδεση
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+                data-testid="nav-login"
+              >
+                Σύνδεση
+              </Link>
+              <Link
+                href="/auth/register"
+                className="text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md transition-colors"
+                data-testid="nav-register"
+              >
+                Εγγραφή
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -74,6 +135,66 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+
+            {/* Mobile Auth Section */}
+            <div className="border-t border-neutral-200 mt-2 pt-2">
+              {isAuthenticated ? (
+                <>
+                  {isProducer && (
+                    <Link
+                      href="/producer/dashboard"
+                      className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-testid="mobile-nav-producer-dashboard"
+                    >
+                      Πίνακας Παραγωγού
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-testid="mobile-nav-admin"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <div className="flex items-center justify-between min-h-[48px] py-3 -mx-4 px-4">
+                    <span className="text-base text-neutral-500">{user?.name}</span>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="text-base font-medium text-neutral-700 hover:text-primary transition-colors"
+                      data-testid="mobile-logout-btn"
+                    >
+                      Αποσύνδεση
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-testid="mobile-nav-login"
+                  >
+                    Σύνδεση
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="flex items-center justify-center min-h-[48px] py-3 text-base font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-md mx-0 my-2 transition-colors touch-manipulation"
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-testid="mobile-nav-register"
+                  >
+                    Εγγραφή
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </nav>
       )}
