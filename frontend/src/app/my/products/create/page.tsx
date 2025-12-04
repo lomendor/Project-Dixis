@@ -1,9 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import UploadImage from '@/components/UploadImage.client';
+
+type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+};
 
 export default function CreateProductPage() {
   return (
@@ -18,18 +25,19 @@ function CreateProductContent() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>('');
 
-  // Greek categories
-  const categories = [
-    'Φρούτα',
-    'Λαχανικά',
-    'Γαλακτοκομικά',
-    'Κρέατα',
-    'Ψάρια',
-    'Αρτοσκευάσματα',
-    'Γλυκά',
-    'Ελαιόλαδα',
-    'Τυροκομικά'
-  ];
+  // Dynamic categories from API
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((data) => {
+        setCategories(data.categories || []);
+        setCategoriesLoading(false);
+      })
+      .catch(() => setCategoriesLoading(false));
+  }, []);
 
   // Units
   const units = ['kg', 'g', 'L', 'ml', 'τεμ'];
@@ -145,13 +153,16 @@ function CreateProductContent() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  disabled={categoriesLoading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
                   data-testid="category-select"
                 >
-                  <option value="">Επιλέξτε κατηγορία</option>
+                  <option value="">
+                    {categoriesLoading ? 'Φόρτωση...' : 'Επιλέξτε κατηγορία'}
+                  </option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.name}>
+                      {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
                     </option>
                   ))}
                 </select>
