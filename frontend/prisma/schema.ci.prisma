@@ -193,3 +193,42 @@ model Waitlist {
   @@index([email])
   @@index([createdAt])
 }
+
+// ============================================
+// ADMIN RBAC & AUDIT (Sprint 11)
+// ============================================
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  role      String   @default("admin") // "admin" | "super_admin"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AdminAuditLog[]
+
+  @@index([phone])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminPhone  String
+  adminUserId String?
+  action      String // PRODUCT_APPROVE, PRODUCT_REJECT, PRODUCER_APPROVE, PRODUCER_REJECT, ORDER_STATUS_CHANGE
+  entityType  String // product, producer, order
+  entityId    String
+  oldValue    Json?
+  newValue    Json?
+  details     String? // rejection reason or additional context
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id])
+
+  @@index([adminPhone])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
