@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
+import { requireAdmin } from '@/lib/auth/admin'
 import { z } from 'zod'
 
 const RejectSchema = z.object({
@@ -15,6 +16,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin()
     const { id: productId } = await params
 
     if (!productId) {

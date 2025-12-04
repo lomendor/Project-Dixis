@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Product {
   id: string
@@ -47,6 +48,7 @@ function StatusBadge({ status }: { status: string }) {
 function AdminProductsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { showSuccess, showError } = useToast()
 
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -88,10 +90,11 @@ function AdminProductsContent() {
     try {
       const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST' })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Το προϊόν εγκρίθηκε επιτυχώς')
       await loadProducts()
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Αποτυχία έγκρισης προϊόντος'
-      alert(message)
+      showError(message)
     } finally {
       setProcessingIds(prev => { const s = new Set(prev); s.delete(productId); return s })
     }
@@ -114,12 +117,13 @@ function AdminProductsContent() {
         body: JSON.stringify({ rejectionReason })
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Το προϊόν απορρίφθηκε')
       setRejectModalOpen(false)
       setProductToReject(null)
       await loadProducts()
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Αποτυχία απόρριψης προϊόντος'
-      alert(message)
+      showError(message)
     } finally {
       setSubmitting(false)
       if (productToReject) {
