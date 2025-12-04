@@ -232,3 +232,18 @@ model AdminAuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
 }
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   // Greek name
+  nameEn      String?  // English name (optional)
+  description String?
+  icon        String?  // emoji or icon name
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
