@@ -200,6 +200,15 @@ jobs:
               pm2 status 2>/dev/null | grep dixis || true
             done
 
+            # Deep health check: verify DB connectivity
+            echo "--- Deep Health Check (DB Connectivity) ---"
+            if curl -s --max-time 10 http://127.0.0.1:3000/api/healthz?deep=1 | grep -q '"db":"connected"'; then
+              echo "✅ Database connection verified!"
+            else
+              echo "⚠️ Warning: Database connectivity could not be verified"
+              curl -s http://127.0.0.1:3000/api/healthz?deep=1 || true
+            fi
+
             echo "=== FINAL DIAGNOSTICS ==="
             pm2 status
 
