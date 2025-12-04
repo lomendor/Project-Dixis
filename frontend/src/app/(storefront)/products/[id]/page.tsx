@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const p = await prisma.product.findUnique({
     where: { id: String(id || '') },
-    select: { id: true, title: true, description: true, price: true, imageUrl: true, category: true }
+    select: { id: true, title: true, description: true, price: true, imageUrl: true, category: true, producer: { select: { name: true } } }
   });
 
   if (!p) {
@@ -63,7 +63,8 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       isActive:true,
       description:true,
       category:true,
-      imageUrl:true
+      imageUrl:true,
+      producer: { select: { name: true } }
     }
   });
 
@@ -146,7 +147,14 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           </h1>
 
           {p.category && (
-            <p className="text-gray-600 mb-4">{p.category}</p>
+            <p className="text-gray-600 mb-2">{p.category}</p>
+          )}
+
+          {/* Producer */}
+          {p.producer?.name && (
+            <p className="text-sm text-emerald-700 mb-4" data-testid="product-producer">
+              Από τον παραγωγό: <span className="font-medium">{p.producer.name}</span>
+            </p>
           )}
 
           {/* Price */}
