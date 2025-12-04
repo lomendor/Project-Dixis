@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
+import { requireAdmin, AdminError } from '@/lib/auth/admin'
+import { logAdminAction, createRejectionContext } from '@/lib/audit/logger'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/admin'
 
 const RejectSchema = z.object({
   rejectionReason: z.string().min(5, 'Ο λόγος απόρριψης πρέπει να έχει τουλάχιστον 5 χαρακτήρες')
@@ -16,12 +17,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAdmin()
-  } catch {
-    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
-  }
-
-  try {
+    // Get admin context for audit logging
+    const admin = await requireAdmin()
     const { id: producerId } = await params
 
     if (!producerId) {
@@ -38,6 +35,17 @@ export async function POST(
       )
     }
 
+    // Fetch existing producer for audit log (oldValue)
+    const existingProducer = await prisma.producer.findUnique({
+      where: { id: producerId },
+      select: { id: true, name: true, approvalStatus: true, isActive: true }
+    })
+
+    if (!existingProducer) {
+      return NextResponse.json({ error: 'Ο παραγωγός δεν βρέθηκε' }, { status: 404 })
+    }
+
+    // Update producer
     const producer = await prisma.producer.update({
       where: { id: producerId },
       data: {
@@ -54,25 +62,37 @@ export async function POST(
       }
     })
 
+    // Audit log with rejection reason
+    await logAdminAction({
+      admin,
+      action: 'PRODUCER_REJECT',
+      entityType: 'producer',
+      entityId: producerId,
+      ...createRejectionContext(existingProducer, parsed.data.rejectionReason)
+    })
+
     return NextResponse.json({
       success: true,
       message: 'Ο παραγωγός απορρίφθηκε',
       producer
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Producer rejection error:', error)
 
-    if (error.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'Ο παραγωγός δεν βρέθηκε' },
-        { status: 404 }
-      )
+    // Handle AdminError
+    if (error instanceof AdminError) {
+      if (error.code === 'NOT_AUTHENTICATED') {
+        return NextResponse.json({ error: 'Απαιτείται σύνδεση' }, { status: 401 })
+      }
+      return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
     }
 
-    return NextResponse.json(
-      { error: 'Σφάλμα διακομιστή' },
-      { status: 500 }
-    )
+    // Handle Prisma errors
+    if ((error as any)?.code === 'P2025') {
+      return NextResponse.json({ error: 'Ο παραγωγός δεν βρέθηκε' }, { status: 404 })
+    }
+
+    return NextResponse.json({ error: 'Σφάλμα διακομιστή' }, { status: 500 })
   }
 }
