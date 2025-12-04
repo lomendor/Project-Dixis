@@ -5,6 +5,28 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting production seed (idempotent)...');
 
+  // Seed categories (idempotent)
+  const CATEGORIES = [
+    { slug: 'vegetables', name: 'Λαχανικά', icon: '🥬', sortOrder: 1 },
+    { slug: 'fruits', name: 'Φρούτα', icon: '🍎', sortOrder: 2 },
+    { slug: 'dairy', name: 'Γαλακτοκομικά', icon: '🧀', sortOrder: 3 },
+    { slug: 'meat', name: 'Κρέατα', icon: '🥩', sortOrder: 4 },
+    { slug: 'fish', name: 'Ψάρια', icon: '🐟', sortOrder: 5 },
+    { slug: 'bakery', name: 'Αρτοσκευάσματα', icon: '🥖', sortOrder: 6 },
+    { slug: 'honey-sweets', name: 'Μέλι & Γλυκά', icon: '🍯', sortOrder: 7 },
+    { slug: 'olive-oil', name: 'Ελαιόλαδο', icon: '🫒', sortOrder: 8 },
+    { slug: 'other', name: 'Άλλο', icon: '📦', sortOrder: 99 }
+  ];
+
+  for (const cat of CATEGORIES) {
+    await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: { name: cat.name, icon: cat.icon, sortOrder: cat.sortOrder, isActive: true },
+      create: { slug: cat.slug, name: cat.name, icon: cat.icon, sortOrder: cat.sortOrder, isActive: true }
+    });
+  }
+  console.log(`✅ Categories: ${CATEGORIES.length} seeded`);
+
   // Idempotent producer upserts
   const producer1 = await prisma.producer.upsert({
     where: { slug: 'malis-garden' },
