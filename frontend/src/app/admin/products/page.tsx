@@ -14,6 +14,10 @@ interface Product {
   isActive: boolean
   approvalStatus: string
   rejectionReason: string | null
+  producer?: {
+    id: string
+    name: string
+  }
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -41,6 +45,108 @@ function StatusBadge({ status }: { status: string }) {
       data-testid={`product-status-${status}`}
     >
       {labels[status] || status}
+    </span>
+  )
+}
+
+function InlineToggle({ productId, isActive, onToggle, disabled }: { productId: string; isActive: boolean; onToggle: (id: string, value: boolean) => Promise<void>; disabled: boolean }) {
+  const [toggling, setToggling] = useState(false)
+
+  const handleToggle = async () => {
+    setToggling(true)
+    try {
+      await onToggle(productId, !isActive)
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleToggle}
+      disabled={disabled || toggling}
+      style={{
+        padding: '4px 12px',
+        borderRadius: 12,
+        fontSize: 12,
+        fontWeight: 500,
+        border: 'none',
+        cursor: disabled || toggling ? 'not-allowed' : 'pointer',
+        opacity: disabled || toggling ? 0.5 : 1,
+        backgroundColor: isActive ? '#10b981' : '#6b7280',
+        color: 'white'
+      }}
+      data-testid={`toggle-active-${productId}`}
+    >
+      {toggling ? '...' : isActive ? 'Ενεργό' : 'Ανενεργό'}
+    </button>
+  )
+}
+
+function InlineEditField({ value, onSave, type, disabled }: { value: number; onSave: (newValue: number) => Promise<void>; type: 'price' | 'stock'; disabled: boolean }) {
+  const [editing, setEditing] = useState(false)
+  const [inputValue, setInputValue] = useState(String(value))
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    const parsed = type === 'price' ? parseFloat(inputValue) : parseInt(inputValue)
+    if (isNaN(parsed) || parsed < 0) return
+
+    setSaving(true)
+    try {
+      await onSave(parsed)
+      setEditing(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setInputValue(String(value))
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <input
+          type="number"
+          step={type === 'price' ? '0.01' : '1'}
+          min="0"
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          disabled={saving}
+          style={{ width: 80, padding: 4, border: '1px solid #ddd', borderRadius: 4 }}
+          data-testid={`edit-${type}-input`}
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{ padding: '2px 8px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+          data-testid={`edit-${type}-save`}
+        >
+          ✓
+        </button>
+        <button
+          onClick={handleCancel}
+          disabled={saving}
+          style={{ padding: '2px 8px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+          data-testid={`edit-${type}-cancel`}
+        >
+          ✗
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <span
+      onClick={() => !disabled && setEditing(true)}
+      style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1 }}
+      title={disabled ? '' : 'Κλικ για επεξεργασία'}
+      data-testid={`edit-${type}-display`}
+    >
+      {type === 'price' ? new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(value) : value}
     </span>
   )
 }
@@ -143,6 +249,54 @@ function AdminProductsContent() {
     router.push(`/admin/products?${params.toString()}`)
   }
 
+  async function handleToggleActive(productId: string, newIsActive: boolean) {
+    try {
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: newIsActive })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Η κατάσταση ενημερώθηκε επιτυχώς')
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης κατάστασης'
+      showError(message)
+    }
+  }
+
+  async function handleUpdatePrice(productId: string, newPrice: number) {
+    try {
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: newPrice })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Η τιμή ενημερώθηκε επιτυχώς')
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης τιμής'
+      showError(message)
+    }
+  }
+
+  async function handleUpdateStock(productId: string, newStock: number) {
+    try {
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: newStock })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Το απόθεμα ενημερώθηκε επιτυχώς')
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης αποθέματος'
+      showError(message)
+    }
+  }
+
   const fmt = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
 
@@ -168,8 +322,10 @@ function AdminProductsContent() {
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd', backgroundColor: '#f5f5f5' }}>
               <th>Τίτλος</th>
+              <th>Παραγωγός</th>
               <th>Τιμή</th>
               <th>Απόθεμα</th>
+              <th>Ενεργό</th>
               <th>Έγκριση</th>
               <th>Ενέργειες</th>
             </tr>
@@ -178,8 +334,32 @@ function AdminProductsContent() {
             {products.map(p => (
               <tr key={p.id} style={{ borderBottom: '1px solid #f0f0f0' }} data-testid={`product-row-${p.id}`}>
                 <td><Link href={`/products/${p.id}`}>{p.title}</Link></td>
-                <td>{fmt(Number(p.price || 0))} / {p.unit}</td>
-                <td>{String(p.stock || 0)}</td>
+                <td>{p.producer?.name || 'Άγνωστος'}</td>
+                <td>
+                  <InlineEditField
+                    value={Number(p.price || 0)}
+                    onSave={(newPrice) => handleUpdatePrice(p.id, newPrice)}
+                    type="price"
+                    disabled={processingIds.has(p.id)}
+                  />
+                  {' / '}{p.unit}
+                </td>
+                <td>
+                  <InlineEditField
+                    value={Number(p.stock || 0)}
+                    onSave={(newStock) => handleUpdateStock(p.id, newStock)}
+                    type="stock"
+                    disabled={processingIds.has(p.id)}
+                  />
+                </td>
+                <td>
+                  <InlineToggle
+                    productId={p.id}
+                    isActive={p.isActive}
+                    onToggle={handleToggleActive}
+                    disabled={processingIds.has(p.id)}
+                  />
+                </td>
                 <td><StatusBadge status={p.approvalStatus} /></td>
                 <td>
                   {p.approvalStatus === 'pending' && (
@@ -212,7 +392,7 @@ function AdminProductsContent() {
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
+                <td colSpan={7} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
                   Δεν βρέθηκαν προϊόντα.
                 </td>
               </tr>

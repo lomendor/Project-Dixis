@@ -26,7 +26,10 @@ export async function GET(req: Request) {
         stock: true,
         isActive: true,
         approvalStatus: true,
-        rejectionReason: true
+        rejectionReason: true,
+        producer: {
+          select: { id: true, name: true }
+        }
       },
       orderBy: { createdAt: 'desc' },
       take: 100

@@ -42,12 +42,16 @@ export async function PATCH(
 
     // Build update data
     const updateData: Record<string, unknown> = {}
-    const changes: Record<string, { old: unknown; new: unknown }> = {}
+    const oldValue: Record<string, number | boolean> = {}
+    const newValue: Record<string, number | boolean> = {}
+    let hasChanges = false
 
     if (isActive !== undefined && typeof isActive === 'boolean') {
       updateData.isActive = isActive
       if (currentProduct.isActive !== isActive) {
-        changes.isActive = { old: currentProduct.isActive, new: isActive }
+        oldValue.isActive = currentProduct.isActive
+        newValue.isActive = isActive
+        hasChanges = true
       }
     }
 
@@ -61,7 +65,9 @@ export async function PATCH(
       }
       updateData.price = newPrice
       if (currentProduct.price !== newPrice) {
-        changes.price = { old: currentProduct.price, new: newPrice }
+        oldValue.price = currentProduct.price
+        newValue.price = newPrice
+        hasChanges = true
       }
     }
 
@@ -75,7 +81,9 @@ export async function PATCH(
       }
       updateData.stock = newStock
       if (currentProduct.stock !== newStock) {
-        changes.stock = { old: currentProduct.stock, new: newStock }
+        oldValue.stock = currentProduct.stock
+        newValue.stock = newStock
+        hasChanges = true
       }
     }
 
@@ -98,15 +106,17 @@ export async function PATCH(
       }
     })
 
-    // Log admin action for audit trail
-    await logAdminAction({
-      admin,
-      action: 'PRODUCT_UPDATE',
-      entityType: 'product',
-      entityId: productId,
-      oldValue: changes,
-      newValue: updateData
-    })
+    // Log admin action for audit trail (only if there were actual changes)
+    if (hasChanges) {
+      await logAdminAction({
+        admin,
+        action: 'PRODUCT_UPDATE',
+        entityType: 'product',
+        entityId: productId,
+        oldValue,
+        newValue
+      })
+    }
 
     return NextResponse.json({
       success: true,
