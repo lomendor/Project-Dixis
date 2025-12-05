@@ -23,14 +23,14 @@ export const pricingApi = {
   },
 
   async updateProduct(productId: number, updates: ProductUpdateData): Promise<void> {
-    const response = await fetch(`/api/v1/products/${productId}`, {
+    const response = await fetch(`/api/admin/products/${productId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(updates),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw error;

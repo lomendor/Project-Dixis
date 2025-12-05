@@ -9,6 +9,7 @@ import type { AdminContext } from '@/lib/auth/admin';
 export type AuditAction =
   | 'PRODUCT_APPROVE'
   | 'PRODUCT_REJECT'
+  | 'PRODUCT_UPDATE'
   | 'PRODUCER_APPROVE'
   | 'PRODUCER_REJECT'
   | 'ORDER_STATUS_CHANGE'
