@@ -119,7 +119,7 @@ function EditProductContent() {
         throw new Error(data.error || 'Αποτυχία ενημέρωσης προϊόντος');
       }
 
-      router.push('/producer/products');
+      router.push('/my/products');
     } catch (err: any) {
       setError(err.message || 'Σφάλμα ενημέρωσης προϊόντος');
     } finally {

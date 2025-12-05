@@ -305,7 +305,7 @@ function ProducerProductsContent() {
                 </p>
               </div>
               <button
-                onClick={() => router.push('/producer/products/create')}
+                onClick={() => router.push('/my/products/create')}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 data-testid="add-product-btn"
               >
@@ -384,7 +384,7 @@ function ProducerProductsContent() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => router.push('/producer/products/create')}
+                    onClick={() => router.push('/my/products/create')}
                     className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                     data-testid="add-first-product-btn"
                   >
@@ -457,7 +457,7 @@ function ProducerProductsContent() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                           <button
-                            onClick={() => router.push(`/producer/products/${product.id}/edit`)}
+                            onClick={() => router.push(`/my/products/${product.id}/edit`)}
                             className="text-blue-600 hover:text-blue-900"
                             data-testid={`edit-product-${product.id}`}
                           >
