@@ -25,6 +25,13 @@ interface ProducerStatus {
   profileExists: boolean;
 }
 
+interface Category {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+}
+
 export default function ProducerProductsPage() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
@@ -32,19 +39,6 @@ export default function ProducerProductsPage() {
     </AuthGuard>
   );
 }
-
-// Greek categories (same as create form)
-const categories = [
-  'Φρούτα',
-  'Λαχανικά',
-  'Γαλακτοκομικά',
-  'Κρέατα',
-  'Ψάρια',
-  'Αρτοσκευάσματα',
-  'Γλυκά',
-  'Ελαιόλαδα',
-  'Τυροκομικά'
-];
 
 function ProducerProductsContent() {
   const { user } = useAuth();
@@ -64,6 +58,10 @@ function ProducerProductsContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
+  // Dynamic categories from API
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
@@ -74,6 +72,17 @@ function ProducerProductsContent() {
       checkProducerStatus();
     }
   }, [user?.id]);
+
+  // Fetch categories from API
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((data) => {
+        setCategories(data.categories || []);
+        setCategoriesLoading(false);
+      })
+      .catch(() => setCategoriesLoading(false));
+  }, []);
 
   const checkProducerStatus = async () => {
     try {
@@ -333,7 +342,9 @@ function ProducerProductsContent() {
                 >
                   <option value="">Όλες οι κατηγορίες</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat.id} value={cat.name}>
+                      {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
+                    </option>
                   ))}
                 </select>
               </div>

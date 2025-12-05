@@ -11,9 +11,10 @@ export type AuditAction =
   | 'PRODUCT_REJECT'
   | 'PRODUCER_APPROVE'
   | 'PRODUCER_REJECT'
-  | 'ORDER_STATUS_CHANGE';
+  | 'ORDER_STATUS_CHANGE'
+  | 'CATEGORY_UPDATE';
 
-export type AuditEntityType = 'product' | 'producer' | 'order';
+export type AuditEntityType = 'product' | 'producer' | 'order' | 'category';
 
 // Use Prisma's InputJsonValue for Json fields
 type JsonValue = Prisma.InputJsonValue;
