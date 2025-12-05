@@ -21,6 +21,8 @@ export async function GET(req: Request) {
       select: {
         id: true,
         title: true,
+        description: true,
+        category: true,
         price: true,
         unit: true,
         stock: true,

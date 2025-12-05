@@ -22,7 +22,7 @@ export async function PATCH(
     }
 
     const body = await request.json().catch(() => ({}))
-    const { isActive, price, stock } = body
+    const { isActive, price, stock, title, description, category, unit } = body
 
     // Fetch current product for audit trail
     const currentProduct = await prisma.product.findUnique({
@@ -30,6 +30,9 @@ export async function PATCH(
       select: {
         id: true,
         title: true,
+        description: true,
+        category: true,
+        unit: true,
         isActive: true,
         price: true,
         stock: true
@@ -42,8 +45,8 @@ export async function PATCH(
 
     // Build update data
     const updateData: Record<string, unknown> = {}
-    const oldValue: Record<string, number | boolean> = {}
-    const newValue: Record<string, number | boolean> = {}
+    const oldValue: Record<string, number | boolean | string> = {}
+    const newValue: Record<string, number | boolean | string> = {}
     let hasChanges = false
 
     if (isActive !== undefined && typeof isActive === 'boolean') {
@@ -87,6 +90,64 @@ export async function PATCH(
       }
     }
 
+    if (title !== undefined && typeof title === 'string') {
+      const trimmedTitle = title.trim()
+      if (trimmedTitle.length < 3) {
+        return NextResponse.json(
+          { error: 'Ο τίτλος πρέπει να έχει τουλάχιστον 3 χαρακτήρες' },
+          { status: 400 }
+        )
+      }
+      updateData.title = trimmedTitle
+      if (currentProduct.title !== trimmedTitle) {
+        oldValue.title = currentProduct.title
+        newValue.title = trimmedTitle
+        hasChanges = true
+      }
+    }
+
+    if (description !== undefined) {
+      const trimmedDesc = typeof description === 'string' ? description.trim() : null
+      updateData.description = trimmedDesc
+      if (currentProduct.description !== trimmedDesc) {
+        oldValue.description = currentProduct.description || ''
+        newValue.description = trimmedDesc || ''
+        hasChanges = true
+      }
+    }
+
+    if (category !== undefined && typeof category === 'string') {
+      const trimmedCategory = category.trim()
+      if (trimmedCategory.length === 0) {
+        return NextResponse.json(
+          { error: 'Η κατηγορία είναι υποχρεωτική' },
+          { status: 400 }
+        )
+      }
+      updateData.category = trimmedCategory
+      if (currentProduct.category !== trimmedCategory) {
+        oldValue.category = currentProduct.category
+        newValue.category = trimmedCategory
+        hasChanges = true
+      }
+    }
+
+    if (unit !== undefined && typeof unit === 'string') {
+      const trimmedUnit = unit.trim()
+      if (trimmedUnit.length === 0) {
+        return NextResponse.json(
+          { error: 'Η μονάδα μέτρησης είναι υποχρεωτική' },
+          { status: 400 }
+        )
+      }
+      updateData.unit = trimmedUnit
+      if (currentProduct.unit !== trimmedUnit) {
+        oldValue.unit = currentProduct.unit
+        newValue.unit = trimmedUnit
+        hasChanges = true
+      }
+    }
+
     // If no changes, return current product
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ success: true, product: currentProduct })
@@ -99,6 +160,9 @@ export async function PATCH(
       select: {
         id: true,
         title: true,
+        description: true,
+        category: true,
+        unit: true,
         price: true,
         stock: true,
         isActive: true,

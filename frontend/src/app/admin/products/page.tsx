@@ -8,6 +8,8 @@ import { useToast } from '@/contexts/ToastContext'
 interface Product {
   id: string
   title: string
+  description: string | null
+  category: string
   price: number
   unit: string
   stock: number
@@ -166,6 +168,12 @@ function AdminProductsContent() {
   const [rejectionReason, setRejectionReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null)
+  const [editForm, setEditForm] = useState({ title: '', description: '', category: '', unit: '' })
+  const [editSubmitting, setEditSubmitting] = useState(false)
+
   const q = searchParams.get('q') || ''
   const approval = searchParams.get('approval') || ''
 
@@ -297,6 +305,43 @@ function AdminProductsContent() {
     }
   }
 
+  function handleEditClick(product: Product) {
+    setProductToEdit(product)
+    setEditForm({
+      title: product.title,
+      description: product.description || '',
+      category: product.category,
+      unit: product.unit
+    })
+    setEditModalOpen(true)
+  }
+
+  async function handleEditConfirm() {
+    if (!productToEdit || editForm.title.trim().length < 3) return
+    setEditSubmitting(true)
+    setProcessingIds(prev => new Set([...prev, productToEdit.id]))
+    try {
+      const res = await fetch(`/api/admin/products/${productToEdit.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Το προϊόν ενημερώθηκε επιτυχώς')
+      setEditModalOpen(false)
+      setProductToEdit(null)
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης προϊόντος'
+      showError(message)
+    } finally {
+      setEditSubmitting(false)
+      if (productToEdit) {
+        setProcessingIds(prev => { const s = new Set(prev); s.delete(productToEdit.id); return s })
+      }
+    }
+  }
+
   const fmt = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
 
@@ -362,31 +407,41 @@ function AdminProductsContent() {
                 </td>
                 <td><StatusBadge status={p.approvalStatus} /></td>
                 <td>
-                  {p.approvalStatus === 'pending' && (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button
-                        onClick={() => handleApprove(p.id)}
-                        disabled={processingIds.has(p.id)}
-                        style={{ padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
-                        data-testid={`approve-btn-${p.id}`}
-                      >
-                        {processingIds.has(p.id) ? '...' : 'Έγκριση'}
-                      </button>
-                      <button
-                        onClick={() => handleRejectClick({ id: p.id, title: p.title })}
-                        disabled={processingIds.has(p.id)}
-                        style={{ padding: '6px 12px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
-                        data-testid={`reject-btn-${p.id}`}
-                      >
-                        Απόρριψη
-                      </button>
-                    </div>
-                  )}
-                  {p.approvalStatus === 'rejected' && p.rejectionReason && (
-                    <span style={{ fontSize: 12, color: '#666' }} title={p.rejectionReason}>
-                      Λόγος: {p.rejectionReason.slice(0, 20)}...
-                    </span>
-                  )}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {p.approvalStatus === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleApprove(p.id)}
+                          disabled={processingIds.has(p.id)}
+                          style={{ padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                          data-testid={`approve-btn-${p.id}`}
+                        >
+                          {processingIds.has(p.id) ? '...' : 'Έγκριση'}
+                        </button>
+                        <button
+                          onClick={() => handleRejectClick({ id: p.id, title: p.title })}
+                          disabled={processingIds.has(p.id)}
+                          style={{ padding: '6px 12px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                          data-testid={`reject-btn-${p.id}`}
+                        >
+                          Απόρριψη
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => handleEditClick(p)}
+                      disabled={processingIds.has(p.id)}
+                      style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
+                      data-testid={`edit-btn-${p.id}`}
+                    >
+                      Επεξεργασία
+                    </button>
+                    {p.approvalStatus === 'rejected' && p.rejectionReason && (
+                      <span style={{ fontSize: 12, color: '#666', alignSelf: 'center' }} title={p.rejectionReason}>
+                        Λόγος: {p.rejectionReason.slice(0, 20)}...
+                      </span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -454,6 +509,107 @@ function AdminProductsContent() {
                 data-testid="rejection-modal-confirm"
               >
                 {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {editModalOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setEditModalOpen(false)}
+          data-testid="edit-modal"
+        >
+          <div
+            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 500, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }} data-testid="edit-modal-title">
+              Επεξεργασία Προϊόντος
+            </h3>
+            <p style={{ color: '#666', marginBottom: 16, fontSize: 14 }}>
+              ID: {productToEdit?.id}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                  Τίτλος *
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={e => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Τίτλος προϊόντος..."
+                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  data-testid="edit-title-input"
+                />
+                {editForm.title.length > 0 && editForm.title.length < 3 && (
+                  <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>Τουλάχιστον 3 χαρακτήρες</p>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                  Περιγραφή
+                </label>
+                <textarea
+                  value={editForm.description}
+                  onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                  rows={4}
+                  placeholder="Περιγραφή προϊόντος..."
+                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }}
+                  data-testid="edit-description-input"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                  Κατηγορία *
+                </label>
+                <input
+                  type="text"
+                  value={editForm.category}
+                  onChange={e => setEditForm(prev => ({ ...prev, category: e.target.value }))}
+                  placeholder="Κατηγορία προϊόντος..."
+                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  data-testid="edit-category-input"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                  Μονάδα Μέτρησης *
+                </label>
+                <input
+                  type="text"
+                  value={editForm.unit}
+                  onChange={e => setEditForm(prev => ({ ...prev, unit: e.target.value }))}
+                  placeholder="π.χ. κιλό, τεμάχιο..."
+                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  data-testid="edit-unit-input"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button
+                onClick={() => { setEditModalOpen(false); setProductToEdit(null) }}
+                disabled={editSubmitting}
+                style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                data-testid="edit-modal-cancel"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={handleEditConfirm}
+                disabled={editSubmitting || editForm.title.trim().length < 3 || !editForm.category.trim() || !editForm.unit.trim()}
+                style={{ padding: '10px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: (editSubmitting || editForm.title.trim().length < 3 || !editForm.category.trim() || !editForm.unit.trim()) ? 0.5 : 1 }}
+                data-testid="edit-modal-confirm"
+              >
+                {editSubmitting ? 'Αποθήκευση...' : 'Αποθήκευση'}
               </button>
             </div>
           </div>
