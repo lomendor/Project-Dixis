@@ -71,7 +71,7 @@ export async function PUT(
     const productId = params.id;
     const body = await request.json();
 
-    const { title, category, price, unit, stock, description, imageUrl, isActive } = body;
+    const { title, slug, category, price, unit, stock, description, imageUrl, isActive } = body;
 
     // Update product scoped to this producer (prevents updating other producers' products)
     const product = await prisma.product.updateMany({
@@ -81,6 +81,7 @@ export async function PUT(
       },
       data: {
         ...(title !== undefined && { title: String(title).trim() }),
+        ...(slug !== undefined && slug.trim().length > 0 && { slug: String(slug).trim().toLowerCase() }),
         ...(category !== undefined && { category: String(category).trim() }),
         ...(price !== undefined && { price: parseFloat(price) }),
         ...(unit !== undefined && { unit: String(unit).trim() }),
