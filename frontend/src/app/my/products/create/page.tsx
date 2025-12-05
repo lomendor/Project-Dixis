@@ -132,7 +132,14 @@ function CreateProductContent() {
                 id="slug"
                 type="text"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                onChange={(e) => {
+                  // Auto-normalize: lowercase, replace spaces with dashes, remove invalid chars
+                  const normalized = e.target.value
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '');
+                  setSlug(normalized);
+                }}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="π.χ. biologikes-tomates"
