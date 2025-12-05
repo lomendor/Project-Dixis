@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://o4508541701652480.ingest.de.sentry.io",
+              "connect-src 'self' http://127.0.0.1:8001 http://localhost:8001 https://o4508541701652480.ingest.de.sentry.io",
               "frame-ancestors 'none'",
             ].join('; '),
           },
