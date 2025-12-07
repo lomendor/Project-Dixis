@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { loginSchema } from '@/lib/validation/auth';
+import { ZodError } from 'zod';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -20,12 +24,51 @@ export default function Login() {
     }
   }, [isAuthenticated, router]);
 
+  // Field-level validation handlers
+  const validateEmail = (value: string) => {
+    try {
+      loginSchema.shape.email.parse(value);
+      setEmailError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setEmailError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
+  const validatePassword = (value: string) => {
+    try {
+      loginSchema.shape.password.parse(value);
+      setPasswordError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setPasswordError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      setError('Παρακαλώ συμπληρώστε όλα τα πεδία');
-      return;
+
+    // Client-side validation με Zod
+    try {
+      loginSchema.parse({ email, password });
+      // Clear any field errors if validation passes
+      setEmailError(null);
+      setPasswordError(null);
+      setError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        // Set field-specific errors
+        err.errors.forEach((error) => {
+          if (error.path[0] === 'email') {
+            setEmailError(error.message);
+          } else if (error.path[0] === 'password') {
+            setPasswordError(error.message);
+          }
+        });
+        return; // Stop submission if validation fails
+      }
     }
 
     try {
@@ -97,11 +140,21 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => validateEmail(email)}
                   data-testid="login-email"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    emailError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Εισάγετε το email σας"
+                  aria-invalid={emailError ? 'true' : 'false'}
+                  aria-describedby={emailError ? 'email-error' : undefined}
                 />
               </div>
+              {emailError && (
+                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {emailError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -117,11 +170,21 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onBlur={() => validatePassword(password)}
                   data-testid="login-password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    passwordError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Εισάγετε τον κωδικό σας"
+                  aria-invalid={passwordError ? 'true' : 'false'}
+                  aria-describedby={passwordError ? 'password-error' : undefined}
                 />
               </div>
+              {passwordError && (
+                <p id="password-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {passwordError}
+                </p>
+              )}
             </div>
 
             <div>

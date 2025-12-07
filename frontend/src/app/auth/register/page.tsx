@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
+import { registerSchema, registerFieldSchema } from '@/lib/validation/auth';
+import { ZodError } from 'zod';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -15,6 +17,10 @@ export default function Register() {
     role: 'consumer' as 'consumer' | 'producer',
   });
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordConfirmationError, setPasswordConfirmationError] = useState<string | null>(null);
   const { register, registerLoading, isAuthenticated, user, getIntendedDestination, clearIntendedDestination } = useAuth();
   const { showSuccess, showError } = useToast();
   const router = useRouter();
@@ -36,6 +42,56 @@ export default function Register() {
     }
   }, [isAuthenticated, user, router, getIntendedDestination, clearIntendedDestination]);
 
+  // Field-level validation handlers
+  const validateName = (value: string) => {
+    try {
+      registerFieldSchema.shape.name.parse(value);
+      setNameError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setNameError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
+  const validateEmail = (value: string) => {
+    try {
+      registerFieldSchema.shape.email.parse(value);
+      setEmailError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setEmailError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
+  const validatePassword = (value: string) => {
+    try {
+      registerFieldSchema.shape.password.parse(value);
+      setPasswordError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setPasswordError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
+  const validatePasswordConfirmation = (value: string) => {
+    try {
+      registerFieldSchema.shape.password_confirmation.parse(value);
+      // Also check if passwords match
+      if (formData.password && value && value !== formData.password) {
+        setPasswordConfirmationError('Οι κωδικοί δεν ταιριάζουν');
+      } else {
+        setPasswordConfirmationError(null);
+      }
+    } catch (err) {
+      if (err instanceof ZodError) {
+        setPasswordConfirmationError(err.errors[0]?.message || null);
+      }
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -46,26 +102,31 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation with Greek messages
-    if (!formData.name || !formData.email || !formData.password) {
-      const message = 'Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία';
-      setError(message);
-      showError(message);
-      return;
-    }
-
-    if (formData.password !== formData.password_confirmation) {
-      const message = 'Οι κωδικοί δεν ταιριάζουν';
-      setError(message);
-      showError(message);
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      const message = 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες';
-      setError(message);
-      showError(message);
-      return;
+    // Client-side validation με Zod
+    try {
+      registerSchema.parse(formData);
+      // Clear any field errors if validation passes
+      setNameError(null);
+      setEmailError(null);
+      setPasswordError(null);
+      setPasswordConfirmationError(null);
+      setError(null);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        // Set field-specific errors
+        err.errors.forEach((error) => {
+          if (error.path[0] === 'name') {
+            setNameError(error.message);
+          } else if (error.path[0] === 'email') {
+            setEmailError(error.message);
+          } else if (error.path[0] === 'password') {
+            setPasswordError(error.message);
+          } else if (error.path[0] === 'password_confirmation') {
+            setPasswordConfirmationError(error.message);
+          }
+        });
+        return; // Stop submission if validation fails
+      }
     }
 
     try {
@@ -126,10 +187,20 @@ export default function Register() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  onBlur={() => validateName(formData.name)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    nameError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Εισάγετε το ονοματεπώνυμό σας"
+                  aria-invalid={nameError ? 'true' : 'false'}
+                  aria-describedby={nameError ? 'name-error' : undefined}
                 />
               </div>
+              {nameError && (
+                <p id="name-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {nameError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -145,10 +216,20 @@ export default function Register() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  onBlur={() => validateEmail(formData.email)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    emailError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Εισάγετε το email σας"
+                  aria-invalid={emailError ? 'true' : 'false'}
+                  aria-describedby={emailError ? 'email-error' : undefined}
                 />
               </div>
+              {emailError && (
+                <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {emailError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -185,13 +266,25 @@ export default function Register() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  onBlur={() => validatePassword(formData.password)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    passwordError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Δημιουργήστε έναν κωδικό"
+                  aria-invalid={passwordError ? 'true' : 'false'}
+                  aria-describedby={passwordError ? 'password-error password-hint' : 'password-hint'}
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες
-              </p>
+              {passwordError && (
+                <p id="password-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {passwordError}
+                </p>
+              )}
+              {!passwordError && (
+                <p id="password-hint" className="mt-1 text-xs text-gray-500">
+                  Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες
+                </p>
+              )}
             </div>
 
             <div>
@@ -207,10 +300,20 @@ export default function Register() {
                   required
                   value={formData.password_confirmation}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  onBlur={() => validatePasswordConfirmation(formData.password_confirmation)}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                    passwordConfirmationError ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Επιβεβαιώστε τον κωδικό σας"
+                  aria-invalid={passwordConfirmationError ? 'true' : 'false'}
+                  aria-describedby={passwordConfirmationError ? 'password-confirmation-error' : undefined}
                 />
               </div>
+              {passwordConfirmationError && (
+                <p id="password-confirmation-error" className="mt-1 text-sm text-red-600" role="alert">
+                  {passwordConfirmationError}
+                </p>
+              )}
             </div>
 
             <div>
