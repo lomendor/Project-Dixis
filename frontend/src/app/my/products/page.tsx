@@ -25,6 +25,13 @@ interface ProducerStatus {
   profileExists: boolean;
 }
 
+interface Category {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+}
+
 export default function ProducerProductsPage() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
@@ -32,19 +39,6 @@ export default function ProducerProductsPage() {
     </AuthGuard>
   );
 }
-
-// Greek categories (same as create form)
-const categories = [
-  'Φρούτα',
-  'Λαχανικά',
-  'Γαλακτοκομικά',
-  'Κρέατα',
-  'Ψάρια',
-  'Αρτοσκευάσματα',
-  'Γλυκά',
-  'Ελαιόλαδα',
-  'Τυροκομικά'
-];
 
 function ProducerProductsContent() {
   const { user } = useAuth();
@@ -64,6 +58,10 @@ function ProducerProductsContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
+  // Dynamic categories from API
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
@@ -74,6 +72,17 @@ function ProducerProductsContent() {
       checkProducerStatus();
     }
   }, [user?.id]);
+
+  // Fetch categories from API
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((data) => {
+        setCategories(data.categories || []);
+        setCategoriesLoading(false);
+      })
+      .catch(() => setCategoriesLoading(false));
+  }, []);
 
   const checkProducerStatus = async () => {
     try {
@@ -296,7 +305,7 @@ function ProducerProductsContent() {
                 </p>
               </div>
               <button
-                onClick={() => router.push('/producer/products/create')}
+                onClick={() => router.push('/my/products/create')}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 data-testid="add-product-btn"
               >
@@ -333,7 +342,9 @@ function ProducerProductsContent() {
                 >
                   <option value="">Όλες οι κατηγορίες</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat.id} value={cat.name}>
+                      {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -373,7 +384,7 @@ function ProducerProductsContent() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => router.push('/producer/products/create')}
+                    onClick={() => router.push('/my/products/create')}
                     className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
                     data-testid="add-first-product-btn"
                   >
@@ -446,7 +457,7 @@ function ProducerProductsContent() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                           <button
-                            onClick={() => router.push(`/producer/products/${product.id}/edit`)}
+                            onClick={() => router.push(`/my/products/${product.id}/edit`)}
                             className="text-blue-600 hover:text-blue-900"
                             data-testid={`edit-product-${product.id}`}
                           >

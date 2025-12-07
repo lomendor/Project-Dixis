@@ -9,11 +9,13 @@ import type { AdminContext } from '@/lib/auth/admin';
 export type AuditAction =
   | 'PRODUCT_APPROVE'
   | 'PRODUCT_REJECT'
+  | 'PRODUCT_UPDATE'
   | 'PRODUCER_APPROVE'
   | 'PRODUCER_REJECT'
-  | 'ORDER_STATUS_CHANGE';
+  | 'ORDER_STATUS_CHANGE'
+  | 'CATEGORY_UPDATE';
 
-export type AuditEntityType = 'product' | 'producer' | 'order';
+export type AuditEntityType = 'product' | 'producer' | 'order' | 'category';
 
 // Use Prisma's InputJsonValue for Json fields
 type JsonValue = Prisma.InputJsonValue;
