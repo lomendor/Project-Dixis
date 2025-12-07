@@ -79,7 +79,7 @@ export default function Login() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit} data-testid="login-form">
             {error && (
-              <div className="rounded-md bg-red-50 p-4" data-testid="error-toast" role="alert">
+              <div className="rounded-md bg-red-50 p-4" data-testid="inline-error" role="alert">
                 <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
