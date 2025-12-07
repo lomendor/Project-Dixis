@@ -23,11 +23,13 @@ await this.page.waitForSelector('.fixed.top-4.right-4');
 // Then wait for toast content to appear
 ```
 
-### 2. **Mobile Navigation Fix** - 3 hours ⭐⭐
-**Files**: Navigation components, responsive CSS  
-**Issue**: Navigation breaks on small screens (found during testing)  
-**Fix**: Implement hamburger menu, fix mobile layouts  
-**Impact**: Mobile user experience dramatically improved
+### 2. **Mobile Navigation Fix** - ✅ COMPLETED (2025-12-07)
+**Files**: `Header.tsx`, navigation components
+**Issue**: Navigation breaks on small screens (found during testing)
+**Fix**: Implemented hamburger menu με 44px touch targets, mobile-optimized layout
+**Impact**: Professional mobile UX με smooth transitions
+**Commit**: `414ce8a1` - Mobile-first header με responsive menu
+**Status**: ✅ Header has proper mobile menu, touch-friendly buttons
 
 ### 3. **Loading States Polish** - ✅ COMPLETED (2025-12-07)
 **Files**: `AuthContext.tsx`, login/register pages
@@ -63,15 +65,21 @@ await this.page.waitForSelector('.fixed.top-4.right-4');
 
 ## 🔧 **TECHNICAL DEBT** (Background Tasks)
 
-### 7. **UI/Marketing Components Polish** - 3 hours ⚡ NEW
-**Files**: `frontend/src/components/marketing/*`, `ProductCard.tsx`
-**Created**: 2025-12-07 (Pass-UI-M1-Mobile-Home)
-**Issues to address**:
-- **Image Optimization**: ProductCard uses `<img>` instead of Next.js `<Image />` (affects performance)
-- **API Error Handling**: FeaturedProducts returns empty array on error (should show user message)
-- **Accessibility**: Trust section SVG icons lack proper ARIA labels
-- **Mobile Testing**: New Hero/Trust/CTA components not tested on real devices (iPhone/Android)
-- **CTA Duplication**: Hero and CTA sections have overlapping CTAs (consolidate later?)
+### 7. **UI/Marketing Components Polish** - ✅ COMPLETED (2025-12-07)
+**Files**: `frontend/src/components/marketing/*`, `ProductCard.tsx`, `Header.tsx`
+**Completed**: 2025-12-07 (Mobile-first homepage redesign)
+**Changes made**:
+- ✅ **Mobile-first redesign**: Hero, Trust, CTA components με generous spacing
+- ✅ **Brand consistency**: Unified neutral-200 colors σε όλα τα components
+- ✅ **Better touch targets**: 44px minimum για mobile interactions
+- ✅ **Improved error handling**: FeaturedProducts με proper error states
+- ✅ **Smooth transitions**: Professional hover/active states
+**Commit**: `414ce8a1` - "feat(ui): Mobile-first homepage polish + brand color consistency"
+
+**Remaining tech debt**:
+- **Image Optimization**: ProductCard uses `<img>` (future: migrate to Next.js `<Image />`)
+- **Accessibility**: Add ARIA labels σε SVG icons (future enhancement)
+- **Real device testing**: Πρέπει manual testing σε physical devices
 
 ### 8. **TypeScript Strict Mode** - 3 hours
 **Goal**: Enable strict mode, fix any/unknown types
