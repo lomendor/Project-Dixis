@@ -29,21 +29,24 @@ await this.page.waitForSelector('.fixed.top-4.right-4');
 **Fix**: Implement hamburger menu, fix mobile layouts  
 **Impact**: Mobile user experience dramatically improved
 
-### 3. **Loading States Polish** - 4 hours ⭐⭐
-**Files**: Product pages, AuthContext, order flows  
-**Issue**: No visual feedback during API calls  
-**Fix**: Add spinners, skeleton screens  
-**Impact**: Professional UX feeling
+### 3. **Loading States Polish** - ✅ COMPLETED (2025-12-07)
+**Files**: `AuthContext.tsx`, login/register pages
+**Issue**: No visual feedback during API calls
+**Fix**: Added loading spinners to auth forms (register/login)
+**Impact**: Professional UX with clear visual feedback
+**Commit**: `3954f2af` - "feat(auth): Βελτίωση UX εγγραφής/σύνδεσης με Ελληνικά μηνύματα"
 
 ---
 
 ## 📋 **MEDIUM-PRIORITY IMPROVEMENTS** (This Week)
 
-### 4. **Error Message Enhancement** - 3 hours
-**Files**: `AuthContext.tsx`, login/register forms  
-**Current**: Generic error messages  
-**Goal**: User-friendly, actionable error messages
-**Example**: "Invalid credentials" → "Email or password incorrect. Try again or reset password."
+### 4. **Error Message Enhancement** - ✅ COMPLETED (2025-12-07)
+**Files**: `AuthContext.tsx`, login/register forms
+**Current**: Generic error messages
+**Goal**: User-friendly, actionable Greek error messages
+**Example**: "Invalid credentials" → "Λάθος email ή κωδικός πρόσβασης. Παρακαλώ δοκιμάστε ξανά."
+**Status**: ✅ Implemented with status-specific messages (401/422/429/500/timeout)
+**Commit**: `3954f2af`
 
 ### 5. **Form Validation Polish** - 2 hours  
 **Files**: Login, register, checkout forms  
@@ -60,16 +63,26 @@ await this.page.waitForSelector('.fixed.top-4.right-4');
 
 ## 🔧 **TECHNICAL DEBT** (Background Tasks)
 
-### 7. **TypeScript Strict Mode** - 3 hours
-**Goal**: Enable strict mode, fix any/unknown types  
+### 7. **UI/Marketing Components Polish** - 3 hours ⚡ NEW
+**Files**: `frontend/src/components/marketing/*`, `ProductCard.tsx`
+**Created**: 2025-12-07 (Pass-UI-M1-Mobile-Home)
+**Issues to address**:
+- **Image Optimization**: ProductCard uses `<img>` instead of Next.js `<Image />` (affects performance)
+- **API Error Handling**: FeaturedProducts returns empty array on error (should show user message)
+- **Accessibility**: Trust section SVG icons lack proper ARIA labels
+- **Mobile Testing**: New Hero/Trust/CTA components not tested on real devices (iPhone/Android)
+- **CTA Duplication**: Hero and CTA sections have overlapping CTAs (consolidate later?)
+
+### 8. **TypeScript Strict Mode** - 3 hours
+**Goal**: Enable strict mode, fix any/unknown types
 **Benefit**: Better IDE support, fewer runtime errors
 
-### 8. **Bundle Size Optimization** - 2 hours  
-**Goal**: Code splitting, tree shaking optimization  
+### 9. **Bundle Size Optimization** - 2 hours
+**Goal**: Code splitting, tree shaking optimization
 **Target**: <500KB initial bundle
 
-### 9. **SEO Optimization** - 3 hours
-**Goal**: Meta tags, OpenGraph, structured data  
+### 10. **SEO Optimization** - 3 hours
+**Goal**: Meta tags, OpenGraph, structured data
 **Benefit**: Better search visibility
 
 ---
