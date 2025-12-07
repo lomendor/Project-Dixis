@@ -87,7 +87,7 @@ export default function Header() {
               </Link>
               <Link
                 href="/auth/register"
-                className="text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md transition-colors"
+                className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-md transition-colors"
                 data-testid="nav-register"
               >
                 Εγγραφή
@@ -186,7 +186,7 @@ export default function Header() {
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="flex items-center justify-center min-h-[48px] py-3 text-base font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-md mx-0 my-2 transition-colors touch-manipulation"
+                    className="flex items-center justify-center min-h-[48px] py-3 text-base font-medium bg-primary hover:bg-primary-light text-white rounded-md mx-0 my-2 transition-colors touch-manipulation"
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="mobile-nav-register"
                   >
