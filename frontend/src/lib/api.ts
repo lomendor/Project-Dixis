@@ -6,6 +6,26 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+// Custom error class that preserves HTTP status and response data
+export class ApiError extends Error {
+  response?: {
+    status: number;
+    data: any;
+  };
+  code?: string;
+
+  constructor(message: string, status?: number, data?: any, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    if (status !== undefined) {
+      this.response = { status, data: data || {} };
+    }
+    if (code) {
+      this.code = code;
+    }
+  }
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -282,23 +302,39 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Handle absolute URLs directly - use new safe URL joining
-    const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
-    
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...this.getHeaders(),
-        ...options.headers,
-      },
-    });
+    try {
+      // Handle absolute URLs directly - use new safe URL joining
+      const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...this.getHeaders(),
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+        throw new ApiError(message, response.status, errorData);
+      }
+
+      return response.json();
+    } catch (error) {
+      // If it's already an ApiError, re-throw it
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      // Network errors (no response from server)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new ApiError('Πρόβλημα δικτύου. Παρακαλώ ελέγξτε τη σύνδεσή σας.', undefined, undefined, 'ERR_NETWORK');
+      }
+
+      // Other errors
+      throw new ApiError(error instanceof Error ? error.message : 'Άγνωστο σφάλμα');
     }
-
-    return response.json();
   }
 
   // Public API methods
