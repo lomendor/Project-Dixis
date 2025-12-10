@@ -1,35 +1,61 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
+/**
+ * CTA Section - Final call-to-action before footer
+ *
+ * Features:
+ * - Simple, focused message
+ * - Brand color background (primary-pale)
+ * - Generous mobile padding
+ * - Touch-friendly CTA buttons
+ */
 export default function CTA() {
   return (
-    <section className="py-10 sm:py-16">
-      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-light p-6 sm:p-8 md:p-12 text-center">
-        {/* Decorative elements - hidden on mobile */}
-        <div className="hidden sm:block absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="hidden sm:block absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+    <section className="bg-primary-pale py-12 sm:py-16 lg:py-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        {/* Heading - mobile-optimized */}
+        <h2 className="text-3xl font-bold text-neutral-900 mb-4 sm:text-4xl lg:text-5xl">
+          Ξεκινήστε τις αγορές σας σήμερα
+        </h2>
 
-        <div className="relative">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3">
-            Είσαι παραγωγός;
-          </h2>
-          <p className="text-sm sm:text-base text-white/90 max-w-md sm:max-w-xl mx-auto mb-6 sm:mb-8 leading-relaxed">
-            Κάνε τα προϊόντα σου διαθέσιμα σε καταναλωτές σε όλη την Ελλάδα.
-            Διαχειρίσου τις παραγγελίες σου εύκολα και γρήγορα.
-          </p>
-          {/* Mobile: full-width button */}
-          <Link href="/producers" className="block sm:inline-block">
-            <Button
-              size="lg"
-              fullWidth
-              className="sm:w-auto bg-white text-primary hover:bg-neutral-50 active:scale-[0.98]"
-            >
-              Γίνε συνεργάτης
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Button>
+        {/* Subheading */}
+        <p className="text-lg text-neutral-600 leading-relaxed mb-8 sm:text-xl sm:mb-10 max-w-2xl mx-auto">
+          Ανακαλύψτε φρέσκα, βιολογικά προϊόντα από τοπικούς Έλληνες παραγωγούς.
+          Υποστηρίξτε την τοπική οικονομία και απολαύστε την πραγματική γεύση της φύσης.
+        </p>
+
+        {/* CTA Buttons - mobile-first stacking */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
+          >
+            Δείτε τα Προϊόντα
           </Link>
+          <Link
+            href="/auth/register"
+            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-lg border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
+          >
+            Δημιουργία Λογαριασμού
+          </Link>
+        </div>
+
+        {/* Trust indicator - subtle */}
+        <div className="mt-10 pt-8 border-t border-primary/20">
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-neutral-600">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="font-medium">Δωρεάν παράδοση άνω των 30€</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="font-medium">500+ ικανοποιημένοι πελάτες</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

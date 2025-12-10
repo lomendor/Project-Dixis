@@ -5,18 +5,26 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/categories
- * Returns all active categories sorted by sortOrder
+ * Returns categories sorted by sortOrder
+ * Query params:
+ * - includeInactive=true: Include inactive categories (for admin)
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+
     const categories = await prisma.category.findMany({
-      where: { isActive: true },
+      where: includeInactive ? {} : { isActive: true },
       orderBy: { sortOrder: 'asc' },
       select: {
         id: true,
         slug: true,
         name: true,
-        icon: true
+        nameEn: true,
+        icon: true,
+        sortOrder: true,
+        isActive: true
       }
     });
 

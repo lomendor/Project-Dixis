@@ -56,6 +56,12 @@ const nextConfig: NextConfig = {
 
   // Security headers (AG-SEC-01)
   async headers() {
+    // Get API base URL from environment
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+    // Extract origin (remove /api/v1 path if present)
+    const apiOrigin = apiBaseUrl.replace('/api/v1', '').replace(/\/$/, '');
+    const sentryDsn = 'https://o4508541701652480.ingest.de.sentry.io';
+
     return [
       {
         source: '/:path*',
@@ -72,7 +78,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://o4508541701652480.ingest.de.sentry.io",
+              `connect-src 'self' ${apiOrigin} ${sentryDsn}`,
               "frame-ancestors 'none'",
             ].join('; '),
           },

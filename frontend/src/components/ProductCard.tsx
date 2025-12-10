@@ -15,8 +15,8 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
   const hasImage = image && image.length > 0
 
   return (
-    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 touch-manipulation active:scale-[0.99]">
-      <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-gray-100 overflow-hidden">
+    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300 touch-manipulation active:scale-[0.99]">
+      <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden">
         {hasImage ? (
           <img
             src={image}
@@ -43,8 +43,8 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
           </h3>
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
-          <span data-testid="product-card-price" className="text-lg font-bold text-gray-900">{price}</span>
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-neutral-100">
+          <span data-testid="product-card-price" className="text-lg font-bold text-neutral-900">{price}</span>
           <div data-testid="product-card-add">
             <AddToCartButton id={String(id)} title={title} priceCents={priceCents} />
           </div>
@@ -56,15 +56,15 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
 
 export function ProductCardSkeleton() {
   return (
-    <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden animate-pulse">
-      <div className="h-48 bg-gray-200 w-full" />
+    <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden animate-pulse">
+      <div className="h-48 bg-neutral-200 w-full" />
       <div className="p-4 flex-grow flex flex-col">
-        <div className="h-3 bg-gray-200 w-1/3 mb-3 rounded" />
-        <div className="h-6 bg-gray-200 w-full mb-2 rounded" />
-        <div className="h-6 bg-gray-200 w-2/3 rounded" />
-        <div className="mt-auto pt-4 flex justify-between items-center border-t border-gray-50">
-          <div className="h-6 bg-gray-200 w-1/4 rounded" />
-          <div className="h-9 bg-gray-200 w-24 rounded-lg" />
+        <div className="h-3 bg-neutral-200 w-1/3 mb-3 rounded" />
+        <div className="h-6 bg-neutral-200 w-full mb-2 rounded" />
+        <div className="h-6 bg-neutral-200 w-2/3 rounded" />
+        <div className="mt-auto pt-4 flex justify-between items-center border-t border-neutral-100">
+          <div className="h-6 bg-neutral-200 w-1/4 rounded" />
+          <div className="h-9 bg-neutral-200 w-24 rounded-lg" />
         </div>
       </div>
     </div>
