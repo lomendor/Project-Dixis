@@ -30,11 +30,14 @@ export async function POST(req: NextRequest) {
     const isAdmin = adminPhones.includes(phone);
     const bypassCode = process.env.OTP_BYPASS;
 
+    // SECURITY: Never allow bypass in production
+    const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+
     let isValid = false;
     let errorMessage: string | undefined;
 
-    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed()) {
-      // Admin bypass - only in dev/staging
+    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed() && !isProd) {
+      // Admin bypass - only in dev/staging, NEVER in production
       console.log(`[Auth] Admin login bypass for ${phone} (non-production)`);
       isValid = true;
     } else {

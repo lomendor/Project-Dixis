@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV === 'production' && process.env.DIXIS_DEV !== '1') {
+  // SECURITY: Block in production unless DIXIS_DEV override
+  const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+  if (isProd && process.env.DIXIS_DEV !== '1') {
     return new NextResponse('Not found', { status: 404 });
   }
 
