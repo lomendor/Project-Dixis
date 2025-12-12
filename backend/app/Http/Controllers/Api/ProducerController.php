@@ -193,6 +193,54 @@ class ProducerController extends Controller
     }
 
     /**
+     * Get current producer profile
+     */
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Ensure user is authenticated
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Ensure user has a producer profile
+        if (! $user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+
+        return response()->json([
+            'producer' => new \App\Http\Resources\ProducerResource($user->producer),
+        ]);
+    }
+
+    /**
+     * Update producer profile
+     */
+    public function updateProfile(\App\Http\Requests\UpdateProducerRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Ensure user is authenticated
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        // Ensure user has a producer profile
+        if (! $user->producer) {
+            return response()->json(['message' => 'Producer profile not found'], 403);
+        }
+
+        $producer = $user->producer;
+        $producer->update($request->validated());
+
+        return response()->json([
+            'producer' => new \App\Http\Resources\ProducerResource($producer->fresh()),
+            'message' => 'Profile updated successfully',
+        ]);
+    }
+
+    /**
      * Get top-selling products for producer dashboard
      */
     public function topProducts(Request $request): JsonResponse

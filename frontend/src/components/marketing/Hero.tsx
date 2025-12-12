@@ -1,71 +1,67 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
+/**
+ * Hero Section - Mobile-first homepage hero
+ *
+ * Features:
+ * - Large, readable typography on mobile
+ * - Generous whitespace and padding
+ * - Dixis brand colors (Cyprus Green)
+ * - Clear CTA with touch-friendly button
+ */
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden -mx-4 -mt-8">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-pale via-accent-cream to-accent-beige" />
+    <section className="bg-gradient-to-b from-primary-pale to-white">
+      {/* Mobile-first container with generous padding */}
+      <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Heading - optimized for mobile readability */}
+          <h1 className="text-4xl font-bold text-neutral-900 leading-tight mb-6 sm:text-5xl lg:text-6xl">
+            Φρέσκα τοπικά προϊόντα
+            <span className="block text-primary mt-2">
+              από Έλληνες παραγωγούς
+            </span>
+          </h1>
 
-      {/* Decorative elements - hidden on mobile for cleaner look */}
-      <div className="hidden sm:block absolute top-20 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-      <div className="hidden sm:block absolute bottom-10 left-10 w-48 h-48 bg-accent-gold/10 rounded-full blur-2xl" />
+          {/* Subheading - generous mobile spacing */}
+          <p className="text-lg text-neutral-600 leading-relaxed mb-8 sm:text-xl sm:mb-10">
+            Ανακαλύψτε ποιοτικά βιολογικά λαχανικά, φρέσκα φρούτα και χειροποίητα προϊόντα
+            απευθείας από τοπικούς παραγωγούς.
+          </p>
 
-      {/* Mobile-first: generous padding, centered content */}
-      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 md:py-24 text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium text-primary mb-4 sm:mb-6 shadow-sm">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success rounded-full animate-pulse" />
-          Φρέσκα προϊόντα κάθε μέρα
-        </div>
-
-        {/* Main heading - Mobile-first typography */}
-        <h1 className="text-[1.75rem] leading-tight sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 max-w-4xl mx-auto">
-          Τοπικά προϊόντα,
-          <span className="text-primary"> απευθείας</span> από παραγωγούς
-        </h1>
-
-        {/* Subtitle - readable line length on mobile */}
-        <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-neutral-600 max-w-xl sm:max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
-          Υποστήριξε Έλληνες παραγωγούς και ανακάλυψε αυθεντικές γεύσεις με διαφάνεια στην παραγγελία και την παράδοση.
-        </p>
-
-        {/* CTA buttons - Mobile: stacked, full-width primary */}
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
-          <Link href="/products" className="w-full sm:w-auto">
-            <Button size="lg" fullWidth className="sm:w-auto">
-              Δες προϊόντα
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Button>
-          </Link>
-          <Link href="/orders/lookup" className="w-full sm:w-auto">
-            <Button variant="secondary" size="lg" fullWidth className="sm:w-auto">
-              Παρακολούθηση παραγγελίας
-            </Button>
-          </Link>
-        </div>
-
-        {/* Trust indicators - Stack vertically on mobile */}
-        <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 sm:gap-6 text-sm text-neutral-500">
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs sm:text-sm">Δωρεάν παράδοση 50+</span>
+          {/* CTA Button - touch-friendly, minimum 44px height */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            >
+              Δείτε τα Προϊόντα
+            </Link>
+            <Link
+              href="/producers"
+              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-lg border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            >
+              Γίνε Παραγωγός
+            </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs sm:text-sm">Ασφαλής πληρωμή</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs sm:text-sm">100% Τοπικά</span>
+
+          {/* Trust indicator - subtle, mobile-optimized */}
+          <div className="mt-10 pt-8 border-t border-neutral-200">
+            <p className="text-sm text-neutral-500 mb-4">Εμπιστοσύνη από 500+ καταναλωτές</p>
+            <div className="flex justify-center gap-6 flex-wrap">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span className="text-sm text-neutral-600 font-medium">Φρεσκάδα εγγυημένη</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                <span className="text-sm text-neutral-600 font-medium">Παράδοση 24-48h</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
