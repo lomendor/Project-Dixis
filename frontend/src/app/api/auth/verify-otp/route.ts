@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import { setSessionCookie } from '@/lib/auth/cookies';
 import { verifyOtp } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed } from '@/lib/env';
@@ -50,9 +51,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Success - create session
+    // Success - create session with JWT
+    const JWT_SECRET = process.env.JWT_SECRET || (() => {
+      throw new Error('JWT_SECRET must be set in environment');
+    })();
+
     const sessionType = isAdmin ? 'admin' : 'user';
-    const sessionToken = `${sessionType}_${phone}_${Date.now()}`;
+    const sessionToken = jwt.sign(
+      { phone, type: sessionType, iat: Math.floor(Date.now() / 1000) },
+      JWT_SECRET,
+      { expiresIn: '7d', algorithm: 'HS256', issuer: 'dixis-auth', subject: phone }
+    );
 
     console.log(`[Auth] Successful ${sessionType} login for ${phone}`);
 
