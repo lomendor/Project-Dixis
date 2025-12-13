@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
+
+        // SECURITY: OPS IP Whitelist middleware
+        $middleware->alias([
+            'ops.ip' => \App\Http\Middleware\OpsIpWhitelist::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
