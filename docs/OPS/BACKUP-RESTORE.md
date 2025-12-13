@@ -1,7 +1,7 @@
 # Backup & Restore SOP (Neon)
 
 - **Backups**: Neon automated daily backups (default retention 7d).
-- **Owner**: ops@dixis.io
+- **Owner**: ops@dixis.gr
 - **Weekly drill (Fri)**:
   1) Create **staging** branch from production.
   2) Restore latest backup to staging.

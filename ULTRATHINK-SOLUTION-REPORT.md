@@ -153,9 +153,9 @@ Cache: ✅ Cleared and rebuilt
 
 3. **Test Flow**:
    ```
-   1. https://dixis.io/products → Πάτα "Προσθήκη"
+   1. https://dixis.gr/products → Πάτα "Προσθήκη"
    2. Badge αυξάνεται σε "1" ✅
-   3. https://dixis.io/cart → Δες το προϊόν
+   3. https://dixis.gr/cart → Δες το προϊόν
    4. Πάτα το + button
    5. Qty αλλάζει από 1 → 2 ✅
    6. Subtotal διπλασιάζεται ✅
@@ -265,4 +265,4 @@ if (typeof window !== 'undefined') {
 
 **Generated**: 2025-11-24T09:05:00Z
 **Deploy Commit**: 92bc279
-**Production URL**: https://dixis.io/cart
+**Production URL**: https://dixis.gr/cart
