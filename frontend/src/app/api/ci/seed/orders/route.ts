@@ -3,6 +3,13 @@ import { NextRequest } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 function allow(req: NextRequest) {
+  // SECURITY: NEVER allow in production (deletes all orders!)
+  const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+  if (isProd) {
+    console.warn('[CI Seed] Blocked attempt in production from:', req.headers.get('x-forwarded-for'));
+    return false;
+  }
+
   if (process.env.CI === 'true' || process.env.NODE_ENV === 'test') return true;
   const hdr = req.headers.get('x-ci-seed-token');
   const token = process.env.CI_SEED_TOKEN || '';

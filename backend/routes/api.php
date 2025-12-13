@@ -27,9 +27,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Test-only login endpoint (E2E testing)
-if (env('ALLOW_TEST_LOGIN', false) && (app()->environment('testing', 'local') || env('CI', false))) {
-    Route::post('v1/test/login', [App\Http\Controllers\Api\TestLoginController::class, 'login'])
-        ->middleware('throttle:30,1');
+// SECURITY: NEVER allow in production, even if ALLOW_TEST_LOGIN is set
+if (!app()->environment('production')) {
+    if (env('ALLOW_TEST_LOGIN', false) && (app()->environment('testing', 'local') || env('CI', false))) {
+        Route::post('v1/test/login', [App\Http\Controllers\Api\TestLoginController::class, 'login'])
+            ->middleware('throttle:30,1');
+    }
 }
 
 // Authentication routes

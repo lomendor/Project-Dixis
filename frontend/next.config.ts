@@ -62,6 +62,12 @@ const nextConfig: NextConfig = {
     const apiOrigin = apiBaseUrl.replace('/api/v1', '').replace(/\/$/, '');
     const sentryDsn = 'https://o4508541701652480.ingest.de.sentry.io';
 
+    // SECURITY: Environment-aware CSP
+    const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+    const scriptSrc = isProd
+      ? "script-src 'self' 'unsafe-inline'" // Production: NO unsafe-eval
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval'"; // Dev: Allow for HMR
+
     return [
       {
         source: '/:path*',
@@ -74,12 +80,14 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               `connect-src 'self' ${apiOrigin} ${sentryDsn}`,
               "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
             ].join('; '),
           },
           {

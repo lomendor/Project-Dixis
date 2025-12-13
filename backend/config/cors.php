@@ -19,9 +19,13 @@ return [
 
     'allowed_methods' => ['*'],
 
+    // SECURITY: Never use wildcard (*) in production unless explicitly configured
     'allowed_origins' => env('CORS_ALLOWED_ORIGINS')
         ? explode(',', env('CORS_ALLOWED_ORIGINS'))
-        : ['*'],
+        : (app()->environment('production')
+            ? [] // DENY ALL if not configured in production
+            : ['*'] // Allow all only in development
+          ),
 
     'allowed_origins_patterns' => [],
 

@@ -12,7 +12,9 @@ function maskPhone(v:string){
 }
 
 export default async function Page(){
-  if (process.env.NODE_ENV === 'production' && process.env.DIXIS_DEV !== '1') {
+  // SECURITY: Block in production unless DIXIS_DEV override
+  const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+  if (isProd && process.env.DIXIS_DEV !== '1') {
     // προφυλάσσουμε την outbox σελίδα στην παραγωγή
     return (<main><h1>404</h1><p>Not found.</p></main>);
   }

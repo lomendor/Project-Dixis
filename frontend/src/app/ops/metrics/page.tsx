@@ -3,7 +3,9 @@ import { prisma } from '@/lib/db/client';
 export const dynamic = 'force-dynamic';
 
 function guard() {
-  if (process.env.NODE_ENV === 'production' && process.env.DIXIS_DEV !== '1') {
+  // SECURITY: Block in production unless DIXIS_DEV override
+  const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
+  if (isProd && process.env.DIXIS_DEV !== '1') {
     return (
       <main>
         <h1>404</h1>
