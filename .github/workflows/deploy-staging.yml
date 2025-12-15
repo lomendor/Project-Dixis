@@ -122,6 +122,24 @@ jobs:
         run: |
           echo "🩺 Staging health check..."
           sleep 3
-          curl -fsS https://staging.dixis.io/api/healthz || \
-            curl -fsS http://staging.dixis.io/api/healthz
+          ssh -i ~/.ssh/id_ed25519 ${STAGING_USER}@${STAGING_HOST} bash <<HEALTH_CHECK
+          set -euo pipefail
+
+          # Discover PORT from PM2
+          PORT=\$(pm2 jlist | grep -A 5 'dixis-staging' | grep -oP '"PORT":\s*"\K\d+' || echo "3001")
+          echo "🔍 Health check on port \$PORT"
+
+          # Call healthz endpoint
+          RESPONSE=\$(curl -fsS http://localhost:\$PORT/api/healthz 2>&1)
+          echo "📋 Response: \$RESPONSE"
+
+          # Validate JSON response contains "status":"ok"
+          if echo "\$RESPONSE" | grep -q '"status":"ok"'; then
+            echo "✅ Health check PASSED"
+            exit 0
+          else
+            echo "❌ Health check FAILED - invalid response"
+            exit 1
+          fi
+          HEALTH_CHECK
           echo "✅ Staging deployment successful!"
