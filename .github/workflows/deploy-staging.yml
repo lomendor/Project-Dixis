@@ -57,11 +57,24 @@ jobs:
       - name: Setup SSH key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$STAGING_HOST" >> ~/.ssh/known_hosts
+
+          # Use pre-configured known_hosts if available, fallback to ssh-keyscan
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+            echo "✅ Using pre-configured known_hosts"
+          else
+            echo "⚠️  KNOWN_HOSTS secret not set, trying ssh-keyscan..."
+            ssh-keyscan -H "$STAGING_HOST" >> ~/.ssh/known_hosts || {
+              echo "❌ ssh-keyscan failed - ensure STAGING_HOST is reachable"
+              exit 1
+            }
+          fi
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Preflight
         run: |
@@ -69,6 +82,28 @@ jobs:
           echo "  Host: $STAGING_HOST"
           echo "  User: $STAGING_USER"
           echo "  Path: $STAGING_PATH"
+
+          # Validate STAGING_HOST format (no https:// prefix, no paths)
+          if [[ "$STAGING_HOST" =~ ^https?:// ]] || [[ "$STAGING_HOST" =~ / ]]; then
+            echo "❌ STAGING_HOST must be clean IP or DNS (found: $STAGING_HOST)"
+            exit 1
+          fi
+
+          # Test DNS resolution
+          echo "🔍 Testing DNS resolution..."
+          if ! getent hosts "$STAGING_HOST" > /dev/null 2>&1; then
+            echo "❌ Cannot resolve STAGING_HOST: $STAGING_HOST"
+            exit 1
+          fi
+          echo "✅ DNS resolution successful"
+
+          # Test SSH connectivity
+          echo "🔍 Testing SSH connectivity (port 22)..."
+          if ! nc -vz -w 5 "$STAGING_HOST" 22 2>&1 | grep -q 'succeeded\|open'; then
+            echo "❌ Cannot connect to $STAGING_HOST:22"
+            exit 1
+          fi
+          echo "✅ SSH port reachable"
 
       - name: Create remote folders
         run: |
