@@ -29,6 +29,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Build Next.js (standalone)
+        run: pnpm build
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+
+      - name: Verify build artifacts
+        run: |
+          test -d frontend/.next/standalone || { echo "❌ Missing .next/standalone"; exit 1; }
+          test -d frontend/.next/static || { echo "❌ Missing .next/static"; exit 1; }
+          test -d frontend/public || { echo "❌ Missing public/"; exit 1; }
+          echo "✅ Build artifacts verified"
+
       - name: Install rsync
         run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
 
@@ -51,20 +73,55 @@ jobs:
       - name: Create remote folders
         run: |
           ssh -i ~/.ssh/id_ed25519 ${STAGING_USER}@${STAGING_HOST} \
-            "mkdir -p ${STAGING_PATH}/current ${STAGING_PATH}/public"
+            "mkdir -p ${STAGING_PATH}/.next/standalone ${STAGING_PATH}/.next/static ${STAGING_PATH}/public"
 
-      - name: Deploy (rsync)
+      - name: Deploy artifacts (rsync)
         run: |
+          echo "📦 Deploying standalone server..."
           rsync -avz --delete \
-            --exclude ".git" \
-            --exclude "node_modules" \
-            --exclude "vendor" \
-            --exclude ".env" \
-            --exclude "*.log" \
-            ./ ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}/current/
+            frontend/.next/standalone/ \
+            ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}/.next/standalone/
 
-      - name: Health check (HTTP via IP)
+          echo "📦 Deploying static assets..."
+          rsync -avz --delete \
+            frontend/.next/static/ \
+            ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}/.next/static/
+
+          echo "📦 Deploying public files..."
+          rsync -avz --delete \
+            frontend/public/ \
+            ${STAGING_USER}@${STAGING_HOST}:${STAGING_PATH}/public/
+
+          echo "✅ Artifacts deployed"
+
+      - name: Restart PM2 (idempotent)
         run: |
-          echo "🩺 Health check..."
-          curl -fsS -H "Host: staging.dixis.gr" "http://${STAGING_HOST}/api/healthz"
+          ssh -i ~/.ssh/id_ed25519 ${STAGING_USER}@${STAGING_HOST} bash <<'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          # Discover PORT from nginx config
+          PORT=$(sudo nginx -T 2>/dev/null | grep -A 10 'server_name staging.dixis.io' | grep 'proxy_pass' | grep -oP '127.0.0.1:\K\d+' || echo "3001")
+          echo "🔍 Discovered PORT: $PORT"
+
+          # Idempotent restart
+          if pm2 list | grep -q dixis-staging; then
+            echo "🔄 Reloading existing process..."
+            pm2 reload dixis-staging --update-env
+          else
+            echo "🚀 Starting new process on port $PORT..."
+            cd ${STAGING_PATH}/.next/standalone
+            PORT=$PORT NODE_ENV=production DIXIS_ENV=staging pm2 start server.js --name dixis-staging --time
+            pm2 save
+          fi
+
+          echo "✅ PM2 status:"
+          pm2 status
+          REMOTE_SCRIPT
+
+      - name: Health check
+        run: |
+          echo "🩺 Staging health check..."
+          sleep 3
+          curl -fsS https://staging.dixis.io/api/healthz || \
+            curl -fsS http://staging.dixis.io/api/healthz
           echo "✅ Staging deployment successful!"

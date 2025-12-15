@@ -1,3 +1,36 @@
+## 🚨 SECURITY RECOVERY - IN PROGRESS (Step 2/6)
+
+**Started**: 2025-12-13 12:00 EET
+**Current Phase**: Step 2 - Secrets Rotation Pack
+**Status**: ⏳ Awaiting user completion signal
+
+### 2025-12-13 14:00 EET — Step 2: Secrets Rotation Pack Created
+
+**Deliverables**:
+- ✅ `docs/AGENT/SUMMARY/STEP2-ROTATION-PACK.md` - Complete rotation guide
+- ✅ Identified 11 GitHub repository secrets requiring rotation
+- ✅ Generation commands for: SSH keys (ed25519), JWT_SECRET (64 bytes), APP_KEY, OPS_TOKEN
+- ✅ GitHub environments detected: `staging` (1 environment)
+
+**Secrets to Rotate** (names only):
+1. **SSH Deploy Keys**: VPS_SSH_KEY, VPS_KEY, DEPLOY_SSH_KEY (last updated: 2025-11-20/21)
+2. **Application Secrets**: JWT_SECRET (NEW), APP_KEY, OPS_TOKEN (to be generated locally)
+3. **Database**: DATABASE_URL_PROD (optional rotation, last updated: 2025-11-28)
+
+**VPS Status**: ⚠️ OFFLINE (intentional for security - remains offline until Step 3)
+
+**Next Steps**:
+1. User generates new secrets locally (commands provided in rotation pack)
+2. User updates GitHub repository secrets via UI or gh CLI
+3. User confirms "Step 2 complete" signal
+4. Proceed to Step 3: VPS Reinstall + Hardening + Deploy RC (f47123a8)
+
+**Blockers**: None (repo-only operations complete)
+
+**Reference**: See `PLAN-SECURITY-COMPLETE-GPT-SEQUENCE.md` for full 6-step recovery plan
+
+---
+
 ## AG-CI-FAST-LOOP-01
 - FAST LOOP: `quality-gates` (light checks) τρέχει σε κάθε PR. `heavy-checks` τρέχει ΜΟΝΟ όταν το PR δεν είναι draft και δεν έχει label `ci:light`.
 - e2e-full: Nightly + manual (`e2e-full.yml`).
@@ -404,3 +437,67 @@ Exit Code: 255 (crash during VPS suspension)
 5. **Future** (when product matures): Consider containerization, CDN, proper observability
 
 **Incident Documentation**: See [INCIDENT-2025-12-DDOS-and-ChunkError.md](./INCIDENT-2025-12-DDOS-and-ChunkError.md) for full postmortem
+
+---
+
+### 2025-12-15 — AG116 COMPLETE (Staging CI Deploy Pipeline)
+
+**Status**: ✅ COMPLETE
+**Branch**: `feat/passAG116-staging-ci`
+**Duration**: ~45 minutes
+
+**Deliverables**:
+1. **Fixed deploy-staging.yml workflow**:
+   - Added build step (corepack + pnpm + standalone output)
+   - Changed rsync to artifacts-only deployment
+   - Added idempotent PM2 restart with port auto-discovery
+   - Fixed health check domain (staging.dixis.io)
+
+2. **Build Process**:
+   - Builds Next.js on GitHub Actions runner (not on VPS)
+   - Verifies standalone artifacts exist (.next/standalone, .next/static, public/)
+   - Rsync sends only built artifacts (NOT full source tree)
+
+3. **Deployment Strategy**:
+   - Remote PM2 restart is IDEMPOTENT
+   - Auto-discovers PORT from nginx config (`sudo nginx -T | grep proxy_pass`)
+   - Falls back to PORT=3001 if not found
+   - Process name: `dixis-staging` (fixed, no collision with production)
+   - If exists: `pm2 reload dixis-staging --update-env`
+   - If not exists: `pm2 start server.js --name dixis-staging`
+
+4. **Health Check**:
+   - External smoke test already exists (staging-smoke.yml)
+   - Tests `/api/healthz` endpoint every 30 minutes
+   - Health endpoint implementation verified: `frontend/src/app/api/healthz/route.ts`
+
+**Files Modified**:
+- `.github/workflows/deploy-staging.yml` - Complete rewrite with build + idempotent restart
+- `docs/OPS/STATE.md` - This entry
+- `docs/AGENT/SUMMARY/Pass-AG116.md` - AG116 completion summary (NEW)
+
+**End State**:
+- ✅ Staging CI pipeline builds on runner (faster, cleaner)
+- ✅ Rsync sends only artifacts (reduced transfer size)
+- ✅ PM2 restart works whether process exists or not
+- ✅ PORT auto-discovery prevents hardcoding
+- ✅ Smoke test validates deployment health
+
+**Verification Commands**:
+```bash
+# Manual dispatch test (after PR merge):
+gh workflow run deploy-staging.yml --ref main
+
+# Check workflow status:
+gh run list --workflow=deploy-staging.yml --limit 1
+
+# Verify staging health:
+curl -fsS https://staging.dixis.io/api/healthz
+```
+
+**Risks Identified**:
+- ⚠️ Workflow requires GitHub environment secrets (STAGING_HOST, STAGING_USER, STAGING_PATH, SSH_PRIVATE_KEY)
+- ⚠️ If nginx config doesn't contain staging.dixis.io server block, PORT fallback to 3001
+- ⚠️ First deployment to staging VPS will `pm2 start` (subsequent ones `pm2 reload`)
+
+**Next Pass Proposal**: `MONITOR-01` - 7-day monitoring of staging deployments with alerting
