@@ -80,6 +80,94 @@
 
 ---
 
+## 2025-12-15 19:55 EET — MONITOR-01 COMPLETE: Uptime Monitoring + Alerting
+
+**Context**: Post-miner incident, need early warning system for downtime and regressions without requiring VPS changes.
+
+**Solution**: Repository-level monitoring workflow with auto-alerting via GitHub Issues.
+
+### Implementation
+
+**Workflow**: `.github/workflows/monitor-uptime.yml`
+- **Schedule**: Every 10 minutes (cron `*/10 * * * *`) + manual dispatch
+- **Concurrency**: `monitor-uptime` group, cancel-in-progress enabled
+
+**Jobs**:
+
+1. **prod-http-smoke** (Production External Checks)
+   - Tests 3 endpoints:
+     - `https://dixis.gr/api/healthz` → must return HTTP 200 with `"status":"ok"`
+     - `https://dixis.gr/auth/login` → must NOT return 5xx
+     - `https://dixis.gr/products` → must NOT return 5xx
+   - On failure: Auto-creates GitHub Issue with:
+     - UTC timestamp
+     - Failed URL
+     - HTTP status code/error
+     - Workflow run link
+     - Debugging commands
+   - Labels: `monitoring`, `alert`, `production`
+
+2. **staging-internal-smoke** (Staging Internal Check - Best-effort)
+   - Requires GitHub Environment `staging` with secrets:
+     - `SSH_PRIVATE_KEY`, `STAGING_HOST`, `STAGING_USER`
+   - SSH to staging VPS, discover PORT from nginx config (fallback 3001)
+   - Tests `http://localhost:$PORT/api/healthz` via SSH tunnel
+   - On failure: Auto-creates GitHub Issue (labels: `monitoring`, `alert`, `staging`)
+   - `continue-on-error: true` (non-blocking if secrets missing)
+
+**Alert Mechanism**:
+- Uses `actions/github-script@v7` with `GITHUB_TOKEN`
+- Creates Issues automatically (no manual intervention)
+- Issues include:
+  - Failure timestamp (UTC)
+  - Failed endpoint/command
+  - Error message (NO SECRETS exposed)
+  - Debugging commands for VPS SSH access
+
+**Verification Commands**:
+```bash
+# Trigger manual run
+gh workflow run monitor-uptime.yml
+
+# Check latest run status
+gh run list --workflow=monitor-uptime.yml --limit 1
+
+# Watch live run
+RUN_ID=$(gh run list --workflow=monitor-uptime.yml --limit 1 --json databaseId -q '.[0].databaseId')
+gh run watch "$RUN_ID"
+
+# Check for alert issues
+gh issue list --label monitoring,alert
+```
+
+**Current Status**:
+- **Production**: 🟢 ONLINE (dixis.gr) - all 3 endpoints passing
+- **Staging**: 🟢 INTERNAL CHECK PASSING (verified via SSH localhost)
+- **Monitor Workflow**: ✅ Active (runs every 10 minutes starting 2025-12-15 20:00 EET)
+
+**Files Modified**:
+- `.github/workflows/monitor-uptime.yml` (NEW, 200 lines) - Complete monitoring workflow
+- `docs/OPS/STATE.md` (this file) - Added MONITOR-01 entry
+- `docs/AGENT/SUMMARY/Pass-MONITOR-01.md` (NEW) - Complete pass summary
+
+**Duration**: ~1 hour (workflow + docs)
+**Impact**: Zero VPS changes, zero business logic changes (CI/docs only)
+
+**Risks Mitigated**:
+- ✅ Early detection of production downtime (<10 minute window)
+- ✅ Auto-alerting (no need to manually check health endpoints)
+- ✅ Post-miner monitoring (CPU/process anomalies would show as 5xx or timeout)
+- ✅ No secrets in logs (only HTTP status codes and URLs exposed)
+
+**Next Steps** (Optional):
+- Add VPS-level CPU/memory monitoring (requires VPS cron + script deployment)
+- Extend monitoring to `/api/v1/public/products` for API health
+- Add Slack/email notifications (requires webhook secrets)
+
+**Reference**: See `docs/AGENT/SUMMARY/Pass-MONITOR-01.md` for complete implementation details
+
+---
+
 ## AG-CI-FAST-LOOP-01
 - FAST LOOP: `quality-gates` (light checks) τρέχει σε κάθε PR. `heavy-checks` τρέχει ΜΟΝΟ όταν το PR δεν είναι draft και δεν έχει label `ci:light`.
 - e2e-full: Nightly + manual (`e2e-full.yml`).
