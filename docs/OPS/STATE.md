@@ -31,6 +31,55 @@
 
 ---
 
+## 2025-12-15 11:15 EET — AG116 COMPLETE: Staging CI Deploy Pipeline Fixed
+
+**Context**: Staging deployment workflow (`deploy-staging.yml`) was failing at Health Check step with exit 255 after 5+ minute hangs.
+
+**Issues Resolved**:
+
+### PR #1681: SSH Setup (ssh-keyscan + KNOWN_HOSTS fallback)
+- **Problem**: ssh-keyscan failed with exit 1, blocking deployments
+- **Fix**:
+  - Added KNOWN_HOSTS secret fallback with preflight connectivity checks
+  - Added DNS resolution + SSH:22 port validation
+  - Made ssh-keyscan non-fatal (best-effort)
+- **Result**: ✅ Deployment progressed past SSH setup
+- **PR**: https://github.com/lomendor/Project-Dixis/pull/1681
+- **Merged**: 2025-12-15 11:05 EET
+
+### PR #1682: Health Check Timeout (PORT discovery + curl timeout)
+- **Problem**: Health check hung for 5+ minutes, exit 255 (broken pipe)
+- **Root Cause**:
+  - PORT discovery returned multiline "3000\n3001\n3001" instead of single value
+  - curl had no timeout, hung indefinitely
+  - SSH connection broke after ~5 minutes
+- **Fix** (.github/workflows/deploy-staging.yml lines 156-187):
+  - Added `| head -1` to PORT grep (take first match only)
+  - Added PORT validation with fallback to 3001
+  - Added `curl -m 30` timeout (prevent indefinite hangs)
+  - Changed heredoc to single-quoted `<<'HEALTH_CHECK'`
+  - Improved error handling with explicit curl exit code check
+- **Result**: ✅ Deployment Run 20230094323 PASSED in 2m42s
+- **PR**: https://github.com/lomendor/Project-Dixis/pull/1682
+- **Merged**: 2025-12-15 11:11 EET
+- **Verification**: https://github.com/lomendor/Project-Dixis/actions/runs/20230094323
+
+**Current Status**:
+- **Production**: 🟢 ONLINE (dixis.gr) - standalone server, SSL valid, health 200 OK
+- **Staging**: 🟢 CI GREEN - internal health check via SSH localhost passes
+- **Known Issue**: External https://staging.dixis.io has SSL error (exit 35) - non-blocking, internal check works
+- **Follow-up**: Investigate staging SSL certificate configuration (future task)
+
+**Files Modified**:
+- `.github/workflows/deploy-staging.yml` (lines 156-187) - Health check step
+- `docs/AGENT/SUMMARY/Pass-AG116.md` - Complete pass summary
+- `docs/AGENT/SUMMARY/Continuation-Capsule-AG116.md` - Paste-ready handoff doc
+
+**Duration**: ~2 hours (2 PRs total)
+**Impact**: Zero production changes (staging-only fixes)
+
+---
+
 ## AG-CI-FAST-LOOP-01
 - FAST LOOP: `quality-gates` (light checks) τρέχει σε κάθε PR. `heavy-checks` τρέχει ΜΟΝΟ όταν το PR δεν είναι draft και δεν έχει label `ci:light`.
 - e2e-full: Nightly + manual (`e2e-full.yml`).
