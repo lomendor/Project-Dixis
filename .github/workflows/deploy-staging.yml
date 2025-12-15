@@ -96,21 +96,21 @@ jobs:
 
       - name: Restart PM2 (idempotent)
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${STAGING_USER}@${STAGING_HOST} bash <<'REMOTE_SCRIPT'
+          ssh -i ~/.ssh/id_ed25519 ${STAGING_USER}@${STAGING_HOST} bash <<REMOTE_SCRIPT
           set -euo pipefail
 
           # Discover PORT from nginx config
-          PORT=$(sudo nginx -T 2>/dev/null | grep -A 10 'server_name staging.dixis.io' | grep 'proxy_pass' | grep -oP '127.0.0.1:\K\d+' || echo "3001")
-          echo "🔍 Discovered PORT: $PORT"
+          PORT=\$(sudo nginx -T 2>/dev/null | grep -A 10 'server_name staging.dixis.io' | grep 'proxy_pass' | grep -oP '127.0.0.1:\K\d+' || echo "3001")
+          echo "🔍 Discovered PORT: \$PORT"
 
           # Idempotent restart
           if pm2 list | grep -q dixis-staging; then
             echo "🔄 Reloading existing process..."
             pm2 reload dixis-staging --update-env
           else
-            echo "🚀 Starting new process on port $PORT..."
+            echo "🚀 Starting new process on port \$PORT..."
             cd ${STAGING_PATH}/.next/standalone
-            PORT=$PORT NODE_ENV=production DIXIS_ENV=staging pm2 start server.js --name dixis-staging --time
+            PORT=\$PORT NODE_ENV=production DIXIS_ENV=staging pm2 start server.js --name dixis-staging --time
             pm2 save
           fi
 
