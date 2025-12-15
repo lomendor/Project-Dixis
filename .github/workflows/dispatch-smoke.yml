@@ -1,0 +1,12 @@
+name: Dispatch Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Manual Dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo OK
+        run: echo "✅ workflow_dispatch works!"
