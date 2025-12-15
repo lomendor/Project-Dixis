@@ -5,7 +5,7 @@
 ## VPS Access
 
 ### SSH Connection
-- **Host**: `147.93.126.235` (dixis.io)
+- **Host**: `147.93.126.235` (dixis.gr)
 - **User**: `root`
 - **SSH Key**: `~/.ssh/dixis_prod_ed25519`
 
@@ -30,7 +30,7 @@ pkill -9 -f "next-server"
 
 # Start server
 cd /var/www/dixis/releases/20251105-201811/frontend
-NEXT_PUBLIC_BASE_URL=https://dixis.io nohup pnpm start > /tmp/nextjs.log 2>&1 &
+NEXT_PUBLIC_BASE_URL=https://dixis.gr nohup pnpm start > /tmp/nextjs.log 2>&1 &
 
 # View logs
 tail -f /tmp/nextjs.log
@@ -71,25 +71,25 @@ git fetch origin && git checkout main && git reset --hard origin/main
 
 # Install & build
 pnpm install --frozen-lockfile
-NEXT_PUBLIC_BASE_URL=https://dixis.io pnpm run build
+NEXT_PUBLIC_BASE_URL=https://dixis.gr pnpm run build
 
 # Restart
 pkill -9 -f "next-server"
-NEXT_PUBLIC_BASE_URL=https://dixis.io nohup pnpm start > /tmp/nextjs.log 2>&1 &
+NEXT_PUBLIC_BASE_URL=https://dixis.gr nohup pnpm start > /tmp/nextjs.log 2>&1 &
 
 # Verify
 sleep 5
-curl -s https://dixis.io/api/products | jq '{source, count: (.items|length)}'
+curl -s https://dixis.gr/api/products | jq '{source, count: (.items|length)}'
 EOF
 ```
 
 ### GitHub Actions Deployment
 ```bash
 # Trigger deployment workflow
-gh workflow run "deploy-prod (dixis.io)" --repo lomendor/Project-Dixis --ref main
+gh workflow run "deploy-prod (dixis.gr)" --repo lomendor/Project-Dixis --ref main
 
 # Watch deployment
-RUN_ID=$(gh run list -R lomendor/Project-Dixis --workflow="deploy-prod (dixis.io)" --limit 1 --json databaseId -q '.[0].databaseId')
+RUN_ID=$(gh run list -R lomendor/Project-Dixis --workflow="deploy-prod (dixis.gr)" --limit 1 --json databaseId -q '.[0].databaseId')
 gh run watch $RUN_ID -R lomendor/Project-Dixis --interval 5
 ```
 
@@ -100,13 +100,13 @@ gh run watch $RUN_ID -R lomendor/Project-Dixis --interval 5
 ### API Endpoints
 ```bash
 # Products API (should return source:"demo", count:8)
-curl -s https://dixis.io/api/products | jq '{source, count: (.items|length)}'
+curl -s https://dixis.gr/api/products | jq '{source, count: (.items|length)}'
 
 # Demo feed
-curl -s https://dixis.io/api/demo-products | jq '.items | length'
+curl -s https://dixis.gr/api/demo-products | jq '.items | length'
 
 # Health endpoint
-curl -sI https://dixis.io/api/healthz
+curl -sI https://dixis.gr/api/healthz
 ```
 
 ### Expected Responses
@@ -148,7 +148,7 @@ curl -sI https://dixis.io/api/healthz
 
 3. **Verify**:
    ```bash
-   curl -s https://dixis.io/api/products | jq '.source'
+   curl -s https://dixis.gr/api/products | jq '.source'
    # Should return: "db"
    ```
 

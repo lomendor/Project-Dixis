@@ -216,7 +216,7 @@ expect(increasedSubtotal).not.toBe(initialSubtotal)  // ✅ ΠΕΡΝΆΕΙ στ�
 ### 4.1 Browser Console Ελέγχος
 
 **Βήματα**:
-1. Άνοιξε https://dixis.io/cart στο browser
+1. Άνοιξε https://dixis.gr/cart στο browser
 2. Άνοιξε Developer Tools (F12)
 3. Πήγαινε στο Console tab
 4. Πάτησε το + button
