@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Healthz
-        run: curl -fsS https://dixis.gr/api/healthz >/dev/null
+        run: curl -fsS https://dixis.gr/api/healthz --connect-timeout 10 --max-time 15 -4 >/dev/null
