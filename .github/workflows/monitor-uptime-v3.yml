@@ -1,0 +1,13 @@
+name: Monitor Uptime v3
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  prod-http-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Healthz
+        run: curl -fsS https://dixis.gr/api/healthz >/dev/null
