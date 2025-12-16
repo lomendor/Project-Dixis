@@ -1,0 +1,82 @@
+name: VPS Backend Revive
+
+on:
+  workflow_dispatch:
+
+jobs:
+  revive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add known host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Find and start Laravel backend
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            set -euo pipefail
+            echo \"=== FINDING LARAVEL BACKEND ===\"
+
+            # Search for artisan in common locations
+            ARTISAN_PATH=\$(find /var/www /srv /home /opt -name artisan -type f 2>/dev/null | head -1) || true
+
+            if [ -z \"\$ARTISAN_PATH\" ]; then
+              echo \"❌ ERROR: artisan not found in /var/www, /srv, /home, /opt\"
+              exit 1
+            fi
+
+            echo \"✅ Found artisan: \$ARTISAN_PATH\"
+            BACKEND_DIR=\$(dirname \"\$ARTISAN_PATH\")
+            echo \"Backend directory: \$BACKEND_DIR\"
+
+            # Check if .env exists
+            if [ ! -f \"\$BACKEND_DIR/.env\" ]; then
+              echo \"⚠️  WARNING: \$BACKEND_DIR/.env not found (backend may fail to start)\"
+            else
+              echo \"✅ .env exists\"
+            fi
+
+            echo \"\"
+            echo \"=== STARTING BACKEND WITH PM2 ===\"
+            cd \"\$BACKEND_DIR\"
+
+            # Stop existing backend if running
+            pm2 delete dixis-backend 2>/dev/null || echo \"No existing dixis-backend process\"
+
+            # Start backend
+            pm2 start php --name dixis-backend -- artisan serve --host=127.0.0.1 --port=8001
+            pm2 save
+
+            echo \"\"
+            echo \"=== WAITING FOR BACKEND TO START ===\"
+            sleep 3
+
+            echo \"\"
+            echo \"=== PM2 LIST ===\"
+            pm2 list
+
+            echo \"\"
+            echo \"=== PORT 8001 CHECK ===\"
+            ss -lntp | grep ':8001' || echo \"⚠️  Port 8001 not listening\"
+
+            echo \"\"
+            echo \"=== LOCAL BACKEND HEALTH ===\"
+            curl -sS -o /dev/null -w \"local8001=%{http_code}\n\" http://127.0.0.1:8001/ || echo \"local8001=FAIL\"
+
+            echo \"\"
+            echo \"=== RESTART FRONTEND (flush cache) ===\"
+            pm2 restart dixis-frontend || echo \"⚠️  Failed to restart frontend\"
+
+            sleep 2
+
+            echo \"\"
+            echo \"=== EXTERNAL CHECKS ===\"
+            curl -sS -o /dev/null -w \"products=%{http_code}\n\" https://dixis.gr/products || echo \"products=FAIL\"
+            curl -sS -o /dev/null -w \"healthz=%{http_code}\n\" https://dixis.gr/api/healthz || echo \"healthz=FAIL\"
+          "'
