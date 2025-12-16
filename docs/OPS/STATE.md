@@ -80,6 +80,82 @@
 
 ---
 
+## 2025-12-16 10:20 EET — MONITOR-01 v3 Migration Complete: Fixed HTTP 422 + Timeout Issues
+
+**Context**: After completing initial monitoring setup (PR #1676), monitor-uptime-v2.yml experienced persistent HTTP 422 errors preventing manual dispatch. Investigation and migration to v3 workflow now complete.
+
+**Problem Resolved**:
+- **HTTP 422 Error**: monitor-uptime-v2.yml (workflow ID 216175596) had corrupted GitHub metadata
+- **Timeout Issue**: First v3 run failed after 136 seconds due to missing curl timeouts
+
+**Solution Implemented**:
+
+### Investigation (7 PRs)
+- PR #1690-1696: Attempted YAML formatting fixes (no effect on 422 error)
+- PR #1697: **Dispatch Smoke Test** - Minimal workflow proved GitHub Actions dispatch works fine
+  - Outcome: Confirmed issue was specific to v2's workflow ID
+- PR #1698: **Monitor Uptime v3** - Created fresh workflow with clean registration
+  - Outcome: Manual dispatch worked (no HTTP 422), but first run timed out after 136s
+- PR #1699: **Timeout Fix** - Added curl timeout parameters
+  - Outcome: SUCCESS in 6 seconds
+
+### PR #1699 Details: feat/monitor-v3-timeouts
+
+**File**: `.github/workflows/monitor-uptime-v3.yml` (line 13)
+
+**Changes**:
+```diff
+- run: curl -fsS https://dixis.gr/api/healthz >/dev/null
++ run: curl -fsS https://dixis.gr/api/healthz --connect-timeout 10 --max-time 15 -4 >/dev/null
+```
+
+**Why These Parameters**:
+- `--connect-timeout 10` - Max 10 seconds to establish connection
+- `--max-time 15` - Max 15 seconds total runtime
+- `-4` - Force IPv4 (avoid IPv6/DNS delays)
+
+**Verification**:
+- Before fix (Run 20263912429): ❌ FAILURE after 2m22s
+- After fix (Run 20264306411): ✅ SUCCESS in 6 seconds
+
+**PR Status**:
+- URL: https://github.com/lomendor/Project-Dixis/pull/1699
+- Merged: 2025-12-16T10:13:06Z
+- Quality Gates: ✅ PASSED (29 seconds)
+- Label: `ai-pass`
+
+**Current Status**:
+- **Monitor Uptime v3**: 🟢 PRODUCTION READY
+  - Workflow ID: NEW (clean metadata)
+  - Manual dispatch: ✅ Working (no HTTP 422)
+  - Curl timeouts: ✅ Active (no 2+ minute hangs)
+  - Last successful run: 20264306411 (6 seconds)
+  - Schedule: Every 10 minutes via cron (`*/10 * * * *`)
+
+- **Monitor Uptime v2**: ⚠️ DEPRECATED
+  - Workflow ID: 216175596 (corrupted metadata)
+  - Manual dispatch: ❌ Broken (HTTP 422 error)
+  - Status: Should be renamed to `.disabled` or deleted
+
+**Files Modified**:
+- `.github/workflows/dispatch-smoke.yml` (PR #1697) - NEW test workflow
+- `.github/workflows/monitor-uptime-v3.yml` (PR #1698) - NEW clean registration
+- `.github/workflows/monitor-uptime-v3.yml` (PR #1699) - Added timeouts
+- `docs/AGENT/SUMMARY/Pass-MONITOR-01.md` (+170 lines) - Complete v3 migration docs
+- `docs/OPS/STATE.md` (this file) - Added v3 migration entry
+
+**Lessons Learned**:
+1. GitHub Actions can cache corrupted workflow metadata - solution is fresh registration
+2. Always set explicit curl timeouts for production health checks
+3. Minimal reproduction tests (dispatch-smoke) effectively isolate issues
+
+**Next Actions** (Optional):
+- Rename/delete monitor-uptime-v2.yml to prevent confusion
+- Monitor v3 runs for 24 hours to ensure stability
+- Consider expanding v3 to test `/auth/login` and `/products` endpoints
+
+---
+
 ## 2025-12-15 19:55 EET — MONITOR-01 COMPLETE: Uptime Monitoring + Alerting
 
 **Context**: Post-miner incident, need early warning system for downtime and regressions without requiring VPS changes.
