@@ -95,8 +95,7 @@ Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ githu
 2. Check nginx status: 'ssh deploy@STAGING_HOST "sudo systemctl status nginx"'
 3. Check PM2 logs: 'ssh deploy@STAGING_HOST "pm2 logs dixis-frontend --lines 50"'
 4. Verify DNS: 'nslookup dixis.gr'
-
-`;
+            `;
 
             await github.rest.issues.create({
               owner: context.repo.owner,
@@ -181,8 +180,7 @@ Workflow Run: https://github.com/${{ github.repository }}/actions/runs/${{ githu
 3. Check PM2 logs: 'pm2 logs dixis-staging --lines 50'
 4. Manual health check: 'curl http://localhost:3001/api/healthz'
 5. Check nginx config: 'sudo nginx -T | grep -A 10 "staging.dixis.io"'
-
-`;
+            `;
 
             await github.rest.issues.create({
               owner: context.repo.owner,
