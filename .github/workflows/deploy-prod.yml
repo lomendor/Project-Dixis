@@ -32,16 +32,39 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Prepare VPS directory (fix permissions)
+      - name: Remote preflight (verify/create directories)
         run: |
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
-            cd /var/www/dixis-marketplace/frontend || exit 0
-            # Remove immutable flags if any
-            sudo chattr -R -i -a /var/www/dixis-marketplace/ 2>/dev/null || true
-            # Fix ownership
-            sudo chown -R deploy:deploy /var/www/dixis-marketplace/
-            sudo chmod -R 775 /var/www/dixis-marketplace/
-            echo \"Permissions fixed\"
+            set -euo pipefail
+            echo \"[Preflight] Checking /var/www/dixis...\"
+
+            # Create base directory if missing
+            if [ ! -d /var/www/dixis ]; then
+              echo \"[Preflight] Creating /var/www/dixis\"
+              sudo mkdir -p /var/www/dixis
+              sudo chown -R deploy:deploy /var/www/dixis
+            fi
+
+            # Create frontend directory if missing
+            if [ ! -d /var/www/dixis/frontend ]; then
+              echo \"[Preflight] Creating /var/www/dixis/frontend\"
+              mkdir -p /var/www/dixis/frontend
+            fi
+
+            # Create backend directory if missing
+            if [ ! -d /var/www/dixis/backend ]; then
+              echo \"[Preflight] Creating /var/www/dixis/backend\"
+              mkdir -p /var/www/dixis/backend
+            fi
+
+            # Verify directories exist
+            ls -la /var/www/dixis/ || { echo \"[ERR] /var/www/dixis missing\"; exit 1; }
+
+            # Fix ownership and permissions
+            sudo chown -R deploy:deploy /var/www/dixis/
+            sudo chmod -R 775 /var/www/dixis/
+
+            echo \"[Preflight] ✅ All directories ready\"
           "'
 
       - name: Rsync frontend (exclude cache/node_modules)
@@ -49,7 +72,7 @@ jobs:
           rsync -rlpgoDz --omit-dir-times \
             --exclude node_modules --exclude .next \
             --exclude ".env" --exclude ".env.production" --exclude "prisma/.env" \
-            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis-marketplace/frontend/"
+            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/frontend/"
 
       - name: Remote deploy (install → migrate → build → pm2) with caches
         env:
@@ -63,7 +86,7 @@ jobs:
 
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc '\''
             set -euo pipefail
-            cd /var/www/dixis-marketplace/frontend
+            cd /var/www/dixis/frontend
 
             # --- Remote caches
             REMOTE_CACHE_BASE=$HOME/.cache/dixis
