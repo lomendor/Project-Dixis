@@ -22,6 +22,23 @@ Route::get('/health', function () {
     ]);
 });
 
+// Alias for /health (smoke tests use /healthz)
+Route::get('/healthz', function () {
+    try {
+        DB::connection()->getPdo();
+        $dbStatus = 'connected';
+    } catch (\Exception $e) {
+        $dbStatus = 'failed: '.$e->getMessage();
+    }
+
+    return response()->json([
+        'status' => 'ok',
+        'database' => $dbStatus,
+        'timestamp' => now()->toISOString(),
+        'version' => app()->version(),
+    ]);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
