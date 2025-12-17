@@ -25,7 +25,7 @@ export function apiPath(path: string): string {
 
   if (isServer) {
     // SSR: Must use absolute URL for Node.js fetch
-    const absoluteBase = base || 'http://127.0.0.1:8001';
+    const absoluteBase = base || 'https://dixis.gr/api/v1';
     return absoluteBase.replace(/\/+$/, '') + path;
   } else {
     // CSR: Prefer relative path, fallback to base if configured
