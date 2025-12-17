@@ -5,7 +5,7 @@ test('homepage: styles applied & no console errors', async ({ page }) => {
   page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByText('Γιατί Dixis')).toBeVisible();
+  await expect(page.getByText('Προϊόντα').first()).toBeVisible();
 
   const styleCount = await page.evaluate(() => document.styleSheets.length);
   expect(styleCount).toBeGreaterThan(0);
