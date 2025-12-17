@@ -1,0 +1,73 @@
+name: Backend Crash Diagnose
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add known host
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts || exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Diagnose Backend Crash
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            set +e
+
+            echo \"=== STEP 1: PM2 BACKEND DETAILS ===\"
+            pm2 show dixis-backend || echo \"pm2 show failed\"
+            echo \"\"
+
+            echo \"=== STEP 1B: PM2 JLIST BACKEND ===\"
+            pm2 jlist | node -e \"const fs=require('\''fs'\''); const l=JSON.parse(fs.readFileSync(0,'\''utf8'\'')); const a=l.find(x=>x.name==='\''dixis-backend'\''); console.log(a?{name:a.name,status:a.pm2_env.status,exec:a.pm2_env.pm_exec_path,cwd:a.pm2_env.pm_cwd,interpreter:a.pm2_env.exec_interpreter,args:a.pm2_env.args}: '\''dixis-backend not found'\'');\" || echo \"jlist parse failed\"
+            echo \"\"
+
+            echo \"=== STEP 2: BACKEND ERROR LOGS ===\"
+            pm2 logs dixis-backend --lines 120 --nostream || echo \"pm2 logs failed\"
+            echo \"\"
+
+            echo \"=== STEP 2B: PM2 LOGS FILES ===\"
+            ls -la /home/*/.pm2/logs | grep -i backend || echo \"no backend logs found\"
+            echo \"\"
+
+            echo \"=== STEP 2C: TAIL BACKEND ERROR LOG ===\"
+            tail -n 120 /home/*/.pm2/logs/*backend*error*.log 2>/dev/null || echo \"no error log to tail\"
+            echo \"\"
+
+            echo \"=== STEP 3: PORT 8001 LISTENING ===\"
+            ss -lntp | grep -E '\'':(8001|3000)\b'\'' || echo \"ports 3000/8001 not listening\"
+            echo \"\"
+
+            echo \"=== STEP 4: MINIMAL RESTART ATTEMPT ===\"
+            pm2 restart dixis-backend --update-env || echo \"restart failed\"
+            echo \"\"
+
+            echo \"=== STEP 4B: WAIT 2 SECONDS ===\"
+            sleep 2
+            echo \"\"
+
+            echo \"=== STEP 4C: CHECK PORT AFTER RESTART ===\"
+            ss -lntp | grep -E '\'':8001\b'\'' || echo \"port 8001 still not listening\"
+            echo \"\"
+
+            echo \"=== STEP 4D: TEST LOCAL 8001 ===\"
+            curl -sS -o /dev/null -w \"local8001=%{http_code}\n\" http://127.0.0.1:8001/ || echo \"local8001=FAIL\"
+            echo \"\"
+
+            echo \"=== DIAGNOSIS COMPLETE ===\"
+          "'
