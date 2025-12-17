@@ -12,13 +12,24 @@ type ApiItem = {
 }
 
 async function getData() {
-  // For local dev: use localhost:3000 (Next.js default port)
-  // For CI/production: use NEXT_PUBLIC_BASE_URL env var
-  const base = process.env.NEXT_PUBLIC_BASE_URL || 'http://127.0.0.1:3000'
+  // Fetch from backend API (source of truth)
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1'
   try {
-    const res = await fetch(`${base}/api/products?pageSize=12`, { cache: 'no-store' })
+    const res = await fetch(`${base}/public/products`, { cache: 'no-store' })
     if (!res.ok) return { items: [], total: 0 }
-    return res.json()
+    const json = await res.json()
+    const products = json?.data ?? []
+
+    // Map backend format to frontend format
+    const items = products.map((p: any) => ({
+      id: p.id,
+      title: p.name,
+      producerName: p.producer?.name || null,
+      priceCents: Math.round(parseFloat(p.price) * 100),
+      imageUrl: p.image_url
+    }))
+
+    return { items, total: items.length }
   } catch {
     return { items: [], total: 0 }
   }
