@@ -13,9 +13,24 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Add known host
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+          # Use pre-configured known_hosts if available, fallback to ssh-keyscan
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+            echo "✅ Using pre-configured known_hosts"
+          else
+            echo "⚠️  KNOWN_HOSTS secret not set, trying ssh-keyscan..."
+            ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts || {
+              echo "❌ ssh-keyscan failed - ensure VPS_HOST is reachable"
+              exit 1
+            }
+          fi
+          chmod 644 ~/.ssh/known_hosts
 
       - name: Find and start Laravel backend
         run: |
