@@ -1,0 +1,81 @@
+name: VPS Facts (Raw Outputs)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  facts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add known host
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts || exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Collect Raw Facts
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            set +e  # Don'\''t exit on errors, collect all outputs
+
+            echo \"=== FACT 1: LISTENING PORTS ===\"
+            ss -lntp | grep -E '\'':(3000|3001|8001|80|443)\b'\'' || echo \"No ports found\"
+            echo \"\"
+
+            echo \"=== FACT 2: PM2 PROCESSES ===\"
+            pm2 list || echo \"PM2 not found\"
+            echo \"\"
+
+            echo \"=== FACT 2A: PM2 FRONTEND DETAILS ===\"
+            pm2 describe dixis-frontend || echo \"dixis-frontend not found\"
+            echo \"\"
+
+            echo \"=== FACT 2B: PM2 BACKEND DETAILS ===\"
+            pm2 describe dixis-backend || echo \"dixis-backend not found\"
+            echo \"\"
+
+            echo \"=== FACT 3: SYSTEMD SERVICES ===\"
+            systemctl --no-pager status nginx || echo \"nginx service not found\"
+            echo \"\"
+            systemctl --no-pager status php8.2-fpm || echo \"php8.2-fpm service not found\"
+            echo \"\"
+
+            echo \"=== FACT 4: NGINX PROXY CONFIG ===\"
+            grep -R '\''8001\\|3001\\|proxy_pass'\'' -n /etc/nginx 2>/dev/null | head -120 || echo \"No proxy config found\"
+            echo \"\"
+
+            echo \"=== FACT 5: ENDPOINT RESPONSES ===\"
+            curl -sS -o /dev/null -w \"healthz=%{http_code}\\n\" https://dixis.gr/api/healthz || echo \"healthz=FAIL\"
+            curl -sS -o /dev/null -w \"health=%{http_code}\\n\" https://dixis.gr/api/health || echo \"health=FAIL\"
+            curl -sS -o /dev/null -w \"products=%{http_code}\\n\" https://dixis.gr/api/v1/public/products || echo \"products=FAIL\"
+            echo \"\"
+
+            echo \"=== FACT 6: BACKEND DIRECTORY CONTENTS ===\"
+            ls -la /var/www/dixis/backend/ 2>/dev/null || echo \"Backend dir not found\"
+            echo \"\"
+
+            echo \"=== FACT 7: BACKEND .ENV EXISTS ===\"
+            ls -la /var/www/dixis/backend/.env 2>/dev/null || echo \"Backend .env not found\"
+            echo \"\"
+
+            echo \"=== FACT 8: BACKEND VENDOR DIR ===\"
+            ls -la /var/www/dixis/backend/vendor/ 2>/dev/null | head -10 || echo \"Vendor dir not found\"
+            echo \"\"
+
+            echo \"=== FACT 9: PHP PROCESSES ===\"
+            ps aux | grep -E '\''php|artisan|serve'\'' | grep -v grep || echo \"No PHP processes\"
+            echo \"\"
+
+            echo \"=== FACTS COLLECTION COMPLETE ===\"
+          "'
