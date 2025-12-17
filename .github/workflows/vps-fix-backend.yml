@@ -1,0 +1,62 @@
+name: VPS Fix Backend (Install Composer Deps)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add known host
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts || exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Install Composer deps and restart backend
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            set -euo pipefail
+
+            echo \"== php ==\"
+            php -v || true
+            echo \"\"
+
+            echo \"== composer ==\"
+            composer -V
+            echo \"\"
+
+            echo \"== backend dir ==\"
+            cd /var/www/dixis/backend
+            ls -la
+            test -f composer.json
+            echo \"\"
+
+            echo \"== composer install ==\"
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            echo \"\"
+
+            echo \"== restart pm2 backend ==\"
+            pm2 restart dixis-backend --update-env || pm2 restart dixis-backend
+            sleep 2
+            echo \"\"
+
+            echo \"== ports ==\"
+            ss -lntp | grep -E '\'':(8001|3000)\b'\'' || true
+            echo \"\"
+
+            echo \"== curl local8001 ==\"
+            curl -sS -o /dev/null -w \"local8001=%{http_code}\n\" http://127.0.0.1:8001/ || true
+            echo \"\"
+          "'
