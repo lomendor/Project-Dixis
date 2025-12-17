@@ -1,63 +1,109 @@
-# NEXT-7D — Immediate Priorities
+# Next 7 Days Roadmap
 
-**Updated:** 2025-10-04
-**Context:** Phase 3 - UI Polish & Release Candidate Prep
+**Period:** 2025-12-18 to 2025-12-25
+**Focus:** Stabilize production + high-impact quick wins
+**Updated:** 2025-12-18
 
-## Phase 2 Complete ✅ (2025-10-04)
+## Objectives
 
-### Final Status
-- ✅ **116/117 tests passing (99.1%)**
-- ✅ **Retry-with-backoff integrated**
-- ✅ **CI/CD gates all GREEN**
-- ✅ **Issue #311 closed**
+1. ✅ Ensure production stability (monitoring, incident response)
+2. 🎯 Close critical gaps (email verification, payment validation)
+3. 🎯 Improve operational visibility (logging, alerts)
+4. 🎯 Reduce friction (guest checkout, better UX)
 
-## Phase 3 - This Week (Days 1-7)
+---
 
-### 1. UI/UX Polish & Accessibility Audit
-- Accessibility compliance review (WCAG 2.1 AA)
-- Color contrast verification
-- Keyboard navigation testing
-- Screen reader compatibility
-- Mobile responsiveness refinement
+## Day 1-2: Production Stability & Monitoring
 
-### 2. Performance Optimization
-- Lighthouse CI baseline (target: 90+ scores)
-- Bundle size analysis and optimization
-- Image optimization and lazy loading
-- Database query performance review
-- API response time monitoring
+### ✅ COMPLETED
+- [x] Uptime monitoring workflow (every 5 minutes)
+- [x] SSH access stabilization (alias configuration)
+- [x] Capability matrix audit (111 features documented)
+- [x] Monitoring documentation
 
-### 3. Nightly E2E Full Suite Monitoring (7-day stability window)
-- Monitor nightly runs for flakiness
-- Track success rate metrics
-- Document any intermittent failures
-- Validate retry-with-backoff effectiveness
+### 🎯 IN PROGRESS
+- [ ] **Payment Validation (Viva Wallet)**
+  - **Owner:** Backend Team
+  - **Est:** 6h
+  - **Tasks:** Test order in staging, verify webhook, document cases
 
-## Next Week (Days 8-14)
+- [ ] **Email Verification**
+  - **Owner:** Backend Team
+  - **Est:** 8h
+  - **Tasks:** Add email_verified_at column, send verification email, create verify endpoint
 
-### 4. Release Candidate Preparation
-- Feature freeze enforcement (no new API changes)
-- Code review and security audit
-- Documentation completeness check
-- Deployment runbook creation
-- Rollback procedure testing
+---
 
-### 5. User Acceptance Testing (UAT) Prep
-- Test data preparation
-- UAT environment setup
-- Test scenarios documentation
-- User feedback collection process
-- Bug triage workflow
+## Day 3-4: Operational Excellence
 
-### 6. Production Readiness Review
-- Infrastructure scalability check
-- Monitoring and alerting setup
-- Backup and disaster recovery validation
-- Performance benchmarks verification
-- Security compliance review
+### 🎯 TODO
+- [ ] **Centralized Logging Setup**
+  - **Owner:** DevOps
+  - **Option A (Minimal - 2h):** PM2 log aggregation
+  - **Option B (Better - 8h):** Loki + Grafana
 
-## Blocked / Deferred
+- [ ] **Admin Alerts (Basic)**
+  - **Owner:** DevOps
+  - **Est:** 3h
+  - **Tasks:** Discord/Slack webhook for critical errors
 
-- Payment integration: Blocked on vendor API access
-- Multi-language: Deferred to Q4 Week 4
-- Advanced analytics: Deferred to Q1 2026
+---
+
+## Day 5-6: UX Improvements
+
+### 🎯 TODO
+- [ ] **Guest Checkout (MVP)**
+  - **Owner:** Frontend + Backend Team
+  - **Est:** 12h
+  - **Approach:** Allow checkout without account, create user post-payment
+
+- [ ] **Cart Backend Sync**
+  - **Owner:** Frontend Team
+  - **Est:** 6h
+  - **Tasks:** Sync cart to backend for logged-in users
+
+---
+
+## Day 7: Testing & Documentation
+
+### 🎯 TODO
+- [ ] E2E tests for new features (4h)
+- [ ] Update documentation (2h)
+- [ ] Deploy to production + monitor
+
+---
+
+## Vertical Slices
+
+### Slice 1: Production Monitoring ✅
+**Status:** DONE - Uptime checks every 5 minutes
+
+### Slice 2: Payment Validation 🎯
+**Status:** IN PROGRESS (Day 1-2)
+
+### Slice 3: User Security 🎯
+**Status:** PLANNED (Day 1-2) - Email verification
+
+### Slice 4: Operational Visibility 🎯
+**Status:** PLANNED (Day 3-4) - Logging + alerts
+
+### Slice 5: Checkout UX 🎯
+**Status:** PLANNED (Day 5-6) - Guest checkout + cart sync
+
+---
+
+## Success Metrics
+
+- [ ] 100% uptime (measured by monitoring)
+- [ ] Payment success rate >95%
+- [ ] Email verification rate >80%
+- [ ] Guest checkout conversion >30%
+- [ ] Zero critical production incidents
+
+---
+
+## Links
+
+- [Capability Matrix](PRODUCT/CAPABILITIES.md)
+- [Next 30 Days](NEXT-30D.md)
+- [Monitoring Guide](OPS/MONITORING.md)
