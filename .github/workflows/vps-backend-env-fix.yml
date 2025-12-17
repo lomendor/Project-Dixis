@@ -1,0 +1,81 @@
+name: VPS Backend ENV Fix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add known host
+        env:
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          if [ -n "$KNOWN_HOSTS" ]; then
+            echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts || exit 1
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Restore backend .env and revive
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
+            set -euo pipefail
+            BACKEND=\"/var/www/dixis/backend\"
+            echo \"== whoami/host ==\"; whoami; hostname; uptime
+            echo \"== backend path ==\"; ls -la \"\$BACKEND\" || true
+
+            echo \"== check .env presence ==\"
+            if [ -f \"\$BACKEND/.env\" ]; then
+              echo \"OK: backend .env already exists\"
+            else
+              echo \"MISSING: backend .env. Searching for a safe existing env to copy (NO CONTENT OUTPUT).\"
+              # list candidate paths ONLY (no cat)
+              find /var/www -maxdepth 5 -type f -name \".env\" -path \"*dixis*\" 2>/dev/null | sed '\''s#^#CANDIDATE:#'\'' || true
+
+              # Prefer typical shared/current locations if they exist:
+              for C in \
+                \"/var/www/dixis/current/backend/.env\" \
+                \"/var/www/dixis/current/.env\" \
+                \"/var/www/dixis/shared/.env\" \
+                \"/var/www/dixis/shared/backend/.env\" \
+                \"/var/www/dixis/.env\"
+              do
+                if [ -f \"\$C\" ]; then
+                  echo \"COPYING from \$C -> \$BACKEND/.env (no content printed)\"
+                  install -m 600 \"\$C\" \"\$BACKEND/.env\"
+                  break
+                fi
+              done
+            fi
+
+            echo \"== verify .env now exists (no content) ==\"
+            test -f \"\$BACKEND/.env\" && echo \"OK: .env present\" || (echo \"FAIL: still missing .env\" && exit 10)
+
+            echo \"== composer install (should allow artisan now) ==\"
+            cd \"\$BACKEND\"
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+            echo \"== pm2 status before ==\"
+            pm2 list || true
+
+            echo \"== restart backend ==\"
+            pm2 restart dixis-backend --update-env || pm2 restart dixis-backend
+
+            sleep 2
+            echo \"== ports ==\"
+            ss -lntp | grep -E '\'':(8001|3000|3001)\\b'\'' || true
+
+            echo \"== curl local8001 ==\"
+            curl -sS -o /dev/null -w \"local8001=%{http_code}\\n\" http://127.0.0.1:8001/ || true
+
+            echo \"== tail backend logs (NO secrets expected) ==\"
+            tail -n 120 /home/*/.pm2/logs/*backend*error*.log 2>/dev/null || true
+          "'
