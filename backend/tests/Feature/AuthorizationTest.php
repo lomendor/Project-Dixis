@@ -408,4 +408,52 @@ class AuthorizationTest extends TestCase
         $response->assertStatus(403);
         $response->assertJson(['message' => 'Producer profile not found']);
     }
+
+    #[Group('mvp')]
+    #[Group('linkage')]
+    public function test_public_products_include_producer_info(): void
+    {
+        // Create producer with products
+        $producer = Producer::factory()->create(['name' => 'Test Producer Farm']);
+        Product::factory()->count(3)->create([
+            'producer_id' => $producer->id,
+            'is_active' => true,
+        ]);
+
+        // Fetch public products
+        $response = $this->getJson('/api/v1/public/products');
+
+        $response->assertStatus(200);
+
+        $data = $response->json('data');
+
+        // Should have products
+        $this->assertGreaterThan(0, count($data));
+
+        // Every product must have producer info
+        foreach ($data as $product) {
+            $this->assertArrayHasKey('producer', $product, 'Product missing producer field');
+            $this->assertNotNull($product['producer'], 'Product has null producer');
+            $this->assertArrayHasKey('id', $product['producer']);
+            $this->assertArrayHasKey('name', $product['producer']);
+            $this->assertNotEmpty($product['producer']['name'], 'Producer name is empty');
+        }
+    }
+
+    #[Group('mvp')]
+    #[Group('linkage')]
+    public function test_database_enforces_producer_id_not_null(): void
+    {
+        // Database schema enforces producer_id NOT NULL
+        // This test verifies orphan products cannot exist
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectExceptionMessageMatches('/not-null|NOT NULL/i');
+
+        // Attempt to create product without producer_id (should fail)
+        Product::factory()->create([
+            'producer_id' => null,
+            'is_active' => true,
+        ]);
+    }
 }
