@@ -309,4 +309,103 @@ class AuthorizationTest extends TestCase
             'producer_id' => $producerB->id,
         ]);
     }
+
+    #[Group('mvp')]
+    #[Group('scoping')]
+    public function test_producer_gets_only_own_products(): void
+    {
+        // Create Producer A with 2 products
+        $producerAUser = User::factory()->producer()->create();
+        $producerA = Producer::factory()->create(['user_id' => $producerAUser->id]);
+        $productA1 = Product::factory()->create([
+            'producer_id' => $producerA->id,
+            'name' => 'Producer A Product 1',
+        ]);
+        $productA2 = Product::factory()->create([
+            'producer_id' => $producerA->id,
+            'name' => 'Producer A Product 2',
+        ]);
+
+        // Create Producer B with 1 product
+        $producerBUser = User::factory()->producer()->create();
+        $producerB = Producer::factory()->create(['user_id' => $producerBUser->id]);
+        $productB1 = Product::factory()->create([
+            'producer_id' => $producerB->id,
+            'name' => 'Producer B Product 1',
+        ]);
+
+        // Producer A fetches their products
+        $response = $this->actingAs($producerAUser, 'sanctum')
+            ->getJson('/api/v1/producer/products');
+
+        $response->assertStatus(200);
+
+        $data = $response->json('data');
+
+        // Should have exactly 2 products
+        $this->assertCount(2, $data);
+
+        // Should contain Producer A's products only
+        $productIds = collect($data)->pluck('id')->toArray();
+        $this->assertContains($productA1->id, $productIds);
+        $this->assertContains($productA2->id, $productIds);
+
+        // Should NOT contain Producer B's product
+        $this->assertNotContains($productB1->id, $productIds);
+    }
+
+    #[Group('mvp')]
+    #[Group('scoping')]
+    public function test_producer_does_not_see_other_producers_products(): void
+    {
+        // Create Producer A with 1 product
+        $producerAUser = User::factory()->producer()->create();
+        $producerA = Producer::factory()->create(['user_id' => $producerAUser->id]);
+        Product::factory()->create([
+            'producer_id' => $producerA->id,
+            'name' => 'Producer A Product',
+        ]);
+
+        // Create Producer B with 3 products
+        $producerBUser = User::factory()->producer()->create();
+        $producerB = Producer::factory()->create(['user_id' => $producerBUser->id]);
+        Product::factory()->count(3)->create(['producer_id' => $producerB->id]);
+
+        // Producer A fetches products - should only see 1 (their own)
+        $response = $this->actingAs($producerAUser, 'sanctum')
+            ->getJson('/api/v1/producer/products');
+
+        $response->assertStatus(200);
+
+        $data = $response->json('data');
+
+        // Should have exactly 1 product (not 4)
+        $this->assertCount(1, $data);
+        $this->assertEquals('Producer A Product', $data[0]['name']);
+    }
+
+    #[Group('mvp')]
+    #[Group('scoping')]
+    public function test_unauthenticated_user_cannot_access_producer_products(): void
+    {
+        // Attempt to fetch producer products without authentication
+        $response = $this->getJson('/api/v1/producer/products');
+
+        $response->assertStatus(401); // Unauthorized
+    }
+
+    #[Group('mvp')]
+    #[Group('scoping')]
+    public function test_consumer_cannot_access_producer_products(): void
+    {
+        $consumer = User::factory()->consumer()->create();
+
+        // Consumer tries to access producer products endpoint
+        $response = $this->actingAs($consumer, 'sanctum')
+            ->getJson('/api/v1/producer/products');
+
+        // Should return 403 (no producer profile)
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'Producer profile not found']);
+    }
 }
