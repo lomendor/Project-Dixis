@@ -221,13 +221,13 @@ export function getE2EAuthState(): E2EAuthState | null {
  * Use with playwright page.route() for consistent API responses
  */
 export const E2E_API_ROUTES = {
-  '/api/auth/login': {
+  '/api/v1/auth/login': {
     POST: E2E_AUTH_API_RESPONSES.login.success
   },
-  '/api/auth/logout': {
+  '/api/v1/auth/logout': {
     POST: E2E_AUTH_API_RESPONSES.logout.success
   },
-  '/api/auth/me': {
+  '/api/v1/auth/profile': {
     GET: E2E_AUTH_API_RESPONSES.me.authenticated
   }
 };
