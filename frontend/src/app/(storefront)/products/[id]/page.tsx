@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/db/client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
@@ -10,12 +9,38 @@ import { getBaseUrl } from '@/lib/site';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Helper to fetch product from API
+async function getProductById(id: string) {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1';
+  try {
+    const res = await fetch(`${base}/public/products`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const items = Array.isArray(json?.data) ? json.data : [];
+    const raw = items.find((p: any) => String(p.id) === String(id));
+    if (!raw) return null;
+
+    // Map backend API format to expected frontend format
+    return {
+      id: raw.id,
+      title: raw.name,
+      description: raw.description,
+      price: raw.price,
+      unit: raw.unit || 'kg',
+      stock: raw.stock,
+      isActive: raw.is_active !== false,
+      category: raw.category,
+      imageUrl: raw.image_url,
+      producer: raw.producer ? { name: raw.producer.name } : null
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const p = await prisma.product.findUnique({
-    where: { id: String(id || '') },
-    select: { id: true, title: true, description: true, price: true, imageUrl: true, category: true, producer: { select: { name: true } } }
-  });
+  const p = await getProductById(String(id || ''));
 
   if (!p) {
     return { title: 'Προϊόν μη διαθέσιμο' };
@@ -52,21 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function Page({ params }:{ params: Promise<{ id:string }> }){
   const t = await getTranslations();
   const { id } = await params;
-  const p = await prisma.product.findUnique({
-    where:{ id: String(id||'') },
-    select:{
-      id:true,
-      title:true,
-      price:true,
-      unit:true,
-      stock:true,
-      isActive:true,
-      description:true,
-      category:true,
-      imageUrl:true,
-      producer: { select: { name: true } }
-    }
-  });
+  const p = await getProductById(String(id || ''));
 
   if(!p || !p.isActive) return notFound();
 
