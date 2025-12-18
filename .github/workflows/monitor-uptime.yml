@@ -1,0 +1,79 @@
+name: Monitor Uptime
+
+on:
+  schedule:
+    # Every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Check API Health Endpoint
+        run: |
+          echo "Checking https://dixis.gr/api/healthz"
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ API health check failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+          echo "✅ API health check passed (HTTP $HTTP_CODE)"
+
+      - name: Check Products Page
+        run: |
+          echo "Checking https://dixis.gr/products"
+          RESPONSE=$(curl -sS https://dixis.gr/products)
+          HTTP_CODE=$(echo "$RESPONSE" | head -c 1 > /dev/null; curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/products)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Products page failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          # Check for expected content
+          if echo "$RESPONSE" | grep -q "Προϊόντα"; then
+            echo "✅ Products page contains expected content"
+          else
+            echo "❌ Products page missing expected content 'Προϊόντα'"
+            exit 1
+          fi
+
+          if echo "$RESPONSE" | grep -q "συνολικά"; then
+            echo "✅ Products page contains product count text"
+          else
+            echo "⚠️  Warning: Products page missing 'συνολικά' text"
+          fi
+
+          echo "✅ Products page check passed (HTTP $HTTP_CODE)"
+
+      - name: Check Auth Pages
+        run: |
+          echo "Checking https://dixis.gr/auth/login"
+          LOGIN_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/auth/login)
+          if [ "$LOGIN_CODE" != "200" ]; then
+            echo "❌ Auth login page failed with HTTP $LOGIN_CODE"
+            exit 1
+          fi
+          echo "✅ Auth login page check passed (HTTP $LOGIN_CODE)"
+
+          echo "Checking https://dixis.gr/auth/register"
+          REGISTER_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/auth/register)
+          if [ "$REGISTER_CODE" != "200" ]; then
+            echo "❌ Auth register page failed with HTTP $REGISTER_CODE"
+            exit 1
+          fi
+          echo "✅ Auth register page check passed (HTTP $REGISTER_CODE)"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ All uptime checks passed"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  • API health: OK"
+          echo "  • Products page: OK"
+          echo "  • Auth pages: OK"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
