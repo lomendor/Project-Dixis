@@ -11,7 +11,8 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // TODO: Implement proper authorization logic
+        // Authorization handled by ProductPolicy in controller
+        return true;
     }
 
     /**
@@ -21,6 +22,8 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+
         return [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products,slug',
@@ -36,7 +39,11 @@ class StoreProductRequest extends FormRequest
             'image_url' => 'nullable|url|max:500',
             'status' => 'nullable|string|in:available,unavailable,discontinued',
             'is_active' => 'nullable|boolean',
-            'producer_id' => 'required|exists:producers,id',
+            // producer_id: required for admin (can assign to any producer)
+            // optional for producer (auto-set server-side to auth user's producer_id)
+            'producer_id' => $user && $user->role === 'admin'
+                ? 'required|exists:producers,id'
+                : 'nullable|exists:producers,id',
         ];
     }
 

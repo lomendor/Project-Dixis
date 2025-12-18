@@ -154,6 +154,19 @@ class ProductsTest extends TestCase
 
         $response = $this->actingAs($user)->postJson('/api/v1/products', []);
 
+        // producer_id is auto-set for producers (not required in validation)
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['name', 'price']);
+    }
+
+    #[Group('mvp')]
+    public function test_admin_product_creation_requires_producer_id(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/products', []);
+
+        // Admin must specify producer_id explicitly
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'price', 'producer_id']);
     }
