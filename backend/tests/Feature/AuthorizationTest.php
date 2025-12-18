@@ -139,4 +139,174 @@ class AuthorizationTest extends TestCase
 
         $response->assertStatus(201);
     }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_producer_cannot_update_other_producers_product(): void
+    {
+        // Create Producer A with their product
+        $producerAUser = User::factory()->producer()->create();
+        $producerA = Producer::factory()->create(['user_id' => $producerAUser->id]);
+        $productA = Product::factory()->create([
+            'producer_id' => $producerA->id,
+            'name' => 'Producer A Product',
+            'price' => 10.00,
+        ]);
+
+        // Create Producer B
+        $producerBUser = User::factory()->producer()->create();
+        Producer::factory()->create(['user_id' => $producerBUser->id]);
+
+        // Producer B tries to update Producer A's product
+        $updateData = ['name' => 'Hacked Product Name', 'price' => 99.99];
+
+        $response = $this->actingAs($producerBUser, 'sanctum')
+            ->patchJson("/api/v1/products/{$productA->id}", $updateData);
+
+        $response->assertStatus(403); // Forbidden
+
+        // Verify product was NOT updated
+        $this->assertDatabaseHas('products', [
+            'id' => $productA->id,
+            'name' => 'Producer A Product',
+            'price' => 10.00,
+        ]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_producer_can_update_own_product(): void
+    {
+        $producerUser = User::factory()->producer()->create();
+        $producer = Producer::factory()->create(['user_id' => $producerUser->id]);
+        $product = Product::factory()->create([
+            'producer_id' => $producer->id,
+            'name' => 'Original Name',
+            'price' => 10.00,
+        ]);
+
+        $updateData = ['name' => 'Updated Name', 'price' => 15.00];
+
+        $response = $this->actingAs($producerUser, 'sanctum')
+            ->patchJson("/api/v1/products/{$product->id}", $updateData);
+
+        $response->assertStatus(200); // OK
+
+        // Verify product was updated
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Updated Name',
+            'price' => 15.00,
+        ]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_admin_can_update_any_product(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $producer = Producer::factory()->create();
+        $product = Product::factory()->create([
+            'producer_id' => $producer->id,
+            'name' => 'Original Name',
+            'price' => 10.00,
+        ]);
+
+        $updateData = ['name' => 'Admin Updated Name', 'price' => 25.00];
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->patchJson("/api/v1/products/{$product->id}", $updateData);
+
+        $response->assertStatus(200); // OK
+
+        // Verify product was updated
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Admin Updated Name',
+            'price' => 25.00,
+        ]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_producer_cannot_delete_other_producers_product(): void
+    {
+        // Create Producer A with their product
+        $producerAUser = User::factory()->producer()->create();
+        $producerA = Producer::factory()->create(['user_id' => $producerAUser->id]);
+        $productA = Product::factory()->create(['producer_id' => $producerA->id]);
+
+        // Create Producer B
+        $producerBUser = User::factory()->producer()->create();
+        Producer::factory()->create(['user_id' => $producerBUser->id]);
+
+        // Producer B tries to delete Producer A's product
+        $response = $this->actingAs($producerBUser, 'sanctum')
+            ->deleteJson("/api/v1/products/{$productA->id}");
+
+        $response->assertStatus(403); // Forbidden
+
+        // Verify product still exists
+        $this->assertDatabaseHas('products', ['id' => $productA->id]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_producer_create_auto_sets_producer_id(): void
+    {
+        $producerUser = User::factory()->producer()->create();
+        $producer = Producer::factory()->create(['user_id' => $producerUser->id]);
+
+        // Try to create product WITHOUT specifying producer_id (should auto-set)
+        $productData = [
+            'name' => 'Auto Producer ID Test',
+            'price' => 10.00,
+            // Note: NO producer_id in request
+        ];
+
+        $response = $this->actingAs($producerUser, 'sanctum')
+            ->postJson('/api/v1/products', $productData);
+
+        $response->assertStatus(201);
+
+        // Verify product was created with correct producer_id (auto-set server-side)
+        $this->assertDatabaseHas('products', [
+            'name' => 'Auto Producer ID Test',
+            'producer_id' => $producer->id, // Should match auth user's producer
+        ]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    public function test_producer_cannot_hijack_producer_id(): void
+    {
+        $producerAUser = User::factory()->producer()->create();
+        $producerA = Producer::factory()->create(['user_id' => $producerAUser->id]);
+
+        $producerB = Producer::factory()->create(); // Different producer
+
+        // Producer A tries to create product with Producer B's ID
+        $productData = [
+            'name' => 'Hijack Attempt',
+            'price' => 10.00,
+            'producer_id' => $producerB->id, // Malicious: different producer
+        ];
+
+        $response = $this->actingAs($producerAUser, 'sanctum')
+            ->postJson('/api/v1/products', $productData);
+
+        $response->assertStatus(201);
+
+        // Verify product was created with Producer A's ID (server-side override)
+        $this->assertDatabaseHas('products', [
+            'name' => 'Hijack Attempt',
+            'producer_id' => $producerA->id, // Should be auth user's producer, NOT request value
+        ]);
+
+        // Verify product was NOT created for Producer B
+        $this->assertDatabaseMissing('products', [
+            'name' => 'Hijack Attempt',
+            'producer_id' => $producerB->id,
+        ]);
+    }
 }

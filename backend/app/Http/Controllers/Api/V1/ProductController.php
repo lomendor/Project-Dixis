@@ -106,6 +106,19 @@ class ProductController extends Controller
         $this->authorize('create', Product::class);
 
         $data = $request->validated();
+        $user = $request->user();
+
+        // Security: Auto-set producer_id from authenticated user (server-side)
+        // Never trust client for ownership. Admin can override via request.
+        if ($user->role === 'producer') {
+            if (!$user->producer) {
+                return response()->json([
+                    'message' => 'Producer profile not found for authenticated user'
+                ], 403);
+            }
+            $data['producer_id'] = $user->producer->id;
+        }
+        // Admin can specify producer_id from request (already validated)
 
         // Generate slug if not provided
         if (empty($data['slug'])) {
