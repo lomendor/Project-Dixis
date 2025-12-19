@@ -1,47 +1,41 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-19 17:56 UTC
+**Last Updated**: 2025-12-19 20:05 UTC
 
 ## WIP (1 item only)
-**1) Data dependency roadmap documentation**
-- **DoD**:
-  - Create `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
-  - Document: Products → Producers → Permissions → Dashboard → Admin
-  - Current state: what exists today
-  - Missing pieces: what needs to be built
-  - Implementation order: 1, 2, 3...
-  - Stakeholder agreement on priority
-- **Proof source**: File exists in repo with complete content
-- **Status**: In PR review
+**None** - Awaiting next priority
 
 ## NEXT (ordered, max 3)
 
-### 2) Producer permissions audit
+### 1) PROD stability monitoring
 - **DoD**:
-  - Backend policy verification: ProductPolicy enforces producer_id ownership
-  - Frontend verification: Dashboard only shows producer's own products
-  - Admin override verification: Admin can edit any product
-  - Authorization test coverage: existing tests pass
-  - Document findings: `docs/FEATURES/PRODUCER-PERMISSIONS.md`
-  - No user-facing bugs found
-- **Estimated effort**: 2-3 hours (audit + docs)
+  - Run `scripts/prod-facts.sh` to verify baseline
+  - All endpoints return expected codes (healthz=200, products=200, login=307)
+  - smoke-production CI stays green
+  - No new regressions introduced
+- **Estimated effort**: Ongoing daily check (5 min)
 
-### 3) Checkout flow smoke test
+### 2) E2E test infrastructure (optional)
 - **DoD**:
-  - Manual test: Add product → Cart → Checkout → Order created
-  - API verification: POST /api/orders returns 201 or 200
-  - Database verification: Order record exists
-  - Email verification: Confirmation email sent (or logged)
-  - Document test: `docs/TESTS/CHECKOUT-SMOKE.md`
-  - No blocking bugs found
-- **Estimated effort**: 1-2 hours (manual test + docs)
+  - Add seed data script for E2E tests
+  - Verify checkout-happy-path.spec.ts runs successfully
+  - Document E2E test setup in README
+- **Estimated effort**: 2-3 hours
+
+### 3) Feature prioritization
+- **DoD**:
+  - Review `docs/PRODUCT/PRD-INDEX.md` for next features
+  - Gather user feedback on checkout flow
+  - Create spec docs for next phase features
+- **Estimated effort**: 1-2 hours planning
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
 - SSH/fail2ban hardening (2025-12-19) - CLOSED ✅
-- Products list verification (2025-12-19) - STABLE ✓
-- Auth routes verification (2025-12-19) - STABLE ✓
-- PROD monitoring workflows (MON1 + prod-smoke) (2025-12-19) - Active ✅
+- Data Dependency Map (2025-12-19) - PR #1763 merged ✅
+- smoke-production CI timeout fix (2025-12-19) - PR #1764 merged ✅
+- Producer permissions audit (2025-12-19) - PASS, no bugs found ✅
+- Checkout flow MVP verification (2025-12-19) - Already implemented ✅
 
 ---
 
