@@ -1,9 +1,17 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-19 21:30 UTC
+**Last Updated**: 2025-12-19 21:45 UTC
 
 ## WIP (1 item only)
-**None** - Awaiting next priority
+**Stage 2 Permissions Audit** - Advanced producer isolation & multi-producer scenarios
+- **DoD**:
+  - Verify producer isolation in edge cases (shared products, multi-producer orders)
+  - Test admin override scenarios comprehensively
+  - Document additional security tests needed
+  - Update ProductPolicy if gaps found
+  - Create audit report: `docs/FEATURES/PERMISSIONS-STAGE-2-AUDIT.md`
+- **Estimated effort**: 3-4 hours (deep audit + edge case testing)
+- **Status**: Planning phase
 
 ## NEXT (ordered, max 3)
 

@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 21:30 UTC
+**Last Updated**: 2025-12-19 21:45 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -24,7 +24,9 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: None (awaiting next priority)
+- **WIP**: Stage 2 - Advanced permissions & multi-producer scenarios
+  - DoD: Verify producer isolation in edge cases (shared products, multi-producer orders), document additional security tests needed, update ProductPolicy if gaps found
+  - Status: Planning phase
 
 ## BLOCKED ⚠️
 - (none)
