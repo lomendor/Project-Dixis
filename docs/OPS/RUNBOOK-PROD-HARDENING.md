@@ -136,6 +136,47 @@ SMOKE_OK
 - `https://dixis.gr/api/v1/public/products` (public API)
 - `https://dixis.gr/products` (public frontend)
 
+### Automated Smoke Test Timer
+
+**Installed:** Systemd timer running every 5 minutes
+
+**Files:**
+- Service: `/etc/systemd/system/dixis-smoke.service`
+- Timer: `/etc/systemd/system/dixis-smoke.timer`
+
+**Check Timer Status:**
+```bash
+# Check timer status (should be "active (waiting)")
+systemctl status dixis-smoke.timer
+
+# View recent smoke test results
+journalctl -u dixis-smoke.service -n 20
+```
+
+**Expected Output:**
+```
+● dixis-smoke.timer - Run Dixis PROD smoke check every 5 minutes
+     Active: active (waiting) since ...
+    Trigger: Fri 2025-12-19 02:00:46 UTC; 2min left
+
+Dec 19 01:55:40 srv709397 prod_smoke.sh[3024]: SMOKE_OK
+Dec 19 01:55:46 srv709397 prod_smoke.sh[3108]: SMOKE_OK
+```
+
+**Timer Configuration:**
+- First run: 2 minutes after boot
+- Interval: Every 5 minutes
+- Persistence: Yes (survives reboots)
+
+**Manual Trigger:**
+```bash
+# Trigger smoke test immediately
+sudo systemctl start dixis-smoke.service
+
+# Check result
+journalctl -u dixis-smoke.service -n 5
+```
+
 ### Manual Service Restart
 
 **Frontend:**
@@ -384,8 +425,11 @@ print(resp.code)
 
 ### systemd Service Files
 
-**Launcher:** `/etc/systemd/system/dixis-frontend-launcher.service`
-**Runtime:** `/run/systemd/transient/dixis-frontend-prod.service` (auto-generated)
+**Frontend Launcher:** `/etc/systemd/system/dixis-frontend-launcher.service`
+**Frontend Runtime:** `/run/systemd/transient/dixis-frontend-prod.service` (auto-generated)
+
+**Smoke Test Service:** `/etc/systemd/system/dixis-smoke.service`
+**Smoke Test Timer:** `/etc/systemd/system/dixis-smoke.timer`
 
 ### Smoke Test Script
 
