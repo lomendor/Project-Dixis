@@ -12,15 +12,21 @@ type ApiItem = {
 }
 
 async function getData() {
-  // Fetch from backend API (source of truth)
-  // Server-side: use localhost to avoid Monarx blocking and reduce latency
-  // Client-side: use public URL
-  const base = typeof window === 'undefined'
-    ? 'http://127.0.0.1:8001/api/v1'
-    : (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1')
+  // Fetch from live API (server-side and client-side use public URL)
+  // Production uses https://dixis.gr/api/v1 consistently
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1'
+
   try {
-    const res = await fetch(`${base}/public/products`, { cache: 'no-store' })
-    if (!res.ok) return { items: [], total: 0 }
+    const res = await fetch(`${base}/public/products`, {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    if (!res.ok) {
+      console.error('[Products] API fetch failed:', res.status, res.statusText)
+      return { items: [], total: 0 }
+    }
+
     const json = await res.json()
     const products = json?.data ?? []
 
@@ -34,7 +40,8 @@ async function getData() {
     }))
 
     return { items, total: items.length }
-  } catch {
+  } catch (err) {
+    console.error('[Products] Fetch error:', err)
     return { items: [], total: 0 }
   }
 }
