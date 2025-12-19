@@ -1,34 +1,49 @@
-name: prod-smoke
+name: PROD Smoke Tests
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'   # κάθε 10 λεπτά
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"  # Every 15 minutes
+  push:
+    paths:
+      - ".github/workflows/prod-smoke.yml"
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Install jq
-        run: sudo apt-get update -y && sudo apt-get install -y jq
-
-      - name: Check /api/healthz
+      - name: Check healthz
         run: |
-          set -e
-          OUT="$(curl -sS https://dixis.gr/api/healthz || true)"
-          echo "$OUT"
-          echo "$OUT" | jq -e '.status == "ok"' >/dev/null
+          set -euo pipefail
+          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)"
+          echo "healthz=$code"
+          test "$code" = "200"
 
-      - name: Check /api/products shape
+      - name: Check public products API
         run: |
-          set -e
-          OUT="$(curl -sS https://dixis.gr/api/products || true)"
-          echo "$OUT"
-          echo "$OUT" | jq -e 'has("source") and has("items") and (.items | type=="array")' >/dev/null
+          set -euo pipefail
+          body="$(curl -fsS https://dixis.gr/api/v1/public/products)"
+          echo "$body" | head -c 200
+          echo
+          echo "$body" | grep -q '"data"'
+          echo "✅ API contains 'data' field"
 
-      - name: Check /products HTTP 200
+      - name: Check product detail page
         run: |
-          set -e
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/products)
-          echo "status=$CODE"
-          [ "$CODE" -eq 200 ]
+          set -euo pipefail
+          body="$(curl -fsS https://dixis.gr/products/1)"
+          if echo "$body" | grep -q "Organic Tomatoes"; then
+            echo "✅ Product detail page contains 'Organic Tomatoes'"
+          else
+            echo "❌ Product detail page missing 'Organic Tomatoes'"
+            exit 1
+          fi
+
+      - name: Check login redirect
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/login)"
+          echo "login=$code"
+          test "$code" = "307"
+          echo "✅ Login redirects correctly"
