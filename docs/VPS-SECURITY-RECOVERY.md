@@ -64,7 +64,7 @@ curl -I https://dixis.gr
 curl https://dixis.gr/api/products | head -50
 
 # Check for malware
-ssh deploy@147.93.126.235 "ps aux | grep -E '(xmrig|miner)' | grep -v grep"
+ssh dixis-prod "ps aux | grep -E '(xmrig|miner)' | grep -v grep"
 # Should return: empty (no malware)
 ```
 
@@ -81,14 +81,14 @@ The deployment script installed **runtime monitoring** that:
 ### Check Monitoring Status
 
 ```bash
-ssh deploy@147.93.126.235 "ps aux | grep detect-exploit"
+ssh dixis-prod "ps aux | grep detect-exploit"
 # Should show: detect-exploit.sh running
 ```
 
 ### View Security Logs
 
 ```bash
-ssh deploy@147.93.126.235 "tail -50 /var/log/dixis/security.log"
+ssh dixis-prod "tail -50 /var/log/dixis/security.log"
 ```
 
 ---
@@ -127,7 +127,7 @@ If you see high CPU or suspicious processes:
 
 ```bash
 # Kill malware immediately
-ssh deploy@147.93.126.235 "pkill -9 -f 'xmrig|miner'"
+ssh dixis-prod "pkill -9 -f 'xmrig|miner'"
 
 # Re-run secure deployment
 bash scripts/vps-secure-deploy.sh
