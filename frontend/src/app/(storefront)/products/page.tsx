@@ -13,7 +13,11 @@ type ApiItem = {
 
 async function getData() {
   // Fetch from backend API (source of truth)
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1'
+  // Server-side: use localhost to avoid Monarx blocking and reduce latency
+  // Client-side: use public URL
+  const base = typeof window === 'undefined'
+    ? 'http://127.0.0.1:8001/api/v1'
+    : (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1')
   try {
     const res = await fetch(`${base}/public/products`, { cache: 'no-store' })
     if (!res.ok) return { items: [], total: 0 }
