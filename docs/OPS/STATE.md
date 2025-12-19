@@ -1,9 +1,10 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 17:20 UTC
+**Last Updated**: 2025-12-19 17:56 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
+- **OPS Bootstrap**: State management system (STATE.md + NEXT-7D.md + prod-facts.sh) committed and merged via PR #1761. (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -16,8 +17,8 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: Bootstrap OPS state management system (this PR)
-  - DoD: STATE.md + NEXT-7D.md + PROD-FACTS-LAST.md + prod-facts.sh committed and merged
+- **WIP**: Data dependency roadmap documentation
+  - DoD: `docs/PRODUCT/DATA-DEPENDENCY-MAP.md` created, defines Products → Producers → Permissions → Dashboard → Admin relationships, current state + missing pieces documented
   - Status: In PR review
 
 ## BLOCKED ⚠️
