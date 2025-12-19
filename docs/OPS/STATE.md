@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 19:30 UTC
+**Last Updated**: 2025-12-19 20:05 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -8,6 +8,8 @@
 - **PM2 Resurrect**: pm2-deploy.service enabled (auto-start on boot). Tested pm2 kill + pm2 resurrect → both processes restored (dixis-frontend + dixis-backend). All health checks 200. Proof: `docs/OPS/PM2-RESURRECT-PROOF.md` (Closed: 2025-12-19)
 - **Data Dependency Map**: Complete roadmap created (`docs/PRODUCT/DATA-DEPENDENCY-MAP.md`). Merged via PR #1763. (Closed: 2025-12-19)
 - **smoke-production CI**: Timeout increased 15s→45s for network resilience (PR #1764). Not a PROD regression (all endpoints 200). Verified: ui-only label does NOT skip smoke tests. (Closed: 2025-12-19)
+- **Producer Permissions Audit**: ProductPolicy enforces producer_id ownership. Admin override works. 12 authorization tests pass. No auth bugs found. Audit doc: `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md` (Closed: 2025-12-19)
+- **Checkout Flow MVP**: Complete checkout flow already implemented and tested. POST /api/checkout creates Order + OrderItems. 13 backend tests PASS. 80+ E2E tests exist. Documentation: `docs/FEATURES/CHECKOUT-MVP.md` (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -20,29 +22,31 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: Producer dashboard permissions audit (Stage 2 - audit first, docs-only)
-  - DoD: Verify ProductPolicy enforces producer_id ownership, admin override works, document findings in `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md`, no code changes unless auth bug proven
-  - Status: Starting audit
+- **WIP**: None (awaiting next priority)
 
 ## BLOCKED ⚠️
 - (none)
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-### 1) Producer dashboard permissions audit
+### 1) PROD monitoring & stability
 - **DoD**:
-  - Verify producers can ONLY edit their own products
-  - Verify admin can override/edit any product
-  - E2E test coverage for authorization rules
-  - Document findings in `docs/FEATURES/PRODUCER-PERMISSIONS.md`
+  - Run `scripts/prod-facts.sh` daily
+  - All endpoints return expected status codes
+  - No regressions in smoke-production CI
+  - Document any new issues in STATE.md
 
-### 3) Checkout flow end-to-end verification
+### 2) Backend test improvements (optional)
 - **DoD**:
-  - User can add products to cart (200 OK)
-  - User can proceed through checkout (200 OK)
-  - Order is created in backend
-  - Confirmation email sent (or logged in dev mode)
-  - Test with real product + shipping address
+  - E2E tests can run with seed data (`pnpm test:e2e:prep`)
+  - All critical flows have E2E coverage
+  - CI runs E2E tests on PR
+
+### 3) Future feature planning
+- **DoD**:
+  - Review PRD-INDEX.md for next phase
+  - Prioritize features based on user feedback
+  - Create feature spec docs in `docs/FEATURES/`
 
 ---
 
