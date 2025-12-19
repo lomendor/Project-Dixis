@@ -122,9 +122,35 @@ ssh dixis-prod /home/deploy/bin/prod_smoke.sh
 - Enabled: ✅ for boot
 - Spawns: transient unit `dixis-frontend-prod.service`
 
+## Feature Integrity Audit (2025-12-19)
+
+**Product ↔ Producer Ownership:** ✅ VERIFIED
+
+**Audit Results:**
+- ✅ Database: producer_id NOT NULL with FK constraint
+- ✅ Authorization: ProductPolicy enforces ownership (17 tests passing)
+- ✅ API: Public endpoints return producer info
+- ✅ Frontend: ProductCard displays producer names
+- ✅ Dashboard: Producer sees only own products
+- ✅ Security: Cross-producer tampering blocked (403)
+
+**Live Verification:**
+```
+GET /api/v1/public/products → Producer: "Green Farm Co." (200 OK)
+GET /products → "Green Farm Co." visible in HTML
+Backend tests: 17 passed (49 assertions)
+```
+
+**Documentation:** `docs/FEATURES/PRODUCT-PRODUCER-INTEGRITY.md`
+
+**Status:** No code changes required. All requirements met.
+
+---
+
 ## Next Actions
 
 - Monitor endpoints via automated uptime monitoring
 - Consider backend systemd service for reboot persistence
 - Future: Re-enable standalone mode with CI/CD pre-built deployment
 - Review RUNBOOK-PROD-HARDENING.md for operational procedures
+- Optional: Add producer profile links to product cards
