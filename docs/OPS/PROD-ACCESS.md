@@ -20,15 +20,26 @@ Protocol: SSH (ed25519 key only)
 
 ### Canonical SSH Command
 ```bash
-ssh -o IdentitiesOnly=yes -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235
+ssh dixis-prod
+```
+
+**Host Alias Configuration** (`~/.ssh/config`):
+```
+Host dixis-prod
+  HostName 147.93.126.235
+  User deploy
+  IdentityFile ~/.ssh/dixis_prod_ed25519
+  IdentitiesOnly yes
+  PreferredAuthentications publickey
 ```
 
 ### Access Policy
 - ✅ **Primary**: GitHub Actions workflows (automated deployment)
 - ⚠️ **Emergency only**: Interactive SSH (manual fixes)
-- ❌ **Never**: Direct root access
+- ❌ **Never**: Direct root access (root login disabled on server)
 
 **SSH Key**: `dixis_prod_ed25519` (ed25519, stored in GitHub Secrets as `VPS_SSH_KEY`)
+**SSH User**: `deploy` (only allowed user; root disabled)
 
 ---
 
@@ -80,17 +91,17 @@ pm2 list
 
 ### Check Service Status
 ```bash
-ssh deploy@147.93.126.235 "pm2 status && ss -lntp | grep -E ':(80|443|3000|8001)'"
+ssh dixis-prod "pm2 status && ss -lntp | grep -E ':(80|443|3000|8001)'"
 ```
 
 ### View Backend Logs
 ```bash
-ssh deploy@147.93.126.235 "pm2 logs dixis-backend --lines 50"
+ssh dixis-prod "pm2 logs dixis-backend --lines 50"
 ```
 
 ### Restart Backend
 ```bash
-ssh deploy@147.93.126.235 "pm2 restart dixis-backend"
+ssh dixis-prod "pm2 restart dixis-backend"
 ```
 
 ### Test Endpoints
