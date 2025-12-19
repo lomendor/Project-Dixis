@@ -308,6 +308,9 @@ Host dixis-prod
   IdentityFile ~/.ssh/dixis_prod_ed25519
   IdentitiesOnly yes
   PreferredAuthentications publickey
+  PubkeyAuthentication yes
+  PasswordAuthentication no
+  StrictHostKeyChecking accept-new
   ServerAliveInterval 30
   ServerAliveCountMax 3
 ```
@@ -315,6 +318,35 @@ Host dixis-prod
 **Key Settings:**
 - `IdentitiesOnly yes` → Only use specified key (no agent keys)
 - `PreferredAuthentications publickey` → Don't try password auth
+- `PasswordAuthentication no` → Never prompt for password
+- `PubkeyAuthentication yes` → Always use public key
+
+**Connection Command:**
+```bash
+ssh dixis-prod
+```
+
+### Server-Side Hardening
+
+**File:** `/etc/ssh/sshd_config.d/99-dixis-hardening.conf`
+```ini
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+UsePAM yes
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+AllowUsers deploy
+MaxAuthTries 3
+LoginGraceTime 20
+```
+
+**Policy:**
+- Only `deploy` user allowed
+- Public key authentication ONLY (no passwords)
+- Root login disabled
+- Maximum 3 authentication attempts
 
 ### Verify SSH Agent
 
@@ -330,6 +362,33 @@ ssh-add -l
 ```
 
 **Expected:** Only one key listed (dixis_prod_ed25519).
+
+### CRITICAL: fail2ban Policy
+
+**DO NOT whitelist dynamic public IPs in fail2ban ignoreip.**
+
+**Why:** Dynamic IPs change frequently. If you whitelist your current IP and it changes, you lose protection. If it gets reassigned to an attacker, they have whitelisted access.
+
+**Correct Approach:**
+1. Fix client-side SSH config (done above)
+2. Use `IdentitiesOnly yes` to prevent wrong key attempts
+3. Keep fail2ban ignoreip as **localhost-only**
+
+**File:** `/etc/fail2ban/jail.d/sshd.local`
+```ini
+[sshd]
+enabled = true
+backend = systemd
+ignoreip = 127.0.0.1/8 ::1
+maxretry = 5
+findtime = 10m
+bantime  = 30m
+```
+
+**If You Get Banned:**
+- Fix your SSH client config FIRST
+- Then unban: `sudo fail2ban-client set sshd unbanip YOUR_IP` (via console access)
+- Never add dynamic IPs to ignoreip permanently
 
 ---
 
