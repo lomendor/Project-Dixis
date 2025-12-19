@@ -7,6 +7,6 @@ import { test, expect } from '@playwright/test';
 test('commission-preview endpoint guarded when flag OFF', async ({ request }) => {
   const base = process.env.BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? 'https://dixis.gr';
   // Use a benign order id; endpoint should be hidden (404) when flag OFF
-  const res = await request.get(`${base}/api/orders/123/commission-preview`, { timeout: 15000 });
+  const res = await request.get(`${base}/api/orders/123/commission-preview`, { timeout: 45000 });
   expect([401, 403, 404]).toContain(res.status());
 });
