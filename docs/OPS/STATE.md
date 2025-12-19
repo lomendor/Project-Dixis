@@ -116,6 +116,19 @@ ssh dixis-prod /home/deploy/bin/prod_smoke.sh
 - **Failure Behavior:** GitHub workflow fails → Email/UI notification
 - **Status:** ✅ Active (Pass MON1)
 
+### GitHub Actions PROD Smoke Tests
+**Workflow:** `.github/workflows/prod-smoke.yml`
+- **Schedule:** Every 15 minutes (`*/15 * * * *`)
+- **Trigger:** Automated cron + manual dispatch + file changes
+- **Monitored Endpoints:**
+  - `https://dixis.gr/api/healthz` → HTTP 200
+  - `https://dixis.gr/api/v1/public/products` → HTTP 200 + contains `"data"`
+  - `https://dixis.gr/products/1` → HTTP 200 + contains "Organic Tomatoes"
+  - `https://dixis.gr/login` → HTTP 307 (redirect)
+- **Validation:** Direct curl checks with grep pattern matching
+- **Failure Behavior:** GitHub workflow fails → Email/UI notification
+- **Status:** ✅ Active
+
 ## Recent Changes
 
 **PR #1747 (Merged - 2025-12-18):**
