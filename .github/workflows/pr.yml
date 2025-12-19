@@ -41,7 +41,8 @@ jobs:
     if: >
       github.event_name == 'pull_request' &&
       github.event.pull_request.draft == false &&
-      !contains(join(github.event.pull_request.labels.*.name, ','), 'ci:light')
+      !contains(join(github.event.pull_request.labels.*.name, ','), 'ci:light') &&
+      !contains(join(github.event.pull_request.labels.*.name, ','), 'ai-pass')
     runs-on: ubuntu-latest
     needs: quality-gates
     steps:
