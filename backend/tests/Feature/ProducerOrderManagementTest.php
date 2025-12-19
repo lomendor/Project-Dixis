@@ -23,11 +23,11 @@ class ProducerOrderManagementTest extends TestCase
     {
         parent::setUp();
 
-        // Create a producer and user
-        $this->producer = Producer::factory()->create();
+        // Create a user first, then associate producer
         $this->producerUser = User::factory()->create();
-        $this->producerUser->producer()->associate($this->producer);
-        $this->producerUser->save();
+        $this->producer = Producer::factory()->create([
+            'user_id' => $this->producerUser->id,
+        ]);
 
         // Create a product for this producer
         $this->product = Product::factory()->create([
@@ -126,7 +126,7 @@ class ProducerOrderManagementTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'success',
-                'order' => ['id', 'status', 'total', 'orderItems'],
+                'order' => ['id', 'status', 'total', 'order_items'],
             ])
             ->assertJsonPath('success', true)
             ->assertJsonPath('order.id', $order->id);
