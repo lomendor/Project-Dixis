@@ -59,12 +59,22 @@ Nginx Reverse Proxy
 ## SSH Stability (Hardened)
 
 **Server Configuration:**
+- sshd hardening: `/etc/ssh/sshd_config.d/99-dixis-hardening.conf`
+  - PermitRootLogin: no
+  - PasswordAuthentication: no
+  - AllowUsers: deploy only
+  - AuthenticationMethods: publickey only
 - fail2ban sshd jail: active
 - ignoreip policy: **localhost-only** (no hardcoded dynamic IPs)
 - Configuration: `/etc/fail2ban/jail.d/sshd.local`
   ```ini
   [sshd]
+  enabled = true
+  backend = systemd
   ignoreip = 127.0.0.1/8 ::1
+  maxretry = 5
+  findtime = 10m
+  bantime  = 30m
   ```
 
 **Local SSH Configuration:**
@@ -74,8 +84,12 @@ Nginx Reverse Proxy
 - Key: `~/.ssh/dixis_prod_ed25519`
 - IdentitiesOnly: `yes` (prevents wrong key attempts)
 - PreferredAuthentications: `publickey`
+- PasswordAuthentication: `no`
+- PubkeyAuthentication: `yes`
 
-**Result:** Zero failed authentication attempts, no risk of IP ban.
+**Connection:** `ssh dixis-prod` (always uses deploy user with correct key)
+
+**Result:** Zero failed authentication attempts, no risk of IP ban. Server enforces public key auth only.
 
 ## Monitoring
 
