@@ -37,8 +37,10 @@
 
 ## Document Links
 
-_To be added as PRDs are created_
+### Architecture & Planning
+- `docs/PRODUCT/DATA-DEPENDENCY-MAP.md` - Entity relationships, permissions matrix, and 5-stage implementation roadmap
 
+### PRDs (To Be Created)
 - `docs/PRODUCT/prd-001-shipping-integration.md` (TBD)
 - `docs/PRODUCT/prd-002-payment-integration.md` (TBD)
 - `docs/PRODUCT/prd-003-multi-language.md` (TBD)
