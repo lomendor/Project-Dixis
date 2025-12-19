@@ -1,11 +1,13 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 18:22 UTC
+**Last Updated**: 2025-12-19 19:30 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
 - **OPS Bootstrap**: State management system (STATE.md + NEXT-7D.md + prod-facts.sh) committed and merged via PR #1761. (Closed: 2025-12-19)
 - **PM2 Resurrect**: pm2-deploy.service enabled (auto-start on boot). Tested pm2 kill + pm2 resurrect → both processes restored (dixis-frontend + dixis-backend). All health checks 200. Proof: `docs/OPS/PM2-RESURRECT-PROOF.md` (Closed: 2025-12-19)
+- **Data Dependency Map**: Complete roadmap created (`docs/PRODUCT/DATA-DEPENDENCY-MAP.md`). Merged via PR #1763. (Closed: 2025-12-19)
+- **smoke-production CI**: Timeout increased 15s→45s for network resilience (PR #1764). Not a PROD regression (all endpoints 200). Verified: ui-only label does NOT skip smoke tests. (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -18,23 +20,16 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: Data dependency roadmap documentation
-  - DoD: `docs/PRODUCT/DATA-DEPENDENCY-MAP.md` created, defines Products → Producers → Permissions → Dashboard → Admin relationships, current state + missing pieces documented
-  - Status: In PR review
+- **WIP**: Producer dashboard permissions audit (Stage 2 - audit first, docs-only)
+  - DoD: Verify ProductPolicy enforces producer_id ownership, admin override works, document findings in `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md`, no code changes unless auth bug proven
+  - Status: Starting audit
 
 ## BLOCKED ⚠️
 - (none)
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-### 1) Data dependency roadmap documentation
-- **DoD**:
-  - Document created: `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
-  - Defines current state of: Products → Producers → Permissions → Dashboard → Admin
-  - Identifies missing pieces with priority order
-  - Agreed upon by stakeholders
-
-### 2) Producer dashboard permissions audit
+### 1) Producer dashboard permissions audit
 - **DoD**:
   - Verify producers can ONLY edit their own products
   - Verify admin can override/edit any product

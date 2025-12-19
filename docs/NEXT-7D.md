@@ -1,32 +1,22 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-19 17:56 UTC
+**Last Updated**: 2025-12-19 19:30 UTC
 
 ## WIP (1 item only)
-**1) Data dependency roadmap documentation**
-- **DoD**:
-  - Create `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
-  - Document: Products → Producers → Permissions → Dashboard → Admin
-  - Current state: what exists today
-  - Missing pieces: what needs to be built
-  - Implementation order: 1, 2, 3...
-  - Stakeholder agreement on priority
-- **Proof source**: File exists in repo with complete content
-- **Status**: In PR review
-
-## NEXT (ordered, max 3)
-
-### 2) Producer permissions audit
+**1) Producer permissions audit (Stage 2)**
 - **DoD**:
   - Backend policy verification: ProductPolicy enforces producer_id ownership
   - Frontend verification: Dashboard only shows producer's own products
   - Admin override verification: Admin can edit any product
   - Authorization test coverage: existing tests pass
-  - Document findings: `docs/FEATURES/PRODUCER-PERMISSIONS.md`
+  - Document findings: `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md`
   - No user-facing bugs found
 - **Estimated effort**: 2-3 hours (audit + docs)
+- **Status**: Starting audit
 
-### 3) Checkout flow smoke test
+## NEXT (ordered, max 3)
+
+### 2) Checkout flow smoke test
 - **DoD**:
   - Manual test: Add product → Cart → Checkout → Order created
   - API verification: POST /api/orders returns 201 or 200
