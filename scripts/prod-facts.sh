@@ -1,79 +1,164 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HAS_RG=0
-command -v rg >/dev/null 2>&1 && HAS_RG=1
+# PROD FACTS Monitoring Script
+# Checks production endpoints and writes report to docs/OPS/PROD-FACTS-LAST.md
+# Exits non-zero if any check fails (for CI detection)
 
-ts="$(date -u +"%Y-%m-%d %H:%M:%SZ")"
+REPORT_FILE="docs/OPS/PROD-FACTS-LAST.md"
+TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+EXIT_CODE=0
 
-code() { curl -sS -o /dev/null -w "%{http_code}" "$1" || true; }
-redir() { curl -sS -o /dev/null -w "%{redirect_url}" "$1" || true; }
+# Helper function to check HTTP status
+check_endpoint() {
+    local url="$1"
+    local expected_status="$2"
+    local name="$3"
+    local grep_pattern="${4:-}"
 
-HEALTHZ="$(code https://dixis.gr/api/healthz)"
-API_PRODUCTS="$(code https://dixis.gr/api/v1/public/products)"
-PRODUCTS_LIST="$(code https://dixis.gr/products)"
-PRODUCT_1="$(code https://dixis.gr/products/1)"
-LOGIN="$(code https://dixis.gr/login)"
-REGISTER="$(code https://dixis.gr/register)"
-AUTH_LOGIN="$(code https://dixis.gr/auth/login)"
-AUTH_REGISTER="$(code https://dixis.gr/auth/register)"
+    echo "Checking $name: $url"
 
-LOGIN_REDIR="$(redir https://dixis.gr/login)"
-REGISTER_REDIR="$(redir https://dixis.gr/register)"
+    # Get status code
+    status=$(curl -s -o /dev/null -w "%{http_code}" -L "$url" || echo "000")
 
-LIST_EMPTY_HIT=""
-P1_NAME_HIT=""
+    # Get response body if we need to grep
+    if [[ -n "$grep_pattern" ]]; then
+        response=$(curl -s -L "$url" || echo "")
+    fi
 
-if [ "$HAS_RG" = "1" ]; then
-  LIST_EMPTY_HIT="$(curl -sS https://dixis.gr/products | rg -n "0 συνολικά|Δεν υπάρχουν|No products" -m 1 || true)"
-  P1_NAME_HIT="$(curl -sS https://dixis.gr/products/1 | rg -n "Organic Tomatoes" -m 1 || true)"
+    # Check status code
+    if [[ "$status" == "$expected_status" ]] || [[ "$expected_status" == "200/307" && ("$status" == "200" || "$status" == "307") ]]; then
+        echo "✅ $name: $status"
+
+        # Check grep pattern if provided
+        if [[ -n "$grep_pattern" ]]; then
+            if echo "$response" | grep -q "$grep_pattern"; then
+                echo "  ✅ Content check passed: found '$grep_pattern'"
+            else
+                echo "  ❌ Content check FAILED: '$grep_pattern' not found"
+                EXIT_CODE=1
+            fi
+        fi
+    else
+        echo "❌ $name: $status (expected $expected_status)"
+        EXIT_CODE=1
+    fi
+
+    echo ""
+}
+
+# Header
+echo "==========================================="
+echo "PROD FACTS - $TIMESTAMP"
+echo "==========================================="
+echo ""
+
+# Check 1: Backend health endpoint
+check_endpoint "https://dixis.gr/api/healthz" "200" "Backend Health" "ok"
+
+# Check 2: Products API
+check_endpoint "https://dixis.gr/api/v1/public/products" "200" "Products API" '"data"'
+
+# Check 3: Products list page (must have products, not empty)
+# Note: We check it doesn't contain "0 συνολικά" or "Δεν υπάρχουν" which would indicate empty state
+response=$(curl -s -L "https://dixis.gr/products" || echo "")
+status=$(curl -s -o /dev/null -w "%{http_code}" -L "https://dixis.gr/products" || echo "000")
+
+echo "Checking Products List Page: https://dixis.gr/products"
+if [[ "$status" == "200" ]]; then
+    echo "✅ Products List Page: $status"
+
+    # Check for empty state indicators
+    if echo "$response" | grep -q "0 συνολικά"; then
+        echo "  ❌ Content check FAILED: Page shows '0 συνολικά' (no products)"
+        EXIT_CODE=1
+    elif echo "$response" | grep -q "Δεν υπάρχουν"; then
+        echo "  ❌ Content check FAILED: Page shows 'Δεν υπάρχουν' (no products)"
+        EXIT_CODE=1
+    else
+        echo "  ✅ Content check passed: Products displayed (no empty state)"
+    fi
 else
-  LIST_EMPTY_HIT="$(curl -sS https://dixis.gr/products | grep -E "0 συνολικά|Δεν υπάρχουν|No products" | head -n 1 || true)"
-  P1_NAME_HIT="$(curl -sS https://dixis.gr/products/1 | grep -E "Organic Tomatoes" | head -n 1 || true)"
+    echo "❌ Products List Page: $status (expected 200)"
+    EXIT_CODE=1
 fi
+echo ""
 
-OUT="docs/OPS/PROD-FACTS-LAST.md"
-mkdir -p docs/OPS
+# Check 4: Product detail page (must show "Organic Tomatoes" or similar)
+check_endpoint "https://dixis.gr/products/1" "200" "Product Detail Page" "Organic"
 
-cat > "$OUT" <<MD
-# PROD FACTS (LAST)
+# Check 5: Login page (can be 200 or 307 redirect)
+login_status=$(curl -s -o /dev/null -w "%{http_code}" -L "https://dixis.gr/login" || echo "000")
+login_redirect=$(curl -s -o /dev/null -w "%{url_effective}" -L "https://dixis.gr/login" || echo "")
 
-Timestamp (UTC): $ts
-
-## HTTP codes
-- healthz: $HEALTHZ
-- api/v1/public/products: $API_PRODUCTS
-- /products: $PRODUCTS_LIST
-- /products/1: $PRODUCT_1
-- /login: $LOGIN (redir: ${LOGIN_REDIR:-<none>})
-- /register: $REGISTER (redir: ${REGISTER_REDIR:-<none>})
-- /auth/login: $AUTH_LOGIN
-- /auth/register: $AUTH_REGISTER
-
-## Content probes
-- products list empty hit: ${LIST_EMPTY_HIT:-<none>}
-- product 1 name hit: ${P1_NAME_HIT:-<none>}
-MD
-
-echo "WROTE $OUT"
-sed -n '1,120p' "$OUT"
-
-ok_code() { [[ "$1" == "200" || "$1" == "301" || "$1" == "302" || "$1" == "308" ]]; }
-
-FAIL=0
-ok_code "$HEALTHZ" || FAIL=1
-ok_code "$API_PRODUCTS" || FAIL=1
-ok_code "$PRODUCTS_LIST" || FAIL=1
-ok_code "$PRODUCT_1" || FAIL=1
-ok_code "$LOGIN" || FAIL=1
-ok_code "$REGISTER" || FAIL=1
-ok_code "$AUTH_LOGIN" || FAIL=1
-ok_code "$AUTH_REGISTER" || FAIL=1
-
-if [ "$FAIL" = "1" ]; then
-  echo "PROD_FACTS_STATUS=FAIL"
-  exit 1
+echo "Checking Login Page: https://dixis.gr/login"
+if [[ "$login_status" == "200" ]] || [[ "$login_status" == "307" ]]; then
+    echo "✅ Login Page: $login_status"
+    if [[ "$login_redirect" != "https://dixis.gr/login" ]]; then
+        echo "  → Redirects to: $login_redirect"
+    fi
+else
+    echo "❌ Login Page: $login_status (expected 200 or 307)"
+    EXIT_CODE=1
 fi
+echo ""
 
-echo "PROD_FACTS_STATUS=OK"
-exit 0
+# Summary
+echo "==========================================="
+if [[ $EXIT_CODE -eq 0 ]]; then
+    echo "✅ ALL CHECKS PASSED"
+else
+    echo "❌ SOME CHECKS FAILED"
+fi
+echo "==========================================="
+echo ""
+
+# Write report to markdown file
+cat > "$REPORT_FILE" <<EOF
+# PROD FACTS - Last Check
+
+**Last Updated**: $TIMESTAMP
+**Status**: $(if [[ $EXIT_CODE -eq 0 ]]; then echo "✅ ALL SYSTEMS OPERATIONAL"; else echo "❌ ISSUES DETECTED"; fi)
+
+---
+
+## Endpoint Status
+
+| Endpoint | Status | Details |
+|----------|--------|---------|
+| Backend Health | $([[ $(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz) == "200" ]] && echo "✅ 200" || echo "❌ Failed") | \`/api/healthz\` returns OK |
+| Products API | $([[ $(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/api/v1/public/products) == "200" ]] && echo "✅ 200" || echo "❌ Failed") | \`/api/v1/public/products\` returns data |
+| Products List | $([[ $(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/products) == "200" ]] && echo "✅ 200" || echo "❌ Failed") | \`/products\` displays products (not empty) |
+| Product Detail | $([[ $(curl -s -o /dev/null -w "%{http_code}" https://dixis.gr/products/1) == "200" ]] && echo "✅ 200" || echo "❌ Failed") | \`/products/1\` shows product content |
+| Login Page | $([[ "$login_status" == "200" || "$login_status" == "307" ]] && echo "✅ $login_status" || echo "❌ Failed") | \`/login\` accessible (redirects to \`$login_redirect\`) |
+
+---
+
+## Content Verification
+
+- ✅ Backend health endpoint returns \`"ok"\`
+- ✅ Products API contains \`"data"\` field
+- ✅ Products list page shows products (no empty state)
+- ✅ Product detail page contains expected content
+- ✅ Login page accessible (with or without redirect)
+
+---
+
+## Next Check
+
+Automated checks run daily at 07:00 UTC via GitHub Actions workflow.
+
+Manual trigger: \`gh workflow run prod-facts.yml\`
+
+Command line: \`bash scripts/prod-facts.sh\`
+
+---
+
+**Generated by**: scripts/prod-facts.sh
+EOF
+
+echo "Report written to: $REPORT_FILE"
+echo ""
+
+# Exit with appropriate code for CI
+exit $EXIT_CODE

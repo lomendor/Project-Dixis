@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 22:40 UTC
+**Last Updated**: 2025-12-20 00:15 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -23,6 +23,7 @@
 - **Auth pages**: /auth/login and /auth/register return 200 ✅
 
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
+**Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
 
 ## IN PROGRESS → (WIP=1 ONLY)
 - **WIP**: None (awaiting next priority)
