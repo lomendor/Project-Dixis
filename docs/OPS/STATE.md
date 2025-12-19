@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 00:15 UTC
+**Last Updated**: 2025-12-19 23:30 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -13,6 +13,7 @@
 - **Producer Product CRUD**: Complete producer dashboard with product CRUD already implemented and production-ready. ProductPolicy enforces ownership. 18 backend tests PASS (0.91s). Frontend pages: list, create, edit. Server-side producer_id assignment. Audit doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-AUDIT.md` (Closed: 2025-12-19)
 - **Orders MVP**: Complete orders system (cart → create order → view order) already implemented and production-ready. 55 backend tests PASS (cart + orders). Frontend pages: order details, confirmation, tracking. User authorization enforced. Cart isolation working. Stock validation prevents overselling. Audit doc: `docs/FEATURES/ORDERS-MVP-AUDIT.md` (Closed: 2025-12-19)
 - **Stage 2 Permissions Audit**: Advanced producer isolation scenarios verified. NO AUTHORIZATION GAPS found. ProductPolicy enforces producer_id ownership (17 tests PASS). Multi-producer orders correctly scoped. Admin override working. Dashboard filtering by producer_id. Audit doc: `docs/FEATURES/PERMISSIONS-STAGE-2-AUDIT.md` (Closed: 2025-12-19)
+- **PROD Facts Monitoring**: Automated production health monitoring implemented. Scripts + GitHub Actions workflow (daily 07:00 UTC). CI heavy-checks skips for `ai-pass` label. PR #1774 merged. (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
