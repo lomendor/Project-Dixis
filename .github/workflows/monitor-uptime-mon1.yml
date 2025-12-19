@@ -1,0 +1,83 @@
+name: MON1 - Production Uptime & Smoke Tests
+
+on:
+  schedule:
+    # Run every 10 minutes
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  prod-endpoint-health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /api/healthz (200 OK)
+        run: |
+          set -e
+          URL="https://dixis.gr/api/healthz"
+          echo "🔍 Checking $URL"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" --connect-timeout 10 --max-time 15)
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ PASS: $URL returned $HTTP_CODE"
+          else
+            echo "❌ FAIL: $URL returned $HTTP_CODE (expected 200)"
+            exit 1
+          fi
+
+      - name: Check /products (200 OK)
+        run: |
+          set -e
+          URL="https://dixis.gr/products"
+          echo "🔍 Checking $URL"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" --connect-timeout 10 --max-time 15)
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ PASS: $URL returned $HTTP_CODE"
+          else
+            echo "❌ FAIL: $URL returned $HTTP_CODE (expected 200)"
+            exit 1
+          fi
+
+      - name: Check /api/v1/public/products (200 + JSON data)
+        run: |
+          set -e
+          URL="https://dixis.gr/api/v1/public/products"
+          echo "🔍 Checking $URL"
+
+          # Fetch response
+          RESPONSE=$(curl -fsS "$URL" --connect-timeout 10 --max-time 15)
+
+          # Validate HTTP 200 (curl -f ensures this)
+          echo "✅ HTTP 200 OK"
+
+          # Parse JSON and check data length using Python
+          python3 - <<PY
+import json
+import sys
+
+response = '''$RESPONSE'''
+data = json.loads(response)
+
+# Check if 'data' key exists and has length > 0
+if 'data' not in data:
+    print("❌ FAIL: Response missing 'data' key")
+    sys.exit(1)
+
+if not isinstance(data['data'], list):
+    print("❌ FAIL: 'data' is not a list")
+    sys.exit(1)
+
+if len(data['data']) == 0:
+    print("❌ FAIL: 'data' array is empty (length = 0)")
+    sys.exit(1)
+
+print(f"✅ PASS: JSON data contains {len(data['data'])} products")
+PY
+
+      - name: All Checks Passed
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ MON1: All production endpoints healthy"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  • /api/healthz → 200 OK"
+          echo "  • /products → 200 OK"
+          echo "  • /api/v1/public/products → 200 OK + JSON data"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

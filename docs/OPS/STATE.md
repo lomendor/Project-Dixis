@@ -79,7 +79,8 @@ Nginx Reverse Proxy
 
 ## Monitoring
 
-**Smoke Test Script:** `/home/deploy/bin/prod_smoke.sh`
+### VPS-Local Smoke Test
+**Script:** `/home/deploy/bin/prod_smoke.sh`
 - Tests: localhost:3000, localhost:8001, public endpoints
 - Uses: Python urllib (bypasses Monarx curl blocking)
 - Status: SMOKE_OK ✅
@@ -88,6 +89,18 @@ Nginx Reverse Proxy
 ```bash
 ssh dixis-prod /home/deploy/bin/prod_smoke.sh
 ```
+
+### GitHub Actions MON1 - Automated Uptime Monitoring
+**Workflow:** `.github/workflows/monitor-uptime-mon1.yml`
+- **Schedule:** Every 10 minutes (`*/10 * * * *`)
+- **Trigger:** Automated cron + manual dispatch
+- **Monitored Endpoints:**
+  - `https://dixis.gr/api/healthz` → HTTP 200 check
+  - `https://dixis.gr/products` → HTTP 200 check
+  - `https://dixis.gr/api/v1/public/products` → HTTP 200 + JSON data validation
+- **Validation:** Python JSON parser ensures `data` array length > 0
+- **Failure Behavior:** GitHub workflow fails → Email/UI notification
+- **Status:** ✅ Active (Pass MON1)
 
 ## Recent Changes
 
@@ -104,12 +117,24 @@ ssh dixis-prod /home/deploy/bin/prod_smoke.sh
 - Fixed products page SSR fetch (external → localhost)
 - Changed server-side API calls to use 127.0.0.1:8001
 
+**PR #1754 (Merged - 2025-12-19):**
+- Product ↔ Producer integrity audit (comprehensive verification)
+- Created `docs/FEATURES/PRODUCT-PRODUCER-INTEGRITY.md`
+- Verified: Database constraints, authorization policies, API responses, frontend display
+- Result: All requirements met, no code changes required (docs-only)
+
 **Post-Hardening (2025-12-19):**
 - Removed dynamic IP from fail2ban ignoreip
 - Created launcher + transient unit architecture
 - Disabled Next.js standalone mode temporarily
 - Verified localhost-only port binding
 - **Reboot test:** ✅ PASSED (1min uptime, all services auto-started)
+
+**Pass MON1 (2025-12-19):**
+- Added GitHub Actions automated uptime monitoring
+- Monitors 3 critical endpoints every 10 minutes
+- JSON validation for API product data
+- Workflow: `.github/workflows/monitor-uptime-mon1.yml`
 
 ## Configuration Files
 
@@ -149,7 +174,7 @@ Backend tests: 17 passed (49 assertions)
 
 ## Next Actions
 
-- Monitor endpoints via automated uptime monitoring
+- ✅ ~~Monitor endpoints via automated uptime monitoring~~ (MON1 active)
 - Consider backend systemd service for reboot persistence
 - Future: Re-enable standalone mode with CI/CD pre-built deployment
 - Review RUNBOOK-PROD-HARDENING.md for operational procedures
