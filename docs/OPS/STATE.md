@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-19 21:45 UTC
+**Last Updated**: 2025-12-19 22:40 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -12,6 +12,7 @@
 - **Checkout Flow MVP**: Complete checkout flow already implemented and tested. POST /api/checkout creates Order + OrderItems. 13 backend tests PASS. 80+ E2E tests exist. Documentation: `docs/FEATURES/CHECKOUT-MVP.md` (Closed: 2025-12-19)
 - **Producer Product CRUD**: Complete producer dashboard with product CRUD already implemented and production-ready. ProductPolicy enforces ownership. 18 backend tests PASS (0.91s). Frontend pages: list, create, edit. Server-side producer_id assignment. Audit doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-AUDIT.md` (Closed: 2025-12-19)
 - **Orders MVP**: Complete orders system (cart → create order → view order) already implemented and production-ready. 55 backend tests PASS (cart + orders). Frontend pages: order details, confirmation, tracking. User authorization enforced. Cart isolation working. Stock validation prevents overselling. Audit doc: `docs/FEATURES/ORDERS-MVP-AUDIT.md` (Closed: 2025-12-19)
+- **Stage 2 Permissions Audit**: Advanced producer isolation scenarios verified. NO AUTHORIZATION GAPS found. ProductPolicy enforces producer_id ownership (17 tests PASS). Multi-producer orders correctly scoped. Admin override working. Dashboard filtering by producer_id. Audit doc: `docs/FEATURES/PERMISSIONS-STAGE-2-AUDIT.md` (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -24,9 +25,7 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: Stage 2 - Advanced permissions & multi-producer scenarios
-  - DoD: Verify producer isolation in edge cases (shared products, multi-producer orders), document additional security tests needed, update ProductPolicy if gaps found
-  - Status: Planning phase
+- **WIP**: None (awaiting next priority)
 
 ## BLOCKED ⚠️
 - (none)
