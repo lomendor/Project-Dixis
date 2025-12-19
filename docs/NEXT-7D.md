@@ -1,109 +1,72 @@
-# Next 7 Days Roadmap
+# NEXT 7 DAYS
 
-**Period:** 2025-12-18 to 2025-12-25
-**Focus:** Stabilize production + high-impact quick wins
-**Updated:** 2025-12-18
+**Last Updated**: 2025-12-19 17:20 UTC
 
-## Objectives
+## WIP (1 item only)
+**1) Bootstrap OPS state management system**
+- **DoD**:
+  - `docs/OPS/STATE.md` created with CLOSED/STABLE/IN-PROGRESS/BLOCKED/NEXT sections
+  - `docs/OPS/PROD-FACTS-LAST.md` created and populated
+  - `docs/NEXT-7D.md` created (this file)
+  - `scripts/prod-facts.sh` created and executable
+  - All files committed and merged to main
+- **Proof source**: PR merged, files exist in repo
+- **Status**: In PR review
 
-1. ✅ Ensure production stability (monitoring, incident response)
-2. 🎯 Close critical gaps (email verification, payment validation)
-3. 🎯 Improve operational visibility (logging, alerts)
-4. 🎯 Reduce friction (guest checkout, better UX)
+## NEXT (ordered, max 3)
 
----
+### 2) Data dependency roadmap
+- **DoD**:
+  - Create `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
+  - Document: Products → Producers → Permissions → Dashboard → Admin
+  - Current state: what exists today
+  - Missing pieces: what needs to be built
+  - Implementation order: 1, 2, 3...
+  - Stakeholder agreement on priority
+- **Estimated effort**: 1-2 hours (docs only)
 
-## Day 1-2: Production Stability & Monitoring
+### 3) Producer permissions audit
+- **DoD**:
+  - Backend policy verification: ProductPolicy enforces producer_id ownership
+  - Frontend verification: Dashboard only shows producer's own products
+  - Admin override verification: Admin can edit any product
+  - Authorization test coverage: existing tests pass
+  - Document findings: `docs/FEATURES/PRODUCER-PERMISSIONS.md`
+  - No user-facing bugs found
+- **Estimated effort**: 2-3 hours (audit + docs)
 
-### ✅ COMPLETED
-- [x] Uptime monitoring workflow (every 5 minutes)
-- [x] SSH access stabilization (alias configuration)
-- [x] Capability matrix audit (111 features documented)
-- [x] Monitoring documentation
+### 4) Checkout flow smoke test
+- **DoD**:
+  - Manual test: Add product → Cart → Checkout → Order created
+  - API verification: POST /api/orders returns 201 or 200
+  - Database verification: Order record exists
+  - Email verification: Confirmation email sent (or logged)
+  - Document test: `docs/TESTS/CHECKOUT-SMOKE.md`
+  - No blocking bugs found
+- **Estimated effort**: 1-2 hours (manual test + docs)
 
-### 🎯 IN PROGRESS
-- [ ] **Payment Validation (Viva Wallet)**
-  - **Owner:** Backend Team
-  - **Est:** 6h
-  - **Tasks:** Test order in staging, verify webhook, document cases
-
-- [ ] **Email Verification**
-  - **Owner:** Backend Team
-  - **Est:** 8h
-  - **Tasks:** Add email_verified_at column, send verification email, create verify endpoint
-
----
-
-## Day 3-4: Operational Excellence
-
-### 🎯 TODO
-- [ ] **Centralized Logging Setup**
-  - **Owner:** DevOps
-  - **Option A (Minimal - 2h):** PM2 log aggregation
-  - **Option B (Better - 8h):** Loki + Grafana
-
-- [ ] **Admin Alerts (Basic)**
-  - **Owner:** DevOps
-  - **Est:** 3h
-  - **Tasks:** Discord/Slack webhook for critical errors
-
----
-
-## Day 5-6: UX Improvements
-
-### 🎯 TODO
-- [ ] **Guest Checkout (MVP)**
-  - **Owner:** Frontend + Backend Team
-  - **Est:** 12h
-  - **Approach:** Allow checkout without account, create user post-payment
-
-- [ ] **Cart Backend Sync**
-  - **Owner:** Frontend Team
-  - **Est:** 6h
-  - **Tasks:** Sync cart to backend for logged-in users
+## DONE (this week)
+- SSH/fail2ban hardening (2025-12-19) - CLOSED ✅
+- Products list verification (2025-12-19) - STABLE ✓
+- Auth routes verification (2025-12-19) - STABLE ✓
+- PROD monitoring workflows (MON1 + prod-smoke) (2025-12-19) - Active ✅
 
 ---
 
-## Day 7: Testing & Documentation
+## Rules
 
-### 🎯 TODO
-- [ ] E2E tests for new features (4h)
-- [ ] Update documentation (2h)
-- [ ] Deploy to production + monitor
+### WIP Limit = 1
+Only ONE item in WIP at any time. No exceptions.
 
----
+### DoD Required
+Every item must have measurable Definition of Done before starting work.
 
-## Vertical Slices
+### State Updates
+After completing WIP item:
+1. Move to DONE section
+2. Update `docs/OPS/STATE.md` (move from IN PROGRESS to STABLE/CLOSED)
+3. Pull next item from NEXT to WIP
+4. Run `./scripts/prod-facts.sh` to verify PROD still healthy
 
-### Slice 1: Production Monitoring ✅
-**Status:** DONE - Uptime checks every 5 minutes
-
-### Slice 2: Payment Validation 🎯
-**Status:** IN PROGRESS (Day 1-2)
-
-### Slice 3: User Security 🎯
-**Status:** PLANNED (Day 1-2) - Email verification
-
-### Slice 4: Operational Visibility 🎯
-**Status:** PLANNED (Day 3-4) - Logging + alerts
-
-### Slice 5: Checkout UX 🎯
-**Status:** PLANNED (Day 5-6) - Guest checkout + cart sync
-
----
-
-## Success Metrics
-
-- [ ] 100% uptime (measured by monitoring)
-- [ ] Payment success rate >95%
-- [ ] Email verification rate >80%
-- [ ] Guest checkout conversion >30%
-- [ ] Zero critical production incidents
-
----
-
-## Links
-
-- [Capability Matrix](PRODUCT/CAPABILITIES.md)
-- [Next 30 Days](NEXT-30D.md)
-- [Monitoring Guide](OPS/MONITORING.md)
+### Estimation
+Optional but helpful for planning. Reality: most tasks take 2-4 hours of focused work.
