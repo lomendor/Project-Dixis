@@ -11,6 +11,7 @@
 - **Producer Permissions Audit**: ProductPolicy enforces producer_id ownership. Admin override works. 12 authorization tests pass. No auth bugs found. Audit doc: `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md` (Closed: 2025-12-19)
 - **Checkout Flow MVP**: Complete checkout flow already implemented and tested. POST /api/checkout creates Order + OrderItems. 13 backend tests PASS. 80+ E2E tests exist. Documentation: `docs/FEATURES/CHECKOUT-MVP.md` (Closed: 2025-12-19)
 - **Producer Product CRUD**: Complete producer dashboard with product CRUD already implemented and production-ready. ProductPolicy enforces ownership. 18 backend tests PASS (0.91s). Frontend pages: list, create, edit. Server-side producer_id assignment. Audit doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-AUDIT.md` (Closed: 2025-12-19)
+- **Orders MVP**: Complete orders system (cart → create order → view order) already implemented and production-ready. 55 backend tests PASS (cart + orders). Frontend pages: order details, confirmation, tracking. User authorization enforced. Cart isolation working. Stock validation prevents overselling. Audit doc: `docs/FEATURES/ORDERS-MVP-AUDIT.md` (Closed: 2025-12-19)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
