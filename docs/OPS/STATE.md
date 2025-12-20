@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 02:00 UTC
+**Last Updated**: 2025-12-20 02:15 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -9,15 +9,14 @@
 - **Data Dependency Map**: Complete roadmap created (`docs/PRODUCT/DATA-DEPENDENCY-MAP.md`). Merged via PR #1763. (Closed: 2025-12-19)
 - **smoke-production CI**: Timeout increased 15s→45s for network resilience (PR #1764). Not a PROD regression (all endpoints 200). Verified: ui-only label does NOT skip smoke tests. (Closed: 2025-12-19)
 - **Producer Permissions Audit**: ProductPolicy enforces producer_id ownership. Admin override works. 12 authorization tests pass. No auth bugs found. Audit doc: `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md` (Closed: 2025-12-19)
-- **Checkout Flow MVP**: Complete checkout flow already implemented and tested. POST /api/checkout creates Order + OrderItems. 13 backend tests PASS. 80+ E2E tests exist. Documentation: `docs/FEATURES/CHECKOUT-MVP.md` (Closed: 2025-12-19)
 - **Producer Product CRUD**: Complete producer dashboard with product CRUD already implemented and production-ready. ProductPolicy enforces ownership. 18 backend tests PASS (0.91s). Frontend pages: list, create, edit. Server-side producer_id assignment. Audit doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-AUDIT.md` (Closed: 2025-12-19)
-- **Orders MVP**: Complete orders system (cart → create order → view order) already implemented and production-ready. 55 backend tests PASS (cart + orders). Frontend pages: order details, confirmation, tracking. User authorization enforced. Cart isolation working. Stock validation prevents overselling. Audit doc: `docs/FEATURES/ORDERS-MVP-AUDIT.md` (Closed: 2025-12-19)
 - **Stage 2 Permissions Audit**: Advanced producer isolation scenarios verified. NO AUTHORIZATION GAPS found. ProductPolicy enforces producer_id ownership (17 tests PASS). Multi-producer orders correctly scoped. Admin override working. Dashboard filtering by producer_id. Audit doc: `docs/FEATURES/PERMISSIONS-STAGE-2-AUDIT.md` (Closed: 2025-12-19)
 - **PROD Facts Monitoring**: Automated production health monitoring implemented. Scripts + GitHub Actions workflow (daily 07:00 UTC). CI heavy-checks skips for `ai-pass` label. PR #1774 merged. (Closed: 2025-12-19)
 - **ProducerOrderManagementTest Fix**: Fixed 8 failing tests caused by incorrect HasOne association usage. All tests now PASS (42 assertions). PR #1776 merged. (Closed: 2025-12-19)
 - **Stage 3 Producer Product Authorization Gap**: Fixed Update/Delete routes bypassing ProductPolicy. Frontend `/api/me/products/{id}` PUT/DELETE now proxy to backend (enforces ProductPolicy consistently). Admin override restored. File: `frontend/src/app/api/me/products/[id]/route.ts`. Evidence: PR #1779 (merged 2025-12-20T00:24:04Z), audit doc: `docs/OPS/STAGE3-EXEC-AUDIT.md`. (Closed: 2025-12-20)
 - **Stage 3 Producer My Products List Verification**: Verified existing implementation of producer product list with ownership enforcement. Backend `GET /api/v1/producer/products` filters by producer_id (server-side). Frontend page `/my/products` exists with AuthGuard. Tests: 4 PASS (11 assertions). Verification doc: `docs/FEATURES/PRODUCER-MY-PRODUCTS-VERIFICATION.md`. (Closed: 2025-12-20)
 - **Stage 3 Producer Product CRUD Complete Verification**: Comprehensive audit confirming create/edit/delete functionality is production-ready. Backend: 49 tests PASS (251 assertions). Frontend: create/edit pages with AuthGuard. ProductPolicy enforces ownership. Admin override working. Server-side producer_id validation. No authorization gaps. Verification doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-COMPLETE-VERIFICATION.md`. (Closed: 2025-12-20)
+- **Stage 4A Orders & Checkout Flow Verification**: Comprehensive verification of cart-to-order flow. Backend: POST /api/v1/orders/checkout creates Order + OrderItems, 54 tests PASS (517 assertions). Frontend: cart page with checkout button, order detail page. Stock validation prevents overselling. User authorization enforced. Transaction-safe order creation. Formal verification doc: `docs/FEATURES/STAGE4A-ORDERS-VERIFICATION.md`. (Closed: 2025-12-20)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
