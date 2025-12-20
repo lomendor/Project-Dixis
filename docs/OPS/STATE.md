@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 22:15 UTC
+**Last Updated**: 2025-12-20 22:40 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -20,7 +20,7 @@
 - **PROD Monitoring & Stability**: Production monitoring enforcement implemented and verified. Workflow `.github/workflows/prod-facts.yml` runs daily at 07:00 UTC, exits non-zero on failure, auto-creates GitHub Issues on failure, auto-commits reports on success. All endpoints healthy (healthz=200, products=200, login=200). Evidence: PR #1790 (merged 2025-12-20T19:32:55Z), last check: 2025-12-20 20:29:13 UTC (ALL CHECKS PASSED). (Closed: 2025-12-20)
 - **Pass 5 Producer Permissions Proof**: Comprehensive authorization proof with test evidence. ProductPolicy enforces producer_id ownership. 19 tests PASS (53 assertions) covering cross-producer isolation, own product management, admin override, server-side producer_id enforcement, producer scoping, and database integrity. NO AUTHORIZATION GAPS found. Proof pack: `docs/FEATURES/PRODUCER-PERMISSIONS-PROOF.md` (Closed: 2025-12-20)
 - **Pass 6 Checkout → Order Creation MVP Proof**: Audit-first verification confirms complete checkout flow is production-ready. POST /api/v1/orders creates Order + OrderItems atomically. 54 tests PASS (517 assertions). Features: DB transaction safety, stock validation with race condition prevention, multi-producer support (producer_id in order_items), authorization (consumers can order, producers cannot), low stock alerts. NO code changes required. Proof pack: `docs/FEATURES/CHECKOUT-ORDER-MVP-PROOF.md` (Closed: 2025-12-20)
-- **Pass 7 Frontend Checkout Wiring**: Frontend cart checkout now calls backend Laravel API (POST /api/v1/orders) instead of frontend Prisma DB. Cart page wired with authentication check, stock validation handled server-side. E2E tests verify cart → order creation flow. Files changed: `frontend/src/app/(storefront)/cart/page.tsx` (uses apiClient.createOrder()), `frontend/tests/e2e/cart-backend-api.spec.ts` (2 tests). Audit doc: `docs/FEATURES/FRONTEND-CHECKOUT-AUDIT.md` (Closed: 2025-12-20)
+- **Pass 7 Frontend Checkout Wiring**: Frontend cart checkout now calls backend Laravel API (POST /api/v1/orders) instead of frontend Prisma DB. Cart page wired with authentication check, stock validation handled server-side. E2E tests verify cart → order creation flow. Files changed: `frontend/src/app/(storefront)/cart/page.tsx` (uses apiClient.createOrder()), `frontend/tests/e2e/cart-backend-api.spec.ts` (2 tests). Audit doc: `docs/FEATURES/FRONTEND-CHECKOUT-AUDIT.md`. PROD proof (2025-12-20 22:40 UTC): cart=200, /order/1=200, /orders/1=200, backend /api/v1/orders=401 (correctly requires auth). PR #1797 merged 2025-12-20T22:36:32Z. (Closed: 2025-12-20)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -29,6 +29,9 @@
 - **Product detail page**: /products/1 returns 200, renders expected product content ✅
 - **Auth redirects**: /login → /auth/login (307), /register → /auth/register (307) ✅
 - **Auth pages**: /auth/login and /auth/register return 200 ✅
+- **Cart page**: /cart returns 200 ✅
+- **Order pages**: /order/1 and /orders/1 return 200 ✅
+- **Backend Orders API**: /api/v1/orders returns 401 (correctly requires authentication) ✅
 
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 **Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
