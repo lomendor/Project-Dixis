@@ -63,11 +63,12 @@ export default function OrdersList() {
     });
   };
 
-  const formatCurrency = (amount: number, currency: string = 'EUR') => {
+  const formatCurrency = (amount: string) => {
+    const numAmount = parseFloat(amount);
     return new Intl.NumberFormat('el-GR', {
       style: 'currency',
-      currency: currency,
-    }).format(amount);
+      currency: 'EUR',
+    }).format(numAmount);
   };
 
   if (!isAuthenticated) {
@@ -199,7 +200,7 @@ export default function OrdersList() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(order.total, order.currency)}
+                          {formatCurrency(order.total_amount)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
