@@ -1,18 +1,9 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-20 20:35 UTC
+**Last Updated**: 2025-12-20 21:50 UTC
 
 ## WIP (1 item only)
-**Consolidate MVP verification docs** (Started: 2025-12-20)
-- **Scope**: Create master verification document summarizing all CLOSED MVP core features
-- **DoD**:
-  - Create `docs/FEATURES/MVP-CORE-VERIFICATION.md` master summary doc
-  - Consolidate Stage 2/3/4A verification results (120+ tests PASS)
-  - Cross-reference all audit docs
-  - Verify DATA-DEPENDENCY-MAP.md consistency
-  - Update STATE.md STABLE section with reference
-  - PR created with auto-merge enabled
-- **Current status**: Pending Pass 2 execution
+(none currently)
 
 ## NEXT (ordered, max 3)
 
@@ -59,6 +50,11 @@
 - Producer Permissions verification (2025-12-20) - 12 tests PASS (ownership + scoping), PR #1786 merged ✅
 - PROD monitoring setup (2025-12-20) - Daily automated checks active ✅
 - PROD monitoring & stability enforcement (2025-12-20) - Issue-on-fail + auto-commit implemented, all endpoints healthy, PR #1790 merged ✅
+- Pass 1 (PROD monitoring WIP closure) (2025-12-20) - Moved PROD monitoring from IN PROGRESS to CLOSED, updated STATE/NEXT docs, PR #1791 merged ✅
+- Pass 2 (MVP core verification master) (2025-12-20) - Created MVP-CORE-VERIFICATION.md consolidating all CLOSED features (140+ tests, 838+ assertions), updated STATE STABLE section, PR #1792 merged ✅
+- Pass 3 (Producer permissions audit) (2025-12-20) - Documented producer ownership/permissions state with grep evidence, PR #1793 merged ✅
+- Pass 4 (Decision Gate installation) (2025-12-20) - Installed Decision Gate process (docs/OPS/DECISION-GATE.md + scripts/rehydrate.sh), PR #1794 merged ✅
+- Pass 5 (Producer permissions proof) (2025-12-20) - Comprehensive authorization proof with 19 tests PASS (53 assertions), no authorization gaps found, proof pack created ✅
 
 ---
 
