@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 02:15 UTC
+**Last Updated**: 2025-12-20 09:30 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -30,27 +30,23 @@
 **Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: None (awaiting next priority)
+- **WIP**: PROD monitoring & stability
+  - **DoD**: Run `scripts/prod-facts.sh` daily, all endpoints return expected codes (healthz=200, products=200, login=307), smoke-production CI stays green, document any issues in STATE.md
+  - **Started**: 2025-12-20
+  - **Evidence**: prod-facts.yml workflow runs daily at 07:00 UTC, last run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
 
 ## BLOCKED ⚠️
 - (none)
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-### 1) PROD monitoring & stability
-- **DoD**:
-  - Run `scripts/prod-facts.sh` daily
-  - All endpoints return expected status codes
-  - No regressions in smoke-production CI
-  - Document any new issues in STATE.md
-
-### 2) Backend test improvements (optional)
+### 1) Backend test improvements (optional)
 - **DoD**:
   - E2E tests can run with seed data (`pnpm test:e2e:prep`)
   - All critical flows have E2E coverage
   - CI runs E2E tests on PR
 
-### 3) Future feature planning
+### 2) Future feature planning
 - **DoD**:
   - Review PRD-INDEX.md for next phase
   - Prioritize features based on user feedback

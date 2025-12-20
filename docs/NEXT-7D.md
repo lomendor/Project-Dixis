@@ -1,21 +1,16 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-20 02:15 UTC
+**Last Updated**: 2025-12-20 09:30 UTC
 
 ## WIP (1 item only)
-None (awaiting next priority)
+**PROD stability monitoring** (Started: 2025-12-20)
+- DoD: Run `scripts/prod-facts.sh` daily, all endpoints return expected codes, smoke-production CI green
+- Evidence: prod-facts.yml runs daily at 07:00 UTC, last run SUCCESS
+- Current status: ✅ All checks passing (healthz=200, products=200, login=307)
 
-## NEXT (ordered, max 3)
+## NEXT (ordered, max 2)
 
-### 1) PROD stability monitoring
-- **DoD**:
-  - Run `scripts/prod-facts.sh` to verify baseline
-  - All endpoints return expected codes (healthz=200, products=200, login=307)
-  - smoke-production CI stays green
-  - No new regressions introduced
-- **Estimated effort**: Ongoing daily check (5 min)
-
-### 2) Feature prioritization
+### 1) Feature prioritization
 - **DoD**:
   - Review `docs/PRODUCT/PRD-INDEX.md` for next features
   - Gather user feedback on checkout flow
