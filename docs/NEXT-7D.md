@@ -1,20 +1,18 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-20 13:30 UTC
+**Last Updated**: 2025-12-20 20:35 UTC
 
 ## WIP (1 item only)
-**PROD monitoring & stability** (Started: 2025-12-20)
-- **Scope**: Daily production health monitoring and stability verification after completing Stage 2/3/4A verification
+**Consolidate MVP verification docs** (Started: 2025-12-20)
+- **Scope**: Create master verification document summarizing all CLOSED MVP core features
 - **DoD**:
-  - Run `scripts/prod-facts.sh` daily → all endpoints return expected codes (healthz=200, products=200, login=307)
-  - smoke-production CI stays green (no regressions introduced)
-  - Document any issues in STATE.md
-  - Monitoring workflow runs automatically at 07:00 UTC daily
-- **Evidence**:
-  - Workflow: `.github/workflows/prod-facts.yml` active
-  - Last run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
-  - Latest facts: `docs/OPS/PROD-FACTS-LAST.md` (updated 2025-12-20 09:45:48 UTC)
-- **Current status**: All systems operational ✅ (see PROD-FACTS-LAST.md)
+  - Create `docs/FEATURES/MVP-CORE-VERIFICATION.md` master summary doc
+  - Consolidate Stage 2/3/4A verification results (120+ tests PASS)
+  - Cross-reference all audit docs
+  - Verify DATA-DEPENDENCY-MAP.md consistency
+  - Update STATE.md STABLE section with reference
+  - PR created with auto-merge enabled
+- **Current status**: Pending Pass 2 execution
 
 ## NEXT (ordered, max 3)
 
@@ -60,6 +58,7 @@
 - Stage 4A Orders & Checkout Flow verification (2025-12-20) - Cart-to-order flow verified production-ready, 54 tests PASS (517 assertions), stock validation working, transaction-safe order creation ✅
 - Producer Permissions verification (2025-12-20) - 12 tests PASS (ownership + scoping), PR #1786 merged ✅
 - PROD monitoring setup (2025-12-20) - Daily automated checks active ✅
+- PROD monitoring & stability enforcement (2025-12-20) - Issue-on-fail + auto-commit implemented, all endpoints healthy, PR #1790 merged ✅
 
 ---
 

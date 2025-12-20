@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 16:25 UTC
+**Last Updated**: 2025-12-20 20:35 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -17,6 +17,7 @@
 - **Stage 3 Producer My Products List Verification**: Verified existing implementation of producer product list with ownership enforcement. Backend `GET /api/v1/producer/products` filters by producer_id (server-side). Frontend page `/my/products` exists with AuthGuard. Tests: 4 PASS (11 assertions). Verification doc: `docs/FEATURES/PRODUCER-MY-PRODUCTS-VERIFICATION.md`. (Closed: 2025-12-20)
 - **Stage 3 Producer Product CRUD Complete Verification**: Comprehensive audit confirming create/edit/delete functionality is production-ready. Backend: 49 tests PASS (251 assertions). Frontend: create/edit pages with AuthGuard. ProductPolicy enforces ownership. Admin override working. Server-side producer_id validation. No authorization gaps. Verification doc: `docs/FEATURES/PRODUCER-PRODUCT-CRUD-COMPLETE-VERIFICATION.md`. (Closed: 2025-12-20)
 - **Stage 4A Orders & Checkout Flow Verification**: Comprehensive verification of cart-to-order flow. Backend: POST /api/v1/orders/checkout creates Order + OrderItems, 54 tests PASS (517 assertions). Frontend: cart page with checkout button, order detail page. Stock validation prevents overselling. User authorization enforced. Transaction-safe order creation. Formal verification doc: `docs/FEATURES/STAGE4A-ORDERS-VERIFICATION.md`. (Closed: 2025-12-20)
+- **PROD Monitoring & Stability**: Production monitoring enforcement implemented and verified. Workflow `.github/workflows/prod-facts.yml` runs daily at 07:00 UTC, exits non-zero on failure, auto-creates GitHub Issues on failure, auto-commits reports on success. All endpoints healthy (healthz=200, products=200, login=200). Evidence: PR #1790 (merged 2025-12-20T19:32:55Z), last check: 2025-12-20 20:29:13 UTC (ALL CHECKS PASSED). (Closed: 2025-12-20)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -30,20 +31,16 @@
 **Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **WIP**: PROD monitoring & stability
+- **WIP**: Consolidate MVP verification docs
   - **DoD**:
-    - `scripts/prod-facts.sh` exits non-zero on failure (enforced) ✅
-    - Workflow scheduled daily at 07:00 UTC (`.github/workflows/prod-facts.yml`) ✅
-    - On failure: auto-creates GitHub Issue with report (no secrets) ✅
-    - All endpoints return expected codes (healthz=200, products=200, login=200/307) ✅
-    - smoke-production CI stays green
-    - Report auto-commits to `docs/OPS/PROD-FACTS-LAST.md` on success
+    - Create `docs/FEATURES/MVP-CORE-VERIFICATION.md` master summary doc
+    - Consolidate Stage 2/3/4A verification results (120+ tests PASS)
+    - Cross-reference all audit docs (PRODUCER-PERMISSIONS.md, PERMISSIONS-STAGE-2-AUDIT.md, PRODUCER-PRODUCT-CRUD-COMPLETE-VERIFICATION.md, STAGE4A-ORDERS-VERIFICATION.md)
+    - Verify DATA-DEPENDENCY-MAP.md consistency with implemented features
+    - Update STATE.md STABLE section with reference to master doc
+    - PR created with auto-merge enabled
   - **Started**: 2025-12-20
-  - **Evidence**:
-    - Script: `scripts/prod-facts.sh` (exits with `$EXIT_CODE`)
-    - Workflow: `.github/workflows/prod-facts.yml` (schedule + issue-on-fail)
-    - Last manual run: 2025-12-20 16:22:33 UTC (ALL CHECKS PASSED ✅)
-    - Last scheduled run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
+  - **Evidence**: (pending Pass 2 execution)
 
 ## BLOCKED ⚠️
 - (none)
