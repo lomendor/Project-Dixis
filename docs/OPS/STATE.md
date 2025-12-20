@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 09:30 UTC
+**Last Updated**: 2025-12-20 16:25 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -31,9 +31,19 @@
 
 ## IN PROGRESS → (WIP=1 ONLY)
 - **WIP**: PROD monitoring & stability
-  - **DoD**: Run `scripts/prod-facts.sh` daily, all endpoints return expected codes (healthz=200, products=200, login=307), smoke-production CI stays green, document any issues in STATE.md
+  - **DoD**:
+    - `scripts/prod-facts.sh` exits non-zero on failure (enforced) ✅
+    - Workflow scheduled daily at 07:00 UTC (`.github/workflows/prod-facts.yml`) ✅
+    - On failure: auto-creates GitHub Issue with report (no secrets) ✅
+    - All endpoints return expected codes (healthz=200, products=200, login=200/307) ✅
+    - smoke-production CI stays green
+    - Report auto-commits to `docs/OPS/PROD-FACTS-LAST.md` on success
   - **Started**: 2025-12-20
-  - **Evidence**: prod-facts.yml workflow runs daily at 07:00 UTC, last run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
+  - **Evidence**:
+    - Script: `scripts/prod-facts.sh` (exits with `$EXIT_CODE`)
+    - Workflow: `.github/workflows/prod-facts.yml` (schedule + issue-on-fail)
+    - Last manual run: 2025-12-20 16:22:33 UTC (ALL CHECKS PASSED ✅)
+    - Last scheduled run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
 
 ## BLOCKED ⚠️
 - (none)
