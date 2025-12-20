@@ -252,6 +252,42 @@ class AuthorizationTest extends TestCase
 
     #[Group('mvp')]
     #[Group('ownership')]
+    #[Group('stage3')]
+    public function test_producer_can_delete_own_product(): void
+    {
+        $producerUser = User::factory()->producer()->create();
+        $producer = Producer::factory()->create(['user_id' => $producerUser->id]);
+        $product = Product::factory()->create(['producer_id' => $producer->id]);
+
+        $response = $this->actingAs($producerUser, 'sanctum')
+            ->deleteJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(204); // No Content (successful deletion)
+
+        // Verify product was deleted
+        $this->assertDatabaseMissing('products', ['id' => $product->id]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
+    #[Group('stage3')]
+    public function test_admin_can_delete_any_product(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $producer = Producer::factory()->create();
+        $product = Product::factory()->create(['producer_id' => $producer->id]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/v1/products/{$product->id}");
+
+        $response->assertStatus(204); // No Content (successful deletion)
+
+        // Verify product was deleted
+        $this->assertDatabaseMissing('products', ['id' => $product->id]);
+    }
+
+    #[Group('mvp')]
+    #[Group('ownership')]
     public function test_producer_create_auto_sets_producer_id(): void
     {
         $producerUser = User::factory()->producer()->create();
