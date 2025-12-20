@@ -4,10 +4,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart, cartCount, cartTotalCents } from '@/lib/cart'
 import { useToast } from '@/contexts/ToastContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { apiClient } from '@/lib/api'
 
 export default function CartPage() {
   const router = useRouter()
   const { showError } = useToast()
+  const { user, isAuthenticated } = useAuth()
   const items = useCart(s => s.items)
   const inc = useCart(s => s.inc)
   const dec = useCart(s => s.dec)
@@ -21,25 +24,32 @@ export default function CartPage() {
   const list = Object.values(items)
 
   const handleCheckout = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      showError('Παρακαλώ συνδεθείτε για να ολοκληρώσετε την παραγγελία.')
+      router.push('/auth/login')
+      return
+    }
+
     setLoading(true)
     try {
-      const cartItems = list.map(item => ({
-        id: item.id,
-        qty: item.qty
+      // Map cart items to backend API format
+      const orderItems = list.map(item => ({
+        product_id: parseInt(item.id.toString()),
+        quantity: item.qty
       }))
 
-      const res = await fetch('/api/order-intents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems })
+      // Call backend Laravel API: POST /api/v1/orders
+      const order = await apiClient.createOrder({
+        items: orderItems,
+        currency: 'EUR',
+        shipping_method: 'HOME',
+        notes: ''
       })
 
-      if (!res.ok) {
-        throw new Error('Failed to create order')
-      }
-
-      const data = await res.json()
-      router.push(`/checkout?orderId=${data.orderId}`)
+      // Clear cart and redirect to order detail page
+      clear()
+      router.push(`/order/${order.id}`)
     } catch (error) {
       console.error('Checkout error:', error)
       showError('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
