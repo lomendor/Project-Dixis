@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-20 22:40 UTC
+**Last Updated**: 2025-12-21 00:15 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -21,6 +21,8 @@
 - **Pass 5 Producer Permissions Proof**: Comprehensive authorization proof with test evidence. ProductPolicy enforces producer_id ownership. 19 tests PASS (53 assertions) covering cross-producer isolation, own product management, admin override, server-side producer_id enforcement, producer scoping, and database integrity. NO AUTHORIZATION GAPS found. Proof pack: `docs/FEATURES/PRODUCER-PERMISSIONS-PROOF.md` (Closed: 2025-12-20)
 - **Pass 6 Checkout → Order Creation MVP Proof**: Audit-first verification confirms complete checkout flow is production-ready. POST /api/v1/orders creates Order + OrderItems atomically. 54 tests PASS (517 assertions). Features: DB transaction safety, stock validation with race condition prevention, multi-producer support (producer_id in order_items), authorization (consumers can order, producers cannot), low stock alerts. NO code changes required. Proof pack: `docs/FEATURES/CHECKOUT-ORDER-MVP-PROOF.md` (Closed: 2025-12-20)
 - **Pass 7 Frontend Checkout Wiring**: Frontend cart checkout now calls backend Laravel API (POST /api/v1/orders) instead of frontend Prisma DB. Cart page wired with authentication check, stock validation handled server-side. E2E tests verify cart → order creation flow. Files changed: `frontend/src/app/(storefront)/cart/page.tsx` (uses apiClient.createOrder()), `frontend/tests/e2e/cart-backend-api.spec.ts` (2 tests). Audit doc: `docs/FEATURES/FRONTEND-CHECKOUT-AUDIT.md`. PROD proof (2025-12-20 22:40 UTC): cart=200, /order/1=200, /orders/1=200, backend /api/v1/orders=401 (correctly requires auth). PR #1797 merged 2025-12-20T22:36:32Z. (Closed: 2025-12-20)
+- **Pass 8 Permissions/Ownership Audit (Stage 2)**: Deep permissions audit proving producer can CRUD ONLY own products. ProductPolicy enforces producer_id ownership (line 48). Server-side producer_id auto-set prevents hijacking (ProductController lines 111-121). OrderPolicy prevents producers from creating orders. 21 authorization tests PASS (56 assertions). NO CRITICAL AUTHORIZATION GAPS FOUND. Audit doc: `docs/SECURITY/PERMISSIONS-AUDIT-PASS8.md`. PROD verification: products=200, api_public_products=200, api_orders=401 (correctly requires auth). (Closed: 2025-12-21)
+- **Pass 9 Producer Dashboard CRUD Verification**: Audit confirmed producer dashboard product management already fully implemented and end-to-end. Frontend pages exist (`/my/products`, create, edit) with AuthGuard. Frontend routes (`/api/me/products/*`) proxy to backend Laravel API (NOT Prisma). Backend routes enforce ProductPolicy with server-side producer_id. Tests: 21 authorization + 49 CRUD tests PASS (from existing verification docs). PROD endpoints healthy. NO CODE CHANGES REQUIRED. Evidence: `docs/FEATURES/PASS9-PRODUCER-DASHBOARD-CRUD.md`, PR #1779 (Stage 3 gap fix merged), `docs/SECURITY/PERMISSIONS-AUDIT-PASS8.md`. (Closed: 2025-12-21)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
