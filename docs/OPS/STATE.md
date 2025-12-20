@@ -30,6 +30,8 @@
 **Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
 **Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
 
+**MVP Core Features Summary**: See `docs/FEATURES/MVP-CORE-VERIFICATION.md` (140+ tests, 838+ assertions, all PASS)
+
 ## IN PROGRESS → (WIP=1 ONLY)
 - **WIP**: Consolidate MVP verification docs
   - **DoD**:
