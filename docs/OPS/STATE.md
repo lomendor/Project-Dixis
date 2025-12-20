@@ -85,3 +85,18 @@ cat docs/NEXT-7D.md
 
 ### Rule: WIP Limit = 1
 Only ONE item can be "IN PROGRESS" at any time. This prevents context switching and ensures completion.
+
+---
+
+## Process Enforcement (MANDATORY)
+
+**Decision Gate**: Every task MUST pass the Decision Gate before execution.
+
+See: `docs/OPS/DECISION-GATE.md`
+
+**3-step preflight**:
+1. CLOSED check: Is topic in CLOSED section? → Require NEW evidence to reopen
+2. WIP check: Does topic match current WIP? → Require explicit WIP change approval
+3. DoD check: Does task have measurable Definition of Done? → Draft DoD first
+
+**No exceptions. Gate runs FIRST.**

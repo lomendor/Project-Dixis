@@ -1,21 +1,47 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-20 09:30 UTC
+**Last Updated**: 2025-12-20 13:15 UTC
 
 ## WIP (1 item only)
-**PROD stability monitoring** (Started: 2025-12-20)
-- DoD: Run `scripts/prod-facts.sh` daily, all endpoints return expected codes, smoke-production CI green
-- Evidence: prod-facts.yml runs daily at 07:00 UTC, last run SUCCESS
-- Current status: ✅ All checks passing (healthz=200, products=200, login=307)
-
-## NEXT (ordered, max 2)
-
-### 1) Feature prioritization
+**Stage 2 — Permission enforcement audit** (Started: 2025-12-20)
+- **Scope**: ProductPolicy + Dashboard visibility (docs + tests first, then E2E)
 - **DoD**:
-  - Review `docs/PRODUCT/PRD-INDEX.md` for next features
-  - Gather user feedback on checkout flow
-  - Create spec docs for next phase features
-- **Estimated effort**: 1-2 hours planning
+  - Backend: ProductPolicy ownership verified + tests pass (test_producer_cannot_update_other_producers_product → 403)
+  - Frontend: Producer dashboard lists ONLY own products (E2E proof: GET /api/v1/producer/products returns only producer's items)
+  - Admin override verified (test_admin_can_update_any_product → 200)
+  - Findings documented in `docs/FEATURES/PRODUCER-PERMISSIONS.md` or update existing audit docs
+- **Evidence**:
+  - PHP tests: `php artisan test --group=ownership --group=scoping`
+  - E2E (if needed): Playwright test showing producer A cannot see/edit producer B's products
+- **Current status**: Backend tests exist and PASS (12 tests), need verification doc update
+
+## NEXT (ordered, max 3)
+
+### 1) Stage 3 — Producer Dashboard Product CRUD
+- **Scope**: Create/Edit product via dashboard (minimal UI, policy-enforced, tests)
+- **DoD**:
+  - Producer can create product → backend auto-sets producer_id (server-side)
+  - Producer can edit own product → ProductPolicy allows
+  - Producer cannot edit competitor's product → ProductPolicy denies (403)
+  - Tests: Create/Update/Delete scenarios with ownership checks
+- **Estimated effort**: 1-2 days (backend + minimal frontend + tests)
+
+### 2) Stage 4 — Cart → Checkout → Order creation
+- **Scope**: Minimum end-to-end "place order" flow (no payments/shipping yet)
+- **DoD**:
+  - User can add items to cart
+  - Checkout creates Order + OrderItems in DB
+  - Customer sees order confirmation
+  - Stock validation (cannot oversell)
+  - User authorization (customer sees only own orders)
+- **Estimated effort**: 2-3 days (backend flow + frontend cart/checkout UI + tests)
+
+### 3) Backlog items (NOT NOW, explicitly future/non-WIP)
+- OS package updates (security patches)
+- Monitoring tweaks (alert thresholds)
+- Future role: "πωλητής Dixis" (seller who sells on behalf of producers)
+- Payment integration (Viva Wallet)
+- Shipping integration (ACS/ELTA Courier)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -33,6 +59,8 @@
 - Stage 3 Producer My Products list verification (2025-12-20) - Verified existing implementation, 4 tests PASS, ownership enforced server-side ✅
 - Stage 3 Producer Product CRUD complete verification (2025-12-20) - Create/edit/delete verified production-ready, 49 tests PASS (251 assertions), ProductPolicy enforces ownership, admin override working ✅
 - Stage 4A Orders & Checkout Flow verification (2025-12-20) - Cart-to-order flow verified production-ready, 54 tests PASS (517 assertions), stock validation working, transaction-safe order creation ✅
+- Producer Permissions verification (2025-12-20) - 12 tests PASS (ownership + scoping), PR #1786 merged ✅
+- PROD monitoring setup (2025-12-20) - Daily automated checks active ✅
 
 ---
 
@@ -53,3 +81,10 @@ After completing WIP item:
 
 ### Estimation
 Optional but helpful for planning. Reality: most tasks take 2-4 hours of focused work.
+
+---
+
+## References
+- Data dependency map: `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
+- Decision gate SOP: `docs/OPS/DECISION-GATE.md`
+- Current state: `docs/OPS/STATE.md`
