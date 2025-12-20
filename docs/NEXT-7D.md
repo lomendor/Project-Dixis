@@ -1,47 +1,46 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-20 13:15 UTC
+**Last Updated**: 2025-12-20 13:30 UTC
 
 ## WIP (1 item only)
-**Stage 2 — Permission enforcement audit** (Started: 2025-12-20)
-- **Scope**: ProductPolicy + Dashboard visibility (docs + tests first, then E2E)
+**PROD monitoring & stability** (Started: 2025-12-20)
+- **Scope**: Daily production health monitoring and stability verification after completing Stage 2/3/4A verification
 - **DoD**:
-  - Backend: ProductPolicy ownership verified + tests pass (test_producer_cannot_update_other_producers_product → 403)
-  - Frontend: Producer dashboard lists ONLY own products (E2E proof: GET /api/v1/producer/products returns only producer's items)
-  - Admin override verified (test_admin_can_update_any_product → 200)
-  - Findings documented in `docs/FEATURES/PRODUCER-PERMISSIONS.md` or update existing audit docs
+  - Run `scripts/prod-facts.sh` daily → all endpoints return expected codes (healthz=200, products=200, login=307)
+  - smoke-production CI stays green (no regressions introduced)
+  - Document any issues in STATE.md
+  - Monitoring workflow runs automatically at 07:00 UTC daily
 - **Evidence**:
-  - PHP tests: `php artisan test --group=ownership --group=scoping`
-  - E2E (if needed): Playwright test showing producer A cannot see/edit producer B's products
-- **Current status**: Backend tests exist and PASS (12 tests), need verification doc update
+  - Workflow: `.github/workflows/prod-facts.yml` active
+  - Last run: https://github.com/lomendor/Project-Dixis/actions/runs/20390970773 (SUCCESS)
+  - Latest facts: `docs/OPS/PROD-FACTS-LAST.md` (updated 2025-12-20 09:45:48 UTC)
+- **Current status**: All systems operational ✅ (see PROD-FACTS-LAST.md)
 
 ## NEXT (ordered, max 3)
 
-### 1) Stage 3 — Producer Dashboard Product CRUD
-- **Scope**: Create/Edit product via dashboard (minimal UI, policy-enforced, tests)
+### 1) Backend E2E test improvements (optional)
+- **Scope**: Enhance test coverage with seed data and E2E scenarios
 - **DoD**:
-  - Producer can create product → backend auto-sets producer_id (server-side)
-  - Producer can edit own product → ProductPolicy allows
-  - Producer cannot edit competitor's product → ProductPolicy denies (403)
-  - Tests: Create/Update/Delete scenarios with ownership checks
-- **Estimated effort**: 1-2 days (backend + minimal frontend + tests)
+  - E2E tests can run with seed data (`pnpm test:e2e:prep`)
+  - All critical flows have E2E coverage
+  - CI runs E2E tests on PR
+- **Estimated effort**: 1-2 days
+- **Priority**: Optional (core features already verified)
 
-### 2) Stage 4 — Cart → Checkout → Order creation
-- **Scope**: Minimum end-to-end "place order" flow (no payments/shipping yet)
+### 2) Feature planning for next phase
+- **Scope**: Review PRD and prioritize next features based on user feedback
 - **DoD**:
-  - User can add items to cart
-  - Checkout creates Order + OrderItems in DB
-  - Customer sees order confirmation
-  - Stock validation (cannot oversell)
-  - User authorization (customer sees only own orders)
-- **Estimated effort**: 2-3 days (backend flow + frontend cart/checkout UI + tests)
+  - Review `docs/PRODUCT/DATA-DEPENDENCY-MAP.md` for next phase
+  - Prioritize features based on user feedback/business goals
+  - Create feature spec docs in `docs/FEATURES/` for chosen items
+- **Estimated effort**: Planning session (4-6 hours)
 
-### 3) Backlog items (NOT NOW, explicitly future/non-WIP)
+### 3) Future features (pending PROD stability + planning)
+- Payment integration (Viva Wallet) - requires feature spec
+- Shipping integration (ACS/ELTA Courier) - requires feature spec
+- Future role: "πωλητής Dixis" (seller who sells on behalf of producers)
 - OS package updates (security patches)
 - Monitoring tweaks (alert thresholds)
-- Future role: "πωλητής Dixis" (seller who sells on behalf of producers)
-- Payment integration (Viva Wallet)
-- Shipping integration (ACS/ELTA Courier)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
