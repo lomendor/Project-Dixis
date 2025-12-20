@@ -1,9 +1,9 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-19 23:52 UTC
+**Last Updated**: 2025-12-20 00:30 UTC
 
 ## WIP (1 item only)
-**Stage 3: Producer Product CRUD** - Verification & gap analysis (audit-first, docs-only)
+None (awaiting next priority)
 
 ## NEXT (ordered, max 3)
 
@@ -15,12 +15,12 @@
   - No new regressions introduced
 - **Estimated effort**: Ongoing daily check (5 min)
 
-### 2) E2E test infrastructure (optional)
+### 2) Stage 3 authorization regression tests (backend)
 - **DoD**:
-  - Add seed data script for E2E tests
-  - Verify checkout-happy-path.spec.ts runs successfully
-  - Document E2E test setup in README
-- **Estimated effort**: 2-3 hours
+  - Add backend tests proving producer product Update/Delete ownership enforcement
+  - Tests: producer can update/delete own product, cannot touch others, admin override works
+  - All tests PASS, no authorization regressions
+- **Estimated effort**: 1 hour
 
 ### 3) Feature prioritization
 - **DoD**:
@@ -41,6 +41,7 @@
 - Stage 2 Permissions Audit (2025-12-19) - NO GAPS FOUND, 17 authorization tests PASS, PR #1772 ✅
 - PROD Facts Monitoring (2025-12-19) - Automated monitoring live, CI heavy-checks guard, PR #1774 ✅
 - ProducerOrderManagementTest fix (2025-12-19) - HasOne association fixed, 8 tests PASS, PR #1776 ✅
+- Stage 3 Producer Product CRUD authorization gap fix (2025-12-20) - Update/Delete routes now proxy to backend (enforce ProductPolicy), admin override restored, PR #1779 ✅
 
 ---
 
