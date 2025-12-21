@@ -106,7 +106,7 @@ jobs:
 
           echo "✅ PASS: Auth redirects working (login=$LOGIN_CODE, register=$REGISTER_CODE)"
 
-      - name: Check PROD orders page (TODO - currently 404)
+      - name: Check PROD orders page
         run: |
           echo "=== Checking orders page ==="
           ORDERS_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
@@ -115,16 +115,12 @@ jobs:
 
           echo "Orders page HTTP code: $ORDERS_CODE"
 
-          # TODO: /orders currently returns 404 for unauthenticated users
-          # Expected behavior: should redirect to /auth/login (307/302) or return 200 if public
-          # For now, we accept 404 as known state, but log it
-          if [ "$ORDERS_CODE" = "404" ]; then
-            echo "⚠️  KNOWN ISSUE: /orders returns 404 (should redirect to /auth/login)"
-            echo "    See: docs/OPS/PROD-MONITORING.md for details"
-          elif [ "$ORDERS_CODE" = "307" ] || [ "$ORDERS_CODE" = "302" ] || [ "$ORDERS_CODE" = "200" ]; then
+          # Expected: redirect to /auth/login (307/302) for unauthenticated, or 200 if public
+          # MUST NOT be 404
+          if [ "$ORDERS_CODE" = "307" ] || [ "$ORDERS_CODE" = "302" ] || [ "$ORDERS_CODE" = "200" ]; then
             echo "✅ PASS: Orders page behavior correct ($ORDERS_CODE)"
           else
-            echo "❌ FAIL: Orders page returned unexpected code $ORDERS_CODE"
+            echo "❌ FAIL: Orders page returned $ORDERS_CODE (expected 307/302/200, NOT 404)"
             exit 1
           fi
 
