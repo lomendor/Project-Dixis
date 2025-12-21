@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 00:15 UTC
+**Last Updated**: 2025-12-21 00:20 UTC
 
 ## WIP (1 item only)
 (none currently)
@@ -59,6 +59,8 @@
 - Pass 7 (Frontend checkout wiring) (2025-12-20) - Cart checkout now calls backend Laravel API (POST /api/v1/orders), E2E tests added (cart-backend-api.spec.ts, 2 tests), authentication check implemented, PR #1797 merged, PROD proof complete (all endpoints healthy) ✅
 - Pass 8 (Permissions/Ownership Audit Stage 2) (2025-12-21) - Deep permissions audit: ProductPolicy enforces producer_id ownership, server-side producer_id prevents hijacking, 21 authorization tests PASS (56 assertions), NO CRITICAL AUTHORIZATION GAPS FOUND, audit doc created (docs/SECURITY/PERMISSIONS-AUDIT-PASS8.md), PROD verification complete ✅
 - Pass 9 (Producer Dashboard CRUD Verification) (2025-12-21) - Audit confirmed producer dashboard product management already fully implemented end-to-end, frontend routes proxy to backend Laravel API (NOT Prisma), ProductPolicy enforced, 21 authorization + 49 CRUD tests PASS, NO CODE CHANGES REQUIRED, plan doc created (docs/FEATURES/PASS9-PRODUCER-DASHBOARD-CRUD.md) ✅
+- Pass 10 (Checkout Orders List Page) (2025-12-21) - Created `/orders` list page to complete MVP checkout flow, PROD `/orders` was 404, created orders list calling backend `GET /api/v1/orders`, orders table with ID/date/status/total, links to order details, AuthGuard enforced, Greek locale, PR #1800 merged (2025-12-20T23:56:24Z), PROD after: /orders → 200 ✅ ✅
+- Pass 11 (Checkout E2E Test) (2025-12-21) - Added E2E happy-path test proving checkout creates order and it appears in `/orders` list, makes checkout order creation non-regressing, test file: checkout-order-creation.spec.ts (111 lines), flow: Login → Browse → Cart → Checkout → Verify order in list, all CI checks PASS, PR #1801 merged (2025-12-21T00:10:20Z), DoD: E2E proof integrates Pass 7 + Pass 10 ✅
 
 ---
 
