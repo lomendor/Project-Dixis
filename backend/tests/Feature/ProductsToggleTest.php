@@ -94,7 +94,8 @@ class ProductsToggleTest extends TestCase
 
         $response = $this->patchJson("/api/v1/producer/products/{$product->id}/toggle");
 
-        $response->assertStatus(404);
+        // ProductPolicy throws 403 Forbidden when authorization fails
+        $response->assertStatus(403);
     }
 
     public function test_unauthenticated_user_cannot_toggle_product(): void
@@ -117,5 +118,32 @@ class ProductsToggleTest extends TestCase
         $response = $this->patchJson("/api/v1/producer/products/{$product->id}/toggle");
 
         $response->assertStatus(401);
+    }
+
+    public function test_admin_can_toggle_any_product(): void
+    {
+        // Create admin user
+        $admin = User::factory()->create([
+            'email' => 'admin@test.com',
+            'role' => 'admin',
+        ]);
+
+        // Create producer and product
+        $producer = Producer::factory()->create();
+        $product = Product::factory()->create([
+            'producer_id' => $producer->id,
+            'is_active' => true,
+        ]);
+
+        // Admin can toggle any product (ProductPolicy admin override)
+        Sanctum::actingAs($admin);
+
+        $response = $this->patchJson("/api/v1/producer/products/{$product->id}/toggle");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'id' => $product->id,
+                'is_active' => false,  // Toggled from true to false
+            ]);
     }
 }

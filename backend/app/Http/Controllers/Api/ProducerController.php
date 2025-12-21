@@ -15,22 +15,8 @@ class ProducerController extends Controller
      */
     public function toggleProduct(Request $request, Product $product): JsonResponse
     {
-        $user = $request->user();
-
-        // Ensure user is authenticated
-        if (! $user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-
-        // Ensure user has a producer profile
-        if (! $user->producer) {
-            return response()->json(['message' => 'Producer profile not found'], 403);
-        }
-
-        // Ensure product belongs to this producer
-        if ($product->producer_id !== $user->producer->id) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
+        // Use ProductPolicy for authorization (enforces producer ownership)
+        $this->authorize('update', $product);
 
         // Toggle the active status
         $product->is_active = ! $product->is_active;
@@ -97,22 +83,8 @@ class ProducerController extends Controller
      */
     public function updateStock(Request $request, Product $product, InventoryService $inventoryService): JsonResponse
     {
-        $user = $request->user();
-
-        // Ensure user is authenticated
-        if (! $user) {
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-
-        // Ensure user has a producer profile
-        if (! $user->producer) {
-            return response()->json(['message' => 'Producer profile not found'], 403);
-        }
-
-        // Ensure product belongs to this producer
-        if ($product->producer_id !== $user->producer->id) {
-            return response()->json(['message' => 'Product not found'], 404);
-        }
+        // Use ProductPolicy for authorization (enforces producer ownership)
+        $this->authorize('update', $product);
 
         // Validate request
         $request->validate([
