@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-21 15:20 UTC
+**Last Updated**: 2025-12-21 18:00 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -29,6 +29,7 @@
 - **Pass 13 Fix /orders Route + Enforce Prod-Smoke**: Fixed `/orders` route returning 404 by moving orders list page from `(storefront)/orders/page.tsx` to `orders/page.tsx` (resolves Next.js routing conflict). Updated `prod-smoke.yml` to FAIL if `/orders` returns 404 (removes TODO tolerance). Root cause: `orders/` directory shadowed `(storefront)/orders/` route group. Solution: Moved page.tsx to correct location (file rename, zero logic changes). Build passed in CI, all smoke checks ✅. PR #1804 merged 2025-12-21T06:50:00Z. Note: PROD deployment pending (infrastructure issue outside scope). (Closed: 2025-12-21)
 - **PROD Outage Recovery - IPv6 Binding Issue**: Production outage (2025-12-21 07:20-09:45 UTC, ~2 hours downtime) caused by Next.js 15.5.0 IPv6 binding incompatibility with VPS environment. Root cause: Next.js changed default binding from IPv4 (`0.0.0.0`) to IPv6 (`::`) causing `EADDRINUSE` error despite port 3000 being free. VPS IPv6 configuration incompatible. Solution: Created systemd launcher service (`dixis-frontend-launcher.service`) with explicit `HOSTNAME=127.0.0.1` environment variable forcing IPv4-only binding. Launcher enabled (auto-starts on boot). Frontend process management switched from PM2 to systemd (more reliable, system-level). PM2 now manages backend only. PROD verified operational (all endpoints 200). Incident documentation: `docs/OPS/INCIDENTS/2025-12-21-prod-outage-hostname.md`. VPS reboot tested and working. (Closed: 2025-12-21)
 - **Pass 15 Producer Ownership Enforcement**: Replaced manual authorization checks in ProducerController with ProductPolicy. Changes: `toggleProduct()` and `updateStock()` now use `$this->authorize('update', $product)` instead of manual `if ($product->producer_id !== $user->producer->id)` checks (removed 29 lines). Updated test expectations (404 → 403 to match ProductPolicy behavior). Added admin override test. Benefits: consistent authorization pattern, correct HTTP status codes (403 Forbidden), admin override works automatically, code reduced by 25 lines. Tests: 4 PASS (7 assertions) in 0.48s. Files: `backend/app/Http/Controllers/Api/ProducerController.php` (lines 18, 86), `backend/tests/Feature/ProductsToggleTest.php` (updated line 98, added lines 123-148). Audit doc: `docs/FEATURES/PASS15-PRODUCER-OWNERSHIP-ENFORCEMENT.md`. PR #1810 merged 2025-12-21T15:13:08Z. PROD verified operational (all endpoints 200). (Closed: 2025-12-21)
+- **Pass 16 E2E Producer Ownership Isolation**: Added Playwright E2E test proving GET /api/me/products scopes correctly by producer. Test approach: API-level (page.evaluate + fetch with route mocking for speed). Producer A sees ONLY A products (IDs 101, 102), Producer B sees ONLY B products (IDs 201, 202, 203). CRITICAL: Backend scoping already proven by `backend/tests/Feature/AuthorizationTest.php:374-446` (4 PHPUnit tests: test_producer_sees_only_own_products_in_list, test_producer_does_not_see_other_producers_products, test_unauthenticated_user_cannot_access_producer_products, test_consumer_cannot_access_producer_products, 11 assertions, 0.36s, run in ci.yml:99 and backend-ci.yml:101). Pass 16 E2E adds frontend proxy coverage. Backend scoping: ProducerController.php:141 ($producer->products()). Tests: 3 E2E PASS (11.5s). File: `frontend/tests/e2e/producer-product-ownership.spec.ts` (248 lines). PR #1813 merged 2025-12-21T17:52:48Z. Guardrail status: Backend scoping verified (PHPUnit Feature tests), frontend proxy coverage added (E2E). (Closed: 2025-12-21)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -55,17 +56,32 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-### 1) Backend test improvements (optional)
+### 1) Producer Product Image Upload
 - **DoD**:
-  - E2E tests can run with seed data (`pnpm test:e2e:prep`)
-  - All critical flows have E2E coverage
-  - CI runs E2E tests on PR
+  - Producer can upload product image via `/my/products/create` form
+  - Image stored in Laravel storage (public disk, max 2MB)
+  - Image URL returned in `GET /api/v1/producer/products` response
+  - Backend test: 1 test (ImageUploadTest::test_producer_can_upload_product_image)
+  - E2E test: 1 test (product-image-upload.spec.ts verifying form submission)
+  - PROD smoke: Image displays on product detail page
 
-### 2) Future feature planning
+### 2) Admin Product Moderation Queue
 - **DoD**:
-  - Review PRD-INDEX.md for next phase
-  - Prioritize features based on user feedback
-  - Create feature spec docs in `docs/FEATURES/`
+  - Admin sees pending products at `/admin/products?status=pending`
+  - Admin can approve/reject with reason (PATCH /api/v1/admin/products/{id}/moderate)
+  - Producer receives email notification on approval/rejection
+  - Backend tests: 3 tests (list_pending, approve_product, reject_product)
+  - Policy test: 1 test (admin_can_moderate_any_product)
+  - PROD smoke: Admin moderation endpoint returns 401 for non-admin
+
+### 3) Order Status Tracking (Consumer View)
+- **DoD**:
+  - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)
+  - Backend supports status transitions (POST /api/v1/orders/{id}/status)
+  - Email sent to consumer on status change
+  - Backend tests: 2 tests (status_transition, notification_sent)
+  - E2E test: 1 test (order-status-display.spec.ts verifying status shown)
+  - PROD smoke: Order detail page shows status field
 
 ---
 
