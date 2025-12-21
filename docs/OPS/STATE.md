@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-21 07:00 UTC
+**Last Updated**: 2025-12-21 10:20 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -27,6 +27,7 @@
 - **Pass 11 Checkout E2E Test**: Added E2E happy-path test proving checkout creates order and it appears in `/orders` list. Makes checkout order creation non-regressing. Test file: `frontend/tests/e2e/checkout-order-creation.spec.ts` (111 lines). Flow: Login → Browse products → Add to cart → Checkout → Verify redirect to `/order/{id}` → Navigate to `/orders` → Verify order appears in list with ID, status, view link. All CI checks PASS. PR #1801 merged 2025-12-21T00:10:20Z. DoD: E2E proof completes integration of Pass 7 (backend API) + Pass 10 (orders list). (Closed: 2025-12-21)
 - **Pass 12 Scheduled PROD Smoke Monitoring**: Created GitHub Actions workflow (`.github/workflows/prod-smoke.yml`) to probe critical PROD endpoints every 15 minutes. Checks: healthz (200), API products (200 + data), products page (200), auth redirects (307/302), orders page. Workflow runs on schedule (`*/15 * * * *`) + manual dispatch. Retries: 3 attempts, 2s delay, 10s connect timeout, 20s max. Documentation: `docs/OPS/PROD-MONITORING.md` (183 lines). Known issue at time of creation: `/orders` returned 404 (fixed in Pass 13). PR #1803 merged 2025-12-21T00:49:37Z. (Closed: 2025-12-21)
 - **Pass 13 Fix /orders Route + Enforce Prod-Smoke**: Fixed `/orders` route returning 404 by moving orders list page from `(storefront)/orders/page.tsx` to `orders/page.tsx` (resolves Next.js routing conflict). Updated `prod-smoke.yml` to FAIL if `/orders` returns 404 (removes TODO tolerance). Root cause: `orders/` directory shadowed `(storefront)/orders/` route group. Solution: Moved page.tsx to correct location (file rename, zero logic changes). Build passed in CI, all smoke checks ✅. PR #1804 merged 2025-12-21T06:50:00Z. Note: PROD deployment pending (infrastructure issue outside scope). (Closed: 2025-12-21)
+- **PROD Outage Recovery - IPv6 Binding Issue**: Production outage (2025-12-21 07:20-09:45 UTC, ~2 hours downtime) caused by Next.js 15.5.0 IPv6 binding incompatibility with VPS environment. Root cause: Next.js changed default binding from IPv4 (`0.0.0.0`) to IPv6 (`::`) causing `EADDRINUSE` error despite port 3000 being free. VPS IPv6 configuration incompatible. Solution: Created systemd launcher service (`dixis-frontend-launcher.service`) with explicit `HOSTNAME=127.0.0.1` environment variable forcing IPv4-only binding. Launcher enabled (auto-starts on boot). Frontend process management switched from PM2 to systemd (more reliable, system-level). PM2 now manages backend only. PROD verified operational (all endpoints 200). Incident documentation: `docs/OPS/INCIDENTS/2025-12-21-prod-outage-hostname.md`. VPS reboot tested and working. (Closed: 2025-12-21)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -36,6 +37,7 @@
 - **Auth redirects**: /login → /auth/login (307), /register → /auth/register (307) ✅
 - **Auth pages**: /auth/login and /auth/register return 200 ✅
 - **Cart page**: /cart returns 200 ✅
+- **Orders list page**: /orders returns 200 (Pass 13 fix deployed) ✅
 - **Order pages**: /order/1 and /orders/1 return 200 ✅
 - **Backend Orders API**: /api/v1/orders returns 401 (correctly requires authentication) ✅
 
