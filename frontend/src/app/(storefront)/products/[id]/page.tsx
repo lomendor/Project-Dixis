@@ -13,12 +13,10 @@ export const revalidate = 0;
 async function getProductById(id: string) {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1';
   try {
-    const res = await fetch(`${base}/public/products`, { cache: 'no-store' });
+    const res = await fetch(`${base}/public/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    const json = await res.json();
-    const items = Array.isArray(json?.data) ? json.data : [];
-    const raw = items.find((p: any) => String(p.id) === String(id));
-    if (!raw) return null;
+    const raw = await res.json();
+    if (!raw || !raw.id) return null;
 
     // Map backend API format to expected frontend format
     return {
