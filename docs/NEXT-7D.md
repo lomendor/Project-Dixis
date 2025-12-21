@@ -1,35 +1,47 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 07:00 UTC
+**Last Updated**: 2025-12-21 18:00 UTC
 
 ## WIP (1 item only)
 (none currently)
 
 ## NEXT (ordered, max 3)
 
-### 1) Backend E2E test improvements (optional)
-- **Scope**: Enhance test coverage with seed data and E2E scenarios
+### 1) Producer Product Image Upload
+- **Scope**: Enable producers to upload product images in create/edit forms
 - **DoD**:
-  - E2E tests can run with seed data (`pnpm test:e2e:prep`)
-  - All critical flows have E2E coverage
-  - CI runs E2E tests on PR
+  - Producer can upload product image via `/my/products/create` form
+  - Image stored in Laravel storage (public disk, max 2MB)
+  - Image URL returned in `GET /api/v1/producer/products` response
+  - Backend test: 1 test (ImageUploadTest::test_producer_can_upload_product_image)
+  - E2E test: 1 test (product-image-upload.spec.ts verifying form submission)
+  - PROD smoke: Image displays on product detail page
+- **Estimated effort**: 1 day
+- **Priority**: High (product photos are core marketplace feature)
+
+### 2) Admin Product Moderation Queue
+- **Scope**: Admin approval workflow for new producer products
+- **DoD**:
+  - Admin sees pending products at `/admin/products?status=pending`
+  - Admin can approve/reject with reason (PATCH /api/v1/admin/products/{id}/moderate)
+  - Producer receives email notification on approval/rejection
+  - Backend tests: 3 tests (list_pending, approve_product, reject_product)
+  - Policy test: 1 test (admin_can_moderate_any_product)
+  - PROD smoke: Admin moderation endpoint returns 401 for non-admin
 - **Estimated effort**: 1-2 days
-- **Priority**: Optional (core features already verified)
+- **Priority**: Medium (quality control for marketplace)
 
-### 2) Feature planning for next phase
-- **Scope**: Review PRD and prioritize next features based on user feedback
+### 3) Order Status Tracking (Consumer View)
+- **Scope**: Show order processing status to consumers
 - **DoD**:
-  - Review `docs/PRODUCT/DATA-DEPENDENCY-MAP.md` for next phase
-  - Prioritize features based on user feedback/business goals
-  - Create feature spec docs in `docs/FEATURES/` for chosen items
-- **Estimated effort**: Planning session (4-6 hours)
-
-### 3) Future features (pending PROD stability + planning)
-- Payment integration (Viva Wallet) - requires feature spec
-- Shipping integration (ACS/ELTA Courier) - requires feature spec
-- Future role: "πωλητής Dixis" (seller who sells on behalf of producers)
-- OS package updates (security patches)
-- Monitoring tweaks (alert thresholds)
+  - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)
+  - Backend supports status transitions (POST /api/v1/orders/{id}/status)
+  - Email sent to consumer on status change
+  - Backend tests: 2 tests (status_transition, notification_sent)
+  - E2E test: 1 test (order-status-display.spec.ts verifying status shown)
+  - PROD smoke: Order detail page shows status field
+- **Estimated effort**: 1 day
+- **Priority**: Medium (transparency for consumers)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -63,6 +75,10 @@
 - Pass 11 (Checkout E2E Test) (2025-12-21) - Added E2E happy-path test proving checkout creates order and it appears in `/orders` list, makes checkout order creation non-regressing, test file: checkout-order-creation.spec.ts (111 lines), flow: Login → Browse → Cart → Checkout → Verify order in list, all CI checks PASS, PR #1801 merged (2025-12-21T00:10:20Z), DoD: E2E proof integrates Pass 7 + Pass 10 ✅
 - Pass 12 (Scheduled PROD Smoke Monitoring) (2025-12-21) - Created GitHub Actions workflow (`.github/workflows/prod-smoke.yml`) probing PROD endpoints every 15 minutes, checks: healthz, API products, products page, auth redirects, orders page, retries: 3 attempts/2s delay/10s timeout, documentation: `docs/OPS/PROD-MONITORING.md` (183 lines), PR #1803 merged (2025-12-21T00:49:37Z) ✅
 - Pass 13 (Fix /orders Route + Enforce Prod-Smoke) (2025-12-21) - Fixed `/orders` 404 by moving page from `(storefront)/orders/` to `orders/` (Next.js routing conflict), updated prod-smoke.yml to FAIL on 404 (no tolerance), build passed CI + all smoke checks ✅, PR #1804 merged (2025-12-21T06:50:00Z), deployment pending (infra issue) ✅
+- PROD Outage Recovery - IPv6 Binding Issue (2025-12-21) - Production outage (~2 hours) caused by Next.js 15.5.0 IPv6 binding incompatibility. Fixed with systemd launcher service (HOSTNAME=127.0.0.1), frontend switched from PM2 to systemd, incident doc created, PROD operational ✅
+- Pass 14 (Producer Permissions Audit) (2025-12-21) - Docs-only audit verifying producer authorization state. ProductPolicy enforces producer_id ownership, server-side producer_id prevents hijacking, 21 authorization + 49 CRUD tests PASS. NO CRITICAL AUTHORIZATION GAPS FOUND. Audit doc: docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md. PR #1809 merged ✅
+- Pass 15 (Producer Ownership Enforcement) (2025-12-21) - Replaced manual authorization checks in ProducerController with ProductPolicy. toggleProduct() and updateStock() now use $this->authorize(). Code reduced by 25 lines, correct HTTP codes (403 not 404), admin override works. Tests: 4 PASS (7 assertions). PR #1810 merged ✅
+- Pass 16 (E2E Producer Ownership Isolation) (2025-12-21) - Added Playwright E2E test proving /api/me/products scopes by producer. Backend scoping already proven by AuthorizationTest.php (4 PHPUnit tests, 11 assertions, run in CI). E2E adds frontend proxy coverage. Tests: 3 E2E PASS (11.5s). PR #1813 merged ✅
 
 ---
 

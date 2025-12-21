@@ -15,8 +15,23 @@ concurrency:
 jobs:
   quality-gates:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: project_dixis_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
+
+      # Frontend checks
       - name: Enable corepack
         run: corepack enable
       - uses: actions/setup-node@v4
@@ -36,6 +51,46 @@ jobs:
       - name: Build
         run: pnpm build
         working-directory: frontend
+
+      # Backend scoping tests (ownership guardrail)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer, openssl, curl, fileinfo
+          coverage: none
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+            composer-
+      - name: Install backend deps
+        run: composer install --no-interaction --prefer-dist
+        working-directory: backend
+      - name: Copy .env
+        run: cp .env.example .env
+        working-directory: backend
+      - name: Generate app key
+        run: php artisan key:generate
+        working-directory: backend
+      - name: Configure DB for testing
+        run: |
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_DATABASE=project_dixis_test" >> .env
+          echo "DB_USERNAME=postgres" >> .env
+          echo "DB_PASSWORD=postgres" >> .env
+        working-directory: backend
+      - name: Migrate database
+        run: php artisan migrate:fresh --seed --env=testing
+        working-directory: backend
+      - name: Run backend scoping tests (ownership guardrail)
+        run: php artisan test --filter=AuthorizationTest --group=scoping --stop-on-failure --env=testing
+        working-directory: backend
 
   heavy-checks:
     if: >
