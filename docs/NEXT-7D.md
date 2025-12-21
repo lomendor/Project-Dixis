@@ -1,9 +1,9 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 01:00 UTC
+**Last Updated**: 2025-12-21 07:00 UTC
 
 ## WIP (1 item only)
-**Pass 12**: Scheduled PROD smoke monitoring (workflow + docs)
+(none currently)
 
 ## NEXT (ordered, max 3)
 
@@ -61,6 +61,8 @@
 - Pass 9 (Producer Dashboard CRUD Verification) (2025-12-21) - Audit confirmed producer dashboard product management already fully implemented end-to-end, frontend routes proxy to backend Laravel API (NOT Prisma), ProductPolicy enforced, 21 authorization + 49 CRUD tests PASS, NO CODE CHANGES REQUIRED, plan doc created (docs/FEATURES/PASS9-PRODUCER-DASHBOARD-CRUD.md) ✅
 - Pass 10 (Checkout Orders List Page) (2025-12-21) - Created `/orders` list page to complete MVP checkout flow, PROD `/orders` was 404, created orders list calling backend `GET /api/v1/orders`, orders table with ID/date/status/total, links to order details, AuthGuard enforced, Greek locale, PR #1800 merged (2025-12-20T23:56:24Z), PROD after: /orders → 200 ✅ ✅
 - Pass 11 (Checkout E2E Test) (2025-12-21) - Added E2E happy-path test proving checkout creates order and it appears in `/orders` list, makes checkout order creation non-regressing, test file: checkout-order-creation.spec.ts (111 lines), flow: Login → Browse → Cart → Checkout → Verify order in list, all CI checks PASS, PR #1801 merged (2025-12-21T00:10:20Z), DoD: E2E proof integrates Pass 7 + Pass 10 ✅
+- Pass 12 (Scheduled PROD Smoke Monitoring) (2025-12-21) - Created GitHub Actions workflow (`.github/workflows/prod-smoke.yml`) probing PROD endpoints every 15 minutes, checks: healthz, API products, products page, auth redirects, orders page, retries: 3 attempts/2s delay/10s timeout, documentation: `docs/OPS/PROD-MONITORING.md` (183 lines), PR #1803 merged (2025-12-21T00:49:37Z) ✅
+- Pass 13 (Fix /orders Route + Enforce Prod-Smoke) (2025-12-21) - Fixed `/orders` 404 by moving page from `(storefront)/orders/` to `orders/` (Next.js routing conflict), updated prod-smoke.yml to FAIL on 404 (no tolerance), build passed CI + all smoke checks ✅, PR #1804 merged (2025-12-21T06:50:00Z), deployment pending (infra issue) ✅
 
 ---
 
