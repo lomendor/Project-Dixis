@@ -84,6 +84,9 @@ jobs:
           echo "DB_DATABASE=project_dixis_test" >> .env
           echo "DB_USERNAME=postgres" >> .env
           echo "DB_PASSWORD=postgres" >> .env
+
+          # Create .env.testing for --env=testing flag (Laravel loads this instead of .env)
+          cp .env .env.testing
         working-directory: backend
       - name: Migrate database
         run: php artisan migrate:fresh --seed --env=testing
