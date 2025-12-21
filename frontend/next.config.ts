@@ -51,9 +51,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Production optimization
-  output: 'standalone',
-
   // Security headers (AG-SEC-01)
   async headers() {
     // Get API base URL from environment
