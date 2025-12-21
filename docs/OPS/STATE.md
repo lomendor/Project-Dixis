@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-21 00:20 UTC
+**Last Updated**: 2025-12-21 01:00 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -43,7 +43,7 @@
 **MVP Core Features Summary**: See `docs/FEATURES/MVP-CORE-VERIFICATION.md` (140+ tests, 838+ assertions, all PASS)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- (none currently)
+- **Pass 12 Scheduled PROD Smoke Monitoring**: Creating GitHub Actions workflow to probe critical PROD endpoints every 15 minutes. Checks: healthz (200), API products (200 + data), products page (200), auth redirects (307/302), orders page (TODO: currently 404, should redirect). Workflow: `.github/workflows/prod-smoke.yml`. Documentation: `docs/OPS/PROD-MONITORING.md`. Known issue: `/orders` returns 404 for unauthenticated (should be 307 redirect) - documented as TODO, workflow logs warning but does not fail. (Started: 2025-12-21)
 
 ## BLOCKED ⚠️
 - (none)

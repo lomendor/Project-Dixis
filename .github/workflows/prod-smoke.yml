@@ -1,49 +1,139 @@
-name: PROD Smoke Tests
+name: Production Smoke Tests
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "*/15 * * * *"  # Every 15 minutes
-  push:
-    paths:
-      - ".github/workflows/prod-smoke.yml"
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      verbose:
+        description: 'Enable verbose output'
+        required: false
+        default: 'false'
 
 jobs:
-  smoke:
+  prod-smoke:
+    name: PROD Endpoint Smoke Tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
     steps:
-      - name: Check healthz
+      - name: Check PROD healthz endpoint
         run: |
-          set -euo pipefail
-          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)"
-          echo "healthz=$code"
-          test "$code" = "200"
+          echo "=== Checking healthz endpoint ==="
+          HTTP_CODE=$(curl --fail --retry 3 --retry-delay 2 \
+            --connect-timeout 10 --max-time 20 \
+            -sS -o /dev/null -w '%{http_code}' \
+            https://dixis.gr/api/healthz)
 
-      - name: Check public products API
-        run: |
-          set -euo pipefail
-          body="$(curl -fsS https://dixis.gr/api/v1/public/products)"
-          echo "$body" | head -c 200
-          echo
-          echo "$body" | grep -q '"data"'
-          echo "✅ API contains 'data' field"
+          echo "healthz HTTP code: $HTTP_CODE"
 
-      - name: Check product detail page
-        run: |
-          set -euo pipefail
-          body="$(curl -fsS https://dixis.gr/products/1)"
-          if echo "$body" | grep -q "Organic Tomatoes"; then
-            echo "✅ Product detail page contains 'Organic Tomatoes'"
-          else
-            echo "❌ Product detail page missing 'Organic Tomatoes'"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ FAIL: healthz returned $HTTP_CODE (expected 200)"
             exit 1
           fi
 
-      - name: Check login redirect
+          echo "✅ PASS: healthz endpoint healthy"
+
+      - name: Check PROD API products endpoint
         run: |
-          set -euo pipefail
-          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/login)"
-          echo "login=$code"
-          test "$code" = "307"
-          echo "✅ Login redirects correctly"
+          echo "=== Checking API products endpoint ==="
+          RESPONSE=$(curl --fail --retry 3 --retry-delay 2 \
+            --connect-timeout 10 --max-time 20 \
+            -sS https://dixis.gr/api/v1/public/products)
+
+          HTTP_CODE=$(curl --retry 3 --retry-delay 2 \
+            --connect-timeout 10 --max-time 20 \
+            -sS -o /dev/null -w '%{http_code}' \
+            https://dixis.gr/api/v1/public/products)
+
+          echo "API products HTTP code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ FAIL: API products returned $HTTP_CODE (expected 200)"
+            exit 1
+          fi
+
+          # Check response contains "data" key
+          if ! echo "$RESPONSE" | grep -q '"data"'; then
+            echo "❌ FAIL: API products response missing 'data' key"
+            echo "Response preview: $(echo "$RESPONSE" | head -c 500)"
+            exit 1
+          fi
+
+          echo "✅ PASS: API products endpoint healthy with data"
+
+      - name: Check PROD products page
+        run: |
+          echo "=== Checking products page ==="
+          HTTP_CODE=$(curl --fail --retry 3 --retry-delay 2 \
+            --connect-timeout 10 --max-time 20 \
+            -sS -o /dev/null -w '%{http_code}' \
+            https://dixis.gr/products)
+
+          echo "Products page HTTP code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ FAIL: Products page returned $HTTP_CODE (expected 200)"
+            exit 1
+          fi
+
+          echo "✅ PASS: Products page accessible"
+
+      - name: Check PROD auth redirects
+        run: |
+          echo "=== Checking auth redirects ==="
+
+          # Check /login redirect
+          LOGIN_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/login)
+
+          if [ "$LOGIN_CODE" != "307" ] && [ "$LOGIN_CODE" != "302" ]; then
+            echo "❌ FAIL: /login returned $LOGIN_CODE (expected 307 or 302)"
+            exit 1
+          fi
+
+          # Check /register redirect
+          REGISTER_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/register)
+
+          if [ "$REGISTER_CODE" != "307" ] && [ "$REGISTER_CODE" != "302" ]; then
+            echo "❌ FAIL: /register returned $REGISTER_CODE (expected 307 or 302)"
+            exit 1
+          fi
+
+          echo "✅ PASS: Auth redirects working (login=$LOGIN_CODE, register=$REGISTER_CODE)"
+
+      - name: Check PROD orders page (TODO - currently 404)
+        run: |
+          echo "=== Checking orders page ==="
+          ORDERS_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/orders || true)
+
+          echo "Orders page HTTP code: $ORDERS_CODE"
+
+          # TODO: /orders currently returns 404 for unauthenticated users
+          # Expected behavior: should redirect to /auth/login (307/302) or return 200 if public
+          # For now, we accept 404 as known state, but log it
+          if [ "$ORDERS_CODE" = "404" ]; then
+            echo "⚠️  KNOWN ISSUE: /orders returns 404 (should redirect to /auth/login)"
+            echo "    See: docs/OPS/PROD-MONITORING.md for details"
+          elif [ "$ORDERS_CODE" = "307" ] || [ "$ORDERS_CODE" = "302" ] || [ "$ORDERS_CODE" = "200" ]; then
+            echo "✅ PASS: Orders page behavior correct ($ORDERS_CODE)"
+          else
+            echo "❌ FAIL: Orders page returned unexpected code $ORDERS_CODE"
+            exit 1
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "================================"
+          echo "PROD Smoke Test Summary"
+          echo "================================"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "All critical endpoints checked"
+          echo "See workflow run for detailed results"

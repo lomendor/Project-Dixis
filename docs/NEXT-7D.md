@@ -1,9 +1,9 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 00:20 UTC
+**Last Updated**: 2025-12-21 01:00 UTC
 
 ## WIP (1 item only)
-(none currently)
+**Pass 12**: Scheduled PROD smoke monitoring (workflow + docs)
 
 ## NEXT (ordered, max 3)
 
