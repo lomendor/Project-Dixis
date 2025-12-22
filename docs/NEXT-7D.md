@@ -3,7 +3,17 @@
 **Last Updated**: 2025-12-21 18:00 UTC
 
 ## WIP (1 item only)
-(none currently)
+### Pass 17 - Product Detail Endpoint Robust Parsing
+- **Scope**: Add defensive JSON parsing to product detail page to handle both API response formats
+- **File**: `frontend/src/app/(storefront)/products/[id]/page.tsx` (lines 18-19)
+- **Change**: `const json = await res.json(); const raw = json?.data ?? json;`
+- **Rationale**: API resilience - handles both direct object `{ id, name, ... }` and wrapped `{ data: { ... } }` responses
+- **DoD**:
+  - PROD `/products/1` returns 200 and contains "Organic Tomatoes"
+  - PROD `/api/v1/public/products/1` returns 200
+  - Build: PASS ✅
+  - PR merged with passing CI
+- **Status**: PR pending (2025-12-22)
 
 ## NEXT (ordered, max 3)
 

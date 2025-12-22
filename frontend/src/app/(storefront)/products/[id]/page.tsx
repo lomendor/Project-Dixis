@@ -15,7 +15,8 @@ async function getProductById(id: string) {
   try {
     const res = await fetch(`${base}/public/products/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    const raw = await res.json();
+    const json = await res.json();
+    const raw = json?.data ?? json;
     if (!raw || !raw.id) return null;
 
     // Map backend API format to expected frontend format
