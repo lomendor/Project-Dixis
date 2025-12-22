@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
   // Hide Next.js version from X-Powered-By header (AG-SEC-01)
   poweredByHeader: false,
 
+  // Production optimization: standalone mode for PM2 deployment
+  output: 'standalone',
+
   // Temporarily disable ESLint during build for hotfix
   eslint: {
     ignoreDuringBuilds: true,
