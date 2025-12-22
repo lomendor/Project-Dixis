@@ -3,33 +3,11 @@
 **Last Updated**: 2025-12-21 18:00 UTC
 
 ## WIP (1 item only)
-### Pass 17 - Product Detail Endpoint Robust Parsing
-- **Scope**: Add defensive JSON parsing to product detail page to handle both API response formats
-- **File**: `frontend/src/app/(storefront)/products/[id]/page.tsx` (lines 18-19)
-- **Change**: `const json = await res.json(); const raw = json?.data ?? json;`
-- **Rationale**: API resilience - handles both direct object `{ id, name, ... }` and wrapped `{ data: { ... } }` responses
-- **DoD**:
-  - PROD `/products/1` returns 200 and contains "Organic Tomatoes"
-  - PROD `/api/v1/public/products/1` returns 200
-  - Build: PASS ✅
-  - PR merged with passing CI
-- **Status**: PR pending (2025-12-22)
+- (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
-### 1) Producer Product Image Upload
-- **Scope**: Enable producers to upload product images in create/edit forms
-- **DoD**:
-  - Producer can upload product image via `/my/products/create` form
-  - Image stored in Laravel storage (public disk, max 2MB)
-  - Image URL returned in `GET /api/v1/producer/products` response
-  - Backend test: 1 test (ImageUploadTest::test_producer_can_upload_product_image)
-  - E2E test: 1 test (product-image-upload.spec.ts verifying form submission)
-  - PROD smoke: Image displays on product detail page
-- **Estimated effort**: 1 day
-- **Priority**: High (product photos are core marketplace feature)
-
-### 2) Admin Product Moderation Queue
+### 1) Admin Product Moderation Queue
 - **Scope**: Admin approval workflow for new producer products
 - **DoD**:
   - Admin sees pending products at `/admin/products?status=pending`
@@ -41,7 +19,7 @@
 - **Estimated effort**: 1-2 days
 - **Priority**: Medium (quality control for marketplace)
 
-### 3) Order Status Tracking (Consumer View)
+### 2) Order Status Tracking (Consumer View)
 - **Scope**: Show order processing status to consumers
 - **DoD**:
   - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)
@@ -89,6 +67,7 @@
 - Pass 14 (Producer Permissions Audit) (2025-12-21) - Docs-only audit verifying producer authorization state. ProductPolicy enforces producer_id ownership, server-side producer_id prevents hijacking, 21 authorization + 49 CRUD tests PASS. NO CRITICAL AUTHORIZATION GAPS FOUND. Audit doc: docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md. PR #1809 merged ✅
 - Pass 15 (Producer Ownership Enforcement) (2025-12-21) - Replaced manual authorization checks in ProducerController with ProductPolicy. toggleProduct() and updateStock() now use $this->authorize(). Code reduced by 25 lines, correct HTTP codes (403 not 404), admin override works. Tests: 4 PASS (7 assertions). PR #1810 merged ✅
 - Pass 16 (E2E Producer Ownership Isolation) (2025-12-21) - Added Playwright E2E test proving /api/me/products scopes by producer. Backend scoping already proven by AuthorizationTest.php (4 PHPUnit tests, 11 assertions, run in CI). E2E adds frontend proxy coverage. Tests: 3 E2E PASS (11.5s). PR #1813 merged ✅
+- Pass 18 (Producer Product Image Upload) (2025-12-22) - Audit-first verification: feature 100% production-ready. Complete vertical slice exists: UploadImage component → POST /api/me/uploads → storage (fs/s3) → Producer forms → Products.image_url + ProductImage → Storefront display. Tests: 8 existing (3 backend + 5 E2E). PROD proof: Product #1 has image_url + 2 ProductImage records. NO CODE CHANGES REQUIRED. Audit doc: docs/FEATURES/PASS18-PRODUCT-IMAGE-UPLOAD-AUDIT.md. Similar to Pass 6 and Pass 9 ✅
 
 ---
 
