@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 18:00 UTC
+**Last Updated**: 2025-12-22 23:50 UTC
 
 ## WIP (1 item only)
 - (none - ready for next item from NEXT queue)
@@ -69,6 +69,7 @@
 - Pass 16 (E2E Producer Ownership Isolation) (2025-12-21) - Added Playwright E2E test proving /api/me/products scopes by producer. Backend scoping already proven by AuthorizationTest.php (4 PHPUnit tests, 11 assertions, run in CI). E2E adds frontend proxy coverage. Tests: 3 E2E PASS (11.5s). PR #1813 merged ✅
 - Pass 18 (Producer Product Image Upload) (2025-12-22) - Audit-first verification: feature 100% production-ready. Complete vertical slice exists: UploadImage component → POST /api/me/uploads → storage (fs/s3) → Producer forms → Products.image_url + ProductImage → Storefront display. Tests: 8 existing (3 backend + 5 E2E). PROD proof: Product #1 has image_url + 2 ProductImage records. NO CODE CHANGES REQUIRED. Audit doc: docs/FEATURES/PASS18-PRODUCT-IMAGE-UPLOAD-AUDIT.md. Similar to Pass 6 and Pass 9 ✅
 - Pass 19 (Product Detail Pages PROD Fix) (2025-12-22) - Fixed product detail pages showing loading skeleton on dixis.gr + www.dixis.gr. Root causes: (1) Backend API down (Laravel not running on 8001), (2) SSR using external URL causing timeout, (3) Nested frontend/frontend/ breaking TypeScript build. Fixes: (1) Created systemd service dixis-backend.service, (2) PR #1836 - SSR uses internal API (127.0.0.1:8001), (3) Removed orphaned nested directory. PROD proof: curl dixis.gr/products/1 | grep "Organic Tomatoes" ✅ + curl www.dixis.gr/products/1 | grep "Organic Tomatoes" ✅ ✅
+- Pass 20 (Cart localStorage Canonical Redirect Fix) (2025-12-22) - Fixed cart appearing empty when navigating between www.dixis.gr and dixis.gr. Root cause: localStorage is origin-specific (www ≠ apex), users adding items on one domain couldn't see them on the other. Solution: Added canonical host redirect in Next.js middleware (www → apex, 301 permanent). Changes: frontend/middleware.ts (redirect logic), cart-prod-regress.spec.ts (3 E2E tests), cart-bug-root-cause.md (analysis). PR #1846 merged (2025-12-22T23:44:01Z), deployed (Deploy Frontend VPS success). PROD proof: curl -I www.dixis.gr/products/1 → HTTP 301 to dixis.gr:3000/products/1 ✅, curl dixis.gr/products/1 → HTTP 200 ✅, same for /cart ✅. Cart persistence fixed + SEO benefit (canonical domain) ✅
 
 ---
 
