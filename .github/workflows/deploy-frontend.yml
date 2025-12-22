@@ -58,6 +58,7 @@ jobs:
           mkdir -p .next/standalone/.next
           cp -r .next/static .next/standalone/.next/static
           cp -r public .next/standalone/public
+          cp -r messages .next/standalone/messages
 
           # Copy prisma client (pnpm puts it in a different location)
           PRISMA_CLIENT=$(find node_modules/.pnpm -type d -name ".prisma" -path "*@prisma+client*" | head -1)
