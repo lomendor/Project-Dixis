@@ -1,7 +1,5 @@
 import { ProductCard } from '@/components/ProductCard'
 
-export const revalidate = 30
-
 type ApiItem = {
   id: string | number
   title: string
