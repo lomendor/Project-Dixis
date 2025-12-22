@@ -3,33 +3,24 @@
 **Last Updated**: 2025-12-21 18:00 UTC
 
 ## WIP (1 item only)
-### Pass 17 - Product Detail Endpoint Robust Parsing
-- **Scope**: Add defensive JSON parsing to product detail page to handle both API response formats
-- **File**: `frontend/src/app/(storefront)/products/[id]/page.tsx` (lines 18-19)
-- **Change**: `const json = await res.json(); const raw = json?.data ?? json;`
-- **Rationale**: API resilience - handles both direct object `{ id, name, ... }` and wrapped `{ data: { ... } }` responses
+### Pass 18 - Producer Product Image Upload
+- **Scope**: Implement minimal vertical slice - producer uploads 1 image for own product
+- **Constraints**:
+  - Audit-first, then smallest working slice (no gold-plating)
+  - No infrastructure changes unless proven necessary
+  - No secrets in output
+- **Backend**: POST /api/me/products/{id}/image (multipart, ProductPolicy auth)
+- **Frontend**: File input on producer edit page + preview
+- **Storage**: Laravel Storage public disk, max 2MB
 - **DoD**:
-  - PROD `/products/1` returns 200 and contains "Organic Tomatoes"
-  - PROD `/api/v1/public/products/1` returns 200
-  - Build: PASS ✅
-  - PR merged with passing CI
-- **Status**: PR pending (2025-12-22)
+  - Backend test: producer can upload for own product (201), cannot for other (403)
+  - API returns image_url in product JSON response
+  - PROD proof: curl product detail returns 200 + <img> tag in HTML
+- **Status**: In progress (2025-12-22)
 
 ## NEXT (ordered, max 3)
 
-### 1) Producer Product Image Upload
-- **Scope**: Enable producers to upload product images in create/edit forms
-- **DoD**:
-  - Producer can upload product image via `/my/products/create` form
-  - Image stored in Laravel storage (public disk, max 2MB)
-  - Image URL returned in `GET /api/v1/producer/products` response
-  - Backend test: 1 test (ImageUploadTest::test_producer_can_upload_product_image)
-  - E2E test: 1 test (product-image-upload.spec.ts verifying form submission)
-  - PROD smoke: Image displays on product detail page
-- **Estimated effort**: 1 day
-- **Priority**: High (product photos are core marketplace feature)
-
-### 2) Admin Product Moderation Queue
+### 1) Admin Product Moderation Queue
 - **Scope**: Admin approval workflow for new producer products
 - **DoD**:
   - Admin sees pending products at `/admin/products?status=pending`
@@ -41,7 +32,7 @@
 - **Estimated effort**: 1-2 days
 - **Priority**: Medium (quality control for marketplace)
 
-### 3) Order Status Tracking (Consumer View)
+### 2) Order Status Tracking (Consumer View)
 - **Scope**: Show order processing status to consumers
 - **DoD**:
   - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)

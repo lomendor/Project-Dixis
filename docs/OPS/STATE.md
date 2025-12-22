@@ -49,7 +49,7 @@
 **MVP Core Features Summary**: See `docs/FEATURES/MVP-CORE-VERIFICATION.md` (140+ tests, 838+ assertions, all PASS)
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **Pass 17 Product Detail Endpoint Robust Parsing**: Fix product detail page (`/products/[id]`) to use defensive JSON parsing that handles both direct object response (`{ id, name, ... }`) and wrapped response (`{ data: { id, name, ... } }`). Change: `const json = await res.json(); const raw = json?.data ?? json;` (line 18-19). Already uses DETAIL endpoint (`${base}/public/products/${id}`), already has `force-dynamic` and `cache: 'no-store'`. Build: PASS ✅. PR #TBD. DoD: `curl https://dixis.gr/products/1` returns 200 and contains "Organic Tomatoes"; `curl https://dixis.gr/api/v1/public/products/1` returns 200. (WIP: 2025-12-22)
+- **Pass 18 Producer Product Image Upload**: Implement minimal vertical slice for producer product image upload. Producer can upload 1 image for own product (dashboard), image stored in Laravel storage (public disk, max 2MB), image URL returned by API, storefront product detail shows image. Constraints: No infrastructure changes (no nginx/vps manual tweaks unless proven necessary), audit-first then smallest working slice, no gold-plating. Backend: POST /api/me/products/{id}/image (multipart, authorize via ProductPolicy). Frontend: file input on producer edit page + preview. DoD: Backend test (producer can upload for own product 201, cannot upload for other producer 403), API returns image_url in JSON, PROD proof (curl product detail returns 200 + image tag visible in HTML). (WIP: 2025-12-22)
 
 ## BLOCKED ⚠️
 - (none)
