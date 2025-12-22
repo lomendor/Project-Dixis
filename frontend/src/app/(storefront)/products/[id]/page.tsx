@@ -212,7 +212,13 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
 
           {/* Add to Cart */}
           <div className="mt-auto">
-            <Add product={p}/>
+            <Add
+              product={p}
+              translations={{
+                addToCart: t('product.addToCart'),
+                cartAdded: t('cart.added')
+              }}
+            />
           </div>
           <BuyBox product={{ id: p!.id as any, title: p!.title ?? p!.title, price: p!.price, currency: 'EUR' }} />
         </div>
