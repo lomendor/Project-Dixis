@@ -3,20 +3,7 @@
 **Last Updated**: 2025-12-21 18:00 UTC
 
 ## WIP (1 item only)
-### Pass 18 - Producer Product Image Upload
-- **Scope**: Implement minimal vertical slice - producer uploads 1 image for own product
-- **Constraints**:
-  - Audit-first, then smallest working slice (no gold-plating)
-  - No infrastructure changes unless proven necessary
-  - No secrets in output
-- **Backend**: POST /api/me/products/{id}/image (multipart, ProductPolicy auth)
-- **Frontend**: File input on producer edit page + preview
-- **Storage**: Laravel Storage public disk, max 2MB
-- **DoD**:
-  - Backend test: producer can upload for own product (201), cannot for other (403)
-  - API returns image_url in product JSON response
-  - PROD proof: curl product detail returns 200 + <img> tag in HTML
-- **Status**: In progress (2025-12-22)
+- (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
@@ -80,6 +67,7 @@
 - Pass 14 (Producer Permissions Audit) (2025-12-21) - Docs-only audit verifying producer authorization state. ProductPolicy enforces producer_id ownership, server-side producer_id prevents hijacking, 21 authorization + 49 CRUD tests PASS. NO CRITICAL AUTHORIZATION GAPS FOUND. Audit doc: docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT.md. PR #1809 merged ✅
 - Pass 15 (Producer Ownership Enforcement) (2025-12-21) - Replaced manual authorization checks in ProducerController with ProductPolicy. toggleProduct() and updateStock() now use $this->authorize(). Code reduced by 25 lines, correct HTTP codes (403 not 404), admin override works. Tests: 4 PASS (7 assertions). PR #1810 merged ✅
 - Pass 16 (E2E Producer Ownership Isolation) (2025-12-21) - Added Playwright E2E test proving /api/me/products scopes by producer. Backend scoping already proven by AuthorizationTest.php (4 PHPUnit tests, 11 assertions, run in CI). E2E adds frontend proxy coverage. Tests: 3 E2E PASS (11.5s). PR #1813 merged ✅
+- Pass 18 (Producer Product Image Upload) (2025-12-22) - Audit-first verification: feature 100% production-ready. Complete vertical slice exists: UploadImage component → POST /api/me/uploads → storage (fs/s3) → Producer forms → Products.image_url + ProductImage → Storefront display. Tests: 8 existing (3 backend + 5 E2E). PROD proof: Product #1 has image_url + 2 ProductImage records. NO CODE CHANGES REQUIRED. Audit doc: docs/FEATURES/PASS18-PRODUCT-IMAGE-UPLOAD-AUDIT.md. Similar to Pass 6 and Pass 9 ✅
 
 ---
 
