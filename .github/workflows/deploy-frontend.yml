@@ -55,6 +55,7 @@ jobs:
         working-directory: frontend
         run: |
           # Next.js standalone mode requires copying static assets
+          mkdir -p .next/standalone/.next
           cp -r .next/static .next/standalone/.next/static
           cp -r public .next/standalone/public
 
