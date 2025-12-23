@@ -22,13 +22,14 @@ test('cart persists after add-to-cart on prod (canonical redirect)', async ({ pa
   await expect(page.locator('body')).not.toContainText('Το καλάθι σου είναι άδειο');
 });
 
-test('canonical redirect: www → apex', async ({ page }) => {
+test('canonical redirect: www → apex (no port in URL)', async ({ page }) => {
   // Navigate to www domain
   const response = await page.goto('https://www.dixis.gr/products', { waitUntil: 'domcontentloaded' });
 
   // Verify redirect happened
   expect(page.url()).toBe('https://dixis.gr/products');
   expect(page.url()).not.toContain('www.');
+  expect(page.url()).not.toContain(':3000'); // Critical: no port in redirect URL
 
   // Verify redirect was 301 (permanent)
   const redirectChain = response?.request().redirectedFrom();
@@ -54,6 +55,7 @@ test('cart persists across www/apex navigation', async ({ page }) => {
   // Navigate to cart via www (will redirect to apex)
   await page.goto('https://www.dixis.gr/cart', { waitUntil: 'domcontentloaded' });
   expect(page.url()).toBe('https://dixis.gr/cart'); // Redirected
+  expect(page.url()).not.toContain(':3000'); // No port in URL
 
   // Cart should still show items
   await expect(page.locator('body')).not.toContainText('Το καλάθι σου είναι άδειο');
