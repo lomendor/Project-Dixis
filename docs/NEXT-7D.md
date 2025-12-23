@@ -1,21 +1,23 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-23 00:30 UTC
+**Last Updated**: 2025-12-23 00:40 UTC
 
 ## WIP (1 item only)
 - (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
-### 1) Cart E2E Verification on PROD
-- **Scope**: Verify cart persistence works end-to-end for real users after canonical redirect fix
+### 1) Producer Permissions Audit (Stage 2)
+- **Scope**: Comprehensive audit of producer authorization with backend policy enforcement verification
 - **DoD**:
-  - Manual test: Add item on www.dixis.gr → redirects to dixis.gr → cart shows item ✅
-  - E2E test `cart-prod-regress.spec.ts` runs against PROD and PASSES
-  - Screenshots of working cart (before empty, after shows items)
-  - User confirmation or field test evidence
-- **Estimated effort**: 30 minutes
-- **Priority**: High (confirm user-reported bug is resolved)
+  - Audit backend ProductPolicy ownership rules + admin override behavior (lines 48, 63)
+  - Verify producer dashboard `/my/products` shows only producer's own products (server-side scoping)
+  - Confirm/add Playwright E2E test: `producer-product-ownership.spec.ts` (cross-producer isolation)
+  - Audit ProducerController server-side producer_id assignment (prevents hijacking)
+  - Output: Audit doc with grep evidence + test run screenshots
+  - PROD proof: All endpoints healthy after audit
+- **Estimated effort**: 45 minutes
+- **Priority**: High (security - verify authorization guardrails)
 
 ### 2) Backend API Stability Check
 - **Scope**: Verify backend /api/v1 is stable after recent systemd fixes
@@ -25,7 +27,7 @@
   - Uptime proof: no restarts in last 24h
   - Response times <500ms for all endpoints
 - **Estimated effort**: 20 minutes
-- **Priority**: High (ensure production stability)
+- **Priority**: Medium (ensure production stability)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -67,6 +69,7 @@
 - Pass 19 (Product Detail Pages PROD Fix) (2025-12-22) - Fixed product detail pages showing loading skeleton on dixis.gr + www.dixis.gr. Root causes: (1) Backend API down (Laravel not running on 8001), (2) SSR using external URL causing timeout, (3) Nested frontend/frontend/ breaking TypeScript build. Fixes: (1) Created systemd service dixis-backend.service, (2) PR #1836 - SSR uses internal API (127.0.0.1:8001), (3) Removed orphaned nested directory. PROD proof: curl dixis.gr/products/1 | grep "Organic Tomatoes" ✅ + curl www.dixis.gr/products/1 | grep "Organic Tomatoes" ✅ ✅
 - Pass 20 (Cart localStorage Canonical Redirect) (2025-12-22) - Fixed cart appearing empty when navigating between www.dixis.gr and dixis.gr. Root cause: localStorage origin-specific (www ≠ apex). Solution: Added canonical host redirect (www → apex, 301 permanent) in Next.js middleware. Changes: frontend/middleware.ts (redirect logic), cart-prod-regress.spec.ts (3 E2E tests), cart-bug-root-cause.md (analysis). PR #1846 merged (2025-12-22T23:44:01Z), deployed. PROD proof: curl -I www.dixis.gr → HTTP 301 ✅. Cart persistence fixed, SEO benefit. Note: Initial redirect had `:3000` port (fixed in Pass 21) ✅
 - Pass 21 (Canonical Redirect Clean URLs) (2025-12-23) - Fixed canonical redirect outputting `:3000` port in Location header. Root cause: middleware cloned request URL including port. Solution: Explicitly set url.protocol='https:', url.hostname='dixis.gr', url.port='' in middleware. Changes: frontend/middleware.ts (3 lines), cart-prod-regress.spec.ts (added :3000 checks). PROD proof (before): location: https://dixis.gr:3000/cart ❌ → (after): location: https://dixis.gr/cart ✅. Clean URLs, no port ✅
+- UltraThink Verification Pass (2025-12-23) - Post-Pass 21 production health verification. All endpoints verified healthy: healthz=200, api_products=200, api_product_1=200, products_list=200, product_1_page=200, login=307→/auth/login, register=307→/auth/register, auth_login=200, auth_register=200. Product detail page renders "Organic Tomatoes" with full details (no error boundaries). Canonical redirect working (www → apex, clean URLs without :3000). Cart persistence verified across domains. Infrastructure: Backend API (dixis-backend.service running), Frontend (dixis-frontend-launcher.service running). Evidence: docs/OPS/PROD-FACTS-LAST.md (updated 2025-12-23 00:35 UTC). All core user journeys functional. No issues found. ✅
 
 ---
 

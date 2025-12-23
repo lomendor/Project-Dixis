@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-23 00:30 UTC
+**Last Updated**: 2025-12-23 00:35 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -47,10 +47,16 @@
 - **Order pages**: /order/1 and /orders/1 return 200 ✅
 - **Backend Orders API**: /api/v1/orders returns 401 (correctly requires authentication) ✅
 
-**Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (auto-updated by `scripts/prod-facts.sh`)
+**Evidence**: See `docs/OPS/PROD-FACTS-LAST.md` (last updated: 2025-12-23 00:35 UTC)
 **Automated Monitoring**: Daily checks at 07:00 UTC via `.github/workflows/prod-facts.yml`
 
 **MVP Core Features Summary**: See `docs/FEATURES/MVP-CORE-VERIFICATION.md` (140+ tests, 838+ assertions, all PASS)
+
+**Latest Verification** (2025-12-23 00:35 UTC):
+- All core endpoints healthy (healthz=200, API=200, storefront=200, auth=200/307)
+- Product detail pages render correctly (Organic Tomatoes visible, no error boundaries)
+- Canonical redirect working (www → apex, clean URLs without :3000)
+- Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
 - (none)
