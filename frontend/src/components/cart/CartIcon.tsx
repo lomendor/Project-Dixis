@@ -40,7 +40,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
 
     async function fetchCartCount() {
       try {
-        const res = await fetch('/api/cart', { cache: 'no-store' });
+        const res = await fetch('/internal/cart', { cache: 'no-store' });
         const data = await res.json();
         setCartItemCount((data?.items?.length) || 0);
       } catch {

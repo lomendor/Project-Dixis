@@ -14,7 +14,7 @@ export default function CartClient({ items }: { items: CartItem[] }) {
 
   const updateQty = (slug: string, qty: number) => {
     startTransition(async () => {
-      await fetch('/api/cart', {
+      await fetch('/internal/cart', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, qty }),
@@ -25,14 +25,14 @@ export default function CartClient({ items }: { items: CartItem[] }) {
 
   const removeItem = (slug: string) => {
     startTransition(async () => {
-      await fetch(`/api/cart?slug=${slug}`, { method: 'DELETE' });
+      await fetch(`/internal/cart?slug=${slug}`, { method: 'DELETE' });
       safeRefresh();
     });
   };
 
   const clearCart = () => {
     startTransition(async () => {
-      await fetch('/api/cart', { method: 'DELETE' });
+      await fetch('/internal/cart', { method: 'DELETE' });
       safeRefresh();
     });
   };
