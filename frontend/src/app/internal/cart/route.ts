@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Cart API Stub
+ * Internal Cart API Stub
+ * Path: /internal/cart (moved from /api/cart to avoid nginx /api/* proxy collision)
  * Temporary stub to prevent 404s from client-side cart implementation
  * Returns empty cart - actual cart logic is client-side (localStorage)
+ *
+ * Note: Nginx proxies all /api/* requests to Laravel backend,
+ * so Next.js API routes under /api/* are unreachable.
+ * Using /internal/* prefix instead.
  *
  * TODO: Implement proper server-side cart if needed for:
  * - Cart persistence across devices
