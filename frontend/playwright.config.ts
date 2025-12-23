@@ -8,15 +8,15 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 10_000 },
   use: {
-    baseURL: process.env.BASE_URL || 'http://127.0.0.1:3000',
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:3001',
     trace: 'on-first-retry',
     video: 'retain-on-failure',
   },
   webServer: useExternal
     ? undefined
     : {
-        command: 'pnpm dev',
-        port: 3000,
+        command: 'PORT=3001 pnpm dev -p 3001',
+        port: 3001,
         reuseExistingServer: true,
         timeout: 60_000,
       },

@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-23 06:15 UTC
+**Last Updated**: 2025-12-23 20:50 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -39,6 +39,7 @@
 - **Pass 24 Admin Product Moderation Queue**: Admin-only workflow for approving/rejecting pending products with full audit trail. Features: Admin moderation queue page at `/admin/products/moderation`, approve/reject actions with mandatory reason (min 10 chars), database audit trail (moderated_by, moderated_at, rejection_reason, approval_status enum). Backend API: GET `/api/v1/admin/products/pending` + PATCH `/api/v1/admin/products/{id}/moderate`. Migration: `2025_12_23_053325_add_moderation_to_products_table.php` (default approval_status='approved' for backwards compatibility). ProductPolicy: `moderate()` method (admin-only). AdminProductController: `pending()` + `moderate()` methods with validation. Tests: 9 backend tests PASS (39 assertions) - list pending, approve, reject, non-admin denied, auth required, validation. 3 E2E tests (admin approve/reject, non-admin denied). Files: 10 changed (1027 insertions). Docs: `docs/AGENT/TASKS/Pass-24-admin-moderation-queue.md`, `docs/AGENT/SUMMARY/Pass-24.md`. PR #1853. PROD smoke pending deployment. (Closed: 2025-12-23)
 - **Pass 25 Order Status Tracking**: Admin-only Laravel API endpoint for updating order status with controlled transitions. Backend: PATCH `/api/v1/admin/orders/{order}/status` (AdminOrderController, OrderPolicy authorization). Status transitions: pending → confirmed/processing/cancelled → shipped → delivered (final states: delivered, cancelled). Optional note parameter (max 500 chars), audit logging via \Log::info(). Existing frontend UI audited (admin: OrderStatusQuickActions.tsx, consumer: orders/[id]/page.tsx with color-coded badges). Tests: 9 backend tests PASS (30 assertions, 0.79s) - admin update, non-admin denied (403), invalid transitions (422), full lifecycle, final states. 3 E2E tests PASS (6.3s) - API endpoint exists, Laravel backend responds, status validation. Files: 5 created, 1 modified (+521 insertions). Docs: `docs/AGENT/TASKS/Pass-25-order-status-tracking.md`, `docs/AGENT/SUMMARY/Pass-25.md`. Pattern: Similar to Pass 6/9/18 (audit-first verification, minimal backend addition for consistency). Email notifications optional (skipped). (Closed: 2025-12-23)
 - **Pass 26 PROD Regression - Products Not Displaying**: Fixed products list page stuck in loading state (showing skeletons indefinitely). Root cause: SSR using external API (`https://dixis.gr/api/v1`) causing timeout, never completing render. Fix: Products list page now uses internal API during SSR (`http://127.0.0.1:8001/api/v1`), same pattern as product detail page (Pass 19). Backend API was working (4 products available), frontend SSR timeout prevented rendering. Login "not working" determined to be expected behavior (user needs to register first). Files: 1 modified (`frontend/src/app/(storefront)/products/page.tsx` +5 lines: added isServer check + internal API for SSR). Docs: `docs/OPS/PROD-REGRESSION-2025-12-23.md` (incident report), `docs/AGENT/SUMMARY/Pass-26.md`. Build: ✅ SUCCESS. E2E smoke test: SKIPPED (too brittle for local env - backend dependency). Pattern: Same SSR optimization as Pass 19 (internal API avoids external round-trip timeout). Incident duration: ~8 hours (report → fix → merge → deploy → verify). **PROD VERIFICATION (2025-12-23 19:28 UTC)**: ✅ Fix deployed and working. Hard evidence: healthz=200, products API returns 4 products, products page HTML contains all 4 product titles (SSR rendering confirmed), auth pages load (200 OK). Functional auth flow (register/login submit) NOT YET VERIFIED. See verification evidence in incident report. (Closed: 2025-12-23)
+- **Pass 27 Auth Functional Verification (PROD + CI Guardrail)**: Verified auth works FUNCTIONALLY (not just "pages load") with hard evidence. PROD verification results (2025-12-23 20:41 UTC): Register API (POST /api/v1/auth/register) returns HTTP 201 Created + User ID 13 created + Bearer token. Login API (POST /api/v1/auth/login) returns HTTP 200 OK + Bearer token. Auth type: Laravel Sanctum Bearer tokens (in response body, not cookies). No email verification required (immediate registration success). CI guardrail: E2E test added (`frontend/tests/e2e/auth-functional-flow.spec.ts`) with 3 tests PASS (19.9s) - full auth flow (register → login → authenticated), wrong password rejection, duplicate email rejection. Infrastructure fixes: Playwright config port mismatch fixed (3000 → 3001 per CLAUDE.md), register page testids added to match login page pattern for E2E stability. User issue resolution: Auth system fully functional, user should register new account on PROD (likely not registered in current database). Files: 3 modified (`playwright.config.ts`, `register/page.tsx` +8 testids, NEW `auth-functional-flow.spec.ts`), 2 docs created (`docs/OPS/PROD-AUTH-VERIFICATION-2025-12-23.md`, `docs/AGENT/SUMMARY/Pass-27.md`). Evidence-first verification: HTTP status codes + response bodies + CI test results. No auth bugs found. (Closed: 2025-12-23)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -47,6 +48,8 @@
 - **Product detail page**: /products/1 returns 200, renders expected product content ✅
 - **Auth redirects**: /login → /auth/login (307), /register → /auth/register (307) ✅
 - **Auth pages**: /auth/login and /auth/register return 200 ✅
+- **Auth functional**: Register API (POST /api/v1/auth/register) returns HTTP 201 + Bearer token ✅
+- **Auth functional**: Login API (POST /api/v1/auth/login) returns HTTP 200 + Bearer token ✅
 - **Cart page**: /cart returns 200 ✅
 - **Orders list page**: /orders returns 200 (Pass 13 fix deployed) ✅
 - **Order pages**: /order/1 and /orders/1 return 200 ✅
@@ -71,16 +74,7 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Auth Functional Verification (PROD)**
-   - **Priority**: P1 (User reported login not working - pages load but functional flow unverified)
-   - **Scope**: Verify register + login form submission works end-to-end in PROD
-   - **DoD**:
-     - Playwright E2E test: Register new user → success response
-     - Playwright E2E test: Login with registered user → authenticated session
-     - Evidence: curl/API test shows POST /api/v1/register and POST /api/v1/auth/login work
-   - **Risk**: Medium (auth pages load but submit behavior unknown)
-
-2. **Deploy Workflow Investigation**
+1. **Deploy Workflow Investigation**
    - **Priority**: P2 (Ops hygiene - deployments working but workflow failing)
    - **Scope**: Investigate why `deploy-prod.yml` shows 0s failures on all recent runs
    - **DoD**:
