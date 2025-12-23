@@ -10,9 +10,12 @@ type ApiItem = {
 }
 
 async function getData() {
-  // Fetch from live API (server-side and client-side use public URL)
-  // Production uses https://dixis.gr/api/v1 consistently
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://dixis.gr/api/v1'
+  // Use internal URL for SSR to avoid external round-trip timeout (Pass 26 fix)
+  // Same pattern as product detail page (Pass 19)
+  const isServer = typeof window === 'undefined';
+  const base = isServer
+    ? (process.env.API_INTERNAL_URL || 'http://127.0.0.1:8001/api/v1')
+    : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://dixis.gr/api/v1');
 
   try {
     const res = await fetch(`${base}/public/products`, {
