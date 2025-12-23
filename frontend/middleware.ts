@@ -20,7 +20,9 @@ export default function middleware(req: NextRequest) {
   // 1. Canonical host redirect: www → apex (fixes cart localStorage bug)
   // Always redirect www.dixis.gr → dixis.gr for consistent localStorage origin
   if (host === 'www.dixis.gr') {
-    url.host = 'dixis.gr';
+    url.protocol = 'https:';
+    url.hostname = 'dixis.gr';
+    url.port = ''; // Critical: clear port to avoid :3000 in redirect URL
     return NextResponse.redirect(url, 301); // Permanent redirect
   }
 

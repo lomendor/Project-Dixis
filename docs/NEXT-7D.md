@@ -1,35 +1,31 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-21 18:00 UTC
+**Last Updated**: 2025-12-23 00:30 UTC
 
 ## WIP (1 item only)
 - (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
-### 1) Admin Product Moderation Queue
-- **Scope**: Admin approval workflow for new producer products
+### 1) Cart E2E Verification on PROD
+- **Scope**: Verify cart persistence works end-to-end for real users after canonical redirect fix
 - **DoD**:
-  - Admin sees pending products at `/admin/products?status=pending`
-  - Admin can approve/reject with reason (PATCH /api/v1/admin/products/{id}/moderate)
-  - Producer receives email notification on approval/rejection
-  - Backend tests: 3 tests (list_pending, approve_product, reject_product)
-  - Policy test: 1 test (admin_can_moderate_any_product)
-  - PROD smoke: Admin moderation endpoint returns 401 for non-admin
-- **Estimated effort**: 1-2 days
-- **Priority**: Medium (quality control for marketplace)
+  - Manual test: Add item on www.dixis.gr → redirects to dixis.gr → cart shows item ✅
+  - E2E test `cart-prod-regress.spec.ts` runs against PROD and PASSES
+  - Screenshots of working cart (before empty, after shows items)
+  - User confirmation or field test evidence
+- **Estimated effort**: 30 minutes
+- **Priority**: High (confirm user-reported bug is resolved)
 
-### 2) Order Status Tracking (Consumer View)
-- **Scope**: Show order processing status to consumers
+### 2) Backend API Stability Check
+- **Scope**: Verify backend /api/v1 is stable after recent systemd fixes
 - **DoD**:
-  - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)
-  - Backend supports status transitions (POST /api/v1/orders/{id}/status)
-  - Email sent to consumer on status change
-  - Backend tests: 2 tests (status_transition, notification_sent)
-  - E2E test: 1 test (order-status-display.spec.ts verifying status shown)
-  - PROD smoke: Order detail page shows status field
-- **Estimated effort**: 1 day
-- **Priority**: Medium (transparency for consumers)
+  - All API endpoints return expected codes (products=200, healthz=200, orders=401)
+  - systemd services active: dixis-backend.service, dixis-frontend-launcher.service
+  - Uptime proof: no restarts in last 24h
+  - Response times <500ms for all endpoints
+- **Estimated effort**: 20 minutes
+- **Priority**: High (ensure production stability)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -69,6 +65,8 @@
 - Pass 16 (E2E Producer Ownership Isolation) (2025-12-21) - Added Playwright E2E test proving /api/me/products scopes by producer. Backend scoping already proven by AuthorizationTest.php (4 PHPUnit tests, 11 assertions, run in CI). E2E adds frontend proxy coverage. Tests: 3 E2E PASS (11.5s). PR #1813 merged ✅
 - Pass 18 (Producer Product Image Upload) (2025-12-22) - Audit-first verification: feature 100% production-ready. Complete vertical slice exists: UploadImage component → POST /api/me/uploads → storage (fs/s3) → Producer forms → Products.image_url + ProductImage → Storefront display. Tests: 8 existing (3 backend + 5 E2E). PROD proof: Product #1 has image_url + 2 ProductImage records. NO CODE CHANGES REQUIRED. Audit doc: docs/FEATURES/PASS18-PRODUCT-IMAGE-UPLOAD-AUDIT.md. Similar to Pass 6 and Pass 9 ✅
 - Pass 19 (Product Detail Pages PROD Fix) (2025-12-22) - Fixed product detail pages showing loading skeleton on dixis.gr + www.dixis.gr. Root causes: (1) Backend API down (Laravel not running on 8001), (2) SSR using external URL causing timeout, (3) Nested frontend/frontend/ breaking TypeScript build. Fixes: (1) Created systemd service dixis-backend.service, (2) PR #1836 - SSR uses internal API (127.0.0.1:8001), (3) Removed orphaned nested directory. PROD proof: curl dixis.gr/products/1 | grep "Organic Tomatoes" ✅ + curl www.dixis.gr/products/1 | grep "Organic Tomatoes" ✅ ✅
+- Pass 20 (Cart localStorage Canonical Redirect) (2025-12-22) - Fixed cart appearing empty when navigating between www.dixis.gr and dixis.gr. Root cause: localStorage origin-specific (www ≠ apex). Solution: Added canonical host redirect (www → apex, 301 permanent) in Next.js middleware. Changes: frontend/middleware.ts (redirect logic), cart-prod-regress.spec.ts (3 E2E tests), cart-bug-root-cause.md (analysis). PR #1846 merged (2025-12-22T23:44:01Z), deployed. PROD proof: curl -I www.dixis.gr → HTTP 301 ✅. Cart persistence fixed, SEO benefit. Note: Initial redirect had `:3000` port (fixed in Pass 21) ✅
+- Pass 21 (Canonical Redirect Clean URLs) (2025-12-23) - Fixed canonical redirect outputting `:3000` port in Location header. Root cause: middleware cloned request URL including port. Solution: Explicitly set url.protocol='https:', url.hostname='dixis.gr', url.port='' in middleware. Changes: frontend/middleware.ts (3 lines), cart-prod-regress.spec.ts (added :3000 checks). PROD proof (before): location: https://dixis.gr:3000/cart ❌ → (after): location: https://dixis.gr/cart ✅. Clean URLs, no port ✅
 
 ---
 
