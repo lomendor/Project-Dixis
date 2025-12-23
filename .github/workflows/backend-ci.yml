@@ -4,17 +4,10 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
-    paths-ignore:
-      - 'docs/**'
-      - 'backend/docs/**'
-      - '**/*.md'
   pull_request:
     paths:
       - 'backend/**'
-    paths-ignore:
-      - 'docs/**'
-      - 'backend/docs/**'
-      - '**/*.md'
+      - '.github/workflows/backend-ci.yml'
   schedule:
     - cron: '0 3 * * *'  # Daily at 3:00 UTC
   workflow_dispatch:
