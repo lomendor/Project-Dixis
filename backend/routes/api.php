@@ -194,6 +194,14 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:120,1'); // 120 requests per minute for dashboard
     });
 
+    // Admin Product Moderation (Pass 24)
+    Route::middleware('auth:sanctum')->prefix('admin/products')->group(function () {
+        Route::get('pending', [App\Http\Controllers\Api\Admin\AdminProductController::class, 'pending'])
+            ->middleware('throttle:60,1'); // 60 requests per minute
+        Route::patch('{product}/moderate', [App\Http\Controllers\Api\Admin\AdminProductController::class, 'moderate'])
+            ->middleware('throttle:30,1'); // 30 moderation actions per minute
+    });
+
     // Admin Shipping (read-only rate tables interface)
     Route::middleware('auth:sanctum')->prefix('admin/shipping')->group(function () {
         Route::get('rates', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getRates'])
