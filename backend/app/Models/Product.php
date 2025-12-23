@@ -26,6 +26,10 @@ class Product extends Model
         'status',
         'is_active',
         'producer_id',
+        'approval_status',
+        'rejection_reason',
+        'moderated_by',
+        'moderated_at',
     ];
 
     protected $casts = [
@@ -34,6 +38,7 @@ class Product extends Model
         'is_active' => 'boolean',
         'is_organic' => 'boolean',
         'is_seasonal' => 'boolean',
+        'moderated_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

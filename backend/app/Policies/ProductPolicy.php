@@ -59,4 +59,13 @@ class ProductPolicy
     {
         return $this->update($user, $product);
     }
+
+    /**
+     * Determine whether the user can moderate products (approve/reject).
+     * Only admins can moderate.
+     */
+    public function moderate(User $user): bool
+    {
+        return $user->role === 'admin';
+    }
 }
