@@ -18,7 +18,10 @@ concurrency:
 jobs:
   deploy:
     name: staging-deploy
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # Skip if SSH key not available (staging environment optional)
+    if: |
+      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
+      secrets.SSH_PRIVATE_KEY != ''
     runs-on: ubuntu-latest
     environment: staging
     env:
