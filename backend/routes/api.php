@@ -202,6 +202,12 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 moderation actions per minute
     });
 
+    // Admin Order Management (Pass 25)
+    Route::middleware('auth:sanctum')->prefix('admin/orders')->group(function () {
+        Route::patch('{order}/status', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'updateStatus'])
+            ->middleware('throttle:60,1'); // 60 status updates per minute
+    });
+
     // Admin Shipping (read-only rate tables interface)
     Route::middleware('auth:sanctum')->prefix('admin/shipping')->group(function () {
         Route::get('rates', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getRates'])

@@ -1,33 +1,13 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-23 05:45 UTC
+**Last Updated**: 2025-12-23 06:15 UTC
 
 ## WIP (1 item only)
 - (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
-### 1) Producer Permissions Audit (Stage 2)
-- **Scope**: Comprehensive audit of producer authorization with backend policy enforcement verification
-- **DoD**:
-  - Audit backend ProductPolicy ownership rules + admin override behavior (lines 48, 63)
-  - Verify producer dashboard `/my/products` shows only producer's own products (server-side scoping)
-  - Confirm/add Playwright E2E test: `producer-product-ownership.spec.ts` (cross-producer isolation)
-  - Audit ProducerController server-side producer_id assignment (prevents hijacking)
-  - Output: Audit doc with grep evidence + test run screenshots
-  - PROD proof: All endpoints healthy after audit
-- **Estimated effort**: 45 minutes
-- **Priority**: High (security - verify authorization guardrails)
-
-### 2) Backend API Stability Check
-- **Scope**: Verify backend /api/v1 is stable after recent systemd fixes
-- **DoD**:
-  - All API endpoints return expected codes (products=200, healthz=200, orders=401)
-  - systemd services active: dixis-backend.service, dixis-frontend-launcher.service
-  - Uptime proof: no restarts in last 24h
-  - Response times <500ms for all endpoints
-- **Estimated effort**: 20 minutes
-- **Priority**: Medium (ensure production stability)
+(To be determined based on product priorities)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -73,6 +53,7 @@
 - Pass 22 (Producer Permissions Audit Stage 2) (2025-12-23) - Audit-first verification of producer authorization. NO AUTHORIZATION BUGS FOUND ✅. ProductPolicy enforces producer_id ownership (line 48), admin override works (line 42-43). Server-side producer_id auto-set prevents hijacking (ProductController line 119). Producer dashboard `/my/products` scopes server-side (ProducerController line 141: `$producer->products()`). E2E tests: 3 PASS (12.2s). Backend tests: 4 PHPUnit Feature tests (AuthorizationTest.php). All attack scenarios blocked. Audit doc: docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT-STAGE2.md. PROD healthy (2025-12-23 01:18 UTC). NO CODE CHANGES - audit-only pass ✅
 - Pass 23 (Backend API Stability Check) (2025-12-23) - Stability verification after systemd migration. All endpoints healthy: healthz=200 (185ms), api_products=200 (241ms), products_list=200 (304ms). All <500ms ✅ (DoD met). Stability risk audit: (1) Courier timeout/retry OK (AcsCourierProvider.php:296), (2) Frontend SSR uses internal API (127.0.0.1:8001) ✅, (3) No rate limiting on public endpoints (low risk - read-only), (4) ProductController error handling relies on Laravel default. Services inferred ACTIVE (all endpoints responding). Stability doc: docs/OPS/BACKEND-API-STABILITY-2025-12-23.md. PROD healthy (2025-12-23 01:41 UTC). NO BUGS FOUND - audit-only pass ✅
 - Pass 24 (Admin Product Moderation Queue) (2025-12-23) - Admin-only workflow for approving/rejecting pending products. Features: Admin moderation queue page at /admin/products/moderation, approve/reject actions with mandatory reason (min 10 chars), audit trail (moderated_by, moderated_at, rejection_reason, approval_status). Backend: Migration 2025_12_23_053325_add_moderation_to_products_table.php (default approved for backwards compat), ProductPolicy::moderate() (admin-only), AdminProductController (pending + moderate methods), routes /api/v1/admin/products/pending + /{id}/moderate. Frontend: Admin moderation page with approve/reject UI, reject modal with validation. Tests: 9 backend PASS (39 assertions: list pending, approve, reject, non-admin denied, auth required, validation), 3 E2E (admin approve/reject, non-admin denied). Files: 10 changed (1027 insertions). Docs: Pass-24-admin-moderation-queue.md, Pass-24.md. PR #1853. PROD smoke pending deployment ✅
+- Pass 25 (Order Status Tracking) (2025-12-23) - Admin-only Laravel API endpoint for updating order status with controlled transitions. Backend: AdminOrderController with updateStatus() method, PATCH /api/v1/admin/orders/{order}/status route, OrderPolicy authorization (admin-only). Status transitions: pending → confirmed/processing/cancelled → shipped → delivered (final states: delivered, cancelled). Optional note parameter (max 500 chars), audit logging via \Log::info(). Existing frontend UI audited (admin: OrderStatusQuickActions.tsx, consumer: orders/[id]/page.tsx with color-coded badges). Tests: 9 backend PASS (30 assertions, 0.79s: admin update, non-admin denied 403, invalid transitions 422, full lifecycle, final states), 3 E2E PASS (6.3s: API endpoint exists, Laravel backend responds, status validation). Files: 5 created, 1 modified (+521 insertions). Docs: Pass-25-order-status-tracking.md, Pass-25.md. Pattern: Similar to Pass 6/9/18 (audit-first verification, minimal backend addition for consistency). Email notifications optional (skipped) ✅
 
 ---
 

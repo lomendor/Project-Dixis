@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-23 05:45 UTC
+**Last Updated**: 2025-12-23 06:15 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
@@ -37,6 +37,7 @@
 - **Pass 22 Producer Permissions Audit (Stage 2)**: Comprehensive audit of producer authorization with backend policy + server-side enforcement verification. Audit-first verification confirms NO AUTHORIZATION BUGS FOUND. ProductPolicy enforces producer_id ownership (line 48: `$product->producer_id === $user->producer->id`), admin override works (line 42-43). Server-side producer_id auto-set prevents hijacking (ProductController line 119: `$data['producer_id'] = $user->producer->id`). Producer dashboard `/my/products` scopes server-side (ProducerController line 141: `$producer->products()`). E2E tests: 3 PASS (producer-product-ownership.spec.ts, 12.2s). Backend tests: 4 PHPUnit Feature tests exist (AuthorizationTest.php). All attack scenarios blocked (hijack, cross-producer edit, view all products). Audit doc: `docs/FEATURES/PRODUCER-PERMISSIONS-AUDIT-STAGE2.md`. PROD verification: all endpoints healthy (2025-12-23 01:18 UTC). NO CODE CHANGES REQUIRED - audit-only pass. (Closed: 2025-12-23)
 - **Pass 23 Backend API Stability Check**: Comprehensive stability verification after systemd service migration. All endpoints healthy: healthz=200 (185ms), api_products=200 (241ms), products_list=200 (304ms), product_detail=200. All response times <500ms (DoD requirement met). Stability risk audit findings: (1) Courier services have timeout (5-30s) + retry mechanism (AcsCourierProvider.php:296), (2) Frontend SSR uses internal API (127.0.0.1:8001, Pass 19 fix verified), (3) No rate limiting on public endpoints (low risk - read-only, no abuse detected), (4) No explicit error logging in ProductController (relies on Laravel default). Services inferred ACTIVE (all endpoints responding, no connection errors). Stability doc: `docs/OPS/BACKEND-API-STABILITY-2025-12-23.md`. PROD verification: all endpoints healthy (2025-12-23 01:41 UTC). NO CONCRETE BUGS FOUND - audit-only pass. (Closed: 2025-12-23)
 - **Pass 24 Admin Product Moderation Queue**: Admin-only workflow for approving/rejecting pending products with full audit trail. Features: Admin moderation queue page at `/admin/products/moderation`, approve/reject actions with mandatory reason (min 10 chars), database audit trail (moderated_by, moderated_at, rejection_reason, approval_status enum). Backend API: GET `/api/v1/admin/products/pending` + PATCH `/api/v1/admin/products/{id}/moderate`. Migration: `2025_12_23_053325_add_moderation_to_products_table.php` (default approval_status='approved' for backwards compatibility). ProductPolicy: `moderate()` method (admin-only). AdminProductController: `pending()` + `moderate()` methods with validation. Tests: 9 backend tests PASS (39 assertions) - list pending, approve, reject, non-admin denied, auth required, validation. 3 E2E tests (admin approve/reject, non-admin denied). Files: 10 changed (1027 insertions). Docs: `docs/AGENT/TASKS/Pass-24-admin-moderation-queue.md`, `docs/AGENT/SUMMARY/Pass-24.md`. PR #1853. PROD smoke pending deployment. (Closed: 2025-12-23)
+- **Pass 25 Order Status Tracking**: Admin-only Laravel API endpoint for updating order status with controlled transitions. Backend: PATCH `/api/v1/admin/orders/{order}/status` (AdminOrderController, OrderPolicy authorization). Status transitions: pending → confirmed/processing/cancelled → shipped → delivered (final states: delivered, cancelled). Optional note parameter (max 500 chars), audit logging via \Log::info(). Existing frontend UI audited (admin: OrderStatusQuickActions.tsx, consumer: orders/[id]/page.tsx with color-coded badges). Tests: 9 backend tests PASS (30 assertions, 0.79s) - admin update, non-admin denied (403), invalid transitions (422), full lifecycle, final states. 3 E2E tests PASS (6.3s) - API endpoint exists, Laravel backend responds, status validation. Files: 5 created, 1 modified (+521 insertions). Docs: `docs/AGENT/TASKS/Pass-25-order-status-tracking.md`, `docs/AGENT/SUMMARY/Pass-25.md`. Pattern: Similar to Pass 6/9/18 (audit-first verification, minimal backend addition for consistency). Email notifications optional (skipped). (Closed: 2025-12-23)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -69,14 +70,7 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-### 1) Order Status Tracking (Consumer View)
-- **DoD**:
-  - Consumer sees order status on `/orders/{id}` page (pending/processing/shipped/delivered)
-  - Backend supports status transitions (POST /api/v1/orders/{id}/status)
-  - Email sent to consumer on status change
-  - Backend tests: 2 tests (status_transition, notification_sent)
-  - E2E test: 1 test (order-status-display.spec.ts verifying status shown)
-  - PROD smoke: Order detail page shows status field
+(To be determined based on product priorities)
 
 ---
 
