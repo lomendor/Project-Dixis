@@ -14,6 +14,57 @@ function originFromReq(req: Request): string {
   return process.env.APP_ORIGIN || 'http://localhost:3000';
 }
 
+// GET /api/orders - List orders (from Prisma/Neon)
+export async function GET() {
+  const prisma = getPrisma();
+  if (!prisma) {
+    return NextResponse.json({ orders: [] });
+  }
+
+  try {
+    const orders = await prisma.order.findMany({
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
+    // Map Prisma orders to API format
+    const mapped = orders.map(order => ({
+      id: order.id,
+      user_id: 0, // Prisma orders don't have user_id currently
+      subtotal: order.subtotal?.toString() || '0',
+      tax_amount: order.vat?.toString() || '0',
+      shipping_amount: order.shipping?.toString() || '0',
+      total_amount: order.total?.toString() || '0',
+      payment_status: order.status || 'pending', // Use status field
+      payment_method: 'COD',
+      status: order.status || 'pending',
+      shipping_method: 'COURIER',
+      shipping_address: order.address,
+      postal_code: order.zip,
+      city: order.city,
+      created_at: order.createdAt?.toISOString() || new Date().toISOString(),
+      items: order.items.map(item => ({
+        id: item.id,
+        product_id: item.productId || 0,
+        quantity: item.qty,
+        price: item.priceSnap?.toString() || '0',
+        unit_price: item.priceSnap?.toString() || '0',
+        total_price: ((item.priceSnap || 0) * item.qty).toString(),
+        product_name: item.titleSnap || '',
+        product_unit: 'kg',
+        product: null as any,
+      })),
+      order_items: [] as any[], // duplicate of items for compatibility
+    }));
+
+    return NextResponse.json({ orders: mapped });
+  } catch (error) {
+    console.error('GET /api/orders error:', error);
+    return NextResponse.json({ orders: [] }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   // Rate-limit: 60 req/min (prod-only)
   if (!(await rateLimit('orders-create', 60))) {
