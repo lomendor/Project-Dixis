@@ -117,8 +117,11 @@ class OrderController extends Controller
             }
 
             // Create the order
+            // Use authenticated user's ID if available, otherwise allow guest orders
+            $userId = auth()->id() ?? $validated['user_id'] ?? null;
+
             $order = Order::create([
-                'user_id' => $validated['user_id'] ?? null,
+                'user_id' => $userId,
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'shipping_method' => $validated['shipping_method'],
