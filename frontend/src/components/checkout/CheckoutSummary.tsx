@@ -1,10 +1,14 @@
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
-import { useCart } from '@/store/cart';
+import { useCart, cartCount, cartTotalCents } from '@/lib/cart';
 
 export default function CheckoutSummary(){
-  const { items, total, count, clear } = useCart();
+  const cartItems = useCart(s => s.items);
+  const clearCart = useCart(s => s.clear);
+  const items = Object.values(cartItems); // Convert Record to array
+  const count = cartCount(cartItems);
+  const total = cartTotalCents(cartItems) / 100; // Convert cents to EUR
   const [submitting, setSubmitting] = React.useState(false);
   const [err, setErr] = React.useState<string|undefined>();
 
@@ -33,7 +37,7 @@ export default function CheckoutSummary(){
       sessionStorage.setItem('dixis:last-order', JSON.stringify(payload));
       // Προσπάθεια αποστολής email (δεν μπλοκάρει την ολοκλήρωση)
       try { fetch('/api/ops/email-order', { method:'POST', headers:{'content-type':'application/json','x-flow':'checkout'}, body: JSON.stringify(payload) }); } catch {}
-      clear();
+      clearCart();
       window.location.href = '/checkout/confirmation';
     } catch (e) {
       setErr('Σφάλμα προσωρινής αποθήκευσης — δοκίμασε ξανά.');
@@ -78,10 +82,10 @@ export default function CheckoutSummary(){
         <div className="border rounded-md p-3 bg-white">
           <h2 className="text-sm font-semibold">Σύνοψη</h2>
           <ul className="divide-y mt-2">
-            {items.map((it: any)=>(
+            {items.map(it => (
               <li key={it.id} className="py-2 flex justify-between text-sm">
                 <span className="text-neutral-700">{it.title} × {it.qty}</span>
-                <span className="font-medium">{(it.price*it.qty).toFixed(2)} {it.currency}</span>
+                <span className="font-medium">{((it.priceCents * it.qty) / 100).toFixed(2)} EUR</span>
               </li>
             ))}
           </ul>
