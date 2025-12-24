@@ -217,3 +217,46 @@ $(head -1607 docs/OPS/STATE.md)
 - Component features: postal code input, shipping method selector, weight/subtotal inputs, "Γιατί?" tooltip
 - No backend business logic changes (frontend-only UI feature)
 - Created docs/AGENT/SUMMARY/Pass-AG7a.md
+
+## Pass CC01 — Checkout Split-Brain Consolidation ✅
+**Date**: 2025-12-24
+**PR**: feat/checkout-consolidation
+**Scope**: Consolidate checkout to single Laravel API path
+
+### Changes Made:
+1. **Updated /checkout page** (`frontend/src/app/(storefront)/checkout/page.tsx`):
+   - Replaced `fetch('/api/checkout')` with `apiClient.createOrder()`
+   - Orders now persist in PostgreSQL via Laravel API (`/api/v1/orders`)
+   - Cart items mapped to Laravel format: `{ product_id, quantity }`
+   - Removed dependency on legacy Next.js API route
+
+2. **Updated CheckoutSummary component** (`frontend/src/components/checkout/CheckoutSummary.tsx`):
+   - Replaced `sessionStorage`-only order creation with `apiClient.createOrder()`
+   - Orders now saved to database before confirmation page
+   - Cart cleared after successful order creation
+
+3. **Marked legacy routes as deprecated**:
+   - Added `@deprecated` comment to `/api/checkout/route.ts`
+   - Routes kept for backward compatibility with payment flow and tests
+   - TODO: Migrate remaining flows to use Laravel API
+
+4. **Created E2E test** (`frontend/tests/e2e/checkout-laravel-api.spec.ts`):
+   - Verifies /checkout uses Laravel API, not legacy route
+   - Tests order persistence in database (not just sessionStorage)
+   - Validates split-brain fix
+
+5. **Documentation**:
+   - Created `CHECKOUT-ARCHITECTURE-SPLIT-BRAIN.md` documenting the problem
+   - Updated STATE.md (this file)
+
+### Impact:
+- ✅ Main checkout flow now persists orders to PostgreSQL
+- ✅ Orders not lost on browser close
+- ✅ Single source of truth for order creation
+- ✅ Build passed successfully
+- ⏸️ Legacy `/api/checkout/*` routes kept for payment flow migration
+
+### Next Steps:
+- Migrate `/checkout/payment` flow to use Laravel API
+- Remove legacy `/api/checkout/*` routes after full migration
+- Add customer shipping fields to Laravel Order schema (optional)

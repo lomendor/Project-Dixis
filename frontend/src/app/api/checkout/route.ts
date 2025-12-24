@@ -1,3 +1,11 @@
+/**
+ * @deprecated This route is legacy and should be replaced with Laravel API (/api/v1/orders).
+ * Currently kept for backward compatibility with:
+ * - CheckoutClient.tsx
+ * - /checkout/payment flow
+ * - Shipping tests
+ * TODO: Migrate all flows to use apiClient.createOrder() and remove this route.
+ */
 import { prisma } from '@/server/db/prisma'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
