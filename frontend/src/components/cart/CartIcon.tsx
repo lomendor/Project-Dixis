@@ -21,7 +21,9 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
     if (isGuest) {
       const updateGuestCart = () => {
         const cart = getCart();
-        setCartItemCount(cart.items.length);
+        // Count total quantity across all items, not just unique items
+        const totalQty = cart.items.reduce((sum, item) => sum + (item.qty || 1), 0);
+        setCartItemCount(totalQty);
       };
 
       updateGuestCart();
@@ -42,7 +44,10 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       try {
         const res = await fetch('/internal/cart', { cache: 'no-store' });
         const data = await res.json();
-        setCartItemCount((data?.items?.length) || 0);
+        // Count total quantity across all items (API uses 'quantity' field)
+        const totalQty = data?.items?.reduce((sum: number, item: any) =>
+          sum + (item.quantity || item.qty || 1), 0) || 0;
+        setCartItemCount(totalQty);
       } catch {
         setCartItemCount(0);
       }
