@@ -1,8 +1,9 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-23 21:35 UTC
+**Last Updated**: 2025-12-24 20:45 UTC
 
 ## CLOSED ✅ (do not reopen without NEW proof)
+- **SECURITY: Database Credentials Rotation (Neon Pooler → Direct Endpoint)**: Critical security incident resolved. Root cause: (1) Neon pgBouncer pooler endpoint incompatible with Laravel `SELECT FOR UPDATE` transactions (causing `SQLSTATE[25P02]: In failed sql transaction`), (2) DATABASE_URL with credentials exposed in terminal logs/summary (security leak). Fix: (1) Rotated Neon database password (`npg_WG10vYeFnsCk` → `npg_8zNfLox1iTIS`), (2) Switched from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`) in production .env, (3) Persisted new DATABASE_URL to GitHub Secret `DATABASE_URL_PRODUCTION` (repository-level), (4) Added CI guardrail: prod-smoke.yml now tests POST /api/v1/public/orders MUST NOT return 500 (detects transaction failures), (5) Created `.github/SECURITY.md` with no-secrets policy. Verification: Backend health check PASS (`database: connected`), order creation working (verified on production). Security measures: Old credentials revoked, new credentials stored securely in GitHub Secrets, no secrets in documentation. Documentation: Incident response following GPT security protocol (rotate → persist → guardrails → docs). Files: `backend/.env` (updated), `prod-smoke.yml` (+27 lines), `.github/SECURITY.md` (new, 71 lines). Pattern: Security-first response to credential exposure. (Closed: 2025-12-24)
 - **SSH/fail2ban**: Canonical SSH config enforced (deploy user + dixis_prod_ed25519 key + IdentitiesOnly yes). fail2ban active with no ignoreip whitelist. Production access stable. (Closed: 2025-12-19)
 - **OPS Bootstrap**: State management system (STATE.md + NEXT-7D.md + prod-facts.sh) committed and merged via PR #1761. (Closed: 2025-12-19)
 - **PM2 Resurrect**: pm2-deploy.service enabled (auto-start on boot). Tested pm2 kill + pm2 resurrect → both processes restored (dixis-frontend + dixis-backend). All health checks 200. Proof: `docs/OPS/PM2-RESURRECT-PROOF.md` (Closed: 2025-12-19)
