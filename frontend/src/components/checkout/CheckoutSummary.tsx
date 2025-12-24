@@ -1,9 +1,12 @@
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart, cartCount, cartTotalCents } from '@/lib/cart';
+import { apiClient } from '@/lib/api';
 
 export default function CheckoutSummary(){
+  const router = useRouter();
   const cartItems = useCart(s => s.items);
   const clearCart = useCart(s => s.clear);
   const items = Object.values(cartItems); // Convert Record to array
@@ -34,13 +37,30 @@ export default function CheckoutSummary(){
       setErr('Συμπλήρωσε τα βασικά στοιχεία αποστολής.'); setSubmitting(false); return;
     }
     try {
+      // Create order via Laravel API (persists to PostgreSQL)
+      const orderData = {
+        items: items.map(item => ({
+          product_id: parseInt(item.id.toString()),
+          quantity: item.qty
+        })),
+        currency: 'EUR' as const,
+        shipping_method: 'HOME' as const,
+        notes: payload.customer.notes || ''
+      };
+
+      const order = await apiClient.createOrder(orderData);
+
+      // Store payload in sessionStorage for confirmation page display
       sessionStorage.setItem('dixis:last-order', JSON.stringify(payload));
-      // Προσπάθεια αποστολής email (δεν μπλοκάρει την ολοκλήρωση)
-      try { fetch('/api/ops/email-order', { method:'POST', headers:{'content-type':'application/json','x-flow':'checkout'}, body: JSON.stringify(payload) }); } catch {}
+
+      // Clear cart after successful order creation
       clearCart();
-      window.location.href = '/checkout/confirmation';
+
+      // Redirect to confirmation page
+      router.push('/checkout/confirmation');
     } catch (e) {
-      setErr('Σφάλμα προσωρινής αποθήκευσης — δοκίμασε ξανά.');
+      console.error('Order creation failed:', e);
+      setErr('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.');
       setSubmitting(false);
     }
   };

@@ -2,6 +2,7 @@
 import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
+import { apiClient } from '@/lib/api'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 
 function CheckoutContent() {
@@ -46,33 +47,31 @@ function CheckoutContent() {
     }
 
     try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
+      // Create order via Laravel API (persists to PostgreSQL)
+      const orderData = {
+        items: Object.values(cartItems).map(item => ({
+          product_id: parseInt(item.id.toString()),
+          quantity: item.qty
+        })),
+        currency: 'EUR' as const,
+        shipping_method: 'HOME' as const,
+        notes: '' // Could add notes field to form if needed
+      };
 
-      const data = await res.json()
+      const order = await apiClient.createOrder(orderData);
 
-      if (!res.ok) {
-        setError(data.error || 'Checkout failed')
-        return
-      }
-
-      // Clear cart
+      // Clear cart after successful order creation
       clear()
 
-      // Redirect based on payment method
-      if (data.vivaCheckoutUrl) {
-        // Viva Wallet: redirect to external payment page
-        window.location.href = data.vivaCheckoutUrl
-      } else {
-        // COD: redirect to thank-you page
-        router.push(`/thank-you?id=${data.orderId}`)
-      }
+      // Store customer details for order confirmation/email
+      sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer));
+
+      // TODO: Payment method integration (Viva Wallet)
+      // For now, redirect to thank-you page with order ID
+      router.push(`/thank-you?id=${order.id}`)
     } catch (err) {
-      console.error('Submit error:', err)
-      setError('Παρουσιάστηκε σφάλμα')
+      console.error('Order creation failed:', err)
+      setError('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
     } finally {
       setLoading(false)
     }
