@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
-import BuyBox from '@/components/cart/BuyBox';
 import { getBaseUrl } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
@@ -220,7 +219,6 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               }}
             />
           </div>
-          <BuyBox product={{ id: p!.id as any, title: p!.title ?? p!.title, price: p!.price, currency: 'EUR' }} />
         </div>
       </div>
 
