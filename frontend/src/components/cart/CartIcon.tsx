@@ -11,7 +11,7 @@ interface CartIconProps {
 }
 
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
-  const { isGuest, isConsumer, isProducer } = useAuth();
+  const { isGuest, isConsumer, isProducer, isAdmin } = useAuth();
 
   // Use Zustand cart for all users (guests and authenticated)
   const items = useCart(state => state.items);
@@ -67,6 +67,31 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
     );
   }
 
+  // Admin users - full cart access (same as consumers)
+  if (isAdmin) {
+    return (
+      <Link
+        href="/cart"
+        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
+        data-testid={isMobile ? "mobile-nav-cart-admin" : "nav-cart-admin"}
+        aria-label={`View cart with ${cartItemCount} items`}
+      >
+        <span className="flex items-center" data-testid="cart-icon-admin">
+          🛒 Cart
+          {cartItemCount > 0 && (
+            <span
+              className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
+              data-testid="cart-item-count-admin"
+              aria-label="cart-count"
+            >
+              {cartItemCount}
+            </span>
+          )}
+        </span>
+      </Link>
+    );
+  }
+
   // Producer users - limited cart access with message
   if (isProducer) {
     return (
@@ -81,6 +106,26 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
     );
   }
 
-  // Fallback (should not reach here)
-  return null;
+  // Fallback - show cart link for safety (defensive programming)
+  return (
+    <Link
+      href="/cart"
+      className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
+      data-testid={isMobile ? "mobile-nav-cart-fallback" : "nav-cart-fallback"}
+      aria-label={`View cart with ${cartItemCount} items`}
+    >
+      <span className="flex items-center" data-testid="cart-icon-fallback">
+        🛒 Cart
+        {cartItemCount > 0 && (
+          <span
+            className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
+            data-testid="cart-item-count-fallback"
+            aria-label="cart-count"
+          >
+            {cartItemCount}
+          </span>
+        )}
+      </span>
+    </Link>
+  );
 }
