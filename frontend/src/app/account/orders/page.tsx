@@ -46,8 +46,14 @@ function OrdersPage(): React.JSX.Element {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.getOrders();
-        setOrders(response.orders);
+        // Fetch from Next.js Prisma orders (where checkout creates them)
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000';
+        const response = await fetch(`${baseUrl}/api/orders`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch orders: ${response.status}`);
+        }
+        const data = await response.json();
+        setOrders(data.orders || []);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
         showToast('error', 'Failed to load your orders. Please try again.');

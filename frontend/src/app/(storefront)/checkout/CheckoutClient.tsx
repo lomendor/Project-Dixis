@@ -97,10 +97,20 @@ export default function CheckoutClient(){
       }
 
       const body = await res.json()
-      const orderId = body.orderId || body.id || ''
+      // Extract order ID with fallback chain
+      const orderId = body?.orderId ?? body?.id ?? body?.data?.id ?? body?.order?.id ?? null
+
+      // CRITICAL: Do NOT redirect without a valid order ID
+      if (!orderId) {
+        console.error('[CHECKOUT] No order ID in response:', body)
+        router.push('/checkout?err=no-order-id')
+        return
+      }
+
       clearCart()
       router.push(`/order/${encodeURIComponent(orderId)}`)
     }catch(e){
+      console.error('[CHECKOUT] Submit error:', e)
       router.push('/checkout?err=submit')
     }finally{
       setLoading(false)
