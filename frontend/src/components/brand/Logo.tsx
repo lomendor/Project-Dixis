@@ -5,7 +5,7 @@ type Props = { className?: string; height?: number; title?: string };
 
 export default function Logo({ className, height = 22, title = "Dixis" }: Props) {
   const [hasImg, setHasImg] = React.useState(true);
-  const src = '/logo.svg'; // drop your logo here later
+  const src = '/logo.png'; // Dixis logo (clean transparent)
 
   return (
     <div
