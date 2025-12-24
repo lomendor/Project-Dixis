@@ -1,5 +1,5 @@
 'use client';
-import { useCart } from '@/lib/cart/context';
+import { useCart } from '@/lib/cart';
 import { useState } from 'react';
 
 interface AddProps {
@@ -11,18 +11,22 @@ interface AddProps {
 }
 
 export default function Add({ product, translations }: AddProps) {
-  const { addItem, force } = useCart();
+  const add = useCart(s => s.add);
   const [added, setAdded] = useState(false);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    addItem({
-      productId: product.id,
+
+    // Use the correct cart system (@/lib/cart - Zustand)
+    // Convert price to cents for consistency with products list
+    const priceCents = Math.round(Number(product.price || 0) * 100);
+
+    add({
+      id: String(product.id),
       title: product.title,
-      price: Number(product.price || 0),
-      qty: 1
+      priceCents: priceCents,
     });
-    force();
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
