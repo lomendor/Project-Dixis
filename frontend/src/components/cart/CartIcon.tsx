@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getCartMessage } from '@/lib/auth/helpers';
-import { getCart } from '@/lib/cart/store';
+import { useCart, cartCount } from '@/lib/cart';
 
 interface CartIconProps {
   className?: string;
@@ -12,54 +11,11 @@ interface CartIconProps {
 }
 
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
-  const { isGuest, isConsumer, isProducer, user } = useAuth();
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const { isGuest, isConsumer, isProducer } = useAuth();
 
-  // Fetch cart count from API (for authenticated users) or localStorage (for guests)
-  useEffect(() => {
-    // Guest users: get cart from localStorage
-    if (isGuest) {
-      const updateGuestCart = () => {
-        const cart = getCart();
-        // Count total quantity across all items, not just unique items
-        const totalQty = cart.items.reduce((sum, item) => sum + (item.qty || 1), 0);
-        setCartItemCount(totalQty);
-      };
-
-      updateGuestCart();
-
-      // Listen for cart updates
-      window.addEventListener('storage', updateGuestCart);
-      window.addEventListener('cart:updated', updateGuestCart);
-      return () => {
-        window.removeEventListener('storage', updateGuestCart);
-        window.removeEventListener('cart:updated', updateGuestCart);
-      };
-    }
-
-    // Consumer users: fetch from API
-    if (!isConsumer) return undefined;
-
-    async function fetchCartCount() {
-      try {
-        const res = await fetch('/internal/cart', { cache: 'no-store' });
-        const data = await res.json();
-        // Count total quantity across all items (API uses 'quantity' field)
-        const totalQty = data?.items?.reduce((sum: number, item: any) =>
-          sum + (item.quantity || item.qty || 1), 0) || 0;
-        setCartItemCount(totalQty);
-      } catch {
-        setCartItemCount(0);
-      }
-    }
-
-    fetchCartCount();
-
-    // Listen for cart updates
-    const handleUpdate = () => fetchCartCount();
-    window.addEventListener('cart:updated', handleUpdate);
-    return () => window.removeEventListener('cart:updated', handleUpdate);
-  }, [isGuest, isConsumer]);
+  // Use Zustand cart for all users (guests and authenticated)
+  const items = useCart(state => state.items);
+  const cartItemCount = cartCount(items);
 
   // Guest users - show cart link (guest checkout supported)
   if (isGuest) {

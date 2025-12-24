@@ -1,8 +1,7 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { useCart } from '@/lib/cart/context'
-import type { CartItem } from '@/lib/cart/store'
+import { useCart, cartTotalCents } from '@/lib/cart'
 import { calcTotals, fmtEUR } from '@/lib/cart/totals'
 import { DEFAULT_OPTIONS } from '@/contracts/shipping'
 import { useTranslations } from 'next-intl'
@@ -18,11 +17,13 @@ export default function CheckoutClient(){
   const router = useRouter()
   const searchParams = useSearchParams()
   const err = searchParams?.get('err') || null
-  const cart = useCart()
   const t = useTranslations()
-  const state = cart.getCart()
-  const items: CartItem[] = state.items
-  const shippingMethod = state.shippingMethod
+
+  // Use Zustand cart
+  const cartItems = useCart(state => state.items)
+  const clearCart = useCart(state => state.clear)
+  const items = Object.values(cartItems) // Convert Record to array
+  const shippingMethod = 'COURIER' // TODO: Add shipping method selection to cart
   const [loading, setLoading] = useState(false)
 
   // Live totals state from ShippingBreakdown
@@ -36,7 +37,8 @@ export default function CheckoutClient(){
   // Find shipping option details
   const shippingOption = DEFAULT_OPTIONS.find(opt => opt.code === shippingMethod) || DEFAULT_OPTIONS[0]
 
-  const lines = items.map((i: CartItem)=>({ price:Number(i.price||0), qty:Number(i.qty||0) }))
+  // Map Zustand cart items (priceCents) to totals format (price in cents)
+  const lines = items.map(i => ({ price: i.priceCents, qty: i.qty }))
   const totals = calcTotals({
     items: lines,
     shippingMethod,
@@ -83,7 +85,7 @@ export default function CheckoutClient(){
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          items: items.map((i: CartItem)=>({ productId: i.productId, qty: i.qty })),
+          items: items.map(i => ({ productId: i.id, qty: i.qty })),
           shipping: { name, phone, email, line1, city, postal },
           payment: { method:'COD' }
         })
@@ -96,7 +98,7 @@ export default function CheckoutClient(){
 
       const body = await res.json()
       const orderId = body.orderId || body.id || ''
-      cart.clear()
+      clearCart()
       router.push(`/order/${encodeURIComponent(orderId)}`)
     }catch(e){
       router.push('/checkout?err=submit')
@@ -189,10 +191,10 @@ export default function CheckoutClient(){
           <aside className="border rounded-lg p-6 bg-gray-50 h-fit" data-testid="checkout-summary">
             <h3 className="font-semibold mb-4">{t('cart.items')}</h3>
             <ul className="space-y-2 mb-4">
-              {items.map((it: CartItem)=>(
-                <li key={it.productId} className="flex justify-between gap-4">
+              {items.map(it => (
+                <li key={it.id} className="flex justify-between gap-4">
                   <span className="text-sm">{it.title} × {it.qty}</span>
-                  <span className="text-sm font-medium">{fmtEUR(Number(it.price)*Number(it.qty))}</span>
+                  <span className="text-sm font-medium">{fmtEUR(it.priceCents * it.qty)}</span>
                 </li>
               ))}
             </ul>
