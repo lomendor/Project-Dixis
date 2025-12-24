@@ -55,7 +55,7 @@ export async function GET() {
         product_unit: 'kg',
         product: null as any,
       })),
-      order_items: [], // duplicate of items for compatibility
+      order_items: [] as any[], // duplicate of items for compatibility
     }));
 
     return NextResponse.json({ orders: mapped });
