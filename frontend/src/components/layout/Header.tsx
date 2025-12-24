@@ -47,6 +47,16 @@ export default function Header() {
           {/* Desktop Auth Section */}
           {isAuthenticated ? (
             <>
+              {/* Consumer: Show "Οι Παραγγελίες Μου" */}
+              {!isProducer && !isAdmin && (
+                <Link
+                  href="/account/orders"
+                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+                  data-testid="nav-my-orders"
+                >
+                  Οι Παραγγελίες Μου
+                </Link>
+              )}
               {isProducer && (
                 <Link
                   href="/producer/dashboard"
@@ -140,6 +150,17 @@ export default function Header() {
             <div className="border-t border-neutral-200 mt-2 pt-2">
               {isAuthenticated ? (
                 <>
+                  {/* Consumer: Show "Οι Παραγγελίες Μου" */}
+                  {!isProducer && !isAdmin && (
+                    <Link
+                      href="/account/orders"
+                      className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-testid="mobile-nav-my-orders"
+                    >
+                      Οι Παραγγελίες Μου
+                    </Link>
+                  )}
                   {isProducer && (
                     <Link
                       href="/producer/dashboard"
