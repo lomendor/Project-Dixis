@@ -9,7 +9,7 @@ import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('el-GR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -21,17 +21,19 @@ function formatDate(dateString: string): string {
 function formatStatus(status: string): { text: string; color: string } {
   switch (status.toLowerCase()) {
     case 'draft':
-      return { text: 'Draft', color: 'bg-gray-100 text-gray-800' };
+      return { text: 'Πρόχειρο', color: 'bg-gray-100 text-gray-800' };
     case 'pending':
-      return { text: 'Pending', color: 'bg-yellow-100 text-yellow-800' };
+      return { text: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' };
     case 'paid':
-      return { text: 'Paid', color: 'bg-blue-100 text-blue-800' };
+      return { text: 'Πληρωμένη', color: 'bg-blue-100 text-blue-800' };
+    case 'processing':
+      return { text: 'Σε Επεξεργασία', color: 'bg-blue-100 text-blue-800' };
     case 'shipped':
-      return { text: 'Shipped', color: 'bg-purple-100 text-purple-800' };
+      return { text: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' };
     case 'delivered':
-      return { text: 'Delivered', color: 'bg-green-100 text-green-800' };
+      return { text: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' };
     case 'cancelled':
-      return { text: 'Cancelled', color: 'bg-red-100 text-red-800' };
+      return { text: 'Ακυρώθηκε', color: 'bg-red-100 text-red-800' };
     default:
       return { text: status, color: 'bg-gray-100 text-gray-800' };
   }
@@ -99,22 +101,22 @@ function OrderDetailsPage(): React.JSX.Element {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Order Not Found</h3>
-            <p className="text-gray-500 mb-6">{error || 'The order you\'re looking for could not be found.'}</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Η Παραγγελία Δεν Βρέθηκε</h3>
+            <p className="text-gray-500 mb-6">{error || 'Η παραγγελία που αναζητάτε δεν βρέθηκε.'}</p>
             <div className="space-x-4">
               <button
                 onClick={() => router.back()}
                 data-testid="back-button"
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                Go Back
+                Πίσω
               </button>
               <Link
                 href="/account/orders"
                 data-testid="view-all-orders-link"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                View All Orders
+                Όλες οι Παραγγελίες
               </Link>
             </div>
           </div>
@@ -141,13 +143,13 @@ function OrderDetailsPage(): React.JSX.Element {
               <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to Orders
+              Επιστροφή στις Παραγγελίες
             </Link>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order #{order.id}</h1>
-              <p className="text-gray-600">Placed on {formatDate(order.created_at)}</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Παραγγελία #{order.id}</h1>
+              <p className="text-gray-600">Ημερομηνία: {formatDate(order.created_at)}</p>
             </div>
             <span
               data-testid="order-status-badge"
@@ -164,7 +166,7 @@ function OrderDetailsPage(): React.JSX.Element {
             {/* Order Items */}
             <div data-testid="order-items-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Order Items ({totalItems})</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Προϊόντα Παραγγελίας ({totalItems})</h2>
               </div>
               <div className="divide-y divide-gray-200">
                 {orderItems.map((item) => (
@@ -192,17 +194,17 @@ function OrderDetailsPage(): React.JSX.Element {
                     )}
                     <div className="ml-4 flex-1">
                       <h3 className="text-sm font-medium text-gray-900" data-testid="product-name">
-                        {item.product_name || item.product?.name || 'Product'}
+                        {item.product_name || item.product?.name || 'Προϊόν'}
                       </h3>
                       <div className="mt-1 flex items-center text-sm text-gray-500">
-                        <span data-testid="item-quantity">Quantity: {item.quantity}</span>
+                        <span data-testid="item-quantity">Ποσότητα: {item.quantity}</span>
                         <span className="mx-2">•</span>
                         <span data-testid="item-unit">
-                          {item.product_unit || item.product?.unit || 'unit'}
+                          {item.product_unit || item.product?.unit || 'τεμ.'}
                         </span>
                       </div>
                       <div className="mt-1 text-sm text-gray-500">
-                        <span data-testid="unit-price">€{item.unit_price || item.price} each</span>
+                        <span data-testid="unit-price">€{item.unit_price || item.price} / τεμάχιο</span>
                       </div>
                     </div>
                     <div className="ml-4">
@@ -218,7 +220,7 @@ function OrderDetailsPage(): React.JSX.Element {
             {/* Order Timeline */}
             <div data-testid="order-timeline-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Order Timeline</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Χρονολόγιο Παραγγελίας</h2>
               </div>
               <div className="p-6">
                 <div className="flow-root">
@@ -236,7 +238,7 @@ function OrderDetailsPage(): React.JSX.Element {
                           <div className="min-w-0 flex-1">
                             <div>
                               <div className="text-sm">
-                                <span className="font-medium text-gray-900">Order placed</span>
+                                <span className="font-medium text-gray-900">Παραγγελία υποβλήθηκε</span>
                               </div>
                               <p className="mt-0.5 text-sm text-gray-500">
                                 {formatDate(order.created_at)}
@@ -264,10 +266,10 @@ function OrderDetailsPage(): React.JSX.Element {
                             <div className="min-w-0 flex-1">
                               <div>
                                 <div className="text-sm">
-                                  <span className="font-medium text-gray-900">Status: {statusConfig.text}</span>
+                                  <span className="font-medium text-gray-900">Κατάσταση: {statusConfig.text}</span>
                                 </div>
                                 <p className="mt-0.5 text-sm text-gray-500">
-                                  Current status
+                                  Τρέχουσα κατάσταση
                                 </p>
                               </div>
                             </div>
@@ -286,18 +288,18 @@ function OrderDetailsPage(): React.JSX.Element {
             {/* Payment Summary */}
             <div data-testid="payment-summary-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Σύνοψη Παραγγελίας</h2>
               </div>
               <div className="p-6 space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Subtotal</span>
+                  <span className="text-sm text-gray-600">Υποσύνολο</span>
                   <span className="text-sm font-medium text-gray-900" data-testid="subtotal-amount">
                     €{order.subtotal}
                   </span>
                 </div>
                 {order.tax_amount && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Tax</span>
+                    <span className="text-sm text-gray-600">ΦΠΑ</span>
                     <span className="text-sm font-medium text-gray-900" data-testid="tax-amount">
                       €{order.tax_amount}
                     </span>
@@ -305,7 +307,7 @@ function OrderDetailsPage(): React.JSX.Element {
                 )}
                 {order.shipping_amount && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Shipping</span>
+                    <span className="text-sm text-gray-600">Αποστολή</span>
                     <span className="text-sm font-medium text-gray-900" data-testid="shipping-amount">
                       €{order.shipping_amount}
                     </span>
@@ -313,7 +315,7 @@ function OrderDetailsPage(): React.JSX.Element {
                 )}
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between">
-                    <span className="text-base font-medium text-gray-900">Total</span>
+                    <span className="text-base font-medium text-gray-900">Σύνολο</span>
                     <span className="text-base font-medium text-gray-900" data-testid="total-amount">
                       €{order.total_amount}
                     </span>
@@ -325,24 +327,24 @@ function OrderDetailsPage(): React.JSX.Element {
             {/* Shipping & Payment Info */}
             <div data-testid="shipping-payment-info-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Shipping & Payment</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Αποστολή & Πληρωμή</h2>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Payment Method</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Πληρωμής</h3>
                   <p className="text-sm text-gray-600" data-testid="payment-method">
-                    {order.payment_method || 'Not specified'}
+                    {order.payment_method || 'Δεν έχει οριστεί'}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Shipping Method</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Αποστολής</h3>
                   <p className="text-sm text-gray-600" data-testid="shipping-method">
-                    {order.shipping_method || 'Not specified'}
+                    {order.shipping_method || 'Δεν έχει οριστεί'}
                   </p>
                 </div>
                 {order.shipping_address && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-1">Shipping Address</h3>
+                    <h3 className="text-sm font-medium text-gray-900 mb-1">Διεύθυνση Αποστολής</h3>
                     <p className="text-sm text-gray-600" data-testid="shipping-address">
                       {order.shipping_address}
                       {order.city && `, ${order.city}`}
@@ -352,7 +354,7 @@ function OrderDetailsPage(): React.JSX.Element {
                 )}
                 {order.notes && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-1">Order Notes</h3>
+                    <h3 className="text-sm font-medium text-gray-900 mb-1">Σημειώσεις Παραγγελίας</h3>
                     <p className="text-sm text-gray-600" data-testid="order-notes">
                       {order.notes}
                     </p>

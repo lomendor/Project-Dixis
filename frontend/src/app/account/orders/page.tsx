@@ -7,7 +7,7 @@ import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString('el-GR', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -19,17 +19,19 @@ function formatDate(dateString: string): string {
 function formatStatus(status: string): { text: string; color: string } {
   switch (status.toLowerCase()) {
     case 'draft':
-      return { text: 'Draft', color: 'bg-gray-100 text-gray-800' };
+      return { text: 'Πρόχειρο', color: 'bg-gray-100 text-gray-800' };
     case 'pending':
-      return { text: 'Pending', color: 'bg-yellow-100 text-yellow-800' };
+      return { text: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' };
     case 'paid':
-      return { text: 'Paid', color: 'bg-blue-100 text-blue-800' };
+      return { text: 'Πληρωμένη', color: 'bg-blue-100 text-blue-800' };
+    case 'processing':
+      return { text: 'Σε Επεξεργασία', color: 'bg-blue-100 text-blue-800' };
     case 'shipped':
-      return { text: 'Shipped', color: 'bg-purple-100 text-purple-800' };
+      return { text: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' };
     case 'delivered':
-      return { text: 'Delivered', color: 'bg-green-100 text-green-800' };
+      return { text: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' };
     case 'cancelled':
-      return { text: 'Cancelled', color: 'bg-red-100 text-red-800' };
+      return { text: 'Ακυρώθηκε', color: 'bg-red-100 text-red-800' };
     default:
       return { text: status, color: 'bg-gray-100 text-gray-800' };
   }
@@ -73,8 +75,8 @@ function OrdersPage(): React.JSX.Element {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Order History</h1>
-          <p className="text-gray-600">Track and manage your orders</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ιστορικό Παραγγελιών</h1>
+          <p className="text-gray-600">Παρακολουθήστε και διαχειριστείτε τις παραγγελίες σας</p>
         </div>
 
         {orders.length === 0 ? (
@@ -84,14 +86,14 @@ function OrdersPage(): React.JSX.Element {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-            <p className="text-gray-500 mb-6">When you make your first purchase, it will appear here.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Δεν έχετε παραγγελίες ακόμα</h3>
+            <p className="text-gray-500 mb-6">Όταν κάνετε την πρώτη σας αγορά, θα εμφανιστεί εδώ.</p>
             <Link
               href="/products"
               data-testid="browse-products-link"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              Browse Products
+              Δείτε τα Προϊόντα
             </Link>
           </div>
         ) : (
@@ -111,10 +113,10 @@ function OrdersPage(): React.JSX.Element {
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          Order #{order.id}
+                          Παραγγελία #{order.id}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Placed on {formatDate(order.created_at)}
+                          Ημερομηνία: {formatDate(order.created_at)}
                         </p>
                       </div>
                       <span
@@ -127,23 +129,23 @@ function OrdersPage(): React.JSX.Element {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Total Amount</p>
+                        <p className="text-sm font-medium text-gray-500">Συνολικό Ποσό</p>
                         <p className="text-lg font-semibold text-gray-900">€{order.total_amount}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Items</p>
-                        <p className="text-lg font-semibold text-gray-900">{totalItems} items</p>
+                        <p className="text-sm font-medium text-gray-500">Προϊόντα</p>
+                        <p className="text-lg font-semibold text-gray-900">{totalItems} {totalItems === 1 ? 'προϊόν' : 'προϊόντα'}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Payment Method</p>
-                        <p className="text-lg font-semibold text-gray-900">{order.payment_method || 'N/A'}</p>
+                        <p className="text-sm font-medium text-gray-500">Τρόπος Πληρωμής</p>
+                        <p className="text-lg font-semibold text-gray-900">{order.payment_method || 'Δεν έχει οριστεί'}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div className="text-sm text-gray-500">
                         {order.shipping_method && (
-                          <span>Shipping: {order.shipping_method}</span>
+                          <span>Αποστολή: {order.shipping_method}</span>
                         )}
                       </div>
                       <Link
@@ -151,7 +153,7 @@ function OrdersPage(): React.JSX.Element {
                         data-testid="view-order-details-link"
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                       >
-                        View Details
+                        Λεπτομέρειες
                         <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>

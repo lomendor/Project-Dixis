@@ -124,6 +124,34 @@ jobs:
             exit 1
           fi
 
+      - name: Check PROD checkout API (MUST NOT return 500)
+        run: |
+          echo "=== Checking checkout API (transaction safety) ==="
+          # POST to checkout with invalid/empty data
+          # Expected: 400, 401, 422 (client errors) - NOT 500 (server error)
+          # This guards against database transaction failures
+          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            -X POST https://dixis.gr/api/v1/public/orders \
+            -H "Content-Type: application/json" \
+            -d '{}')
+
+          echo "Checkout API HTTP code: $HTTP_CODE"
+
+          # CRITICAL: MUST NOT be 500 (indicates DB transaction failure)
+          if [ "$HTTP_CODE" = "500" ]; then
+            echo "❌ CRITICAL FAIL: Checkout API returned 500 (database transaction error)"
+            echo "This may indicate: Neon pooler issue, SELECT FOR UPDATE failure, or DB connection problem"
+            exit 1
+          fi
+
+          # Expected client errors (400, 401, 422) are OK
+          if [ "$HTTP_CODE" = "400" ] || [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "422" ]; then
+            echo "✅ PASS: Checkout API responding correctly ($HTTP_CODE - validation/auth error as expected)"
+          else
+            echo "⚠️  WARNING: Checkout API returned unexpected code: $HTTP_CODE (expected 400/401/422 for invalid request)"
+          fi
+
       - name: Summary
         if: always()
         run: |
