@@ -3,22 +3,27 @@ import * as React from 'react';
 
 type Props = { className?: string; height?: number; title?: string };
 
-export default function Logo({ className, height = 22, title = "Dixis" }: Props) {
+export default function Logo({ className, height = 40, title = "Dixis" }: Props) {
   const [hasImg, setHasImg] = React.useState(true);
-  const src = '/logo.png'; // Dixis logo (clean transparent)
+  const src = '/logo.png'; // Dixis icon (512x512, optimized)
 
   return (
     <div
       data-testid="logo"
       className={className}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+      style={{ display: 'inline-flex', alignItems: 'center' }}
     >
       {hasImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt={title}
+          alt={`${title} logo`}
+          width={height}
           height={height}
+          style={{
+            objectFit: 'contain',
+            display: 'block'
+          }}
           onError={() => setHasImg(false)}
         />
       ) : (
