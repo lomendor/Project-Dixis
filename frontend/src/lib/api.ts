@@ -468,7 +468,7 @@ class ApiClient {
     shipping_method: 'HOME' | 'PICKUP';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('orders', {
+    return this.request<Order>('public/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
