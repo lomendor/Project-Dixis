@@ -29,22 +29,8 @@ export async function GET() {
     });
 
     // Map Prisma orders to API format
-    const mapped = orders.map(order => ({
-      id: order.id,
-      user_id: 0, // Prisma orders don't have user_id currently
-      subtotal: order.subtotal?.toString() || '0',
-      tax_amount: order.vat?.toString() || '0',
-      shipping_amount: order.shipping?.toString() || '0',
-      total_amount: order.total?.toString() || '0',
-      payment_status: order.status || 'pending', // Use status field
-      payment_method: 'COD',
-      status: order.status || 'pending',
-      shipping_method: 'COURIER',
-      shipping_address: order.address,
-      postal_code: order.zip,
-      city: order.city,
-      created_at: order.createdAt?.toISOString() || new Date().toISOString(),
-      items: order.items.map(item => ({
+    const mapped = orders.map(order => {
+      const items = order.items.map(item => ({
         id: item.id,
         product_id: item.productId || 0,
         quantity: item.qty,
@@ -54,9 +40,27 @@ export async function GET() {
         product_name: item.titleSnap || '',
         product_unit: 'kg',
         product: null as any,
-      })),
-      order_items: [] as any[], // duplicate of items for compatibility
-    }));
+      }));
+
+      return {
+        id: order.id,
+        user_id: 0, // Prisma orders don't have user_id currently
+        subtotal: order.subtotal?.toString() || '0',
+        tax_amount: order.vat?.toString() || '0',
+        shipping_amount: order.shipping?.toString() || '0',
+        total_amount: order.total?.toString() || '0',
+        payment_status: order.status || 'pending', // Use status field
+        payment_method: 'COD',
+        status: order.status || 'pending',
+        shipping_method: 'COURIER',
+        shipping_address: order.address,
+        postal_code: order.zip,
+        city: order.city,
+        created_at: order.createdAt?.toISOString() || new Date().toISOString(),
+        items,
+        order_items: items, // duplicate for compatibility, typed correctly
+      };
+    });
 
     return NextResponse.json({ orders: mapped });
   } catch (error) {
