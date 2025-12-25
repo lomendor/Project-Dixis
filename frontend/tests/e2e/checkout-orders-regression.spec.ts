@@ -58,7 +58,7 @@ test.describe('Checkout → Orders History (Regression)', () => {
     await page.goto('/account/orders');
 
     // Intercept orders API (Next.js endpoint now, not Laravel)
-    await page.route('**/api/orders', async (route) => {
+    await page.route('**/internal/orders', async (route) => {
       await route.fulfill({
         status: 200,
         json: {
