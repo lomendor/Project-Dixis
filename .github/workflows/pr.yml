@@ -30,6 +30,8 @@ jobs:
           --health-retries=5
     steps:
       - uses: actions/checkout@v4
+      - name: Guard - block secret leaks in diff
+        run: ./scripts/guard-no-secrets-diff.sh
 
       # Frontend checks
       - name: Enable corepack
