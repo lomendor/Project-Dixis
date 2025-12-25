@@ -17,11 +17,20 @@ class OrderCommissionPreviewController extends Controller
             abort(404);
         }
 
-        $payload = $service->calculateFee($order);
+        try {
+            $payload = $service->calculateFee($order);
 
-        return response()->json([
-            'order_id' => $order->id,
-            'commission_preview' => $payload, // { commission_cents, rule_id, breakdown }
-        ]);
+            return response()->json([
+                'order_id' => $order->id,
+                'commission_preview' => $payload, // { commission_cents, rule_id, breakdown }
+            ]);
+        } catch (\Exception $e) {
+            // Log error but return 404 instead of 500 to avoid exposing internals
+            \Log::error('Commission preview calculation failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            abort(404);
+        }
     }
 }
