@@ -65,4 +65,13 @@ class OrderCommissionPreviewTest extends TestCase
         $this->assertEquals($order->id, $res['order_id']);
         $this->assertEquals(1200, $res['commission_preview']['commission_cents']); // 12% of 10000
     }
+
+    public function test_returns_404_for_nonexistent_order(): void
+    {
+        Feature::define('commission_engine_v1', fn() => true);
+
+        // Try to access an order that doesn't exist
+        $this->getJson('/api/orders/999999/commission-preview')
+            ->assertStatus(404);
+    }
 }
