@@ -74,7 +74,7 @@ export default function PaymentPage() {
     if (res.ok) {
       // Save order to database/memory before redirect
       try {
-        const resp = await fetch('/api/orders', {
+        const resp = await fetch('/internal/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

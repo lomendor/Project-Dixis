@@ -48,7 +48,7 @@ function OrdersPage(): React.JSX.Element {
         setLoading(true);
         // Fetch from Next.js Prisma orders (where checkout creates them)
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000';
-        const response = await fetch(`${baseUrl}/api/orders`);
+        const response = await fetch(`${baseUrl}/internal/orders`);
         if (!response.ok) {
           throw new Error(`Failed to fetch orders: ${response.status}`);
         }
