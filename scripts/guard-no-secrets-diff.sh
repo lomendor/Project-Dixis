@@ -5,9 +5,11 @@ set -euo pipefail
 # It scans only changed lines vs origin/main (or upstream main) to avoid false positives.
 BASE_REF="${BASE_REF:-origin/main}"
 
-git fetch origin main >/dev/null 2>&1 || true
+# Fetch with enough depth to find merge base (CI shallow clone needs this)
+git fetch origin main --depth=50 >/dev/null 2>&1 || true
 
-DIFF="$(git diff --unified=0 "${BASE_REF}...HEAD")"
+# Try three-dot diff first (merge base), fall back to two-dot if no merge base
+DIFF="$(git diff --unified=0 "${BASE_REF}...HEAD" 2>/dev/null || git diff --unified=0 "${BASE_REF}..HEAD")"
 
 # Patterns that should never appear with real values in diffs.
 # We allow placeholders like "<redacted>" or "***" by explicitly excluding them.
