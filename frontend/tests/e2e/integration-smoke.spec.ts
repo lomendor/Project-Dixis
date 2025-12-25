@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Frontend ↔ API Integration Smoke Tests', () => {
   test.describe.configure({ mode: 'skip' }); // Temporarily skip integration tests
   const API_BASE = 'http://127.0.0.1:8001';
-  const FRONTEND_BASE = 'http://127.0.0.1:3001';
+  const FRONTEND_BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
   test('Core Flow: Login → View Products → Create Order', async ({ page }) => {
     // 1. LOGIN FLOW - Direct API token authentication

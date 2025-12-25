@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-const BASE = process.env.BASE_URL || 'http://127.0.0.1:3001' // local dev
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000' // local dev
 
 test.describe('Cart +/- buttons (AG119.2)', () => {
   test('add from products, then + and - work, badge & total update', async ({ page }) => {
