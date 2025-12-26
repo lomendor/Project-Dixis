@@ -32,6 +32,7 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 15);
 
         $query = Order::query()
+            ->with('orderItems') // Eager-load items for list view
             ->withCount('orderItems')
             ->orderBy('created_at', 'desc');
 

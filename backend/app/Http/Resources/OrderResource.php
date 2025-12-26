@@ -14,16 +14,30 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Calculate total from subtotal + shipping if total is not set
+        $total = $this->total ?? $this->total_amount ?? ($this->subtotal + ($this->shipping_cost ?? 0));
+
         return [
             'id' => $this->id,
             'order_number' => 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT),
-            'status' => $this->status,
-            'total' => number_format((float) ($this->total ?? $this->total_amount ?? 0), 2),
-            'currency' => $this->currency ?? 'EUR', // Use order currency or default to EUR
+            'status' => $this->status ?? 'pending',
+            'payment_status' => $this->payment_status ?? 'pending',
+            'payment_method' => $this->payment_method ?? 'cod', // Default: Cash on Delivery
+            'shipping_method' => $this->shipping_method ?? 'HOME',
+            // Financial fields - use both new and legacy field names for frontend compatibility
+            'subtotal' => number_format((float) ($this->subtotal ?? 0), 2),
+            'tax_amount' => number_format((float) ($this->tax_amount ?? 0), 2),
+            'shipping_amount' => number_format((float) ($this->shipping_cost ?? $this->shipping_amount ?? 0), 2),
+            'shipping_cost' => number_format((float) ($this->shipping_cost ?? $this->shipping_amount ?? 0), 2),
+            'total' => number_format((float) $total, 2),
+            'total_amount' => number_format((float) $total, 2), // Alias for frontend compatibility
+            'currency' => $this->currency ?? 'EUR',
             'created_at' => $this->created_at?->toISOString(),
             'items_count' => $this->order_items_count ?? $this->orderItems?->count() ?? 0,
+            // Always include items when loaded
             $this->mergeWhen($this->relationLoaded('orderItems'), [
                 'items' => OrderItemResource::collection($this->orderItems ?? []),
+                'order_items' => OrderItemResource::collection($this->orderItems ?? []), // Alias
             ]),
         ];
     }

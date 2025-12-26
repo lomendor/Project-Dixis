@@ -308,11 +308,16 @@ class OrdersCreateApiTest extends TestCase
             $this->assertArrayHasKey($field, $responseData);
         }
 
-        // Verify PII fields are NOT present
-        $piiFields = ['user_id', 'email', 'phone', 'shipping_address', 'billing_address', 'payment_method'];
+        // Verify actual PII fields are NOT present (payment_method is NOT PII)
+        $piiFields = ['user_id', 'email', 'phone', 'shipping_address', 'billing_address'];
         foreach ($piiFields as $field) {
             $this->assertArrayNotHasKey($field, $responseData);
         }
+
+        // Verify non-PII operational fields ARE present (needed for UI)
+        $this->assertArrayHasKey('payment_method', $responseData);
+        $this->assertArrayHasKey('shipping_method', $responseData);
+        $this->assertArrayHasKey('payment_status', $responseData);
 
         // Verify currency was saved correctly
         $this->assertEquals('USD', $responseData['currency']);

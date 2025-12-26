@@ -15,10 +15,13 @@ class OrderItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'product_id' => $this->product_id,
-            'product_name' => $this->product_name,
+            'product_name' => $this->product_name ?? 'Product',
+            'product_unit' => $this->product_unit ?? 'τεμ.',
             'quantity' => $this->quantity,
             'unit_price' => number_format((float) $this->unit_price, 2),
+            'price' => number_format((float) $this->unit_price, 2), // Alias for frontend
             'total_price' => number_format((float) $this->total_price, 2),
         ];
     }
