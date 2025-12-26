@@ -201,7 +201,7 @@ function CheckoutContent() {
                 autoComplete="postal-code"
                 placeholder="10671"
                 className="w-full h-11 px-4 border rounded-lg text-base"
-                data-testid="checkout-postcode"
+                data-testid="checkout-postal"
               />
             </div>
 

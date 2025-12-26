@@ -7,7 +7,7 @@ export const dynamic = 'force-static';
 export async function GET(request: NextRequest) {
   try {
     // In standalone mode, public files are at the root level
-    const logoPath = path.join(process.cwd(), 'public', 'logo.png');
+    const logoPath = path.join(process.cwd(), 'public', 'assets', 'logo.png');
 
     // Check if file exists
     if (!fs.existsSync(logoPath)) {

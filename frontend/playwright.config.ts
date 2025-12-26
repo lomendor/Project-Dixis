@@ -14,10 +14,20 @@ export default defineConfig({
   },
   webServer: useExternal
     ? undefined
-    : {
-        command: 'PORT=3001 pnpm dev -p 3001',
-        port: 3001,
-        reuseExistingServer: true,
-        timeout: 60_000,
-      },
+    : [
+        // Frontend webServer (Next.js)
+        {
+          command: 'PORT=3001 pnpm dev -p 3001',
+          port: 3001,
+          reuseExistingServer: true,
+          timeout: 60_000,
+        },
+        // Backend webServer (Laravel API on port 8001)
+        {
+          command: 'bash ../scripts/dev-backend-8001.sh',
+          url: 'http://127.0.0.1:8001',
+          reuseExistingServer: true,
+          timeout: 120_000,
+        },
+      ],
 });
