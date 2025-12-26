@@ -392,4 +392,109 @@ class OrdersCreateApiTest extends TestCase
             'shipping_method' => 'PICKUP',
         ]);
     }
+
+    /**
+     * Regression test for Pass 38 - ProductController TypeError
+     * Ensures string IDs return 404 instead of 500 TypeError
+     */
+    public function test_product_show_returns_404_on_string_id_not_500(): void
+    {
+        // Test with non-numeric string (should return 404, not 500 TypeError)
+        $response = $this->getJson('/api/v1/public/products/abc123');
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format',
+            ]);
+
+        // Test with special characters
+        $response = $this->getJson('/api/v1/public/products/test-product');
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format',
+            ]);
+
+        // Test with negative number (should also fail gracefully)
+        $response = $this->getJson('/api/v1/public/products/-5');
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format',
+            ]);
+
+        // Test with zero
+        $response = $this->getJson('/api/v1/public/products/0');
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format',
+            ]);
+    }
+
+    /**
+     * Regression test for Pass 38 - Transaction leak prevention
+     * Ensures failed order creation doesn't leave open transactions
+     */
+    public function test_failed_order_does_not_leak_transaction(): void
+    {
+        $initialOrderCount = Order::count();
+
+        // First request: intentionally fail order creation
+        $orderData = [
+            'items' => [
+                [
+                    'product_id' => 99999, // Non-existent product
+                    'quantity' => 1,
+                ],
+            ],
+            'currency' => 'EUR',
+            'shipping_method' => 'HOME',
+        ];
+
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
+        $response->assertStatus(422); // Validation error
+
+        // Second request: immediately create valid order (tests connection isn't poisoned)
+        $validOrderData = [
+            'items' => [
+                [
+                    'product_id' => $this->product1->id,
+                    'quantity' => 1,
+                ],
+            ],
+            'currency' => 'EUR',
+            'shipping_method' => 'HOME',
+        ];
+
+        $response = $this->postJson('/api/v1/public/orders', $validOrderData);
+
+        // If transaction was leaked, this would fail with SQLSTATE[25P02]
+        $response->assertStatus(201);
+
+        // Verify only the valid order was created
+        $this->assertEquals($initialOrderCount + 1, Order::count());
+
+        // Third request: test with stock insufficient error
+        $orderData = [
+            'items' => [
+                [
+                    'product_id' => $this->product2->id,
+                    'quantity' => 999, // Exceeds stock
+                ],
+            ],
+            'currency' => 'EUR',
+            'shipping_method' => 'HOME',
+        ];
+
+        $response = $this->postJson('/api/v1/public/orders', $orderData);
+        $response->assertStatus(409);
+
+        // Fourth request: verify connection still works after 409 error
+        $response = $this->postJson('/api/v1/public/orders', $validOrderData);
+        $response->assertStatus(201);
+
+        // Verify we now have 2 valid orders (not affected by failed attempts)
+        $this->assertEquals($initialOrderCount + 2, Order::count());
+    }
 }

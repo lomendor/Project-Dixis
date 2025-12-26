@@ -108,13 +108,21 @@ class ProductController extends Controller
     /**
      * Display the specified product with categories and images.
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
+        // Validate ID is numeric to prevent TypeError
+        if (!is_numeric($id) || $id <= 0) {
+            return response()->json([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format'
+            ], 404);
+        }
+
         $product = Product::with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
         }, 'producer'])
             ->where('is_active', true)
-            ->findOrFail($id);
+            ->findOrFail((int) $id);
 
         $data = $product->toArray();
 
