@@ -50,8 +50,8 @@ function OrderDetailsPage(): React.JSX.Element {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      // Validate ID is non-empty string (accept CUID format)
-      if (!orderId || typeof orderId !== 'string' || orderId.length < 10) {
+      // Validate ID is non-empty
+      if (!orderId || typeof orderId !== 'string') {
         setError('Invalid order ID');
         setLoading(false);
         return;
@@ -61,17 +61,9 @@ function OrderDetailsPage(): React.JSX.Element {
         setLoading(true);
         setError(null);
 
-        // Fetch from internal Prisma endpoint (supports CUID IDs)
-        const response = await fetch(`/internal/orders/${orderId}`);
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Order not found');
-          }
-          throw new Error(`Failed to fetch order: ${response.status}`);
-        }
-
-        const orderData = await response.json();
+        // Fetch from Laravel API where orders are created
+        apiClient.refreshToken(); // Ensure latest token is loaded
+        const orderData = await apiClient.getPublicOrder(orderId);
         setOrder(orderData);
       } catch (error) {
         console.error('Failed to fetch order:', error);
