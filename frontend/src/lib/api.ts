@@ -461,6 +461,32 @@ class ApiClient {
     return this.request<Order>(`orders/${id}`);
   }
 
+  // Public orders endpoints (consumer-facing)
+  async getPublicOrders(params?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+  }): Promise<{ data: Order[] }> {
+    const searchParams = new URLSearchParams();
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = `public/orders${queryString ? `?${queryString}` : ''}`;
+
+    return this.request<{ data: Order[] }>(endpoint);
+  }
+
+  async getPublicOrder(id: number | string): Promise<Order> {
+    return this.request<Order>(`public/orders/${id}`);
+  }
+
   // Direct order creation (new V1 API)
   async createOrder(data: {
     items: { product_id: number; quantity: number }[];

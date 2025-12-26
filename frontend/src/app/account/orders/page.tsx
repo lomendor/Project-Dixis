@@ -46,17 +46,14 @@ function OrdersPage(): React.JSX.Element {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        // Fetch from Next.js Prisma orders (where checkout creates them)
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000';
-        const response = await fetch(`${baseUrl}/internal/orders`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch orders: ${response.status}`);
-        }
-        const data = await response.json();
-        setOrders(data.orders || []);
+        // Fetch from Laravel API where orders are created
+        apiClient.refreshToken(); // Ensure latest token is loaded
+        const response = await apiClient.getPublicOrders();
+        setOrders(response.data || []);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
         showToast('error', 'Failed to load your orders. Please try again.');
+        setOrders([]); // Explicitly set empty on error
       } finally {
         setLoading(false);
       }
