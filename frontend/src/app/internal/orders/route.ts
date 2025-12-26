@@ -64,8 +64,9 @@ export async function GET() {
 
     return NextResponse.json({ orders: mapped });
   } catch (error) {
-    console.error('GET /api/orders error:', error);
-    return NextResponse.json({ orders: [] }, { status: 500 });
+    console.error('GET /internal/orders error:', error);
+    // Return empty array with 200 instead of 500 to prevent breaking UI
+    return NextResponse.json({ orders: [] });
   }
 }
 
