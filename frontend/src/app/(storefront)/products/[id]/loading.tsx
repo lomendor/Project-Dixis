@@ -1,6 +1,6 @@
 export default function ProductDetailLoading() {
   return (
-    <main className="container mx-auto px-4 py-6">
+    <main className="container mx-auto px-4 py-6" data-testid="product-detail-skeleton">
       {/* Breadcrumb Skeleton */}
       <nav className="mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
         <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
