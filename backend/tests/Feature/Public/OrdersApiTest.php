@@ -81,9 +81,15 @@ class OrdersApiTest extends TestCase
                         'order_number',
                         'status',
                         'total',
+                        'total_amount', // Frontend compatibility alias
                         'currency',
                         'created_at',
                         'items_count',
+                        'payment_status', // Needed for UI status display
+                        'payment_method', // Needed for UI
+                        'shipping_method', // Needed for UI
+                        'subtotal', // Needed for order summary
+                        'items', // Now included in list for UI card display
                     ],
                 ],
                 'links',
@@ -91,13 +97,12 @@ class OrdersApiTest extends TestCase
             ])
             ->assertJsonCount(2, 'data'); // Should have 2 orders
 
-        // Verify no PII fields are present
+        // Verify no PII fields are present (these are sensitive)
         $orderData = $response->json('data.0');
         $this->assertArrayNotHasKey('email', $orderData);
         $this->assertArrayNotHasKey('shipping_address', $orderData);
         $this->assertArrayNotHasKey('billing_address', $orderData);
         $this->assertArrayNotHasKey('user_id', $orderData);
-        $this->assertArrayNotHasKey('payment_status', $orderData);
 
         // Verify order_number format
         $this->assertMatchesRegularExpression('/^ORD-\d{6}$/', $orderData['order_number']);
@@ -105,8 +110,9 @@ class OrdersApiTest extends TestCase
         // Verify currency
         $this->assertEquals('EUR', $orderData['currency']);
 
-        // Verify items are NOT included in index (only in show)
-        $this->assertArrayNotHasKey('items', $orderData);
+        // Verify items ARE included in list (for card display)
+        $this->assertArrayHasKey('items', $orderData);
+        $this->assertIsArray($orderData['items']);
     }
 
     public function test_orders_show_returns_items_and_correct_total(): void
@@ -122,15 +128,23 @@ class OrdersApiTest extends TestCase
                     'order_number',
                     'status',
                     'total',
+                    'total_amount', // Frontend alias
                     'currency',
                     'created_at',
                     'items_count',
+                    'payment_status',
+                    'payment_method',
+                    'shipping_method',
+                    'subtotal',
                     'items' => [
                         '*' => [
+                            'id', // Item ID needed for keying
                             'product_id',
                             'product_name',
+                            'product_unit', // Unit display
                             'quantity',
                             'unit_price',
+                            'price', // Alias
                             'total_price',
                         ],
                     ],
@@ -146,11 +160,13 @@ class OrdersApiTest extends TestCase
 
         // Verify total value
         $this->assertEquals('29.75', $orderData['total']);
+        $this->assertEquals('29.75', $orderData['total_amount']); // Alias
 
         // Verify item structure includes product_name
         $item = $orderData['items'][0];
         $this->assertArrayHasKey('product_name', $item);
         $this->assertNotEmpty($item['product_name']);
+        $this->assertArrayHasKey('product_unit', $item);
     }
 
     public function test_orders_show_returns_404_for_nonexistent_order(): void
