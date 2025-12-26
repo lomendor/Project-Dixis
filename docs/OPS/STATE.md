@@ -3,10 +3,13 @@
 **Last Updated**: 2025-12-25 20:17 UTC
 
 ## TODO (tomorrow)
-- **SECURITY: Credential Rotation**: Rotate RESEND_API_KEY + DB credentials (Neon password). Today (2025-12-25) performed emergency hotfix: updated production .env files with current password, restarted services. Both frontend and backend DATABASE_URL now functional. Commission-preview endpoint fixed (returns 404 instead of 500). No secrets in this doc - rotation details via secure channel.
+- (none)
+
+## 2025-12-26 — Pass 35: Security Credential Rotation
+- **Credentials Rotated**: RESEND_API_KEY + Neon DATABASE_URL rotated successfully. Process: (1) User generated new credentials in Resend dashboard + Neon console, (2) GitHub Secrets updated (RESEND_API_KEY, DATABASE_URL_PROD, DATABASE_URL_PRODUCTION updated 2025-12-26T11:50Z), (3) VPS environment files updated via SSH (backend + frontend .env), (4) Services restarted (dixis-backend.service ✅, dixis-frontend-launcher.service ✅ after port conflict resolved). Verification (status codes only): healthz=200 ✅, api_products=200 ✅, internal_orders=500 (pre-existing, not regression). Policy: Zero secrets printed (SOP-SEC-ROTATION.md compliance). Checklist doc: `docs/OPS/ROTATION-CHECKLIST-PASS35.md`. PR #1897 merged 2025-12-26T11:31:44Z. (Closed: 2025-12-26)
 
 ## 2025-12-25 — Pass SEC-GUARDRAILS
-- **Security Guardrails Implemented**: Added comprehensive secret hygiene protections to prevent future credential leaks. Components: (1) SOP document `docs/AGENT/SOPs/SOP-SEC-ROTATION.md` codifies strict no-secrets rules (never print DATABASE_URL, RESEND_API_KEY, or any .env contents), (2) CI diff guard `scripts/guard-no-secrets-diff.sh` automatically blocks PRs containing secret assignments (DATABASE_URL=, RESEND_API_KEY=, JWT_SECRET=, private keys), allows only placeholders (<redacted>, ***, example), (3) Wired into `.github/workflows/pr.yml` as required check (runs after checkout, before any code execution). Pattern: Defense-in-depth - SOP prevents human error, CI guard prevents accidents from merging. Reminder: rotate RESEND_API_KEY + Neon DB credentials tomorrow per TODO above (no values in this doc). (Closed: 2025-12-25)
+- **Security Guardrails Implemented**: Added comprehensive secret hygiene protections to prevent future credential leaks. Components: (1) SOP document `docs/AGENT/SOPs/SOP-SEC-ROTATION.md` codifies strict no-secrets rules (never print DATABASE_URL, RESEND_API_KEY, or any .env contents), (2) CI diff guard `scripts/guard-no-secrets-diff.sh` automatically blocks PRs containing secret assignments (DATABASE_URL=, RESEND_API_KEY=, JWT_SECRET=, private keys), allows only placeholders (<redacted>, ***, example), (3) Wired into `.github/workflows/pr.yml` as required check (runs after checkout, before any code execution). Pattern: Defense-in-depth - SOP prevents human error, CI guard prevents accidents from merging. (Closed: 2025-12-25)
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SECURITY: Database Credentials Rotation (Neon Pooler → Direct Endpoint)**: Critical security incident resolved. Root cause: (1) Neon pgBouncer pooler endpoint incompatible with Laravel `SELECT FOR UPDATE` transactions (causing `SQLSTATE[25P02]: In failed sql transaction`), (2) DATABASE_URL with credentials exposed in terminal logs/summary (security leak). Fix: (1) Rotated Neon database password (`npg_WG10vYeFnsCk` → `npg_8zNfLox1iTIS`), (2) Switched from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`) in production .env, (3) Persisted new DATABASE_URL to GitHub Secret `DATABASE_URL_PRODUCTION` (repository-level), (4) Added CI guardrail: prod-smoke.yml now tests POST /api/v1/public/orders MUST NOT return 500 (detects transaction failures), (5) Created `.github/SECURITY.md` with no-secrets policy. Verification: Backend health check PASS (`database: connected`), order creation working (verified on production). Security measures: Old credentials revoked, new credentials stored securely in GitHub Secrets, no secrets in documentation. Documentation: Incident response following GPT security protocol (rotate → persist → guardrails → docs). Files: `backend/.env` (updated), `prod-smoke.yml` (+27 lines), `.github/SECURITY.md` (new, 71 lines). Pattern: Security-first response to credential exposure. (Closed: 2025-12-24)
@@ -79,7 +82,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **Pass 35 — Security Credential Rotation** (2025-12-26): Rotating RESEND_API_KEY + Neon DB credentials per TODO above. Policy: no secrets printed, verify via /api/healthz + status codes only. Checklist doc: `docs/OPS/ROTATION-CHECKLIST-PASS35.md`. Phases: (1) Prep + safe verification harness ✅, (2) User rotates in consoles + updates GitHub Secrets (pending), (3) Update VPS env + restart services + verify (pending). Current status: Phase 1 complete, awaiting user confirmation for Phase 2.
+- (none)
 
 ## BLOCKED ⚠️
 - (none)
