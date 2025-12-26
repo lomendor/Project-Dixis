@@ -7,37 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('el-GR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-function formatStatus(status: string): { text: string; color: string } {
-  switch (status.toLowerCase()) {
-    case 'draft':
-      return { text: 'Πρόχειρο', color: 'bg-gray-100 text-gray-800' };
-    case 'pending':
-      return { text: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' };
-    case 'paid':
-      return { text: 'Πληρωμένη', color: 'bg-blue-100 text-blue-800' };
-    case 'processing':
-      return { text: 'Σε Επεξεργασία', color: 'bg-blue-100 text-blue-800' };
-    case 'shipped':
-      return { text: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' };
-    case 'delivered':
-      return { text: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' };
-    case 'cancelled':
-      return { text: 'Ακυρώθηκε', color: 'bg-red-100 text-red-800' };
-    default:
-      return { text: status, color: 'bg-gray-100 text-gray-800' };
-  }
-}
+import { formatDate, formatStatus, safeMoney, safeText } from '@/lib/orderUtils';
 
 function OrderDetailsPage(): React.JSX.Element {
   const params = useParams();
@@ -208,12 +178,12 @@ function OrderDetailsPage(): React.JSX.Element {
                         </span>
                       </div>
                       <div className="mt-1 text-sm text-gray-500">
-                        <span data-testid="unit-price">€{item.unit_price || item.price} / τεμάχιο</span>
+                        <span data-testid="unit-price">€{safeMoney(item.unit_price || item.price)} / τεμάχιο</span>
                       </div>
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-900" data-testid="item-total">
-                        €{item.total_price}
+                        €{safeMoney(item.total_price)}
                       </p>
                     </div>
                   </div>
@@ -298,22 +268,22 @@ function OrderDetailsPage(): React.JSX.Element {
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Υποσύνολο</span>
                   <span className="text-sm font-medium text-gray-900" data-testid="subtotal-amount">
-                    €{order.subtotal}
+                    €{safeMoney(order.subtotal)}
                   </span>
                 </div>
-                {order.tax_amount && (
+                {order.tax_amount && safeMoney(order.tax_amount) !== '—' && (
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">ΦΠΑ</span>
                     <span className="text-sm font-medium text-gray-900" data-testid="tax-amount">
-                      €{order.tax_amount}
+                      €{safeMoney(order.tax_amount)}
                     </span>
                   </div>
                 )}
-                {order.shipping_amount && (
+                {order.shipping_amount && safeMoney(order.shipping_amount) !== '—' && (
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Αποστολή</span>
                     <span className="text-sm font-medium text-gray-900" data-testid="shipping-amount">
-                      €{order.shipping_amount}
+                      €{safeMoney(order.shipping_amount)}
                     </span>
                   </div>
                 )}
@@ -321,7 +291,7 @@ function OrderDetailsPage(): React.JSX.Element {
                   <div className="flex justify-between">
                     <span className="text-base font-medium text-gray-900">Σύνολο</span>
                     <span className="text-base font-medium text-gray-900" data-testid="total-amount">
-                      €{order.total_amount}
+                      €{safeMoney(order.total_amount)}
                     </span>
                   </div>
                 </div>
@@ -337,13 +307,13 @@ function OrderDetailsPage(): React.JSX.Element {
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Πληρωμής</h3>
                   <p className="text-sm text-gray-600" data-testid="payment-method">
-                    {order.payment_method || 'Δεν έχει οριστεί'}
+                    {safeText(order.payment_method)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Αποστολής</h3>
                   <p className="text-sm text-gray-600" data-testid="shipping-method">
-                    {order.shipping_method || 'Δεν έχει οριστεί'}
+                    {safeText(order.shipping_method)}
                   </p>
                 </div>
                 {order.shipping_address && (
