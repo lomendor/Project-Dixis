@@ -79,7 +79,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- (none)
+- **Pass 35 — Security Credential Rotation** (2025-12-26): Rotating RESEND_API_KEY + Neon DB credentials per TODO above. Policy: no secrets printed, verify via /api/healthz + status codes only. Checklist doc: `docs/OPS/ROTATION-CHECKLIST-PASS35.md`. Phases: (1) Prep + safe verification harness ✅, (2) User rotates in consoles + updates GitHub Secrets (pending), (3) Update VPS env + restart services + verify (pending). Current status: Phase 1 complete, awaiting user confirmation for Phase 2.
 
 ## BLOCKED ⚠️
 - (none)
