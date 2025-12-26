@@ -189,16 +189,43 @@ pnpm run type-check # ✅ PASSED
 
 ## Remaining Work
 
-### TODO: E2E Tests
-- Currently skipped due to AuthGuard requirements
-- Need to configure proper auth tokens for E2E environment
-- Tests are written but marked `.skip()`
-- File: `frontend/tests/e2e/checkout-to-orders-list.spec.ts`
+### TODO: E2E Tests (Technical Debt)
+**Priority**: Medium
+**Blocked by**: Auth token setup in E2E environment
+
+**Current state**:
+- Tests written and committed
+- All tests marked `.skip()` in `frontend/tests/e2e/checkout-to-orders-list.spec.ts`
+- Tests verify: checkout → orders list → order details flow
+
+**Required to enable**:
+1. Configure Playwright `storageState` with valid auth token
+2. OR: Seed test user credentials in CI environment
+3. OR: Mock AuthGuard to bypass auth in E2E tests
+4. Update test file: Remove `.skip()` from all test cases
+5. Verify tests pass in CI
+
+**Acceptance criteria**:
+- `npx playwright test checkout-to-orders-list.spec.ts` passes
+- All 5 test cases execute (not skipped)
+- CI quality-gates include E2E coverage
 
 ### TODO: Remove Legacy Prisma Orders Route (Optional)
-- `/internal/orders` route still exists but unused
-- Can be removed in future cleanup PR
-- Low priority - not causing issues
+**Priority**: Low
+**Status**: Non-blocking
+
+**Current state**:
+- `/internal/orders` route still exists in `frontend/src/app/internal/orders/route.ts`
+- Route is functional but unused (no client calls it)
+- Prisma `Order` table remains empty
+
+**Required to remove**:
+1. Delete `frontend/src/app/internal/orders/route.ts`
+2. Delete `frontend/src/app/internal/orders/[id]/route.ts`
+3. Verify no references in codebase
+4. Consider keeping for admin/debug purposes
+
+**Risk**: Low - route not exposed publicly
 
 ---
 
@@ -239,13 +266,16 @@ pnpm run type-check # ✅ PASSED
 
 ## Deployment Notes
 
-**Status**: ✅ DEPLOYED to production
+**Status**: 🔄 PENDING MERGE
+**PR**: https://github.com/lomendor/Project-Dixis/pull/1903
+**Commit**: `1b44bea1`
 **Date**: 2025-12-26
-**Commit**: (to be added after PR merge)
 
-**No migration required** - Frontend-only changes
-**No cache clear required** - Client-side code only
-**No server restart required** - Static assets only
+**Deployment requirements after merge:**
+- ✅ No migration required (frontend-only changes)
+- ✅ No cache clear required (client-side code)
+- ✅ No server restart required (static assets)
+- ⚠️ Frontend build + deploy needed (Next.js static pages)
 
 ---
 
