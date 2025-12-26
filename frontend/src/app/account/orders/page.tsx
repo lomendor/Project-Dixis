@@ -5,37 +5,7 @@ import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('el-GR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-function formatStatus(status: string): { text: string; color: string } {
-  switch (status.toLowerCase()) {
-    case 'draft':
-      return { text: 'Πρόχειρο', color: 'bg-gray-100 text-gray-800' };
-    case 'pending':
-      return { text: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' };
-    case 'paid':
-      return { text: 'Πληρωμένη', color: 'bg-blue-100 text-blue-800' };
-    case 'processing':
-      return { text: 'Σε Επεξεργασία', color: 'bg-blue-100 text-blue-800' };
-    case 'shipped':
-      return { text: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' };
-    case 'delivered':
-      return { text: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' };
-    case 'cancelled':
-      return { text: 'Ακυρώθηκε', color: 'bg-red-100 text-red-800' };
-    default:
-      return { text: status, color: 'bg-gray-100 text-gray-800' };
-  }
-}
+import { formatDateShort, formatStatus, safeMoney, safeText } from '@/lib/orderUtils';
 
 function OrdersPage(): React.JSX.Element {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -119,7 +89,7 @@ function OrdersPage(): React.JSX.Element {
                           Παραγγελία #{order.id}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          Ημερομηνία: {formatDate(order.created_at)}
+                          Ημερομηνία: {formatDateShort(order.created_at)}
                         </p>
                       </div>
                       <span
@@ -133,22 +103,24 @@ function OrdersPage(): React.JSX.Element {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Συνολικό Ποσό</p>
-                        <p className="text-lg font-semibold text-gray-900">€{order.total_amount}</p>
+                        <p className="text-lg font-semibold text-gray-900">€{safeMoney(order.total_amount)}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Προϊόντα</p>
-                        <p className="text-lg font-semibold text-gray-900">{totalItems} {totalItems === 1 ? 'προϊόν' : 'προϊόντα'}</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {totalItems > 0 ? `${totalItems} ${totalItems === 1 ? 'προϊόν' : 'προϊόντα'}` : '—'}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Τρόπος Πληρωμής</p>
-                        <p className="text-lg font-semibold text-gray-900">{order.payment_method || 'Δεν έχει οριστεί'}</p>
+                        <p className="text-lg font-semibold text-gray-900">{safeText(order.payment_method)}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div className="text-sm text-gray-500">
-                        {order.shipping_method && (
-                          <span>Αποστολή: {order.shipping_method}</span>
+                        {order.shipping_method && safeText(order.shipping_method) !== '—' && (
+                          <span>Αποστολή: {safeText(order.shipping_method)}</span>
                         )}
                       </div>
                       <Link
