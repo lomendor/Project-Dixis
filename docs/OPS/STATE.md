@@ -96,14 +96,34 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Deploy Workflow Investigation**
+1. **Pass 45 — Deploy Workflow Investigation**
    - **Priority**: P2 (Ops hygiene - deployments working but workflow failing)
    - **Scope**: Investigate why `deploy-prod.yml` shows 0s failures on all recent runs
    - **DoD**:
-     - Root cause identified (workflow file syntax? permissions? trigger?)
-     - Either: workflow fixed and passing, OR documented as deprecated (alternate deploy mechanism working)
-     - Evidence: gh run view shows success OR docs explain current deploy process
-   - **Risk**: Low (deployments happening despite workflow failures, Pass 26 deployed successfully)
+     - [ ] Root cause identified (workflow file syntax? permissions? trigger?)
+     - [ ] Either: workflow fixed and passing, OR documented as deprecated
+     - [ ] Evidence: `gh run view` shows success OR docs explain current deploy process
+   - **Risk**: Low (deployments happening despite workflow failures)
+
+2. **Pass 46 — CI E2E Auth Setup + Unskip Critical Tests**
+   - **Priority**: P1 (Test coverage gap - critical E2E tests skipped)
+   - **Scope**: Enable stable auth strategy for CI, unskip critical checkout/orders E2E tests
+   - **DoD**:
+     - [ ] Auth strategy implemented (Playwright storageState OR CI seed user)
+     - [ ] Unskip at least 3 critical E2E tests (checkout-to-orders, orders-data-completeness, orders-details-stable)
+     - [ ] quality-gates workflow stays green
+     - [ ] No new `.skip()` added
+   - **Risk**: Medium (E2E flakiness possible if auth unstable)
+
+3. **Pass 47 — Shipping Cost v1 + Address/Shipping Fee Display**
+   - **Priority**: P2 (Feature - complete order details UX)
+   - **Scope**: Display shipping address + compute/display shipping fee in order details
+   - **DoD**:
+     - [ ] Shipping address displayed in order details page (already in API, wire to UI)
+     - [ ] Shipping fee placeholder OR rule-based v1 (e.g., flat rate per zone)
+     - [ ] Keep single source of truth (Laravel API)
+     - [ ] E2E test for shipping display
+   - **Risk**: Low (read-only UI enhancement, no checkout changes)
 
 ---
 
