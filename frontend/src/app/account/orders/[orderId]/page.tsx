@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-import { formatDate, formatStatus, safeMoney, safeText } from '@/lib/orderUtils';
+import { formatDate, formatStatus, safeMoney, safeText, formatShippingMethod, formatShippingAddress, hasShippingAddress } from '@/lib/orderUtils';
 
 function OrderDetailsPage(): React.JSX.Element {
   const params = useParams();
@@ -170,6 +170,11 @@ function OrderDetailsPage(): React.JSX.Element {
                       <h3 className="text-sm font-medium text-gray-900" data-testid="product-name">
                         {item.product_name || item.product?.name || 'Προϊόν'}
                       </h3>
+                      {item.producer && (
+                        <p className="text-xs text-green-700" data-testid="item-producer">
+                          από {item.producer.name}
+                        </p>
+                      )}
                       <div className="mt-1 flex items-center text-sm text-gray-500">
                         <span data-testid="item-quantity">Ποσότητα: {item.quantity}</span>
                         <span className="mx-2">•</span>
@@ -313,16 +318,14 @@ function OrderDetailsPage(): React.JSX.Element {
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Αποστολής</h3>
                   <p className="text-sm text-gray-600" data-testid="shipping-method">
-                    {safeText(order.shipping_method)}
+                    {formatShippingMethod(order.shipping_method, order.shipping_method_label)}
                   </p>
                 </div>
-                {order.shipping_address && (
+                {hasShippingAddress(order.shipping_address) && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 mb-1">Διεύθυνση Αποστολής</h3>
-                    <p className="text-sm text-gray-600" data-testid="shipping-address">
-                      {order.shipping_address}
-                      {order.city && `, ${order.city}`}
-                      {order.postal_code && ` ${order.postal_code}`}
+                    <p className="text-sm text-gray-600 whitespace-pre-line" data-testid="shipping-address">
+                      {formatShippingAddress(order.shipping_address)}
                     </p>
                   </div>
                 )}

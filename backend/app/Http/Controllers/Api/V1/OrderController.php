@@ -32,7 +32,7 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 15);
 
         $query = Order::query()
-            ->with('orderItems') // Eager-load items for list view
+            ->with('orderItems.producer') // Eager-load items + producer for list view
             ->withCount('orderItems')
             ->orderBy('created_at', 'desc');
 
@@ -63,7 +63,7 @@ class OrderController extends Controller
      */
     public function show(Order $order): OrderResource
     {
-        $order->load('orderItems')->loadCount('orderItems');
+        $order->load('orderItems.producer')->loadCount('orderItems');
 
         return new OrderResource($order);
     }
@@ -151,7 +151,7 @@ class OrderController extends Controller
                 }
 
                 // Load relationships for response
-                $order->load('orderItems')->loadCount('orderItems');
+                $order->load('orderItems.producer')->loadCount('orderItems');
 
                 return new OrderResource($order);
             });

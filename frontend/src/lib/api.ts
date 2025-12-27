@@ -57,6 +57,23 @@ export interface CartResponse {
   total_amount: string;
 }
 
+export interface ShippingAddress {
+  name?: string;
+  phone?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  postal_code?: string;
+  region?: string;
+  country?: string;
+}
+
+export interface OrderItemProducer {
+  id: number;
+  name: string;
+  slug?: string;
+}
+
 export interface Order {
   id: number;
   user_id: number;
@@ -68,7 +85,8 @@ export interface Order {
   payment_method: string;
   status: string;
   shipping_method: string;
-  shipping_address?: string;
+  shipping_method_label?: string; // Human-readable label (Greek)
+  shipping_address?: ShippingAddress | string; // Object or legacy string
   shipping_cost?: number;
   shipping_carrier?: string;
   shipping_eta_days?: number;
@@ -90,6 +108,7 @@ export interface OrderItem {
   product_name: string;
   product_unit: string;
   product: Product;
+  producer?: OrderItemProducer; // Producer info for marketplace grouping
 }
 
 export interface ProducerOrder {

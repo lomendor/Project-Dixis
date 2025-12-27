@@ -17,13 +17,26 @@ class OrderResource extends JsonResource
         // Calculate total from subtotal + shipping if total is not set
         $total = $this->total ?? $this->total_amount ?? ($this->subtotal + ($this->shipping_cost ?? 0));
 
+        // Shipping method labels (Greek)
+        $shippingMethodLabels = [
+            'HOME' => 'Παράδοση στο σπίτι',
+            'PICKUP' => 'Παραλαβή από κατάστημα',
+            'COURIER' => 'Μεταφορική εταιρεία',
+        ];
+        $shippingMethodCode = $this->shipping_method ?? 'HOME';
+
         return [
             'id' => $this->id,
             'order_number' => 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT),
             'status' => $this->status ?? 'pending',
             'payment_status' => $this->payment_status ?? 'pending',
             'payment_method' => $this->payment_method ?? 'cod', // Default: Cash on Delivery
-            'shipping_method' => $this->shipping_method ?? 'HOME',
+            'shipping_method' => $shippingMethodCode,
+            'shipping_method_label' => $shippingMethodLabels[$shippingMethodCode] ?? $shippingMethodCode,
+            // Shipping address (structured object, null if not set)
+            'shipping_address' => $this->shipping_address,
+            // Delivery notes
+            'notes' => $this->notes,
             // Financial fields - use both new and legacy field names for frontend compatibility
             'subtotal' => number_format((float) ($this->subtotal ?? 0), 2),
             'tax_amount' => number_format((float) ($this->tax_amount ?? 0), 2),
