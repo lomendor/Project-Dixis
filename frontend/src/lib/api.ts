@@ -484,7 +484,9 @@ class ApiClient {
   }
 
   async getPublicOrder(id: number | string): Promise<Order> {
-    return this.request<Order>(`public/orders/${id}`);
+    // API returns { data: Order }, must unwrap
+    const response = await this.request<{ data: Order }>(`public/orders/${id}`);
+    return response.data;
   }
 
   // Direct order creation (new V1 API)
