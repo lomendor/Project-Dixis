@@ -7,6 +7,7 @@ import { DEFAULT_OPTIONS } from '@/contracts/shipping'
 import { useTranslations } from 'next-intl'
 import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
 import type { QuoteResponse } from '@/lib/quoteClient'
+import { apiClient } from '@/lib/api'
 
 // Helper to derive total from subtotal + shipping + cod
 function deriveTotal(subtotal: number, shipping: number, cod: number = 0) {
@@ -80,35 +81,33 @@ export default function CheckoutClient(){
 
     setLoading(true)
     try{
-      const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3000'
-      const res = await fetch(`${base}/api/checkout`, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          items: items.map(i => ({ productId: i.id, qty: i.qty })),
-          shipping: { name, phone, email, line1, city, postal },
-          payment: { method:'COD' }
-        })
-      })
-
-      if(!res.ok){
-        router.push('/checkout?err=submit')
-        return
-      }
-
-      const body = await res.json()
-      // Extract order ID with fallback chain
-      const orderId = body?.orderId ?? body?.id ?? body?.data?.id ?? body?.order?.id ?? null
+      // Pass 44: Use Laravel API directly (Single Source of Truth)
+      // No more legacy /api/checkout - orders are created in Laravel PostgreSQL
+      const order = await apiClient.createOrder({
+        items: items.map(i => ({ product_id: parseInt(i.id, 10), quantity: i.qty })),
+        currency: 'EUR',
+        shipping_method: shippingMethod as 'HOME' | 'PICKUP' | 'COURIER',
+        shipping_address: {
+          name,
+          phone,
+          line1,
+          city,
+          postal_code: postal,
+          country: 'GR', // Default to Greece
+        },
+        payment_method: 'COD',
+        notes: undefined,
+      });
 
       // CRITICAL: Do NOT redirect without a valid order ID
-      if (!orderId) {
-        console.error('[CHECKOUT] No order ID in response:', body)
+      if (!order?.id) {
+        console.error('[CHECKOUT] No order ID in response:', order)
         router.push('/checkout?err=no-order-id')
         return
       }
 
       clearCart()
-      router.push(`/order/${encodeURIComponent(orderId)}`)
+      router.push(`/order/${encodeURIComponent(order.id)}`)
     }catch(e){
       console.error('[CHECKOUT] Submit error:', e)
       router.push('/checkout?err=submit')

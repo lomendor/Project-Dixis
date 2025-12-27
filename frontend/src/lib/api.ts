@@ -508,17 +508,20 @@ class ApiClient {
     return response.data;
   }
 
-  // Direct order creation (new V1 API)
+  // Direct order creation via Laravel API (Pass 44 - Single Source of Truth)
   async createOrder(data: {
     items: { product_id: number; quantity: number }[];
     currency: 'EUR' | 'USD';
-    shipping_method: 'HOME' | 'PICKUP';
+    shipping_method: 'HOME' | 'PICKUP' | 'COURIER';
+    shipping_address?: ShippingAddress;
+    payment_method?: 'COD' | 'CARD' | 'BANK_TRANSFER';
     notes?: string;
   }): Promise<Order> {
-    return this.request<Order>('public/orders', {
+    const response = await this.request<{ data: Order }>('public/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return response.data;
   }
 
   // Producer methods
