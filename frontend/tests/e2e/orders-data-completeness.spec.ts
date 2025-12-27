@@ -1,13 +1,17 @@
 /**
- * Pass 41 Regression Test: Orders Data Completeness
+ * Pass 41 + 43 Regression Test: Orders Data Completeness
  *
  * Verifies that:
  * 1. Orders list shows real data (total, items count, status) not placeholders
  * 2. Order details page shows line items with product info
  * 3. Newly created orders appear with correct data
+ * 4. [Pass 43] Shipping method has human-readable label
+ * 5. [Pass 43] Shipping address is structured object
+ * 6. [Pass 43] Order items include producer info
  *
- * Root cause fixed: OrderResource was missing fields (total_amount, subtotal,
- * payment_method, shipping_method, items in list view).
+ * Root cause fixed:
+ * - Pass 41: OrderResource was missing fields
+ * - Pass 43: Added shipping_method_label, shipping_address (object), producer per item
  */
 
 import { test, expect } from '@playwright/test';
@@ -61,6 +65,22 @@ test.describe('Orders Data Completeness (Pass 41)', () => {
         expect(order.status).toBeDefined();
         expect(typeof order.status).toBe('string');
         expect(order.status.length).toBeGreaterThan(0);
+
+        // [Pass 43] Shipping method label should be present
+        expect(order).toHaveProperty('shipping_method_label');
+        expect(typeof order.shipping_method_label).toBe('string');
+        // Should be a Greek label, not the raw code
+        if (order.shipping_method === 'HOME') {
+          expect(order.shipping_method_label).toBe('Παράδοση στο σπίτι');
+        }
+
+        // [Pass 43] shipping_address can be null but if present should be object or string
+        if (order.shipping_address !== null) {
+          expect(['object', 'string']).toContain(typeof order.shipping_address);
+        }
+
+        // [Pass 43] notes field should be present (can be null)
+        expect(order).toHaveProperty('notes');
       }
     });
 
@@ -110,6 +130,18 @@ test.describe('Orders Data Completeness (Pass 41)', () => {
         expect(item.product_name).toBeDefined();
         expect(item.product_name).not.toBe('—');
         expect(item.product_name.length).toBeGreaterThan(0);
+
+        // [Pass 43] Producer info should be present if loaded
+        if (item.producer !== undefined) {
+          expect(item.producer).toHaveProperty('id');
+          expect(item.producer).toHaveProperty('name');
+          expect(typeof item.producer.id).toBe('number');
+          expect(typeof item.producer.name).toBe('string');
+          // slug is optional
+          if (item.producer.slug !== undefined) {
+            expect(typeof item.producer.slug).toBe('string');
+          }
+        }
       }
     });
   });

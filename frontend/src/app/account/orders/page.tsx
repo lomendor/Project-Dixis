@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-import { formatDateShort, formatStatus, safeMoney, safeText } from '@/lib/orderUtils';
+import { formatDateShort, formatStatus, safeMoney, safeText, formatShippingMethod } from '@/lib/orderUtils';
 
 function OrdersPage(): React.JSX.Element {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -119,8 +119,8 @@ function OrdersPage(): React.JSX.Element {
 
                     <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div className="text-sm text-gray-500">
-                        {order.shipping_method && safeText(order.shipping_method) !== '—' && (
-                          <span>Αποστολή: {safeText(order.shipping_method)}</span>
+                        {order.shipping_method && (
+                          <span>Αποστολή: {formatShippingMethod(order.shipping_method, order.shipping_method_label)}</span>
                         )}
                       </div>
                       <Link

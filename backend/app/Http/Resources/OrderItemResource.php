@@ -23,6 +23,14 @@ class OrderItemResource extends JsonResource
             'unit_price' => number_format((float) $this->unit_price, 2),
             'price' => number_format((float) $this->unit_price, 2), // Alias for frontend
             'total_price' => number_format((float) $this->total_price, 2),
+            // Producer info for marketplace-style grouping
+            'producer' => $this->whenLoaded('producer', function () {
+                return [
+                    'id' => $this->producer->id,
+                    'name' => $this->producer->name,
+                    'slug' => $this->producer->slug ?? null,
+                ];
+            }),
         ];
     }
 }

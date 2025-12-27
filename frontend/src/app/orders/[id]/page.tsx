@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
+import { formatShippingAddress, hasShippingAddress } from '@/lib/orderUtils';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -237,11 +238,11 @@ export default function OrderDetails() {
                       </div>
                     )}
                     
-                    {order.shipping_address && (
+                    {hasShippingAddress(order.shipping_address) && (
                       <div>
                         <span className="text-gray-600">Full Address:</span>
-                        <p className="font-medium">
-                          {order.shipping_address}
+                        <p className="font-medium whitespace-pre-line">
+                          {formatShippingAddress(order.shipping_address)}
                         </p>
                       </div>
                     )}

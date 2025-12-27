@@ -79,6 +79,91 @@ export function formatDateShort(dateString: string | undefined): string {
 }
 
 /**
+ * Shipping method code to Greek label mapping
+ */
+const SHIPPING_METHOD_LABELS: Record<string, string> = {
+  HOME: 'Παράδοση στο σπίτι',
+  PICKUP: 'Παραλαβή από κατάστημα',
+  COURIER: 'Μεταφορική εταιρεία',
+};
+
+/**
+ * Format shipping method with safe handling
+ * Prefers API-provided label, falls back to local mapping
+ */
+export function formatShippingMethod(method: unknown, apiLabel?: string): string {
+  // Prefer API-provided label if available
+  if (apiLabel && typeof apiLabel === 'string' && apiLabel.trim()) {
+    return apiLabel;
+  }
+  // Fallback to local mapping
+  if (typeof method === 'string' && method.trim()) {
+    return SHIPPING_METHOD_LABELS[method.toUpperCase()] || method;
+  }
+  return '—';
+}
+
+/**
+ * Shipping address type (can be object or legacy string)
+ */
+export interface ShippingAddressObj {
+  name?: string;
+  phone?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  postal_code?: string;
+  region?: string;
+  country?: string;
+}
+
+/**
+ * Format shipping address for display
+ * Handles both structured object and legacy string formats
+ * Returns null if address is empty/invalid (hide section)
+ */
+export function formatShippingAddress(address: unknown): string | null {
+  // Handle null/undefined
+  if (!address) {
+    return null;
+  }
+
+  // Handle legacy string format
+  if (typeof address === 'string') {
+    return address.trim() || null;
+  }
+
+  // Handle structured object
+  if (typeof address === 'object') {
+    const addr = address as ShippingAddressObj;
+    const parts: string[] = [];
+
+    // Build address string from parts
+    if (addr.name) parts.push(addr.name);
+    if (addr.line1) parts.push(addr.line1);
+    if (addr.line2) parts.push(addr.line2);
+
+    // City + postal code on same line
+    const cityLine = [addr.city, addr.postal_code].filter(Boolean).join(' ');
+    if (cityLine) parts.push(cityLine);
+
+    if (addr.region) parts.push(addr.region);
+    if (addr.phone) parts.push(`Τηλ: ${addr.phone}`);
+
+    return parts.length > 0 ? parts.join('\n') : null;
+  }
+
+  return null;
+}
+
+/**
+ * Check if shipping address has displayable content
+ */
+export function hasShippingAddress(address: unknown): boolean {
+  return formatShippingAddress(address) !== null;
+}
+
+/**
  * Format order status with safe handling
  * Returns Greek text and color class for badge
  */
