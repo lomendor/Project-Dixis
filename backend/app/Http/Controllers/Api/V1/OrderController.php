@@ -128,11 +128,14 @@ class OrderController extends Controller
                     'user_id' => $userId,
                     'status' => 'pending',
                     'payment_status' => 'pending',
+                    'payment_method' => $validated['payment_method'] ?? 'COD',
                     'shipping_method' => $validated['shipping_method'],
+                    'shipping_address' => $validated['shipping_address'] ?? null,
                     'currency' => $validated['currency'],
                     'subtotal' => $orderTotal,
                     'shipping_cost' => 0, // No shipping cost for now
                     'total' => $orderTotal,
+                    'total_amount' => $orderTotal, // Legacy alias for frontend compatibility
                     'notes' => $validated['notes'] ?? null,
                 ]);
 
