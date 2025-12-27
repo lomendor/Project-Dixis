@@ -1,13 +1,17 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-23 21:35 UTC
+**Last Updated**: 2025-12-27 12:00 UTC
 
 ## WIP (1 item only)
 - (none - ready for next item from NEXT queue)
 
 ## NEXT (ordered, max 3)
 
-(To be determined based on product priorities)
+1. **Pass 45 — Deploy Workflow Investigation** (P2 Ops Hygiene)
+2. **Pass 46 — CI E2E Auth Setup + Unskip Critical Tests**
+3. **Pass 47 — Shipping Cost v1 + Address/Shipping Fee Display**
+
+See `docs/OPS/STATE.md` for full DoD checklists.
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
@@ -58,6 +62,15 @@
 - Pass 27 (Auth Functional Verification - PROD + CI Guardrail) (2025-12-23) - Verified auth works FUNCTIONALLY (not just "pages load") with hard evidence. PROD verification: Register API (POST /api/v1/auth/register) → HTTP 201 Created + User ID 13 + Bearer token. Login API (POST /api/v1/auth/login) → HTTP 200 OK + Bearer token. Auth type: Laravel Sanctum Bearer tokens (response body, not cookies). No email verification required (immediate registration). CI guardrail: E2E test `auth-functional-flow.spec.ts` with 3 tests PASS (19.9s) - full auth flow (register → login → authenticated), wrong password rejection, duplicate email rejection. Infrastructure fixes: Playwright config port mismatch fixed (3000 → 3001 per CLAUDE.md), register page testids added (+8 testids: form, name, email, password, confirm, role, submit, error) to match login page pattern. User issue resolution: Auth system fully functional, user should register new account (likely not in current DB). Files: 3 modified (`playwright.config.ts`, `register/page.tsx`, NEW `auth-functional-flow.spec.ts`), 2 docs (PROD-AUTH-VERIFICATION-2025-12-23.md, Pass-27.md). Evidence-first: HTTP status + response bodies + CI test results. No auth bugs found. ✅
 - Pass 28 (Deploy Staging Signal Fix) (2025-12-23) - Fixed 3 failing workflows on main branch with evidence-based root cause analysis. Deploy Staging: Permission denied (publickey) → added SSH key guard to skip when SSH_PRIVATE_KEY missing. Staging Smoke: curl exit code 6 (connection failed) → added continue-on-error: true (staging optional). os-state-capsule: docs/OS/STATE.md typo → fixed path to docs/OPS/STATE.md (3 locations). Evidence URLs: Run #20471409483, #20471409463, #20471409476. Minimal ops-only fixes applied (3 workflow files). PR #1858 merged (2025-12-23T21:29:00Z). Post-merge verification: Staging Smoke SUCCESS (was FAILURE), os-state-capsule SUCCESS (was FAILURE), Deploy Staging SKIPPED (guard working). Main branch now green. Docs: Pass-28.md (comprehensive evidence + root causes). Impact: LOW risk (CI logic only, no production code). ✅
 - Pass 31 (PROD CSP Localhost Fix + Cart Route Collision) (2025-12-23) - Fixed production CSP header showing localhost and cart 404 spam. Root causes: (1) deploy-frontend.yml missing NEXT_PUBLIC_API_BASE_URL at build time → localhost baked into production bundle, (2) /api/cart route blocked by nginx proxy collision (nginx proxies /api/* to Laravel). Solutions: (1) Added NEXT_PUBLIC_BASE_URL, NEXT_PUBLIC_API_BASE_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SITE_URL to deploy-frontend.yml build step, (2) Moved cart route from /api/cart to /internal/cart (avoids nginx collision), updated all client calls (CartClient.tsx, CartIcon.tsx, payload.ts). PR #1863 merged (2025-12-23T23:54:22Z). Deploy run 20474288631 success (2m58s). PROD verification (2025-12-24 00:06 UTC): CSP header shows `connect-src 'self' https://dixis.gr` ✅ (no localhost), /internal/cart returns 200 ✅, /producers/login returns 307 redirect ✅, no localhost in HTML ✅. Terminal evidence: `curl -s https://dixis.gr/products | grep -q "127.0.0.1:8001"` → OK (not found). Remaining issue: /logo.svg returns 404 (tracked for Pass 32). ✅
+- Pass 34 (Orders E2E Regression Guardrails) (2025-12-26) - Stabilized checkout regression tests with Playwright infrastructure fixes. Cart localStorage key mismatch fixed, backend webServer configured. 3 tests PASS, 10 SKIPPED. PR #1895 merged. ✅
+- Pass 35 (Security Credential Rotation) (2025-12-26) - RESEND_API_KEY + Neon DATABASE_URL rotated. GitHub Secrets + VPS env updated. Zero secrets printed (SOP compliance). PR #1897 merged. ✅
+- Pass 36 (Internal Orders 500 Fix) (2025-12-26) - Fixed /internal/orders returning 500 on Prisma errors. Now returns 200 with empty array (graceful degradation). PR #1899 merged. ✅
+- Pass 39 (Split-Brain Fix) (2025-12-26) - Orders list now reads from Laravel API (was Prisma). Single source of truth established. PR #1903 merged. ✅
+- Pass 40 (Orders UI Crash Fix) (2025-12-26) - Fixed TypeError crash on undefined order fields. Created safe utility functions (safeLower, safeMoney, safeText). PR merged. ✅
+- Pass 41 (Orders Data Completeness) (2025-12-27) - Enhanced Laravel OrderResource with all required fields. Backend eager-loads orderItems. 18 tests PASS. PR merged. ✅
+- Pass 42 (Order Details Data Unwrap) (2025-12-27) - Fixed getPublicOrder() to unwrap API response. Order details now show correct data. PR merged. ✅
+- Pass 43 (Order Details v1) (2025-12-27) - Added shipping_method_label (Greek), shipping_address panel, producer info per item. Marketplace-style order details. PR #1909 merged. ✅
+- Pass 44 (Architecture Reconciliation) (2025-12-27) - Checkout now uses Laravel API exclusively. Legacy /api/checkout returns 410 Gone. Single source of truth complete. PR #1911 merged. Deployed + verified on PROD. ✅
 
 ---
 
