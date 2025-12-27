@@ -18,10 +18,11 @@ concurrency:
 jobs:
   deploy:
     name: staging-deploy
-    # Skip if SSH key not available (staging environment optional)
+    # Only run on main branch pushes or manual dispatch
+    # Fork PRs are automatically skipped (no secrets access)
     if: |
       (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
-      secrets.SSH_PRIVATE_KEY != ''
+      github.event.pull_request.head.repo.fork != true
     runs-on: ubuntu-latest
     environment: staging
     env:

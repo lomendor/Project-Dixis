@@ -12,6 +12,10 @@ concurrency:
 
 jobs:
   deploy:
+    # DEPRECATED: Use deploy-frontend.yml for production deployments
+    # This workflow is kept for manual-only use (workflow_dispatch)
+    # Guard ensures it never runs on push/PR events (prevents 0s failures)
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
