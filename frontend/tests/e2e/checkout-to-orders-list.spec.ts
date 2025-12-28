@@ -7,9 +7,8 @@
  * Root cause fix: Orders list now reads from Laravel API instead of Prisma
  * to match where checkout creates orders.
  *
- * Note: Tests are currently skipped pending proper auth setup in E2E environment.
- * The code changes have been verified manually on production.
- * TODO: Enable tests once AuthGuard is configured for E2E testing.
+ * Pass 46: Auth now provided via storageState from globalSetup.
+ * Tests use route mocking for deterministic API responses.
  */
 import { test, expect } from '@playwright/test';
 
@@ -282,7 +281,8 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
     await expect(page.locator('[data-testid="empty-orders-message"]')).toBeVisible();
   });
 
-  test.skip('verifies orders list calls Laravel API endpoint', async ({ page }) => {
+  // Pass 46: Unskipped - uses storageState auth + API mocking
+  test('verifies orders list calls Laravel API endpoint', async ({ page }) => {
     // This test verifies the fix: orders list should call Laravel API, not Prisma /internal/orders
     let calledLaravelApi = false;
     let calledPrismaApi = false;
@@ -290,7 +290,7 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
     // Monitor API calls
     page.on('request', (request) => {
       const url = request.url();
-      if (url.includes('/api/v1/public/orders')) {
+      if (url.includes('/api/v1/public/orders') || url.includes('/api/v1/orders')) {
         calledLaravelApi = true;
       }
       if (url.includes('/internal/orders') && !url.includes('/api/')) {
@@ -298,9 +298,24 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
       }
     });
 
-    // Mock Laravel API response
+    // Mock auth/me endpoint for AuthContext
+    await page.route('**/api/v1/auth/me', async (route) => {
+      await route.fulfill({
+        status: 200,
+        json: {
+          id: 1,
+          name: 'E2E Consumer',
+          email: 'consumer@example.com',
+          role: 'consumer',
+          profile: { role: 'consumer' }
+        }
+      });
+    });
+
+    // Mock Laravel API response for orders
     await page.route('**/api/v1/public/orders', async (route) => {
       if (route.request().method() === 'GET') {
+        calledLaravelApi = true;
         await route.fulfill({
           status: 200,
           json: { data: [] }
@@ -310,16 +325,22 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
       }
     });
 
-    // Setup minimal auth to bypass AuthGuard
-    await page.goto('/');
-    await page.evaluate(() => {
-      localStorage.setItem('auth_token', 'test-token');
-      localStorage.setItem('user_role', 'consumer');
+    // Also mock /api/v1/orders (alternative endpoint)
+    await page.route('**/api/v1/orders', async (route) => {
+      if (route.request().method() === 'GET') {
+        calledLaravelApi = true;
+        await route.fulfill({
+          status: 200,
+          json: { data: [] }
+        });
+      } else {
+        route.continue();
+      }
     });
 
-    // Try to navigate to orders page
+    // Navigate to orders page - auth provided by storageState
     await page.goto('/account/orders');
-    await page.waitForTimeout(2000); // Wait for API calls
+    await page.waitForLoadState('networkidle');
 
     // ASSERT: Should call Laravel API
     expect(calledLaravelApi).toBe(true);
