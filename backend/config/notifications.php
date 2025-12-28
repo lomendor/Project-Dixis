@@ -40,4 +40,15 @@ return [
     */
     'queue_enabled' => env('EMAIL_QUEUE_ENABLED', false),
     'queue_name' => env('EMAIL_QUEUE_NAME', 'emails'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pass 55: Producer Weekly Digest Feature Flag
+    |--------------------------------------------------------------------------
+    |
+    | When false (default), weekly digest emails are not sent.
+    | Enable separately from transactional emails.
+    |
+    */
+    'producer_digest_enabled' => env('PRODUCER_DIGEST_ENABLED', false),
 ];
