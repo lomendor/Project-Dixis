@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-28 (Pass 49)
+**Last Updated**: 2025-12-28 (Pass 51)
 
 ## TODO (tomorrow)
 - (none)
@@ -69,6 +69,8 @@
 - **Pass 47 Production Healthz & Smoke-Matrix Policy**: Investigated smoke-production timeout that blocked PR #1919. Root cause: Transient PM2 restart during CI run (healthz now 200 OK from both local 127.0.0.1:3000 and external https://dixis.gr). Solution: (1) Added `continue-on-error` for production smoke on PRs (non-blocking), (2) Extended preflight reachability check to production (was staging-only), (3) Simplified step conditions. Policy summary: Production smoke runs for alerting on main/schedule but doesn't block PR merges. Files: 2 changed (smoke-matrix.yml +8/-6 lines, Pass-47.md new). Evidence: VPS SSH verification shows healthz 200 OK. Docs: `docs/AGENT/SUMMARY/Pass-47.md`. (Closed: 2025-12-28)
 - **Pass 48 Shipping Display in Checkout & Order Details**: Added shipping method selector to checkout (HOME/PICKUP/COURIER with Greek labels) and ensured shipping cost displays correctly. Frontend: (1) Checkout shows 3 shipping options with costs (free for PICKUP, free for orders ≥€35), (2) Shipping cost shown in checkout summary, (3) Selected shipping method and cost sent to Laravel API. Backend: (1) `StoreOrderRequest.php` accepts `shipping_cost` (numeric 0-100), (2) `OrderController.php` stores shipping_cost and includes it in order total. Order Details: Already displays shipping address, method (Greek label), and cost via Pass 43. E2E: 5 new tests in `pass-48-shipping-display.spec.ts` (selector visibility, cost display, PICKUP free, order details fields, graceful handling). Files: 6 changed. Evidence: All CI checks PASS, PR #1921 merged 2025-12-28T05:37:59Z. Docs: `docs/AGENT/SUMMARY/Pass-48.md`. (Closed: 2025-12-28)
 - **Pass 49 Greek Market Validation**: Added Greek phone and postal code validation to checkout form with Greek error messages. Phone validation: accepts 10+ digit Greek numbers (69XXXXXXXX mobile, 21XXXXXXXX landline, +306912345678 international format). Postal code validation: exactly 5 digits required. Validation: client-side in `CheckoutClient.tsx` before API call, inline error messages in Greek. E2E: 7 tests in `pass-49-greek-validation.spec.ts` (invalid phone rejected, valid Greek mobile accepted, +30 prefix accepted, invalid postal rejected, valid 5-digit postal accepted, multiple errors shown, errors clear on resubmit). Files: 2 changed (CheckoutClient.tsx +37 lines, new E2E test +184 lines). Evidence: All CI checks PASS, PR #1925 merged 2025-12-28. Docs: `docs/AGENT/SUMMARY/Pass-49.md`. (Closed: 2025-12-28)
+- **Pass 50 Zone-Based Shipping Pricing**: Implemented zone-based shipping cost calculation with 8 Greek shipping zones (Αττική, Θεσσαλονίκη, Στερεά Ελλάδα, Πελοπόννησος, Κρήτη, Δωδεκάνησα, Κυκλάδες, Βόρεια Ελλάδα). Backend: (1) ShippingZone + ShippingRate models with per-zone base/per-item costs, (2) ShippingZoneSeeder populates zones with postal code ranges, (3) POST `/api/v1/public/shipping/quote` endpoint returns zone-aware price. Frontend: (1) Dynamic shipping cost fetched from API based on postal code and method, (2) Free shipping threshold (€35), (3) Cost shown in checkout summary before order creation. E2E: 6 tests in `pass-50-zone-shipping.spec.ts`. Files: 14 changed (backend models, migration, seeder, controller + frontend components, API client). Evidence: All CI checks PASS, PR #1927 merged 2025-12-28. PROD verification: Shipping quote API returns zone prices (Αττική €3.50, Κρήτη €4.50). Docs: `docs/AGENT/SUMMARY/Pass-50.md`. (Closed: 2025-12-28)
+- **Pass 51 Card Payments with Feature Flag**: Added card payment infrastructure via Stripe with feature flag (default OFF, COD still primary). Backend: (1) Migration adds `payment_provider`, `payment_reference` columns + `unpaid`, `refunded` enum values to orders, (2) PaymentCheckoutController creates Stripe Checkout Sessions, (3) StripeWebhookController handles payment events with signature validation and idempotent handling, (4) `config/payments.php` with `card_enabled` flag. Frontend: (1) Payment method selector in checkout (COD always visible, Card only when `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`), (2) Dynamic button text based on payment method, (3) Card flow redirects to Stripe Checkout. Tests: Backend PaymentWebhookTest (4 tests), E2E pass-51-payments.spec.ts (6 tests: COD regression, card hidden by default, card visible when flag enabled, payment method selector). Files: 12 changed (~900 insertions). Evidence: All CI checks PASS, PR #1931 merged 2025-12-28. PROD deployment: Migration applied successfully (141ms), COD order creation verified (Order #18), card option hidden (flag OFF). Docs: `docs/AGENT/SUMMARY/Pass-51.md`. (Closed: 2025-12-28)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -103,23 +105,24 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Pass 49 — Greek Market Readiness**
-   - **Priority**: P1 (Localization)
-   - **Scope**: Ensure all user-facing strings are Greek, phone validation for GR, postal code format
-   - **DoD**:
-     - [ ] All checkout/order UI strings in Greek
-     - [ ] Phone validation accepts Greek mobile format (+30, 69x)
-     - [ ] Postal code format validation (5 digits)
-   - **Risk**: Low (UI-only changes)
-
-2. **Pass 50 — Shipping Pricing Model**
+1. **Pass 52 — Card Payments Enable (when ready)**
    - **Priority**: P2 (Feature)
-   - **Scope**: Zone-based or weight-based shipping cost calculation
+   - **Scope**: Enable card payments in production with real Stripe credentials
    - **DoD**:
-     - [ ] Define shipping zones (e.g., mainland, islands, remote)
-     - [ ] Calculate shipping cost based on zone and/or weight
-     - [ ] Update checkout to use calculated cost
-   - **Risk**: Medium (requires business rules definition)
+     - [ ] Configure real Stripe keys in VPS (STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET)
+     - [ ] Enable feature flag: `PAYMENTS_CARD_FLAG=true`, `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`
+     - [ ] Verify Stripe webhook endpoint registered
+     - [ ] Test real card payment end-to-end
+   - **Risk**: Medium (requires Stripe account setup, webhook configuration)
+
+2. **Pass 53 — Order Email Notifications**
+   - **Priority**: P2 (Feature)
+   - **Scope**: Send email confirmation when order is created
+   - **DoD**:
+     - [ ] Order confirmation email sent after successful checkout
+     - [ ] Email includes order summary, shipping address, payment method
+     - [ ] Uses Resend or SMTP for delivery
+   - **Risk**: Low (email infrastructure already exists)
 
 ---
 
