@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-28 (Pass 47)
+**Last Updated**: 2025-12-28 (Pass 48)
 
 ## TODO (tomorrow)
 - (none)
@@ -67,6 +67,7 @@
 - **Pass 44 Architecture Reconciliation - Single Source of Truth**: Fixed split-brain architecture where checkout created orders in Prisma/Neon but Orders UI read from Laravel PostgreSQL. Root cause: CheckoutClient.tsx called `/api/checkout` (Prisma) while orders pages fetched from Laravel API - two databases, zero sync. Shipping address saved in Prisma was invisible to orders UI reading from Laravel. Solution: (1) Checkout now calls Laravel API via `apiClient.createOrder()` → `POST /api/v1/public/orders`, (2) Legacy `/api/checkout` route returns 410 Gone (hard-disabled), (3) Laravel `StoreOrderRequest.php` updated to accept `shipping_address`, `payment_method`, `COURIER` shipping method, (4) Laravel `OrderController.php` saves `shipping_address`, `payment_method`, `total_amount`. Documentation: Created `docs/AGENT/SYSTEM/sources-of-truth.md` (architecture rules, flow diagrams, verification commands). E2E tests: `pass-44-architecture-reconciliation.spec.ts` (12 tests: 410 Gone, shipping_address creation, Greek labels, producer info, data consistency). Files changed: 7 (2 backend, 5 frontend). Pattern: Frontend-only fix (checkout calls different endpoint), no migration required. Impact: Orders created via checkout now appear in orders list with correct shipping address, labels, and producer info. Single source of truth: Laravel API + Laravel PostgreSQL. PR #1911 merged 2025-12-27T10:57:00Z. (Closed: 2025-12-27)
 - **Pass 46 CI E2E Auth Setup**: Fixed CI E2E tests skipping auth-dependent tests. Root cause: `global-setup.ts` bailed out when CI=true ("⏭️ CI detected: Skipping global API auth"), no storageState created for authenticated tests. Solution: (1) Created `ci-global-setup.ts` that sets localStorage auth tokens (auth_token, user_role, user_id) without real Laravel, creates storageState for authenticated test projects, (2) Updated `playwright.config.ts` to use CI globalSetup when BASE_URL or CI mode, (3) Unskipped 4 critical tests (orders-data-completeness: 3 tests, checkout-to-orders-list: 1 test). Files: 4 changed. Evidence: E2E job PASS (1m 5s), E2E PostgreSQL PASS (3m 8s), typecheck PASS. PR #1919 merged 2025-12-28. Docs: `docs/AGENT/SUMMARY/Pass-46.md`. (Closed: 2025-12-28)
 - **Pass 47 Production Healthz & Smoke-Matrix Policy**: Investigated smoke-production timeout that blocked PR #1919. Root cause: Transient PM2 restart during CI run (healthz now 200 OK from both local 127.0.0.1:3000 and external https://dixis.gr). Solution: (1) Added `continue-on-error` for production smoke on PRs (non-blocking), (2) Extended preflight reachability check to production (was staging-only), (3) Simplified step conditions. Policy summary: Production smoke runs for alerting on main/schedule but doesn't block PR merges. Files: 2 changed (smoke-matrix.yml +8/-6 lines, Pass-47.md new). Evidence: VPS SSH verification shows healthz 200 OK. Docs: `docs/AGENT/SUMMARY/Pass-47.md`. (Closed: 2025-12-28)
+- **Pass 48 Shipping Display in Checkout & Order Details**: Added shipping method selector to checkout (HOME/PICKUP/COURIER with Greek labels) and ensured shipping cost displays correctly. Frontend: (1) Checkout shows 3 shipping options with costs (free for PICKUP, free for orders ≥€35), (2) Shipping cost shown in checkout summary, (3) Selected shipping method and cost sent to Laravel API. Backend: (1) `StoreOrderRequest.php` accepts `shipping_cost` (numeric 0-100), (2) `OrderController.php` stores shipping_cost and includes it in order total. Order Details: Already displays shipping address, method (Greek label), and cost via Pass 43. E2E: 5 new tests in `pass-48-shipping-display.spec.ts` (selector visibility, cost display, PICKUP free, order details fields, graceful handling). Files: 6 changed. Evidence: All CI checks PASS, PR #1921 merged 2025-12-28T05:37:59Z. Docs: `docs/AGENT/SUMMARY/Pass-48.md`. (Closed: 2025-12-28)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -101,17 +102,7 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Pass 48 — Shipping Cost v1 + Address/Shipping Fee Display**
-   - **Priority**: P2 (Feature - complete order details UX)
-   - **Scope**: Display shipping address + compute/display shipping fee in order details
-   - **DoD**:
-     - [ ] Shipping address displayed in order details page (already in API, wire to UI)
-     - [ ] Shipping fee placeholder OR rule-based v1 (e.g., flat rate per zone)
-     - [ ] Keep single source of truth (Laravel API)
-     - [ ] E2E test for shipping display
-   - **Risk**: Low (read-only UI enhancement, no checkout changes)
-
-2. **Pass 49 — Greek Market Readiness**
+1. **Pass 49 — Greek Market Readiness**
    - **Priority**: P1 (Localization)
    - **Scope**: Ensure all user-facing strings are Greek, phone validation for GR, postal code format
    - **DoD**:
@@ -119,6 +110,15 @@
      - [ ] Phone validation accepts Greek mobile format (+30, 69x)
      - [ ] Postal code format validation (5 digits)
    - **Risk**: Low (UI-only changes)
+
+2. **Pass 50 — Shipping Pricing Model**
+   - **Priority**: P2 (Feature)
+   - **Scope**: Zone-based or weight-based shipping cost calculation
+   - **DoD**:
+     - [ ] Define shipping zones (e.g., mainland, islands, remote)
+     - [ ] Calculate shipping cost based on zone and/or weight
+     - [ ] Update checkout to use calculated cost
+   - **Risk**: Medium (requires business rules definition)
 
 ---
 
