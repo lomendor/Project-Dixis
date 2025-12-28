@@ -1,8 +1,8 @@
 # Pass 49 - Greek Market Validation
 
 **Date**: 2025-12-28
-**Status**: IN_PROGRESS
-**PRs**: #1925 (pending CI)
+**Status**: COMPLETE
+**PRs**: #1925 (merged)
 
 ## Problem Statement
 
@@ -45,7 +45,8 @@ const GREEK_POSTAL_REGEX = /^\d{5}$/
 ## Evidence
 
 ### CI Results (PR #1925)
-- Pending: build-and-test, e2e, E2E (PostgreSQL), typecheck, quality-gates
+- All checks PASS: build-and-test, e2e, typecheck, quality-gates, heavy-checks
+- Merged: 2025-12-28
 
 ### Test Coverage
 - `pass-49-greek-validation.spec.ts`: 7 tests covering:
@@ -64,9 +65,9 @@ const GREEK_POSTAL_REGEX = /^\d{5}$/
 - [x] Error messages in Greek
 - [x] E2E tests added
 - [x] TypeScript passes
-- [ ] CI green
-- [ ] PR merged
-- [ ] Docs updated
+- [x] CI green
+- [x] PR merged
+- [x] Docs updated
 
 ## Next Passes
 
