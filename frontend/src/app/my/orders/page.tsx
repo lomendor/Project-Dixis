@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { apiClient, ProducerOrder, ProducerOrdersResponse } from '@/lib/api';
 
@@ -41,7 +41,7 @@ function formatMoney(value: string | number): string {
   return `${num.toFixed(2)} €`;
 }
 
-export default function ProducerOrdersPage() {
+function ProducerOrdersContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -84,9 +84,7 @@ export default function ProducerOrdersPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Οι Παραγγελίες μου</h1>
-
+    <>
       {/* Status tabs */}
       <nav className="flex flex-wrap gap-2 mb-6" role="tablist">
         {TABS.map((tab) => {
@@ -237,6 +235,27 @@ export default function ProducerOrdersPage() {
           </p>
         </div>
       )}
+    </>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="text-center py-12" data-testid="suspense-loading">
+      <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
+      <p className="text-gray-600">Φόρτωση...</p>
+    </div>
+  );
+}
+
+export default function ProducerOrdersPage() {
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Οι Παραγγελίες μου</h1>
+
+      <Suspense fallback={<LoadingFallback />}>
+        <ProducerOrdersContent />
+      </Suspense>
     </main>
   );
 }
