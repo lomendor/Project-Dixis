@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-27 (Pass 44)
+**Last Updated**: 2025-12-28 (Pass 45)
 
 ## TODO (tomorrow)
 - (none)
@@ -10,6 +10,9 @@
 
 ## 2025-12-25 — Pass SEC-GUARDRAILS
 - **Security Guardrails Implemented**: Added comprehensive secret hygiene protections to prevent future credential leaks. Components: (1) SOP document `docs/AGENT/SOPs/SOP-SEC-ROTATION.md` codifies strict no-secrets rules (never print DATABASE_URL, RESEND_API_KEY, or any .env contents), (2) CI diff guard `scripts/guard-no-secrets-diff.sh` automatically blocks PRs containing secret assignments (DATABASE_URL=, RESEND_API_KEY=, JWT_SECRET=, private keys), allows only placeholders (<redacted>, ***, example), (3) Wired into `.github/workflows/pr.yml` as required check (runs after checkout, before any code execution). Pattern: Defense-in-depth - SOP prevents human error, CI guard prevents accidents from merging. (Closed: 2025-12-25)
+
+## 2025-12-28 — Pass 45: Deploy Workflow Hardening
+- **Deploy Workflow Noise Eliminated**: Fixed `deploy-prod.yml` (0s "workflow file issue") and `deploy-staging.yml` (SSH permission denied) failures on main pushes. Root causes: (1) deploy-prod had complex 149-line bash script causing YAML parsing issues, (2) deploy-staging had invalid `secrets.SSH_PRIVATE_KEY` in job-level `if:` + staging secrets not configured. Solution: (1) Replaced deploy-prod.yml with minimal 33-line deprecated stub (manual-only, prints deprecation notice), (2) Made deploy-staging.yml manual-only until staging secrets configured. Result: Neither workflow runs on push events, eliminating red checks. Canonical deploy path remains `deploy-frontend.yml`. PRs: #1916 (partial fix), #1917 (final hardening, merged 2025-12-28T03:57:51Z). Evidence: No new runs for deploy-prod/staging after merge. Docs: `docs/AGENT/SUMMARY/Pass-45.md`. (Closed: 2025-12-28)
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SECURITY: Database Credentials Rotation (Neon Pooler → Direct Endpoint)**: Critical security incident resolved. Root cause: (1) Neon pgBouncer pooler endpoint incompatible with Laravel `SELECT FOR UPDATE` transactions (causing `SQLSTATE[25P02]: In failed sql transaction`), (2) DATABASE_URL with credentials exposed in terminal logs/summary (security leak). Fix: (1) Rotated Neon database password (`npg_WG10vYeFnsCk` → `npg_8zNfLox1iTIS`), (2) Switched from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`) in production .env, (3) Persisted new DATABASE_URL to GitHub Secret `DATABASE_URL_PRODUCTION` (repository-level), (4) Added CI guardrail: prod-smoke.yml now tests POST /api/v1/public/orders MUST NOT return 500 (detects transaction failures), (5) Created `.github/SECURITY.md` with no-secrets policy. Verification: Backend health check PASS (`database: connected`), order creation working (verified on production). Security measures: Old credentials revoked, new credentials stored securely in GitHub Secrets, no secrets in documentation. Documentation: Incident response following GPT security protocol (rotate → persist → guardrails → docs). Files: `backend/.env` (updated), `prod-smoke.yml` (+27 lines), `.github/SECURITY.md` (new, 71 lines). Pattern: Security-first response to credential exposure. (Closed: 2025-12-24)
@@ -96,16 +99,7 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Pass 45 — Deploy Workflow Investigation**
-   - **Priority**: P2 (Ops hygiene - deployments working but workflow failing)
-   - **Scope**: Investigate why `deploy-prod.yml` shows 0s failures on all recent runs
-   - **DoD**:
-     - [ ] Root cause identified (workflow file syntax? permissions? trigger?)
-     - [ ] Either: workflow fixed and passing, OR documented as deprecated
-     - [ ] Evidence: `gh run view` shows success OR docs explain current deploy process
-   - **Risk**: Low (deployments happening despite workflow failures)
-
-2. **Pass 46 — CI E2E Auth Setup + Unskip Critical Tests**
+1. **Pass 46 — CI E2E Auth Setup + Unskip Critical Tests**
    - **Priority**: P1 (Test coverage gap - critical E2E tests skipped)
    - **Scope**: Enable stable auth strategy for CI, unskip critical checkout/orders E2E tests
    - **DoD**:
@@ -115,7 +109,7 @@
      - [ ] No new `.skip()` added
    - **Risk**: Medium (E2E flakiness possible if auth unstable)
 
-3. **Pass 47 — Shipping Cost v1 + Address/Shipping Fee Display**
+2. **Pass 47 — Shipping Cost v1 + Address/Shipping Fee Display**
    - **Priority**: P2 (Feature - complete order details UX)
    - **Scope**: Display shipping address + compute/display shipping fee in order details
    - **DoD**:
