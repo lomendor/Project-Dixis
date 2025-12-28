@@ -2,7 +2,7 @@
 
 **Date**: 2025-12-28
 **Status**: COMPLETE
-**PR**: (pending)
+**PR**: #1938 (MERGED)
 
 ## Problem Statement
 
