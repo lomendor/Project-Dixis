@@ -54,6 +54,7 @@ function ProducerOrdersContent() {
   const [meta, setMeta] = useState<ProducerOrdersResponse['meta'] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -83,8 +84,47 @@ function ProducerOrdersContent() {
     router.push(`/my/orders?tab=${tab}`);
   }
 
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const blob = await apiClient.exportProducerOrdersCsv();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Failed to export orders:', err);
+      setError('Αποτυχία εξαγωγής παραγγελιών');
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <>
+      {/* Export button */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          data-testid="export-csv-button"
+        >
+          {exporting ? (
+            <>
+              <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              Εξαγωγή...
+            </>
+          ) : (
+            'Εξαγωγή CSV'
+          )}
+        </button>
+      </div>
+
       {/* Status tabs */}
       <nav className="flex flex-wrap gap-2 mb-6" role="tablist">
         {TABS.map((tab) => {
