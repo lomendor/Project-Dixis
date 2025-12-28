@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-28 (Pass 53)
+**Last Updated**: 2025-12-28 (Pass 54)
 
 ## TODO (tomorrow)
 - (none)
@@ -72,6 +72,7 @@
 - **Pass 50 Zone-Based Shipping Pricing**: Implemented zone-based shipping cost calculation with 8 Greek shipping zones (Αττική, Θεσσαλονίκη, Στερεά Ελλάδα, Πελοπόννησος, Κρήτη, Δωδεκάνησα, Κυκλάδες, Βόρεια Ελλάδα). Backend: (1) ShippingZone + ShippingRate models with per-zone base/per-item costs, (2) ShippingZoneSeeder populates zones with postal code ranges, (3) POST `/api/v1/public/shipping/quote` endpoint returns zone-aware price. Frontend: (1) Dynamic shipping cost fetched from API based on postal code and method, (2) Free shipping threshold (€35), (3) Cost shown in checkout summary before order creation. E2E: 6 tests in `pass-50-zone-shipping.spec.ts`. Files: 14 changed (backend models, migration, seeder, controller + frontend components, API client). Evidence: All CI checks PASS, PR #1927 merged 2025-12-28. PROD verification: Shipping quote API returns zone prices (Αττική €3.50, Κρήτη €4.50). Docs: `docs/AGENT/SUMMARY/Pass-50.md`. (Closed: 2025-12-28)
 - **Pass 51 Card Payments with Feature Flag**: Added card payment infrastructure via Stripe with feature flag (default OFF, COD still primary). Backend: (1) Migration adds `payment_provider`, `payment_reference` columns + `unpaid`, `refunded` enum values to orders, (2) PaymentCheckoutController creates Stripe Checkout Sessions, (3) StripeWebhookController handles payment events with signature validation and idempotent handling, (4) `config/payments.php` with `card_enabled` flag. Frontend: (1) Payment method selector in checkout (COD always visible, Card only when `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`), (2) Dynamic button text based on payment method, (3) Card flow redirects to Stripe Checkout. Tests: Backend PaymentWebhookTest (4 tests), E2E pass-51-payments.spec.ts (6 tests: COD regression, card hidden by default, card visible when flag enabled, payment method selector). Files: 12 changed (~900 insertions). Evidence: All CI checks PASS, PR #1931 merged 2025-12-28. PROD deployment: Migration applied successfully (141ms), COD order creation verified (Order #18), card option hidden (flag OFF). Docs: `docs/AGENT/SUMMARY/Pass-51.md`. (Closed: 2025-12-28)
 - **Pass 53 Order Email Notifications**: Added order email notifications for consumers and producers with feature flag (default OFF, production safe). Backend: (1) Migration creates `order_notifications` idempotency table (prevents double-sends on retries/webhook replays), (2) ConsumerOrderPlaced mailable (Greek content: order confirmation after checkout), (3) ProducerNewOrder mailable (each producer gets only their items), (4) OrderEmailService with idempotent sending logic, (5) `config/notifications.php` with `email_enabled` flag. Blade templates: Greek email content for both consumer and producer. Graceful failure: missing emails logged, order still created (no crash). OrderController hooks email service AFTER transaction commit (ensures no emails for failed orders). Tests: 8 backend tests PASS (15 assertions: feature flag, idempotency, multi-producer, graceful failure). Files: 13 changed (+1149/-11). Evidence: All CI checks PASS, PR #1933 merged 2025-12-28 (commit eace9657). PROD status: `EMAIL_NOTIFICATIONS_ENABLED=false` by default until SMTP configured. Docs: `docs/AGENT/SUMMARY/Pass-53.md`. (Closed: 2025-12-28)
+- **Pass 54 Order Status Update Emails**: Added email notifications when order status changes to shipped/delivered. Backend: (1) OrderShipped mailable (Greek: "Η παραγγελία στάλθηκε"), (2) OrderDelivered mailable (Greek: "Η παραγγελία παραδόθηκε"), (3) OrderEmailService extended with `sendOrderStatusNotification()`, (4) AdminOrderController hooks email service after status update. Idempotency via order_notifications table (events: order_shipped, order_delivered). Graceful failure: email errors don't crash status update. Reuses Pass 53 feature flag (EMAIL_NOTIFICATIONS_ENABLED). Tests: 8 backend tests PASS (16 assertions). Files: 8 changed (+564 lines). Evidence: All CI checks PASS, PR #1936 merged 2025-12-28 (commit 6014dfcc). Docs: `docs/AGENT/SUMMARY/Pass-54.md`. (Closed: 2025-12-28)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -116,22 +117,22 @@
      - [ ] Test real card payment end-to-end
    - **Risk**: Medium (requires Stripe account setup, webhook configuration)
 
-2. **Pass 54 — Order Status Update Emails**
-   - **Priority**: P3 (Enhancement)
-   - **Scope**: Send email when order status changes (shipped, delivered)
-   - **DoD**:
-     - [ ] Email sent when status changes to shipped/delivered
-     - [ ] Uses same idempotency pattern as Pass 53
-     - [ ] Greek content
-   - **Risk**: Low (reuses Pass 53 infrastructure)
-
-3. **Pass 55 — Weekly Producer Digest**
+2. **Pass 55 — Weekly Producer Digest**
    - **Priority**: P3 (Enhancement)
    - **Scope**: Weekly summary email for producers with order stats
    - **DoD**:
      - [ ] Scheduled job sends weekly digest
      - [ ] Includes: orders received, revenue, pending items
      - [ ] Uses same email infrastructure as Pass 53
+   - **Risk**: Low
+
+3. **Pass 56 — Producer Dashboard Improvements**
+   - **Priority**: P3 (Enhancement)
+   - **Scope**: Improve order management UI for producers
+   - **DoD**:
+     - [ ] Producer can view orders containing their products
+     - [ ] Status filter and search
+     - [ ] Export orders to CSV
    - **Risk**: Low
 
 ---
