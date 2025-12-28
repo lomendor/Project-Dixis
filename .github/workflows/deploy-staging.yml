@@ -1,15 +1,29 @@
+# Deploy Staging - MANUAL ONLY
+#
+# This workflow is currently MANUAL-ONLY (workflow_dispatch) because:
+# - Staging environment secrets (SSH_PRIVATE_KEY, STAGING_HOST, etc.) are not configured
+# - VPS authorized_keys not set up for staging
+#
+# TO ENABLE AUTOMATIC DEPLOYS:
+# 1. Configure staging secrets in GitHub (SSH_PRIVATE_KEY, STAGING_HOST, STAGING_USER, STAGING_PATH)
+# 2. Add SSH public key to staging VPS authorized_keys
+# 3. Uncomment the push/pull_request triggers below
+#
+# See: docs/OPS/STATE.md for staging setup instructions
+
 name: Deploy Staging
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/deploy-staging.yml'
+  # DISABLED until staging secrets are configured:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'backend/**'
+  #     - '.github/workflows/deploy-staging.yml'
 
 concurrency:
   group: deploy-staging
@@ -18,11 +32,6 @@ concurrency:
 jobs:
   deploy:
     name: staging-deploy
-    # Only run on main branch pushes or manual dispatch
-    # Fork PRs are automatically skipped (no secrets access)
-    if: |
-      (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') &&
-      github.event.pull_request.head.repo.fork != true
     runs-on: ubuntu-latest
     environment: staging
     env:

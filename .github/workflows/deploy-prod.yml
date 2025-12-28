@@ -1,148 +1,32 @@
-name: deploy-prod (dixis.gr)
+# DEPRECATED: This workflow is obsolete.
+# Use deploy-frontend.yml for production deployments.
+#
+# This file is kept as a manual-only stub to prevent workflow file errors.
+# It does nothing except print a deprecation notice.
+
+name: deploy-prod (DEPRECATED)
+
 on:
   workflow_dispatch:
     inputs:
       reason:
-        description: Why deploying?
+        description: "This workflow is deprecated. Use deploy-frontend.yml instead."
         required: false
-        default: manual
-concurrency:
-  group: deploy-prod
-  cancel-in-progress: false
+        default: "deprecated"
 
 jobs:
-  deploy:
-    # DEPRECATED: Use deploy-frontend.yml for production deployments
-    # This workflow is kept for manual-only use (workflow_dispatch)
-    # Guard ensures it never runs on push/PR events (prevents 0s failures)
-    if: github.event_name == 'workflow_dispatch'
+  deprecated-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      - name: Known hosts
+      - name: Deprecation Notice
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Remote preflight (verify/create directories)
-        run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -c "
-            set -euo pipefail
-            echo \"[Preflight] Checking /var/www/dixis...\"
-
-            # Create base directory if missing
-            if [ ! -d /var/www/dixis ]; then
-              echo \"[Preflight] Creating /var/www/dixis\"
-              sudo mkdir -p /var/www/dixis
-              sudo chown -R deploy:deploy /var/www/dixis
-            fi
-
-            # Create frontend directory if missing
-            if [ ! -d /var/www/dixis/frontend ]; then
-              echo \"[Preflight] Creating /var/www/dixis/frontend\"
-              mkdir -p /var/www/dixis/frontend
-            fi
-
-            # Create backend directory if missing
-            if [ ! -d /var/www/dixis/backend ]; then
-              echo \"[Preflight] Creating /var/www/dixis/backend\"
-              mkdir -p /var/www/dixis/backend
-            fi
-
-            # Verify directories exist
-            ls -la /var/www/dixis/ || { echo \"[ERR] /var/www/dixis missing\"; exit 1; }
-
-            # Fix ownership and permissions
-            sudo chown -R deploy:deploy /var/www/dixis/
-            sudo chmod -R 775 /var/www/dixis/
-
-            echo \"[Preflight] ✅ All directories ready\"
-          "'
-
-      - name: Rsync frontend (exclude cache/node_modules)
-        run: |
-          rsync -rlpgoDz --omit-dir-times \
-            --exclude node_modules --exclude .next \
-            --exclude ".env" --exclude ".env.production" --exclude "prisma/.env" \
-            ./frontend/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/frontend/"
-
-      - name: Remote deploy (install → migrate → build → pm2) with caches
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-          RUNTIME_DATABASE_URL: ${{ secrets.RUNTIME_DATABASE_URL_PROD || secrets.DATABASE_URL_PROD }}
-        run: |
-          # Write DATABASE_URL to a temp file to avoid shell escaping issues
-          echo "$DATABASE_URL" > /tmp/db_url.txt
-          scp /tmp/db_url.txt "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/db_url.txt"
-          rm /tmp/db_url.txt
-
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" 'bash -lc '\''
-            set -euo pipefail
-            cd /var/www/dixis/frontend
-
-            # --- Remote caches
-            REMOTE_CACHE_BASE=$HOME/.cache/dixis
-            PNPM_STORE_DIR=$REMOTE_CACHE_BASE/pnpm-store
-            NEXT_CACHE_DIR=$REMOTE_CACHE_BASE/next
-            mkdir -p "$PNPM_STORE_DIR" "$NEXT_CACHE_DIR"
-
-            # --- Read DATABASE_URL from file (avoids shell escaping issues)
-            DATABASE_URL=$(cat /tmp/db_url.txt)
-            rm -f /tmp/db_url.txt
-            export DATABASE_URL
-
-            # --- DATABASE_URL guard
-            [ -n "${DATABASE_URL:-}" ] || { echo "[ERR] DATABASE_URL empty"; exit 1; }
-
-            corepack enable >/dev/null 2>&1 || true
-            corepack prepare pnpm@9.15.9 --activate
-            export CI=true
-            pnpm config set store-dir "$PNPM_STORE_DIR"
-
-            # Write env files
-            rm -f prisma/.env
-            cat > .env << 'ENVEOF'
-DATABASE_URL=$DATABASE_URL
-NEXT_PUBLIC_API_BASE_URL=https://dixis.gr/api/v1
-ENVEOF
-            # Replace the DATABASE_URL placeholder with actual value
-            sed -i "s|DATABASE_URL=\$DATABASE_URL|DATABASE_URL=$DATABASE_URL|g" .env
-            cp .env .env.production
-
-            pnpm install --frozen-lockfile
-            pnpm prisma migrate deploy || exit 21
-            export NEXT_CACHE_DIR="$NEXT_CACHE_DIR"
-            pnpm build
-
-            # Copy .env and static assets to standalone directory
-            mkdir -p .next/standalone
-            cp .env .next/standalone/.env
-            cp -r public .next/standalone/ 2>/dev/null || true
-            cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
-
-            # Kill any existing process and restart with standalone server
-            pkill -f "node.*server.js" || pkill -f "next start" || true
-            sleep 2
-            cd .next/standalone
-            pm2 restart dixis-frontend --update-env || pm2 start server.js --name dixis-frontend
-            cd ../..
-            sleep 3
-            curl -sI http://127.0.0.1:3000/api/healthz | head -n1 || true
-          '\'''
-
-      - name: Smoke
-        run: |
-          curl -sI https://dixis.gr/api/healthz | head -n1
-          curl -sI https://dixis.gr | head -n1
+          echo "=============================================="
+          echo "DEPRECATED WORKFLOW"
+          echo "=============================================="
+          echo ""
+          echo "This workflow (deploy-prod.yml) is deprecated."
+          echo "Please use deploy-frontend.yml for production deployments."
+          echo ""
+          echo "See: https://github.com/lomendor/Project-Dixis/actions/workflows/deploy-frontend.yml"
+          echo "=============================================="
+          exit 0
