@@ -847,6 +847,8 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     // Producer Order Management (AG126.1)
     Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'index'])
         ->middleware('throttle:60,1'); // 60 requests per minute
+    Route::get('orders/export', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'export'])
+        ->middleware('throttle:10,1'); // 10 exports per minute (Pass 57)
     Route::get('orders/{id}', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'show'])
         ->middleware('throttle:60,1'); // 60 requests per minute
     Route::patch('orders/{id}/status', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'updateStatus'])

@@ -626,6 +626,23 @@ class ApiClient {
     );
   }
 
+  // Pass 57: Export producer orders to CSV
+  async exportProducerOrdersCsv(): Promise<Blob> {
+    const url = apiUrl('producer/orders/export');
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': this.token ? `Bearer ${this.token}` : '',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response.blob();
+  }
+
   // Pass 50: Get zone-based shipping quote (new V1 endpoint)
   async getZoneShippingQuote(data: {
     postal_code: string;

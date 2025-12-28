@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProducerOrderController extends Controller
 {
@@ -173,6 +175,94 @@ class ProducerOrderController extends Controller
             'message' => "Order status updated to '{$newStatus}'",
             'order' => $order,
         ]);
+    }
+
+    /**
+     * Export producer orders to CSV.
+     *
+     * GET /api/v1/producer/orders/export
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        // Get producer ID from authenticated user
+        $user = $request->user();
+        if (!$user || !$user->producer) {
+            abort(403, 'User is not associated with a producer');
+        }
+
+        $producerId = $user->producer->id;
+
+        // Fetch orders for the last 30 days by default
+        $orders = Order::forProducer($producerId)
+            ->with(['user', 'orderItems' => function ($q) use ($producerId) {
+                $q->where('producer_id', $producerId);
+            }])
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'orders-' . now()->format('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ];
+
+        $callback = function () use ($orders) {
+            $file = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // Header row
+            fputcsv($file, [
+                'order_id',
+                'created_at',
+                'status',
+                'customer_name',
+                'customer_email',
+                'items_summary',
+                'subtotal',
+                'shipping',
+                'total',
+                'payment_method',
+                'shipping_method',
+            ]);
+
+            // Data rows
+            foreach ($orders as $order) {
+                // Build items summary (producer's items only)
+                $itemsSummary = $order->orderItems->map(function ($item) {
+                    $name = $item->product_name ?? 'Unknown';
+                    $qty = $item->quantity ?? 0;
+                    return "{$name} x{$qty}";
+                })->implode('; ');
+
+                // Calculate producer's subtotal from their items
+                $producerSubtotal = $order->orderItems->sum(function ($item) {
+                    return floatval($item->total_price ?? 0);
+                });
+
+                fputcsv($file, [
+                    $order->id,
+                    $order->created_at->format('Y-m-d H:i'),
+                    $order->status ?? 'unknown',
+                    $order->user->name ?? '',
+                    $order->user->email ?? '',
+                    $itemsSummary,
+                    number_format($producerSubtotal, 2, '.', ''),
+                    number_format(floatval($order->shipping_cost ?? 0), 2, '.', ''),
+                    number_format(floatval($order->total ?? 0), 2, '.', ''),
+                    $order->payment_method ?? '',
+                    $order->shipping_method ?? '',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
