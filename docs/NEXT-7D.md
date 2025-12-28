@@ -1,17 +1,25 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-27 12:00 UTC
+**Last Updated**: 2025-12-28 14:00 UTC
 
 ## WIP (1 item only)
-- (none - ready for next item from NEXT queue)
+- **Pass 50 — Zone-Based Shipping Pricing** (in PR)
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 45 — Deploy Workflow Investigation** (P2 Ops Hygiene)
-2. **Pass 46 — CI E2E Auth Setup + Unskip Critical Tests**
-3. **Pass 47 — Shipping Cost v1 + Address/Shipping Fee Display**
+1. **Pass 51 — Payment Provider Integration** (Viva Wallet or Stripe)
+2. **Pass 52 — Email Notifications** (Order confirmation, shipping updates)
+3. **Pass 53 — Producer Dashboard Improvements** (Order management UI)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
+
+## Recently Completed (Pass 45-49)
+
+- **Pass 45** — Deploy Workflow Hardening ✅
+- **Pass 46** — CI E2E Auth Setup ✅
+- **Pass 47** — Production Healthz & Smoke-Matrix Policy ✅
+- **Pass 48** — Shipping Display in Checkout & Order Details ✅
+- **Pass 49** — Greek Market Validation ✅
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅

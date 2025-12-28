@@ -623,6 +623,28 @@ class ApiClient {
       }
     );
   }
+
+  // Pass 50: Get zone-based shipping quote (new V1 endpoint)
+  async getZoneShippingQuote(data: {
+    postal_code: string;
+    method: 'HOME' | 'COURIER' | 'PICKUP';
+    weight_kg?: number;
+    subtotal?: number;
+  }): Promise<{
+    price_eur: number;
+    zone_name: string | null;
+    zone_id?: number;
+    method: string;
+    free_shipping: boolean;
+    free_shipping_reason?: 'threshold' | 'pickup';
+    threshold?: number;
+    source: 'zone' | 'fallback' | 'threshold' | 'pickup';
+  }> {
+    return this.request('public/shipping/quote', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
