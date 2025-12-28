@@ -1,0 +1,132 @@
+name: VPS Migration Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      migration_action:
+        description: 'Migration action to perform'
+        required: true
+        default: 'status'
+        type: choice
+        options:
+          - status
+          - migrate
+          - seed-shipping-zones
+          - full-pass-50
+          - diagnose-ssh
+
+jobs:
+  run-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run migration on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "=== VPS Migration Runner ==="
+            echo "Action: ${{ inputs.migration_action }}"
+            echo "Time: $(date -Iseconds)"
+            echo ""
+
+            cd /var/www/dixis/current/backend
+
+            case "${{ inputs.migration_action }}" in
+              status)
+                echo "=== Migration Status ==="
+                php artisan migrate:status
+                ;;
+
+              migrate)
+                echo "=== Running Migrations ==="
+                php artisan migrate --force
+                echo ""
+                echo "=== Post-Migration Status ==="
+                php artisan migrate:status | tail -20
+                ;;
+
+              seed-shipping-zones)
+                echo "=== Seeding Shipping Zones ==="
+                php artisan db:seed --class=ShippingZoneSeeder --force
+                echo ""
+                echo "=== Verifying Zones ==="
+                php artisan tinker --execute="echo 'Zones: ' . \App\Models\ShippingZone::count() . ', Rates: ' . \App\Models\ShippingRate::count();"
+                ;;
+
+              full-pass-50)
+                echo "=== PASS 50: Full Migration ==="
+                echo ""
+                echo "--- Step 1: Pull latest code ---"
+                cd /var/www/dixis/current
+                git fetch origin main
+                git reset --hard origin/main
+                echo "HEAD: $(git rev-parse --short HEAD)"
+                echo ""
+
+                echo "--- Step 2: Run migrations ---"
+                cd backend
+                php artisan migrate --force
+                echo ""
+
+                echo "--- Step 3: Seed shipping zones ---"
+                php artisan db:seed --class=ShippingZoneSeeder --force
+                echo ""
+
+                echo "--- Step 4: Clear caches ---"
+                php artisan config:clear
+                php artisan cache:clear
+                php artisan route:clear
+                echo ""
+
+                echo "--- Step 5: Verify ---"
+                php artisan tinker --execute="echo 'Zones: ' . \App\Models\ShippingZone::count() . ', Rates: ' . \App\Models\ShippingRate::count();"
+                echo ""
+                echo "--- Step 6: Test quote endpoint ---"
+                curl -sS -X POST http://127.0.0.1:8001/api/v1/public/shipping/quote \
+                  -H "Content-Type: application/json" \
+                  -d '{"postal_code":"10558","method":"HOME","weight_kg":1}' | head -100
+                ;;
+
+              diagnose-ssh)
+                echo "=== SSH/Security Diagnostics ==="
+                echo ""
+                echo "--- fail2ban status ---"
+                sudo fail2ban-client status sshd 2>/dev/null || echo "fail2ban not running or no sshd jail"
+                echo ""
+                echo "--- sshd status ---"
+                sudo systemctl status ssh --no-pager -l | head -30
+                echo ""
+                echo "--- iptables SSH rules ---"
+                sudo iptables -L INPUT -n --line-numbers | grep -E '22|ssh' || echo "No SSH rules found"
+                echo ""
+                echo "--- Listening ports ---"
+                ss -lntp | grep -E ':22|sshd'
+                echo ""
+                echo "--- Recent auth failures ---"
+                sudo journalctl -u ssh --since "1 hour ago" --no-pager | tail -30
+                ;;
+
+              *)
+                echo "Unknown action: ${{ inputs.migration_action }}"
+                exit 1
+                ;;
+            esac
+
+            echo ""
+            echo "=== Done ==="
+
+      - name: Public endpoint verification
+        if: inputs.migration_action == 'full-pass-50' || inputs.migration_action == 'migrate'
+        run: |
+          echo "=== Verifying public endpoints ==="
+          echo ""
+          echo "--- Health check ---"
+          curl -sS https://dixis.gr/api/healthz | head -20
+          echo ""
+          echo "--- Shipping quote (Athens) ---"
+          curl -sS -X POST https://dixis.gr/api/v1/public/shipping/quote \
+            -H "Content-Type: application/json" \
+            -d '{"postal_code":"10558","method":"HOME","weight_kg":1}' | head -50
