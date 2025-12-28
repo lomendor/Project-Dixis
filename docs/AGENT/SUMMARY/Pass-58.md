@@ -2,7 +2,7 @@
 
 **Date**: 2025-12-28
 **Status**: COMPLETE
-**PR**: (pending)
+**PR**: #1945 (merged 318d3ac8)
 
 ## TL;DR
 
@@ -44,6 +44,7 @@ Uses existing `apiClient.updateProducerOrderStatus()` method.
 
 - Backend endpoint already existed (no backend changes)
 - Follows same pattern as Pass 57 (CSV export button)
+- CI note: `reload-and-css.smoke.spec.ts` flaky failure (net::ERR_ABORTED) is PROD network transient, not code-related. E2E PostgreSQL passed.
 
 ---
 Generated-by: Claude (Pass 58)

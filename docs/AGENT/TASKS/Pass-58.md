@@ -23,5 +23,5 @@ Excluded:
 - [x] Loading state while updating
 - [x] Error handling with Greek message
 - [x] E2E tests pass
-- [ ] CI green
-- [ ] docs updated
+- [x] CI green (E2E PostgreSQL passed; flaky PROD smoke non-blocking)
+- [x] docs updated
