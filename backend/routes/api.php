@@ -225,7 +225,19 @@ Route::prefix('v1')->group(function () {
 
 });
 
+// Pass 51: Card payment checkout (authenticated)
+Route::middleware('auth:sanctum')->prefix('v1/public/payments')->group(function () {
+    Route::post('checkout', [App\Http\Controllers\Api\V1\PaymentCheckoutController::class, 'createCheckoutSession'])
+        ->middleware('throttle:10,1'); // 10 payment initiations per minute
+});
+
 // Webhook routes (no authentication - verified by signature)
+Route::prefix('v1/webhooks')->group(function () {
+    // Pass 51: Stripe webhook (signature verified in controller)
+    Route::post('stripe', [App\Http\Controllers\Api\V1\StripeWebhookController::class, 'handle']);
+});
+
+// Legacy webhook routes (for backwards compatibility)
 Route::prefix('webhooks')->group(function () {
     Route::post('stripe', [App\Http\Controllers\Api\WebhookController::class, 'stripe']);
     Route::post('viva', [App\Http\Controllers\Api\WebhookController::class, 'viva']);

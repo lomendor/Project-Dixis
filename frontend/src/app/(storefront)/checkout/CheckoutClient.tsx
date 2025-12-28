@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { calcTotals, fmtEUR } from '@/lib/cart/totals'
 import { DEFAULT_OPTIONS, calculateShippingCost, type ShippingMethod } from '@/contracts/shipping'
@@ -8,6 +8,9 @@ import { useTranslations } from 'next-intl'
 import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
 import type { QuoteResponse } from '@/lib/quoteClient'
 import { apiClient } from '@/lib/api'
+
+// Pass 51: Payment method type
+type PaymentMethodType = 'COD' | 'CARD'
 
 // Pass 49: Greek market validation
 const GREEK_PHONE_REGEX = /^(\+30|0030|30)?[2-9]\d{8,9}$/
@@ -59,6 +62,9 @@ export default function CheckoutClient(){
   // Pass 50: Zone-based shipping quote state
   const [zoneQuote, setZoneQuote] = useState<{ price: number; zoneName: string | null; source: string } | null>(null)
   const [postalInput, setPostalInput] = useState('')
+  // Pass 51: Payment method and card payments feature flag
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('COD')
+  const [cardPaymentsEnabled, setCardPaymentsEnabled] = useState(false)
 
   // Live totals state from ShippingBreakdown
   const [liveTotals, setLiveTotals] = useState<{shipping:number; cod:number; total:number; free:boolean}>({
@@ -67,6 +73,23 @@ export default function CheckoutClient(){
     total: 0,
     free: false
   })
+
+  // Pass 51: Check if card payments are enabled on mount
+  useEffect(() => {
+    const checkCardPayments = async () => {
+      try {
+        // Check env var first (faster than API call)
+        const envEnabled = process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true'
+        if (envEnabled) {
+          setCardPaymentsEnabled(true)
+        }
+      } catch {
+        // Card payments disabled by default
+        setCardPaymentsEnabled(false)
+      }
+    }
+    checkCardPayments()
+  }, [])
 
   // Find shipping option details
   const shippingOption = SHIPPING_OPTIONS.find(opt => opt.code === shippingMethod) || SHIPPING_OPTIONS[0]
@@ -168,6 +191,7 @@ export default function CheckoutClient(){
     try{
       // Pass 44: Use Laravel API directly (Single Source of Truth)
       // Pass 48: Include shipping_cost in order creation
+      // Pass 51: Support both COD and CARD payment methods
       const order = await apiClient.createOrder({
         items: items.map(i => ({ product_id: parseInt(i.id, 10), quantity: i.qty })),
         currency: 'EUR',
@@ -181,7 +205,7 @@ export default function CheckoutClient(){
           country: 'GR', // Default to Greece
         },
         shipping_cost: shippingCost, // Pass 48: Send calculated shipping cost
-        payment_method: 'COD',
+        payment_method: paymentMethod, // Pass 51: COD or CARD
         notes: undefined,
       });
 
@@ -192,6 +216,23 @@ export default function CheckoutClient(){
         return
       }
 
+      // Pass 51: Handle card payment - redirect to Stripe checkout
+      if (paymentMethod === 'CARD') {
+        try {
+          const paymentSession = await apiClient.createPaymentCheckout(order.id)
+          clearCart()
+          // Redirect to Stripe Checkout
+          window.location.href = paymentSession.redirect_url
+          return
+        } catch (paymentError) {
+          console.error('[CHECKOUT] Card payment init failed:', paymentError)
+          // Order created but payment failed - redirect to order page with error
+          router.push(`/order/${encodeURIComponent(order.id)}?payment_error=true`)
+          return
+        }
+      }
+
+      // COD: Clear cart and redirect to order confirmation
       clearCart()
       router.push(`/order/${encodeURIComponent(order.id)}`)
     }catch(e){
@@ -346,13 +387,72 @@ export default function CheckoutClient(){
               )}
             </div>
 
+            {/* Pass 51: Payment Method Selection */}
+            <div className="pt-4 border-t border-gray-200">
+              <label className="block text-sm font-medium mb-3">Τρόπος Πληρωμής</label>
+              <div className="space-y-2" data-testid="payment-method-selector">
+                {/* COD - Always available */}
+                <label
+                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition ${
+                    paymentMethod === 'COD' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  data-testid="payment-option-COD"
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      value="COD"
+                      checked={paymentMethod === 'COD'}
+                      onChange={() => setPaymentMethod('COD')}
+                      className="h-4 w-4 text-green-600 focus:ring-green-500"
+                    />
+                    <div>
+                      <span className="font-medium">Αντικαταβολή</span>
+                      <span className="text-xs text-gray-500 ml-2">(Πληρωμή κατά την παράδοση)</span>
+                    </div>
+                  </div>
+                </label>
+
+                {/* Card - Only if feature flag enabled */}
+                {cardPaymentsEnabled && (
+                  <label
+                    className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition ${
+                      paymentMethod === 'CARD' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    data-testid="payment-option-CARD"
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value="CARD"
+                        checked={paymentMethod === 'CARD'}
+                        onChange={() => setPaymentMethod('CARD')}
+                        className="h-4 w-4 text-green-600 focus:ring-green-500"
+                      />
+                      <div>
+                        <span className="font-medium">Κάρτα</span>
+                        <span className="text-xs text-gray-500 ml-2">(Ασφαλής πληρωμή με κάρτα)</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-400">Visa / Mastercard</span>
+                  </label>
+                )}
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-6 rounded-lg transition"
               data-testid="checkout-submit"
             >
-              {loading ? `${t('common.submit')}...` : t('checkout.submit')}
+              {loading
+                ? 'Επεξεργασία...'
+                : paymentMethod === 'CARD'
+                  ? 'Συνέχεια στην Πληρωμή'
+                  : 'Ολοκλήρωση Παραγγελίας'}
             </button>
             {err && (
               <p className="text-red-600" data-testid="checkout-error">

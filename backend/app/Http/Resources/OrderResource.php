@@ -31,6 +31,8 @@ class OrderResource extends JsonResource
             'status' => $this->status ?? 'pending',
             'payment_status' => $this->payment_status ?? 'pending',
             'payment_method' => $this->payment_method ?? 'cod', // Default: Cash on Delivery
+            'payment_provider' => $this->payment_provider, // Pass 51: stripe, null for COD
+            'payment_reference' => $this->payment_reference, // Pass 51: external session/transaction ID
             'shipping_method' => $shippingMethodCode,
             'shipping_method_label' => $shippingMethodLabels[$shippingMethodCode] ?? $shippingMethodCode,
             // Shipping address (structured object, null if not set)
