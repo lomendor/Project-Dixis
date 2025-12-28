@@ -1,8 +1,8 @@
 # Pass 50 - Zone-Based Shipping Pricing
 
 **Date**: 2025-12-28
-**Status**: IN_PROGRESS
-**PRs**: (pending)
+**Status**: ✅ COMPLETE
+**PRs**: #1927 (implementation), #1928 (migration workflow), #1929 (path fix)
 
 ## Problem Statement
 
@@ -92,7 +92,25 @@ Shipping costs were hardcoded in frontend (HOME=€3.50, COURIER=€4.50). Real 
 - E2E: 5 Playwright tests (Athens zone, islands zone, free shipping, PICKUP, fallback)
 
 ### CI Results
-- Pending
+- ✅ All checks passed
+
+### Production Verification (2025-12-28)
+```bash
+# Athens (10558) → €3.50 Αττική ✅
+curl -X POST https://dixis.gr/api/v1/public/shipping/quote \
+  -H "Content-Type: application/json" \
+  -d '{"postal_code":"10558","method":"HOME","weight_kg":1}'
+
+# Mykonos (84600) → €7.00 Νησιά ✅
+curl -X POST https://dixis.gr/api/v1/public/shipping/quote \
+  -H "Content-Type: application/json" \
+  -d '{"postal_code":"84600","method":"HOME","weight_kg":1}'
+
+# Free shipping (>€35) → €0.00 ✅
+curl -X POST https://dixis.gr/api/v1/public/shipping/quote \
+  -H "Content-Type: application/json" \
+  -d '{"postal_code":"10558","method":"HOME","weight_kg":1,"subtotal":40}'
+```
 
 ## DoD Checklist
 
@@ -105,9 +123,9 @@ Shipping costs were hardcoded in frontend (HOME=€3.50, COURIER=€4.50). Real 
 - [x] Backend tests: 8 tests
 - [x] E2E tests: 5 tests
 - [x] TypeScript passes
-- [ ] CI green
-- [ ] PR merged
-- [ ] Docs updated
+- [x] CI green
+- [x] PR merged (#1927)
+- [x] Docs updated (ACCESS.md)
 
 ## Next Passes
 
