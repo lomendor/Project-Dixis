@@ -30,10 +30,38 @@ return new class extends Migration
             }
         });
 
-        // Update payment_status enum to include 'unpaid' and 'refunded'
-        // Note: Using raw SQL because Laravel doesn't support modifying enums easily
-        // This is safe because we're only ADDING values, not removing existing ones
-        DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('unpaid', 'pending', 'paid', 'failed', 'refunded') DEFAULT 'unpaid'");
+        // PostgreSQL: Add new enum values using ALTER TYPE
+        // Check if values exist before adding (idempotent)
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'pgsql') {
+            // Get the enum type name - Laravel creates it as orders_payment_status
+            // Add 'unpaid' before 'pending' if it doesn't exist
+            DB::statement("DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'unpaid' AND enumtypid = 'orders_payment_status'::regtype) THEN
+                    ALTER TYPE orders_payment_status ADD VALUE IF NOT EXISTS 'unpaid' BEFORE 'pending';
+                END IF;
+            EXCEPTION
+                WHEN others THEN NULL;
+            END $$;");
+
+            // Add 'refunded' after 'failed' if it doesn't exist
+            DB::statement("DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'refunded' AND enumtypid = 'orders_payment_status'::regtype) THEN
+                    ALTER TYPE orders_payment_status ADD VALUE IF NOT EXISTS 'refunded' AFTER 'failed';
+                END IF;
+            EXCEPTION
+                WHEN others THEN NULL;
+            END $$;");
+
+            // Change default to 'unpaid'
+            DB::statement("ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'unpaid'");
+        } else {
+            // MySQL/SQLite: Use MODIFY COLUMN syntax
+            DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('unpaid', 'pending', 'paid', 'failed', 'refunded') DEFAULT 'unpaid'");
+        }
 
         // Set existing NULL payment_method values to 'cod' (backwards compatibility)
         DB::statement("UPDATE orders SET payment_method = 'cod' WHERE payment_method IS NULL");
@@ -41,8 +69,16 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Revert payment_status back to original enum
-        DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending'");
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'pgsql') {
+            // PostgreSQL doesn't support removing enum values easily
+            // Just change default back to 'pending'
+            DB::statement("ALTER TABLE orders ALTER COLUMN payment_status SET DEFAULT 'pending'");
+        } else {
+            // MySQL: Revert enum
+            DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending'");
+        }
 
         Schema::table('orders', function (Blueprint $table) {
             if (Schema::hasColumn('orders', 'payment_provider')) {
