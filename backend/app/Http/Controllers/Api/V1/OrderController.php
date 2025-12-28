@@ -124,6 +124,10 @@ class OrderController extends Controller
                 // Use authenticated user's ID if available, otherwise allow guest orders
                 $userId = auth()->id() ?? $validated['user_id'] ?? null;
 
+                // Pass 48: Use shipping_cost from frontend, default to 0
+                $shippingCost = $validated['shipping_cost'] ?? 0;
+                $totalWithShipping = $orderTotal + $shippingCost;
+
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => 'pending',
@@ -133,9 +137,9 @@ class OrderController extends Controller
                     'shipping_address' => $validated['shipping_address'] ?? null,
                     'currency' => $validated['currency'],
                     'subtotal' => $orderTotal,
-                    'shipping_cost' => 0, // No shipping cost for now
-                    'total' => $orderTotal,
-                    'total_amount' => $orderTotal, // Legacy alias for frontend compatibility
+                    'shipping_cost' => $shippingCost,
+                    'total' => $totalWithShipping,
+                    'total_amount' => $totalWithShipping, // Legacy alias for frontend compatibility
                     'notes' => $validated['notes'] ?? null,
                 ]);
 

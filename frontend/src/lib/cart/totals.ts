@@ -22,7 +22,8 @@ export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export type ShippingMethod = 'PICKUP' | 'COURIER' | 'COURIER_COD';
+// Pass 48: Added 'HOME' for backward compatibility with checkout UI
+export type ShippingMethod = 'PICKUP' | 'COURIER' | 'COURIER_COD' | 'HOME';
 
 export interface CartItem {
   price: number; // in cents
@@ -63,8 +64,9 @@ export function calcTotals(input: TotalsInput): TotalsOutput {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   // Calculate shipping based on method
+  // Pass 48: HOME also uses baseShipping (like COURIER)
   let shipping = 0;
-  if (shippingMethod === 'COURIER' || shippingMethod === 'COURIER_COD') {
+  if (shippingMethod === 'COURIER' || shippingMethod === 'COURIER_COD' || shippingMethod === 'HOME') {
     shipping = baseShipping;
   }
 
