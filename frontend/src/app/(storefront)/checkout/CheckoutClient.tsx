@@ -9,6 +9,10 @@ import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
 import type { QuoteResponse } from '@/lib/quoteClient'
 import { apiClient } from '@/lib/api'
 
+// Pass 49: Greek market validation
+const GREEK_PHONE_REGEX = /^(\+30|0030|30)?[2-9]\d{8,9}$/
+const GREEK_POSTAL_REGEX = /^\d{5}$/
+
 // Shipping method options for UI (Pass 48)
 const SHIPPING_OPTIONS: Array<{
   code: 'HOME' | 'PICKUP' | 'COURIER';
@@ -24,6 +28,12 @@ const SHIPPING_OPTIONS: Array<{
 
 // Free shipping threshold (€)
 const FREE_SHIPPING_THRESHOLD = 35;
+
+// Pass 49: Field validation errors type
+interface FieldErrors {
+  phone?: string;
+  postal?: string;
+}
 
 // Helper to derive total from subtotal + shipping + cod
 function deriveTotal(subtotal: number, shipping: number, cod: number = 0) {
@@ -44,6 +54,8 @@ export default function CheckoutClient(){
   // Pass 48: Shipping method selection state
   const [shippingMethod, setShippingMethod] = useState<'HOME' | 'PICKUP' | 'COURIER'>('HOME')
   const [loading, setLoading] = useState(false)
+  // Pass 49: Validation error state for Greek market
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   // Live totals state from ShippingBreakdown
   const [liveTotals, setLiveTotals] = useState<{shipping:number; cod:number; total:number; free:boolean}>({
@@ -108,6 +120,20 @@ export default function CheckoutClient(){
       return
     }
 
+    // Pass 49: Greek market validation
+    const errors: FieldErrors = {}
+    if (!GREEK_PHONE_REGEX.test(phone)) {
+      errors.phone = 'Παρακαλώ εισάγετε έγκυρο ελληνικό τηλέφωνο (π.χ. 6912345678 ή +306912345678)'
+    }
+    if (!GREEK_POSTAL_REGEX.test(postal)) {
+      errors.postal = 'Ο Τ.Κ. πρέπει να έχει ακριβώς 5 ψηφία'
+    }
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+    setFieldErrors({}) // Clear errors on successful validation
+
     setLoading(true)
     try{
       // Pass 44: Use Laravel API directly (Single Source of Truth)
@@ -170,9 +196,13 @@ export default function CheckoutClient(){
               <input
                 name="phone"
                 required
-                className="w-full px-3 py-2 border rounded-lg"
+                placeholder="6912345678"
+                className={`w-full px-3 py-2 border rounded-lg ${fieldErrors.phone ? 'border-red-500' : ''}`}
                 data-testid="checkout-phone"
               />
+              {fieldErrors.phone && (
+                <p className="text-red-600 text-sm mt-1" data-testid="phone-error">{fieldErrors.phone}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">{t('checkout.email')}</label>
@@ -207,9 +237,14 @@ export default function CheckoutClient(){
                 <input
                   name="postal"
                   required
-                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="10564"
+                  maxLength={5}
+                  className={`w-full px-3 py-2 border rounded-lg ${fieldErrors.postal ? 'border-red-500' : ''}`}
                   data-testid="checkout-postal"
                 />
+                {fieldErrors.postal && (
+                  <p className="text-red-600 text-sm mt-1" data-testid="postal-error">{fieldErrors.postal}</p>
+                )}
               </div>
             </div>
 
