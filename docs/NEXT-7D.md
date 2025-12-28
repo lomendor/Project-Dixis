@@ -1,25 +1,28 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-28 14:00 UTC
+**Last Updated**: 2025-12-28 16:30 UTC
 
 ## WIP (1 item only)
-- **Pass 50 — Zone-Based Shipping Pricing** (in PR)
+- **Pass 53 — Order Email Notifications** (in PR)
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 51 — Payment Provider Integration** (Viva Wallet or Stripe)
-2. **Pass 52 — Email Notifications** (Order confirmation, shipping updates)
-3. **Pass 53 — Producer Dashboard Improvements** (Order management UI)
+1. **Pass 54 — Card Payments Enable** (configure Stripe in production)
+2. **Pass 55 — Order Status Email Updates** (shipped, delivered notifications)
+3. **Pass 56 — Producer Dashboard Improvements** (Order management UI)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 
-## Recently Completed (Pass 45-49)
+## Recently Completed (Pass 45-52)
 
 - **Pass 45** — Deploy Workflow Hardening ✅
 - **Pass 46** — CI E2E Auth Setup ✅
 - **Pass 47** — Production Healthz & Smoke-Matrix Policy ✅
 - **Pass 48** — Shipping Display in Checkout & Order Details ✅
 - **Pass 49** — Greek Market Validation ✅
+- **Pass 50** — Zone-Based Shipping Pricing ✅
+- **Pass 51** — Card Payments via Stripe (feature flag) ✅
+- **Pass 52** — (skipped, Pass 51 already covers card payments)
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
