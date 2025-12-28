@@ -1,8 +1,8 @@
 # Pass 46 - E2E Auth Setup
 
 **Date**: 2025-12-28
-**Status**: IN_PROGRESS
-**PRs**: #1919
+**Status**: COMPLETE
+**PRs**: #1919 (merged)
 
 ## Problem Statement
 
@@ -78,8 +78,8 @@ globalSetup: useCIAuth
 - [x] 4 tests unskipped (>= 3 required)
 - [x] Type-check passes
 - [x] E2E job passes in CI
-- [ ] PR merged
-- [ ] Docs updated (this file)
+- [x] PR merged
+- [x] Docs updated (this file)
 
 ---
 Generated-by: Claude (Pass 46)

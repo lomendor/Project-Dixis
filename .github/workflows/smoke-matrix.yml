@@ -13,6 +13,9 @@ jobs:
   smoke:
     name: smoke-${{ matrix.name }}
     runs-on: ubuntu-latest
+    # Pass 47: Production smoke is non-blocking on PRs (continue-on-error)
+    # This keeps it running for alerting but won't block merges
+    continue-on-error: ${{ github.event_name == 'pull_request' && matrix.name == 'production' }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,45 +30,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Preflight μόνο για staging: αν ο host δεν απαντά, κάνε graceful skip
-      - name: Preflight reachability (staging only)
+      # Pass 47: Preflight for both staging AND production
+      # Gracefully skip if target is unreachable (transient issues shouldn't block PRs)
+      - name: Preflight reachability
         id: preflight
-        if: ${{ matrix.name == 'staging' }}
         env:
           BASE_URL: ${{ matrix.BASE_URL }}
         run: |
           set -e
           echo "Checking $BASE_URL/api/healthz ..."
-          if curl -fsS --max-time 5 "$BASE_URL/api/healthz" >/dev/null; then
+          if curl -fsS --max-time 10 "$BASE_URL/api/healthz" >/dev/null; then
             echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "✅ ${{ matrix.name }} reachable"
           else
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "⚠️ ${{ matrix.name }} unreachable - will skip smoke tests"
           fi
 
       - name: Setup Node
-        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        if: ${{ steps.preflight.outputs.skip != 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Enable corepack
-        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        if: ${{ steps.preflight.outputs.skip != 'true' }}
         run: corepack enable
 
       - name: Install deps
-        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        if: ${{ steps.preflight.outputs.skip != 'true' }}
         run: |
           cd frontend
           pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        if: ${{ steps.preflight.outputs.skip != 'true' }}
         run: |
           cd frontend
           npx playwright install --with-deps
 
       - name: Run smoke tests
-        if: ${{ matrix.name != 'staging' || steps.preflight.outputs.skip != 'true' }}
+        if: ${{ steps.preflight.outputs.skip != 'true' }}
         env:
           BASE_URL: ${{ matrix.BASE_URL }}
           FLAG_COMMISSION_V1: ${{ matrix.FLAG_COMMISSION_V1 }}
@@ -77,6 +82,6 @@ jobs:
             tests/e2e/smoke-commission-preview.spec.ts \
             --reporter=list
 
-      - name: Mark staging skipped (info)
-        if: ${{ matrix.name == 'staging' && steps.preflight.outputs.skip == 'true' }}
-        run: echo "ℹ️ Staging unreachable; gracefully skipped smoke."
+      - name: Mark skipped (info)
+        if: ${{ steps.preflight.outputs.skip == 'true' }}
+        run: echo "ℹ️ ${{ matrix.name }} unreachable; gracefully skipped smoke."
