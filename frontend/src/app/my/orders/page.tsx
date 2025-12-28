@@ -27,6 +27,21 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   delivered: 'bg-green-100 text-green-800',
 };
 
+// Pass 58: Valid status transitions for producers
+const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
+  pending: 'processing',
+  processing: 'shipped',
+  shipped: 'delivered',
+  delivered: null, // terminal state
+};
+
+const NEXT_STATUS_LABELS: Record<OrderStatus, string> = {
+  pending: 'Σε Επεξεργασία',
+  processing: 'Απεστάλη',
+  shipped: 'Παραδόθηκε',
+  delivered: '',
+};
+
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('el-GR', {
     day: '2-digit',
@@ -55,6 +70,7 @@ function ProducerOrdersContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -101,6 +117,41 @@ function ProducerOrdersContent() {
       setError('Αποτυχία εξαγωγής παραγγελιών');
     } finally {
       setExporting(false);
+    }
+  }
+
+  // Pass 58: Handle status update
+  async function handleStatusUpdate(orderId: number, newStatus: 'processing' | 'shipped' | 'delivered') {
+    setUpdatingOrderId(orderId);
+    setError(null);
+    try {
+      const response = await apiClient.updateProducerOrderStatus(orderId, newStatus);
+      if (response.success) {
+        // Optimistic update: update the order in state
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === orderId ? { ...order, status: newStatus } : order
+          )
+        );
+        // Update meta counts
+        if (meta) {
+          const oldStatus = orders.find((o) => o.id === orderId)?.status;
+          if (oldStatus && oldStatus !== newStatus) {
+            setMeta({
+              ...meta,
+              [oldStatus]: Math.max(0, meta[oldStatus] - 1),
+              [newStatus]: meta[newStatus] + 1,
+            });
+          }
+        }
+      } else {
+        setError('Αποτυχία ενημέρωσης κατάστασης');
+      }
+    } catch (err) {
+      console.error('Failed to update order status:', err);
+      setError('Σφάλμα ενημέρωσης κατάστασης');
+    } finally {
+      setUpdatingOrderId(null);
     }
   }
 
@@ -261,6 +312,29 @@ function ProducerOrdersContent() {
                     )}
                   </span>
                 </div>
+
+                {/* Pass 58: Status update button */}
+                {NEXT_STATUS[order.status] && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(order.id, NEXT_STATUS[order.status] as 'processing' | 'shipped' | 'delivered')
+                      }
+                      disabled={updatingOrderId === order.id}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      data-testid={`status-update-${order.id}`}
+                    >
+                      {updatingOrderId === order.id ? (
+                        <>
+                          <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                          Ενημέρωση...
+                        </>
+                      ) : (
+                        <>Αλλαγή σε: {NEXT_STATUS_LABELS[order.status]}</>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             ))
           )}
