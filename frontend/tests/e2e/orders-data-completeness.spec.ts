@@ -16,9 +16,9 @@
 
 import { test, expect } from '@playwright/test';
 
-// Skip tests that require full auth flow in CI - these need auth setup
-// Enable locally or in CI with proper Playwright storageState configuration
-const SKIP_AUTH_TESTS = process.env.CI === 'true';
+// Pass 46: CI now has storageState auth via globalSetup
+// Tests can run in CI with mock auth from storageState
+const SKIP_AUTH_TESTS = false;
 
 // Backend API base URL (Laravel runs on port 8001)
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
