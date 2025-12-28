@@ -1,8 +1,8 @@
 # Pass 57 — Producer Orders CSV Export
 
 **Date**: 2025-12-28
-**Status**: COMPLETE
-**PR**: (pending)
+**Status**: MERGED
+**PR**: #1943 (commit cd09adc0)
 
 ## TL;DR
 

@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-28 (Pass 56)
+**Last Updated**: 2025-12-28 (Pass 57)
 
 ## TODO (tomorrow)
 - (none)
@@ -75,6 +75,7 @@
 - **Pass 54 Order Status Update Emails**: Added email notifications when order status changes to shipped/delivered. Backend: (1) OrderShipped mailable (Greek: "Η παραγγελία στάλθηκε"), (2) OrderDelivered mailable (Greek: "Η παραγγελία παραδόθηκε"), (3) OrderEmailService extended with `sendOrderStatusNotification()`, (4) AdminOrderController hooks email service after status update. Idempotency via order_notifications table (events: order_shipped, order_delivered). Graceful failure: email errors don't crash status update. Reuses Pass 53 feature flag (EMAIL_NOTIFICATIONS_ENABLED). Tests: 8 backend tests PASS (16 assertions). Files: 8 changed (+564 lines). Evidence: All CI checks PASS, PR #1936 merged 2025-12-28 (commit 6014dfcc). Docs: `docs/AGENT/SUMMARY/Pass-54.md`. (Closed: 2025-12-28)
 - **Pass 55 Weekly Producer Digest**: Added weekly producer digest email with order statistics. Backend: (1) WeeklyProducerDigest mailable (Greek content: orders received, revenue, top products), (2) ProducerDigestService calculates weekly stats per producer, (3) Scheduled command `producer:send-weekly-digest` runs weekly via Laravel scheduler. Features: Only sends if producer has activity that week, graceful failure (logs errors, continues to next producer), reuses Pass 53 email infrastructure. Tests: 6 backend tests PASS. Files: 8 changed. Evidence: All CI checks PASS, PR #1938 merged 2025-12-28. Docs: `docs/AGENT/SUMMARY/Pass-55.md`. (Closed: 2025-12-28)
 - **Pass 56 Producer Orders Split-Brain Fix**: Fixed producer orders page `/my/orders` using Prisma while orders created in Laravel PostgreSQL (same split-brain issue as Pass 39/44). Result: Producers saw "Δεν υπάρχουν εγγραφές" even when they had orders. Solution: Rewrote page as Client Component using Laravel API (`apiClient.getProducerOrders()`). Features: Status tabs with counts (pending/processing/shipped/delivered), order cards with customer info and producer's items only, Greek labels. Suspense boundary added for Next.js 15 `useSearchParams()` requirement. Tests: 4 E2E tests (page loads, data display, empty state, tab navigation). Files: 4 changed. Evidence: All CI checks PASS, PR #1940 merged 2025-12-28. Architecture alignment: Both consumer (Pass 39) and producer (Pass 56) orders now read from Laravel PostgreSQL (single source of truth). Docs: `docs/AGENT/SUMMARY/Pass-56.md`. (Closed: 2025-12-28)
+- **Pass 57 Producer Orders CSV Export**: Producers can export orders to CSV from `/my/orders`. Backend: `ProducerOrderController.export()` method returns text/csv with UTF-8 BOM (Excel Greek support). Route: `GET /api/v1/producer/orders/export` (throttle: 10/min). CSV columns: order_id, created_at, status, customer_name, customer_email, items_summary, subtotal, shipping, total, payment_method, shipping_method. Default scope: last 30 days, producer-scoped via auth. Frontend: "Εξαγωγή CSV" button with loading state on `/my/orders`. API client: `apiClient.exportProducerOrdersCsv()` returns Blob. Tests: 4 E2E tests (button visible, CSV headers, loading state, auth required). Files: 7 changed (+362 insertions). Evidence: All CI checks PASS, PR #1943 merged 2025-12-28 (commit cd09adc0). Docs: `docs/AGENT/SUMMARY/Pass-57.md`. (Closed: 2025-12-28)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -120,25 +121,25 @@
    - **Risk**: Medium (requires Stripe account setup, webhook configuration)
    - **Status**: BLOCKED on Stripe credentials (user must provide)
 
-2. **Pass 57 — Producer Orders CSV Export**
-   - **Priority**: P3 (Enhancement)
-   - **Scope**: Add CSV export functionality to producer orders page
-   - **DoD**:
-     - [ ] Backend: GET `/api/v1/producer/orders/export` returns CSV
-     - [ ] Frontend: Export button on `/my/orders` page
-     - [ ] CSV includes: order ID, date, customer, items, total
-     - [ ] E2E test for export functionality
-   - **Risk**: Low
-
-3. **Pass 58 — Producer Order Status Updates**
+2. **Pass 58 — Producer Order Status Updates**
    - **Priority**: P3 (Enhancement)
    - **Scope**: Allow producers to update order status for their items
    - **DoD**:
-     - [ ] Backend: PATCH `/api/v1/producer/orders/{id}/status`
+     - [ ] Backend: PATCH `/api/v1/producer/orders/{id}/status` (already exists)
      - [ ] Frontend: Status update buttons on order cards
      - [ ] Status transitions: pending → processing → shipped
      - [ ] E2E tests
    - **Risk**: Low
+
+3. **Pass 59 — Email Infrastructure Enable**
+   - **Priority**: P3 (Feature)
+   - **Scope**: Enable email notifications in production
+   - **DoD**:
+     - [ ] Configure SMTP/Resend in VPS (MAIL_MAILER, MAIL_HOST, etc.)
+     - [ ] Enable feature flag: `EMAIL_NOTIFICATIONS_ENABLED=true`
+     - [ ] Test order confirmation email on PROD
+     - [ ] Verify producer notification works
+   - **Risk**: Low (email code already tested, just needs credentials)
 
 ---
 
