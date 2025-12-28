@@ -509,11 +509,13 @@ class ApiClient {
   }
 
   // Direct order creation via Laravel API (Pass 44 - Single Source of Truth)
+  // Pass 48: Added shipping_cost parameter
   async createOrder(data: {
     items: { product_id: number; quantity: number }[];
     currency: 'EUR' | 'USD';
     shipping_method: 'HOME' | 'PICKUP' | 'COURIER';
     shipping_address?: ShippingAddress;
+    shipping_cost?: number; // Pass 48: Shipping cost in EUR
     payment_method?: 'COD' | 'CARD' | 'BANK_TRANSFER';
     notes?: string;
   }): Promise<Order> {

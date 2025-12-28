@@ -1,13 +1,29 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { calcTotals, fmtEUR } from '@/lib/cart/totals'
-import { DEFAULT_OPTIONS } from '@/contracts/shipping'
+import { DEFAULT_OPTIONS, calculateShippingCost, type ShippingMethod } from '@/contracts/shipping'
 import { useTranslations } from 'next-intl'
 import ShippingBreakdown from '@/components/checkout/ShippingBreakdown'
 import type { QuoteResponse } from '@/lib/quoteClient'
 import { apiClient } from '@/lib/api'
+
+// Shipping method options for UI (Pass 48)
+const SHIPPING_OPTIONS: Array<{
+  code: 'HOME' | 'PICKUP' | 'COURIER';
+  label: string;
+  labelEl: string;
+  cost: number;
+  etaDays?: string;
+}> = [
+  { code: 'HOME', label: 'Home Delivery', labelEl: 'Παράδοση στο σπίτι', cost: 3.50, etaDays: '2-3 ημέρες' },
+  { code: 'PICKUP', label: 'Store Pickup', labelEl: 'Παραλαβή από κατάστημα', cost: 0, etaDays: 'Άμεση' },
+  { code: 'COURIER', label: 'Courier', labelEl: 'Μεταφορική εταιρεία', cost: 4.50, etaDays: '1-2 ημέρες' },
+];
+
+// Free shipping threshold (€)
+const FREE_SHIPPING_THRESHOLD = 35;
 
 // Helper to derive total from subtotal + shipping + cod
 function deriveTotal(subtotal: number, shipping: number, cod: number = 0) {
@@ -24,7 +40,9 @@ export default function CheckoutClient(){
   const cartItems = useCart(state => state.items)
   const clearCart = useCart(state => state.clear)
   const items = Object.values(cartItems) // Convert Record to array
-  const shippingMethod = 'COURIER' // TODO: Add shipping method selection to cart
+
+  // Pass 48: Shipping method selection state
+  const [shippingMethod, setShippingMethod] = useState<'HOME' | 'PICKUP' | 'COURIER'>('HOME')
   const [loading, setLoading] = useState(false)
 
   // Live totals state from ShippingBreakdown
@@ -36,15 +54,26 @@ export default function CheckoutClient(){
   })
 
   // Find shipping option details
-  const shippingOption = DEFAULT_OPTIONS.find(opt => opt.code === shippingMethod) || DEFAULT_OPTIONS[0]
+  const shippingOption = SHIPPING_OPTIONS.find(opt => opt.code === shippingMethod) || SHIPPING_OPTIONS[0]
 
   // Map Zustand cart items (priceCents) to totals format (price in cents)
   const lines = items.map(i => ({ price: i.priceCents, qty: i.qty }))
+
+  // Calculate subtotal in euros
+  const subtotalEur = lines.reduce((sum, l) => sum + (l.price * l.qty) / 100, 0)
+
+  // Pass 48: Calculate shipping cost (free over threshold)
+  const shippingCost = useMemo(() => {
+    if (shippingMethod === 'PICKUP') return 0
+    if (subtotalEur >= FREE_SHIPPING_THRESHOLD) return 0
+    return shippingOption.cost
+  }, [shippingMethod, subtotalEur, shippingOption.cost])
+
   const totals = calcTotals({
     items: lines,
     shippingMethod,
-    baseShipping: shippingOption.baseCost * 100, // Convert to cents
-    codFee: (shippingOption.codFee || 0) * 100, // Convert to cents
+    baseShipping: shippingCost * 100, // Convert to cents
+    codFee: 0, // No COD fee in this flow
     taxRate: 0.24 // 24% VAT
   })
 
@@ -82,11 +111,11 @@ export default function CheckoutClient(){
     setLoading(true)
     try{
       // Pass 44: Use Laravel API directly (Single Source of Truth)
-      // No more legacy /api/checkout - orders are created in Laravel PostgreSQL
+      // Pass 48: Include shipping_cost in order creation
       const order = await apiClient.createOrder({
         items: items.map(i => ({ product_id: parseInt(i.id, 10), quantity: i.qty })),
         currency: 'EUR',
-        shipping_method: shippingMethod as 'HOME' | 'PICKUP' | 'COURIER',
+        shipping_method: shippingMethod,
         shipping_address: {
           name,
           phone,
@@ -95,6 +124,7 @@ export default function CheckoutClient(){
           postal_code: postal,
           country: 'GR', // Default to Greece
         },
+        shipping_cost: shippingCost, // Pass 48: Send calculated shipping cost
         payment_method: 'COD',
         notes: undefined,
       });
@@ -182,6 +212,52 @@ export default function CheckoutClient(){
                 />
               </div>
             </div>
+
+            {/* Pass 48: Shipping Method Selection */}
+            <div className="pt-4 border-t border-gray-200">
+              <label className="block text-sm font-medium mb-3">Τρόπος Αποστολής</label>
+              <div className="space-y-2" data-testid="shipping-method-selector">
+                {SHIPPING_OPTIONS.map((option) => {
+                  const isSelected = shippingMethod === option.code
+                  const isFree = option.code === 'PICKUP' || subtotalEur >= FREE_SHIPPING_THRESHOLD
+                  return (
+                    <label
+                      key={option.code}
+                      className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition ${
+                        isSelected ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      data-testid={`shipping-option-${option.code}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="shipping_method"
+                          value={option.code}
+                          checked={isSelected}
+                          onChange={() => setShippingMethod(option.code)}
+                          className="h-4 w-4 text-green-600 focus:ring-green-500"
+                        />
+                        <div>
+                          <span className="font-medium">{option.labelEl}</span>
+                          {option.etaDays && (
+                            <span className="text-xs text-gray-500 ml-2">({option.etaDays})</span>
+                          )}
+                        </div>
+                      </div>
+                      <span className={`text-sm font-medium ${isFree ? 'text-green-600' : 'text-gray-700'}`}>
+                        {isFree ? 'Δωρεάν' : `€${option.cost.toFixed(2)}`}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+              {subtotalEur >= FREE_SHIPPING_THRESHOLD && shippingMethod !== 'PICKUP' && (
+                <p className="mt-2 text-sm text-green-600" data-testid="free-shipping-message">
+                  ✓ Δωρεάν αποστολή για παραγγελίες άνω των €{FREE_SHIPPING_THRESHOLD}
+                </p>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -211,11 +287,17 @@ export default function CheckoutClient(){
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('cart.subtotal')}</span>
-                <span className="font-medium">{fmtEUR(totals.subtotal)}</span>
+                <span className="font-medium" data-testid="subtotal-display">{fmtEUR(totals.subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('cart.shipping')}</span>
-                <span>{totals.shipping === 0 ? t('shipping.PICKUP') : fmtEUR(totals.shipping)}</span>
+                <span data-testid="shipping-cost-display" className={shippingCost === 0 ? 'text-green-600' : ''}>
+                  {shippingCost === 0 ? 'Δωρεάν' : `€${shippingCost.toFixed(2)}`}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Τρόπος:</span>
+                <span data-testid="shipping-method-display">{shippingOption.labelEl}</span>
               </div>
               {totals.codFee > 0 && (
                 <div className="flex justify-between">

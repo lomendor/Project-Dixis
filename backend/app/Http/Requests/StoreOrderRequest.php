@@ -40,6 +40,8 @@ class StoreOrderRequest extends FormRequest
             'shipping_address.postal_code' => 'nullable|string|max:20',
             'shipping_address.region' => 'nullable|string|max:100',
             'shipping_address.country' => 'nullable|string|max:100',
+            // Shipping cost (Pass 48 - Frontend-calculated, EUR)
+            'shipping_cost' => 'nullable|numeric|min:0|max:100',
             // Payment method (optional, defaults to COD)
             'payment_method' => 'nullable|string|in:COD,CARD,BANK_TRANSFER',
         ];
