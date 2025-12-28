@@ -1,19 +1,19 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-28 18:00 UTC
+**Last Updated**: 2025-12-28 22:00 UTC
 
 ## WIP (1 item only)
 - (none)
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 52 — Card Payments Enable** (configure Stripe in production, blocked on credentials)
-2. **Pass 55 — Weekly Producer Digest** (order stats email)
-3. **Pass 56 — Producer Dashboard Improvements** (order management UI)
+1. **Pass 52 — Card Payments Enable** (BLOCKED on Stripe credentials - user must provide)
+2. **Pass 57 — Producer Orders CSV Export** (export button on /my/orders)
+3. **Pass 58 — Producer Order Status Updates** (producers can update their item status)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 
-## Recently Completed (Pass 45-54)
+## Recently Completed (Pass 45-56)
 
 - **Pass 45** — Deploy Workflow Hardening ✅
 - **Pass 46** — CI E2E Auth Setup ✅
@@ -24,6 +24,8 @@ See `docs/OPS/STATE.md` for full DoD checklists.
 - **Pass 51** — Card Payments via Stripe (feature flag) ✅
 - **Pass 53** — Order Email Notifications (consumer + producers) ✅
 - **Pass 54** — Order Status Update Emails (shipped/delivered) ✅
+- **Pass 55** — Weekly Producer Digest (order stats email) ✅
+- **Pass 56** — Producer Orders Split-Brain Fix (Laravel API for /my/orders) ✅
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
