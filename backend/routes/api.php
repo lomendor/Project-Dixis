@@ -106,6 +106,11 @@ Route::prefix('v1')->group(function () {
         Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.public.orders.show');
         Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
             ->middleware('throttle:10,1'); // 10 requests per minute for order creation
+
+        // Pass 50: Zone-based shipping quote (simpler than /api/shipping/quote)
+        Route::post('shipping/quote', [App\Http\Controllers\Api\V1\ShippingQuoteController::class, 'quote'])
+            ->name('api.v1.public.shipping.quote')
+            ->middleware('throttle:60,1'); // 60 quote requests per minute
     });
 
     // Cart (authenticated)

@@ -56,6 +56,9 @@ export default function CheckoutClient(){
   const [loading, setLoading] = useState(false)
   // Pass 49: Validation error state for Greek market
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  // Pass 50: Zone-based shipping quote state
+  const [zoneQuote, setZoneQuote] = useState<{ price: number; zoneName: string | null; source: string } | null>(null)
+  const [postalInput, setPostalInput] = useState('')
 
   // Live totals state from ShippingBreakdown
   const [liveTotals, setLiveTotals] = useState<{shipping:number; cod:number; total:number; free:boolean}>({
@@ -74,12 +77,39 @@ export default function CheckoutClient(){
   // Calculate subtotal in euros
   const subtotalEur = lines.reduce((sum, l) => sum + (l.price * l.qty) / 100, 0)
 
-  // Pass 48: Calculate shipping cost (free over threshold)
+  // Pass 50: Calculate shipping cost (zone-based with fallback)
   const shippingCost = useMemo(() => {
     if (shippingMethod === 'PICKUP') return 0
     if (subtotalEur >= FREE_SHIPPING_THRESHOLD) return 0
+    // Use zone quote if available, otherwise fallback to hardcoded
+    if (zoneQuote && zoneQuote.source !== 'fallback') {
+      return zoneQuote.price
+    }
     return shippingOption.cost
-  }, [shippingMethod, subtotalEur, shippingOption.cost])
+  }, [shippingMethod, subtotalEur, shippingOption.cost, zoneQuote])
+
+  // Pass 50: Fetch zone-based quote when postal code changes
+  const fetchShippingQuote = async (postal: string, method: 'HOME' | 'PICKUP' | 'COURIER') => {
+    if (!postal || postal.length !== 5 || method === 'PICKUP') {
+      setZoneQuote(null)
+      return
+    }
+    try {
+      const quote = await apiClient.getZoneShippingQuote({
+        postal_code: postal,
+        method,
+        subtotal: subtotalEur,
+      })
+      setZoneQuote({
+        price: quote.price_eur,
+        zoneName: quote.zone_name,
+        source: quote.source,
+      })
+    } catch {
+      // Fallback silently - use hardcoded prices
+      setZoneQuote(null)
+    }
+  }
 
   const totals = calcTotals({
     items: lines,
@@ -239,6 +269,14 @@ export default function CheckoutClient(){
                   required
                   placeholder="10564"
                   maxLength={5}
+                  value={postalInput}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 5)
+                    setPostalInput(val)
+                    if (val.length === 5) {
+                      fetchShippingQuote(val, shippingMethod)
+                    }
+                  }}
                   className={`w-full px-3 py-2 border rounded-lg ${fieldErrors.postal ? 'border-red-500' : ''}`}
                   data-testid="checkout-postal"
                 />
@@ -269,7 +307,12 @@ export default function CheckoutClient(){
                           name="shipping_method"
                           value={option.code}
                           checked={isSelected}
-                          onChange={() => setShippingMethod(option.code)}
+                          onChange={() => {
+                            setShippingMethod(option.code)
+                            if (postalInput.length === 5) {
+                              fetchShippingQuote(postalInput, option.code)
+                            }
+                          }}
                           className="h-4 w-4 text-green-600 focus:ring-green-500"
                         />
                         <div>
@@ -280,7 +323,11 @@ export default function CheckoutClient(){
                         </div>
                       </div>
                       <span className={`text-sm font-medium ${isFree ? 'text-green-600' : 'text-gray-700'}`}>
-                        {isFree ? 'Δωρεάν' : `€${option.cost.toFixed(2)}`}
+                        {isFree ? 'Δωρεάν' : (
+                          zoneQuote && isSelected && zoneQuote.source !== 'fallback'
+                            ? `€${zoneQuote.price.toFixed(2)}`
+                            : `€${option.cost.toFixed(2)}`
+                        )}
                       </span>
                     </label>
                   )
@@ -289,6 +336,12 @@ export default function CheckoutClient(){
               {subtotalEur >= FREE_SHIPPING_THRESHOLD && shippingMethod !== 'PICKUP' && (
                 <p className="mt-2 text-sm text-green-600" data-testid="free-shipping-message">
                   ✓ Δωρεάν αποστολή για παραγγελίες άνω των €{FREE_SHIPPING_THRESHOLD}
+                </p>
+              )}
+              {/* Pass 50: Show zone info when available */}
+              {zoneQuote && zoneQuote.zoneName && shippingMethod !== 'PICKUP' && (
+                <p className="mt-2 text-xs text-gray-500" data-testid="zone-info">
+                  Ζώνη: {zoneQuote.zoneName}
                 </p>
               )}
             </div>
