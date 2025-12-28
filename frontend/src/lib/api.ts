@@ -83,6 +83,8 @@ export interface Order {
   total_amount: string;
   payment_status: string;
   payment_method: string;
+  payment_provider?: string; // Pass 51: stripe, null for COD
+  payment_reference?: string; // Pass 51: external session/transaction ID
   status: string;
   shipping_method: string;
   shipping_method_label?: string; // Human-readable label (Greek)
@@ -643,6 +645,31 @@ class ApiClient {
     return this.request('public/shipping/quote', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  }
+
+  // Pass 51: Check if card payments are enabled (feature flag)
+  async getPaymentConfig(): Promise<{
+    card_enabled: boolean;
+    cod_enabled: boolean;
+    stripe_public_key?: string;
+  }> {
+    try {
+      return this.request('public/payments/config');
+    } catch {
+      // Fallback: if endpoint doesn't exist, assume card disabled
+      return { card_enabled: false, cod_enabled: true };
+    }
+  }
+
+  // Pass 51: Create Stripe checkout session for card payment
+  async createPaymentCheckout(orderId: number): Promise<{
+    redirect_url: string;
+    session_id: string;
+  }> {
+    return this.request('public/payments/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ order_id: orderId }),
     });
   }
 }
