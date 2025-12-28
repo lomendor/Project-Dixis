@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Mail\ConsumerOrderPlaced;
+use App\Mail\OrderDelivered;
+use App\Mail\OrderShipped;
 use App\Mail\ProducerNewOrder;
 use App\Models\Order;
 use App\Models\OrderNotification;
@@ -21,6 +23,72 @@ use Illuminate\Support\Facades\Mail;
  */
 class OrderEmailService
 {
+    /**
+     * Pass 54: Send notification when order status changes to shipped/delivered.
+     * Called after status update commits.
+     */
+    public function sendOrderStatusNotification(Order $order, string $newStatus): void
+    {
+        if (!$this->isEnabled()) {
+            Log::debug('Pass 54: Email notifications disabled, skipping', [
+                'order_id' => $order->id,
+                'status' => $newStatus,
+            ]);
+            return;
+        }
+
+        // Only send for shipped and delivered statuses
+        if (!in_array($newStatus, ['shipped', 'delivered'])) {
+            return;
+        }
+
+        $email = $this->getConsumerEmail($order);
+        if (!$email) {
+            Log::warning('Pass 54: No consumer email available, skipping status notification', [
+                'order_id' => $order->id,
+                'status' => $newStatus,
+            ]);
+            return;
+        }
+
+        $event = "order_{$newStatus}";
+
+        // Idempotency check
+        if (OrderNotification::alreadySent($order->id, 'consumer', null, $event)) {
+            Log::debug("Pass 54: Consumer {$event} already sent, skipping", [
+                'order_id' => $order->id,
+            ]);
+            return;
+        }
+
+        try {
+            $mailable = $newStatus === 'shipped'
+                ? new OrderShipped($order)
+                : new OrderDelivered($order);
+
+            Mail::to($email)->send($mailable);
+
+            OrderNotification::recordSent(
+                $order->id,
+                'consumer',
+                null,
+                $email,
+                $event
+            );
+
+            Log::info("Pass 54: Consumer {$event} notification sent", [
+                'order_id' => $order->id,
+                'email' => $this->maskEmail($email),
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Pass 54: Failed to send {$event} notification", [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            // Don't throw - graceful failure
+        }
+    }
+
     /**
      * Send all notifications for a newly placed order.
      * Called after order creation transaction commits.
