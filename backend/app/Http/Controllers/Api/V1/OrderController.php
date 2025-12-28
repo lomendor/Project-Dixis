@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\InventoryService;
+use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -70,15 +71,22 @@ class OrderController extends Controller
 
     /**
      * Create a new order with atomic transactions and stock validation.
+     * Pass 53: Sends email notifications after transaction commits.
      */
-    public function store(StoreOrderRequest $request, InventoryService $inventoryService): OrderResource
-    {
+    public function store(
+        StoreOrderRequest $request,
+        InventoryService $inventoryService,
+        OrderEmailService $emailService
+    ): OrderResource {
         $requestId = uniqid('order_', true); // Request tracking ID
 
         try {
             $this->authorize('create', Order::class);
 
-            return DB::transaction(function () use ($request, $inventoryService, $requestId) {
+            // Store order reference for afterCommit callback
+            $createdOrder = null;
+
+            $result = DB::transaction(function () use ($request, $inventoryService, $requestId, &$createdOrder) {
                 $validated = $request->validated();
                 $orderTotal = 0;
                 $productData = [];
@@ -160,8 +168,27 @@ class OrderController extends Controller
                 // Load relationships for response
                 $order->load('orderItems.producer')->loadCount('orderItems');
 
+                // Store order for email sending after commit
+                $createdOrder = $order;
+
                 return new OrderResource($order);
             });
+
+            // Pass 53: Send email notifications AFTER transaction commits
+            // This ensures we never send emails for orders that failed to save
+            if ($createdOrder) {
+                try {
+                    $emailService->sendOrderPlacedNotifications($createdOrder);
+                } catch (\Exception $e) {
+                    // Log but don't fail the order creation
+                    \Log::error('Pass 53: Email notification failed (order still created)', [
+                        'order_id' => $createdOrder->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            return $result;
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             // Log authorization failures (guest trying to create order when not allowed)
             \Log::warning('Order creation authorization failed', [
