@@ -1,19 +1,19 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-28 16:30 UTC
+**Last Updated**: 2025-12-28 17:00 UTC
 
 ## WIP (1 item only)
-- **Pass 53 — Order Email Notifications** (in PR)
+- (none)
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 54 — Card Payments Enable** (configure Stripe in production)
-2. **Pass 55 — Order Status Email Updates** (shipped, delivered notifications)
-3. **Pass 56 — Producer Dashboard Improvements** (Order management UI)
+1. **Pass 52 — Card Payments Enable** (configure Stripe in production)
+2. **Pass 54 — Order Status Update Emails** (shipped, delivered notifications)
+3. **Pass 55 — Weekly Producer Digest** (order stats email)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 
-## Recently Completed (Pass 45-52)
+## Recently Completed (Pass 45-53)
 
 - **Pass 45** — Deploy Workflow Hardening ✅
 - **Pass 46** — CI E2E Auth Setup ✅
@@ -22,7 +22,7 @@ See `docs/OPS/STATE.md` for full DoD checklists.
 - **Pass 49** — Greek Market Validation ✅
 - **Pass 50** — Zone-Based Shipping Pricing ✅
 - **Pass 51** — Card Payments via Stripe (feature flag) ✅
-- **Pass 52** — (skipped, Pass 51 already covers card payments)
+- **Pass 53** — Order Email Notifications (consumer + producers) ✅
 
 ## DONE (this week)
 - Bootstrap OPS state management system (2025-12-19) - PR #1761 merged ✅
