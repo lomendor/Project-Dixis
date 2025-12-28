@@ -32,7 +32,7 @@ jobs:
             echo "Time: $(date -Iseconds)"
             echo ""
 
-            cd /var/www/dixis/current/backend
+            cd /var/www/dixis/backend
 
             case "${{ inputs.migration_action }}" in
               status)
@@ -60,14 +60,13 @@ jobs:
                 echo "=== PASS 50: Full Migration ==="
                 echo ""
                 echo "--- Step 1: Pull latest code ---"
-                cd /var/www/dixis/current
+                cd /var/www/dixis/backend
                 git fetch origin main
                 git reset --hard origin/main
                 echo "HEAD: $(git rev-parse --short HEAD)"
                 echo ""
 
                 echo "--- Step 2: Run migrations ---"
-                cd backend
                 php artisan migrate --force
                 echo ""
 
