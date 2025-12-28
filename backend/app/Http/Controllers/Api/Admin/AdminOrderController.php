@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class AdminOrderController extends Controller
      *   "note": "..." (optional)
      * }
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(Request $request, Order $order, OrderEmailService $emailService)
     {
         Gate::authorize('update', $order);
 
@@ -51,6 +52,17 @@ class AdminOrderController extends Controller
             'admin_id' => $request->user()->id,
             'note' => $validated['note'] ?? null,
         ]);
+
+        // Pass 54: Send status update email notification
+        try {
+            $emailService->sendOrderStatusNotification($order->fresh()->load('user'), $newStatus);
+        } catch (\Exception $e) {
+            \Log::error('Pass 54: Status email notification failed (status still updated)', [
+                'order_id' => $order->id,
+                'status' => $newStatus,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return response()->json([
             'message' => 'Order status updated successfully',
