@@ -42,6 +42,7 @@ Added readiness gate pattern:
 |------|------|-------------|
 | `frontend/tests/e2e/helpers/readiness.ts` | New | Readiness helper with exponential backoff |
 | `frontend/tests/e2e/auth-probe.spec.ts` | Modified | Added readiness gate, increased timeouts, 2 retries |
+| `frontend/tests/e2e/reload-and-css.smoke.spec.ts` | Modified | Added readiness gate, increased timeouts, 2 retries |
 | `frontend/tests/e2e/setup/ci-global-setup.ts` | Modified | Added healthz wait before navigation |
 
 ## Backoff Strategy
