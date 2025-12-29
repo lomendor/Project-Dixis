@@ -39,7 +39,8 @@ const mockProducts = [
 
 export async function GET() {
   // In CI/test mode, return mock data immediately
-  if (process.env.DIXIS_ENV === 'test' || process.env.NODE_ENV === 'test') {
+  // Pass E2E-SEED-01: Also check CI env var (set by GitHub Actions)
+  if (process.env.DIXIS_ENV === 'test' || process.env.NODE_ENV === 'test' || process.env.CI === 'true') {
     return NextResponse.json({
       data: mockProducts,
       total: mockProducts.length,
