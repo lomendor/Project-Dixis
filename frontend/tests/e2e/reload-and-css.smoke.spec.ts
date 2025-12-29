@@ -1,13 +1,40 @@
 import { test, expect, Page } from '@playwright/test';
+import { waitForReadiness } from './helpers/readiness';
+
+const BASE = process.env.PLAYWRIGHT_BASE_URL || 'https://dixis.gr';
 
 /**
  * Pass 59: Stabilized prod smoke tests
+ * Pass 63: Added readiness gate to prevent cold-start timeouts
  *
  * Fixes net::ERR_ABORTED flakiness by:
- * 1. Using targeted retry wrapper for navigation (max 2 attempts)
- * 2. Using domcontentloaded + optional networkidle (non-blocking)
- * 3. Deterministic CSS assertions (font-family, stylesheets count)
+ * 1. Waiting for production to be ready (healthz check)
+ * 2. Using targeted retry wrapper for navigation (max 2 attempts)
+ * 3. Using domcontentloaded + optional networkidle (non-blocking)
+ * 4. Deterministic CSS assertions (font-family, stylesheets count)
  */
+
+// Generous timeout for smoke tests against production
+test.setTimeout(120_000);
+
+// Configure retries for this spec only (CI flakiness mitigation)
+test.describe.configure({ retries: 2 });
+
+// Wait for production to be ready before running any tests
+test.beforeAll(async () => {
+  const result = await waitForReadiness({
+    baseUrl: BASE,
+    maxAttempts: 6,      // ~60s total with backoff
+    initialDelayMs: 2000,
+    maxDelayMs: 15000,
+    timeoutMs: 15000,    // Per-request timeout
+  });
+
+  if (!result.ready) {
+    console.warn(`⚠️ Production may be unavailable: ${result.lastError}`);
+    // Don't fail here - let individual tests fail with clearer errors
+  }
+});
 
 /**
  * Retry navigation on ERR_ABORTED errors (common in SPA redirects)
@@ -17,7 +44,8 @@ async function gotoWithRetry(
   url: string,
   options: { maxRetries?: number; timeout?: number } = {}
 ): Promise<void> {
-  const { maxRetries = 2, timeout = 30000 } = options;
+  // Pass 63: Increased timeout to 60s (was 30s) after readiness gate warms up site
+  const { maxRetries = 2, timeout = 60000 } = options;
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
