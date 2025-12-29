@@ -1,6 +1,6 @@
 # Production Monitoring
 
-**Last Updated:** 2025-12-29 (MONITOR-01: added GitHub Issue alerting)
+**Last Updated:** 2025-12-29 (MONITOR-02: added drill testing capability)
 **Owner:** DevOps
 **Status:** Active ✅
 
@@ -88,7 +88,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://dixis.gr/auth/register
 
 ## Monitoring Workflows
 
-### Primary: `uptime-monitor.yml` (MONITOR-01)
+### Primary: `uptime-monitor.yml` (MONITOR-01/02)
 
 **Location:** `.github/workflows/uptime-monitor.yml`
 **Schedule:** Every 10 minutes (`*/10 * * * *`)
@@ -98,6 +98,24 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://dixis.gr/auth/register
 - **Creates GitHub Issue on failure** with `production-down` label
 - Deduplicates issues (adds comment to existing open issue)
 - No external secrets required
+- **Drill mode** (`force_fail=true`) for testing alerting pipeline
+
+**Drill Testing (MONITOR-02):**
+```bash
+# Test that alerts work (creates issue with `drill` label)
+gh workflow run uptime-monitor.yml -f force_fail=true
+
+# Re-run to test deduplication (adds comment to existing drill issue)
+gh workflow run uptime-monitor.yml -f force_fail=true
+
+# Normal run (should succeed, no new issues)
+gh workflow run uptime-monitor.yml -f force_fail=false
+```
+
+**Drill Evidence (2025-12-29):**
+- Issue #1959 created on first drill run
+- Comment added on second drill run (dedupe verified)
+- Normal run passed, no issues created
 
 ### Secondary: `monitor-uptime.yml` (legacy)
 
