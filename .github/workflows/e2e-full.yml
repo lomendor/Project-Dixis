@@ -60,9 +60,16 @@ jobs:
 
       - name: Build Next.js app
         run: pnpm run build:ci
+        env:
+          # Pass E2E-SEED-01: SSR needs internal URL pointing to Next.js mock API
+          API_INTERNAL_URL: http://127.0.0.1:3001/api/v1
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3001/api/v1
 
       - name: Start Next.js server
         run: pnpm run start:ci &
+        env:
+          API_INTERNAL_URL: http://127.0.0.1:3001/api/v1
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:3001/api/v1
 
       - name: Wait for healthz endpoint
         run: npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
