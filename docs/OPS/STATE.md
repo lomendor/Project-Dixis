@@ -80,6 +80,7 @@
 - **Pass 59 Stabilize PROD Smoke (reload-and-css)**: Fixed flaky `reload-and-css.smoke.spec.ts` causing random CI failures with `net::ERR_ABORTED`. Solution: Added `gotoWithRetry()` helper with targeted retry for ERR_ABORTED errors (max 2 attempts), use `domcontentloaded` + optional `networkidle` (non-blocking), filter network errors from console assertions, explicit timeouts on visibility assertions. Tests: 2 pass against PROD (13.9s). Files: 1 changed (+63/-5). Evidence: All CI checks PASS including smoke-production (1m7s), PR #1948 merged 2025-12-28 (commit 08c9d23c). Docs: `docs/AGENT/SUMMARY/Pass-59.md`. (Closed: 2025-12-29)
 - **Pass 61 Admin Dashboard Polish**: Connected admin orders dashboard to Laravel API (single source of truth). Backend: Added `GET /api/v1/admin/orders` endpoint with filters (status, q, date range), pagination, and quick stats. Frontend: API route proxies to Laravel when auth token present, demo fallback gated to CI/test only. E2E: 4 tests (page elements, filters, pagination, stats). Files: 8 changed (+420 lines). Evidence: All CI checks PASS, PR #1950 merged 2025-12-29 (commit 66fb4fad). Docs: `docs/AGENT/SUMMARY/Pass-61.md`. (Closed: 2025-12-29)
 - **Pass 62 Orders/Checkout E2E Guardrail**: Added comprehensive E2E regression test to guard the consumer checkout journey from silently breaking. Tests verify: auth → cart → checkout → orders list → order details (with producer info). 11 E2E tests covering full consumer journey with route mocking for deterministic CI behavior. Verifies Laravel API is called (not Prisma /internal). Files: 4 changed (1 new test file +352 lines, 3 docs files). Evidence: All CI checks PASS (E2E PostgreSQL 3m12s ✅), PR #1952 merged 2025-12-29 (commit f0ab0066). Docs: `docs/AGENT/SUMMARY/Pass-62.md`. (Closed: 2025-12-29)
+- **Pass 63 Smoke Readiness Gate**: Stabilized flaky smoke-production/auth-probe CI tests by adding healthz readiness gate with exponential backoff. New `readiness.ts` helper polls `/api/healthz` with backoff (2s, 4s, 8s, 15s...) up to ~60s before running tests. Applied to `auth-probe.spec.ts`, `reload-and-css.smoke.spec.ts`, and `ci-global-setup.ts`. Added 2 retries and increased timeouts (90-120s) for production smoke tests. Prevents cold-start timeouts that caused intermittent CI failures. Files: 4 changed (+277 lines). Evidence: e2e PASS (1m7s), smoke PASS (1m20s), smoke-production PASS (1m11s). PRs: #1954 merged 2025-12-29 (commit fd470679), #1956 merged 2025-12-29 (commit 05100c2f). Docs: `docs/AGENT/SUMMARY/Pass-63.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -107,7 +108,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **Pass 63 — Smoke Readiness Gate**: Stabilizing smoke-production/auth-probe flakiness by adding healthz readiness check with exponential backoff before running tests. Branch: `fix/pass63-smoke-readiness-gate`. PR: pending.
+- (none)
 
 ## BLOCKED ⚠️
 - (none)
