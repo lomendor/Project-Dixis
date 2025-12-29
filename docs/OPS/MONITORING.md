@@ -1,10 +1,13 @@
 # Production Monitoring
 
-**Last Updated:** 2025-12-18 (verified all endpoints operational)
+**Last Updated:** 2025-12-29 (MONITOR-01: added GitHub Issue alerting)
 **Owner:** DevOps
 **Status:** Active ✅
 
-**Latest Verification:** All endpoints returning 200 OK as of 2025-12-18 UTC (see STATE.md)
+**Latest Verification:** All endpoints returning 200 OK as of 2025-12-29 UTC (see STATE.md)
+
+## ⚠️ RISK NOTE
+Prod uptime relies on GitHub Actions checks; no external alerting (Slack/email) yet. If GitHub Actions is down, no alerts will fire.
 
 ## Overview
 
@@ -83,19 +86,36 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://dixis.gr/auth/register
 
 ---
 
-## Monitoring Workflow
+## Monitoring Workflows
+
+### Primary: `uptime-monitor.yml` (MONITOR-01)
+
+**Location:** `.github/workflows/uptime-monitor.yml`
+**Schedule:** Every 10 minutes (`*/10 * * * *`)
+**Timeout:** 5 minutes
+**Features:**
+- Checks `https://dixis.gr/api/healthz` with 3 retries
+- **Creates GitHub Issue on failure** with `production-down` label
+- Deduplicates issues (adds comment to existing open issue)
+- No external secrets required
+
+### Secondary: `monitor-uptime.yml` (legacy)
 
 **Location:** `.github/workflows/monitor-uptime.yml`
 **Schedule:** Every 5 minutes (`*/5 * * * *`)
 **Timeout:** 3 minutes per check
+**Features:**
+- Checks healthz, products page, auth pages
+- No automatic issue creation (workflow failure only)
 
 ### Failure Handling
 
 When a check fails:
-1. Workflow turns red in GitHub Actions
-2. GitHub sends notification to repository watchers
-3. Check logs in Actions tab for exact failure reason
-4. Manual investigation required
+1. **MONITOR-01**: Creates GitHub Issue with `production-down` label (or adds comment to existing)
+2. Workflow turns red in GitHub Actions
+3. GitHub sends notification to repository watchers
+4. Check logs in Actions tab for exact failure reason
+5. Follow runbook below for investigation
 
 ### Manual Trigger
 
@@ -125,29 +145,34 @@ Or via GitHub UI: Actions → Monitor Uptime → Run workflow
 
 1. Check backend status:
    ```bash
-   ssh dixis-prod 'pm2 status | grep dixis-backend'
+   ssh dixis-vps 'systemctl status dixis-backend'
    ```
 
 2. Check backend logs:
    ```bash
-   ssh dixis-prod 'pm2 logs dixis-backend --lines 50'
+   ssh dixis-vps 'journalctl -u dixis-backend -n 100 --no-pager'
    ```
 
 3. Check database connection:
    ```bash
-   ssh dixis-prod 'cd /var/www/dixis/backend && php artisan db:show'
+   ssh dixis-vps 'cd /var/www/dixis/current/backend && php artisan db:show'
+   ```
+
+4. Restart if needed:
+   ```bash
+   ssh dixis-vps 'sudo systemctl restart dixis-backend'
    ```
 
 ### If Products Page Fails
 
 1. Check frontend status:
    ```bash
-   ssh dixis-prod 'pm2 status | grep dixis-frontend'
+   ssh dixis-vps 'systemctl status dixis-frontend-launcher'
    ```
 
 2. Check frontend logs:
    ```bash
-   ssh dixis-prod 'pm2 logs dixis-frontend --lines 50'
+   ssh dixis-vps 'journalctl -u dixis-frontend-launcher -n 100 --no-pager'
    ```
 
 3. Verify backend API:
@@ -155,21 +180,26 @@ Or via GitHub UI: Actions → Monitor Uptime → Run workflow
    curl -sS https://dixis.gr/api/v1/public/products
    ```
 
+4. Restart if needed:
+   ```bash
+   ssh dixis-vps 'sudo systemctl restart dixis-frontend-launcher'
+   ```
+
 ### If Auth Pages Fail
 
 1. Check for deployment issues:
    ```bash
-   ssh dixis-prod 'cd /var/www/dixis/frontend && git log -1'
+   ssh dixis-vps 'cd /var/www/dixis/current/frontend && git log -1'
    ```
 
 2. Check nginx config:
    ```bash
-   ssh dixis-prod 'sudo nginx -t'
+   ssh dixis-vps 'sudo nginx -t'
    ```
 
 3. Check frontend build:
    ```bash
-   ssh dixis-prod 'ls -lah /var/www/dixis/current/frontend/.next'
+   ssh dixis-vps 'ls -lah /var/www/dixis/current/frontend/.next'
    ```
 
 ---
