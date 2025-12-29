@@ -207,8 +207,10 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 moderation actions per minute
     });
 
-    // Admin Order Management (Pass 25)
+    // Admin Order Management (Pass 25 + Pass 61)
     Route::middleware('auth:sanctum')->prefix('admin/orders')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'index'])
+            ->middleware('throttle:60,1'); // 60 requests per minute (Pass 61)
         Route::patch('{order}/status', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'updateStatus'])
             ->middleware('throttle:60,1'); // 60 status updates per minute
     });

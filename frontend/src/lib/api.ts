@@ -145,6 +145,39 @@ export interface ProducerOrdersResponse {
   };
 }
 
+// Pass 61: Admin orders response
+export interface AdminOrder {
+  id: number;
+  user_id: number;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  payment_status: string;
+  subtotal: string;
+  tax_amount: string;
+  shipping_amount: string;
+  total_amount: string;
+  shipping_method: string;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  order_items?: OrderItem[];
+}
+
+export interface AdminOrdersResponse {
+  success: boolean;
+  orders: AdminOrder[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+  stats: Record<string, number>;
+}
+
 export interface User {
   id: number;
   name: string;
@@ -688,6 +721,28 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ order_id: orderId }),
     });
+  }
+
+  // Pass 61: Admin orders list with filters/pagination/stats
+  async getAdminOrders(params?: {
+    status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    q?: string;
+    from_date?: string;
+    to_date?: string;
+    page?: number;
+    per_page?: number;
+    sort?: 'created_at' | '-created_at';
+  }): Promise<AdminOrdersResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.q) searchParams.set('q', params.q);
+    if (params?.from_date) searchParams.set('from_date', params.from_date);
+    if (params?.to_date) searchParams.set('to_date', params.to_date);
+    if (params?.page) searchParams.set('page', String(params.page));
+    if (params?.per_page) searchParams.set('per_page', String(params.per_page));
+    if (params?.sort) searchParams.set('sort', params.sort);
+    const qs = searchParams.toString();
+    return this.request<AdminOrdersResponse>(`admin/orders${qs ? `?${qs}` : ''}`);
   }
 }
 
