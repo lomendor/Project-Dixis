@@ -1,19 +1,20 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-29 17:45 UTC
+**Last Updated**: 2025-12-29 19:00 UTC
 
 ## WIP (1 item only)
 - (none)
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 52 — Card Payments Enable** (BLOCKED on Stripe credentials - user must provide)
-2. **Pass 60 — Email Infrastructure Enable** (BLOCKED on SMTP/Resend credentials - user must provide)
-3. **TEST-UNSKIP-01 — Enable Skipped E2E Tests** (actionable - unskip tests from Pass 39/40/44)
+1. **Pass 52 — Card Payments Enable** (BLOCKED — READY once user provides Stripe keys, see CREDENTIALS.md)
+2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — READY once user provides SMTP/Resend keys, see CREDENTIALS.md)
+3. **E2E-SEED-03 — Expand CI @smoke Coverage** (actionable - add cart/checkout @smoke tests)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
+See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 
-## Recently Completed (Pass 58-63 + MONITOR + E2E-SEED)
+## Recently Completed (Pass 58-63 + MONITOR + E2E-SEED + CRED)
 
 - **Pass 58** — Producer Order Status Updates (status buttons on /my/orders) ✅
 - **Pass 59** — Stabilize PROD Smoke reload-and-css ✅
@@ -27,6 +28,7 @@ See `docs/OPS/STATE.md` for full DoD checklists.
 - **TEST-UNSKIP-03** — False-Green Prevention (count assertion + e2e-full rewrite) ✅
 - **E2E-SEED-01** — Deterministic CI Seeding (seed-ci.ts + mock API + 2 @smoke tests) ✅
 - **E2E-SEED-02** — Products Page Smoke Tests (CI-safe, 4 total @smoke tests now) ✅
+- **CRED-01** — Credential Inventory (VPS enablement guide for Pass 52/60) ✅
 
 ## Previously Completed (Pass 45-57)
 

@@ -89,6 +89,7 @@
 - **TEST-UNSKIP-03 False-Green Prevention**: Eliminated the "tests appear unskipped but aren't running due to grep filter" class of bugs. Changes: (1) `e2e-postgres.yml` now has explicit banner + count assertion (fails if no @smoke tests found, preventing zero-test runs), (2) `e2e-full.yml` completely rewritten with proper build/webServer/discovery (nightly full suite now actually works). Evidence: CI logs show "Found 2 smoke test(s)" assertion passing, E2E PostgreSQL PASS (3m11s). PR #1968. **e2e-full manual run verified (2025-12-29 13:25 UTC, run 20573972552)**: Workflow executed correctly (build ✅, start server ✅, healthz ready ✅, discovered 655 tests ✅, ran tests ✅). Test failures are expected (tests need seeded product data) - this is the desired behavior: e2e-full catches issues that smoke gate misses. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-03.md`. (Closed: 2025-12-29)
 - **E2E-SEED-01 Deterministic CI Seeding**: Made e2e-full failures actionable by adding deterministic CI seeded data and minimal @smoke tests. Components: (1) `frontend/prisma/seed-ci.ts` creates 1 producer + 3 products with stable IDs (ci-producer-001, ci-product-001/002/003), (2) `ci:seed` npm script added to package.json, (3) Seed step added to both `e2e-postgres.yml` and `e2e-full.yml`, (4) Mock products API route (`/api/v1/public/products/route.ts`) now checks `CI=true` env var (set by GitHub Actions) in addition to `DIXIS_ENV=test`, (5) 2 @smoke tests: healthz responds + mock products API responds. PR #1970 (base infrastructure), PR #1971 (env.ci + seed step), PR #1972 (simplify SSR tests to API-only), PR #1973 (CI env var fix). Evidence: E2E PostgreSQL PASS (4m12s), all 2 @smoke tests discovered and executed. Products page @smoke tests removed because SSR calls Laravel backend (not available in CI) - full suite runs nightly. Pattern: API-only tests for PR gate, SSR tests in nightly e2e-full. (Closed: 2025-12-29)
 - **E2E-SEED-02 Products Page Smoke Tests**: Added 2 new @smoke tests for products page (CI-safe, no Laravel dependency). Tests: (1) `@smoke products page loads` - verifies heading renders, (2) `@smoke products page renders content` - checks for EITHER products grid OR empty state (handles SSR data unavailability). Key insight: Playwright route mocking cannot intercept SSR fetch - tests must be tolerant of empty data. Technical fix: `.first()` on empty state locator to avoid strict mode violation (multiple matching elements). PRs: #1975 (initial tests - auto-merged with broken test), #1977 (CI-safe fix - also auto-merged with strict mode bug), #1978 (final fix with `.first()`). Evidence: E2E PostgreSQL PASS (3m19s), 4 @smoke tests discovered and executed. Total @smoke tests now: 4 (healthz, mock API, products loads, products content). (Closed: 2025-12-29)
+- **CRED-01 Credential Inventory**: Documents VPS credential requirements for Pass 52 (Stripe) and Pass 60 (Email). Key finding: These credentials are VPS-only (not GitHub secrets), so no CI workflow changes needed — feature flags default to OFF and handle missing credentials gracefully. Created `docs/AGENT/SOPs/CREDENTIALS.md` with step-by-step VPS enablement commands (secret names only, no values). PR #1980 merged 2025-12-29. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -125,16 +126,18 @@
 
 ### Blocked (waiting on user-provided credentials)
 
+**Credential Guide**: See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps (CRED-01).
+
 1. **Pass 52 — Card Payments Enable**
    - **Priority**: P2 (Feature)
    - **Scope**: Enable card payments in production with real Stripe credentials
    - **DoD**:
-     - [ ] Configure real Stripe keys in VPS (STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET)
+     - [ ] Configure real Stripe keys in VPS (STRIPE_SECRET_KEY, STRIPE_PUBLIC_KEY, STRIPE_WEBHOOK_SECRET)
      - [ ] Enable feature flag: `PAYMENTS_CARD_FLAG=true`, `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`
      - [ ] Verify Stripe webhook endpoint registered
      - [ ] Test real card payment end-to-end
    - **Risk**: Medium (requires Stripe account setup, webhook configuration)
-   - **Status**: ⚠️ BLOCKED on Stripe credentials (user must provide)
+   - **Status**: ⚠️ BLOCKED on Stripe credentials — READY once user provides keys (see CREDENTIALS.md)
 
 2. **Pass 60 — Email Infrastructure Enable**
    - **Priority**: P3 (Feature)
@@ -145,7 +148,7 @@
      - [ ] Test order confirmation email on PROD
      - [ ] Verify producer notification works
    - **Risk**: Low (email code already tested, just needs credentials)
-   - **Status**: ⚠️ BLOCKED on SMTP/Resend credentials (user must provide)
+   - **Status**: ⚠️ BLOCKED on SMTP/Resend credentials — READY once user provides keys (see CREDENTIALS.md)
 
 ### Actionable (no external dependencies)
 
