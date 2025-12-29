@@ -21,10 +21,19 @@ on:
         required: false
         default: 'false'
         type: boolean
+      force_fail:
+        description: 'Force failure for drill testing (hits invalid endpoint)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: uptime-monitor
   cancel-in-progress: true
+
+permissions:
+  issues: write
+  contents: read
 
 jobs:
   check-production:
@@ -35,7 +44,16 @@ jobs:
       - name: Check production healthz
         id: healthz
         run: |
-          echo "🔍 Checking https://dixis.gr/api/healthz..."
+          # Determine endpoint based on force_fail input
+          if [ "${{ github.event.inputs.force_fail }}" = "true" ]; then
+            ENDPOINT="https://dixis.gr/api/healthz__drill"
+            echo "🧪 DRILL MODE: Checking known-bad endpoint $ENDPOINT"
+            echo "is_drill=true" >> $GITHUB_OUTPUT
+          else
+            ENDPOINT="https://dixis.gr/api/healthz"
+            echo "🔍 Checking $ENDPOINT..."
+            echo "is_drill=false" >> $GITHUB_OUTPUT
+          fi
 
           MAX_RETRIES=3
           RETRY_DELAY=5
@@ -47,7 +65,7 @@ jobs:
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
               --connect-timeout $TIMEOUT \
               --max-time $TIMEOUT \
-              https://dixis.gr/api/healthz) || HTTP_CODE="000"
+              "$ENDPOINT") || HTTP_CODE="000"
 
             if [ "$HTTP_CODE" = "200" ]; then
               echo "✅ Production healthy (HTTP $HTTP_CODE)"
@@ -69,29 +87,40 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const title = '🚨 Production DOWN - healthz check failed';
-            const body = `## Production Health Check Failed
+            const isDrill = '${{ steps.healthz.outputs.is_drill }}' === 'true';
+            const drillPrefix = isDrill ? '🧪 [DRILL] ' : '';
+            const drillNote = isDrill ? '\n\n> ⚠️ **This is a DRILL** - triggered manually with force_fail=true to test alerting.' : '';
+
+            const title = isDrill
+              ? '🧪 [DRILL] Uptime monitor alert test'
+              : '🚨 Production DOWN - healthz check failed';
+
+            const body = `## ${isDrill ? 'Alert Drill' : 'Production Health Check Failed'}${drillNote}
 
             **Time**: ${new Date().toISOString()}
-            **Endpoint**: https://dixis.gr/api/healthz
+            **Endpoint**: ${isDrill ? 'https://dixis.gr/api/healthz__drill (intentionally invalid)' : 'https://dixis.gr/api/healthz'}
             **Last HTTP Code**: ${{ steps.healthz.outputs.http_code || 'unknown' }}
             **Workflow Run**: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
-
+            ${isDrill ? '' : `
             ## First Steps
             1. Check if site is accessible: https://dixis.gr
             2. SSH to VPS and check services: \`systemctl status dixis-backend dixis-frontend-launcher\`
             3. Check logs: \`journalctl -u dixis-backend -n 50\`
             4. See runbook: docs/OPS/MONITORING.md
-
+            `}
             ---
-            *Auto-created by uptime-monitor workflow*`;
+            *Auto-created by uptime-monitor workflow${isDrill ? ' (drill mode)' : ''}*`;
+
+            // For drills, use different label to avoid confusion
+            const labels = isDrill ? ['drill', 'monitor-test'] : ['production-down', 'urgent'];
+            const labelFilter = isDrill ? 'drill' : 'production-down';
 
             // Check for existing open issue to avoid duplicates
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: 'production-down',
+              labels: labelFilter,
               per_page: 1
             });
 
@@ -101,7 +130,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues[0].number,
-                body: `⏰ Health check failed again at ${new Date().toISOString()}\n\nWorkflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+                body: `⏰ ${isDrill ? '[DRILL] ' : ''}Health check failed again at ${new Date().toISOString()}\n\nWorkflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
               });
             } else {
               console.log('Creating new issue');
@@ -110,6 +139,6 @@ jobs:
                 repo: context.repo.repo,
                 title,
                 body,
-                labels: ['production-down', 'urgent']
+                labels
               });
             }
