@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (Pass 59)
+**Last Updated**: 2025-12-29 (Pass 61)
 
 ## TODO (tomorrow)
 - (none)
@@ -78,6 +78,7 @@
 - **Pass 57 Producer Orders CSV Export**: Producers can export orders to CSV from `/my/orders`. Backend: `ProducerOrderController.export()` method returns text/csv with UTF-8 BOM (Excel Greek support). Route: `GET /api/v1/producer/orders/export` (throttle: 10/min). CSV columns: order_id, created_at, status, customer_name, customer_email, items_summary, subtotal, shipping, total, payment_method, shipping_method. Default scope: last 30 days, producer-scoped via auth. Frontend: "Εξαγωγή CSV" button with loading state on `/my/orders`. API client: `apiClient.exportProducerOrdersCsv()` returns Blob. Tests: 4 E2E tests (button visible, CSV headers, loading state, auth required). Files: 7 changed (+362 insertions). Evidence: All CI checks PASS, PR #1943 merged 2025-12-28 (commit cd09adc0). Docs: `docs/AGENT/SUMMARY/Pass-57.md`. (Closed: 2025-12-28)
 - **Pass 58 Producer Order Status Updates**: Producers can update order status from `/my/orders` with single-click buttons. Status transitions: pending → processing → shipped → delivered (delivered is terminal, no button). Frontend: Blue status update button on each order card showing next status in Greek ("Αλλαγή σε: Σε Επεξεργασία" / "Απεστάλη" / "Παραδόθηκε"). Loading state with spinner and "Ενημέρωση..." while API call in progress. Optimistic UI update (order status + meta counts). Uses existing backend endpoint PATCH `/api/v1/producer/orders/{id}/status`. Tests: 4 E2E tests (button visible, API call + UI update, no button for delivered, loading state). Files: 4 changed. Evidence: All CI checks PASS (E2E PostgreSQL passed, flaky PROD smoke non-blocking), PR #1945 merged 2025-12-28 (commit 318d3ac8). Docs: `docs/AGENT/SUMMARY/Pass-58.md`. (Closed: 2025-12-28)
 - **Pass 59 Stabilize PROD Smoke (reload-and-css)**: Fixed flaky `reload-and-css.smoke.spec.ts` causing random CI failures with `net::ERR_ABORTED`. Solution: Added `gotoWithRetry()` helper with targeted retry for ERR_ABORTED errors (max 2 attempts), use `domcontentloaded` + optional `networkidle` (non-blocking), filter network errors from console assertions, explicit timeouts on visibility assertions. Tests: 2 pass against PROD (13.9s). Files: 1 changed (+63/-5). Evidence: All CI checks PASS including smoke-production (1m7s), PR #1948 merged 2025-12-28 (commit 08c9d23c). Docs: `docs/AGENT/SUMMARY/Pass-59.md`. (Closed: 2025-12-29)
+- **Pass 61 Admin Dashboard Polish**: Connected admin orders dashboard to Laravel API (single source of truth). Backend: Added `GET /api/v1/admin/orders` endpoint with filters (status, q, date range), pagination, and quick stats. Frontend: API route proxies to Laravel when auth token present, demo fallback gated to CI/test only. E2E: 4 tests (page elements, filters, pagination, stats). Files: 8 changed (+420 lines). Evidence: All CI checks PASS, PR #1950 merged 2025-12-29 (commit 66fb4fad). Docs: `docs/AGENT/SUMMARY/Pass-61.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -105,7 +106,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **Pass 61 — Admin Dashboard Polish**: Adding Laravel admin orders endpoint with filters/pagination/stats, wiring frontend to use Laravel API (single source of truth). Branch: `feat/pass-61-admin-dashboard-polish`. PR: #1950.
+- (none)
 
 ## BLOCKED ⚠️
 - (none)
@@ -132,15 +133,6 @@
      - [ ] Test order confirmation email on PROD
      - [ ] Verify producer notification works
    - **Risk**: Low (email code already tested, just needs credentials)
-
-3. **Pass 61 — Admin Dashboard Polish**
-   - **Priority**: P3 (Enhancement)
-   - **Scope**: Improve admin dashboard UX and add missing features
-   - **DoD**:
-     - [ ] Order search/filter by status, date, customer
-     - [ ] Pagination for orders list
-     - [ ] Quick stats on dashboard (orders today, revenue today)
-   - **Risk**: Low
 
 ---
 
