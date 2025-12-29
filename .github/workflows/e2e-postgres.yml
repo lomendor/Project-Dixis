@@ -59,8 +59,25 @@ jobs:
       - name: Sanity ping (healthz)
         run: curl -sS http://127.0.0.1:3001/api/healthz || true
 
-      - name: Run E2E tests (@smoke only)
-        run: npx dotenv-cli -e .env.ci -- npx playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1
+      # Pass TEST-UNSKIP-03: Explicit banner + count assertion to prevent false-green
+      - name: "⚠️ SMOKE ONLY - Run E2E tests (grep=@smoke)"
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ⚠️  SMOKE TESTS ONLY (--grep @smoke)                        ║"
+          echo "║  This PR gate runs ONLY @smoke tagged tests.                 ║"
+          echo "║  Full E2E suite runs nightly via e2e-full.yml                ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "Discovering @smoke tests..."
+          SMOKE_COUNT=$(npx playwright test --grep @smoke --list 2>/dev/null | grep -c "test" || echo "0")
+          echo "Found $SMOKE_COUNT smoke test(s)"
+          if [ "$SMOKE_COUNT" -lt 1 ]; then
+            echo "❌ ERROR: No @smoke tests found! This would be a false-green."
+            exit 1
+          fi
+          echo ""
+          echo "Running smoke tests..."
+          npx dotenv-cli -e .env.ci -- npx playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1
         env:
           CI: true
           SKIP_WEBSERVER: 'true'

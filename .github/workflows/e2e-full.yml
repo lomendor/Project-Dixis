@@ -1,20 +1,117 @@
+# Pass TEST-UNSKIP-03: Full E2E suite (nightly + manual)
+# Runs ALL tests without grep filter - catches issues missed by PR smoke gate
+
 name: E2E Full (nightly & manual)
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 2 * * *"  # 2 AM UTC daily
   workflow_dispatch:
+    inputs:
+      grep_filter:
+        description: 'Optional grep filter (leave empty for all tests)'
+        required: false
+        default: ''
 
 jobs:
   e2e-full:
+    name: E2E Full Suite
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3001
+
+    defaults:
+      run:
+        working-directory: frontend
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: corepack enable
-      - run: cd frontend && pnpm install
-      - run: cd frontend && pnpm exec playwright install --with-deps
-      - name: Run full e2e
-        run: cd frontend && pnpm exec playwright test --reporter=line
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Generate Prisma Client & Migrate
+        run: |
+          pnpm run ci:gen || echo "Prisma gen skipped"
+          pnpm run ci:migrate || echo "Prisma migrate skipped"
+
+      - name: Build Next.js app
+        run: pnpm run build:ci
+
+      - name: Start Next.js server
+        run: pnpm run start:ci &
+
+      - name: Wait for healthz endpoint
+        run: npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
+
+      - name: Sanity ping (healthz)
+        run: curl -sS http://127.0.0.1:3001/api/healthz || true
+
+      - name: Discover all tests
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  🔍 FULL E2E SUITE - All tests (no grep filter)              ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          FILTER="${{ github.event.inputs.grep_filter }}"
+          if [ -n "$FILTER" ]; then
+            echo "Using grep filter: $FILTER"
+            TOTAL=$(npx playwright test --grep "$FILTER" --list 2>/dev/null | grep -c "test" || echo "0")
+          else
+            echo "Running ALL tests (no filter)"
+            TOTAL=$(npx playwright test --list 2>/dev/null | grep -c "test" || echo "0")
+          fi
+          echo "Total tests discovered: $TOTAL"
+          if [ "$TOTAL" -lt 1 ]; then
+            echo "❌ ERROR: No tests found!"
+            exit 1
+          fi
+
+      - name: Run full E2E tests
+        run: |
+          FILTER="${{ github.event.inputs.grep_filter }}"
+          if [ -n "$FILTER" ]; then
+            npx dotenv-cli -e .env.ci -- npx playwright test --grep "$FILTER" --reporter=line,html --global-timeout=600000
+          else
+            npx dotenv-cli -e .env.ci -- npx playwright test --reporter=line,html --global-timeout=600000
+          fi
+        env:
+          CI: true
+          SKIP_WEBSERVER: 'true'
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-full-report-${{ github.run_number }}
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 14
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## E2E Full Suite Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f playwright-report/index.html ]; then
+            echo "✅ Test report generated - see artifacts" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No test report found" >> $GITHUB_STEP_SUMMARY
+          fi
