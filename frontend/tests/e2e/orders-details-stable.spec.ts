@@ -32,7 +32,7 @@ async function setupConsumerAuth(page: any) {
 }
 
 test.describe('Orders → Details Flow (Crash Prevention)', () => {
-  test.skip('orders list renders without crash when status is undefined', async ({ page }) => {
+  test('orders list renders without crash when status is undefined', async ({ page }) => {
     // SETUP: Mock auth
     await setupConsumerAuth(page);
 
@@ -83,7 +83,7 @@ test.describe('Orders → Details Flow (Crash Prevention)', () => {
     await expect(orderCard.locator('text=—')).toBeVisible();
   });
 
-  test.skip('order details page renders without crash when data is incomplete', async ({ page }) => {
+  test('order details page renders without crash when data is incomplete', async ({ page }) => {
     const mockOrderId = 888;
 
     // SETUP: Consumer auth
@@ -167,7 +167,7 @@ test.describe('Orders → Details Flow (Crash Prevention)', () => {
     await expect(page.locator('[data-testid="item-total"]').first()).toContainText('€—');
   });
 
-  test.skip('order details shows 404 error gracefully when order not found', async ({ page }) => {
+  test('order details shows 404 error gracefully when order not found', async ({ page }) => {
     const nonExistentOrderId = 99999;
 
     // SETUP: Consumer auth
@@ -199,7 +199,7 @@ test.describe('Orders → Details Flow (Crash Prevention)', () => {
     await expect(page.locator('[data-testid="view-all-orders-link"]')).toBeVisible();
   });
 
-  test.skip('verifies orders list calls Laravel API and renders page', async ({ page }) => {
+  test('verifies orders list calls Laravel API and renders page', async ({ page }) => {
     let calledLaravelApi = false;
 
     // Monitor API calls

@@ -46,7 +46,7 @@ async function setupConsumerAuth(page: any) {
 }
 
 test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
-  test.skip('order appears in orders list after successful checkout', async ({ page }) => {
+  test('order appears in orders list after successful checkout', async ({ page }) => {
     // SETUP: Add item to cart
     await addItemToCart(page);
 
@@ -172,7 +172,7 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
     await expect(orderCard.locator(':text("€14.40")')).toBeVisible();
   });
 
-  test.skip('order details page loads after checkout', async ({ page }) => {
+  test('order details page loads after checkout', async ({ page }) => {
     const mockOrderId = 12345;
 
     // SETUP: Consumer auth
@@ -231,7 +231,7 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
     await expect(page.locator('[data-testid="order-items-section"]')).toBeVisible();
   });
 
-  test.skip('handles empty orders list gracefully', async ({ page }) => {
+  test('handles empty orders list gracefully', async ({ page }) => {
     // SETUP: Consumer auth
     await setupConsumerAuth(page);
 
@@ -257,7 +257,7 @@ test.describe('Checkout → Orders List (Split-Brain Fix)', () => {
     await expect(page.locator('[data-testid="browse-products-link"]')).toBeVisible();
   });
 
-  test.skip('handles order fetch error gracefully', async ({ page }) => {
+  test('handles order fetch error gracefully', async ({ page }) => {
     // SETUP: Consumer auth
     await setupConsumerAuth(page);
 
