@@ -105,7 +105,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- (none)
+- **Pass 61 — Admin Dashboard Polish**: Adding Laravel admin orders endpoint with filters/pagination/stats, wiring frontend to use Laravel API (single source of truth). Branch: `feat/pass-61-admin-dashboard-polish`. PR: #1950.
 
 ## BLOCKED ⚠️
 - (none)
