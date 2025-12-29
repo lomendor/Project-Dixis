@@ -51,6 +51,7 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL: https://dixis.gr/api/v1
           NEXT_PUBLIC_APP_URL: https://dixis.gr
           NEXT_PUBLIC_SITE_URL: https://dixis.gr
+          NEXT_PUBLIC_PAYMENTS_CARD_FLAG: 'true'
           PRODUCTS_MODE: demo
         run: pnpm build
 
