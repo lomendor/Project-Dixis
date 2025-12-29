@@ -20,11 +20,73 @@ test('@smoke mock products API responds', async ({ request }) => {
   expect(json.data.length).toBeGreaterThan(0);
 });
 
-// NOTE: Products page @smoke tests removed because:
-// - Products page SSR calls API_INTERNAL_URL which defaults to port 8001 (Laravel)
-// - In CI, there's no Laravel backend - only Next.js mock API
-// - Full product page tests run in e2e-full.yml (nightly/manual) with proper env setup
-//
-// To enable products page @smoke tests, need to:
-// 1. Set API_INTERNAL_URL=http://127.0.0.1:3001/api/v1 during Next.js build AND runtime
-// 2. Or refactor products page to not rely on SSR API call
+// @smoke — Products page loads and shows heading
+// Pass E2E-SEED-02: CI-safe test that doesn't depend on SSR data
+// The page may show empty state or products depending on SSR env, but heading always renders
+test('@smoke products page loads', async ({ page }) => {
+  await page.goto('/products', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Page heading should always be present regardless of data
+  await expect(page.getByRole('heading', { name: 'Προϊόντα' })).toBeVisible({ timeout: 10000 });
+});
+
+// @smoke — Products page with mocked API renders product cards
+// Pass E2E-SEED-02: Uses route mocking to inject product data client-side
+test('@smoke products page renders cards with mocked data', async ({ page }) => {
+  // Mock the API response before navigation
+  const mockProducts = [
+    {
+      id: 1,
+      name: 'CI Test Olive Oil',
+      slug: 'ci-olive-oil',
+      price: '15.50',
+      image_url: null,
+      producer: { id: 1, name: 'Test Producer' }
+    },
+    {
+      id: 2,
+      name: 'CI Test Honey',
+      slug: 'ci-honey',
+      price: '12.00',
+      image_url: null,
+      producer: { id: 2, name: 'Another Producer' }
+    }
+  ];
+
+  // Intercept both SSR and client-side API calls
+  await page.route('**/api/v1/public/products*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: mockProducts, total: mockProducts.length })
+    });
+  });
+
+  // Also mock internal API calls (SSR uses different path patterns)
+  await page.route('**/public/products*', async (route) => {
+    // Only mock if it's an API request (not the page itself)
+    if (route.request().url().includes('/api/') ||
+        route.request().headers()['content-type']?.includes('application/json')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockProducts, total: mockProducts.length })
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  await page.goto('/products', { waitUntil: 'networkidle', timeout: 30000 });
+
+  // Verify heading
+  await expect(page.getByRole('heading', { name: 'Προϊόντα' })).toBeVisible({ timeout: 10000 });
+
+  // Verify product grid has items (using grid structure from page.tsx)
+  const productGrid = page.locator('main .grid');
+  await expect(productGrid).toBeVisible({ timeout: 10000 });
+
+  // Should have at least one product card in the grid
+  const cards = productGrid.locator('> div, > a');
+  await expect(cards.first()).toBeVisible({ timeout: 10000 });
+});
