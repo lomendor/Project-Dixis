@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (Pass 61)
+**Last Updated**: 2025-12-29 (Pass 62)
 
 ## TODO (tomorrow)
 - (none)
@@ -106,7 +106,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- (none)
+- **Pass 62 — Orders/Checkout E2E Guardrail**: Adding comprehensive regression test to prevent silent breakage of consumer checkout journey. Branch: `test/pass62-orders-checkout-e2e-guardrail`. PR: pending.
 
 ## BLOCKED ⚠️
 - (none)
