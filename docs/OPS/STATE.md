@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (TEST-UNSKIP-02-CORRECTION)
+**Last Updated**: 2025-12-29 (TEST-UNSKIP-03)
 
 ## TODO (tomorrow)
 - (none)
@@ -86,6 +86,7 @@
 - **TEST-UNSKIP-01 Enable Skipped E2E Tests**: Unskipped 8 E2E tests from orders flow specs (`checkout-to-orders-list.spec.ts`: 4 tests, `orders-details-stable.spec.ts`: 4 tests). Tests use route mocking for deterministic behavior. Evidence: E2E PostgreSQL job PASS (3m1s), PR #1962 merged 2025-12-29. ~50+ tests remain skipped (conditional guards, missing routes). Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-01.md`. (Closed: 2025-12-29)
 - **TEST-UNSKIP-02 Enable More Skipped E2E Tests**: Unskipped 6 E2E tests from PDP and products specs (`pdp-happy.spec.ts`: 5 tests, `products-ui.smoke.spec.ts`: 1 test). Key insight: PDP is SSR so page.route() can't intercept server-side fetch - tests now rely on production data. Evidence: E2E PostgreSQL job PASS (3m21s), PR #1964 merged 2025-12-29. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-02.md`. (Closed: 2025-12-29)
 - **TEST-UNSKIP-02-CORRECTION**: **CRITICAL FIX**: Tests from TEST-UNSKIP-02 were NOT actually running in CI. Root cause: `e2e-postgres.yml` uses `--grep @smoke` but pdp-happy.spec.ts and products-ui.smoke.spec.ts have no `@smoke` tag. Tests "passed" because they were never executed. Safety guard (sanity check) caught this during STATUS CHECK. Fix: Re-skipped all 6 tests (PR #1966 merged 2025-12-29). Next steps: Either add `@smoke` tag + seeded data OR create dedicated workflow. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-02-CORRECTION.md`. (Closed: 2025-12-29)
+- **TEST-UNSKIP-03 False-Green Prevention**: Eliminated the "tests appear unskipped but aren't running due to grep filter" class of bugs. Changes: (1) `e2e-postgres.yml` now has explicit banner + count assertion (fails if no @smoke tests found, preventing zero-test runs), (2) `e2e-full.yml` completely rewritten with proper build/webServer/discovery (nightly full suite now actually works). Evidence: CI logs show "Found 2 smoke test(s)" assertion passing, E2E PostgreSQL PASS (3m11s). PR #1968. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-03.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
