@@ -57,14 +57,25 @@ export async function GET(req: NextRequest) {
             meta: data.meta || {},
           }, { status: 200 });
         }
-        // If Laravel returns 403/401, fall through to demo
+        // If Laravel returns 403/401, return unauthorized (no demo fallback in prod)
+        return NextResponse.json({ error: 'Unauthorized' }, { status: laravelRes.status });
       }
     } catch (err) {
-      console.error('[admin/orders] Laravel API error, falling back to demo:', err);
+      console.error('[admin/orders] Laravel API error:', err);
+      // In production, don't fallback to demo - require real auth
+      if (process.env.NODE_ENV === 'production' && !process.env.CI) {
+        return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+      }
     }
   }
 
-  // Fallback: demo mode (local data)
+  // Demo fallback: ONLY allowed in CI/test environments
+  const isCIOrTest = process.env.CI === 'true' || process.env.NODE_ENV === 'test' || forceDemo;
+  if (!isCIOrTest && process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Unauthorized - admin authentication required' }, { status: 401 });
+  }
+
+  // Fallback: demo mode (local data) - CI/test only
   const ALLOWED = new Set(['pending','paid','shipped','cancelled','refunded','confirmed','processing','delivered']);
   if (status && !ALLOWED.has(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
