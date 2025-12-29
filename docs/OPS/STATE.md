@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (Pass 62)
+**Last Updated**: 2025-12-29 (Pass 63)
 
 ## TODO (tomorrow)
 - (none)
@@ -107,7 +107,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- (none)
+- **Pass 63 — Smoke Readiness Gate**: Stabilizing smoke-production/auth-probe flakiness by adding healthz readiness check with exponential backoff before running tests. Branch: `fix/pass63-smoke-readiness-gate`. PR: pending.
 
 ## BLOCKED ⚠️
 - (none)
