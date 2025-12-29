@@ -59,6 +59,7 @@
     "ci:db": "npx prisma db push --accept-data-loss --schema prisma/schema.ci.prisma",
     "ci:gen": "npx prisma generate --schema prisma/schema.ci.prisma",
     "ci:migrate": "npx prisma db push --accept-data-loss --skip-generate --schema prisma/schema.ci.prisma",
+    "ci:seed": "npx tsx prisma/seed-ci.ts",
     "build:ci": "next build",
     "test:e2e:ci": "npx -y dotenv-cli -e .env.ci -- playwright test --reporter=line,html --global-timeout=1200000 --max-failures=1",
     "pree2e:smoke": "node -e \"const p=process.cwd(); if(!p.includes('Project-Dixis/frontend')){console.error('❌ Wrong workspace:',p); process.exit(1)}\"",
