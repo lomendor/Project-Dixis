@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (MONITOR-02)
+**Last Updated**: 2025-12-29 (DOCS-REFRESH-01)
 
 ## TODO (tomorrow)
 - (none)
@@ -117,7 +117,9 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Pass 52 — Card Payments Enable (when ready)**
+### Blocked (waiting on user-provided credentials)
+
+1. **Pass 52 — Card Payments Enable**
    - **Priority**: P2 (Feature)
    - **Scope**: Enable card payments in production with real Stripe credentials
    - **DoD**:
@@ -126,7 +128,7 @@
      - [ ] Verify Stripe webhook endpoint registered
      - [ ] Test real card payment end-to-end
    - **Risk**: Medium (requires Stripe account setup, webhook configuration)
-   - **Status**: BLOCKED on Stripe credentials (user must provide)
+   - **Status**: ⚠️ BLOCKED on Stripe credentials (user must provide)
 
 2. **Pass 60 — Email Infrastructure Enable**
    - **Priority**: P3 (Feature)
@@ -137,6 +139,20 @@
      - [ ] Test order confirmation email on PROD
      - [ ] Verify producer notification works
    - **Risk**: Low (email code already tested, just needs credentials)
+   - **Status**: ⚠️ BLOCKED on SMTP/Resend credentials (user must provide)
+
+### Actionable (no external dependencies)
+
+3. **TEST-UNSKIP-01 — Enable Skipped E2E Tests**
+   - **Priority**: P2 (Quality)
+   - **Scope**: Unskip E2E tests from Pass 39/40/44 that were skipped due to auth setup issues
+   - **DoD**:
+     - [ ] Enable ≥6 previously-skipped tests in `checkout-to-orders-list.spec.ts`, `orders-details-stable.spec.ts`, `pass-44-*.spec.ts`
+     - [ ] All unskipped tests PASS in CI (E2E PostgreSQL job)
+     - [ ] No new test failures introduced
+     - [ ] E2E job stays under 5 minutes
+   - **Risk**: Medium (tests may fail and need debugging)
+   - **Status**: Ready to start
 
 ---
 
