@@ -104,8 +104,9 @@ Route::prefix('v1')->group(function () {
         // Public Orders API (demo access - no PII exposed)
         Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.public.orders.index');
         Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.public.orders.show');
+        // Pass 52 fix: auth.optional captures user_id when logged in, allows guest checkout
         Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
-            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
+            ->middleware(['auth.optional', 'throttle:10,1']);
 
         // Pass 50: Zone-based shipping quote (simpler than /api/shipping/quote)
         Route::post('shipping/quote', [App\Http\Controllers\Api\V1\ShippingQuoteController::class, 'quote'])

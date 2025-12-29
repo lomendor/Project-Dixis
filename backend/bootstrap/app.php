@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // API routes should return JSON 401, not redirect to login
         $middleware->redirectGuestsTo(fn () => null);
+
+        // Register custom middleware aliases
+        $middleware->alias([
+            'auth.optional' => \App\Http\Middleware\OptionalSanctumAuth::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Return JSON 401 for unauthenticated API requests instead of redirect
