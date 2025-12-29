@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-29 12:00 UTC
+**Last Updated**: 2025-12-29 14:45 UTC
 
 ## WIP (1 item only)
 - (none)
@@ -13,7 +13,7 @@
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 
-## Recently Completed (Pass 58-63 + MONITOR)
+## Recently Completed (Pass 58-63 + MONITOR + E2E-SEED)
 
 - **Pass 58** — Producer Order Status Updates (status buttons on /my/orders) ✅
 - **Pass 59** — Stabilize PROD Smoke reload-and-css ✅
@@ -22,6 +22,10 @@ See `docs/OPS/STATE.md` for full DoD checklists.
 - **Pass 63** — Smoke Readiness Gate (healthz polling with backoff) ✅
 - **MONITOR-01** — Uptime Alerting (GitHub Issue on failure) ✅
 - **MONITOR-02** — Alert Drill (proved alerting pipeline works) ✅
+- **TEST-UNSKIP-01** — Enable Skipped E2E Tests (8 tests unskipped from orders flow) ✅
+- **TEST-UNSKIP-02-CORRECTION** — Re-skipped SSR tests (were not actually running) ✅
+- **TEST-UNSKIP-03** — False-Green Prevention (count assertion + e2e-full rewrite) ✅
+- **E2E-SEED-01** — Deterministic CI Seeding (seed-ci.ts + mock API + 2 @smoke tests) ✅
 
 ## Previously Completed (Pass 45-57)
 
