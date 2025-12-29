@@ -51,6 +51,13 @@ jobs:
           pnpm run ci:gen || echo "Prisma gen skipped"
           pnpm run ci:migrate || echo "Prisma migrate skipped"
 
+      # Pass E2E-SEED-01: Seed deterministic test data for meaningful failures
+      - name: Seed CI Database
+        run: |
+          echo "🌱 Seeding CI database with deterministic test data..."
+          pnpm run ci:seed
+          echo "✅ CI seed complete"
+
       - name: Build Next.js app
         run: pnpm run build:ci
 
