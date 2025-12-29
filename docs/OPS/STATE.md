@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (DOCS-REFRESH-01)
+**Last Updated**: 2025-12-29 (TEST-UNSKIP-01)
 
 ## TODO (tomorrow)
 - (none)
@@ -83,6 +83,7 @@
 - **Pass 63 Smoke Readiness Gate**: Stabilized flaky smoke-production/auth-probe CI tests by adding healthz readiness gate with exponential backoff. New `readiness.ts` helper polls `/api/healthz` with backoff (2s, 4s, 8s, 15s...) up to ~60s before running tests. Applied to `auth-probe.spec.ts`, `reload-and-css.smoke.spec.ts`, and `ci-global-setup.ts`. Added 2 retries and increased timeouts (90-120s) for production smoke tests. Prevents cold-start timeouts that caused intermittent CI failures. Files: 4 changed (+277 lines). Evidence: e2e PASS (1m7s), smoke PASS (1m20s), smoke-production PASS (1m11s). PRs: #1954 merged 2025-12-29 (commit fd470679), #1956 merged 2025-12-29 (commit 05100c2f). Docs: `docs/AGENT/SUMMARY/Pass-63.md`. (Closed: 2025-12-29)
 - **MONITOR-01 Uptime Alerting**: Added automated uptime monitoring with GitHub Issue creation on failure. New workflow `.github/workflows/uptime-monitor.yml` checks `/api/healthz` every 10 minutes with 3 retries. On failure, creates GitHub Issue with `production-down` label (or adds comment to existing open issue to avoid duplicates). No external secrets required (uses GITHUB_TOKEN). Updated runbook `docs/OPS/MONITORING.md` with systemd commands and investigation playbook. **RISK**: Prod uptime relies on GitHub Actions; no external alerting (Slack/email) yet. PR: #1958. Docs: `docs/OPS/MONITORING.md`. (Closed: 2025-12-29)
 - **MONITOR-02 Alert Drill**: Proved uptime-monitor alerting pipeline works end-to-end. Added `force_fail` input to workflow (hits invalid endpoint to trigger failure). Added `permissions: issues: write` for non-default branch execution. Drill results: (1) Issue #1959 created on first force_fail=true run, (2) Comment added on second run (dedupe verified), (3) Normal run passed with no issues created. Drill issues use separate labels (`drill`, `monitor-test`) to avoid confusion with real incidents. Evidence documented in `docs/OPS/MONITORING.md`. Docs: `docs/AGENT/SUMMARY/MONITOR-02.md`. (Closed: 2025-12-29)
+- **TEST-UNSKIP-01 Enable Skipped E2E Tests**: Unskipped 8 E2E tests from orders flow specs (`checkout-to-orders-list.spec.ts`: 4 tests, `orders-details-stable.spec.ts`: 4 tests). Tests use route mocking for deterministic behavior. Evidence: E2E PostgreSQL job PASS (3m1s), PR #1962 merged 2025-12-29. ~50+ tests remain skipped (conditional guards, missing routes). Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-01.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -143,16 +144,15 @@
 
 ### Actionable (no external dependencies)
 
-3. **TEST-UNSKIP-01 — Enable Skipped E2E Tests**
-   - **Priority**: P2 (Quality)
-   - **Scope**: Unskip E2E tests from Pass 39/40/44 that were skipped due to auth setup issues
+3. **TEST-UNSKIP-02 — Enable More Skipped E2E Tests**
+   - **Priority**: P3 (Quality)
+   - **Scope**: Continue unskipping E2E tests (pdp-happy.spec.ts, products-ui.smoke.spec.ts)
    - **DoD**:
-     - [ ] Enable ≥6 previously-skipped tests in `checkout-to-orders-list.spec.ts`, `orders-details-stable.spec.ts`, `pass-44-*.spec.ts`
-     - [ ] All unskipped tests PASS in CI (E2E PostgreSQL job)
-     - [ ] No new test failures introduced
+     - [ ] Enable ≥5 more previously-skipped tests
+     - [ ] All unskipped tests PASS in CI
      - [ ] E2E job stays under 5 minutes
-   - **Risk**: Medium (tests may fail and need debugging)
-   - **Status**: Ready to start
+   - **Risk**: Medium (may need to implement missing functionality)
+   - **Status**: Ready to start (depends on TEST-UNSKIP-01 success)
 
 ---
 
