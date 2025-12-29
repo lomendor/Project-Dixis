@@ -31,6 +31,10 @@ concurrency:
   group: uptime-monitor
   cancel-in-progress: true
 
+permissions:
+  issues: write
+  contents: read
+
 jobs:
   check-production:
     runs-on: ubuntu-latest
