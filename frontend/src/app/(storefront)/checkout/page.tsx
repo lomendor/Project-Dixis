@@ -13,6 +13,7 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod')
+  const [cardProcessing, setCardProcessing] = useState(false)
 
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
@@ -55,19 +56,34 @@ function CheckoutContent() {
         })),
         currency: 'EUR' as const,
         shipping_method: 'HOME' as const,
-        notes: '' // Could add notes field to form if needed
+        payment_method: paymentMethod === 'card' ? 'CARD' as const : 'COD' as const,
+        notes: ''
       };
 
       const order = await apiClient.createOrder(orderData);
 
-      // Clear cart after successful order creation
-      clear()
-
       // Store customer details for order confirmation/email
       sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer));
 
-      // TODO: Payment method integration (Viva Wallet)
-      // For now, redirect to thank-you page with order ID
+      // Handle card payment via Stripe
+      if (paymentMethod === 'card') {
+        setCardProcessing(true)
+        try {
+          const paymentSession = await apiClient.createPaymentCheckout(order.id)
+          clear()
+          // Redirect to Stripe Checkout
+          window.location.href = paymentSession.redirect_url
+          return
+        } catch (paymentErr) {
+          console.error('Card payment init failed:', paymentErr)
+          setError('Σφάλμα κατά την εκκίνηση πληρωμής με κάρτα. Παρακαλώ δοκιμάστε ξανά.')
+          setCardProcessing(false)
+          return
+        }
+      }
+
+      // COD: Clear cart and redirect to thank-you page
+      clear()
       router.push(`/thank-you?id=${order.id}`)
     } catch (err) {
       console.error('Order creation failed:', err)
@@ -222,11 +238,17 @@ function CheckoutContent() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || cardProcessing}
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
               data-testid="checkout-submit"
             >
-              {loading ? 'Επεξεργασία...' : 'Ολοκλήρωση Παραγγελίας'}
+              {cardProcessing
+                ? 'Μεταφορά στη σελίδα πληρωμής...'
+                : loading
+                  ? 'Επεξεργασία...'
+                  : paymentMethod === 'card'
+                    ? 'Συνέχεια στην Πληρωμή'
+                    : 'Ολοκλήρωση Παραγγελίας'}
             </button>
           </div>
         </form>

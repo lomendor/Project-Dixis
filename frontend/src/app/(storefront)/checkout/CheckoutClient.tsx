@@ -1,3 +1,17 @@
+/**
+ * DEPRECATED: Unused checkout implementation.
+ *
+ * This component was an alternative checkout that used i18n (useTranslations)
+ * and had Stripe integration gated by NEXT_PUBLIC_PAYMENTS_CARD_FLAG.
+ *
+ * The canonical checkout is now: /app/(storefront)/checkout/page.tsx
+ * which uses PaymentMethodSelector with Stripe support.
+ *
+ * This file will be deleted after Stripe rollout is verified stable.
+ * Do NOT import this component anywhere.
+ *
+ * @deprecated Since 2025-12-29 - Use page.tsx instead
+ */
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useMemo, useEffect } from 'react'
