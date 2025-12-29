@@ -18,5 +18,5 @@ Excluded:
 - [x] domcontentloaded + optional networkidle
 - [x] Network errors filtered from console assertions
 - [x] Tests pass against PROD locally
-- [ ] CI green
-- [ ] docs updated
+- [x] CI green (smoke-production passed in 1m7s)
+- [x] docs updated
