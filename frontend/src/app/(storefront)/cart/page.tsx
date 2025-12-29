@@ -1,60 +1,30 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCart, cartCount, cartTotalCents } from '@/lib/cart'
-import { useToast } from '@/contexts/ToastContext'
-import { useAuth } from '@/contexts/AuthContext'
-import { apiClient } from '@/lib/api'
+import { useCart, cartTotalCents } from '@/lib/cart'
 
 export default function CartPage() {
   const router = useRouter()
-  const { showError } = useToast()
-  const { user, isAuthenticated } = useAuth()
   const items = useCart(s => s.items)
   const inc = useCart(s => s.inc)
   const dec = useCart(s => s.dec)
   const clear = useCart(s => s.clear)
-  const [loading, setLoading] = useState(false)
 
-  const count = cartCount(items)
   const totalCents = cartTotalCents(items)
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
   const list = Object.values(items)
 
-  const handleCheckout = async () => {
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      showError('Παρακαλώ συνδεθείτε για να ολοκληρώσετε την παραγγελία.')
-      router.push('/auth/login')
-      return
-    }
-
-    setLoading(true)
-    try {
-      // Map cart items to backend API format
-      const orderItems = list.map(item => ({
-        product_id: parseInt(item.id.toString()),
-        quantity: item.qty
-      }))
-
-      // Call backend Laravel API: POST /api/v1/orders
-      const order = await apiClient.createOrder({
-        items: orderItems,
-        currency: 'EUR',
-        shipping_method: 'HOME',
-        notes: ''
-      })
-
-      // Clear cart and redirect to order detail page
-      clear()
-      router.push(`/order/${order.id}`)
-    } catch (error) {
-      console.error('Checkout error:', error)
-      showError('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
-      setLoading(false)
-    }
+  const handleCheckout = () => {
+    // Pass 52 fix: Navigate to /checkout page where user can:
+    // 1. Fill shipping details
+    // 2. Select payment method (COD or Card)
+    // 3. Submit order with all required fields
+    //
+    // Previously this function created the order directly from cart,
+    // bypassing the checkout page entirely and never showing payment options.
+    router.push('/checkout')
   }
 
   return (
@@ -112,11 +82,10 @@ export default function CartPage() {
               </button>
               <button
                 onClick={handleCheckout}
-                disabled={loading}
-                className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-4 w-full inline-flex justify-center bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700"
                 data-testid="go-checkout"
               >
-                {loading ? 'Παρακαλώ περιμένετε...' : 'Συνέχεια στο checkout'}
+                Συνέχεια στο checkout
               </button>
               <Link href="/products" className="mt-2 w-full inline-flex justify-center border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50">
                 Συνέχεια αγορών
