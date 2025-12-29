@@ -42,7 +42,7 @@ test('@smoke products page renders content', async ({ page }) => {
   // Page should show EITHER products grid OR empty state message
   // This makes the test CI-safe regardless of SSR data availability
   const productGrid = page.locator('main .grid');
-  const emptyState = page.getByText('Δεν υπάρχουν διαθέσιμα προϊόντα');
+  const emptyState = page.getByText('Δεν υπάρχουν διαθέσιμα προϊόντα').first();
 
   // Wait for either condition - at least one should be visible
   await expect(productGrid.or(emptyState)).toBeVisible({ timeout: 15000 });
