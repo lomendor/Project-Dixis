@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000'
 
-test.skip('flaky: products page renders grid', async ({ page }) => {
+// Pass 47 (TEST-UNSKIP-02): Unskipped - works against production data
+test('products page renders grid', async ({ page }) => {
   await page.goto(`${BASE}/products`, { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Προϊόντα' })).toBeVisible()
 
