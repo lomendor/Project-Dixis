@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-28 (Pass 58)
+**Last Updated**: 2025-12-29 (Pass 59)
 
 ## TODO (tomorrow)
 - (none)
@@ -77,6 +77,7 @@
 - **Pass 56 Producer Orders Split-Brain Fix**: Fixed producer orders page `/my/orders` using Prisma while orders created in Laravel PostgreSQL (same split-brain issue as Pass 39/44). Result: Producers saw "Δεν υπάρχουν εγγραφές" even when they had orders. Solution: Rewrote page as Client Component using Laravel API (`apiClient.getProducerOrders()`). Features: Status tabs with counts (pending/processing/shipped/delivered), order cards with customer info and producer's items only, Greek labels. Suspense boundary added for Next.js 15 `useSearchParams()` requirement. Tests: 4 E2E tests (page loads, data display, empty state, tab navigation). Files: 4 changed. Evidence: All CI checks PASS, PR #1940 merged 2025-12-28. Architecture alignment: Both consumer (Pass 39) and producer (Pass 56) orders now read from Laravel PostgreSQL (single source of truth). Docs: `docs/AGENT/SUMMARY/Pass-56.md`. (Closed: 2025-12-28)
 - **Pass 57 Producer Orders CSV Export**: Producers can export orders to CSV from `/my/orders`. Backend: `ProducerOrderController.export()` method returns text/csv with UTF-8 BOM (Excel Greek support). Route: `GET /api/v1/producer/orders/export` (throttle: 10/min). CSV columns: order_id, created_at, status, customer_name, customer_email, items_summary, subtotal, shipping, total, payment_method, shipping_method. Default scope: last 30 days, producer-scoped via auth. Frontend: "Εξαγωγή CSV" button with loading state on `/my/orders`. API client: `apiClient.exportProducerOrdersCsv()` returns Blob. Tests: 4 E2E tests (button visible, CSV headers, loading state, auth required). Files: 7 changed (+362 insertions). Evidence: All CI checks PASS, PR #1943 merged 2025-12-28 (commit cd09adc0). Docs: `docs/AGENT/SUMMARY/Pass-57.md`. (Closed: 2025-12-28)
 - **Pass 58 Producer Order Status Updates**: Producers can update order status from `/my/orders` with single-click buttons. Status transitions: pending → processing → shipped → delivered (delivered is terminal, no button). Frontend: Blue status update button on each order card showing next status in Greek ("Αλλαγή σε: Σε Επεξεργασία" / "Απεστάλη" / "Παραδόθηκε"). Loading state with spinner and "Ενημέρωση..." while API call in progress. Optimistic UI update (order status + meta counts). Uses existing backend endpoint PATCH `/api/v1/producer/orders/{id}/status`. Tests: 4 E2E tests (button visible, API call + UI update, no button for delivered, loading state). Files: 4 changed. Evidence: All CI checks PASS (E2E PostgreSQL passed, flaky PROD smoke non-blocking), PR #1945 merged 2025-12-28 (commit 318d3ac8). Docs: `docs/AGENT/SUMMARY/Pass-58.md`. (Closed: 2025-12-28)
+- **Pass 59 Stabilize PROD Smoke (reload-and-css)**: Fixed flaky `reload-and-css.smoke.spec.ts` causing random CI failures with `net::ERR_ABORTED`. Solution: Added `gotoWithRetry()` helper with targeted retry for ERR_ABORTED errors (max 2 attempts), use `domcontentloaded` + optional `networkidle` (non-blocking), filter network errors from console assertions, explicit timeouts on visibility assertions. Tests: 2 pass against PROD (13.9s). Files: 1 changed (+63/-5). Evidence: All CI checks PASS including smoke-production (1m7s), PR #1948 merged 2025-12-28 (commit 08c9d23c). Docs: `docs/AGENT/SUMMARY/Pass-59.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -111,17 +112,7 @@
 
 ## NEXT 📋 (max 3, ordered, each with DoD)
 
-1. **Pass 59 — Stabilize PROD Smoke (reload-and-css)**
-   - **Priority**: P1 (CI Hygiene)
-   - **Scope**: Fix flaky `reload-and-css.smoke.spec.ts` causing random CI failures
-   - **DoD**:
-     - [ ] Make test resilient to SPA navigations
-     - [ ] Add retry logic for goto (max 2 retries)
-     - [ ] Add proper waitForLoadState after navigation
-     - [ ] Test passes reliably against PROD
-   - **Risk**: Low
-
-2. **Pass 52 — Card Payments Enable (when ready)**
+1. **Pass 52 — Card Payments Enable (when ready)**
    - **Priority**: P2 (Feature)
    - **Scope**: Enable card payments in production with real Stripe credentials
    - **DoD**:
@@ -132,7 +123,7 @@
    - **Risk**: Medium (requires Stripe account setup, webhook configuration)
    - **Status**: BLOCKED on Stripe credentials (user must provide)
 
-3. **Pass 60 — Email Infrastructure Enable**
+2. **Pass 60 — Email Infrastructure Enable**
    - **Priority**: P3 (Feature)
    - **Scope**: Enable email notifications in production
    - **DoD**:
@@ -141,6 +132,15 @@
      - [ ] Test order confirmation email on PROD
      - [ ] Verify producer notification works
    - **Risk**: Low (email code already tested, just needs credentials)
+
+3. **Pass 61 — Admin Dashboard Polish**
+   - **Priority**: P3 (Enhancement)
+   - **Scope**: Improve admin dashboard UX and add missing features
+   - **DoD**:
+     - [ ] Order search/filter by status, date, customer
+     - [ ] Pagination for orders list
+     - [ ] Quick stats on dashboard (orders today, revenue today)
+   - **Risk**: Low
 
 ---
 
