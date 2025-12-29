@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (TEST-UNSKIP-01)
+**Last Updated**: 2025-12-29 (TEST-UNSKIP-02)
 
 ## TODO (tomorrow)
 - (none)
@@ -84,6 +84,7 @@
 - **MONITOR-01 Uptime Alerting**: Added automated uptime monitoring with GitHub Issue creation on failure. New workflow `.github/workflows/uptime-monitor.yml` checks `/api/healthz` every 10 minutes with 3 retries. On failure, creates GitHub Issue with `production-down` label (or adds comment to existing open issue to avoid duplicates). No external secrets required (uses GITHUB_TOKEN). Updated runbook `docs/OPS/MONITORING.md` with systemd commands and investigation playbook. **RISK**: Prod uptime relies on GitHub Actions; no external alerting (Slack/email) yet. PR: #1958. Docs: `docs/OPS/MONITORING.md`. (Closed: 2025-12-29)
 - **MONITOR-02 Alert Drill**: Proved uptime-monitor alerting pipeline works end-to-end. Added `force_fail` input to workflow (hits invalid endpoint to trigger failure). Added `permissions: issues: write` for non-default branch execution. Drill results: (1) Issue #1959 created on first force_fail=true run, (2) Comment added on second run (dedupe verified), (3) Normal run passed with no issues created. Drill issues use separate labels (`drill`, `monitor-test`) to avoid confusion with real incidents. Evidence documented in `docs/OPS/MONITORING.md`. Docs: `docs/AGENT/SUMMARY/MONITOR-02.md`. (Closed: 2025-12-29)
 - **TEST-UNSKIP-01 Enable Skipped E2E Tests**: Unskipped 8 E2E tests from orders flow specs (`checkout-to-orders-list.spec.ts`: 4 tests, `orders-details-stable.spec.ts`: 4 tests). Tests use route mocking for deterministic behavior. Evidence: E2E PostgreSQL job PASS (3m1s), PR #1962 merged 2025-12-29. ~50+ tests remain skipped (conditional guards, missing routes). Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-01.md`. (Closed: 2025-12-29)
+- **TEST-UNSKIP-02 Enable More Skipped E2E Tests**: Unskipped 6 E2E tests from PDP and products specs (`pdp-happy.spec.ts`: 5 tests, `products-ui.smoke.spec.ts`: 1 test). Key insight: PDP is SSR so page.route() can't intercept server-side fetch - tests now rely on production data. Evidence: E2E PostgreSQL job PASS (3m21s), PR #1964 merged 2025-12-29. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-02.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
