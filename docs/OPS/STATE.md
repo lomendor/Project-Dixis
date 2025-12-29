@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-29 (TEST-UNSKIP-02)
+**Last Updated**: 2025-12-29 (TEST-UNSKIP-02-CORRECTION)
 
 ## TODO (tomorrow)
 - (none)
@@ -85,6 +85,7 @@
 - **MONITOR-02 Alert Drill**: Proved uptime-monitor alerting pipeline works end-to-end. Added `force_fail` input to workflow (hits invalid endpoint to trigger failure). Added `permissions: issues: write` for non-default branch execution. Drill results: (1) Issue #1959 created on first force_fail=true run, (2) Comment added on second run (dedupe verified), (3) Normal run passed with no issues created. Drill issues use separate labels (`drill`, `monitor-test`) to avoid confusion with real incidents. Evidence documented in `docs/OPS/MONITORING.md`. Docs: `docs/AGENT/SUMMARY/MONITOR-02.md`. (Closed: 2025-12-29)
 - **TEST-UNSKIP-01 Enable Skipped E2E Tests**: Unskipped 8 E2E tests from orders flow specs (`checkout-to-orders-list.spec.ts`: 4 tests, `orders-details-stable.spec.ts`: 4 tests). Tests use route mocking for deterministic behavior. Evidence: E2E PostgreSQL job PASS (3m1s), PR #1962 merged 2025-12-29. ~50+ tests remain skipped (conditional guards, missing routes). Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-01.md`. (Closed: 2025-12-29)
 - **TEST-UNSKIP-02 Enable More Skipped E2E Tests**: Unskipped 6 E2E tests from PDP and products specs (`pdp-happy.spec.ts`: 5 tests, `products-ui.smoke.spec.ts`: 1 test). Key insight: PDP is SSR so page.route() can't intercept server-side fetch - tests now rely on production data. Evidence: E2E PostgreSQL job PASS (3m21s), PR #1964 merged 2025-12-29. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-02.md`. (Closed: 2025-12-29)
+- **TEST-UNSKIP-02-CORRECTION**: **CRITICAL FIX**: Tests from TEST-UNSKIP-02 were NOT actually running in CI. Root cause: `e2e-postgres.yml` uses `--grep @smoke` but pdp-happy.spec.ts and products-ui.smoke.spec.ts have no `@smoke` tag. Tests "passed" because they were never executed. Safety guard (sanity check) caught this during STATUS CHECK. Fix: Re-skipped all 6 tests (PR #1966 merged 2025-12-29). Next steps: Either add `@smoke` tag + seeded data OR create dedicated workflow. Docs: `docs/AGENT/SUMMARY/Pass-TEST-UNSKIP-02-CORRECTION.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
