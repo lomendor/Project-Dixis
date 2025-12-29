@@ -79,6 +79,7 @@
 - **Pass 58 Producer Order Status Updates**: Producers can update order status from `/my/orders` with single-click buttons. Status transitions: pending → processing → shipped → delivered (delivered is terminal, no button). Frontend: Blue status update button on each order card showing next status in Greek ("Αλλαγή σε: Σε Επεξεργασία" / "Απεστάλη" / "Παραδόθηκε"). Loading state with spinner and "Ενημέρωση..." while API call in progress. Optimistic UI update (order status + meta counts). Uses existing backend endpoint PATCH `/api/v1/producer/orders/{id}/status`. Tests: 4 E2E tests (button visible, API call + UI update, no button for delivered, loading state). Files: 4 changed. Evidence: All CI checks PASS (E2E PostgreSQL passed, flaky PROD smoke non-blocking), PR #1945 merged 2025-12-28 (commit 318d3ac8). Docs: `docs/AGENT/SUMMARY/Pass-58.md`. (Closed: 2025-12-28)
 - **Pass 59 Stabilize PROD Smoke (reload-and-css)**: Fixed flaky `reload-and-css.smoke.spec.ts` causing random CI failures with `net::ERR_ABORTED`. Solution: Added `gotoWithRetry()` helper with targeted retry for ERR_ABORTED errors (max 2 attempts), use `domcontentloaded` + optional `networkidle` (non-blocking), filter network errors from console assertions, explicit timeouts on visibility assertions. Tests: 2 pass against PROD (13.9s). Files: 1 changed (+63/-5). Evidence: All CI checks PASS including smoke-production (1m7s), PR #1948 merged 2025-12-28 (commit 08c9d23c). Docs: `docs/AGENT/SUMMARY/Pass-59.md`. (Closed: 2025-12-29)
 - **Pass 61 Admin Dashboard Polish**: Connected admin orders dashboard to Laravel API (single source of truth). Backend: Added `GET /api/v1/admin/orders` endpoint with filters (status, q, date range), pagination, and quick stats. Frontend: API route proxies to Laravel when auth token present, demo fallback gated to CI/test only. E2E: 4 tests (page elements, filters, pagination, stats). Files: 8 changed (+420 lines). Evidence: All CI checks PASS, PR #1950 merged 2025-12-29 (commit 66fb4fad). Docs: `docs/AGENT/SUMMARY/Pass-61.md`. (Closed: 2025-12-29)
+- **Pass 62 Orders/Checkout E2E Guardrail**: Added comprehensive E2E regression test to guard the consumer checkout journey from silently breaking. Tests verify: auth → cart → checkout → orders list → order details (with producer info). 11 E2E tests covering full consumer journey with route mocking for deterministic CI behavior. Verifies Laravel API is called (not Prisma /internal). Files: 4 changed (1 new test file +352 lines, 3 docs files). Evidence: All CI checks PASS (E2E PostgreSQL 3m12s ✅), PR #1952 merged 2025-12-29 (commit f0ab0066). Docs: `docs/AGENT/SUMMARY/Pass-62.md`. (Closed: 2025-12-29)
 
 ## STABLE ✓ (working with evidence)
 - **Backend health**: /api/healthz returns 200 ✅
@@ -106,7 +107,7 @@
 - Cart persistence verified across domains
 
 ## IN PROGRESS → (WIP=1 ONLY)
-- **Pass 62 — Orders/Checkout E2E Guardrail**: Adding comprehensive regression test to prevent silent breakage of consumer checkout journey. Branch: `test/pass62-orders-checkout-e2e-guardrail`. PR: pending.
+- (none)
 
 ## BLOCKED ⚠️
 - (none)
