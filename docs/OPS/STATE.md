@@ -1,9 +1,16 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-30 (Pass-53 Payment Flows E2E)
+**Last Updated**: 2025-12-30 (Pass UI-CATS v0 - Categories + Demo Fallback)
 
 ## TODO (tomorrow)
-- (none)
+- Re-enable real products + categories from DB when Neon quota resets (1 Jan)
+- Remove demo banner / keep fallback only on hard failures
+
+## ACTIVE ISSUE: Neon DB Quota Exceeded
+- **Status**: Neon free tier compute quota exhausted (100 CU-hours/month)
+- **Impact**: All DB queries fail with "Your account or project has exceeded the compute time quota"
+- **Workaround**: UI-CATS v0 provides demo fallback (18 products) when API/DB unavailable
+- **Resolution**: Quota resets ~1 January (monthly reset) OR upgrade Neon plan
 
 ## 2025-12-26 — Pass 35: Security Credential Rotation
 - **Credentials Rotated**: RESEND_API_KEY + Neon DATABASE_URL rotated successfully. Process: (1) User generated new credentials in Resend dashboard + Neon console, (2) GitHub Secrets updated (RESEND_API_KEY, DATABASE_URL_PROD, DATABASE_URL_PRODUCTION updated 2025-12-26T11:50Z), (3) VPS environment files updated via SSH (backend + frontend .env), (4) Services restarted (dixis-backend.service ✅, dixis-frontend-launcher.service ✅ after port conflict resolved). Verification (status codes only): healthz=200 ✅, api_products=200 ✅, internal_orders=500 (pre-existing, not regression). Policy: Zero secrets printed (SOP-SEC-ROTATION.md compliance). Checklist doc: `docs/OPS/ROTATION-CHECKLIST-PASS35.md`. PR #1897 merged 2025-12-26T11:31:44Z. (Closed: 2025-12-26)
