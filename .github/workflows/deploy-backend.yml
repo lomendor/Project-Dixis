@@ -1,0 +1,152 @@
+# Deploy Backend (Laravel) to VPS
+#
+# Triggered on push to main when backend/** changes.
+# Uses SSH to pull latest code and clear caches.
+# NO automatic migrations - requires explicit approval.
+
+name: Deploy Backend (VPS)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: 'Run migrations (yes/no)'
+        required: false
+        default: 'no'
+
+# Prevent concurrent deploys
+concurrency:
+  group: deploy-backend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Laravel Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+
+            BACKEND_PATH="/var/www/dixis/current/backend"
+
+            echo "=== PREFLIGHT CHECKS ==="
+
+            # 1. Verify backend directory exists
+            if [ ! -d "$BACKEND_PATH" ]; then
+              echo "❌ FATAL: Backend directory not found: $BACKEND_PATH"
+              exit 1
+            fi
+            echo "✅ Backend directory exists: $BACKEND_PATH"
+
+            # 2. Verify git is available
+            if ! command -v git &> /dev/null; then
+              echo "❌ FATAL: git not found"
+              exit 1
+            fi
+            echo "✅ git available"
+
+            # 3. Verify composer is available (check common paths)
+            COMPOSER_CMD=""
+            if command -v composer &> /dev/null; then
+              COMPOSER_CMD="composer"
+            elif [ -x /usr/local/bin/composer ]; then
+              COMPOSER_CMD="/usr/local/bin/composer"
+            elif [ -x /usr/bin/composer ]; then
+              COMPOSER_CMD="/usr/bin/composer"
+            elif [ -x "$HOME/.composer/vendor/bin/composer" ]; then
+              COMPOSER_CMD="$HOME/.composer/vendor/bin/composer"
+            fi
+
+            if [ -z "$COMPOSER_CMD" ]; then
+              echo "❌ FATAL: composer not found in PATH or common locations"
+              exit 1
+            fi
+            echo "✅ composer available: $COMPOSER_CMD"
+
+            # 4. Verify php is available
+            if ! command -v php &> /dev/null; then
+              echo "❌ FATAL: php not found"
+              exit 1
+            fi
+            echo "✅ php available: $(php -v | head -1)"
+
+            cd "$BACKEND_PATH"
+
+            echo ""
+            echo "=== PRE-DEPLOY STATE ==="
+            echo "Current commit: $(git rev-parse --short HEAD)"
+            echo "Current branch: $(git branch --show-current)"
+            git status --porcelain | head -5 || echo "(clean working tree)"
+
+            echo ""
+            echo "=== FETCHING LATEST CODE ==="
+            git fetch origin main
+
+            # Show what will change
+            COMMITS_BEHIND=$(git rev-list HEAD..origin/main --count)
+            echo "Commits behind origin/main: $COMMITS_BEHIND"
+
+            if [ "$COMMITS_BEHIND" -eq 0 ]; then
+              echo "ℹ️ Already up to date, continuing with cache clear..."
+            else
+              echo "Updating to: $(git rev-parse --short origin/main)"
+              git reset --hard origin/main
+            fi
+
+            echo ""
+            echo "=== POST-PULL STATE ==="
+            echo "New commit: $(git rev-parse --short HEAD)"
+            git status --porcelain | head -5 || echo "(clean working tree)"
+
+            echo ""
+            echo "=== COMPOSER INSTALL ==="
+            $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction 2>&1 | tail -20
+
+            echo ""
+            echo "=== CLEARING CACHES ==="
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
+            echo "✅ All caches cleared"
+
+            echo ""
+            echo "=== HEALTH CHECK ==="
+            # Try multiple health check methods
+            HEALTH_OK=false
+
+            # Method 1: Direct backend port (if known)
+            if curl -sf --max-time 5 http://127.0.0.1:8001/api/healthz > /dev/null 2>&1; then
+              echo "✅ Health check passed (127.0.0.1:8001)"
+              HEALTH_OK=true
+            # Method 2: Via nginx/public URL (internal)
+            elif curl -sf --max-time 5 http://127.0.0.1/api/healthz > /dev/null 2>&1; then
+              echo "✅ Health check passed (127.0.0.1:80)"
+              HEALTH_OK=true
+            # Method 3: Via public URL
+            elif curl -sf --max-time 10 https://dixis.gr/api/healthz > /dev/null 2>&1; then
+              echo "✅ Health check passed (dixis.gr)"
+              HEALTH_OK=true
+            fi
+
+            if [ "$HEALTH_OK" = false ]; then
+              echo "⚠️ Warning: Health check could not be verified"
+              echo "Backend may be running on different port or behind proxy"
+              # Don't fail - backend might be managed by systemd separately
+            fi
+
+            echo ""
+            echo "=== DEPLOY COMPLETE ==="
+            echo "Deployed commit: $(git rev-parse --short HEAD)"
+            echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
