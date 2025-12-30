@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-30 (Pass-52 Card Payments PROD verified)
+**Last Updated**: 2025-12-30 (Pass-52 + E2E CI fix)
 
 ## TODO (tomorrow)
 - (none)
@@ -16,6 +16,7 @@
 
 ## 2025-12-30 — Pass 52: Card Payments PROD Verification
 - **PROD Card Checkout Verified (PAY-PROD-VERIFY-02)**: End-to-end card payment flow confirmed working on production. Verification steps: (1) healthz=200 ✅, (2) POST /api/v1/public/payments/checkout returns 401 (exists, not 404) ✅, (3) User registration with token ✅, (4) Order creation (order #35) ✅, (5) Payment checkout returns Stripe redirect_url ✅, (6) Order appears in /api/v1/public/orders list ✅. Prerequisites resolved: (a) SSH access restored via fail2ban unban-ip workflow action, (b) Backend deployed with latest commit, (c) Stripe API keys cleaned in production .env. Note: Using Stripe test keys (expire in 7 days). Summary doc: `docs/AGENT/SUMMARY/2025-12-30-pass-52-prod-verify.md`. (Closed: 2025-12-30)
+- **E2E CI Fix (PR #1986 regression)**: Fixed `E2E (PostgreSQL)` failure caused by `pass-52-card-payment-init.spec.ts` referencing missing `playwright/.auth/consumer.json`. Test rewritten to use inline auth setup, no external storageState dependency. PR #1995 merged. (Closed: 2025-12-30)
 
 ## CLOSED ✅ (do not reopen without NEW proof)
 - **SECURITY: Database Credentials Rotation (Neon Pooler → Direct Endpoint)**: Critical security incident resolved. Root cause: (1) Neon pgBouncer pooler endpoint incompatible with Laravel `SELECT FOR UPDATE` transactions (causing `SQLSTATE[25P02]: In failed sql transaction`), (2) DATABASE_URL with credentials exposed in terminal logs/summary (security leak). Fix: (1) Rotated Neon database password (`npg_WG10vYeFnsCk` → `npg_8zNfLox1iTIS`), (2) Switched from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`) in production .env, (3) Persisted new DATABASE_URL to GitHub Secret `DATABASE_URL_PRODUCTION` (repository-level), (4) Added CI guardrail: prod-smoke.yml now tests POST /api/v1/public/orders MUST NOT return 500 (detects transaction failures), (5) Created `.github/SECURITY.md` with no-secrets policy. Verification: Backend health check PASS (`database: connected`), order creation working (verified on production). Security measures: Old credentials revoked, new credentials stored securely in GitHub Secrets, no secrets in documentation. Documentation: Incident response following GPT security protocol (rotate → persist → guardrails → docs). Files: `backend/.env` (updated), `prod-smoke.yml` (+27 lines), `.github/SECURITY.md` (new, 71 lines). Pattern: Security-first response to credential exposure. (Closed: 2025-12-24)
