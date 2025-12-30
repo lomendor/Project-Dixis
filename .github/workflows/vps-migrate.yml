@@ -14,6 +14,11 @@ on:
           - seed-shipping-zones
           - full-pass-50
           - diagnose-ssh
+          - unban-ip
+      ip:
+        description: 'IPv4 address to unban (required for unban-ip action)'
+        required: false
+        type: string
 
 jobs:
   run-migration:
@@ -106,6 +111,36 @@ jobs:
                 echo ""
                 echo "--- Recent auth failures ---"
                 sudo journalctl -u ssh --since "1 hour ago" --no-pager | tail -30
+                ;;
+
+              unban-ip)
+                IP="${{ inputs.ip }}"
+                echo "=== Unban IP from fail2ban ==="
+
+                # Validate IPv4 format (strict)
+                if ! echo "$IP" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$'; then
+                  echo "❌ ERROR: Invalid IPv4 format: $IP"
+                  exit 1
+                fi
+
+                # Validate each octet is 0-255
+                for octet in $(echo "$IP" | tr '.' ' '); do
+                  if [ "$octet" -gt 255 ]; then
+                    echo "❌ ERROR: Invalid octet in IP: $IP"
+                    exit 1
+                  fi
+                done
+
+                echo "Target IP: $IP"
+                echo ""
+                echo "--- Before unban ---"
+                sudo fail2ban-client status sshd | grep -E "Currently banned|Banned IP"
+                echo ""
+                echo "--- Unbanning $IP ---"
+                sudo fail2ban-client set sshd unbanip "$IP" && echo "✅ Unbanned: $IP" || echo "⚠️ IP was not banned or unban failed"
+                echo ""
+                echo "--- After unban ---"
+                sudo fail2ban-client status sshd | tail -10
                 ;;
 
               *)
