@@ -38,7 +38,8 @@ jobs:
           script: |
             set -euo pipefail
 
-            BACKEND_PATH="/var/www/dixis/current/backend"
+            # Path verified from vps-migrate.yml, vps-fix-backend.yml
+            BACKEND_PATH="/var/www/dixis/backend"
 
             echo "=== PREFLIGHT CHECKS ==="
 
