@@ -75,6 +75,40 @@ jobs:
             echo "Warning: Prisma client not found, Next.js standalone should include it"
           fi
 
+      - name: Precheck VPS env files
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            echo "=== FRONTEND ENV PRECHECK ==="
+
+            ENV_FILE="/var/www/dixis/frontend/.env"
+
+            if [ ! -f "$ENV_FILE" ]; then
+              echo "❌ FATAL: .env file not found at $ENV_FILE"
+              exit 1
+            fi
+            echo "✅ .env file exists"
+
+            # Check for placeholder values
+            MISSING_ENVS=""
+            for VAR in NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY; do
+              VALUE=$(grep "^${VAR}=" "$ENV_FILE" | cut -d= -f2- || echo "")
+              if [ -z "$VALUE" ] || [ "$VALUE" = "__FILL_ME__" ]; then
+                MISSING_ENVS="$MISSING_ENVS $VAR"
+              fi
+            done
+
+            if [ -n "$MISSING_ENVS" ]; then
+              echo "❌ FATAL: Missing or placeholder values for:$MISSING_ENVS"
+              echo "Please fill these in /var/www/dixis/frontend/.env before deploying"
+              exit 1
+            fi
+            echo "✅ Required env vars are set"
+
       - name: Prepare VPS directory (fix permissions)
         uses: appleboy/ssh-action@v1.0.3
         with:
