@@ -11,11 +11,12 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+          log-public-key: false
 
       - name: Add known host
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
       - name: Remote diagnostic (ports, processes, nginx)
         run: |

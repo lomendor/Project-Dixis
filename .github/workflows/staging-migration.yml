@@ -1,4 +1,5 @@
-name: Staging Migration
+name: Staging Migration [DISABLED]
+# DISABLED: Staging environment not configured. Re-enable when DATABASE_URL_STAGING is set.
 on:
   workflow_dispatch:
     inputs:

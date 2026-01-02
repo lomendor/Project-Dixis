@@ -85,6 +85,32 @@ jobs:
             cd "$BACKEND_PATH"
 
             echo ""
+            echo "=== ENV FILE PRECHECK ==="
+            MISSING_ENVS=""
+
+            # Check .env file exists
+            if [ ! -f ".env" ]; then
+              echo "❌ FATAL: .env file not found at $BACKEND_PATH/.env"
+              exit 1
+            fi
+            echo "✅ .env file exists"
+
+            # Check required env vars are set (not __FILL_ME__ placeholders)
+            for VAR in APP_KEY DATABASE_URL; do
+              VALUE=$(grep "^${VAR}=" .env | cut -d= -f2-)
+              if [ -z "$VALUE" ] || [ "$VALUE" = "__FILL_ME__" ]; then
+                MISSING_ENVS="$MISSING_ENVS $VAR"
+              fi
+            done
+
+            if [ -n "$MISSING_ENVS" ]; then
+              echo "❌ FATAL: Missing or placeholder values for:$MISSING_ENVS"
+              echo "Please fill these in /var/www/dixis/backend/.env before deploying"
+              exit 1
+            fi
+            echo "✅ Required env vars are set (APP_KEY, DATABASE_URL)"
+
+            echo ""
             echo "=== PRE-DEPLOY STATE ==="
             echo "Current commit: $(git rev-parse --short HEAD)"
             echo "Current branch: $(git branch --show-current)"
