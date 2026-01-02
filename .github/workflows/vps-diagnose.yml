@@ -15,7 +15,7 @@ jobs:
       - name: Add known host
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
       - name: Remote diagnostic (ports, processes, nginx)
         run: |
