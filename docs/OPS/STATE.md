@@ -11,6 +11,7 @@
 - **Files Changed**: `frontend/src/app/(storefront)/thank-you/page.tsx` (uses apiClient instead of fetch), `frontend/tests/e2e/pass-54-thank-you-api.spec.ts` (new).
 - **Architecture Alignment**: This completes the single-source-of-truth migration. All order-related pages now use Laravel PostgreSQL: checkout, thank-you, /account/orders, /account/orders/[id].
 - **Branch**: `fix/pass-54-shipping-save` (includes both shipping data fix and thank-you page fix).
+- **Deployed to VPS + verified on prod (2026-01-03 21:44 UTC)**: Homepage=200, thank-you?id=56=200, Laravel API returns order with shipping data, /account/orders=200. PM2 restart successful (pid 30755).
 
 ## 2026-01-03 — VPS Frontend Deployment Fix
 - **Neon Pooler Transaction Fix**: Fixed Orders API returning 500 errors. Root cause: Neon pgBouncer pooler incompatible with Laravel `SELECT FOR UPDATE` transactions. Solution: Changed backend `.env` DATABASE_URL from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`). Backend verified operational (order creation works).
