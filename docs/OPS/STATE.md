@@ -1,16 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2025-12-30 (Pass UI-CATS v0 - Categories + Demo Fallback)
+**Last Updated**: 2026-01-03 (Pass 54 Thank-You Single Source Fix)
 
-## TODO (tomorrow)
-- Re-enable real products + categories from DB when Neon quota resets (1 Jan)
-- Remove demo banner / keep fallback only on hard failures
+## 2026-01-03 — Pass 54 Thank-You Page Single Source of Truth Fix
+- **Problem**: Thank-you page showed "Αποτυχία φόρτωσης παραγγελίας" after checkout, and "auth stability" issue where user appeared logged out after Stripe redirect.
+- **Root Cause**: Thank-you page was fetching from `/api/orders/[id]` (Next.js API route using Prisma/SQLite) while orders are created in Laravel/PostgreSQL. This is a data source mismatch - the old Next.js route queried a different database than where checkout creates orders.
+- **Auth Investigation**: Auth is token-based (Bearer token in localStorage), NOT cookie-based. Token persists across Stripe redirects (localStorage is origin-scoped, not affected by cross-site navigation). The "logged out" appearance was due to orders not loading from the wrong data source.
+- **Fix**: Updated `frontend/src/app/(storefront)/thank-you/page.tsx` to use `apiClient.getPublicOrder()` which fetches from Laravel API (`GET /api/v1/public/orders/{id}`). This is the same source as `/account/orders` (single source of truth).
+- **E2E Test**: Created `pass-54-thank-you-api.spec.ts` with 2 tests: (1) Verifies Laravel API is called, (2) Verifies legacy Next.js API is NOT called.
+- **Files Changed**: `frontend/src/app/(storefront)/thank-you/page.tsx` (uses apiClient instead of fetch), `frontend/tests/e2e/pass-54-thank-you-api.spec.ts` (new).
+- **Architecture Alignment**: This completes the single-source-of-truth migration. All order-related pages now use Laravel PostgreSQL: checkout, thank-you, /account/orders, /account/orders/[id].
+- **Branch**: `fix/pass-54-shipping-save` (includes both shipping data fix and thank-you page fix).
 
-## ACTIVE ISSUE: Neon DB Quota Exceeded
-- **Status**: Neon free tier compute quota exhausted (100 CU-hours/month)
-- **Impact**: All DB queries fail with "Your account or project has exceeded the compute time quota"
-- **Workaround**: UI-CATS v0 provides demo fallback (18 products) when API/DB unavailable
-- **Resolution**: Quota resets ~1 January (monthly reset) OR upgrade Neon plan
+## 2026-01-03 — VPS Frontend Deployment Fix
+- **Neon Pooler Transaction Fix**: Fixed Orders API returning 500 errors. Root cause: Neon pgBouncer pooler incompatible with Laravel `SELECT FOR UPDATE` transactions. Solution: Changed backend `.env` DATABASE_URL from pooled endpoint (`ep-weathered-flower-ago2k929-pooler`) to direct endpoint (`ep-weathered-flower-ago2k929`). Backend verified operational (order creation works).
+- **Card Payments Flag Enabled**: Set `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true` in VPS frontend `.env` and rebuilt on VPS. Card payment option now visible in checkout. Playwright verification: `Card payment option visible: true ✅`.
+- **Mac Build Artifacts Disaster Recovery**: Production broke (502 errors, PM2 516 restarts) after rsync of local Mac build to VPS. Mac builds embed Mac-specific paths that don't work on Linux VPS. Solution: Rolled back to VPS backup (`/var/www/dixis/frontend-backup-20260102-230116`), then rebuilt on VPS with proper env vars. **Lesson: NEVER rsync local builds to production — always build on VPS.**
+- **Safe Deploy Script**: Created `scripts/safe-frontend-deploy.sh` with 5-step deployment (backup → clean build → verify artifacts → PM2 restart → healthcheck) and automatic rollback on failure. Script verifies `.next/standalone/server.js` exists before restart.
+- **SSH Security Hardening**: Created proper known_hosts file (`~/.ssh/dixis_known_hosts`) to eliminate MITM risk from `StrictHostKeyChecking=no`.
+- **Documentation**: Created `docs/OPS/DEPLOY-FRONTEND.md` with deployment guide, common issues, and rollback procedures.
+- **Evidence**: PROD healthz=200 ✅, Card payment option visible ✅, Order creation 201 ✅. (Closed: 2026-01-03)
 
 ## 2025-12-26 — Pass 35: Security Credential Rotation
 - **Credentials Rotated**: RESEND_API_KEY + Neon DATABASE_URL rotated successfully. Process: (1) User generated new credentials in Resend dashboard + Neon console, (2) GitHub Secrets updated (RESEND_API_KEY, DATABASE_URL_PROD, DATABASE_URL_PRODUCTION updated 2025-12-26T11:50Z), (3) VPS environment files updated via SSH (backend + frontend .env), (4) Services restarted (dixis-backend.service ✅, dixis-frontend-launcher.service ✅ after port conflict resolved). Verification (status codes only): healthz=200 ✅, api_products=200 ✅, internal_orders=500 (pre-existing, not regression). Policy: Zero secrets printed (SOP-SEC-ROTATION.md compliance). Checklist doc: `docs/OPS/ROTATION-CHECKLIST-PASS35.md`. PR #1897 merged 2025-12-26T11:31:44Z. (Closed: 2025-12-26)
