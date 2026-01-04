@@ -13,13 +13,13 @@ function getEnvVar(name: string, defaultValue?: string): string {
 }
 
 // API Configuration
-// CRITICAL: Production MUST set NEXT_PUBLIC_API_BASE_URL
-// Fallback removed to prevent localhost calls in production
+// CRITICAL: Production uses same-origin /api/v1 (no localhost fallback)
+// Development uses localhost:8001 for local backend
 export const API_BASE_URL = getEnvVar(
   'NEXT_PUBLIC_API_BASE_URL',
-  typeof window === 'undefined' && process.env.NODE_ENV === 'production'
-    ? 'https://dixis.gr/api/v1'  // Server-side production fallback
-    : 'http://127.0.0.1:8001/api/v1'  // Dev fallback
+  process.env.NODE_ENV === 'production'
+    ? '/api/v1'  // Same-origin relative URL for production
+    : 'http://127.0.0.1:8001/api/v1'  // Dev fallback (local backend)
 );
 
 export const SITE_URL = getEnvVar(
@@ -80,4 +80,12 @@ export function logEnvironmentConfig(): void {
 // Auto-log in development
 if (typeof window !== 'undefined' && IS_DEVELOPMENT) {
   logEnvironmentConfig();
+}
+
+// GUARDRAIL: Prevent localhost API calls in production
+if (IS_PRODUCTION && API_BASE_URL.includes('127.0.0.1')) {
+  throw new Error(
+    'CRITICAL: API_BASE_URL contains localhost in production! ' +
+    'Set NEXT_PUBLIC_API_BASE_URL environment variable correctly.'
+  );
 }
