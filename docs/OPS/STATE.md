@@ -46,7 +46,8 @@
 - **Fix**: Added `waitForCheckoutOrSkip()` helper with 15s timeout + `test.skip()` if not reachable.
 - **Files**: `pass-54-shipping-save.spec.ts` (+helper function, +testInfo param)
 - **Result**: e2e-full completes fast; tests skip with explicit reason instead of hanging.
-- **Proof run**: (pending - link after PR merge)
+- **Proof run**: https://github.com/lomendor/Project-Dixis/actions/runs/20698663073
+  - Result: SUCCESS (2 skipped with explicit reason, no timeouts)
 
 ## 2026-01-04 — SMOKE-STABLE-01 E2E Test Stabilization
 - **Problem**: `pass-54-shipping-save.spec.ts` tagged `@smoke` but required complex checkout setup (cart, auth, form fill). Caused CI timeouts.
