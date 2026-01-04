@@ -82,8 +82,8 @@ if (typeof window !== 'undefined' && IS_DEVELOPMENT) {
   logEnvironmentConfig();
 }
 
-// GUARDRAIL: Prevent localhost API calls in production
-if (IS_PRODUCTION && API_BASE_URL.includes('127.0.0.1')) {
+// GUARDRAIL: Prevent localhost API calls in production (catches both 127.0.0.1 and localhost)
+if (IS_PRODUCTION && (API_BASE_URL.includes('127.0.0.1') || API_BASE_URL.includes('localhost'))) {
   throw new Error(
     'CRITICAL: API_BASE_URL contains localhost in production! ' +
     'Set NEXT_PUBLIC_API_BASE_URL environment variable correctly.'
