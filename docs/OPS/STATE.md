@@ -1,6 +1,15 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (AUTH-01 Navigation Auth Stability Fix + VPS Deployment)
+**Last Updated**: 2026-01-04 (SITEMAP-01 Laravel API Fix)
+
+## 2026-01-04 — SITEMAP-01 Sitemap Laravel API Fix
+- **Problem**: Build logs showed `[Sitemap] Error fetching products: PrismaClientInitializationError: Authentication failed` during static generation.
+- **Root Cause**: `sitemap.ts` used Prisma to query products, but Prisma DB credentials not available during Next.js build on VPS. Sitemap returned static pages only (no products).
+- **Fix**: Replaced Prisma query with Laravel API fetch (`/api/v1/public/products`). Single source of truth - products managed in Laravel, not Prisma.
+- **Code Changes**: `frontend/src/app/sitemap.ts` - Removed Prisma import, added fetch to Laravel API with graceful fallback.
+- **PR**: #2086 merged (693b130b)
+- **Status**: Code merged to main. **VPS rebuild required** for fix to take effect in production.
+- **Verification pending**: After VPS rebuild, `curl https://dixis.gr/sitemap.xml` should include `/products/{id}` URLs.
 
 ## 2026-01-04 — AUTH-01 Navigation Auth Stability Fix
 - **Problem**: Header flashes between "guest" and "logged-in" states during navigation. Users see Σύνδεση/Εγγραφή buttons briefly before auth loads.
