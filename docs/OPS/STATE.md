@@ -1,6 +1,17 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (REGRESSION-FIX-01)
+**Last Updated**: 2026-01-05 (OPS-PM2-01)
+
+## 2026-01-05 — OPS-PM2-01 PM2 Stabilization in Deploy Workflow
+- **Problem**: After `Deploy Frontend (VPS)` workflow ran, PM2 process crash-looped (32+ restarts, 20-30s uptime cycles). nginx saw `Connection refused` on upstream → intermittent 502.
+- **Root Cause**: PM2 started without `--restart-delay` and with low `--max-old-space-size=320`. Next.js RSC streaming caused `TypeError: controller[kState].transformAlgorithm is not a function` crashes. Without restart delay, PM2 restarted too fast → port not released → nginx 502.
+- **Fix**: Updated `.github/workflows/deploy-frontend.yml`:
+  - `NODE_OPTIONS="--max-old-space-size=1024"` (prevents OOM/GC pressure)
+  - `--restart-delay 5000` (ensures port is released before restart)
+  - `--time --update-env` (better logging, picks up NODE_OPTIONS)
+  - Added strict 20x localhost curl proof (fails workflow if any request ≠ 200/204)
+- **Files**: `.github/workflows/deploy-frontend.yml` (PM2 start block + proof step)
+- **Result**: Deploy workflow now guarantees stable PM2 or fails with explicit error.
 
 ## E2E Test Tagging Policy (SMOKE-STABLE-01)
 
