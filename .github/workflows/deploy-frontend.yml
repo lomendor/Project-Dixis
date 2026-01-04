@@ -201,25 +201,22 @@ jobs:
             pm2 flush 2>/dev/null || true
             rm -f /home/$USER/.pm2/logs/dixis-frontend-*.log 2>/dev/null || true
 
-            # Start PM2 with STABILITY-FOCUSED config for low-RAM VPS
-            # Environment variables must be passed inline - Next.js standalone doesn't load .env
-            # Analysis: App peaks at ~175MB during startup, settles ~150MB after warmup
-            # --max-memory-restart 256M: Above startup peak (175MB) to allow initialization
-            # --kill-timeout 5000: Clean process shutdown to prevent EADDRINUSE on restart
-            # --max-restarts 10: Fewer restarts - focus on stability not resilience
-            # --exp-backoff-restart-delay 3000: Longer delay (3s) to ensure port is released
-            echo "Starting PM2 with stability-focused config (256M limit, 5s kill timeout)..."
-            NODE_OPTIONS="--max-old-space-size=320" \
+            # Start PM2 with STABILITY-FOCUSED config (OPS-PM2-01)
+            # --max-old-space-size=1024: Prevents RSC streaming crashes (transformAlgorithm bug)
+            # --restart-delay 5000: Ensures port is fully released before restart
+            # --time: Adds timestamps to PM2 logs
+            # --update-env: Picks up NODE_OPTIONS from environment
+            echo "Starting PM2 with stability-focused config (OPS-PM2-01: 1024MB heap, 5s restart-delay)..."
+            export NODE_OPTIONS="--max-old-space-size=1024"
             PORT=3000 HOSTNAME=0.0.0.0 \
             DATABASE_URL="${DATABASE_URL}" \
             RESEND_API_KEY="${RESEND_API_KEY}" \
             INTERNAL_API_URL="http://localhost:3000" \
             pm2 start /var/www/dixis/current/frontend/server.js \
                 --name "dixis-frontend" \
-                --max-memory-restart 256M \
-                --kill-timeout 5000 \
-                --max-restarts 10 \
-                --exp-backoff-restart-delay=3000 2>&1 || {
+                --time \
+                --restart-delay 5000 \
+                --update-env 2>&1 || {
                 echo "PM2 start failed! Exit code: $?"
                 echo "Checking if server.js exists..."
                 ls -la /var/www/dixis/current/frontend/server.js || echo "server.js NOT FOUND!"
@@ -249,6 +246,26 @@ jobs:
               echo "⚠️ Warning: Database connectivity could not be verified"
               curl -s http://127.0.0.1:3000/api/healthz?deep=1 || true
             fi
+
+            # === OPS-PM2-01 STRICT PROOF: 20x localhost curl must all return 200/204 ===
+            echo "--- OPS-PM2-01: Strict 20x Curl Proof ---"
+            sudo ss -lntp | grep -E ":3000" || { echo "FAIL: NO_LISTENER_3000"; exit 1; }
+            FAIL_COUNT=0
+            for i in $(seq 1 20); do
+              CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://127.0.0.1:3000/manifest.webmanifest || echo "000")
+              if [ "$CODE" != "200" ] && [ "$CODE" != "204" ]; then
+                echo "FAIL: Request $i returned $CODE"
+                FAIL_COUNT=$((FAIL_COUNT + 1))
+              fi
+              sleep 1
+            done
+            if [ "$FAIL_COUNT" -gt 0 ]; then
+              echo "FAIL: $FAIL_COUNT/20 requests failed. PM2 unstable."
+              pm2 show dixis-frontend | grep -E "status|restarts|uptime|unstable" || true
+              exit 1
+            fi
+            echo "✅ OPS-PM2-01 PROOF PASSED: 20/20 requests returned 200/204"
+            pm2 show dixis-frontend | grep -E "status|restarts|uptime|unstable" || true
 
             echo "=== FINAL DIAGNOSTICS ==="
             pm2 status
