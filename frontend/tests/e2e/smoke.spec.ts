@@ -47,3 +47,30 @@ test('@smoke products page renders content', async ({ page }) => {
   // Wait for either condition - at least one should be visible
   await expect(productGrid.or(emptyState)).toBeVisible({ timeout: 15000 });
 });
+
+// @smoke — Checkout page loads or redirects sensibly (no crash, no timeout)
+// SMOKE-STABLE-01: Minimal checkout smoke - verifies page doesn't crash
+// Does NOT test full form flow (that's @regression in pass-54-shipping-save.spec.ts)
+test('@smoke checkout page loads or redirects', async ({ page }) => {
+  const response = await page.goto('/checkout', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Page should either:
+  // 1. Load checkout form (200)
+  // 2. Redirect to login/auth (302/307)
+  // 3. Redirect to cart if empty (302/307)
+  // All are valid smoke outcomes - we just verify no crash/500
+  const status = response?.status() || 0;
+  const url = page.url();
+
+  // Accept: 200 OK, 307/302 redirect (to login, cart, etc.)
+  const isValidStatus = status === 200 || status === 307 || status === 302;
+  const isValidRedirect = url.includes('/login') || url.includes('/auth') || url.includes('/cart') || url.includes('/checkout');
+
+  expect(isValidStatus || isValidRedirect).toBe(true);
+
+  // If we're on checkout, verify basic structure (heading or form exists)
+  if (url.includes('/checkout')) {
+    const checkoutContent = page.locator('h1, [data-testid="checkout-form"], [data-testid="checkout-heading"]').first();
+    await expect(checkoutContent).toBeVisible({ timeout: 10000 });
+  }
+});
