@@ -4,13 +4,14 @@
  * Verifies that checkout saves shipping_address and shipping_cost to the order.
  * Bug: Card payment flow was creating orders with shipping_address=null, shipping_cost=0.
  * Fix: Frontend now sends shipping_address and shipping_cost in createOrder payload.
+ *
+ * Tagged @regression - runs in nightly e2e-full, NOT in PR gate @smoke.
+ * These tests require full cart + form setup which is non-deterministic in CI.
  */
 import { test, expect } from '@playwright/test';
 
-test.describe('Pass 54: Shipping Data Save', () => {
-  // Skip in CI - checkout requires full cart + auth setup that's fragile in GitHub Actions
-  // This test is better suited for local development or staging environment
-  test.skip('@smoke checkout form sends shipping data to API', async ({ page }) => {
+test.describe('Pass 54: Shipping Data Save @regression', () => {
+  test('checkout form sends shipping data to API', async ({ page }) => {
     // Intercept the order creation API call
     let capturedPayload: Record<string, unknown> | null = null;
 
@@ -101,8 +102,7 @@ test.describe('Pass 54: Shipping Data Save', () => {
     expect(Number(capturedPayload?.shipping_cost)).toBeGreaterThan(0);
   });
 
-  // Skip in CI - same as above test
-  test.skip('@smoke COD checkout also sends shipping data', async ({ page }) => {
+  test('COD checkout also sends shipping data', async ({ page }) => {
     let capturedPayload: Record<string, unknown> | null = null;
 
     await page.route('**/api/v1/public/orders', async (route) => {

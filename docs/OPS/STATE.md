@@ -1,6 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (ENV-HTTPS-01 TrustProxies Fix)
+**Last Updated**: 2026-01-04 (SMOKE-STABLE-01 E2E Test Policy)
+
+## E2E Test Tagging Policy (SMOKE-STABLE-01)
+
+| Tag | Purpose | When Runs | Timeout |
+|-----|---------|-----------|---------|
+| `@smoke` | "App is fundamentally working" | PR gate (e2e-postgres.yml) | 30s |
+| `@regression` | "Specific feature didn't break" | Nightly (e2e-full.yml) | 120s |
+| (no tag) | Full coverage | Nightly (e2e-full.yml) | 120s |
+
+**Smoke Tests MUST be:**
+- Deterministic (no flaky waits, no complex setup)
+- Fast (<30s each)
+- Independent (no auth/cart/form prerequisites)
+
+**Regression Tests MAY:**
+- Require full cart + auth setup
+- Test complete user flows
+- Have longer timeouts
+
+## 2026-01-04 — SMOKE-STABLE-01 E2E Test Stabilization
+- **Problem**: `pass-54-shipping-save.spec.ts` tagged `@smoke` but required complex checkout setup (cart, auth, form fill). Caused CI timeouts.
+- **Root Cause**: Smoke tests should verify "app works", not "specific feature regression". Full checkout flow is regression-level.
+- **Fix**: (1) Retagged `pass-54-shipping-save` from `@smoke` to `@regression`, (2) Added minimal `/checkout` smoke test (loads or redirects, no form).
+- **Files**: `pass-54-shipping-save.spec.ts` (@regression), `smoke.spec.ts` (+1 checkout smoke)
+- **Result**: PR gate runs only deterministic @smoke, nightly runs all including @regression.
 
 ## 2026-01-04 — ENV-HTTPS-01 TrustProxies Fix
 - **Problem**: Laravel redirects showed `http://dixis.gr` instead of `https://` even though `APP_URL=https://dixis.gr` was set.
