@@ -26,9 +26,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Check if we have a token in localStorage (client-side only)
+ * Used for initial hydration to prevent flash to guest state
+ */
+function getInitialAuthState(): { hasToken: boolean } {
+  if (typeof window === 'undefined') {
+    return { hasToken: false };
+  }
+  const token = localStorage.getItem('auth_token');
+  return { hasToken: !!token && token !== '' };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // AUTH-01 Fix: Initialize with token check to prevent flash to guest state
+  // If token exists, assume authenticated until profile loads (prevents UI flash)
+  const initialState = getInitialAuthState();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasTokenOnMount] = useState(initialState.hasToken);
   const [registerLoading, setRegisterLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -188,6 +204,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  // AUTH-01 Fix: During loading, use hasTokenOnMount to prevent flash to guest state
+  // This ensures header doesn't briefly show "Σύνδεση/Εγγραφή" before profile loads
+  const isAuthenticated = loading ? hasTokenOnMount : !!user;
+
   const value: AuthContextType = {
     user,
     loading,
@@ -195,7 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated,
     isProducer: user?.role === 'producer',
   };
 

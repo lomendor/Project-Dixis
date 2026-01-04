@@ -1,6 +1,14 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-03 (Pass 54 Thank-You Single Source Fix)
+**Last Updated**: 2026-01-04 (AUTH-01 Navigation Auth Stability Fix)
+
+## 2026-01-04 — AUTH-01 Navigation Auth Stability Fix
+- **Problem**: Header flashes between "guest" and "logged-in" states during navigation. Users see Σύνδεση/Εγγραφή buttons briefly before auth loads.
+- **Root Cause**: AuthContext started with `loading=true` and `isAuthenticated=false`. During the loading period (while fetching profile), the header rendered guest state. This caused a visual flash on every page navigation.
+- **Fix**: AuthContext now checks localStorage for `auth_token` during initial render (synchronously) and sets `isAuthenticated` based on token presence while loading. This prevents the flash because the header immediately sees `isAuthenticated=true` if a token exists.
+- **Code Changes**: `frontend/src/contexts/AuthContext.tsx` - Added `getInitialAuthState()` function and `hasTokenOnMount` state. During loading, `isAuthenticated = hasTokenOnMount` instead of `false`.
+- **E2E Test**: Created `auth-nav-regression.spec.ts` with 2 tests: (1) /account/orders accessible without redirect to login, (2) Header auth persists through multiple navigations.
+- **Proof**: E2E tests pass (2 passed, 16.7s) against production.
 
 ## 2026-01-03 — Pass 54 Thank-You Page Single Source of Truth Fix
 - **Problem**: Thank-you page showed "Αποτυχία φόρτωσης παραγγελίας" after checkout, and "auth stability" issue where user appeared logged out after Stripe redirect.
