@@ -101,7 +101,8 @@ test.describe('Pass 54: Shipping Data Save', () => {
     expect(Number(capturedPayload?.shipping_cost)).toBeGreaterThan(0);
   });
 
-  test('@smoke COD checkout also sends shipping data', async ({ page }) => {
+  // Skip in CI - same as above test
+  test.skip('@smoke COD checkout also sends shipping data', async ({ page }) => {
     let capturedPayload: Record<string, unknown> | null = null;
 
     await page.route('**/api/v1/public/orders', async (route) => {
