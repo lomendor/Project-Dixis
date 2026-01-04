@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2025-12-29 19:00 UTC
+**Last Updated**: 2026-01-04 20:00 UTC
 
 ## WIP (1 item only)
 - (none)
@@ -9,12 +9,22 @@
 
 1. **Pass 52 — Card Payments Enable** (BLOCKED — READY once user provides Stripe keys, see CREDENTIALS.md)
 2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — READY once user provides SMTP/Resend keys, see CREDENTIALS.md)
-3. **E2E-SEED-03 — Expand CI @smoke Coverage** (actionable - add cart/checkout @smoke tests)
+3. **Monitor nightly e2e-full results** - Check Actions for failures
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 
-## Recently Completed (Pass 58-63 + MONITOR + E2E-SEED + CRED)
+## How to Run E2E Full Manually
+
+1. Go to GitHub Actions → "E2E Full (nightly & manual)"
+2. Click "Run workflow"
+3. Optional: Enter grep filter (e.g., `@regression`)
+4. Artifacts: `e2e-full-report-{run_number}` (playwright-report + test-results)
+
+## Recently Completed (Pass 58-63 + SMOKE-STABLE + E2E-FULL)
+
+- **SMOKE-STABLE-01** — E2E Test Policy (PR gate @smoke only, nightly for @regression) ✅
+- **E2E-FULL-01** — Nightly regression suite documentation ✅
 
 - **Pass 58** — Producer Order Status Updates (status buttons on /my/orders) ✅
 - **Pass 59** — Stabilize PROD Smoke reload-and-css ✅
