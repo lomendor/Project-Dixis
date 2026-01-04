@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (AUTH-01 Navigation Auth Stability Fix)
+**Last Updated**: 2026-01-04 (AUTH-01 Navigation Auth Stability Fix + VPS Deployment)
 
 ## 2026-01-04 — AUTH-01 Navigation Auth Stability Fix
 - **Problem**: Header flashes between "guest" and "logged-in" states during navigation. Users see Σύνδεση/Εγγραφή buttons briefly before auth loads.
@@ -9,6 +9,7 @@
 - **Code Changes**: `frontend/src/contexts/AuthContext.tsx` - Added `getInitialAuthState()` function and `hasTokenOnMount` state. During loading, `isAuthenticated = hasTokenOnMount` instead of `false`.
 - **E2E Test**: Created `auth-nav-regression.spec.ts` with 2 tests: (1) /account/orders accessible without redirect to login, (2) Header auth persists through multiple navigations.
 - **Proof**: E2E tests pass (2 passed, 16.7s) against production.
+- **VPS Deployment (2026-01-04 11:04 UTC)**: Deployed commit `d5c94f09` to production VPS. Working tree repaired (`git reset --hard HEAD`), pnpm install, standalone build successful. PM2 reconfigured for `.next/standalone/server.js`. PROD verification: healthz=200 ✅, `{"status":"ok","basicAuth":false,"devMailbox":false}`. Non-fatal sitemap Prisma error during build (expected - DB auth for static generation).
 
 ## 2026-01-03 — Pass 54 Thank-You Page Single Source of Truth Fix
 - **Problem**: Thank-you page showed "Αποτυχία φόρτωσης παραγγελίας" after checkout, and "auth stability" issue where user appeared logged out after Stripe redirect.
