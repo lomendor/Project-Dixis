@@ -49,6 +49,21 @@ function CheckoutContent() {
 
     try {
       // Create order via Laravel API (persists to PostgreSQL)
+      // Pass 54: Include shipping_address and shipping_cost
+      const shippingAddress = {
+        name: body.customer.name,
+        phone: body.customer.phone,
+        email: body.customer.email,
+        line1: body.customer.address,
+        city: body.customer.city,
+        postal_code: body.customer.postcode,
+        country: 'GR'
+      };
+
+      // Calculate shipping cost based on postal code zone (simplified: €3.50 default for HOME)
+      // TODO: Call /api/v1/public/shipping/quote for accurate zone-based pricing
+      const shippingCost = 3.50;
+
       const orderData = {
         items: Object.values(cartItems).map(item => ({
           product_id: parseInt(item.id.toString()),
@@ -57,6 +72,8 @@ function CheckoutContent() {
         currency: 'EUR' as const,
         shipping_method: 'HOME' as const,
         payment_method: paymentMethod === 'card' ? 'CARD' as const : 'COD' as const,
+        shipping_address: shippingAddress,
+        shipping_cost: shippingCost,
         notes: ''
       };
 

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { apiClient, Order as ApiOrder } from '@/lib/api'
 
 interface OrderItem {
   id: string
@@ -38,12 +39,30 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
     async function fetchOrder() {
       try {
-        const res = await fetch(`/api/orders/${orderId}`)
-        if (!res.ok) {
-          throw new Error('Failed to fetch order')
+        // Pass 54: Fetch from Laravel API (single source of truth)
+        // This ensures we get the same order data as /account/orders
+        const laravelOrder = await apiClient.getPublicOrder(orderId)
+
+        // Transform Laravel order format to thank-you page format
+        const orderItems = laravelOrder.items || laravelOrder.order_items || []
+        const transformedOrder: Order = {
+          id: String(laravelOrder.id),
+          status: laravelOrder.status,
+          total: parseFloat(laravelOrder.total_amount) || 0,
+          subtotal: parseFloat(laravelOrder.subtotal) || 0,
+          shipping: parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0,
+          vat: parseFloat(laravelOrder.tax_amount) || 0,
+          zone: 'mainland', // Default, could be derived from shipping_address if needed
+          email: null, // Not exposed in public order response for privacy
+          name: null,
+          items: orderItems.map((item) => ({
+            id: String(item.id),
+            qty: item.quantity,
+            price: parseFloat(item.unit_price || item.price) || 0,
+            titleSnap: item.product_name || 'Προϊόν',
+          })),
         }
-        const data = await res.json()
-        setOrder(data)
+        setOrder(transformedOrder)
       } catch (err) {
         console.error('Fetch order error:', err)
         setError('Αποτυχία φόρτωσης παραγγελίας')
