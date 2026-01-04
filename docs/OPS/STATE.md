@@ -1,6 +1,13 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (SITEMAP-01 Laravel API Fix)
+**Last Updated**: 2026-01-04 (ENV-HTTPS-01 TrustProxies Fix)
+
+## 2026-01-04 — ENV-HTTPS-01 TrustProxies Fix
+- **Problem**: Laravel redirects showed `http://dixis.gr` instead of `https://` even though `APP_URL=https://dixis.gr` was set.
+- **Root Cause**: Laravel 11 behind nginx reverse proxy didn't trust `X-Forwarded-Proto` header. TrustProxies not configured.
+- **Fix**: Added `$middleware->trustProxies(at: '*');` to `bootstrap/app.php` and `TRUSTED_PROXIES=*` to `.env`.
+- **PR**: #2089 (tracks fix in repo)
+- **PROD VERIFIED ✅**: POST redirect now shows `https://dixis.gr` instead of `http://`.
 
 ## 2026-01-04 — SITEMAP-01 Sitemap Laravel API Fix
 - **Problem**: Build logs showed `[Sitemap] Error fetching products: PrismaClientInitializationError: Authentication failed` during static generation.
