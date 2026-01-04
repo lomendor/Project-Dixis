@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-04 (SMOKE-STABLE-01 E2E Test Policy)
+**Last Updated**: 2026-01-04 (E2E-FULL-01 Documentation)
 
 ## E2E Test Tagging Policy (SMOKE-STABLE-01)
 
@@ -19,6 +19,23 @@
 - Require full cart + auth setup
 - Test complete user flows
 - Have longer timeouts
+
+## How to Run E2E Full Suite (E2E-FULL-01)
+
+**Nightly**: Runs automatically at 02:00 UTC via `.github/workflows/e2e-full.yml`
+
+**Manual**: GitHub Actions → "E2E Full (nightly & manual)" → Run workflow
+- Optional: Enter grep filter (e.g., `@regression` for only regression tests)
+- Leave empty to run ALL tests
+
+**Artifacts**: On any run, find `e2e-full-report-{run_number}` in Actions artifacts (playwright-report + test-results)
+
+## 2026-01-04 — E2E-FULL-01 Documentation
+- **Context**: SMOKE-STABLE-01 stabilized PR gate with @smoke only. @regression tests now run in nightly e2e-full.
+- **Workflow**: `.github/workflows/e2e-full.yml` (already existed from Pass TEST-UNSKIP-03)
+- **Triggers**: Schedule (02:00 UTC daily), Manual (workflow_dispatch)
+- **Coverage**: All tests including @regression (pass-53-payment-flows, pass-54-shipping-save)
+- **Not a required check**: Does NOT block PRs - runs nightly for monitoring.
 
 ## 2026-01-04 — SMOKE-STABLE-01 E2E Test Stabilization
 - **Problem**: `pass-54-shipping-save.spec.ts` tagged `@smoke` but required complex checkout setup (cart, auth, form fill). Caused CI timeouts.
