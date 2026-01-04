@@ -36,6 +36,10 @@
 - **Triggers**: Schedule (02:00 UTC daily), Manual (workflow_dispatch)
 - **Coverage**: All tests including @regression (pass-53-payment-flows, pass-54-shipping-save)
 - **Not a required check**: Does NOT block PRs - runs nightly for monitoring.
+- **Proof run**: https://github.com/lomendor/Project-Dixis/actions/runs/20698287265
+  - Result: FAIL (expected - @regression tests need checkout setup work)
+  - Failing: `pass-53-payment-flows`, `pass-54-shipping-save` (checkout form timeout)
+  - **Next pass**: REGRESSION-FIX-01 - Make @regression tests CI-compatible
 
 ## 2026-01-04 — SMOKE-STABLE-01 E2E Test Stabilization
 - **Problem**: `pass-54-shipping-save.spec.ts` tagged `@smoke` but required complex checkout setup (cart, auth, form fill). Caused CI timeouts.
