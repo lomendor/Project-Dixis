@@ -1,7 +1,15 @@
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/db/client';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+
+// Use internal API during build (SSR), external for runtime
+const API_BASE = process.env.INTERNAL_API_URL || 'https://dixis.gr/api/v1';
+
+interface ProductForSitemap {
+  id: number;
+  updated_at: string;
+  is_active: boolean;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
@@ -44,28 +52,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Dynamic product pages
+  // Dynamic product pages from Laravel API (single source of truth)
   let productPages: MetadataRoute.Sitemap = [];
 
   try {
-    const products = await prisma.product.findMany({
-      where: { isActive: true },
-      select: {
-        id: true,
-        updatedAt: true,
-      },
-      orderBy: { updatedAt: 'desc' },
+    const response = await fetch(`${API_BASE}/public/products?per_page=100`, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
-    productPages = products.map((product) => ({
-      url: `${BASE_URL}/products/${product.id}`,
-      lastModified: product.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    }));
+    if (response.ok) {
+      const data = await response.json();
+      const products: ProductForSitemap[] = data.data || [];
+
+      productPages = products
+        .filter((p) => p.is_active)
+        .map((product) => ({
+          url: `${BASE_URL}/products/${product.id}`,
+          lastModified: new Date(product.updated_at),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        }));
+    }
   } catch (error) {
-    console.error('[Sitemap] Error fetching products:', error);
-    // Continue with static pages only
+    console.error('[Sitemap] Error fetching products from API:', error);
+    // Continue with static pages only - graceful degradation
   }
 
   return [...staticPages, ...productPages];
