@@ -1,6 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-05 (OPS-PM2-01)
+**Last Updated**: 2026-01-05 (AUTH-CRED-01)
+
+## 2026-01-05 — AUTH-CRED-01 CORS Credentials for Sanctum Auth
+- **Problem**: Intermittent logout / 502 on authenticated routes after navigation. Users randomly logged out when navigating between pages.
+- **Root Cause**: `backend/config/cors.php` had `supports_credentials => false`. This prevents browsers from sending session cookies with cross-origin requests. Even though other session config was correct (APP_URL, SANCTUM_STATEFUL_DOMAINS, SESSION_DOMAIN), cookies weren't attached to API requests → auth state lost.
+- **Fix**: Changed `supports_credentials` to be env-driven with default `true`:
+  ```php
+  'supports_credentials' => env('CORS_SUPPORTS_CREDENTIALS', true),
+  ```
+- **Env additions** (`.env.example`):
+  - `CORS_SUPPORTS_CREDENTIALS=true` (default)
+  - `SESSION_SECURE_COOKIE=true` (for production HTTPS)
+- **Files**: `backend/config/cors.php`, `backend/.env.example`
+- **VPS Deploy Steps** (after merge):
+  1. Add to `/var/www/dixis/current/backend/.env`:
+     - `CORS_SUPPORTS_CREDENTIALS=true`
+     - `SESSION_SECURE_COOKIE=true`
+  2. Clear config cache: `cd /var/www/dixis/current/backend && php artisan config:clear && php artisan cache:clear`
+- **Risk**: Low (default true is safe, matches expected browser behavior for auth)
+- **Verification**: Login → navigate 20+ times → /account/orders should not 502 or logout
 
 ## 2026-01-05 — OPS-PM2-01 PM2 Stabilization in Deploy Workflow
 - **Problem**: After `Deploy Frontend (VPS)` workflow ran, PM2 process crash-looped (32+ restarts, 20-30s uptime cycles). nginx saw `Connection refused` on upstream → intermittent 502.

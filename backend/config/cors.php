@@ -35,6 +35,8 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    // CORS credentials required for Sanctum cookie-based auth
+    // Default true for production auth stability (Pass AUTH-CRED-01)
+    'supports_credentials' => env('CORS_SUPPORTS_CREDENTIALS', true),
 
 ];
