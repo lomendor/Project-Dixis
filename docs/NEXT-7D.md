@@ -1,9 +1,9 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-05 00:00 UTC
+**Last Updated**: 2026-01-05 01:00 UTC
 
 ## WIP (1 item only)
-- (none)
+- **AUTH-CRED-01** — CORS Credentials for Sanctum Auth (in PR)
 
 ## NEXT (ordered, max 3)
 
@@ -21,8 +21,9 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 3. Optional: Enter grep filter (e.g., `@regression`)
 4. Artifacts: `e2e-full-report-{run_number}` (playwright-report + test-results)
 
-## Recently Completed (Pass 58-63 + SMOKE-STABLE + E2E-FULL + OPS-PM2)
+## Recently Completed (Pass 58-63 + SMOKE-STABLE + E2E-FULL + OPS-PM2 + AUTH-CRED)
 
+- **AUTH-CRED-01** — CORS Credentials for Sanctum Auth (fixes intermittent logout) ✅
 - **OPS-PM2-01** — PM2 Stabilization in Deploy Workflow (prevents 502 after deploy) ✅
 - **SMOKE-STABLE-01** — E2E Test Policy (PR gate @smoke only, nightly for @regression) ✅
 - **E2E-FULL-01** — Nightly regression suite documentation ✅
