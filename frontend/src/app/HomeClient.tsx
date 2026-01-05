@@ -481,77 +481,90 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
             onRetry={loadProducts}
           />
         ) : (
-          <div id="products" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 scroll-mt-20">
+          <div id="products" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 scroll-mt-20">
             {safeProducts.map((product) => (
-              <div key={product.id} data-testid="product-card" className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <ProductImage
-                  src={product.images[0]?.url || product.images[0]?.image_path || '/placeholder.jpg'}
-                  alt={product.images[0]?.alt_text || product.name}
-                  priority={products.indexOf(product) < 4}
-                  data-testid="product-image-timeout"
-                />
+              <div
+                key={product.id}
+                data-testid="product-card"
+                className="relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group hover:-translate-y-1"
+              >
+                {/* Product Image with Aspect Ratio */}
+                <div className="relative aspect-square overflow-hidden bg-gray-100">
+                  <ProductImage
+                    src={product.images[0]?.url || product.images[0]?.image_path || '/placeholder.jpg'}
+                    alt={product.images[0]?.alt_text || product.name}
+                    priority={products.indexOf(product) < 4}
+                    data-testid="product-image-timeout"
+                  />
+                </div>
 
-                <div className="p-4">
-                  <h3 data-testid="product-title" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                <div className="p-5 md:p-6">
+                  <h3 data-testid="product-title" className="text-lg md:text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
                     {product.name}
                   </h3>
-                  
-                  <p className="text-sm text-gray-600 mb-2">
-                    By {product.producer.name}
+
+                  <p className="text-sm text-gray-600 mb-3">
+                    από {product.producer.name}
                   </p>
-                  
-                  <div className="flex items-center justify-between mb-4">
-                    <span data-testid="product-price" className="text-xl font-bold text-green-600">
-                      €{product.price} / {product.unit}
-                    </span>
+
+                  <div className="flex items-baseline justify-between mb-4">
+                    <div>
+                      <span data-testid="product-price" className="text-2xl font-bold text-green-700">
+                        €{product.price}
+                      </span>
+                      <span className="text-sm text-gray-500 ml-1">/ {product.unit}</span>
+                    </div>
                     {product.stock !== null && (
-                      <span className="text-sm text-gray-500">
-                        Stock: {product.stock}
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {product.stock > 0 ? `${product.stock} διαθέσιμα` : 'Εξαντλημένο'}
                       </span>
                     )}
                   </div>
 
-                  {/* Categories */}
+                  {/* Categories - Larger badges */}
                   {product.categories.length > 0 && (
                     <div className="mb-4">
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-2">
                         {product.categories.slice(0, 2).map((category) => (
                           <span
                             key={category.id}
-                            className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+                            className="px-3 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-xs font-medium rounded-full"
                           >
                             {category.name}
                           </span>
                         ))}
                         {product.categories.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                            +{product.categories.length - 2} more
+                          <span className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                            +{product.categories.length - 2}
                           </span>
                         )}
                       </div>
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  {/* Touch-Friendly Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Link
                       href={`/products/${product.id}`}
                       data-testid="product-view-details"
-                      className="relative z-10 flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-center text-sm font-medium"
+                      className="relative z-10 flex-1 inline-flex items-center justify-center min-h-[48px] bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-3 rounded-lg text-center text-sm font-semibold transition-all active:scale-95 touch-manipulation"
                     >
-                      View Details
+                      Προβολή
                     </Link>
                     <button
                       data-testid="add-to-cart"
                       onClick={() => handleAddToCart(product.id)}
                       disabled={product.stock === 0 || addingToCart.has(product.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      className="flex-1 inline-flex items-center justify-center min-h-[48px] bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white px-4 py-3 rounded-lg text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 active:scale-95 touch-manipulation shadow-md hover:shadow-lg"
                       aria-label={`Add ${product.name} to cart`}
                     >
-                      {product.stock === 0 
-                        ? 'Out of Stock' 
-                        : addingToCart.has(product.id) 
-                          ? 'Adding...' 
-                          : 'Add to Cart'
+                      {product.stock === 0
+                        ? 'Μη Διαθέσιμο'
+                        : addingToCart.has(product.id)
+                          ? 'Προσθήκη...'
+                          : 'Στο Καλάθι'
                       }
                     </button>
                   </div>
