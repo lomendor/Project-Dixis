@@ -338,9 +338,10 @@ class ApiClient {
   ): Promise<T> {
     // Handle absolute URLs directly - use new safe URL joining
     const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
-    
+
     const response = await fetch(url, {
       ...options,
+      credentials: 'include', // Required for Sanctum session cookies (AUTH-CRED-01)
       headers: {
         ...this.getHeaders(),
         ...options.headers,
