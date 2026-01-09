@@ -4,11 +4,9 @@ import { prisma } from '@/lib/db/client';
 
 export const runtime = 'nodejs';
 
+// Security hardening: removed execSync, use build-time env only
 function commit() {
-  try {
-    const { execSync } = require('child_process');
-    return execSync('git rev-parse --short HEAD').toString().trim();
-  } catch { return process.env.COMMIT_SHA || null; }
+  return process.env.COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || null;
 }
 
 export async function GET() {
