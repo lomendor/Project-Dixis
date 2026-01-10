@@ -13,7 +13,7 @@ async function getProductById(id: string) {
   // Use internal URL for SSR to avoid external round-trip timeout
   const isServer = typeof window === 'undefined';
   const base = isServer
-    ? (process.env.API_INTERNAL_URL || 'http://127.0.0.1:8001/api/v1')
+    ? (process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001/api/v1')
     : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://dixis.gr/api/v1');
 
   try {

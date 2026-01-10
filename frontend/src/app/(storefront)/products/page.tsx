@@ -18,7 +18,7 @@ async function getData(): Promise<{ items: ApiItem[]; total: number; isDemo: boo
   // Same pattern as product detail page (Pass 19)
   const isServer = typeof window === 'undefined';
   const base = isServer
-    ? process.env.API_INTERNAL_URL || 'http://127.0.0.1:8001/api/v1'
+    ? process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001/api/v1'
     : process.env.NEXT_PUBLIC_API_BASE_URL || 'https://dixis.gr/api/v1';
 
   try {
