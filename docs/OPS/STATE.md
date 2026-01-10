@@ -1,6 +1,153 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-05 (AUTH-CRED-01)
+**Last Updated**: 2026-01-10 (SEC-CLEANUP-02)
+
+## 2026-01-10 — SEC-CLEANUP-02 Crypto Miner Malware Eradication & Server Hardening
+
+**Context**: VPS reinfected with crypto miner after PTYSPY cleanup. Full forensics and hardening.
+
+### Malware Found & Removed
+| File | Size | Location | Created | Action |
+|------|------|----------|---------|--------|
+| `hg0jidAp` | - | Running process (PID 65183) | - | **KILLED** |
+| `/etc/cron.d/auto-upgrade` | - | Cron persistence | Jan 8 | **DELETED** |
+| `dbusconfigdaemon` | 6.9MB | `/home/deploy/.cache/` | Jan 8 | **DELETED** |
+| `jbd2` | 6.9MB | `/home/deploy/.cache/` | Jan 7 | **DELETED** |
+| `.sys5qtCYWQOzh` | 6.9MB | `/home/deploy/.cache/` | Jan 7 | **DELETED** |
+
+**Note**: Real `[jbd2/sda*]` kernel threads (low PIDs, brackets) are legitimate. The malware named itself `jbd2` to blend in.
+
+### Persistence Mechanism Destroyed
+- **Cron job** at `/etc/cron.d/auto-upgrade` contained:
+  ```
+  0 0 * * * root echo [base64-payload] | base64 -d | bash
+  ```
+- Decoded payload downloaded miner from `abcdefghijklmnopqrst.net`
+- **Fixed**: Cron file deleted, cron.d permissions corrected (666 → 644)
+
+### Security Hardening Applied
+1. **noexec on /dev/shm**: Added to `/etc/fstab` - prevents malware execution in shared memory
+2. **Deploy sudo restricted**: Changed from `NOPASSWD: ALL` to only:
+   - `systemctl reload/restart nginx`
+   - `systemctl reload/restart php8.2-fpm`
+   - `pm2 *`
+3. **opsadmin break-glass user**: Created with full sudo for emergencies
+4. **Ubuntu NOPASSWD disabled**: Commented out in `/etc/sudoers.d/90-cloud-init-users`
+5. **AllowUsers updated**: Added `opsadmin` to SSH AllowUsers
+
+### Entry Vector Analysis
+- **NOT SSH**: All auth.log logins from user's IP (94.66.136.115)
+- **Likely vector**: Unknown web exploit or supply chain - investigation ongoing
+- **GitHub repo**: Scanned - appears clean (no malicious deploy scripts)
+
+### Verification Commands
+```bash
+# Check for malware processes
+ps aux | grep -E 'miner|xmrig|hg0jidAp' | grep -v grep
+
+# Check for large executables in suspicious locations
+find /tmp /home -type f -executable -size +5M 2>/dev/null
+
+# Verify cron is clean
+ls -la /etc/cron.d/
+crontab -l
+
+# Verify restricted sudo
+sudo -l -U deploy
+```
+
+### Post-Cleanup Status
+- ✅ No malware processes running
+- ✅ CPU usage normal (<2%)
+- ✅ Cron persistence removed
+- ✅ Hidden malware files deleted
+- ✅ Sudo privileges hardened
+- ⚠️ Entry vector not definitively identified
+
+---
+
+## 2026-01-10 — SEC-FPM-01 Replace artisan serve with PHP-FPM
+
+**Context**: `php artisan serve` (development server) was running in production - major security risk and likely entry vector for malware.
+
+### Migration Details
+| Component | Before | After |
+|-----------|--------|-------|
+| Backend server | `artisan serve` (dev) | PHP-FPM 8.2 (production) |
+| Port 8001 | Open (artisan) | **CLOSED** |
+| Process model | Single-threaded | Multi-worker (10 max) |
+| Security | Known vulnerabilities | Proper isolation |
+
+### New Architecture
+```
+                     nginx (443)
+                        |
+         +--------------+---------------+
+         |                              |
+    location /api               location /
+         |                              |
+    PHP-FPM socket              proxy_pass :3000
+         |                              |
+    Laravel backend              Next.js (PM2)
+```
+
+### Files Changed
+- `/etc/nginx/sites-available/dixis.gr` - Routes /api/* to PHP-FPM
+- `/etc/php/8.2/fpm/pool.d/dixis-backend.conf` - New dedicated pool
+- `/etc/systemd/system/dixis-backend.service` - **DISABLED**
+
+### PHP-FPM Pool Config
+```ini
+[dixis-backend]
+user = deploy
+group = deploy
+listen = /run/php/php8.2-fpm-dixis-backend.sock
+listen.owner = www-data
+pm = dynamic
+pm.max_children = 10
+pm.start_servers = 2
+```
+
+### Verification
+```bash
+# All endpoints return 200
+curl https://dixis.gr/           # Frontend
+curl https://dixis.gr/api/healthz  # API
+curl https://dixis.gr/api/v1/public/products  # Products
+
+# Port 8001 closed
+ss -lntp | grep 8001  # Returns nothing (good!)
+```
+
+### Rollback Procedure
+```bash
+# Backups at /tmp/backup-fpm-migration-20260110-090237/
+sudo cp /tmp/.../dixis.gr.nginx.backup /etc/nginx/sites-available/dixis.gr
+sudo rm /etc/php/8.2/fpm/pool.d/dixis-backend.conf
+sudo systemctl enable dixis-backend
+sudo systemctl start dixis-backend
+sudo nginx -t && sudo systemctl reload nginx php8.2-fpm
+```
+
+---
+
+## 2026-01-10 — SEC-SMOKE-01 Post-Security-Incident Smoke Test & Hardening
+- **Context**: VPS security incident (PTYSPY malware cleanup) from Pass 53
+- **Fixes Applied This Session**:
+  1. **Session Bug (getProfile)**: Fixed `api.ts` returning `{user: {...}}` instead of `response.user`
+  2. **Checkout 401**: Removed `auth:sanctum` from `/api/v1/public/payments/checkout` (allows guest checkout)
+  3. **Price €0.00**: Fixed `PaymentCheckoutController.php` using `$item->price` → `$item->unit_price`
+- **Smoke Test Results**:
+  - ✅ Port 3000 bound to 127.0.0.1 (not publicly accessible)
+  - ✅ HTTPS homepage: 200
+  - ✅ Frontend running stable (5h+ uptime, 293MB memory)
+- **Hardening**:
+  - ✅ pm2-logrotate installed (max_size: 100M, retain: 7, compress: true)
+  - ✅ Rate limiting already in nginx (previous session)
+- **Artifacts**: `/home/deploy/smoke-20260110-075011`
+- **Pending**:
+  - React hydration #418 warning (cosmetic, app works)
+  - Stripe webhook secret rotation (recommended)
 
 ## 2026-01-05 — AUTH-CRED-01 CORS Credentials for Sanctum Auth
 - **Problem**: Intermittent logout / 502 on authenticated routes after navigation. Users randomly logged out when navigating between pages.
