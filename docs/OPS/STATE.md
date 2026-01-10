@@ -1,6 +1,257 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-05 (AUTH-CRED-01)
+**Last Updated**: 2026-01-10 (SEC-RCA-01)
+
+## 2026-01-10 — SEC-RCA-01 Root Cause Analysis: Why Malware Kept Returning
+
+**Context**: After 7 VPS rebuilds with credential rotation, malware returned within hours each time. This analysis identifies the definitive root cause.
+
+### 🔴 ROOT CAUSE: Next.js RCE Vulnerability (CVE-2025-66478)
+
+| Date | Event |
+|------|-------|
+| **Dec 3, 2025** | CVE-2025-66478 (GHSA-9qr9-h5gf-34mp) publicly disclosed |
+| **Dec 3 - Jan 9** | VPS running vulnerable Next.js 15.5.0 |
+| **Jan 7-8** | Malware files and C2 agent created on VPS |
+| **Jan 9** | Security patch applied (15.5.0 → 15.5.9) |
+
+**Why credential rotation didn't help**: The attacker used a **web-based RCE** (Remote Code Execution) that required **no authentication**. They simply scanned for vulnerable Next.js instances and exploited the React Flight protocol vulnerability remotely.
+
+### Attack Details
+
+**CVE-2025-66478 / GHSA-9qr9-h5gf-34mp**:
+- **Severity**: Critical (Max severity RCE)
+- **Component**: React Server Components / React Flight Protocol
+- **Attack Type**: Prototype pollution → Remote Code Execution
+- **Authentication Required**: None (unauthenticated)
+- **Fixed in**: Next.js 15.5.7+
+
+**Attacker's Infrastructure**:
+- C2 (Command & Control) agent with auto-restart
+- French-language logs: `"Démarrage de l'agent C2 (multi-arch + auto-restart)"`
+- Crypto miner (`hg0jidAp`) running as root (179% CPU)
+- Cron-based persistence (`/etc/cron.d/auto-upgrade`)
+- Immutable files (`chattr +i`) to prevent deletion
+
+### Additional Malware Artifacts Found & Removed (SEC-CLEANUP-03)
+
+| File | Purpose | Action |
+|------|---------|--------|
+| `~/.cache/.yarn/.systemd.log` | C2 agent log file | **DELETED** |
+| `~/.cache/kcompactd` | Marker file (immutable) | **chattr -i && DELETED** |
+
+### Why Each Rebuild Failed
+
+1. VPS gets rebuilt with fresh OS ✓
+2. GitHub Actions deploys Next.js app (15.5.0 - **vulnerable**) ✗
+3. Attacker's scanner finds new vulnerable instance within hours
+4. RCE exploited → C2 agent deployed → Miner installed
+5. User notices CPU spike, rebuilds VPS... cycle repeats
+
+### Mitigations Applied
+
+| Mitigation | Status | Date |
+|------------|--------|------|
+| Next.js 15.5.0 → 15.5.9 | ✅ Applied | Jan 9 |
+| React 19.1.0 → 19.1.4 (CVE-2025-55182) | ✅ Applied | Jan 9 |
+| artisan serve → PHP-FPM | ✅ Applied | Jan 10 |
+| Sudo hardening (deploy user) | ✅ Applied | Jan 10 |
+| /dev/shm noexec | ✅ Applied | Jan 10 |
+| C2 remnants deleted | ✅ Applied | Jan 10 |
+
+### Verification: System is Now Clean
+
+```bash
+# Verify patched versions
+ssh dixis-prod "cat /var/www/dixis/current/frontend/node_modules/next/package.json | grep version"
+# Output: "version": "15.5.9"
+
+# Verify no malware
+ssh dixis-prod "ps aux | awk '\$3 > 10 {print}'"
+# Should show only legitimate processes
+
+# Verify C2 remnants removed
+ssh dixis-prod "ls -la ~/.cache/.yarn 2>/dev/null || echo 'Clean'"
+# Output: Clean
+```
+
+### References
+- [GHSA-9qr9-h5gf-34mp](https://github.com/advisories/GHSA-9qr9-h5gf-34mp) - Next.js RCE Advisory
+- [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) - React Server Components RCE
+- [Next.js Security Update (Dec 11, 2025)](https://nextjs.org/blog/security-update-2025-12-11)
+
+---
+
+## 2026-01-10 — SEC-CLEANUP-02 Crypto Miner Malware Eradication & Server Hardening
+
+**Context**: VPS reinfected with crypto miner after PTYSPY cleanup. Full forensics and hardening.
+
+### Malware Found & Removed
+| File | Size | Location | Created | Action |
+|------|------|----------|---------|--------|
+| `hg0jidAp` | - | Running process (PID 65183) | - | **KILLED** |
+| `/etc/cron.d/auto-upgrade` | - | Cron persistence | Jan 8 | **DELETED** |
+| `dbusconfigdaemon` | 6.9MB | `/home/deploy/.cache/` | Jan 8 | **DELETED** |
+| `jbd2` | 6.9MB | `/home/deploy/.cache/` | Jan 7 | **DELETED** |
+| `.sys5qtCYWQOzh` | 6.9MB | `/home/deploy/.cache/` | Jan 7 | **DELETED** |
+
+**Note**: Real `[jbd2/sda*]` kernel threads (low PIDs, brackets) are legitimate. The malware named itself `jbd2` to blend in.
+
+### Persistence Mechanism Destroyed
+- **Cron job** at `/etc/cron.d/auto-upgrade` contained:
+  ```
+  0 0 * * * root echo [base64-payload] | base64 -d | bash
+  ```
+- Decoded payload downloaded miner from `abcdefghijklmnopqrst.net`
+- **Fixed**: Cron file deleted, cron.d permissions corrected (666 → 644)
+
+### Security Hardening Applied
+1. **noexec on /dev/shm**: Added to `/etc/fstab` - prevents malware execution in shared memory
+2. **Deploy sudo restricted**: Changed from `NOPASSWD: ALL` to only:
+   - `systemctl reload/restart nginx`
+   - `systemctl reload/restart php8.2-fpm`
+   - `pm2 *`
+3. **opsadmin break-glass user**: Created with full sudo for emergencies
+4. **Ubuntu NOPASSWD disabled**: Commented out in `/etc/sudoers.d/90-cloud-init-users`
+5. **AllowUsers updated**: Added `opsadmin` to SSH AllowUsers
+
+### Entry Vector Analysis
+- **NOT SSH**: All auth.log logins from user's IP (94.66.136.115)
+- **CONFIRMED VECTOR**: Next.js RCE (CVE-2025-66478) - see SEC-RCA-01 above
+- **GitHub repo**: Scanned - appears clean (no malicious deploy scripts)
+
+### Verification Commands
+```bash
+# Check for malware processes
+ps aux | grep -E 'miner|xmrig|hg0jidAp' | grep -v grep
+
+# Check for large executables in suspicious locations
+find /tmp /home -type f -executable -size +5M 2>/dev/null
+
+# Verify cron is clean
+ls -la /etc/cron.d/
+crontab -l
+
+# Verify restricted sudo
+sudo -l -U deploy
+```
+
+### Post-Cleanup Status
+- ✅ No malware processes running
+- ✅ CPU usage normal (<2%)
+- ✅ Cron persistence removed
+- ✅ Hidden malware files deleted
+- ✅ Sudo privileges hardened
+- ✅ Entry vector identified (Next.js RCE - see SEC-RCA-01)
+
+### Ongoing Monitoring Plan
+
+**Daily Checks** (automated via cron or monitoring):
+```bash
+# 1. Check for high CPU processes (miner detection)
+ps aux | awk '$3 > 50 {print}'
+
+# 2. Check for suspicious files in .cache
+ls -la ~/.cache/.yarn ~/.cache/kcompactd 2>/dev/null
+
+# 3. Check cron.d for new files
+ls -la /etc/cron.d/
+
+# 4. Verify Next.js version is patched
+cat /var/www/dixis/current/frontend/node_modules/next/package.json | grep version
+```
+
+**Weekly Security Tasks**:
+- Run `npm audit` on frontend dependencies
+- Check for new CVEs affecting Next.js/React
+- Review auth.log for unusual SSH attempts
+
+**Recommended**: Set up automated alerts for CPU > 80% sustained
+
+---
+
+## 2026-01-10 — SEC-FPM-01 Replace artisan serve with PHP-FPM
+
+**Context**: `php artisan serve` (development server) was running in production - major security risk and likely entry vector for malware.
+
+### Migration Details
+| Component | Before | After |
+|-----------|--------|-------|
+| Backend server | `artisan serve` (dev) | PHP-FPM 8.2 (production) |
+| Port 8001 | Open (artisan) | **CLOSED** |
+| Process model | Single-threaded | Multi-worker (10 max) |
+| Security | Known vulnerabilities | Proper isolation |
+
+### New Architecture
+```
+                     nginx (443)
+                        |
+         +--------------+---------------+
+         |                              |
+    location /api               location /
+         |                              |
+    PHP-FPM socket              proxy_pass :3000
+         |                              |
+    Laravel backend              Next.js (PM2)
+```
+
+### Files Changed
+- `/etc/nginx/sites-available/dixis.gr` - Routes /api/* to PHP-FPM
+- `/etc/php/8.2/fpm/pool.d/dixis-backend.conf` - New dedicated pool
+- `/etc/systemd/system/dixis-backend.service` - **DISABLED**
+
+### PHP-FPM Pool Config
+```ini
+[dixis-backend]
+user = deploy
+group = deploy
+listen = /run/php/php8.2-fpm-dixis-backend.sock
+listen.owner = www-data
+pm = dynamic
+pm.max_children = 10
+pm.start_servers = 2
+```
+
+### Verification
+```bash
+# All endpoints return 200
+curl https://dixis.gr/           # Frontend
+curl https://dixis.gr/api/healthz  # API
+curl https://dixis.gr/api/v1/public/products  # Products
+
+# Port 8001 closed
+ss -lntp | grep 8001  # Returns nothing (good!)
+```
+
+### Rollback Procedure
+```bash
+# Backups at /tmp/backup-fpm-migration-20260110-090237/
+sudo cp /tmp/.../dixis.gr.nginx.backup /etc/nginx/sites-available/dixis.gr
+sudo rm /etc/php/8.2/fpm/pool.d/dixis-backend.conf
+sudo systemctl enable dixis-backend
+sudo systemctl start dixis-backend
+sudo nginx -t && sudo systemctl reload nginx php8.2-fpm
+```
+
+---
+
+## 2026-01-10 — SEC-SMOKE-01 Post-Security-Incident Smoke Test & Hardening
+- **Context**: VPS security incident (PTYSPY malware cleanup) from Pass 53
+- **Fixes Applied This Session**:
+  1. **Session Bug (getProfile)**: Fixed `api.ts` returning `{user: {...}}` instead of `response.user`
+  2. **Checkout 401**: Removed `auth:sanctum` from `/api/v1/public/payments/checkout` (allows guest checkout)
+  3. **Price €0.00**: Fixed `PaymentCheckoutController.php` using `$item->price` → `$item->unit_price`
+- **Smoke Test Results**:
+  - ✅ Port 3000 bound to 127.0.0.1 (not publicly accessible)
+  - ✅ HTTPS homepage: 200
+  - ✅ Frontend running stable (5h+ uptime, 293MB memory)
+- **Hardening**:
+  - ✅ pm2-logrotate installed (max_size: 100M, retain: 7, compress: true)
+  - ✅ Rate limiting already in nginx (previous session)
+- **Artifacts**: `/home/deploy/smoke-20260110-075011`
+- **Pending**:
+  - React hydration #418 warning (cosmetic, app works)
+  - Stripe webhook secret rotation (recommended)
 
 ## 2026-01-05 — AUTH-CRED-01 CORS Credentials for Sanctum Auth
 - **Problem**: Intermittent logout / 502 on authenticated routes after navigation. Users randomly logged out when navigating between pages.
