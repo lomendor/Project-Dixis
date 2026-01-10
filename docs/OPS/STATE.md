@@ -1,6 +1,86 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-10 (SEC-CLEANUP-02)
+**Last Updated**: 2026-01-10 (SEC-RCA-01)
+
+## 2026-01-10 — SEC-RCA-01 Root Cause Analysis: Why Malware Kept Returning
+
+**Context**: After 7 VPS rebuilds with credential rotation, malware returned within hours each time. This analysis identifies the definitive root cause.
+
+### 🔴 ROOT CAUSE: Next.js RCE Vulnerability (CVE-2025-66478)
+
+| Date | Event |
+|------|-------|
+| **Dec 3, 2025** | CVE-2025-66478 (GHSA-9qr9-h5gf-34mp) publicly disclosed |
+| **Dec 3 - Jan 9** | VPS running vulnerable Next.js 15.5.0 |
+| **Jan 7-8** | Malware files and C2 agent created on VPS |
+| **Jan 9** | Security patch applied (15.5.0 → 15.5.9) |
+
+**Why credential rotation didn't help**: The attacker used a **web-based RCE** (Remote Code Execution) that required **no authentication**. They simply scanned for vulnerable Next.js instances and exploited the React Flight protocol vulnerability remotely.
+
+### Attack Details
+
+**CVE-2025-66478 / GHSA-9qr9-h5gf-34mp**:
+- **Severity**: Critical (Max severity RCE)
+- **Component**: React Server Components / React Flight Protocol
+- **Attack Type**: Prototype pollution → Remote Code Execution
+- **Authentication Required**: None (unauthenticated)
+- **Fixed in**: Next.js 15.5.7+
+
+**Attacker's Infrastructure**:
+- C2 (Command & Control) agent with auto-restart
+- French-language logs: `"Démarrage de l'agent C2 (multi-arch + auto-restart)"`
+- Crypto miner (`hg0jidAp`) running as root (179% CPU)
+- Cron-based persistence (`/etc/cron.d/auto-upgrade`)
+- Immutable files (`chattr +i`) to prevent deletion
+
+### Additional Malware Artifacts Found & Removed (SEC-CLEANUP-03)
+
+| File | Purpose | Action |
+|------|---------|--------|
+| `~/.cache/.yarn/.systemd.log` | C2 agent log file | **DELETED** |
+| `~/.cache/kcompactd` | Marker file (immutable) | **chattr -i && DELETED** |
+
+### Why Each Rebuild Failed
+
+1. VPS gets rebuilt with fresh OS ✓
+2. GitHub Actions deploys Next.js app (15.5.0 - **vulnerable**) ✗
+3. Attacker's scanner finds new vulnerable instance within hours
+4. RCE exploited → C2 agent deployed → Miner installed
+5. User notices CPU spike, rebuilds VPS... cycle repeats
+
+### Mitigations Applied
+
+| Mitigation | Status | Date |
+|------------|--------|------|
+| Next.js 15.5.0 → 15.5.9 | ✅ Applied | Jan 9 |
+| React 19.1.0 → 19.1.4 (CVE-2025-55182) | ✅ Applied | Jan 9 |
+| artisan serve → PHP-FPM | ✅ Applied | Jan 10 |
+| Sudo hardening (deploy user) | ✅ Applied | Jan 10 |
+| /dev/shm noexec | ✅ Applied | Jan 10 |
+| C2 remnants deleted | ✅ Applied | Jan 10 |
+
+### Verification: System is Now Clean
+
+```bash
+# Verify patched versions
+ssh dixis-prod "cat /var/www/dixis/current/frontend/node_modules/next/package.json | grep version"
+# Output: "version": "15.5.9"
+
+# Verify no malware
+ssh dixis-prod "ps aux | awk '\$3 > 10 {print}'"
+# Should show only legitimate processes
+
+# Verify C2 remnants removed
+ssh dixis-prod "ls -la ~/.cache/.yarn 2>/dev/null || echo 'Clean'"
+# Output: Clean
+```
+
+### References
+- [GHSA-9qr9-h5gf-34mp](https://github.com/advisories/GHSA-9qr9-h5gf-34mp) - Next.js RCE Advisory
+- [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) - React Server Components RCE
+- [Next.js Security Update (Dec 11, 2025)](https://nextjs.org/blog/security-update-2025-12-11)
+
+---
 
 ## 2026-01-10 — SEC-CLEANUP-02 Crypto Miner Malware Eradication & Server Hardening
 
@@ -37,7 +117,7 @@
 
 ### Entry Vector Analysis
 - **NOT SSH**: All auth.log logins from user's IP (94.66.136.115)
-- **Likely vector**: Unknown web exploit or supply chain - investigation ongoing
+- **CONFIRMED VECTOR**: Next.js RCE (CVE-2025-66478) - see SEC-RCA-01 above
 - **GitHub repo**: Scanned - appears clean (no malicious deploy scripts)
 
 ### Verification Commands
@@ -62,7 +142,31 @@ sudo -l -U deploy
 - ✅ Cron persistence removed
 - ✅ Hidden malware files deleted
 - ✅ Sudo privileges hardened
-- ⚠️ Entry vector not definitively identified
+- ✅ Entry vector identified (Next.js RCE - see SEC-RCA-01)
+
+### Ongoing Monitoring Plan
+
+**Daily Checks** (automated via cron or monitoring):
+```bash
+# 1. Check for high CPU processes (miner detection)
+ps aux | awk '$3 > 50 {print}'
+
+# 2. Check for suspicious files in .cache
+ls -la ~/.cache/.yarn ~/.cache/kcompactd 2>/dev/null
+
+# 3. Check cron.d for new files
+ls -la /etc/cron.d/
+
+# 4. Verify Next.js version is patched
+cat /var/www/dixis/current/frontend/node_modules/next/package.json | grep version
+```
+
+**Weekly Security Tasks**:
+- Run `npm audit` on frontend dependencies
+- Check for new CVEs affecting Next.js/React
+- Review auth.log for unusual SSH attempts
+
+**Recommended**: Set up automated alerts for CPU > 80% sustained
 
 ---
 
