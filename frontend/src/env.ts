@@ -13,14 +13,31 @@ function getEnvVar(name: string, defaultValue?: string): string {
 }
 
 // API Configuration
-// CRITICAL: Production uses same-origin /api/v1 (no localhost fallback)
-// Development uses localhost:8001 for local backend
-export const API_BASE_URL = getEnvVar(
-  'NEXT_PUBLIC_API_BASE_URL',
-  process.env.NODE_ENV === 'production'
-    ? '/api/v1'  // Same-origin relative URL for production
-    : 'http://127.0.0.1:8001/api/v1'  // Dev fallback (local backend)
-);
+// CRITICAL: Browser ALWAYS uses relative /api/v1 (same-origin)
+// Only server-side SSR can use INTERNAL_API_URL for server-to-server calls
+function getApiBaseUrlFromEnv(): string {
+  // 1. Explicit NEXT_PUBLIC_API_BASE_URL takes precedence
+  const explicitUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (explicitUrl) {
+    return explicitUrl;
+  }
+
+  // 2. Browser: ALWAYS relative URL (same-origin requests)
+  if (typeof window !== 'undefined') {
+    return '/api/v1';
+  }
+
+  // 3. Server-side: Use INTERNAL_API_URL if set, else relative
+  const internalUrl = process.env.INTERNAL_API_URL;
+  if (internalUrl) {
+    return internalUrl;
+  }
+
+  // 4. Fallback: relative (works in both environments)
+  return '/api/v1';
+}
+
+export const API_BASE_URL = getApiBaseUrlFromEnv();
 
 export const SITE_URL = getEnvVar(
   'NEXT_PUBLIC_SITE_URL',

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     // Build backend API URL
     const backendUrl = new URL(
       '/api/v1/producer/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001'
+      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
     );
 
     // Add query params
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     // Call backend API
     const backendUrl = new URL(
       '/api/v1/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001'
+      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
     );
 
     const response = await fetch(backendUrl.toString(), {

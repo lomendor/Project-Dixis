@@ -129,7 +129,8 @@ export class GDPRDataSubjectService {
   private apiBaseUrl: string;
 
   private constructor() {
-    this.apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+    // Use relative URL for browser (same-origin), env var if set
+    this.apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
   }
 
   static getInstance(): GDPRDataSubjectService {

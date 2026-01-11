@@ -27,7 +27,7 @@ export async function GET(
     // Proxy to backend GET /api/v1/products/{id}
     const backendUrl = new URL(
       `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001'
+      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
     );
 
     const response = await fetch(backendUrl.toString(), {
@@ -118,7 +118,7 @@ export async function PUT(
     // Proxy to backend PATCH /api/v1/products/{id}
     const backendUrl = new URL(
       `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001'
+      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
     );
 
     const response = await fetch(backendUrl.toString(), {
@@ -198,7 +198,7 @@ export async function DELETE(
     // Proxy to backend DELETE /api/v1/products/{id}
     const backendUrl = new URL(
       `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001'
+      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
     );
 
     const response = await fetch(backendUrl.toString(), {

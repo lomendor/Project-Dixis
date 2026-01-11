@@ -45,7 +45,7 @@ export default function ModerationQueuePage() {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
       const response = await fetch(`${baseUrl}/admin/products/pending`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -86,7 +86,7 @@ export default function ModerationQueuePage() {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
       const response = await fetch(`${baseUrl}/admin/products/${productId}/moderate`, {
         method: 'PATCH',
         headers: {

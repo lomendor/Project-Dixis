@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       const token = cookieStore.get('auth_token')?.value || req.headers.get('authorization')?.replace('Bearer ', '');
 
       if (token) {
-        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
         const params = new URLSearchParams();
         if (status) params.set('status', status);
         if (q) params.set('q', q);

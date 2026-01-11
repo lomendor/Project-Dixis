@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation';
 export const dynamic = 'force-dynamic';
 
 async function getOrder(orderId: string) {
+  // Use relative URL for same-origin fetch (no localhost in production)
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL || 'http://127.0.0.1:3000'}/api/orders/lookup`,
+    `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/orders/lookup`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

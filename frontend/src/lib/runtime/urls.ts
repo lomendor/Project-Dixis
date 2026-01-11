@@ -3,11 +3,11 @@
  *
  * SSR context (Node.js):
  *   - Returns absolute URL (required for fetch in Node)
- *   - Uses NEXT_PUBLIC_API_BASE_URL or defaults to http://127.0.0.1:8001
+ *   - Uses NEXT_PUBLIC_API_BASE_URL or defaults to production URL
  *
  * CSR context (browser):
  *   - Returns relative path (works with proxy/same-origin)
- *   - Falls back to NEXT_PUBLIC_API_BASE_URL if configured
+ *   - CRITICAL: Never defaults to localhost in production!
  *
  * Usage:
  *   const url = apiPath('/api/public/products');

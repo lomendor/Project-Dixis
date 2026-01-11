@@ -11,10 +11,11 @@ export const revalidate = 0;
 // Helper to fetch product from API
 async function getProductById(id: string) {
   // Use internal URL for SSR to avoid external round-trip timeout
+  // CRITICAL: No localhost fallback - use relative URL if not configured
   const isServer = typeof window === 'undefined';
   const base = isServer
-    ? (process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001/api/v1')
-    : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://dixis.gr/api/v1');
+    ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1')
+    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
 
   try {
     const res = await fetch(`${base}/public/products/${id}`, { cache: 'no-store' });

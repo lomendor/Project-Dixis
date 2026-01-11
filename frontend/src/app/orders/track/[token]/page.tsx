@@ -4,7 +4,8 @@ export const dynamic = 'force-dynamic';
 export const metadata = { robots: { index:false, follow:false } };
 
 async function getOrder(token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+  // Use relative URL for same-origin fetch (avoids localhost in production)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
   const res = await fetch(`${baseUrl}/api/orders/track?token=${encodeURIComponent(token)}`, {
     cache: 'no-store'
   });

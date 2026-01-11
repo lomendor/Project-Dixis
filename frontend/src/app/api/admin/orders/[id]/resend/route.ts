@@ -12,7 +12,8 @@ function originFromReq(req: Request): string {
     const o = req.headers.get('origin');
     if (o) return o;
   } catch {}
-  return process.env.APP_ORIGIN || 'http://localhost:3000';
+  // Use NEXT_PUBLIC_SITE_URL for production, never localhost
+  return process.env.APP_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
 }
 
 export async function POST(req: Request, ctx: { params: { id: string } }) {

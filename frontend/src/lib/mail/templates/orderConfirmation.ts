@@ -16,7 +16,7 @@ export function html(params: {
       (i) => `<tr><td>${i.title}</td><td>${i.qty}</td><td>${fmt(i.price * i.qty)}</td></tr>`
     )
     .join('');
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001').replace(/\/$/, '');
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr').replace(/\/$/, '');
   const track = `${base}/orders/track/${params.publicToken}`;
 
   return `<div style="font-family:system-ui,Arial,sans-serif">
