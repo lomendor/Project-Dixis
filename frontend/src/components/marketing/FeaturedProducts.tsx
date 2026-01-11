@@ -22,7 +22,7 @@ interface Product {
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
     const res = await fetch(`${apiUrl}/public/products?limit=8`, {
       next: { revalidate: 3600 }, // Revalidate every hour
     });

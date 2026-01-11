@@ -15,7 +15,7 @@
     "clean": "rimraf .next && rimraf node_modules/.cache || true",
     "dev:clean": "npm run clean:cache && npm run dev",
     "build": "prisma generate && next build",
-    "postbuild": "if [ -d .next/standalone ]; then mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/ && echo 'Standalone static files copied'; fi",
+    "postbuild": "if [ -d .next/standalone ]; then mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/ && echo 'Standalone static files copied'; fi && bash scripts/no-localhost-in-bundle.sh",
     "start": "next start",
     "start:ci": "next start -p 3001",
     "mock:api": "node ../scripts/mock-api/lhci-mock.cjs",

@@ -15,11 +15,11 @@ type ApiItem = {
 
 async function getData(): Promise<{ items: ApiItem[]; total: number; isDemo: boolean }> {
   // Use internal URL for SSR to avoid external round-trip timeout (Pass 26 fix)
-  // Same pattern as product detail page (Pass 19)
+  // CRITICAL: No localhost fallback - use relative URL if not configured
   const isServer = typeof window === 'undefined';
   const base = isServer
-    ? process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001/api/v1'
-    : process.env.NEXT_PUBLIC_API_BASE_URL || 'https://dixis.gr/api/v1';
+    ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1')
+    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
 
   try {
     const res = await fetch(`${base}/public/products`, {

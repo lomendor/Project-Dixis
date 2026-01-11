@@ -11,7 +11,8 @@ function originFromReq(req: Request): string {
     const o = (req as any).headers?.get?.('origin');
     if (o) return o;
   } catch {}
-  return process.env.APP_ORIGIN || 'http://localhost:3000';
+  // Use NEXT_PUBLIC_SITE_URL for production, never localhost
+  return process.env.APP_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
 }
 
 // GET /api/orders - List orders (from Prisma/Neon)

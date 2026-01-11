@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Forward the request to the Laravel backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1'}/lockers/search?postal_code=${encodeURIComponent(postalCode)}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'}/lockers/search?postal_code=${encodeURIComponent(postalCode)}`;
 
     const response = await fetch(backendUrl, {
       method: 'GET',

@@ -1,7 +1,8 @@
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
 
 // Internal URL for server-side API calls (avoids self-deadlock through nginx)
-const INTERNAL_URL = process.env.INTERNAL_API_URL || 'http://localhost:3000';
+// NEVER use localhost fallback - use empty string for relative URL if env not set
+const INTERNAL_URL = process.env.INTERNAL_API_URL || '';
 
 export function abs(path: string): string {
   if (!path) return SITE_URL;

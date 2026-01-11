@@ -11,19 +11,14 @@ export default async function DevCheckPage() {
   let healthTimestamp = 'N/A';
 
   try {
-    const baseUrl = process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '';
-
-    if (baseUrl) {
-      const response = await fetch(`${baseUrl}/api/health`, {
-        cache: 'no-store',
-        next: { revalidate: 0 }
-      });
-      const data = await response.json();
-      healthStatus = data.status || 'error';
-      healthTimestamp = data.ts ? new Date(data.ts).toISOString() : 'N/A';
-    }
+    // Use relative URL to avoid localhost in production bundle
+    const response = await fetch('/api/health', {
+      cache: 'no-store',
+      next: { revalidate: 0 }
+    });
+    const data = await response.json();
+    healthStatus = data.status || 'error';
+    healthTimestamp = data.ts ? new Date(data.ts).toISOString() : 'N/A';
   } catch (_error) {
     healthStatus = 'error';
   }
@@ -31,7 +26,7 @@ export default async function DevCheckPage() {
   const envChecks = {
     'Next.js Version': '15.5.0',
     'Node ENV': process.env.NODE_ENV,
-    'API Base URL': process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
+    'API Base URL': process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1',
     'E2E Mode': process.env.NEXT_PUBLIC_E2E || 'false',
     'Health Status': healthStatus,
     'Health Timestamp': healthTimestamp,
