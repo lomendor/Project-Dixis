@@ -79,7 +79,7 @@ class PaymentCheckoutController extends Controller
                         'product_data' => [
                             'name' => $item->product_name ?? 'Προϊόν #' . $item->product_id,
                         ],
-                        'unit_amount' => (int) ($item->price * 100), // Convert to cents
+                        'unit_amount' => (int) ($item->unit_price * 100), // Convert to cents
                     ],
                     'quantity' => $item->quantity,
                 ];
