@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
@@ -14,6 +14,12 @@ function CheckoutContent() {
   const [error, setError] = useState('')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod')
   const [cardProcessing, setCardProcessing] = useState(false)
+  // Fix React error #418: Prevent hydration mismatch by waiting for client mount
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
@@ -48,6 +54,10 @@ function CheckoutContent() {
     }
 
     try {
+      // Ensure token is loaded from localStorage before API calls
+      // This fixes SSR singleton issue where token might be null
+      apiClient.refreshToken();
+
       // Create order via Laravel API (persists to PostgreSQL)
       // Pass 54: Include shipping_address and shipping_cost
       const shippingAddress = {
@@ -108,6 +118,17 @@ function CheckoutContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Fix React error #418: Show loading during SSR/hydration
+  if (!isMounted) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
+          <p className="text-gray-600">Φόρτωση...</p>
+        </div>
+      </main>
+    )
   }
 
   // If cart is empty, show message

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export type PaymentMethod = 'cod' | 'card'
 
@@ -15,14 +16,22 @@ export default function PaymentMethodSelector({
   onChange,
   disabled = false,
 }: PaymentMethodSelectorProps) {
-  // Card payments gated by build-time env flag
+  // Card payments gated by build-time env flag AND user authentication
+  // Guest users can only use COD; logged-in users can use card
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [cardEnabled, setCardEnabled] = useState(false)
 
   useEffect(() => {
     // NEXT_PUBLIC_* vars are replaced at build time
-    const enabled = process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true'
-    setCardEnabled(enabled)
-  }, [])
+    // Card is only available if: flag enabled AND user is logged in
+    const flagEnabled = process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true'
+    setCardEnabled(flagEnabled && isAuthenticated)
+
+    // If user not authenticated and card was selected, reset to COD
+    if (!isAuthenticated && value === 'card') {
+      onChange('cod')
+    }
+  }, [isAuthenticated, value, onChange])
 
   return (
     <fieldset className="space-y-3" disabled={disabled}>
@@ -53,7 +62,7 @@ export default function PaymentMethodSelector({
         </div>
       </label>
 
-      {/* Card (Stripe) - Only if feature flag enabled */}
+      {/* Card (Stripe) - Only if feature flag enabled AND user is logged in */}
       {cardEnabled && (
         <label
           htmlFor="payment-card"
@@ -82,6 +91,14 @@ export default function PaymentMethodSelector({
             <span className="text-xs bg-gray-100 px-2 py-1 rounded">MC</span>
           </div>
         </label>
+      )}
+
+      {/* Message for guests when card flag is enabled but user not logged in */}
+      {/* Only render after auth loading completes to avoid hydration mismatch */}
+      {!authLoading && !isAuthenticated && cardEnabled === false && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
+        <p className="text-sm text-gray-500 mt-2">
+          💡 <a href="/login?redirect=/checkout" className="text-emerald-600 hover:underline">Συνδεθείτε</a> για να πληρώσετε με κάρτα
+        </p>
       )}
     </fieldset>
   )

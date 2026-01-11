@@ -203,6 +203,10 @@ export default function CheckoutClient(){
 
     setLoading(true)
     try{
+      // Ensure token is loaded from localStorage before API calls
+      // This fixes SSR singleton issue where token might be null
+      apiClient.refreshToken();
+
       // Pass 44: Use Laravel API directly (Single Source of Truth)
       // Pass 48: Include shipping_cost in order creation
       // Pass 51: Support both COD and CARD payment methods
