@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000';
+
 test.describe('Greek Normalization Demo - PP03-B', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3001');
+    await page.goto(BASE);
     await page.waitForLoadState('networkidle');
   });
 
