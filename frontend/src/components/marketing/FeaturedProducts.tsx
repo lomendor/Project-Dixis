@@ -16,6 +16,7 @@ interface Product {
   id: number;
   name: string;
   price_cents: number;
+  producer_id?: number;
   producer_name?: string;
   image_url?: string;
 }
@@ -77,6 +78,7 @@ export default async function FeaturedProducts() {
                 id={product.id}
                 title={product.name}
                 producer={product.producer_name || null}
+                producerId={product.producer_id}
                 priceCents={product.price_cents}
                 image={product.image_url || null}
               />

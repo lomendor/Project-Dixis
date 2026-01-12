@@ -260,3 +260,67 @@ $(head -1607 docs/OPS/STATE.md)
 - Migrate `/checkout/payment` flow to use Laravel API
 - Remove legacy `/api/checkout/*` routes after full migration
 - Add customer shipping fields to Laravel Order schema (optional)
+
+## Pass 56 — Single Producer Cart Enforcement (Option A) ✅
+**Date**: 2026-01-12
+**Scope**: Implement "one producer per order" cart constraint for MVP
+
+### Problem:
+Dixis is a direct-to-consumer marketplace without a central warehouse. Each producer ships their own orders.
+Multi-producer carts would require:
+- Multiple shipments (multiple shipping fees)
+- Complex order splitting logic
+- Coordination between producers
+
+### Solution (Option A - MVP):
+Enforce single-producer carts at the frontend level:
+- Cart can only contain products from ONE producer at a time
+- If user tries to add product from different producer, show blocking modal
+- Modal offers: "Complete current order" / "Clear cart" / "Cancel"
+
+### Changes Made:
+1. **Updated cart store** (`frontend/src/lib/cart.ts`):
+   - Added `producerId` and `producerName` to `CartItem` type
+   - `add()` now returns `AddResult` with `'added'` or `'conflict'` status
+   - Added `forceAdd()` method for replacing cart after user confirms
+   - Producer guard: checks if new item's producer differs from existing cart items
+
+2. **Created ProducerConflictModal** (`frontend/src/components/cart/ProducerConflictModal.tsx`):
+   - Greek UI: "Διαφορετικός Παραγωγός" heading
+   - Shows current producer name
+   - Three buttons: "Ολοκλήρωσε την παραγγελία σου" / "Άδειασε το καλάθι" / "Ακύρωση"
+   - data-testid attributes for E2E testing
+
+3. **Updated AddToCartButton components**:
+   - `frontend/src/components/cart/AddToCartButton.tsx`
+   - `frontend/src/components/AddToCartButton.tsx`
+   - Both now accept `producerId` and `producerName` props
+   - Handle conflict response and show modal
+
+4. **Updated ProductCard components**:
+   - `frontend/src/components/ProductCard.tsx`
+   - `frontend/src/components/catalogue/ProductCard.tsx`
+   - Pass `producerId` and `producerName` to AddToCartButton
+
+5. **Updated data sources**:
+   - `frontend/src/data/demoProducts.ts`: Added `producerId` to demo products
+   - `frontend/src/app/(storefront)/products/page.tsx`: Map `producer.id` from API
+   - `frontend/src/components/marketing/FeaturedProducts.tsx`: Pass `producer_id`
+
+6. **Created E2E tests** (`frontend/tests/e2e/pass-56-single-producer-cart.spec.ts`):
+   - Test: allows adding multiple products from same producer
+   - Test: shows conflict modal when adding from different producer
+   - Test: can clear cart and add new product via conflict modal
+   - Test: can cancel conflict modal without changes
+   - Test: checkout option navigates to checkout
+
+### Impact:
+- ✅ Cart enforces single-producer constraint
+- ✅ User-friendly Greek modal explains the restriction
+- ✅ Three clear options for resolving conflicts
+- ✅ TypeScript compiles without errors
+- ✅ E2E tests cover all scenarios
+- ✅ Backward compatible (producerId is optional for existing code)
+
+### TODO (Follow-up):
+- [ ] **Server-side guard**: Add validation at order creation API (checkout/order-intents) to reject mixed-producer carts as a hard safety net. Frontend enforcement is sufficient for MVP but server-side validation adds defense-in-depth.

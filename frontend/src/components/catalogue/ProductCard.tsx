@@ -10,7 +10,7 @@ interface ProductCardProps {
   name: string;
   price: number;
   currency?: string;
-  producer?: { name: string };
+  producer?: { id?: number; name: string };
   imageUrl?: string | null;
 }
 
@@ -43,7 +43,7 @@ export default function ProductCard({ id, slug, name, price, currency = 'EUR', p
         {producer?.name && <p className="mt-1 text-sm text-neutral-600">{producer.name}</p>}
         <p className="mt-2 font-semibold text-brand">{formatCurrency(price, currency)}</p>
       </Link>
-      <div className="mt-2"><AddToCartButton id={id} title={name} price={price} currency={currency} className="w-full" /></div>
+      <div className="mt-2"><AddToCartButton id={id} title={name} price={price} currency={currency} className="w-full" producerId={producer?.id ? String(producer.id) : undefined} producerName={producer?.name} /></div>
     </article>
   );
 }
