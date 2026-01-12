@@ -1,8 +1,8 @@
 # Pass 57: Server-Side Multi-Producer Guard
 
-**Status**: PENDING DEPLOYMENT
-**Created**: 2025-01-12
-**PRs**: TBD (feature + docs)
+**Status**: ✅ DONE
+**Closed**: 2026-01-12
+**PRs**: #2185 (feature, merged), #2187 (test fix)
 
 ## TL;DR
 
@@ -54,15 +54,21 @@ if ($producerIds->count() > 1) {
 2. **Accepts single-producer orders**: POST with products from producer 1 only → NOT 422
 3. **Returns correct error code**: Response contains `MULTI_PRODUCER_CART_NOT_ALLOWED`
 
-## Verify on PROD (after deployment)
+## PROD Verification (2026-01-12)
 
+**curl test**:
 ```bash
-# Test 1: Multi-producer order → should return 422
 curl -X POST https://dixis.gr/api/v1/public/orders \
   -H "Content-Type: application/json" \
-  -d '{"items":[{"product_id":1,"quantity":1},{"product_id":6,"quantity":1}],"shipping_method":"HOME","currency":"EUR"}'
+  -d '{"items":[{"product_id":1,"quantity":1},{"product_id":6,"quantity":1}],...}'
+# Result: HTTP 422, MULTI_PRODUCER_CART_NOT_ALLOWED ✓
+```
 
-# Expected: 422 with MULTI_PRODUCER_CART_NOT_ALLOWED
+**E2E tests**:
+```
+API_BASE_URL=https://dixis.gr/api/v1 npx playwright test pass-57-server-guard.spec.ts
+Running 3 tests using 1 worker
+  3 passed (1.2s) ✓
 ```
 
 ## Integration with Pass 56

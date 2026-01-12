@@ -1,6 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-10 (SEC-RCA-01)
+**Last Updated**: 2026-01-12 (Pass-57)
+
+## 2026-01-12 — Pass 57: Server-Side Multi-Producer Guard
+
+**Status**: ✅ DEPLOYED & VERIFIED
+
+Defense in depth for single-producer cart MVP. Server rejects orders with products from multiple producers, even if client-side guard (Pass 56) is bypassed.
+
+### Changes
+- `backend/app/Http/Controllers/Api/V1/OrderController.php`: Added validation after product loading
+- Returns HTTP 422 with `MULTI_PRODUCER_CART_NOT_ALLOWED` error code
+
+### Evidence
+
+**curl test (2026-01-12 20:04 UTC)**:
+```
+POST https://dixis.gr/api/v1/public/orders
+Body: {"items":[{"product_id":1,"quantity":1},{"product_id":6,"quantity":1}],...}
+Response: HTTP 422
+{"message":"{\"error\":\"MULTI_PRODUCER_CART_NOT_ALLOWED\",...,\"producer_ids\":[1,4]}"}
+```
+
+**E2E tests (PROD)**:
+```
+Running 3 tests using 1 worker
+  3 passed (1.2s)
+```
+
+### PRs
+- #2185 (feature) — merged
+- #2187 (test fix) — pending
+
+---
 
 ## 2026-01-10 — SEC-RCA-01 Root Cause Analysis: Why Malware Kept Returning
 
