@@ -467,7 +467,9 @@ class ApiClient {
   }
 
   async getProfile(): Promise<User> {
-    return this.request<User>('auth/profile');
+    // Backend returns { user: {...} }, we need to unwrap it
+    const response = await this.request<{ user: User }>('auth/profile');
+    return response.user;
   }
 
   // Cart methods
