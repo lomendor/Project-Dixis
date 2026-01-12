@@ -11,12 +11,15 @@ import { test, expect } from '@playwright/test';
  * - Producer #4: Test Producer B (product: id=6)
  */
 
+// API base URL: PROD uses dixis.gr/api, local uses 127.0.0.1:8001/api
+const API_BASE_URL = process.env.API_BASE_URL || 'https://dixis.gr/api/v1';
+
 test.describe('Pass 57: Server-Side Multi-Producer Guard', () => {
   test('API rejects order with products from multiple producers', async ({ request }) => {
     // Attempt to create order with products from 2 different producers
     // Product ID 1 is from producer 1 (Green Farm Co.)
     // Product ID 6 is from producer 4 (Test Producer B)
-    const response = await request.post('/api/v1/public/orders', {
+    const response = await request.post(`${API_BASE_URL}/public/orders`, {
       data: {
         items: [
           { product_id: 1, quantity: 1 }, // Producer 1
@@ -50,7 +53,7 @@ test.describe('Pass 57: Server-Side Multi-Producer Guard', () => {
   test('API accepts order with products from single producer', async ({ request }) => {
     // Attempt to create order with products from same producer
     // Product ID 1 and 2 are both from producer 1 (Green Farm Co.)
-    const response = await request.post('/api/v1/public/orders', {
+    const response = await request.post(`${API_BASE_URL}/public/orders`, {
       data: {
         items: [
           { product_id: 1, quantity: 1 }, // Producer 1
@@ -86,7 +89,7 @@ test.describe('Pass 57: Server-Side Multi-Producer Guard', () => {
   });
 
   test('error response contains MULTI_PRODUCER_CART_NOT_ALLOWED code', async ({ request }) => {
-    const response = await request.post('/api/v1/public/orders', {
+    const response = await request.post(`${API_BASE_URL}/public/orders`, {
       data: {
         items: [
           { product_id: 1, quantity: 1 }, // Producer 1
