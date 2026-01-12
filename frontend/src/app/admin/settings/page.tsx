@@ -6,7 +6,7 @@ import Link from 'next/link';
 const envConfig = {
   nodeEnv: process.env.NODE_ENV || 'development',
   lowStockThreshold: process.env.LOW_STOCK_THRESHOLD || '3',
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8001/api',
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1',
 };
 
 export default async function AdminSettingsPage() {

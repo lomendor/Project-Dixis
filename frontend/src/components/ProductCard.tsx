@@ -7,11 +7,12 @@ type Props = {
   id: string | number
   title: string
   producer: string | null
+  producerId?: string | number | null
   priceCents: number
   image?: string | null
 }
 
-export function ProductCard({ id, title, producer, priceCents, image }: Props) {
+export function ProductCard({ id, title, producer, producerId, priceCents, image }: Props) {
   const price = typeof priceCents === 'number' ? (priceCents / 100).toFixed(2) + '€' : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
@@ -51,7 +52,7 @@ export function ProductCard({ id, title, producer, priceCents, image }: Props) {
       <div className="px-4 pb-4 mt-auto flex items-center justify-between pt-2 border-t border-neutral-100">
         <span data-testid="product-card-price" className="text-lg font-bold text-neutral-900">{price}</span>
         <div data-testid="product-card-add">
-          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} />
+          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} />
         </div>
       </div>
     </div>

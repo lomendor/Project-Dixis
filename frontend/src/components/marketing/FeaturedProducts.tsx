@@ -16,13 +16,14 @@ interface Product {
   id: number;
   name: string;
   price_cents: number;
+  producer_id?: number;
   producer_name?: string;
   image_url?: string;
 }
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
     const res = await fetch(`${apiUrl}/public/products?limit=8`, {
       next: { revalidate: 3600 }, // Revalidate every hour
     });
@@ -77,6 +78,7 @@ export default async function FeaturedProducts() {
                 id={product.id}
                 title={product.name}
                 producer={product.producer_name || null}
+                producerId={product.producer_id}
                 priceCents={product.price_cents}
                 image={product.image_url || null}
               />
