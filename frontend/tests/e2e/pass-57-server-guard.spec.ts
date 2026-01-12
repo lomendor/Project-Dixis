@@ -45,9 +45,10 @@ test.describe('Pass 57: Server-Side Multi-Producer Guard', () => {
     // Should return 422 Unprocessable Entity
     expect(response.status()).toBe(422);
 
-    // Response should contain Greek error message about producer
+    // Response should contain error code (Greek text is unicode-escaped in JSON)
     const text = await response.text();
-    expect(text.toLowerCase()).toContain('παραγωγ'); // "παραγωγός" or "παραγωγούς"
+    // Check for error code which is ASCII and reliable
+    expect(text.toLowerCase()).toContain('multi_producer_cart_not_allowed');
   });
 
   test('API accepts order with products from single producer', async ({ request }) => {
