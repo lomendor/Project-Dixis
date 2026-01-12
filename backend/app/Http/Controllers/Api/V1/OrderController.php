@@ -128,6 +128,21 @@ class OrderController extends Controller
                     }
                 }
 
+                // Pass 57: Server-side guard - one producer per order (MVP)
+                // Defense in depth: validates even if client guard is bypassed
+                $producerIds = collect($productData)
+                    ->pluck('product.producer_id')
+                    ->filter() // Remove nulls
+                    ->unique();
+
+                if ($producerIds->count() > 1) {
+                    abort(422, json_encode([
+                        'error' => 'MULTI_PRODUCER_CART_NOT_ALLOWED',
+                        'message' => 'Το καλάθι περιέχει προϊόντα από διαφορετικούς παραγωγούς. Στο MVP υποστηρίζεται μόνο ένας παραγωγός ανά παραγγελία.',
+                        'producer_ids' => $producerIds->values()->toArray(),
+                    ]));
+                }
+
                 // Create the order
                 // Use authenticated user's ID if available, otherwise allow guest orders
                 $userId = auth()->id() ?? $validated['user_id'] ?? null;
