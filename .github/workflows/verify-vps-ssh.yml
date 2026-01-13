@@ -1,0 +1,26 @@
+name: Verify VPS SSH
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify-ssh:
+    name: Verify SSH Connection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "=== SSH CONNECTION OK ==="
+            whoami
+            hostname
+            echo "=== CHECKING DEPLOY DIRS ==="
+            test -d /var/www/dixis/current || (echo "MISSING: /var/www/dixis/current" && exit 1)
+            test -d /var/www/dixis/current/frontend || (echo "MISSING: /var/www/dixis/current/frontend" && exit 1)
+            echo "=== PM2 STATUS ==="
+            pm2 list || echo "PM2 not running as this user"
+            echo "=== SSH_VERIFY_OK ==="
