@@ -171,8 +171,8 @@ jobs:
             echo "RESEND_API_KEY=${RESEND_API_KEY}" >> .env
             # Memory limit for Node.js (VPS has limited RAM - stability-focused)
             echo "NODE_OPTIONS=--max-old-space-size=320" >> .env
-            # Internal URL for SSR - prevents deadlock through nginx
-            echo "INTERNAL_API_URL=http://localhost:3000" >> .env
+            # Internal URL for SSR - external round-trip (nginx port 80 redirects to HTTPS)
+            echo "INTERNAL_API_URL=https://dixis.gr/api/v1" >> .env
             cat .env | head -5
 
             # AGGRESSIVE CLEANUP: Delete all PM2 processes and their configs
