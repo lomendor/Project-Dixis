@@ -290,18 +290,24 @@ const BASE = trimBoth(RAW_BASE);
 
 // Safe URL joining with validation and normalization
 export const apiUrl = (path: string) => {
-  if (!path || typeof path !== 'string') return BASE;
-  
+  if (!path || typeof path !== 'string') return `/${BASE}`;
+
   const cleanPath = trimBoth(path);
-  if (!cleanPath) return BASE;
-  
+  if (!cleanPath) return `/${BASE}`;
+
   // Handle absolute URLs passed as path
   if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
     return cleanPath;
   }
-  
-  // Safe join with single slash
-  return `${BASE}/${cleanPath}`;
+
+  // If BASE is a full URL (has ://), join normally
+  if (BASE.includes('://')) {
+    return `${BASE}/${cleanPath}`;
+  }
+
+  // For relative paths, ALWAYS prepend / to make it absolute from root
+  // This ensures /api/v1/auth/login instead of api/v1/auth/login
+  return `/${BASE}/${cleanPath}`.replace(/\/+/g, '/');
 };
 
 // Legacy functions for compatibility
@@ -346,10 +352,37 @@ class ApiClient {
   }
 
   setToken(token: string | null) {
+    // DEBUG: Token instrumentation (masked for security) - enable with NEXT_PUBLIC_DEBUG_AUTH=1
+    const DEBUG_AUTH = typeof window !== 'undefined' &&
+      (process.env.NEXT_PUBLIC_DEBUG_AUTH === '1' || localStorage.getItem('DEBUG_AUTH') === '1');
+
+    const maskToken = (t: string | null | undefined) =>
+      t ? `${t.slice(0, 6)}...${t.slice(-4)}` : 'null';
+
+    if (DEBUG_AUTH && token && typeof window !== 'undefined') {
+      const parts = token.split('|');
+      console.log('🔐 [setToken] BEFORE save:', {
+        masked: maskToken(token),
+        totalLen: token.length,
+        plainLen: parts[1]?.length,
+      });
+    }
+
     this.token = token;
     if (typeof window !== 'undefined') {
       if (token) {
         localStorage.setItem('auth_token', token);
+
+        if (DEBUG_AUTH) {
+          const saved = localStorage.getItem('auth_token');
+          const savedParts = saved?.split('|');
+          console.log('🔐 [setToken] AFTER save:', {
+            masked: maskToken(saved),
+            totalLen: saved?.length,
+            plainLen: savedParts?.[1]?.length,
+            MATCH: saved === token ? '✅ YES' : '❌ NO - TRUNCATION',
+          });
+        }
       } else {
         localStorage.removeItem('auth_token');
       }
@@ -432,11 +465,25 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    
+
+    // DEBUG: Token instrumentation (masked) - enable with DEBUG_AUTH=1 in localStorage
     if (response.token) {
+      const DEBUG_AUTH = typeof window !== 'undefined' &&
+        (process.env.NEXT_PUBLIC_DEBUG_AUTH === '1' || localStorage.getItem('DEBUG_AUTH') === '1');
+
+      if (DEBUG_AUTH) {
+        const parts = response.token.split('|');
+        const masked = `${response.token.slice(0, 6)}...${response.token.slice(-4)}`;
+        console.log('🔐 [login] API RESPONSE:', {
+          masked,
+          totalLen: response.token.length,
+          idPart: parts[0],
+          plainLen: parts[1]?.length,
+        });
+      }
       this.setToken(response.token);
     }
-    
+
     return response;
   }
 
