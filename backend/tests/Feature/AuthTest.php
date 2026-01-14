@@ -303,4 +303,29 @@ class AuthTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'email', 'password', 'role']);
     }
+
+    /**
+     * Smoke test: Prove /api/v1/auth/login route exists (NOT 404).
+     * This test explicitly verifies the route is registered and responds.
+     * Expected: 422 (validation error) for empty payload, NOT 404.
+     */
+    public function test_v1_auth_login_route_exists_not_404(): void
+    {
+        $response = $this->postJson('/api/v1/auth/login', []);
+
+        // Route exists if we get 422 (validation) instead of 404
+        $this->assertNotEquals(404, $response->status(), 'Route /api/v1/auth/login should exist (not 404)');
+        $response->assertStatus(422);
+    }
+
+    /**
+     * Smoke test: Prove /api/v1/auth/register route exists (NOT 404).
+     */
+    public function test_v1_auth_register_route_exists_not_404(): void
+    {
+        $response = $this->postJson('/api/v1/auth/register', []);
+
+        $this->assertNotEquals(404, $response->status(), 'Route /api/v1/auth/register should exist (not 404)');
+        $response->assertStatus(422);
+    }
 }
