@@ -85,7 +85,10 @@ The `deploy` user is configured for deployments only:
 ### "FAIL: NO_LISTENER_3000"
 1. Check PM2 status: `pm2 status`
 2. Check PM2 logs: `pm2 logs dixis-frontend --err --lines 50`
-3. Check if port is blocked: `lsof -i:3000`
+3. Verify port 3000 is listening (no sudo needed):
+   - `curl -s http://127.0.0.1:3000/ > /dev/null && echo "OK" || echo "NOT LISTENING"`
+   - `ss -ltn | grep :3000`
+   - (optional, may need sudo): `lsof -i:3000`
 
 ### Health check timeout
 1. App may be starting slowly - wait and retry
