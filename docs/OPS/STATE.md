@@ -1,6 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-14 (Pass-OPS-VERIFY-01)
+**Last Updated**: 2026-01-14 (Pass-OPS-CANONICAL-PATHS-01)
+
+## 2026-01-14 — Pass OPS-CANONICAL-PATHS-01: Canonical Prod Paths in Deploy Workflows
+
+**Status**: ✅ MERGED (backend OK, frontend blocked by missing env var)
+
+Fixed deploy workflows to use canonical prod paths: `/var/www/dixis/current/{frontend,backend}` instead of legacy paths.
+
+### Decision
+
+**Canonical prod root is `/var/www/dixis/current/`** — All deploy workflows now check:
+- Frontend: `/var/www/dixis/current/frontend/.env`
+- Backend: `/var/www/dixis/current/backend/`
+
+### Deploy Results
+
+| Workflow | Status | Notes |
+|----------|--------|-------|
+| deploy-backend | ✅ PASS | https://github.com/lomendor/Project-Dixis/actions/runs/21012280130 |
+| deploy-frontend | ❌ BLOCKED | Path fix works; missing `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in VPS |
+
+### Prod Sanity (all pass)
+- `https://dixis.gr/` → 200 OK
+- `/api/v1/public/products` → 200 OK, JSON
+- `/api/auth/request-otp` → 200 OK, success
+
+### PRs
+- #2201 (fix: use canonical paths) — merged
+
+### Next Steps
+Add `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` to `/var/www/dixis/current/frontend/.env` on VPS to unblock frontend deploys.
+
+---
 
 ## 2026-01-14 — Pass OPS-VERIFY-01: Deploy Verification Proof Standard
 
