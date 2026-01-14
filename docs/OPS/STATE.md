@@ -1,6 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-12 (Pass-58)
+**Last Updated**: 2026-01-14 (Pass-OPS-VERIFY-01)
+
+## 2026-01-14 — Pass OPS-VERIFY-01: Deploy Verification Proof Standard
+
+**Status**: ✅ MERGED
+
+Established curl-based deploy verification standard. Removed sudo commands from deploy workflow since `deploy` user lacks passwordless sudo.
+
+### Decision
+
+**No sudo in deploy verify** — All post-deploy checks use curl-based proofs:
+1. Port listener check: `curl -s http://127.0.0.1:3000/`
+2. Health endpoint: `/api/healthz`
+3. OPS-PM2-01 20x curl stability proof
+
+### PRs
+- #2195 (fix: remove sudo from deploy verify) — merged
+- #2197 (docs: deploy verification proof standard) — merged
+
+### Documentation
+- `docs/OPS/DEPLOY-VERIFY-PROOF.md` — Canonical verification standard
+
+---
 
 ## 2026-01-12 — Pass 58: E2E Flaky Test Fix (Card Option Guardrail)
 
