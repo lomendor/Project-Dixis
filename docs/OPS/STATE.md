@@ -1,6 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (TEST-COVERAGE-01)
+**Last Updated**: 2026-01-15 (SEC-WATCH-01)
+
+## 2026-01-15 — Pass SEC-WATCH-01: Hardening Baseline + Watchdog
+
+**Status**: ✅ CLOSED
+
+48h post-SEC-UDEV-01 verification and hardening baseline applied.
+
+### VPS Re-check (CLEAN)
+
+- Load: 0.00, CPU normalized
+- Stratum scan: no mining pool connections
+- UDEV rules: empty (malicious rule stayed removed)
+- Cron jobs: only legitimate system jobs
+
+### Hardening Applied
+
+| Component | Status |
+|-----------|--------|
+| SSHD (key-only, no password) | ✅ |
+| fail2ban (sshd jail active) | ✅ |
+| UFW firewall (deny incoming) | ✅ |
+| nftables (block mining ports 3333/4444/5555/14444) | ✅ |
+| sec-watch.timer (daily watchdog) | ✅ |
+
+### PRs
+
+- #2215 (docs: SEC-WATCH-01 hardening baseline) — merged
+
+---
 
 ## 2026-01-15 — Pass TEST-COVERAGE-01: Expand @smoke Test Coverage
 
