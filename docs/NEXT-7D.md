@@ -1,15 +1,15 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-05 01:00 UTC
+**Last Updated**: 2026-01-15 11:00 UTC
 
 ## WIP (1 item only)
-- **AUTH-CRED-01** — CORS Credentials for Sanctum Auth (in PR)
+_(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, max 3)
 
 1. **Pass 52 — Card Payments Enable** (BLOCKED — READY once user provides Stripe keys, see CREDENTIALS.md)
 2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — READY once user provides SMTP/Resend keys, see CREDENTIALS.md)
-3. **Audit other deploy workflows for PM2 parity** (optional: apply OPS-PM2-01 pattern to deploy-backend if applicable)
+3. **TEST-COVERAGE-01 — Expand @smoke test coverage** (UNBLOCKED — add more CI-safe @smoke tests)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -21,10 +21,17 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 3. Optional: Enter grep filter (e.g., `@regression`)
 4. Artifacts: `e2e-full-report-{run_number}` (playwright-report + test-results)
 
-## Recently Completed (Pass 58-63 + SMOKE-STABLE + E2E-FULL + OPS-PM2 + AUTH-CRED)
+## Recently Completed (2026-01-14 to 2026-01-15)
+
+- **TEST-UNSKIP-02** — Add 5 CI-safe @smoke page load tests (PDP, cart, login, register, home) ✅
+- **OPS-PM2-01b** — STATE.md housekeeping for OPS-PM2-01 ✅
+- **OPS-PM2-01** — Deploy workflow readiness gate (prevents 502 after deploy) ✅
+- **OPS-CANONICAL-PATHS-01** — Canonical VPS paths in deploy workflows ✅
+- **OPS-VERIFY-01** — Deploy verification proof standard (curl-based) ✅
+
+## Recently Completed (Pass 58-63 + SMOKE-STABLE + E2E-FULL + AUTH-CRED)
 
 - **AUTH-CRED-01** — CORS Credentials for Sanctum Auth (fixes intermittent logout) ✅
-- **OPS-PM2-01** — PM2 Stabilization in Deploy Workflow (prevents 502 after deploy) ✅
 - **SMOKE-STABLE-01** — E2E Test Policy (PR gate @smoke only, nightly for @regression) ✅
 - **E2E-FULL-01** — Nightly regression suite documentation ✅
 
