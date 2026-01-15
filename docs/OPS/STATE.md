@@ -1,6 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (SEC-WATCH-01)
+**Last Updated**: 2026-01-15 (SEC-EGRESS-01)
+
+## 2026-01-15 — Pass SEC-EGRESS-01: Egress Monitoring + fail2ban Tightening
+
+**Status**: ✅ CLOSED
+
+Added egress monitoring and tightened fail2ban for enhanced security visibility.
+
+### Installed
+
+| Component | Status |
+|-----------|--------|
+| sec-egress.timer (daily at 06:00 UTC) | ✅ |
+| /var/log/sec-egress.log (outbound report) | ✅ |
+| fail2ban tightened (bantime=3600s, maxretry=5) | ✅ |
+| Admin IP whitelisted (ignoreip) | ✅ |
+
+### Evidence
+
+- Baseline connections: CLEAN (nginx, next-server, admin SSH only)
+- Accepted logins: ALL from admin IP via publickey
+- Mining port scan: CLEAN
+- Failed SSH (24h): 0
+
+### PRs
+
+- #2216 (docs: SEC-EGRESS-01 egress monitoring) — merged
+
+---
 
 ## 2026-01-15 — Pass SEC-WATCH-01: Hardening Baseline + Watchdog
 
