@@ -158,3 +158,51 @@ test('@smoke home page loads', async ({ page }) => {
   // Page rendered meaningful structure
   expect(hasNav || hasMain).toBe(true);
 });
+
+// === TEST-COVERAGE-01: 4 new @smoke tests for public pages ===
+
+// @smoke — Producers listing page loads without crash
+// CI-safe: Public page that lists producers
+test('@smoke producers page loads', async ({ page }) => {
+  const response = await page.goto('/producers', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Page should load (200) or show content
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  // Body should be visible
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+});
+
+// @smoke — Contact page loads without crash
+// CI-safe: Static contact page
+test('@smoke contact page loads', async ({ page }) => {
+  const response = await page.goto('/contact', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+});
+
+// @smoke — Terms page loads without crash
+// CI-safe: Static legal page
+test('@smoke terms page loads', async ({ page }) => {
+  const response = await page.goto('/legal/terms', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+});
+
+// @smoke — Privacy page loads without crash
+// CI-safe: Static legal page
+test('@smoke privacy page loads', async ({ page }) => {
+  const response = await page.goto('/legal/privacy', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+});
