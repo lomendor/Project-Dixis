@@ -22,6 +22,7 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 
 ## Recently Completed (2026-01-14 to 2026-01-15)
 
+- **SEC-ROTATE-01** — SSH key rotation (old keys removed, new key installed) ✅
 - **SEC-LOGWATCH-01** — Local log monitoring (auth, fail2ban, nginx) ✅
 - **SEC-EGRESS-01** — Egress monitoring + fail2ban tightening ✅
 - **SEC-WATCH-01** — Hardening baseline + watchdog (48h post-incident verification) ✅

@@ -1,6 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (SEC-LOGWATCH-01)
+**Last Updated**: 2026-01-15 (SEC-ROTATE-01)
+
+## 2026-01-15 — Pass SEC-ROTATE-01: SSH Key Rotation
+
+**Status**: ✅ CLOSED
+
+Rotated SSH keys after miner incident. Old keys removed, new key installed.
+
+### Key Status
+
+| Key | Status |
+|-----|--------|
+| dixis-prod-20260115 (MekIeM...) | ✅ ACTIVE |
+| dixis-main-key (Y1NzLF...) | ❌ REMOVED |
+| dixis-prod-20251105 (KrAQdz...) | ❌ REMOVED |
+
+### Verification
+
+- NEW key login: SUCCESS
+- OLD key login: Permission denied (as expected)
+- SSHD: key-only, no password
+
+### PRs
+
+- #2219 (docs: SEC-ROTATE-01 SSH key rotation) — merged
+
+---
 
 ## 2026-01-15 — Pass SEC-LOGWATCH-01: Local Log Monitoring
 
