@@ -22,6 +22,7 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 
 ## Recently Completed (2026-01-14 to 2026-01-15)
 
+- **SEC-EGRESS-01** — Egress monitoring + fail2ban tightening ✅
 - **SEC-WATCH-01** — Hardening baseline + watchdog (48h post-incident verification) ✅
 - **TEST-COVERAGE-01** — Expand @smoke test coverage (4 new tests: producers, contact, terms, privacy) ✅
 - **TEST-UNSKIP-02** — Add 5 CI-safe @smoke page load tests (PDP, cart, login, register, home) ✅
