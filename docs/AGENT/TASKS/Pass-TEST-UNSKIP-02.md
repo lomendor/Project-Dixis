@@ -37,12 +37,12 @@ All tests are CI-safe:
 ## Definition of Done
 
 - [x] 5 new `@smoke` tests added to smoke.spec.ts
-- [ ] CI E2E PostgreSQL job discovers and runs all @smoke tests
-- [ ] All @smoke tests PASS
-- [ ] quality-gates PASS
+- [x] CI E2E PostgreSQL job discovers and runs all @smoke tests
+- [x] All @smoke tests PASS
+- [x] quality-gates PASS
 
 ## PRs
 
 | PR | Title | Status |
 |----|-------|--------|
-| #XXXX | Pass TEST-UNSKIP-02: add 5 @smoke page load tests | PENDING |
+| #2206 | Pass TEST-UNSKIP-02: add 5 @smoke page load tests | ✅ MERGED |

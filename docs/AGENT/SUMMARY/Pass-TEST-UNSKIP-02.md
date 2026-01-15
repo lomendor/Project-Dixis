@@ -1,8 +1,8 @@
 # TEST-UNSKIP-02 — Add CI-Safe @smoke Page Load Tests
 
 **Date**: 2026-01-15
-**Status**: IN PROGRESS
-**PR**: #PENDING
+**Status**: ✅ COMPLETE
+**PR**: #2206
 
 ## TL;DR
 
@@ -39,9 +39,9 @@ All tests follow these principles:
 ## DoD Verification
 
 - [x] 5 new `@smoke` tests added to smoke.spec.ts
-- [ ] CI E2E PostgreSQL job discovers and runs all @smoke tests
-- [ ] All @smoke tests PASS
-- [ ] quality-gates PASS
+- [x] CI E2E PostgreSQL job discovers and runs all @smoke tests
+- [x] All @smoke tests PASS
+- [x] quality-gates PASS
 
 ## Key Technical Insight
 
