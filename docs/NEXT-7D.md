@@ -9,7 +9,6 @@ _(empty — pick next unblocked item from NEXT)_
 
 1. **Pass 52 — Card Payments Enable** (BLOCKED — READY once user provides Stripe keys, see CREDENTIALS.md)
 2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — READY once user provides SMTP/Resend keys, see CREDENTIALS.md)
-3. **TEST-COVERAGE-01 — Expand @smoke test coverage** (UNBLOCKED — add more CI-safe @smoke tests)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -23,6 +22,7 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 
 ## Recently Completed (2026-01-14 to 2026-01-15)
 
+- **TEST-COVERAGE-01** — Expand @smoke test coverage (4 new tests: producers, contact, terms, privacy) ✅
 - **TEST-UNSKIP-02** — Add 5 CI-safe @smoke page load tests (PDP, cart, login, register, home) ✅
 - **OPS-PM2-01b** — STATE.md housekeeping for OPS-PM2-01 ✅
 - **OPS-PM2-01** — Deploy workflow readiness gate (prevents 502 after deploy) ✅
