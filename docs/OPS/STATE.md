@@ -1,6 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-14 (Pass-OPS-CANONICAL-PATHS-01)
+**Last Updated**: 2026-01-15 (Pass-TEST-UNSKIP-02)
+
+## 2026-01-15 — Pass TEST-UNSKIP-02: Add CI-Safe @smoke Page Load Tests
+
+**Status**: ✅ MERGED
+
+Added 5 new `@smoke` tests for core page loads that actually run in CI (e2e-postgres uses `--grep @smoke`).
+
+### Why
+
+Previous TEST-UNSKIP-02 (PR #1964) unskipped tests that were "false-green" — they appeared to pass but never actually ran in CI because they lacked the `@smoke` tag.
+
+### Tests Added
+
+| Test | Description |
+|------|-------------|
+| `@smoke PDP page loads` | Product detail page (200 or 404 gracefully) |
+| `@smoke cart page loads` | Cart page renders body |
+| `@smoke login page loads` | Login page (200/302/307) |
+| `@smoke register page loads` | Register page (200/302/307) |
+| `@smoke home page loads` | Home page renders nav/main |
+
+### PRs
+
+- #2206 (test: add 5 @smoke page load tests) — merged
+
+---
 
 ## 2026-01-14 — Pass OPS-CANONICAL-PATHS-01: Canonical Prod Paths in Deploy Workflows
 
