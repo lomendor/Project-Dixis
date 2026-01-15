@@ -1,6 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (SEC-UDEV-01)
+**Last Updated**: 2026-01-15 (TEST-COVERAGE-01)
+
+## 2026-01-15 — Pass TEST-COVERAGE-01: Expand @smoke Test Coverage
+
+**Status**: ✅ CLOSED
+
+Added 4 new `@smoke` tests for public pages (producers, contact, legal/terms, legal/privacy).
+
+### Tests Added
+
+| Test | Description |
+|------|-------------|
+| `@smoke producers page loads` | Producer listing page |
+| `@smoke contact page loads` | Contact page |
+| `@smoke terms page loads` | Legal terms page |
+| `@smoke privacy page loads` | Legal privacy page |
+
+### Evidence
+
+- PR #2213 merged (all checks passed: E2E PostgreSQL, quality-gates, heavy-checks)
+- Smoke test count in smoke.spec.ts: 11 → 15
+
+### PRs
+
+- #2213 (test: add 4 @smoke page load tests) — merged
+
+---
 
 ## 2026-01-15 — SEC-UDEV-01: UDEV Persistence Mechanism Found & Removed
 
