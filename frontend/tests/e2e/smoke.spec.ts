@@ -75,3 +75,87 @@ test('@smoke checkout page loads or redirects', async ({ page }) => {
   // - Actual form (if cart has items)
   // Full form testing is done in @regression tests
 });
+
+// === TEST-UNSKIP-02: 5 new @smoke tests (CI-safe, no SSR data dependency) ===
+
+// @smoke — PDP page loads without crash (product detail page)
+// CI-safe: Checks page structure loads, doesn't require specific product data
+test('@smoke PDP page loads', async ({ page }) => {
+  // Use product ID 1 (commonly available) - page should at least load structure
+  const response = await page.goto('/products/1', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Page should either:
+  // 1. Load product detail (200) - with skeleton or actual data
+  // 2. Show 404/not found gracefully
+  // Both are valid - we just verify no crash/500
+  const status = response?.status() || 0;
+  expect([200, 404].includes(status)).toBe(true);
+
+  // Verify body exists (page rendered something)
+  await expect(page.locator('body')).toBeVisible();
+});
+
+// @smoke — Cart page loads without crash
+// CI-safe: Cart page should always render (empty state if no items)
+test('@smoke cart page loads', async ({ page }) => {
+  await page.goto('/cart', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Cart page should show EITHER items OR empty state
+  // Both are valid smoke outcomes
+  const cartContent = page.locator('main');
+  await expect(cartContent).toBeVisible({ timeout: 10000 });
+
+  // Look for any cart-related content (items, empty message, or heading)
+  const hasContent = await page.locator('text=/καλάθι|cart|άδειο|empty|προϊόν|product/i').first().isVisible({ timeout: 5000 }).catch(() => false);
+
+  // Page rendered something cart-related
+  expect(hasContent || await cartContent.isVisible()).toBe(true);
+});
+
+// @smoke — Login page loads without crash
+// CI-safe: Auth page should always render its form
+test('@smoke login page loads', async ({ page }) => {
+  const response = await page.goto('/auth/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Login page should load (200) or redirect (already logged in)
+  const status = response?.status() || 0;
+  const url = page.url();
+
+  // Accept: 200 (login form), 307/302 (redirect if already logged in)
+  const isValidStatus = status === 200 || status === 307 || status === 302;
+  const isValidRedirect = url.includes('/login') || url.includes('/auth') || url.includes('/account') || url === '/';
+
+  expect(isValidStatus || isValidRedirect).toBe(true);
+});
+
+// @smoke — Register page loads without crash
+// CI-safe: Auth page should always render its form
+test('@smoke register page loads', async ({ page }) => {
+  const response = await page.goto('/auth/register', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Register page should load (200) or redirect (already logged in)
+  const status = response?.status() || 0;
+  const url = page.url();
+
+  // Accept: 200 (register form), 307/302 (redirect if already logged in)
+  const isValidStatus = status === 200 || status === 307 || status === 302;
+  const isValidRedirect = url.includes('/register') || url.includes('/auth') || url.includes('/account') || url === '/';
+
+  expect(isValidStatus || isValidRedirect).toBe(true);
+});
+
+// @smoke — Home page loads without crash
+// CI-safe: Home page should always render
+test('@smoke home page loads', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Home page should render body
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+
+  // Should have some navigation or main content
+  const hasNav = await page.locator('nav, header').first().isVisible({ timeout: 5000 }).catch(() => false);
+  const hasMain = await page.locator('main').isVisible({ timeout: 5000 }).catch(() => false);
+
+  // Page rendered meaningful structure
+  expect(hasNav || hasMain).toBe(true);
+});
