@@ -1,6 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-15 (SEC-EGRESS-01)
+**Last Updated**: 2026-01-15 (SEC-LOGWATCH-01)
+
+## 2026-01-15 — Pass SEC-LOGWATCH-01: Local Log Monitoring
+
+**Status**: ✅ CLOSED
+
+Added automated local log analysis for security anomalies (no email dependency).
+
+### Installed
+
+| Component | Status |
+|-----------|--------|
+| sec-logwatch.timer (daily at 07:00 UTC) | ✅ |
+| /var/log/sec-logwatch.log | ✅ |
+| Admin IP whitelist (94.66.136.90, 94.66.136.115) | ✅ |
+
+### Reports Include
+
+- AUTH.LOG: Top 10 IPs with accepted logins, unknown IP flagging
+- FAIL2BAN: Total bans, bans by jail
+- NGINX ACCESS: Top 10 IPs, top 10 status codes
+- NGINX ERROR: Last 20 lines
+
+### First Run
+
+- All accepted logins from admin IPs (260 total)
+- fail2ban: 24 bans in log
+- nginx: 830 200s, 59 404s (healthy)
+
+### PRs
+
+- #2217 (docs: SEC-LOGWATCH-01 local log monitoring) — merged
+
+---
 
 ## 2026-01-15 — Pass SEC-EGRESS-01: Egress Monitoring + fail2ban Tightening
 
