@@ -25,7 +25,8 @@ test.describe('Guest Checkout @smoke', () => {
 
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.locator('a').first().click();
-    await page.waitForURL(/\/products\/\d+/);
+    // Wait for any product detail page (numeric ID or slug like demo-1)
+    await page.waitForURL(/\/products\/[^/]+$/, { timeout: 10000 });
 
     const addToCartBtn = page.getByTestId('add-to-cart');
     await addToCartBtn.click();
@@ -47,7 +48,8 @@ test.describe('Guest Checkout @smoke', () => {
 
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.locator('a').first().click();
-    await page.waitForURL(/\/products\/\d+/);
+    // Wait for any product detail page (numeric ID or slug like demo-1)
+    await page.waitForURL(/\/products\/[^/]+$/, { timeout: 10000 });
 
     const addToCartBtn = page.getByTestId('add-to-cart');
     await addToCartBtn.click();
@@ -88,7 +90,8 @@ test.describe('Guest Checkout @smoke', () => {
 
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.locator('a').first().click();
-    await page.waitForURL(/\/products\/\d+/);
+    // Wait for any product detail page (numeric ID or slug like demo-1)
+    await page.waitForURL(/\/products\/[^/]+$/, { timeout: 10000 });
 
     const addToCartBtn = page.getByTestId('add-to-cart');
     await addToCartBtn.click();
@@ -130,7 +133,8 @@ test.describe('Guest Checkout @smoke', () => {
 
     const firstProduct = page.locator('[data-testid="product-card"]').first();
     await firstProduct.locator('a').first().click();
-    await page.waitForURL(/\/products\/\d+/);
+    // Wait for any product detail page (numeric ID or slug like demo-1)
+    await page.waitForURL(/\/products\/[^/]+$/, { timeout: 10000 });
 
     const addToCartBtn = page.getByTestId('add-to-cart');
     await addToCartBtn.click();
