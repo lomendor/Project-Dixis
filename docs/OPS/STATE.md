@@ -1,8 +1,37 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (SEARCH-FTS-01)
+**Last Updated**: 2026-01-16 (EN-LANGUAGE-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-16 — Pass EN-LANGUAGE-01: English Language Support
+
+**Status**: ✅ CLOSED
+
+Added multi-language support with Greek (default) and English fallback.
+
+### Changes
+
+- **LocaleContext**: Cookie-based persistence (`dixis_locale`), browser language detection
+- **Header**: Language switcher buttons (EL/EN) for desktop and mobile
+- **Translations**: Complete EN translations in `messages/en.json` (154+ lines)
+- **i18n Integration**: Login page, Products search, Header navigation
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| LocaleContext with cookie | ✅ |
+| Language switcher (Header) | ✅ |
+| EN translations complete | ✅ |
+| Browser language detection | ✅ |
+| E2E locale tests (3) | ✅ |
+
+### PRs
+
+- #2249 (feat: Pass EN-LANGUAGE-01 English language support) — merged
+
+---
 
 ## 2026-01-16 — Pass SEARCH-FTS-01: Full-Text Product Search
 

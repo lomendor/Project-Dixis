@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-16 (SEARCH-FTS-01)
+**Last Updated**: 2026-01-16 (EN-LANGUAGE-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -16,9 +16,9 @@ _(empty — pick next unblocked item from NEXT)_
 
 ### Unblocked (ready to start)
 
-3. **Pass EN-LANGUAGE-01** — English Language Support
-4. **Pass PRODUCER-DASHBOARD-01** — Producer Dashboard Enhancements
-5. **Pass NOTIFICATIONS-01** — In-app Notifications System
+3. **Pass PRODUCER-DASHBOARD-01** — Producer Dashboard Enhancements
+4. **Pass NOTIFICATIONS-01** — In-app Notifications System
+5. **Pass EN-LANGUAGE-02** — Extend i18n to remaining pages (checkout, orders, producer)
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -33,6 +33,7 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## Recently Completed (2026-01-14 to 2026-01-16)
 
+- **EN-LANGUAGE-01** — English language support with LocaleContext + language switcher ✅
 - **SEARCH-FTS-01** — Full-text product search with PostgreSQL FTS + ranking ✅
 - **ADMIN-USERS-01** — Admin user management UI at /admin/users ✅
 - **GUEST-CHECKOUT-01** — Guest checkout enabled (no auth required to purchase) ✅
