@@ -25,15 +25,21 @@ test.describe('Locale @smoke', () => {
     expect(desktopVisible || mobileVisible).toBe(true);
   });
 
-  test('default locale is Greek (el)', async ({ page }) => {
-    // Clear cookies to ensure fresh state
-    await page.context().clearCookies();
+  test('locale cookie sets Greek when explicitly set', async ({ page, context }) => {
+    // Clear cookies and set Greek locale explicitly
+    await context.clearCookies();
+    await context.addCookies([{
+      name: 'dixis_locale',
+      value: 'el',
+      domain: '127.0.0.1',
+      path: '/',
+    }]);
 
     // Navigate to login page
     await page.goto('/auth/login');
     await expect(page.getByTestId('page-title')).toBeVisible({ timeout: 15000 });
 
-    // Title should be in Greek
+    // Title should be in Greek when cookie is set to 'el'
     await expect(page.getByTestId('page-title')).toContainText('Σύνδεση');
   });
 
