@@ -1,17 +1,26 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-15 11:00 UTC
+**Last Updated**: 2026-01-16 (PRD-AUDIT-01)
 
 ## WIP (1 item only)
 _(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, max 3)
 
-1. **Pass 52 — Card Payments Enable** (BLOCKED — READY once user provides Stripe keys, see CREDENTIALS.md)
-2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — READY once user provides SMTP/Resend keys, see CREDENTIALS.md)
+### Blocked (awaiting credentials)
+
+1. **Pass 52 — Card Payments Enable** (BLOCKED — needs Stripe keys, see CREDENTIALS.md)
+2. **Pass 60 — Email Infrastructure Enable** (BLOCKED — needs SMTP/Resend keys, see CREDENTIALS.md)
+
+### Unblocked (ready to start)
+
+3. **Pass GUEST-CHECKOUT-01** — Guest Checkout (no auth required to purchase)
+4. **Pass ADMIN-USERS-01** — Admin User Management UI
+5. **Pass SEARCH-FTS-01** — Full-Text Product Search
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
+See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## How to Run E2E Full Manually
 
@@ -20,8 +29,9 @@ See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 3. Optional: Enter grep filter (e.g., `@regression`)
 4. Artifacts: `e2e-full-report-{run_number}` (playwright-report + test-results)
 
-## Recently Completed (2026-01-14 to 2026-01-15)
+## Recently Completed (2026-01-14 to 2026-01-16)
 
+- **PRD-AUDIT-01** — PRD→Reality mapping (111 features, 88% health score, gaps identified) ✅
 - **SEC-ROTATE-01** — SSH key rotation (old keys removed, new key installed) ✅
 - **SEC-LOGWATCH-01** — Local log monitoring (auth, fail2ban, nginx) ✅
 - **SEC-EGRESS-01** — Egress monitoring + fail2ban tightening ✅
