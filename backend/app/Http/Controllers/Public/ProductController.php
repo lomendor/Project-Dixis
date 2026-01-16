@@ -6,14 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of products with filtering, search, and sorting.
+     *
+     * Pass SEARCH-FTS-01: Ranked full-text search on PostgreSQL,
+     * ILIKE fallback on other databases (e.g., SQLite in CI).
      */
     public function index(Request $request): JsonResponse
     {
+        $search = $request->get('search');
+        $usesFts = false;
+
         $query = Product::query()->with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
         }, 'producer']);
@@ -21,12 +28,27 @@ class ProductController extends Controller
         // Default to active products only
         $query->where('is_active', true);
 
-        // Search filter
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
+        // Search filter with FTS ranking on PostgreSQL, ILIKE fallback otherwise
+        if ($search) {
+            if (DB::getDriverName() === 'pgsql') {
+                // PostgreSQL: Use full-text search with ranking
+                // websearch_to_tsquery handles phrases and operators safely
+                $query->whereRaw(
+                    "search_vector @@ websearch_to_tsquery('simple', ?)",
+                    [$search]
+                );
+                $query->selectRaw(
+                    "*, ts_rank_cd(search_vector, websearch_to_tsquery('simple', ?)) AS search_rank",
+                    [$search]
+                );
+                $usesFts = true;
+            } else {
+                // Non-PostgreSQL (SQLite in CI): Use ILIKE fallback
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
         }
 
         // Category filter (by slug or id)
@@ -68,11 +90,15 @@ class ProductController extends Controller
         }
 
         // Sorting
-        $sortField = $request->get('sort', 'created_at');
+        // When FTS is active and no explicit sort requested, order by search_rank DESC
+        $sortField = $request->get('sort', $usesFts ? 'relevance' : 'created_at');
         $sortDir = $request->get('dir', 'desc');
 
         $allowedSorts = ['price', 'name', 'created_at'];
-        if (in_array($sortField, $allowedSorts)) {
+        if ($usesFts && $sortField === 'relevance') {
+            // FTS ranking: best matches first
+            $query->orderByRaw('search_rank DESC');
+        } elseif (in_array($sortField, $allowedSorts)) {
             $query->orderBy($sortField, $sortDir === 'asc' ? 'asc' : 'desc');
         } else {
             $query->orderBy('created_at', 'desc');
