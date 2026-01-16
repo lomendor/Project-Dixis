@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
+import { useAuth } from '@/hooks/useAuth'
 
 function CheckoutContent() {
   const router = useRouter()
   const cartItems = useCart(s => s.items)
   const clear = useCart(s => s.clear)
+  const { isAuthenticated, user } = useAuth()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -16,6 +18,9 @@ function CheckoutContent() {
   const [cardProcessing, setCardProcessing] = useState(false)
   // Fix React error #418: Prevent hydration mismatch by waiting for client mount
   const [isMounted, setIsMounted] = useState(false)
+
+  // Guest checkout: email is required for order confirmation
+  const isGuest = !isAuthenticated
 
   useEffect(() => {
     setIsMounted(true)
@@ -179,6 +184,14 @@ function CheckoutContent() {
         <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6" data-testid="checkout-form">
           <h2 className="font-semibold mb-4">Στοιχεία Αποστολής</h2>
 
+          {isGuest && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" data-testid="guest-checkout-notice">
+              <p className="text-sm text-blue-800">
+                Αγορά χωρίς λογαριασμό — Εισάγετε το email σας για να λάβετε επιβεβαίωση παραγγελίας.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">Ονοματεπώνυμο</label>
@@ -208,16 +221,25 @@ function CheckoutContent() {
             </div>
 
             <div>
-              <label htmlFor="checkout-email" className="block text-sm font-medium mb-1">Email</label>
+              <label htmlFor="checkout-email" className="block text-sm font-medium mb-1">
+                Email{isGuest && <span className="text-red-500 ml-1">*</span>}
+              </label>
               <input
                 id="checkout-email"
                 name="email"
                 type="email"
                 inputMode="email"
+                required={isGuest}
                 autoComplete="email"
+                defaultValue={user?.email || ''}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-email"
               />
+              {isGuest && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Απαιτείται για την αποστολή επιβεβαίωσης παραγγελίας
+                </p>
+              )}
             </div>
 
             <div>
