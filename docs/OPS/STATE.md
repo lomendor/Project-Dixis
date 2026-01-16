@@ -1,6 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (PRD-AUDIT-01)
+**Last Updated**: 2026-01-16 (OPS-ACTIVE-01)
+
+## 2026-01-16 — Pass OPS-ACTIVE-01: Create ACTIVE.md Entry Point
+
+**Status**: ✅ CLOSED
+
+Created single entry point file to reduce agent boot time and token consumption.
+
+### Changes
+
+- `docs/ACTIVE.md` (new) — THE entry point (~90 lines)
+- `docs/AGENT/SEEDS/boot.md` — Updated startup sequence
+- `docs/AGENT/README.md` — Points to ACTIVE.md
+
+### Before vs After
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Boot files | 4+ | 3 |
+| Boot tokens | ~3000+ | ~800-1000 |
+
+### PRs
+
+- #TBD (docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point) — pending
+
+---
 
 ## 2026-01-16 — Pass PRD-AUDIT-01: PRD→Reality Mapping
 
@@ -33,7 +58,7 @@ Audited PRD against repository reality. Created mapping document with gaps and o
 
 ### PRs
 
-- #TBD (docs: Pass PRD-AUDIT-01 PRD→Reality mapping) — pending
+- #2225 (docs: Pass PRD-AUDIT-01 PRD→Reality mapping) — merged
 
 ---
 
