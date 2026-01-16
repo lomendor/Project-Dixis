@@ -1,6 +1,8 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-16 (PRD-AUDIT-01)
+**Last Updated**: 2026-01-16 (OPS-ACTIVE-01)
+
+> **New**: See `docs/ACTIVE.md` for quick-start entry point.
 
 ## WIP (1 item only)
 _(empty — pick next unblocked item from NEXT)_
@@ -31,6 +33,7 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## Recently Completed (2026-01-14 to 2026-01-16)
 
+- **OPS-ACTIVE-01** — Create ACTIVE.md entry point (reduced boot tokens from ~3000 to ~800) ✅
 - **PRD-AUDIT-01** — PRD→Reality mapping (111 features, 88% health score, gaps identified) ✅
 - **SEC-ROTATE-01** — SSH key rotation (old keys removed, new key installed) ✅
 - **SEC-LOGWATCH-01** — Local log monitoring (auth, fail2ban, nginx) ✅

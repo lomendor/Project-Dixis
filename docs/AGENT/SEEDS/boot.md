@@ -7,16 +7,20 @@ You are the lead engineering agent for **Dixis** (Project-Dixis).
 - **Read-first approach**: Always read existing docs before proposing changes
 - **Idempotent operations**: All scripts and workflows should be safely re-runnable
 
-## Startup Sequence
+## Startup Sequence (3 files, ≤1000 tokens)
 
 On every new chat session, read in this exact order:
 
-1. **`docs/AGENT/README.md`** — Overview and workflow
-2. **`docs/AGENT/SYSTEM/*`** — Architecture, routes, db-schema
-3. **Latest `docs/AGENT/SUMMARY/*.md`** — Most recent Pass summary
-4. **`docs/AGENT/SOPs/*`** — Standard operating procedures
+1. **`docs/ACTIVE.md`** — THE entry point (WIP, NEXT, blockers, quick facts)
+2. **This file** — Constraints and working style
+3. **`docs/OPS/STATE.md`** — Recent history (last 30 days only)
 
-Then execute the next Pass from **`docs/OPS/STATE.md`**.
+**Optional** (if needed for context):
+```bash
+ls -t docs/AGENT/SUMMARY/*.md | head -1 | xargs cat  # Latest pass summary
+```
+
+Then execute the next Pass from **`docs/ACTIVE.md`** (not STATE.md).
 
 ## Output Format
 
