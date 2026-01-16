@@ -4,12 +4,15 @@
     "products": "Προϊόντα",
     "producers": "Παραγωγοί",
     "login": "Είσοδος",
-    "signup": "Εγγραφή"
+    "signup": "Εγγραφή",
+    "logout": "Αποσύνδεση",
+    "myOrders": "Οι Παραγγελίες μου",
+    "cart": "Καλάθι"
   },
   "home": {
     "title": "Dixis — Φρέσκα τοπικά προϊόντα",
     "subtitle": "Ανακάλυψε ποιοτικά ελληνικά προϊόντα απευθείας από παραγωγούς.",
-    "searchPlaceholder": "Αναζήτηση προϊόντων (π.χ. ελιές, πορτοκάλια…) "
+    "searchPlaceholder": "Αναζήτηση προϊόντων (π.χ. ελιές, πορτοκάλια…)"
   },
   "common": {
     "loading": "Φόρτωση…",
@@ -86,6 +89,10 @@
     "note": "Έκδοση προεπισκόπησης.",
     "error": "Αποτυχία φόρτωσης προϊόντων. Παρακαλώ δοκιμάστε ξανά.",
     "loading": "Φόρτωση προϊόντων...",
+    "searchPlaceholder": "Αναζήτηση προϊόντων...",
+    "noResults": "Δεν βρέθηκαν προϊόντα",
+    "showing": "{count} προϊόντα",
+    "showingSearch": "{count} προϊόντα για \"{search}\"",
     "filters": {
       "title": "Φίλτρα",
       "search": "Αναζήτηση...",
@@ -116,5 +123,41 @@
     "addToCart": "Προσθήκη στο καλάθι",
     "notFound": "Το προϊόν δεν βρέθηκε.",
     "backToProducts": "Επιστροφή στα προϊόντα"
+  },
+  "auth": {
+    "login": {
+      "title": "Σύνδεση στον Λογαριασμό σας",
+      "subtitle": "Ή",
+      "createAccount": "δημιουργήστε νέο λογαριασμό",
+      "email": "Διεύθυνση Email",
+      "emailPlaceholder": "Εισάγετε το email σας",
+      "password": "Κωδικός Πρόσβασης",
+      "passwordPlaceholder": "Εισάγετε τον κωδικό σας",
+      "submit": "Σύνδεση",
+      "submitting": "Σύνδεση...",
+      "backToProducts": "Πίσω στα Προϊόντα",
+      "fillAllFields": "Παρακαλώ συμπληρώστε όλα τα πεδία"
+    },
+    "register": {
+      "title": "Δημιουργία Λογαριασμού",
+      "subtitle": "Ή",
+      "haveAccount": "συνδεθείτε στον λογαριασμό σας",
+      "name": "Ονοματεπώνυμο",
+      "namePlaceholder": "Εισάγετε το ονοματεπώνυμό σας",
+      "email": "Διεύθυνση Email",
+      "emailPlaceholder": "Εισάγετε το email σας",
+      "password": "Κωδικός Πρόσβασης",
+      "passwordPlaceholder": "Δημιουργήστε κωδικό",
+      "confirmPassword": "Επιβεβαίωση κωδικού",
+      "confirmPlaceholder": "Επιβεβαιώστε τον κωδικό σας",
+      "submit": "Δημιουργία λογαριασμού",
+      "submitting": "Δημιουργία...",
+      "backToProducts": "Πίσω στα Προϊόντα"
+    }
+  },
+  "language": {
+    "select": "Γλώσσα",
+    "el": "Ελληνικά",
+    "en": "Αγγλικά"
   }
 }

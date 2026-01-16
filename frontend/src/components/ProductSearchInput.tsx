@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 /**
  * Pass SEARCH-FTS-01: Product search input with debounce and URL sync.
@@ -11,6 +12,7 @@ export function ProductSearchInput() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations();
 
   // Initialize from URL param
   const initialSearch = searchParams.get('search') || '';
@@ -66,18 +68,18 @@ export function ProductSearchInput() {
       <input
         type="search"
         data-testid="search-input"
-        placeholder="Αναζήτηση προϊόντων..."
+        placeholder={t('products.searchPlaceholder')}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
-        aria-label="Αναζήτηση προϊόντων"
+        aria-label={t('products.searchPlaceholder')}
       />
       {inputValue && (
         <button
           type="button"
           onClick={handleClear}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          aria-label="Καθαρισμός αναζήτησης"
+          aria-label={t('common.cancel')}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

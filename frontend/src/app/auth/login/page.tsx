@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const t = useTranslations();
 
   // Redirect authenticated users away from login page
   useEffect(() => {
@@ -22,29 +24,29 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
-      setError('Παρακαλώ συμπληρώστε όλα τα πεδία');
+      setError(t('auth.login.fillAllFields'));
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('🔐 Starting login process...', { email });
+
+      console.log('Starting login process...', { email });
       await login(email, password);
-      console.log('✅ Login successful, redirecting to home...');
-      
+      console.log('Login successful, redirecting to home...');
+
       // Small delay to ensure toast renders before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {
-      console.error('❌ Login failed:', err);
+      console.error('Login failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      
+
       // Set inline error display for form
       setError(errorMessage);
       // Note: Toast error is already handled by AuthContext
@@ -61,15 +63,15 @@ export default function Login() {
             Dixis
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-gray-900" data-testid="page-title">
-            Σύνδεση στον Λογαριασμό σας
+            {t('auth.login.title')}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Ή{' '}
+            {t('auth.login.subtitle')}{' '}
             <Link
               href="/auth/register"
               className="font-medium text-green-600 hover:text-green-500"
             >
-              δημιουργήστε νέο λογαριασμό
+              {t('auth.login.createAccount')}
             </Link>
           </p>
         </div>
@@ -86,7 +88,7 @@ export default function Login() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Διεύθυνση Email
+                {t('auth.login.email')}
               </label>
               <div className="mt-1">
                 <input
@@ -99,14 +101,14 @@ export default function Login() {
                   onChange={(e) => setEmail(e.target.value)}
                   data-testid="login-email"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Εισάγετε το email σας"
+                  placeholder={t('auth.login.emailPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Κωδικός Πρόσβασης
+                {t('auth.login.password')}
               </label>
               <div className="mt-1">
                 <input
@@ -119,7 +121,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   data-testid="login-password"
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="Εισάγετε τον κωδικό σας"
+                  placeholder={t('auth.login.passwordPlaceholder')}
                 />
               </div>
             </div>
@@ -137,7 +139,7 @@ export default function Login() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 )}
-                {loading ? 'Σύνδεση...' : 'Σύνδεση'}
+                {loading ? t('auth.login.submitting') : t('auth.login.submit')}
               </button>
             </div>
           </form>
@@ -148,7 +150,7 @@ export default function Login() {
                 href="/"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                ← Πίσω στα Προϊόντα
+                ← {t('auth.login.backToProducts')}
               </Link>
             </div>
           </div>
