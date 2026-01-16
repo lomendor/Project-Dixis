@@ -21,7 +21,9 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "back": "Back",
-    "continue": "Continue"
+    "continue": "Continue",
+    "previous": "Previous",
+    "next": "Next"
   },
   "cart": {
     "title": "Cart",
@@ -159,5 +161,18 @@
     "select": "Language",
     "el": "Greek",
     "en": "English"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You have no notifications.",
+    "error": "Failed to load notifications.",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all",
+    "showRead": "Show read",
+    "justNow": "Just now",
+    "minutesAgo": "minutes ago",
+    "hoursAgo": "hours ago",
+    "daysAgo": "days ago"
   }
 }
