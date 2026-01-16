@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-16 (OPS-ACTIVE-01)
+**Updated**: 2026-01-16 (OPS-STATE-THIN-01)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -89,7 +89,8 @@ ls -t docs/AGENT/SUMMARY/*.md | head -1 | xargs cat
 | Doc | Purpose |
 |-----|---------|
 | `docs/NEXT-7D.md` | Full backlog + completed history |
-| `docs/OPS/STATE.md` | Detailed pass records |
+| `docs/OPS/STATE.md` | Detailed pass records (last 10) |
+| `docs/OPS/STATE-ARCHIVE/` | Older pass history |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
 | `docs/AGENT/SOPs/CREDENTIALS.md` | VPS credential setup |
 
