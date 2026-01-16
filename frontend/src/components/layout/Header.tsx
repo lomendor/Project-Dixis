@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocale, useTranslations } from '@/contexts/LocaleContext';
 import { locales, type Locale } from '../../../i18n';
@@ -151,6 +152,9 @@ export default function Header() {
               </button>
             ))}
           </div>
+
+          {/* Notification Bell - only for authenticated users */}
+          <NotificationBell />
 
           <CartIcon />
 
