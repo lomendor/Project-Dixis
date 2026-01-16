@@ -136,6 +136,47 @@ class PublicProductsTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('tomatoes', $data[0]['name']);
     }
 
+    /**
+     * Pass SEARCH-FTS-01: Test search returns empty results for nonsense query.
+     */
+    public function test_search_returns_empty_for_nonsense_query(): void
+    {
+        $response = $this->get('/api/v1/public/products?search=xyz123nonexistent');
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        // Should return empty array for nonsense search
+        $this->assertCount(0, $data);
+    }
+
+    /**
+     * Pass SEARCH-FTS-01: Test search works with Greek characters.
+     */
+    public function test_search_works_with_greek_characters(): void
+    {
+        // Create a product with Greek name
+        $user = User::factory()->create(['role' => 'producer']);
+        $producer = Producer::factory()->create(['user_id' => $user->id]);
+
+        $greekProduct = Product::factory()->create([
+            'name' => 'Ελληνικές Ντομάτες',
+            'description' => 'Φρέσκες ντομάτες από Κρήτη',
+            'producer_id' => $producer->id,
+            'is_active' => true,
+        ]);
+
+        // URL-encode Greek search term properly
+        $searchTerm = urlencode('Ελληνικές');
+        $response = $this->get("/api/v1/public/products?search={$searchTerm}");
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        $this->assertGreaterThan(0, count($data));
+        $this->assertStringContainsString('Ελληνικές', $data[0]['name']);
+    }
+
     public function test_category_filter_by_slug_works(): void
     {
         $response = $this->get('/api/v1/public/products?category=vegetables');
