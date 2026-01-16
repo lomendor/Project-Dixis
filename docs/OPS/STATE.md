@@ -1,8 +1,37 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (NOTIFICATIONS-01)
+**Last Updated**: 2026-01-17 (PRODUCER-DASHBOARD-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass PRODUCER-DASHBOARD-01: i18n + UX Polish
+
+**Status**: ✅ CLOSED
+
+Added i18n compliance and UX improvements to producer dashboard.
+
+### Changes
+
+- **i18n**: Convert hardcoded Greek to `useTranslations()`, add `producerDashboard.*` keys (el+en)
+- **Notifications Link**: Add quick action to `/account/notifications` (leverages NOTIFICATIONS-01)
+- **Test IDs**: Add data-testid attributes for E2E testing
+- **E2E**: 2 smoke tests (route protection, i18n compliance)
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| i18n compliance (no hardcoded Greek) | ✅ |
+| producerDashboard.* keys (25 each) | ✅ |
+| Notifications quick action | ✅ |
+| data-testid attributes | ✅ |
+| E2E smoke tests (2) | ✅ |
+
+### PRs
+
+- #2254 (feat: Pass PRODUCER-DASHBOARD-01 i18n + notifications link) — merged
+
+---
 
 ## 2026-01-16 — Pass NOTIFICATIONS-01: Notification Bell and Page UI
 
