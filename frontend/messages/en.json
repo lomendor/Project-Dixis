@@ -174,5 +174,30 @@
     "minutesAgo": "minutes ago",
     "hoursAgo": "hours ago",
     "daysAgo": "days ago"
+  },
+  "producerDashboard": {
+    "title": "Producer Dashboard",
+    "welcome": "Welcome, {name}! Here is your business overview.",
+    "totalOrders": "Total Orders",
+    "totalRevenue": "Total Revenue",
+    "activeProducts": "Active Products",
+    "averageOrderValue": "Average Order Value",
+    "topProducts": "Top Products",
+    "viewAllProducts": "View All Products",
+    "noProductsYet": "No products yet",
+    "startSelling": "Start by adding your first product to begin selling.",
+    "addProduct": "Add Product",
+    "product": "Product",
+    "price": "Price",
+    "stock": "Stock",
+    "status": "Status",
+    "inStock": "In Stock",
+    "active": "Active",
+    "noImage": "No Image",
+    "quickActions": "Quick Actions",
+    "viewOrders": "View Orders",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "tryAgain": "Try Again"
   }
 }
