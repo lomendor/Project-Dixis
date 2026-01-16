@@ -45,4 +45,5 @@ Enable guest checkout: users can purchase without creating an account.
 
 | PR | Title | Status |
 |----|-------|--------|
-| TBD | feat: Pass GUEST-CHECKOUT-01 guest checkout | PENDING |
+| #2232 | feat: Pass GUEST-CHECKOUT-01 guest checkout | MERGED |
+| #2233 | fix: E2E URL pattern for CI | PENDING |
