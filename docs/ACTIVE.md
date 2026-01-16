@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-16 (GUEST-CHECKOUT-01)
+**Updated**: 2026-01-16 (ADMIN-USERS-01)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -16,9 +16,9 @@ _(empty — pick next unblocked item from NEXT)_
 
 | # | Pass | Description | Effort |
 |---|------|-------------|--------|
-| 1 | ADMIN-USERS-01 | Admin user management UI | Small |
-| 2 | SEARCH-FTS-01 | Full-text product search | Medium |
-| 3 | EN-LANGUAGE-01 | English language support | Small |
+| 1 | SEARCH-FTS-01 | Full-text product search | Medium |
+| 2 | EN-LANGUAGE-01 | English language support | Small |
+| 3 | PRODUCER-DASHBOARD-01 | Producer dashboard enhancements | Medium |
 
 ---
 

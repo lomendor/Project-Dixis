@@ -1,8 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (GUEST-CHECKOUT-01)
+**Last Updated**: 2026-01-16 (ADMIN-USERS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-16 — Pass ADMIN-USERS-01: Admin User Management UI
+
+**Status**: ✅ CLOSED
+
+Created admin user management page at `/admin/users` with server-side authentication.
+
+### Changes
+
+- `frontend/src/app/admin/users/page.tsx` — Admin users list page
+- `frontend/tests/e2e/admin-users.spec.ts` — E2E tests for admin access
+- Fixed `guest-checkout.spec.ts` E2E tests for CI compatibility
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| `/admin/users` page | ✅ |
+| `requireAdmin()` server-side guard | ✅ |
+| Table: phone, role badge, status, date | ✅ |
+| E2E: admin sees users list | ✅ |
+| E2E: non-admin denied access | ✅ |
+
+### PRs
+
+- #2235 (feat: Pass ADMIN-USERS-01 admin users management) — merged
+- #2236 (fix: E2E guest-checkout cart tests for CI) — merged
+- #2237 (fix: E2E auth-guard tests for CI) — merged
+
+---
 
 ## 2026-01-16 — Pass GUEST-CHECKOUT-01: Guest Checkout
 
