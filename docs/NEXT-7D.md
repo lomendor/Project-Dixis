@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-16 (OPS-STATE-THIN-01)
+**Last Updated**: 2026-01-16 (GUEST-CHECKOUT-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -16,9 +16,9 @@ _(empty — pick next unblocked item from NEXT)_
 
 ### Unblocked (ready to start)
 
-3. **Pass GUEST-CHECKOUT-01** — Guest Checkout (no auth required to purchase)
-4. **Pass ADMIN-USERS-01** — Admin User Management UI
-5. **Pass SEARCH-FTS-01** — Full-Text Product Search
+3. **Pass ADMIN-USERS-01** — Admin User Management UI
+4. **Pass SEARCH-FTS-01** — Full-Text Product Search
+5. **Pass EN-LANGUAGE-01** — English Language Support
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -33,6 +33,7 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## Recently Completed (2026-01-14 to 2026-01-16)
 
+- **GUEST-CHECKOUT-01** — Guest checkout enabled (no auth required to purchase) ✅
 - **OPS-STATE-THIN-01** — Thin STATE + archive (1009→385 lines, history preserved) ✅
 - **OPS-ACTIVE-01** — Create ACTIVE.md entry point (reduced boot tokens from ~3000 to ~800) ✅
 - **PRD-AUDIT-01** — PRD→Reality mapping (111 features, 88% health score, gaps identified) ✅

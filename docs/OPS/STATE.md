@@ -1,8 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (OPS-STATE-THIN-01)
+**Last Updated**: 2026-01-16 (GUEST-CHECKOUT-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-16 — Pass GUEST-CHECKOUT-01: Guest Checkout
+
+**Status**: ✅ CLOSED
+
+Enabled guest checkout — users can purchase without creating an account.
+
+### Key Finding
+
+Backend already fully supported guest checkout (Pass 52):
+- `auth.optional` middleware on POST /orders
+- `OrderPolicy::create()` returns `true` for `$user = null`
+- `OrderEmailService` extracts email from `shipping_address`
+
+### Changes (Frontend only)
+
+- Guest checkout notice banner
+- Email field required for guests
+- Pre-fill email for logged-in users
+- E2E tests for guest checkout flow
+
+### PRs
+
+- #2232 (feat: Pass GUEST-CHECKOUT-01 guest checkout) — merged
+- #2233 (fix: E2E URL pattern for CI) — pending
+
+---
 
 ## 2026-01-16 — Pass OPS-STATE-THIN-01: Thin STATE + Archive
 
