@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 import ToastContainer from "@/components/Toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipLink from "@/components/SkipLink";
@@ -180,18 +181,20 @@ export default function RootLayout({
         {/* Skip to main content link for screen readers */}
         <SkipLink />
         <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
-          <ToastProvider>
-            <AuthProvider>
-              <Header />
-              <div className="max-w-6xl mx-auto px-4 py-8">
-                <main data-testid="page-root">
-                  {children}
-                </main>
-              </div>
-              <Footer />
-              <ToastContainer />
-            </AuthProvider>
-          </ToastProvider>
+          <LocaleProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <Header />
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                  <main data-testid="page-root">
+                    {children}
+                  </main>
+                </div>
+                <Footer />
+                <ToastContainer />
+              </AuthProvider>
+            </ToastProvider>
+          </LocaleProvider>
         </ErrorBoundary>
       </body>
     </html>

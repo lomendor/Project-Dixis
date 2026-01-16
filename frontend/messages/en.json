@@ -1,5 +1,14 @@
 {
-  "nav": { "home": "Home", "products": "Products", "login": "Login", "signup": "Sign Up" },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "producers": "Producers",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "myOrders": "My Orders",
+    "cart": "Cart"
+  },
   "home": {
     "title": "Dixis — Fresh local products",
     "subtitle": "Discover quality Greek products directly from producers.",
@@ -8,6 +17,147 @@
   "common": {
     "loading": "Loading…",
     "error": "Something went wrong",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty.",
+    "items": "Items",
+    "qty": "Quantity",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "codFee": "Cash on delivery fee",
+    "tax": "VAT",
+    "total": "Total",
+    "update": "Update",
+    "remove": "Remove",
+    "checkout": "Proceed to checkout",
+    "continue": "Continue shopping",
+    "added": "Added to cart"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "name": "Full name",
+    "phone": "Phone",
+    "email": "Email (optional)",
+    "address": "Address",
+    "submit": "Place order",
+    "success": "Order completed!",
+    "orderId": "Order number",
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "oversell": "Insufficient stock. Please adjust quantities.",
+      "empty": "Cart is empty."
+    }
+  },
+  "shipping": {
+    "method": "Shipping method",
+    "PICKUP": "Store pickup",
+    "COURIER": "Courier delivery",
+    "COURIER_COD": "Cash on delivery"
+  },
+  "form": {
+    "name": "Full name",
+    "address": "Address",
+    "city": "City",
+    "postal": "Postal code",
+    "phone": "Phone"
+  },
+  "order": {
+    "success": {
+      "title": "Thank you!",
+      "body": "Your order has been placed with number #{id}."
+    }
+  },
+  "errors": {
+    "phone": "Please enter a valid Greek phone number.",
+    "postal": "Please enter a valid postal code (5 digits).",
+    "forbidden": "Forbidden",
+    "notfound": "Not found"
+  },
+  "producers": {
+    "title": "Our Producers",
+    "subtitle": "Meet the local producers"
+  },
+  "products": {
+    "title": "Products",
+    "empty": "No products available.",
+    "note": "Preview version.",
+    "error": "Failed to load products. Please try again.",
+    "loading": "Loading products...",
+    "searchPlaceholder": "Search products...",
+    "noResults": "No products found",
+    "showing": "Showing {count} products",
+    "showingSearch": "Showing {count} products for \"{search}\"",
+    "filters": {
+      "title": "Filters",
+      "search": "Search...",
+      "category": "Category...",
+      "price_min": "Min price",
+      "price_max": "Max price",
+      "in_stock": "In stock only",
+      "apply": "Apply"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "card": {
+      "stock": "In stock",
+      "outOfStock": "Out of stock",
+      "price": "Price"
+    }
+  },
+  "product": {
+    "title": "Product",
+    "price": "Price",
+    "stock": "Stock",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "producer": "Producer",
+    "description": "Description",
+    "addToCart": "Add to cart",
+    "notFound": "Product not found.",
+    "backToProducts": "Back to products"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Or",
+      "createAccount": "create a new account",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "backToProducts": "Back to Products",
+      "fillAllFields": "Please fill in all fields"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Or",
+      "haveAccount": "sign in to existing account",
+      "name": "Full name",
+      "namePlaceholder": "Enter your full name",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Create a password",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Confirm your password",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "backToProducts": "Back to Products"
+    }
+  },
+  "language": {
+    "select": "Language",
+    "el": "Greek",
+    "en": "English"
   }
 }

@@ -4,17 +4,21 @@ import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
 import { useAuth } from '@/hooks/useAuth';
-
-const navLinks = [
-  { href: '/products', label: 'Προϊόντα' },
-  { href: '/orders/lookup', label: 'Παραγγελία' },
-  { href: '/producers', label: 'Για Παραγωγούς' },
-  { href: '/legal/terms', label: 'Όροι' },
-];
+import { useLocale, useTranslations } from '@/contexts/LocaleContext';
+import { locales, type Locale } from '../../../i18n';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
+  const t = useTranslations();
+  const { locale, setLocale } = useLocale();
+
+  const navLinks = [
+    { href: '/products', label: t('nav.products') },
+    { href: '/orders/lookup', label: t('checkout.orderId') },
+    { href: '/producers', label: t('producers.title') },
+    { href: '/legal/terms', label: t('errors.forbidden').split(' ')[0] || 'Terms' },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -22,6 +26,10 @@ export default function Header() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleLocaleChange = (newLocale: Locale) => {
+    setLocale(newLocale);
   };
 
   return (
@@ -47,14 +55,14 @@ export default function Header() {
           {/* Desktop Auth Section */}
           {isAuthenticated ? (
             <>
-              {/* Consumer: Show "Οι Παραγγελίες Μου" */}
+              {/* Consumer: Show "My Orders" */}
               {!isProducer && !isAdmin && (
                 <Link
                   href="/account/orders"
                   className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
                   data-testid="nav-my-orders"
                 >
-                  Οι Παραγγελίες Μου
+                  {t('nav.myOrders')}
                 </Link>
               )}
               {isProducer && (
@@ -63,7 +71,7 @@ export default function Header() {
                   className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
                   data-testid="nav-producer-dashboard"
                 >
-                  Πίνακας Παραγωγού
+                  {t('producers.title')}
                 </Link>
               )}
               {isAdmin && (
@@ -83,7 +91,7 @@ export default function Header() {
                 className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
                 data-testid="logout-btn"
               >
-                Αποσύνδεση
+                {t('nav.logout')}
               </button>
             </>
           ) : (
@@ -93,20 +101,57 @@ export default function Header() {
                 className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
                 data-testid="nav-login"
               >
-                Σύνδεση
+                {t('nav.login')}
               </Link>
               <Link
                 href="/auth/register"
                 className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-md transition-colors"
                 data-testid="nav-register"
               >
-                Εγγραφή
+                {t('nav.signup')}
               </Link>
             </>
           )}
+
+          {/* Language Switcher */}
+          <div className="flex items-center gap-1 ml-2 border-l border-neutral-200 pl-4">
+            {locales.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => handleLocaleChange(loc)}
+                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                  locale === loc
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
+                }`}
+                data-testid={`lang-${loc}`}
+                aria-label={t(`language.${loc}`)}
+              >
+                {loc.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Mobile Language Switcher */}
+          <div className="flex md:hidden items-center gap-1">
+            {locales.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => handleLocaleChange(loc)}
+                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                  locale === loc
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-500 hover:text-neutral-700'
+                }`}
+                data-testid={`mobile-lang-${loc}`}
+              >
+                {loc.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           <CartIcon />
 
           {/* Mobile Menu Button - 44px touch target */}
@@ -115,7 +160,7 @@ export default function Header() {
             className="md:hidden p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
-            aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             data-testid="mobile-menu-button"
           >
             {mobileMenuOpen ? (
@@ -150,7 +195,7 @@ export default function Header() {
             <div className="border-t border-neutral-200 mt-2 pt-2">
               {isAuthenticated ? (
                 <>
-                  {/* Consumer: Show "Οι Παραγγελίες Μου" */}
+                  {/* Consumer: Show "My Orders" */}
                   {!isProducer && !isAdmin && (
                     <Link
                       href="/account/orders"
@@ -158,7 +203,7 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       data-testid="mobile-nav-my-orders"
                     >
-                      Οι Παραγγελίες Μου
+                      {t('nav.myOrders')}
                     </Link>
                   )}
                   {isProducer && (
@@ -168,7 +213,7 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       data-testid="mobile-nav-producer-dashboard"
                     >
-                      Πίνακας Παραγωγού
+                      {t('producers.title')}
                     </Link>
                   )}
                   {isAdmin && (
@@ -191,7 +236,7 @@ export default function Header() {
                       className="text-base font-medium text-neutral-700 hover:text-primary transition-colors"
                       data-testid="mobile-logout-btn"
                     >
-                      Αποσύνδεση
+                      {t('nav.logout')}
                     </button>
                   </div>
                 </>
@@ -203,7 +248,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="mobile-nav-login"
                   >
-                    Σύνδεση
+                    {t('nav.login')}
                   </Link>
                   <Link
                     href="/auth/register"
@@ -211,7 +256,7 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-testid="mobile-nav-register"
                   >
-                    Εγγραφή
+                    {t('nav.signup')}
                   </Link>
                 </>
               )}
