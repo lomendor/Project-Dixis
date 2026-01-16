@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { labelFor } from '@/lib/shipping/format';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 interface Order {
   id: string;
@@ -33,6 +34,7 @@ export default function OrderConfirmationPage() {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,25 +68,27 @@ export default function OrderConfirmationPage() {
       const data = await response.json();
       setOrder(data);
     } catch {
-      setError('Σφάλμα κατά τη φόρτωση της παραγγελίας');
+      setError(t('orderConfirmation.loadError'));
     } finally {
       setLoading(false);
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; color: string }> = {
-      PENDING: { label: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' },
-      PAID: { label: 'Πληρωμένη', color: 'bg-green-100 text-green-800' },
-      PROCESSING: { label: 'Επεξεργασία', color: 'bg-blue-100 text-blue-800' },
-      SHIPPED: { label: 'Απεστάλη', color: 'bg-purple-100 text-purple-800' },
-      DELIVERED: { label: 'Παραδόθηκε', color: 'bg-green-100 text-green-800' },
+    const statusColors: Record<string, string> = {
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      PAID: 'bg-green-100 text-green-800',
+      PROCESSING: 'bg-blue-100 text-blue-800',
+      SHIPPED: 'bg-purple-100 text-purple-800',
+      DELIVERED: 'bg-green-100 text-green-800',
     };
 
-    const config = statusConfig[status.toUpperCase()] || statusConfig['PENDING'];
+    const statusKey = status.toLowerCase() as 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered';
+    const color = statusColors[status.toUpperCase()] || statusColors['PENDING'];
+
     return (
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
-        {config.label}
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>
+        {t(`orderStatus.${statusKey}`)}
       </span>
     );
   };
@@ -119,13 +123,13 @@ export default function OrderConfirmationPage() {
             <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
               <span className="text-2xl">❌</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Σφάλμα</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('orderConfirmation.error')}</h1>
             <p className="text-gray-600 mb-6">{error}</p>
             <Link
               href="/"
               className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
-              Επιστροφή στην Αρχική
+              {t('orderConfirmation.backToHome')}
             </Link>
           </div>
         </div>
@@ -138,15 +142,15 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Παραγγελία Δεν Βρέθηκε</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('orderConfirmation.orderNotFound')}</h1>
             <p className="text-gray-600 mb-6">
-              Η παραγγελία με κωδικό {orderId} δεν βρέθηκε.
+              {t('orderConfirmation.orderNotFoundMsg').replace('{id}', orderId)}
             </p>
             <Link
               href="/"
               className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
-              Επιστροφή στην Αρχική
+              {t('orderConfirmation.backToHome')}
             </Link>
           </div>
         </div>
@@ -155,7 +159,7 @@ export default function OrderConfirmationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8" data-testid="order-confirmation-page">
       <div className="max-w-4xl mx-auto px-4">
         {/* Success Header */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-8 text-center">
@@ -163,10 +167,10 @@ export default function OrderConfirmationPage() {
             <span className="text-2xl">✅</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="confirmation-title">
-            Παραγγελία Ολοκληρώθηκε!
+            {t('orderConfirmation.orderComplete')}
           </h1>
           <p className="text-gray-600">
-            Η παραγγελία σας έχει καταγραφεί επιτυχώς και θα επεξεργαστεί σύντομα.
+            {t('orderConfirmation.orderSuccessMsg')}
           </p>
         </div>
 
@@ -174,14 +178,14 @@ export default function OrderConfirmationPage() {
         <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
-              Παραγγελία #{order.id}
+              {t('orderConfirmation.orderNumber').replace('{id}', order.id)}
             </h2>
             {getStatusBadge(order.status)}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Ημερομηνία Παραγγελίας</h3>
+              <h3 className="text-sm font-medium text-gray-900 mb-2">{t('orderConfirmation.orderDate')}</h3>
               <p className="text-gray-600">
                 {new Date(order.createdAt).toLocaleDateString('el-GR', {
                   year: 'numeric',
@@ -194,7 +198,7 @@ export default function OrderConfirmationPage() {
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Σύνολο Παραγγελίας</h3>
+              <h3 className="text-sm font-medium text-gray-900 mb-2">{t('orderConfirmation.orderTotal')}</h3>
               <p className="text-xl font-bold text-green-600" data-testid="order-total">
                 €{order.total.toFixed(2)}
               </p>
@@ -203,14 +207,14 @@ export default function OrderConfirmationPage() {
 
           {/* Order Items */}
           <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Προϊόντα</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('orderConfirmation.products')}</h3>
             <div className="space-y-4">
               {order.items.map((item) => (
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{item.name}</p>
                     <p className="text-sm text-gray-600">
-                      Ποσότητα: {item.quantity} × €{item.price.toFixed(2)}
+                      {t('orderConfirmation.quantity')}: {item.quantity} × €{item.price.toFixed(2)}
                     </p>
                   </div>
                   <p className="font-medium text-gray-900">
@@ -226,26 +230,26 @@ export default function OrderConfirmationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Shipping Address */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Διεύθυνση Αποστολής</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('orderConfirmation.shippingAddress')}</h3>
             <div className="text-gray-600">
               <p className="font-medium">{order.shipping.name}</p>
               <p>{order.shipping.line1}</p>
               {order.shipping.line2 && <p>{order.shipping.line2}</p>}
               <p>{order.shipping.city}, {order.shipping.postal}</p>
-              <p>Ελλάδα</p>
+              <p>{t('orderConfirmation.greece')}</p>
               {order.shipping.phone && (
-                <p className="mt-2">Τηλ: {order.shipping.phone}</p>
+                <p className="mt-2">{t('orderConfirmation.phone')}: {order.shipping.phone}</p>
               )}
             </div>
           </div>
 
           {/* Shipping Method & Cost */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Μεταφορικά</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('orderConfirmation.shippingCost')}</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">
-                  Μέθοδος (<span data-testid="order-shipping-label">{labelFor(order.shippingMethod)}</span>):
+                  {t('orderConfirmation.method')} (<span data-testid="order-shipping-label">{labelFor(order.shippingMethod)}</span>):
                 </span>
                 <span className="text-sm text-gray-600" data-testid="order-shipping">
                   €{Number(order.computedShipping || 0).toFixed(2)}
@@ -263,7 +267,7 @@ export default function OrderConfirmationPage() {
               className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
               data-testid="track-order-btn"
             >
-              Παρακολούθηση παραγγελίας »
+              {t('orderConfirmation.trackOrder')} »
             </Link>
 
             <Link
@@ -271,7 +275,7 @@ export default function OrderConfirmationPage() {
               className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors text-center font-medium"
               data-testid="continue-shopping-btn"
             >
-              Συνέχεια Αγορών
+              {t('orderConfirmation.continueShopping')}
             </Link>
 
             <button
@@ -279,7 +283,7 @@ export default function OrderConfirmationPage() {
               className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               data-testid="print-order-btn"
             >
-              Εκτύπωση Παραγγελίας
+              {t('orderConfirmation.printOrder')}
             </button>
           </div>
         </div>

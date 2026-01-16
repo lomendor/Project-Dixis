@@ -6,15 +6,9 @@ import { apiClient, ProducerOrder } from '@/lib/api';
 import Navigation from '@/components/Navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { formatCurrency } from '@/env';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
-
-const statusLabels: Record<OrderStatus, string> = {
-  pending: 'Σε Εκκρεμότητα',
-  processing: 'Σε Επεξεργασία',
-  shipped: 'Απεσταλμένη',
-  delivered: 'Παραδομένη',
-};
 
 const statusColors: Record<OrderStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -32,6 +26,7 @@ interface OrderCounts {
 }
 
 export default function ProducerOrdersPage() {
+  const t = useTranslations();
   const [orders, setOrders] = useState<ProducerOrder[]>([]);
   const [counts, setCounts] = useState<OrderCounts>({
     total: 0,
@@ -62,6 +57,10 @@ export default function ProducerOrdersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getStatusLabel = (status: OrderStatus): string => {
+    return t(`producerOrders.${status}`);
   };
 
   const FilterTab = ({
@@ -95,10 +94,10 @@ export default function ProducerOrdersPage() {
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              Παραγγελία #{order.id}
+              {t('producerOrders.orderNumber').replace('{id}', String(order.id))}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              {order.user?.name || 'Επισκέπτης'}
+              {order.user?.name || t('producerOrders.guest')}
             </p>
             <p className="text-sm text-gray-500">
               {new Date(order.created_at).toLocaleDateString('el-GR', {
@@ -116,7 +115,7 @@ export default function ProducerOrdersPage() {
                 statusColors[order.status]
               }`}
             >
-              {statusLabels[order.status]}
+              {getStatusLabel(order.status)}
             </span>
             <p className="text-xl font-bold text-gray-900 mt-2">
               {formatCurrency(parseFloat(order.total))}
@@ -127,7 +126,7 @@ export default function ProducerOrdersPage() {
         {/* Order Items */}
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">
-            Προϊόντα ({order.orderItems.length})
+            {t('producerOrders.products')} ({order.orderItems.length})
           </h4>
           <div className="space-y-2">
             {order.orderItems.map((item) => (
@@ -156,39 +155,39 @@ export default function ProducerOrdersPage() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50" data-testid="producer-orders-page">
         <Navigation />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Παραγγελίες</h1>
+            <h1 className="text-3xl font-bold text-gray-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
             <p className="text-gray-600 mt-2">
-              Διαχείριση παραγγελιών που περιέχουν τα προϊόντα σας
+              {t('producerOrders.subtitle')}
             </p>
           </div>
 
           {/* Status Filter Tabs */}
           <nav className="flex flex-wrap gap-2 mb-6">
-            <FilterTab status="all" label="Όλες" count={counts.total} />
+            <FilterTab status="all" label={t('producerOrders.all')} count={counts.total} />
             <FilterTab
               status="pending"
-              label="Σε Εκκρεμότητα"
+              label={t('producerOrders.pending')}
               count={counts.pending}
             />
             <FilterTab
               status="processing"
-              label="Σε Επεξεργασία"
+              label={t('producerOrders.processing')}
               count={counts.processing}
             />
             <FilterTab
               status="shipped"
-              label="Απεσταλμένες"
+              label={t('producerOrders.shipped')}
               count={counts.shipped}
             />
             <FilterTab
               status="delivered"
-              label="Παραδομένες"
+              label={t('producerOrders.delivered')}
               count={counts.delivered}
             />
           </nav>
@@ -221,7 +220,7 @@ export default function ProducerOrdersPage() {
                 onClick={loadOrders}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                Δοκιμάστε Ξανά
+                {t('producerOrders.tryAgain')}
               </button>
             </div>
           ) : orders.length === 0 ? (
@@ -243,14 +242,12 @@ export default function ProducerOrdersPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Δεν υπάρχουν παραγγελίες
+                {t('producerOrders.noOrders')}
               </h3>
               <p className="text-gray-600">
                 {activeFilter === 'all'
-                  ? 'Δεν έχετε λάβει ακόμη παραγγελίες για τα προϊόντα σας.'
-                  : `Δεν υπάρχουν παραγγελίες με κατάσταση "${
-                      statusLabels[activeFilter as OrderStatus]
-                    }".`}
+                  ? t('producerOrders.noOrdersYet')
+                  : t('producerOrders.noOrdersStatus').replace('{status}', getStatusLabel(activeFilter as OrderStatus))}
               </p>
             </div>
           ) : (
