@@ -1,8 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (ADMIN-USERS-01)
+**Last Updated**: 2026-01-16 (SEARCH-FTS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-16 — Pass SEARCH-FTS-01: Full-Text Product Search
+
+**Status**: ✅ CLOSED
+
+Implemented ranked full-text product search with PostgreSQL FTS and frontend search input.
+
+### Changes
+
+- **Backend migration**: tsvector column + GIN index (PostgreSQL-only)
+- **Backend controller**: websearch_to_tsquery + ts_rank_cd ranking
+- **Frontend**: Search input on /products with debounce + URL sync
+- **Tests**: PHPUnit + E2E filters-search.spec.ts updated
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| tsvector + GIN index (pgsql) | ✅ |
+| websearch_to_tsquery (safe) | ✅ |
+| ts_rank_cd ranking | ✅ |
+| ILIKE fallback (SQLite CI) | ✅ |
+| Search input with debounce | ✅ |
+| URL sync (?search=...) | ✅ |
+| "No results" message | ✅ |
+
+### PRs
+
+- #2242 (feat: Pass SEARCH-FTS-01 full-text product search) — merged
+
+---
 
 ## 2026-01-16 — Pass ADMIN-USERS-01: Admin User Management UI
 

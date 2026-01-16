@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-16 (ADMIN-USERS-01)
+**Last Updated**: 2026-01-16 (SEARCH-FTS-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -16,9 +16,9 @@ _(empty — pick next unblocked item from NEXT)_
 
 ### Unblocked (ready to start)
 
-3. **Pass SEARCH-FTS-01** — Full-Text Product Search
-4. **Pass EN-LANGUAGE-01** — English Language Support
-5. **Pass PRODUCER-DASHBOARD-01** — Producer Dashboard Enhancements
+3. **Pass EN-LANGUAGE-01** — English Language Support
+4. **Pass PRODUCER-DASHBOARD-01** — Producer Dashboard Enhancements
+5. **Pass NOTIFICATIONS-01** — In-app Notifications System
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -33,6 +33,7 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## Recently Completed (2026-01-14 to 2026-01-16)
 
+- **SEARCH-FTS-01** — Full-text product search with PostgreSQL FTS + ranking ✅
 - **ADMIN-USERS-01** — Admin user management UI at /admin/users ✅
 - **GUEST-CHECKOUT-01** — Guest checkout enabled (no auth required to purchase) ✅
 - **OPS-STATE-THIN-01** — Thin STATE + archive (1009→385 lines, history preserved) ✅
