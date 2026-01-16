@@ -5,12 +5,14 @@ import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 import { useAuth } from '@/hooks/useAuth'
+import { useTranslations } from '@/contexts/LocaleContext'
 
 function CheckoutContent() {
   const router = useRouter()
   const cartItems = useCart(s => s.items)
   const clear = useCart(s => s.clear)
   const { isAuthenticated, user } = useAuth()
+  const t = useTranslations()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -108,7 +110,7 @@ function CheckoutContent() {
           return
         } catch (paymentErr) {
           console.error('Card payment init failed:', paymentErr)
-          setError('Σφάλμα κατά την εκκίνηση πληρωμής με κάρτα. Παρακαλώ δοκιμάστε ξανά.')
+          setError(t('checkoutPage.cardPaymentError'))
           setCardProcessing(false)
           return
         }
@@ -119,7 +121,7 @@ function CheckoutContent() {
       router.push(`/thank-you?id=${order.id}`)
     } catch (err) {
       console.error('Order creation failed:', err)
-      setError('Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.')
+      setError(t('checkoutPage.orderError'))
     } finally {
       setLoading(false)
     }
@@ -130,7 +132,7 @@ function CheckoutContent() {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">Φόρτωση...</p>
+          <p className="text-gray-600">{t('checkoutPage.loading')}</p>
         </div>
       </main>
     )
@@ -141,9 +143,9 @@ function CheckoutContent() {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600 mb-4">Το καλάθι σας είναι κενό</p>
+          <p className="text-gray-600 mb-4">{t('checkoutPage.emptyCart')}</p>
           <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
-            Προβολή Προϊόντων
+            {t('checkoutPage.viewProducts')}
           </a>
         </div>
       </main>
@@ -153,10 +155,10 @@ function CheckoutContent() {
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6">Checkout</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-6" data-testid="checkout-title">{t('checkout.title')}</h1>
 
         <div className="bg-white border rounded-xl p-6 mb-6">
-          <h2 className="font-semibold mb-4">Στοιχεία Παραγγελίας</h2>
+          <h2 className="font-semibold mb-4">{t('checkoutPage.orderDetails')}</h2>
           <div className="space-y-2 mb-4">
             {Object.values(cartItems).map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
@@ -172,29 +174,29 @@ function CheckoutContent() {
 
           <div className="border-t pt-3">
             <div className="flex justify-between font-medium">
-              <span>Υποσύνολο:</span>
+              <span>{t('checkoutPage.subtotal')}:</span>
               <span>{fmt.format(subtotal)}</span>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Τα μεταφορικά και ο ΦΠΑ θα υπολογιστούν στο επόμενο βήμα
+              {t('checkoutPage.shippingNote')}
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6" data-testid="checkout-form">
-          <h2 className="font-semibold mb-4">Στοιχεία Αποστολής</h2>
+          <h2 className="font-semibold mb-4">{t('checkoutPage.shippingDetails')}</h2>
 
           {isGuest && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" data-testid="guest-checkout-notice">
               <p className="text-sm text-blue-800">
-                Αγορά χωρίς λογαριασμό — Εισάγετε το email σας για να λάβετε επιβεβαίωση παραγγελίας.
+                {t('checkoutPage.guestNotice')}
               </p>
             </div>
           )}
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">Ονοματεπώνυμο</label>
+              <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">{t('checkoutPage.fullName')}</label>
               <input
                 id="checkout-name"
                 name="name"
@@ -206,7 +208,7 @@ function CheckoutContent() {
             </div>
 
             <div>
-              <label htmlFor="checkout-phone" className="block text-sm font-medium mb-1">Τηλέφωνο</label>
+              <label htmlFor="checkout-phone" className="block text-sm font-medium mb-1">{t('checkoutPage.phone')}</label>
               <input
                 id="checkout-phone"
                 name="phone"
@@ -237,13 +239,13 @@ function CheckoutContent() {
               />
               {isGuest && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Απαιτείται για την αποστολή επιβεβαίωσης παραγγελίας
+                  {t('checkoutPage.emailRequired')}
                 </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="checkout-address" className="block text-sm font-medium mb-1">Διεύθυνση</label>
+              <label htmlFor="checkout-address" className="block text-sm font-medium mb-1">{t('checkoutPage.address')}</label>
               <input
                 id="checkout-address"
                 name="address"
@@ -255,7 +257,7 @@ function CheckoutContent() {
             </div>
 
             <div>
-              <label htmlFor="checkout-city" className="block text-sm font-medium mb-1">Πόλη</label>
+              <label htmlFor="checkout-city" className="block text-sm font-medium mb-1">{t('checkoutPage.city')}</label>
               <input
                 id="checkout-city"
                 name="city"
@@ -267,7 +269,7 @@ function CheckoutContent() {
             </div>
 
             <div>
-              <label htmlFor="checkout-postcode" className="block text-sm font-medium mb-1">Ταχυδρομικός Κώδικας</label>
+              <label htmlFor="checkout-postcode" className="block text-sm font-medium mb-1">{t('checkoutPage.postalCode')}</label>
               <input
                 id="checkout-postcode"
                 name="postcode"
@@ -303,12 +305,12 @@ function CheckoutContent() {
               data-testid="checkout-submit"
             >
               {cardProcessing
-                ? 'Μεταφορά στη σελίδα πληρωμής...'
+                ? t('checkoutPage.redirectingToPayment')
                 : loading
-                  ? 'Επεξεργασία...'
+                  ? t('checkoutPage.processing')
                   : paymentMethod === 'card'
-                    ? 'Συνέχεια στην Πληρωμή'
-                    : 'Ολοκλήρωση Παραγγελίας'}
+                    ? t('checkoutPage.continueToPayment')
+                    : t('checkoutPage.completeOrder')}
             </button>
           </div>
         </form>
@@ -318,11 +320,12 @@ function CheckoutContent() {
 }
 
 export default function CheckoutPage() {
+  const t = useTranslations()
   return (
     <Suspense fallback={
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">Φόρτωση...</p>
+          <p className="text-gray-600">{t('checkoutPage.loading')}</p>
         </div>
       </main>
     }>
