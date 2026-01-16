@@ -1,8 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (PRODUCER-DASHBOARD-01)
+**Last Updated**: 2026-01-17 (EN-LANGUAGE-02)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass EN-LANGUAGE-02: Extend i18n to Checkout/Orders
+
+**Status**: ✅ CLOSED
+
+Extended i18n compliance to checkout, order confirmation, and producer orders pages.
+
+### Changes
+
+- **Checkout page**: Form labels, error messages, button text
+- **Order confirmation**: Status labels, shipping info, action buttons
+- **Producer orders**: Filter tabs, status badges, empty states
+- **i18n**: 4 new namespaces (orderStatus, checkoutPage, orderConfirmation, producerOrders)
+- **E2E**: 4 smoke tests for locale compliance
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| Checkout i18n | ✅ |
+| Order confirmation i18n | ✅ |
+| Producer orders i18n | ✅ |
+| orderStatus.* keys | ✅ |
+| E2E smoke tests (4) | ✅ |
+
+### PRs
+
+- #2256 (feat: Pass EN-LANGUAGE-02 extend i18n) — merged
+
+---
 
 ## 2026-01-17 — Pass PRODUCER-DASHBOARD-01: i18n + UX Polish
 
