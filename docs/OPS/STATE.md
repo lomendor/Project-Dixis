@@ -1,8 +1,41 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-16 (EN-LANGUAGE-01)
+**Last Updated**: 2026-01-16 (NOTIFICATIONS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-16 — Pass NOTIFICATIONS-01: Notification Bell and Page UI
+
+**Status**: ✅ CLOSED
+
+Added notification UI components for authenticated users.
+
+### Changes
+
+- **NotificationBell**: Bell icon in header with unread count badge, 60s polling interval
+- **NotificationDropdown**: Latest 5 notifications, mark as read (single/all), time ago formatting
+- **NotificationsPage**: Full /account/notifications page with pagination, filtering by read status
+- **i18n**: Greek + English translations for all notification strings
+- **E2E**: 3 smoke tests (bell visibility, dropdown, page accessibility)
+
+### Features
+
+| Feature | Status |
+|---------|--------|
+| NotificationBell component | ✅ |
+| NotificationDropdown component | ✅ |
+| /account/notifications page | ✅ |
+| Pagination (10 per page) | ✅ |
+| Mark as read (single) | ✅ |
+| Mark all as read | ✅ |
+| i18n (el + en) | ✅ |
+| E2E smoke tests (3) | ✅ |
+
+### PRs
+
+- #2250 (feat: Pass NOTIFICATIONS-01 notification bell and page UI) — merged
+
+---
 
 ## 2026-01-16 — Pass EN-LANGUAGE-01: English Language Support
 
