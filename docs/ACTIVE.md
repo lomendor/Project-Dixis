@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-16 (NOTIFICATIONS-01)
+**Updated**: 2026-01-17 (PRODUCER-DASHBOARD-01)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -16,13 +16,13 @@ _(empty — pick next unblocked item from NEXT)_
 
 | # | Pass | Description | Effort |
 |---|------|-------------|--------|
-| 1 | PRODUCER-DASHBOARD-01 | Producer dashboard enhancements | Medium |
-| 2 | EN-LANGUAGE-02 | Extend i18n to remaining pages | Small |
+| 1 | EN-LANGUAGE-02 | Extend i18n to remaining pages | Small |
 
 ---
 
 ## Recently Completed
 
+- **PRODUCER-DASHBOARD-01** — i18n + notifications link ✅
 - **NOTIFICATIONS-01** — Notification bell + page UI ✅
 - **EN-LANGUAGE-01** — English language support ✅
 
