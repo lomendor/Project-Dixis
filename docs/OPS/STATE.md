@@ -23,7 +23,7 @@ Created single entry point file to reduce agent boot time and token consumption.
 
 ### PRs
 
-- #TBD (docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point) — pending
+- #2227 (docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point) — merged
 
 ---
 

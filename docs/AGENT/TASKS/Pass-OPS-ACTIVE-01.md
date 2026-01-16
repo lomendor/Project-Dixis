@@ -41,4 +41,4 @@ Create single entry point file (`docs/ACTIVE.md`) to reduce agent boot time and 
 
 | PR | Title | Status |
 |----|-------|--------|
-| TBD | docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point | PENDING |
+| #2227 | docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point | MERGED |
