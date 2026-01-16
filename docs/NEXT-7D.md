@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (PRODUCER-DASHBOARD-01)
+**Last Updated**: 2026-01-17 (EN-LANGUAGE-02)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -16,7 +16,7 @@ _(empty — pick next unblocked item from NEXT)_
 
 ### Unblocked (ready to start)
 
-3. **Pass EN-LANGUAGE-02** — Extend i18n to remaining pages (checkout, orders, producer)
+_(All unblocked passes complete — consult PRD-AUDIT.md for next priorities)_
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -31,6 +31,7 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **EN-LANGUAGE-02** — Extend i18n to checkout, orders, producer pages ✅
 - **PRODUCER-DASHBOARD-01** — i18n + notifications link + E2E tests ✅
 - **NOTIFICATIONS-01** — Notification bell + page UI (NotificationBell, NotificationDropdown, /account/notifications) ✅
 - **EN-LANGUAGE-01** — English language support with LocaleContext + language switcher ✅

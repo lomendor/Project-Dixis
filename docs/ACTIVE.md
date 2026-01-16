@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-17 (PRODUCER-DASHBOARD-01)
+**Updated**: 2026-01-17 (EN-LANGUAGE-02)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -14,14 +14,13 @@ _(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, top 3 unblocked)
 
-| # | Pass | Description | Effort |
-|---|------|-------------|--------|
-| 1 | EN-LANGUAGE-02 | Extend i18n to remaining pages | Small |
+_(All unblocked passes complete — consult PRD-AUDIT.md for next priorities)_
 
 ---
 
 ## Recently Completed
 
+- **EN-LANGUAGE-02** — Extend i18n to checkout/orders pages ✅
 - **PRODUCER-DASHBOARD-01** — i18n + notifications link ✅
 - **NOTIFICATIONS-01** — Notification bell + page UI ✅
 - **EN-LANGUAGE-01** — English language support ✅
