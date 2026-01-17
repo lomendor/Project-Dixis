@@ -6,9 +6,9 @@
 
 ## 2026-01-17 — Pass 52: Stripe Enable
 
-**Status**: READY FOR CREDENTIALS (code complete)
+**Status**: ✅ CLOSED
 
-Added payment configuration status to health endpoints. All Stripe wiring from Pass 51 confirmed complete.
+Added payment configuration status to health endpoints. Stripe fully operational on production.
 
 ### Changes
 
@@ -21,13 +21,20 @@ Added payment configuration status to health endpoints. All Stripe wiring from P
 - `test_health_endpoint_includes_payments_status()`
 - `test_healthz_endpoint_includes_payments_status()`
 
-### Operator Steps
+### Production Verification
 
-See `docs/AGENT/TASKS/Pass-52-STRIPE-ENABLE.md` for VPS enablement.
-
-### Next
-
-User to provide Stripe credentials, run operator steps on VPS.
+```json
+{
+  "payments": {
+    "cod": "enabled",
+    "card": {
+      "flag": "enabled",
+      "stripe_configured": true,
+      "keys_present": {"secret": true, "public": true, "webhook": true}
+    }
+  }
+}
+```
 
 ---
 
