@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (Pass-PROD-UNBLOCK-01)
+**Last Updated**: 2026-01-18 (Pass-CARD-PAYMENT-SMOKE-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -41,8 +41,9 @@ Email is live on production via Resend. Verified 2026-01-17 via `/api/health`:
 3. Optional: Enter grep filter (e.g., `@regression`)
 4. Artifacts: `e2e-full-report-{run_number}` (playwright-report + test-results)
 
-## Recently Completed (2026-01-14 to 2026-01-17)
+## Recently Completed (2026-01-14 to 2026-01-18)
 
+- **Pass CARD-PAYMENT-SMOKE-01** — Card payment E2E smoke tests (backend config verified, frontend env blocker identified) ✅
 - **Pass PROD-UNBLOCK-01** — Production auth/products verification (all working, shell escaping was cause) ✅
 - **Pass EMAIL-SMOKE-01** — VPS → Resend e2e smoke (artisan test + reset endpoint) ✅
 - **Pass OPS-SSH-HYGIENE-01** — Canonical SSH access (alias + key cleanup + docs) ✅
