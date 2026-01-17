@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-17 (CREDENTIALS-01)
+**Updated**: 2026-01-17 (Pass-60.1-EMAIL-VERIFY)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -20,6 +20,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 ## Recently Completed
 
+- **Pass 60.1** — Email Verify Tooling (from_configured + test command) ✅
 - **Pass 60** — Email Enable (health diagnostic, awaiting credentials) ✅
 - **Pass 52** — Stripe Enable (health diagnostic, Stripe live on prod) ✅
 - **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
@@ -36,7 +37,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 | Pass | Blocker | See |
 |------|---------|-----|
-| Pass 60 — Email Infra | Resend API key needed | `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` |
+| OPS-EMAIL-ENABLE-01 | Resend key OR SMTP creds + `EMAIL_NOTIFICATIONS_ENABLED=true` | `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` |
 
 ---
 

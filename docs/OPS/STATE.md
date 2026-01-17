@@ -1,8 +1,54 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-60-EMAIL-ENABLE)
+**Last Updated**: 2026-01-17 (Pass-60.1-EMAIL-VERIFY)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass 60.1: Email Verification Tooling
+
+**Status**: ✅ CLOSED
+
+Enhanced operator tooling for email enablement. Email still BLOCKED pending credentials.
+
+### Changes
+
+- **Health endpoints**: Added `from_configured` field to `/api/health` and `/api/healthz`
+- **Artisan command**: `php artisan dixis:email:test --to=<email> [--dry-run]`
+- **Runbook**: Enhanced with Resend setup checklist, DNS verification, rollback steps
+
+### Tests Added
+
+- Updated `test_health_endpoint_includes_email_status()` (from_configured assertion)
+- Updated `test_healthz_endpoint_includes_email_status()` (from_configured assertion)
+- New `TestEmailCommandTest` (7 tests for Artisan command)
+
+### Production Verification
+
+```json
+{
+  "email": {
+    "flag": "disabled",
+    "mailer": "resend",
+    "configured": false,
+    "from_configured": true,
+    "keys_present": {"resend": false, "smtp_host": false, "smtp_user": false}
+  }
+}
+```
+
+### Blocked Until
+
+Operator provides credentials:
+- **Option A (Resend)**: `RESEND_KEY=re_...` + `EMAIL_NOTIFICATIONS_ENABLED=true`
+- **Option B (SMTP)**: `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` + `EMAIL_NOTIFICATIONS_ENABLED=true`
+
+See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement runbook.
+
+### PRs
+
+- #2271 (feat: Pass 60.1 - enhanced email runbook + test command) — merged
+
+---
 
 ## 2026-01-17 — Pass 60: Email Infrastructure Enable
 
