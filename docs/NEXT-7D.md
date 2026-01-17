@@ -22,6 +22,47 @@ See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
 See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
+---
+
+## Waiting on Credentials
+
+### Pass 52 — Card Payments (Stripe)
+
+Provide these values to enable card payments:
+
+| Env Var | Format | Where |
+|---------|--------|-------|
+| `STRIPE_SECRET_KEY` | `sk_live_...` | VPS backend/.env |
+| `STRIPE_PUBLIC_KEY` | `pk_live_...` | VPS backend/.env |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | VPS backend/.env |
+| `PAYMENTS_CARD_FLAG` | `true` | VPS backend/.env |
+| `NEXT_PUBLIC_PAYMENTS_CARD_FLAG` | `true` | VPS frontend/.env |
+
+### Pass 60 — Email Notifications (SMTP or Resend)
+
+**Option A — Resend** (recommended):
+
+| Env Var | Format | Where |
+|---------|--------|-------|
+| `MAIL_MAILER` | `resend` | VPS backend/.env |
+| `RESEND_KEY` | `re_...` | VPS backend/.env |
+| `EMAIL_NOTIFICATIONS_ENABLED` | `true` | VPS backend/.env |
+
+**Option B — SMTP**:
+
+| Env Var | Example | Where |
+|---------|---------|-------|
+| `MAIL_MAILER` | `smtp` | VPS backend/.env |
+| `MAIL_HOST` | `smtp.example.com` | VPS backend/.env |
+| `MAIL_PORT` | `587` | VPS backend/.env |
+| `MAIL_USERNAME` | (your username) | VPS backend/.env |
+| `MAIL_PASSWORD` | (your password) | VPS backend/.env |
+| `EMAIL_NOTIFICATIONS_ENABLED` | `true` | VPS backend/.env |
+
+Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
+
+---
+
 ## How to Run E2E Full Manually
 
 1. Go to GitHub Actions → "E2E Full (nightly & manual)"
