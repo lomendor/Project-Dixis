@@ -1,8 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-PROD-UNBLOCK-01)
+**Last Updated**: 2026-01-18 (Pass-CARD-PAYMENT-SMOKE-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-18 — Pass CARD-PAYMENT-SMOKE-01: Card Payment E2E Smoke Test
+
+**Status**: ✅ CLOSED (with blocker documented)
+
+Created E2E smoke tests for Stripe card payment infrastructure. Identified blocker: frontend VPS env missing required vars.
+
+### Backend Stripe Config (Verified)
+
+| Key | Status |
+|-----|--------|
+| STRIPE_KEY | present |
+| STRIPE_SECRET | present |
+| STRIPE_WEBHOOK_SECRET | present |
+| card.flag via /api/health | enabled |
+| card.stripe_configured | true |
+
+### Frontend Env (BLOCKER)
+
+Missing on VPS:
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`
+
+### Tests Added
+
+- `card-payment-smoke.spec.ts` - 3 tests (CI-safe with graceful skips)
+
+### Next Step
+
+Add missing frontend env vars to VPS and rebuild Next.js to enable card payments.
+
+### PRs
+
+- #TBD (feat: Pass CARD-PAYMENT-SMOKE-01) — pending
+
+---
 
 ## 2026-01-17 — Pass PROD-UNBLOCK-01: Production Auth & Products Verification
 
