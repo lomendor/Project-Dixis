@@ -57,4 +57,51 @@ class HealthTest extends TestCase
                 ],
             ]);
     }
+
+    /**
+     * Pass 60: Verify health endpoint includes email configuration status
+     */
+    public function test_health_endpoint_includes_email_status(): void
+    {
+        $res = $this->getJson('/api/health');
+        $res->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'database',
+                'payments',
+                'email' => [
+                    'flag',
+                    'mailer',
+                    'configured',
+                    'keys_present' => ['resend', 'smtp_host', 'smtp_user'],
+                ],
+                'timestamp',
+                'version',
+            ]);
+
+        // Email flag should be 'disabled' or 'enabled' (string)
+        $flag = $res->json('email.flag');
+        $this->assertContains($flag, ['enabled', 'disabled']);
+
+        // Mailer should be a valid string
+        $mailer = $res->json('email.mailer');
+        $this->assertIsString($mailer);
+    }
+
+    /**
+     * Pass 60: Verify healthz endpoint also includes email configuration status
+     */
+    public function test_healthz_endpoint_includes_email_status(): void
+    {
+        $res = $this->getJson('/api/healthz');
+        $res->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'email' => [
+                    'flag',
+                    'mailer',
+                    'configured',
+                ],
+            ]);
+    }
 }

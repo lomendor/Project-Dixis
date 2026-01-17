@@ -1,8 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-52-STRIPE-ENABLE)
+**Last Updated**: 2026-01-17 (Pass-60-EMAIL-ENABLE)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass 60: Email Infrastructure Enable
+
+**Status**: READY FOR CREDENTIALS (code complete)
+
+Added email configuration status to health endpoints. Email wiring from Pass 53-55 confirmed complete.
+
+### Changes
+
+- **Health endpoints**: `/api/health` and `/api/healthz` now include `email` section
+- Shows email flag, mailer type, configuration status (keys present)
+- No secrets exposed - boolean presence checks only
+
+### Tests Added
+
+- `test_health_endpoint_includes_email_status()`
+- `test_healthz_endpoint_includes_email_status()`
+
+### Operator Steps
+
+See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement.
+
+### Next
+
+User to provide Resend/SMTP credentials, run operator steps on VPS.
+
+---
 
 ## 2026-01-17 — Pass 52: Stripe Enable
 
