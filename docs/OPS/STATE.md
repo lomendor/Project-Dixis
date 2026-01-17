@@ -1,8 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (PRD-AUDIT-REFRESH-01)
+**Last Updated**: 2026-01-17 (CREDENTIALS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass CREDENTIALS-01: Credentials Wiring Map
+
+**Status**: ✅ CLOSED
+
+Created consolidated credential wiring map to unblock Pass 52 (Stripe) and Pass 60 (Email).
+
+### Deliverables
+
+- **docs/OPS/CREDENTIALS.md**: Env vars, locations, code refs, validation steps
+
+### Key Findings
+
+| Provider | Required Env Vars | Where to Set |
+|----------|-------------------|--------------|
+| Stripe | 6 vars (secret, public, webhook, flags) | VPS backend + frontend |
+| Email | 3-6 vars (Resend or SMTP + flag) | VPS backend |
+
+### Next Steps
+
+User to provide credentials, then execute Pass 52 + Pass 60.
+
+---
 
 ## 2026-01-17 — Pass PRD-AUDIT-REFRESH-01: Refresh Audit After 8 Passes
 

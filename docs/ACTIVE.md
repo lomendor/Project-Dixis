@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-17 (PRD-AUDIT-REFRESH-01)
+**Updated**: 2026-01-17 (CREDENTIALS-01)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -20,6 +20,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 ## Recently Completed
 
+- **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
 - **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅
 - **PRD-AUDIT-STRUCTURE-01** — Page inventory + flows + V1 must-haves ✅
 - **EN-LANGUAGE-02** — Extend i18n to checkout/orders pages ✅

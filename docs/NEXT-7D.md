@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (PRD-AUDIT-REFRESH-01)
+**Last Updated**: 2026-01-17 (CREDENTIALS-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -72,6 +72,7 @@ Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
 - **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅
 - **PRD-AUDIT-STRUCTURE-01** — Page inventory + flows + V1 must-haves ✅
 - **EN-LANGUAGE-02** — Extend i18n to checkout, orders, producer pages ✅
