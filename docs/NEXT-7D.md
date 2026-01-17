@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (Pass-OPS-SSH-HYGIENE-01)
+**Last Updated**: 2026-01-17 (Pass-EMAIL-SMOKE-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -43,10 +43,10 @@ Email is live on production via Resend. Verified 2026-01-17 via `/api/health`:
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **Pass EMAIL-SMOKE-01** — VPS → Resend e2e smoke (artisan test + reset endpoint) ✅
 - **Pass OPS-SSH-HYGIENE-01** — Canonical SSH access (alias + key cleanup + docs) ✅
 - **Pass OPS-EMAIL-UNBLOCK-01** — Email now live on production (Resend verified) ✅
 - **Pass OPS-EMAIL-ENABLE-01** — VPS env configured (RESEND_KEY present) ✅
-- **Pass OPS-EMAIL-SMOKE-01** — Password reset endpoint returns HTTP 200 ✅
 - **Pass EMAIL-AUTH-01** — Password Reset via Resend (backend + frontend + tests) ✅
 - **Pass 60.1** — Email Verify Tooling (from_configured + Artisan test command) ✅
 - **Pass 60** — Email Enable (health diagnostic, now enabled) ✅

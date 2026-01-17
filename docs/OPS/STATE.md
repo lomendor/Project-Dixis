@@ -1,8 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-OPS-SSH-HYGIENE-01)
+**Last Updated**: 2026-01-17 (Pass-EMAIL-SMOKE-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass EMAIL-SMOKE-01: VPS → Resend End-to-End Smoke Test
+
+**Status**: ✅ CLOSED
+
+Verified end-to-end email sending from VPS production backend via Resend.
+
+### Mail Configuration (No Secrets)
+
+| Config | Value |
+|--------|-------|
+| MAIL_MAILER | resend |
+| MAIL_FROM_ADDRESS | info@dixis.gr |
+| MAIL_FROM_NAME | Dixis |
+
+### Evidence
+
+**Test 1: Artisan Command**
+```
+$ ssh dixis-prod 'php artisan dixis:email:test --to=kourkoutisp@gmail.com'
+[OK] Test email sent successfully to kourkoutisp@gmail.com
+```
+
+**Test 2: Password Reset Endpoint**
+```
+$ curl -s -X POST "https://dixis.gr/api/v1/auth/password/forgot" ...
+{"message":"If an account exists with this email, you will receive a password reset link."}
+```
+
+### PRs
+
+- #TBD (docs: Pass EMAIL-SMOKE-01 VPS email smoke test) — pending
+
+---
 
 ## 2026-01-17 — Pass OPS-SSH-HYGIENE-01: Canonical SSH Access
 
