@@ -1,7 +1,7 @@
 # PRD-AUDIT: Reality vs Requirements
 
-**Date**: 2026-01-16
-**Pass**: PRD-AUDIT-01
+**Date**: 2026-01-17 (refreshed)
+**Pass**: PRD-AUDIT-REFRESH-01
 **Auditor**: Claude AI Agent
 **Source**: docs/PRODUCT/CAPABILITIES.md (v1.0, 2025-12-18)
 
@@ -9,63 +9,76 @@
 
 ## Executive Summary
 
-| Metric | Value |
-|--------|-------|
-| Total Features Mapped | 111 |
-| ✅ DONE | 68 (61%) |
-| ⚠️ PARTIAL | 30 (27%) |
-| ❌ MISSING | 13 (12%) |
+| Metric | Value | Change |
+|--------|-------|--------|
+| Total Features Mapped | 111 | — |
+| ✅ DONE | 78 (70%) | +10 |
+| ⚠️ PARTIAL | 23 (21%) | -7 |
+| ❌ MISSING | 10 (9%) | -3 |
 
-**Health Score**: 88% (DONE + PARTIAL coverage)
+**Health Score**: 91% (DONE + PARTIAL coverage) — up from 88%
 
 ---
 
-## Critical Gaps (MISSING - 13 Features)
+## Critical Gaps (MISSING - 10 Features)
 
 ### P0: MVP Blockers
 
 | Feature | Category | Impact | Blocked By |
 |---------|----------|--------|------------|
-| Email Verification | Auth | Security risk (unverified accounts) | Pass 60 (email infra) |
-| Guest Checkout | Checkout | Friction for new customers | None - can implement |
-| User Management (Admin) | Admin | Cannot manage users | None - can implement |
+| Email Verification | Auth | Security risk (unverified accounts) | Pass 60 (SMTP/Resend keys) |
+| Card Payments | Payments | No online payment option | Pass 52 (Stripe keys) |
+| Email Notifications | Notifications | No transactional emails | Pass 60 (SMTP/Resend keys) |
 
-### P1: Market Expansion Blockers
+### P1: Previously Missing — NOW DONE
 
-| Feature | Category | Impact | Blocked By |
-|---------|----------|--------|------------|
-| English Language | i18n | Limits market reach | None - can implement |
-| i18n Framework | i18n | Required for multi-language | None - can implement |
-| Reorder Functionality | Orders | UX gap for repeat customers | None - can implement |
+| Feature | Category | Completed By |
+|---------|----------|--------------|
+| ~~Guest Checkout~~ | Checkout | Pass GUEST-CHECKOUT-01 ✅ |
+| ~~User Management (Admin)~~ | Admin | Pass ADMIN-USERS-01 ✅ |
+| ~~English Language~~ | i18n | Pass EN-LANGUAGE-01 ✅ |
+| ~~i18n Framework~~ | i18n | Pass EN-LANGUAGE-01 ✅ |
+| ~~Full-Text Product Search~~ | Catalog | Pass SEARCH-FTS-01 ✅ |
+| ~~Notification Center UI~~ | Notifications | Pass NOTIFICATIONS-01 ✅ |
 
-### P2: Ops & Developer
+### P2: Remaining Gaps (Non-Blockers)
 
-| Feature | Category | Impact | Blocked By |
-|---------|----------|--------|------------|
-| Admin Notifications | Notifications | Ops blind spots | Pass 60 (email infra) |
-| Notification Center | Notifications | No persistent notification UI | None - can implement |
-| Admin Messaging | Messaging | No admin communication channel | None - can implement |
-| Centralized Logging | Monitoring | Hard to debug prod issues | None - can implement |
-| Performance Monitoring (APM) | Monitoring | No visibility into slow requests | None - can implement |
-| Payment Methods (PayPal, etc.) | Payments | Limited payment options | None - can implement |
-| Native Mobile App | Mobile | Missing mobile presence | None - can implement |
+| Feature | Category | Impact | Notes |
+|---------|----------|--------|-------|
+| Reorder Functionality | Orders | UX gap for repeat customers | Can implement |
+| Admin Messaging | Messaging | No admin → user communication | Can implement |
+| Centralized Logging | Monitoring | Hard to debug prod issues | Can implement |
+| Performance Monitoring (APM) | Monitoring | No visibility into slow requests | Can implement |
+| Payment Methods (PayPal, etc.) | Payments | Limited payment options | Can implement |
+| Native Mobile App | Mobile | Missing mobile presence | Out of scope V1 |
+| Admin Notifications | Notifications | Ops blind spots | Blocked by Pass 60 |
 
 ---
 
-## Partial Features Needing Completion (Top 10)
+## Recently Completed (Since Original Audit)
+
+| Pass | Feature | Date |
+|------|---------|------|
+| GUEST-CHECKOUT-01 | Guest checkout flow | 2026-01-16 |
+| ADMIN-USERS-01 | Admin user management UI | 2026-01-16 |
+| SEARCH-FTS-01 | Full-text product search (PostgreSQL FTS) | 2026-01-16 |
+| EN-LANGUAGE-01 | English language + i18n framework | 2026-01-16 |
+| EN-LANGUAGE-02 | i18n for checkout/orders pages | 2026-01-17 |
+| NOTIFICATIONS-01 | Notification bell + page UI | 2026-01-16 |
+| PRODUCER-DASHBOARD-01 | Producer dashboard i18n + polish | 2026-01-17 |
+| PRD-AUDIT-STRUCTURE-01 | Page inventory + flows + V1 scope docs | 2026-01-17 |
+
+---
+
+## Partial Features Needing Completion (Top 5)
 
 | Feature | Category | Current State | Gap |
 |---------|----------|---------------|-----|
-| Payment Processing (Viva) | Payments | Code exists | Prod testing needed |
-| Shipping Labels | Shipping | Service layer exists | No admin UI |
 | Cart Persistence | Cart | LocalStorage only | Not synced to backend |
-| Product Search | Catalog | Basic filter | No full-text search |
-| Product Filters | Catalog | Category only | Missing price/producer filters |
+| Shipping Labels | Shipping | Service layer exists | No admin UI |
 | Tracking Numbers | Shipping | Stored in DB | Not displayed to consumers |
-| Shipment Tracking | Shipping | Backend exists | Frontend integration incomplete |
 | PWA Support | Mobile | Manifest exists | No service worker |
 | API Documentation | DevEx | Partial | No OpenAPI/Swagger spec |
-| Test Coverage | DevEx | Reports generated | No coverage gates |
 
 ---
 
@@ -74,117 +87,98 @@
 ### Authentication & Authorization (10 features)
 - ✅ DONE: 8 (80%)
 - ⚠️ PARTIAL: 1 (10%)
-- ❌ MISSING: 1 (10%) - Email Verification
+- ❌ MISSING: 1 (10%) — Email Verification (blocked Pass 60)
 
 ### Product Catalog (12 features)
-- ✅ DONE: 10 (83%)
-- ⚠️ PARTIAL: 2 (17%)
+- ✅ DONE: 11 (92%) — +1 (FTS search added)
+- ⚠️ PARTIAL: 1 (8%)
 
 ### Producer Management (9 features)
 - ✅ DONE: 9 (100%)
 
 ### Shopping Cart & Checkout (10 features)
-- ✅ DONE: 7 (70%)
-- ⚠️ PARTIAL: 2 (20%)
-- ❌ MISSING: 1 (10%) - Guest Checkout
+- ✅ DONE: 9 (90%) — +2 (guest checkout, i18n)
+- ⚠️ PARTIAL: 1 (10%)
 
 ### Order Management (11 features)
-- ✅ DONE: 8 (73%)
-- ⚠️ PARTIAL: 2 (18%)
-- ❌ MISSING: 1 (9%) - Reorder
+- ✅ DONE: 9 (82%) — +1 (i18n)
+- ⚠️ PARTIAL: 1 (9%)
+- ❌ MISSING: 1 (9%) — Reorder
 
 ### Payments (6 features)
-- ⚠️ PARTIAL: 5 (83%)
-- ❌ MISSING: 1 (17%) - PayPal, etc.
+- ✅ DONE: 1 (17%) — COD
+- ⚠️ PARTIAL: 4 (66%)
+- ❌ MISSING: 1 (17%) — Card (blocked Pass 52)
 
 ### Shipping & Logistics (8 features)
 - ✅ DONE: 5 (63%)
 - ⚠️ PARTIAL: 3 (37%)
 
 ### Admin Panel (7 features)
-- ✅ DONE: 6 (86%)
-- ❌ MISSING: 1 (14%) - User Management
+- ✅ DONE: 7 (100%) — +1 (user management added)
 
 ### Notifications & Messaging (9 features)
-- ✅ DONE: 2 (22%)
-- ⚠️ PARTIAL: 4 (44%)
-- ❌ MISSING: 3 (33%)
+- ✅ DONE: 4 (44%) — +2 (bell, page UI)
+- ⚠️ PARTIAL: 2 (22%)
+- ❌ MISSING: 3 (33%) — Email notifications blocked
 
 ### Platform Features (9 features)
-- ✅ DONE: 5 (56%)
-- ⚠️ PARTIAL: 2 (22%)
-- ❌ MISSING: 2 (22%) - English, i18n
+- ✅ DONE: 9 (100%) — +4 (English, i18n framework, language switcher, locale persistence)
 
 ### Developer Experience (10 features)
 - ✅ DONE: 5 (50%)
 - ⚠️ PARTIAL: 4 (40%)
-- ❌ MISSING: 1 (10%) - APM
+- ❌ MISSING: 1 (10%) — APM
 
 ---
 
-## Next Passes (Ordered by Priority)
+## Blocked Items (Need External Resources)
 
-### BLOCKED (Need External Resources)
+| Pass | Feature | Blocker | Status |
+|------|---------|---------|--------|
+| Pass 52 | Card Payments | Stripe API keys | BLOCKED |
+| Pass 60 | Email Infrastructure | SMTP or Resend API keys | BLOCKED |
 
-| Pass | Blocker | Status |
-|------|---------|--------|
-| Pass 52 — Card Payments Enable | Stripe keys needed | BLOCKED |
-| Pass 60 — Email Infrastructure Enable | SMTP/Resend keys needed | BLOCKED |
-
-### UNBLOCKED (Ready to Start)
-
-| Priority | Pass Candidate | Effort | Value |
-|----------|----------------|--------|-------|
-| P0 | Guest Checkout | Medium | High - reduces friction |
-| P0 | Admin User Management | Small | High - admin ops |
-| P1 | Full-Text Product Search | Medium | High - discovery UX |
-| P1 | Cart Backend Sync | Medium | High - data integrity |
-| P1 | Shipping Label Admin UI | Small | Medium - ops efficiency |
-| P2 | English Language + i18n | Large | High - market expansion |
-| P2 | Notification Center UI | Medium | Medium - user engagement |
-| P2 | OpenAPI/Swagger Docs | Small | Medium - dev friction |
+**See**: `docs/AGENT/SOPs/CREDENTIALS.md` for exact env vars needed.
+**See**: `docs/NEXT-7D.md` → "Waiting on Credentials" section.
 
 ---
 
-## Dependencies for Blocked Items
+## V1 Readiness (per PRD-MUST-V1.md)
 
-### Pass 52 — Card Payments Enable
-**Requires**: Stripe API keys in VPS environment
-**See**: `docs/AGENT/SOPs/CREDENTIALS.md`
+| Category | Status |
+|----------|--------|
+| Core Storefront | ✅ Ready |
+| Checkout (COD) | ✅ Ready |
+| Checkout (Card) | ⏳ Blocked (Pass 52) |
+| Producer Portal | ✅ Ready |
+| Admin Panel | ✅ Ready |
+| Auth (Basic) | ✅ Ready |
+| Auth (Email Verify) | ⏳ Blocked (Pass 60) |
+| i18n (EL + EN) | ✅ Ready |
+| Notifications (UI) | ✅ Ready |
+| Notifications (Email) | ⏳ Blocked (Pass 60) |
+| E2E Tests | ✅ Ready |
 
-### Pass 60 — Email Infrastructure Enable
-**Requires**: SMTP or Resend API credentials
-**See**: `docs/AGENT/SOPs/CREDENTIALS.md`
-
-Once credentials provided:
-1. Email Verification can be implemented
-2. Admin Notifications can be implemented
-3. Full notification system can be completed
-
----
-
-## Audit Methodology
-
-1. **Source**: Analyzed `docs/PRODUCT/CAPABILITIES.md` (111 features)
-2. **Validation**: Cross-referenced with `docs/PRODUCT/DATA-DEPENDENCY-MAP.md`
-3. **State Check**: Verified against `docs/OPS/STATE.md` for recent passes
-4. **NEXT-7D Check**: Confirmed blocked items match NEXT-7D.md
+**V1 Launch Status**: 🟡 READY (with COD only, pending credentials for card payments + email)
 
 ---
 
-## Recommendations
+## Audit History
 
-1. **Immediate**: Provide Stripe + SMTP credentials to unblock Pass 52/60
-2. **Quick Wins**: Guest Checkout + Admin User Management (no blockers)
-3. **UX Focus**: Full-text search + Cart backend sync
-4. **Future**: English language support for market expansion
+| Date | Pass | Changes |
+|------|------|---------|
+| 2026-01-16 | PRD-AUDIT-01 | Initial audit (111 features, 88% health) |
+| 2026-01-17 | PRD-AUDIT-REFRESH-01 | Refresh after 8 passes (+10 DONE, 91% health) |
 
 ---
 
 ## Related Documents
 
-- [CAPABILITIES.md](./CAPABILITIES.md) - Detailed feature matrix
-- [DATA-DEPENDENCY-MAP.md](./DATA-DEPENDENCY-MAP.md) - Entity relationships
-- [PRD-INDEX.md](./PRD-INDEX.md) - PRD entry point
-- [NEXT-7D.md](../NEXT-7D.md) - Short-term priorities
-- [STATE.md](../OPS/STATE.md) - Operational state
+- [CAPABILITIES.md](./CAPABILITIES.md) — Detailed feature matrix
+- [DATA-DEPENDENCY-MAP.md](./DATA-DEPENDENCY-MAP.md) — Entity relationships
+- [PRD-MUST-V1.md](./PRD-MUST-V1.md) — V1 must-haves + out of scope
+- [PAGES.md](./PAGES.md) — Page inventory (70+ pages)
+- [FLOWS.md](./FLOWS.md) — Core user journeys
+- [NEXT-7D.md](../NEXT-7D.md) — Short-term priorities
+- [STATE.md](../OPS/STATE.md) — Operational state
