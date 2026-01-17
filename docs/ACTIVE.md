@@ -8,7 +8,7 @@
 
 ## WIP (max 1)
 
-**Pass 60 — Email Infrastructure Enable** (code complete, PR pending)
+_(empty — pick next unblocked item from NEXT)_
 
 ---
 
@@ -20,6 +20,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 ## Recently Completed
 
+- **Pass 60** — Email Enable (health diagnostic, awaiting credentials) ✅
 - **Pass 52** — Stripe Enable (health diagnostic, Stripe live on prod) ✅
 - **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
 - **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅
@@ -35,7 +36,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 | Pass | Blocker | See |
 |------|---------|-----|
-| Pass 60 — Email Infra | SMTP/Resend keys needed | `docs/AGENT/SOPs/CREDENTIALS.md` |
+| Pass 60 — Email Infra | Resend API key needed | `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` |
 
 ---
 
