@@ -1,8 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-OPS-EMAIL-UNBLOCK-01)
+**Last Updated**: 2026-01-17 (Pass-OPS-SSH-HYGIENE-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass OPS-SSH-HYGIENE-01: Canonical SSH Access
+
+**Status**: ✅ CLOSED
+
+Established canonical SSH configuration to eliminate access guessing.
+
+### Changes
+
+- **~/.ssh/config**: Updated to use `dixis_prod_ed25519_20260115` key with `dixis-prod` alias
+- **Quarantine**: Moved 19 old/unused keys to `~/.ssh/_quarantine_ssh_keys_20260117/`
+- **Docs**: Created `docs/AGENT/SYSTEM/ssh-access.md` with canonical config and health-check
+
+### Verification
+
+```
+$ ssh dixis-prod 'echo SSH_OK && whoami && hostname'
+SSH_OK
+root
+srv709397
+```
+
+### Canonical Config
+
+| Item | Value |
+|------|-------|
+| Alias | `dixis-prod` |
+| User | root |
+| Key | `dixis_prod_ed25519_20260115` |
+| Host | 147.93.126.235 |
+
+### PRs
+
+- #TBD (feat: Pass OPS-SSH-HYGIENE-01 canonical SSH access) — pending
+
+---
 
 ## 2026-01-17 — Pass OPS-EMAIL-UNBLOCK-01: Email Now Live on Production
 
