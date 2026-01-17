@@ -14,9 +14,29 @@ Route::get('/health', function () {
         $dbStatus = 'failed: '.$e->getMessage();
     }
 
+    // Pass 52: Payment configuration status (no secrets exposed)
+    $cardEnabled = config('payments.card_enabled', false);
+    $stripeKeySet = !empty(config('payments.stripe.secret_key'));
+    $stripePublicSet = !empty(config('payments.stripe.public_key'));
+    $stripeWebhookSet = !empty(config('payments.stripe.webhook_secret'));
+
+    $paymentsStatus = [
+        'cod' => 'enabled',
+        'card' => [
+            'flag' => $cardEnabled ? 'enabled' : 'disabled',
+            'stripe_configured' => $cardEnabled && $stripeKeySet && $stripePublicSet,
+            'keys_present' => [
+                'secret' => $stripeKeySet,
+                'public' => $stripePublicSet,
+                'webhook' => $stripeWebhookSet,
+            ],
+        ],
+    ];
+
     return response()->json([
         'status' => 'ok',
         'database' => $dbStatus,
+        'payments' => $paymentsStatus,
         'timestamp' => now()->toISOString(),
         'version' => app()->version(),
     ]);
@@ -31,9 +51,29 @@ Route::get('/healthz', function () {
         $dbStatus = 'failed: '.$e->getMessage();
     }
 
+    // Pass 52: Payment configuration status (no secrets exposed)
+    $cardEnabled = config('payments.card_enabled', false);
+    $stripeKeySet = !empty(config('payments.stripe.secret_key'));
+    $stripePublicSet = !empty(config('payments.stripe.public_key'));
+    $stripeWebhookSet = !empty(config('payments.stripe.webhook_secret'));
+
+    $paymentsStatus = [
+        'cod' => 'enabled',
+        'card' => [
+            'flag' => $cardEnabled ? 'enabled' : 'disabled',
+            'stripe_configured' => $cardEnabled && $stripeKeySet && $stripePublicSet,
+            'keys_present' => [
+                'secret' => $stripeKeySet,
+                'public' => $stripePublicSet,
+                'webhook' => $stripeWebhookSet,
+            ],
+        ],
+    ];
+
     return response()->json([
         'status' => 'ok',
         'database' => $dbStatus,
+        'payments' => $paymentsStatus,
         'timestamp' => now()->toISOString(),
         'version' => app()->version(),
     ]);

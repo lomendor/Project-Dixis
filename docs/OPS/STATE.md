@@ -1,8 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (CREDENTIALS-01)
+**Last Updated**: 2026-01-17 (Pass-52-STRIPE-ENABLE)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass 52: Stripe Enable
+
+**Status**: READY FOR CREDENTIALS (code complete)
+
+Added payment configuration status to health endpoints. All Stripe wiring from Pass 51 confirmed complete.
+
+### Changes
+
+- **Health endpoints**: `/api/health` and `/api/healthz` now include `payments` section
+- Shows COD status, card flag, Stripe configuration (keys present)
+- No secrets exposed - boolean presence checks only
+
+### Tests Added
+
+- `test_health_endpoint_includes_payments_status()`
+- `test_healthz_endpoint_includes_payments_status()`
+
+### Operator Steps
+
+See `docs/AGENT/TASKS/Pass-52-STRIPE-ENABLE.md` for VPS enablement.
+
+### Next
+
+User to provide Stripe credentials, run operator steps on VPS.
+
+---
 
 ## 2026-01-17 — Pass CREDENTIALS-01: Credentials Wiring Map
 

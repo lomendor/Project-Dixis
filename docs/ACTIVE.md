@@ -8,7 +8,7 @@
 
 ## WIP (max 1)
 
-_(empty — pick next unblocked item from NEXT)_
+**Pass 52 — Stripe Enable** (code complete, PR pending)
 
 ---
 
