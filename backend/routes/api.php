@@ -33,10 +33,41 @@ Route::get('/health', function () {
         ],
     ];
 
+    // Pass 60: Email configuration status (no secrets exposed)
+    $emailEnabled = config('notifications.email_enabled', false);
+    $mailer = config('mail.default', 'log');
+    $resendKeySet = !empty(config('services.resend.key'));
+    $smtpHostSet = !empty(config('mail.mailers.smtp.host')) && config('mail.mailers.smtp.host') !== '127.0.0.1';
+    $smtpUserSet = !empty(config('mail.mailers.smtp.username'));
+
+    // Determine if email is properly configured based on mailer type
+    $emailConfigured = false;
+    if ($emailEnabled) {
+        if ($mailer === 'resend') {
+            $emailConfigured = $resendKeySet;
+        } elseif ($mailer === 'smtp') {
+            $emailConfigured = $smtpHostSet && $smtpUserSet;
+        } elseif (in_array($mailer, ['log', 'array'])) {
+            $emailConfigured = true; // Dev/test mailers always "configured"
+        }
+    }
+
+    $emailStatus = [
+        'flag' => $emailEnabled ? 'enabled' : 'disabled',
+        'mailer' => $mailer,
+        'configured' => $emailConfigured,
+        'keys_present' => [
+            'resend' => $resendKeySet,
+            'smtp_host' => $smtpHostSet,
+            'smtp_user' => $smtpUserSet,
+        ],
+    ];
+
     return response()->json([
         'status' => 'ok',
         'database' => $dbStatus,
         'payments' => $paymentsStatus,
+        'email' => $emailStatus,
         'timestamp' => now()->toISOString(),
         'version' => app()->version(),
     ]);
@@ -70,10 +101,41 @@ Route::get('/healthz', function () {
         ],
     ];
 
+    // Pass 60: Email configuration status (no secrets exposed)
+    $emailEnabled = config('notifications.email_enabled', false);
+    $mailer = config('mail.default', 'log');
+    $resendKeySet = !empty(config('services.resend.key'));
+    $smtpHostSet = !empty(config('mail.mailers.smtp.host')) && config('mail.mailers.smtp.host') !== '127.0.0.1';
+    $smtpUserSet = !empty(config('mail.mailers.smtp.username'));
+
+    // Determine if email is properly configured based on mailer type
+    $emailConfigured = false;
+    if ($emailEnabled) {
+        if ($mailer === 'resend') {
+            $emailConfigured = $resendKeySet;
+        } elseif ($mailer === 'smtp') {
+            $emailConfigured = $smtpHostSet && $smtpUserSet;
+        } elseif (in_array($mailer, ['log', 'array'])) {
+            $emailConfigured = true; // Dev/test mailers always "configured"
+        }
+    }
+
+    $emailStatus = [
+        'flag' => $emailEnabled ? 'enabled' : 'disabled',
+        'mailer' => $mailer,
+        'configured' => $emailConfigured,
+        'keys_present' => [
+            'resend' => $resendKeySet,
+            'smtp_host' => $smtpHostSet,
+            'smtp_user' => $smtpUserSet,
+        ],
+    ];
+
     return response()->json([
         'status' => 'ok',
         'database' => $dbStatus,
         'payments' => $paymentsStatus,
+        'email' => $emailStatus,
         'timestamp' => now()->toISOString(),
         'version' => app()->version(),
     ]);

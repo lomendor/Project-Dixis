@@ -1,11 +1,11 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (Pass-52-STRIPE-ENABLE)
+**Last Updated**: 2026-01-17 (Pass-60-EMAIL-ENABLE)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
 ## WIP (1 item only)
-_(empty — pick next unblocked item from NEXT)_
+**Pass 60 — Email Infrastructure Enable** (code complete, PR pending)
 
 ## NEXT (ordered, max 3)
 

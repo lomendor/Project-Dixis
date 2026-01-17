@@ -8,7 +8,7 @@
 
 ## WIP (max 1)
 
-_(empty — pick next unblocked item from NEXT)_
+**Pass 60 — Email Infrastructure Enable** (code complete, PR pending)
 
 ---
 
