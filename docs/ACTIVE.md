@@ -1,6 +1,6 @@
 # ACTIVE — Dixis Agent State
 
-**Updated**: 2026-01-17 (PRD-AUDIT-STRUCTURE-01)
+**Updated**: 2026-01-17 (PRD-AUDIT-REFRESH-01)
 
 > **This is THE entry point.** Read this first on every session.
 
@@ -20,6 +20,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 
 ## Recently Completed
 
+- **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅
 - **PRD-AUDIT-STRUCTURE-01** — Page inventory + flows + V1 must-haves ✅
 - **EN-LANGUAGE-02** — Extend i18n to checkout/orders pages ✅
 - **PRODUCER-DASHBOARD-01** — i18n + notifications link ✅
@@ -45,7 +46,7 @@ _(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 statu
 | **Health endpoint** | `/api/healthz` (200 = OK) |
 | **SSH key** | `~/.ssh/dixis_prod_ed25519` (dixis-prod-20260115) |
 | **VPS IP** | 147.93.126.235 |
-| **Feature health** | 88% (68 DONE + 30 PARTIAL / 111 total) |
+| **Feature health** | 91% (78 DONE + 23 PARTIAL / 111 total) |
 | **Ports** | 8001 (backend), 3001 (frontend) — LOCKED |
 
 ---
