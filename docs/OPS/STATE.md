@@ -1,12 +1,51 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-EMAIL-AUTH-01)
+**Last Updated**: 2026-01-17 (Pass-OPS-EMAIL-UNBLOCK-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
 
+## 2026-01-17 — Pass OPS-EMAIL-UNBLOCK-01: Email Now Live on Production
+
+**Status**: ✅ CLOSED
+
+Production email verified working via Resend. Docs corrected from BLOCKED to ENABLED.
+
+### Verification Evidence
+
+**Health API** (`https://dixis.gr/api/health`):
+```json
+{
+  "email": {
+    "flag": "enabled",
+    "mailer": "resend",
+    "configured": true,
+    "from_configured": true,
+    "keys_present": { "resend": true, "smtp_host": false, "smtp_user": false }
+  }
+}
+```
+
+**Password Reset Endpoint**: `POST /api/v1/auth/password/forgot` → HTTP 200
+
+### What Changed
+
+| Item | Before | After |
+|------|--------|-------|
+| RESEND_KEY | missing | present |
+| EMAIL_NOTIFICATIONS_ENABLED | false | true |
+| email.flag in health | disabled | enabled |
+| OPS-EMAIL-ENABLE-01 | BLOCKED | ✅ DONE |
+| OPS-EMAIL-SMOKE-01 | BLOCKED | ✅ DONE |
+
+### PRs
+
+- #TBD (docs: Pass OPS-EMAIL-UNBLOCK-01 correct email status) — pending
+
+---
+
 ## 2026-01-17 — Pass EMAIL-AUTH-01: Password Reset via Resend
 
-**Status**: ✅ MERGED (email sending BLOCKED pending credentials)
+**Status**: ✅ MERGED (email now ENABLED on production)
 
 Implemented full password reset flow using Resend email infrastructure.
 
