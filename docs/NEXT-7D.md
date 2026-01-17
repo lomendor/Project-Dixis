@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (Pass-EMAIL-AUTH-01)
+**Last Updated**: 2026-01-17 (Pass-OPS-EMAIL-UNBLOCK-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -8,17 +8,6 @@
 _(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, max 3)
-
-### Blocked (awaiting operator action)
-
-1. **OPS-EMAIL-ENABLE-01** — VPS env + test send (BLOCKED — needs Resend key OR SMTP creds)
-   - Required: `RESEND_KEY` OR (`MAIL_HOST` + `MAIL_USERNAME` + `MAIL_PASSWORD`)
-   - Required: `EMAIL_NOTIFICATIONS_ENABLED=true`
-   - Runbook: `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md`
-
-2. **OPS-EMAIL-SMOKE-01** — Enable email creds on VPS + smoke test password reset flow
-   - Prereq: OPS-EMAIL-ENABLE-01 complete
-   - Verify: reset email received, token works, password changed
 
 ### Unblocked (ready to start)
 
@@ -30,42 +19,18 @@ See `docs/PRODUCT/PRD-AUDIT.md` for full gap analysis.
 
 ---
 
-## Waiting on Credentials
+## Credentials Status
 
-### Pass 52 — Card Payments (Stripe)
+### Pass 52 — Card Payments (Stripe) ✅ ENABLED
 
-Provide these values to enable card payments:
+Card payments are live on production.
 
-| Env Var | Format | Where |
-|---------|--------|-------|
-| `STRIPE_SECRET_KEY` | `sk_live_...` | VPS backend/.env |
-| `STRIPE_PUBLIC_KEY` | `pk_live_...` | VPS backend/.env |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | VPS backend/.env |
-| `PAYMENTS_CARD_FLAG` | `true` | VPS backend/.env |
-| `NEXT_PUBLIC_PAYMENTS_CARD_FLAG` | `true` | VPS frontend/.env |
+### Pass 60 — Email Notifications (Resend) ✅ ENABLED
 
-### Pass 60 — Email Notifications (SMTP or Resend)
-
-**Option A — Resend** (recommended):
-
-| Env Var | Format | Where |
-|---------|--------|-------|
-| `MAIL_MAILER` | `resend` | VPS backend/.env |
-| `RESEND_KEY` | `re_...` | VPS backend/.env |
-| `EMAIL_NOTIFICATIONS_ENABLED` | `true` | VPS backend/.env |
-
-**Option B — SMTP**:
-
-| Env Var | Example | Where |
-|---------|---------|-------|
-| `MAIL_MAILER` | `smtp` | VPS backend/.env |
-| `MAIL_HOST` | `smtp.example.com` | VPS backend/.env |
-| `MAIL_PORT` | `587` | VPS backend/.env |
-| `MAIL_USERNAME` | (your username) | VPS backend/.env |
-| `MAIL_PASSWORD` | (your password) | VPS backend/.env |
-| `EMAIL_NOTIFICATIONS_ENABLED` | `true` | VPS backend/.env |
-
-Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
+Email is live on production via Resend. Verified 2026-01-17 via `/api/health`:
+- `email.flag`: enabled
+- `email.configured`: true
+- `keys_present.resend`: true
 
 ---
 
@@ -78,9 +43,12 @@ Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **Pass OPS-EMAIL-UNBLOCK-01** — Email now live on production (Resend verified) ✅
+- **Pass OPS-EMAIL-ENABLE-01** — VPS env configured (RESEND_KEY present) ✅
+- **Pass OPS-EMAIL-SMOKE-01** — Password reset endpoint returns HTTP 200 ✅
 - **Pass EMAIL-AUTH-01** — Password Reset via Resend (backend + frontend + tests) ✅
 - **Pass 60.1** — Email Verify Tooling (from_configured + Artisan test command) ✅
-- **Pass 60** — Email Enable (health diagnostic, awaiting credentials) ✅
+- **Pass 60** — Email Enable (health diagnostic, now enabled) ✅
 - **Pass 52** — Stripe Enable (health diagnostic, Stripe live on prod) ✅
 - **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
 - **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅
