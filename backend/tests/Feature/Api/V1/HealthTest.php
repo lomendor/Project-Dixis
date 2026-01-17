@@ -60,6 +60,7 @@ class HealthTest extends TestCase
 
     /**
      * Pass 60: Verify health endpoint includes email configuration status
+     * Pass 60.1: Added from_configured field
      */
     public function test_health_endpoint_includes_email_status(): void
     {
@@ -73,6 +74,7 @@ class HealthTest extends TestCase
                     'flag',
                     'mailer',
                     'configured',
+                    'from_configured',
                     'keys_present' => ['resend', 'smtp_host', 'smtp_user'],
                 ],
                 'timestamp',
@@ -86,10 +88,15 @@ class HealthTest extends TestCase
         // Mailer should be a valid string
         $mailer = $res->json('email.mailer');
         $this->assertIsString($mailer);
+
+        // from_configured should be a boolean
+        $fromConfigured = $res->json('email.from_configured');
+        $this->assertIsBool($fromConfigured);
     }
 
     /**
      * Pass 60: Verify healthz endpoint also includes email configuration status
+     * Pass 60.1: Added from_configured field
      */
     public function test_healthz_endpoint_includes_email_status(): void
     {
@@ -101,7 +108,12 @@ class HealthTest extends TestCase
                     'flag',
                     'mailer',
                     'configured',
+                    'from_configured',
                 ],
             ]);
+
+        // from_configured should be a boolean
+        $fromConfigured = $res->json('email.from_configured');
+        $this->assertIsBool($fromConfigured);
     }
 }

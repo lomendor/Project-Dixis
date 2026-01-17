@@ -34,11 +34,16 @@ Route::get('/health', function () {
     ];
 
     // Pass 60: Email configuration status (no secrets exposed)
+    // Pass 60.1: Added from_configured field
     $emailEnabled = config('notifications.email_enabled', false);
     $mailer = config('mail.default', 'log');
     $resendKeySet = !empty(config('services.resend.key'));
     $smtpHostSet = !empty(config('mail.mailers.smtp.host')) && config('mail.mailers.smtp.host') !== '127.0.0.1';
     $smtpUserSet = !empty(config('mail.mailers.smtp.username'));
+
+    // Check FROM address configuration (fallback to info@dixis.gr is applied in mail.php)
+    $fromAddress = config('mail.from.address', 'info@dixis.gr');
+    $fromConfigured = !empty($fromAddress) && $fromAddress !== 'hello@example.com';
 
     // Determine if email is properly configured based on mailer type
     $emailConfigured = false;
@@ -56,6 +61,7 @@ Route::get('/health', function () {
         'flag' => $emailEnabled ? 'enabled' : 'disabled',
         'mailer' => $mailer,
         'configured' => $emailConfigured,
+        'from_configured' => $fromConfigured,
         'keys_present' => [
             'resend' => $resendKeySet,
             'smtp_host' => $smtpHostSet,
@@ -102,11 +108,16 @@ Route::get('/healthz', function () {
     ];
 
     // Pass 60: Email configuration status (no secrets exposed)
+    // Pass 60.1: Added from_configured field
     $emailEnabled = config('notifications.email_enabled', false);
     $mailer = config('mail.default', 'log');
     $resendKeySet = !empty(config('services.resend.key'));
     $smtpHostSet = !empty(config('mail.mailers.smtp.host')) && config('mail.mailers.smtp.host') !== '127.0.0.1';
     $smtpUserSet = !empty(config('mail.mailers.smtp.username'));
+
+    // Check FROM address configuration (fallback to info@dixis.gr is applied in mail.php)
+    $fromAddress = config('mail.from.address', 'info@dixis.gr');
+    $fromConfigured = !empty($fromAddress) && $fromAddress !== 'hello@example.com';
 
     // Determine if email is properly configured based on mailer type
     $emailConfigured = false;
@@ -124,6 +135,7 @@ Route::get('/healthz', function () {
         'flag' => $emailEnabled ? 'enabled' : 'disabled',
         'mailer' => $mailer,
         'configured' => $emailConfigured,
+        'from_configured' => $fromConfigured,
         'keys_present' => [
             'resend' => $resendKeySet,
             'smtp_host' => $smtpHostSet,
