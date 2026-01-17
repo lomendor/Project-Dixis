@@ -1,7 +1,8 @@
 # Pass 60: Email Infrastructure Enable
 
-**Status**: READY FOR CREDENTIALS
+**Status**: ✅ CODE COMPLETE (awaiting credentials)
 **Created**: 2026-01-17
+**Updated**: 2026-01-17 (Pass 60.1 - Enhanced runbook)
 
 ## Goal
 
@@ -19,6 +20,8 @@ Minimal code change: Add email status to `/api/health` and `/api/healthz` endpoi
 - [x] Add CI-safe tests for health endpoint changes
 - [x] Create documentation (TASKS + SUMMARY)
 - [x] PR merged
+- [x] Pass 60.1: Enhanced operator runbook
+- [x] Pass 60.1: Test email Artisan command
 
 ## Implementation Summary
 
@@ -48,6 +51,7 @@ Added email configuration status to `/api/health` and `/api/healthz`:
     "flag": "disabled",
     "mailer": "log",
     "configured": false,
+    "from_configured": true,
     "keys_present": {
       "resend": false,
       "smtp_host": false,
@@ -64,12 +68,29 @@ Added email configuration status to `/api/health` and `/api/healthz`:
 
 ---
 
-## Operator Steps (VPS Enablement)
+## Operator Runbook (Production)
 
-### Prerequisites
+### Prerequisites Checklist
 
-1. Resend account with API key OR SMTP credentials
-2. SSH access to VPS: `ssh -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235`
+Before enabling email on production, complete these steps:
+
+#### 1. Resend Account Setup
+
+- [ ] Create account at [resend.com](https://resend.com)
+- [ ] Add and verify domain `dixis.gr`
+- [ ] Configure DNS records (provided by Resend):
+  - SPF record (TXT): Allows Resend to send on behalf of dixis.gr
+  - DKIM record (TXT): Cryptographic signature for email authentication
+  - Optional: DMARC record for reporting
+- [ ] Wait for domain verification (usually 5-10 minutes)
+- [ ] Generate API key (starts with `re_`)
+- [ ] Note recommended FROM address: `info@dixis.gr` or `no-reply@dixis.gr`
+
+#### 2. SSH Access
+
+- [ ] Confirm SSH access works: `ssh -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235`
+
+---
 
 ### Option A: Resend (Recommended)
 
@@ -77,20 +98,19 @@ Added email configuration status to `/api/health` and `/api/healthz`:
 # 1. SSH to VPS
 ssh -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235
 
-# 2. Add Resend configuration
+# 2. Add Resend configuration (replace re_YOUR_API_KEY with actual key)
 cat >> /var/www/dixis/current/backend/.env << 'EOF'
 MAIL_MAILER=resend
 RESEND_KEY=re_YOUR_API_KEY
 EMAIL_NOTIFICATIONS_ENABLED=true
-MAIL_FROM_ADDRESS=no-reply@dixis.gr
+MAIL_FROM_ADDRESS=info@dixis.gr
 MAIL_FROM_NAME=Dixis
 EOF
 
-# 3. Restart backend
+# 3. Clear config cache and restart backend
+cd /var/www/dixis/current/backend
+php artisan config:clear
 sudo systemctl restart dixis-backend.service
-
-# 4. Validate presence (no secrets printed)
-grep -q "^EMAIL_NOTIFICATIONS_ENABLED=true" /var/www/dixis/current/backend/.env && echo "Email enabled: OK" || echo "Email: DISABLED"
 ```
 
 ### Option B: SMTP
@@ -107,48 +127,119 @@ MAIL_PORT=587
 MAIL_USERNAME=your_username
 MAIL_PASSWORD=your_password
 EMAIL_NOTIFICATIONS_ENABLED=true
-MAIL_FROM_ADDRESS=no-reply@dixis.gr
+MAIL_FROM_ADDRESS=info@dixis.gr
 MAIL_FROM_NAME=Dixis
 EOF
 
-# 3. Restart backend
+# 3. Clear config cache and restart backend
+cd /var/www/dixis/current/backend
+php artisan config:clear
 sudo systemctl restart dixis-backend.service
 ```
 
-### Validation
+---
+
+### Verification Steps
+
+#### Step 1: Check Health Endpoint
 
 ```bash
-# 1. Check health endpoint shows email configured
+# Run from local machine or VPS
 curl -s https://dixis.gr/api/healthz | jq '.email'
+```
 
-# Expected output (when enabled with Resend):
-# {
-#   "flag": "enabled",
-#   "mailer": "resend",
-#   "configured": true,
-#   "keys_present": {
-#     "resend": true,
-#     "smtp_host": false,
-#     "smtp_user": false
-#   }
-# }
+**Expected output when correctly configured:**
 
-# 2. Test email via Tinker
+```json
+{
+  "flag": "enabled",
+  "mailer": "resend",
+  "configured": true,
+  "from_configured": true,
+  "keys_present": {
+    "resend": true,
+    "smtp_host": false,
+    "smtp_user": false
+  }
+}
+```
+
+**If you see `configured: false`**, check:
+- Is `RESEND_KEY` set correctly? (starts with `re_`)
+- Did you run `php artisan config:clear`?
+- Did you restart the backend service?
+
+#### Step 2: Send Test Email
+
+```bash
+# SSH to VPS first
+ssh -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235
+
+# Navigate to backend
 cd /var/www/dixis/current/backend
-php artisan tinker
->>> Mail::raw('Test from Dixis', fn($m) => $m->to('test@example.com')->subject('Test'));
 
-# 3. Check Laravel logs
+# Dry run (validates config without sending)
+php artisan dixis:email:test --to=your-email@example.com --dry-run
+
+# Send actual test email
+php artisan dixis:email:test --to=your-email@example.com
+```
+
+**Expected output (success):**
+
+```
+[OK] Test email sent successfully to your-email@example.com
+```
+
+**Expected output (dry run):**
+
+```
+[DRY RUN] Email configuration is valid.
+[DRY RUN] Would send to: your-email@example.com
+[DRY RUN] From: Dixis <i***@dixis.gr>
+[DRY RUN] Subject: Test Email from Dixis
+```
+
+#### Step 3: Check Laravel Logs
+
+```bash
 tail -50 /var/www/dixis/current/backend/storage/logs/laravel.log | grep -i mail
 ```
 
-### Rollback (if needed)
+---
+
+### Rollback Steps
+
+If email is causing issues, disable it immediately:
 
 ```bash
-# Disable email notifications
+# 1. SSH to VPS
+ssh -i ~/.ssh/dixis_prod_ed25519 deploy@147.93.126.235
+
+# 2. Disable email notifications
 sed -i 's/EMAIL_NOTIFICATIONS_ENABLED=true/EMAIL_NOTIFICATIONS_ENABLED=false/' /var/www/dixis/current/backend/.env
 
-# Restart backend
+# 3. Clear cache and restart
+cd /var/www/dixis/current/backend
+php artisan config:clear
+sudo systemctl restart dixis-backend.service
+
+# 4. Verify disabled
+curl -s https://dixis.gr/api/healthz | jq '.email.flag'
+# Should output: "disabled"
+```
+
+To fully remove email configuration:
+
+```bash
+# Remove email-related lines from .env
+sed -i '/^MAIL_MAILER=/d' /var/www/dixis/current/backend/.env
+sed -i '/^RESEND_KEY=/d' /var/www/dixis/current/backend/.env
+sed -i '/^EMAIL_NOTIFICATIONS_ENABLED=/d' /var/www/dixis/current/backend/.env
+
+# Restart
+cd /var/www/dixis/current/backend
+php artisan config:clear
 sudo systemctl restart dixis-backend.service
 ```
 
@@ -163,6 +254,8 @@ sudo systemctl restart dixis-backend.service
 | `MAIL_MAILER` | `resend` | VPS backend/.env |
 | `RESEND_KEY` | `re_...` | VPS backend/.env |
 | `EMAIL_NOTIFICATIONS_ENABLED` | `true` | VPS backend/.env |
+| `MAIL_FROM_ADDRESS` | `info@dixis.gr` | VPS backend/.env |
+| `MAIL_FROM_NAME` | `Dixis` | VPS backend/.env |
 
 ### Option B: SMTP
 
@@ -181,10 +274,35 @@ sudo systemctl restart dixis-backend.service
 |---------|---------|---------|
 | `EMAIL_QUEUE_ENABLED` | Queue emails vs sync | `false` |
 | `PRODUCER_DIGEST_ENABLED` | Weekly producer digest | `false` |
-| `MAIL_FROM_ADDRESS` | Sender email | `no-reply@dixis.gr` |
+| `MAIL_FROM_ADDRESS` | Sender email | `info@dixis.gr` |
 | `MAIL_FROM_NAME` | Sender name | `Dixis` |
 
 See `docs/OPS/CREDENTIALS.md` for complete reference.
+
+---
+
+## Troubleshooting
+
+### "configured: false" after adding keys
+
+1. Check if `RESEND_KEY` starts with `re_`
+2. Run `php artisan config:clear`
+3. Restart service: `sudo systemctl restart dixis-backend.service`
+4. Check `.env` file: `grep RESEND /var/www/dixis/current/backend/.env`
+
+### Test email command refuses to send
+
+The command requires `EMAIL_NOTIFICATIONS_ENABLED=true`. Check:
+```bash
+grep EMAIL_NOTIFICATIONS_ENABLED /var/www/dixis/current/backend/.env
+```
+
+### Emails not being received
+
+1. Check Laravel logs for errors
+2. Verify domain is verified in Resend dashboard
+3. Check spam folder
+4. Verify FROM address matches verified domain
 
 ---
 
@@ -193,4 +311,5 @@ See `docs/OPS/CREDENTIALS.md` for complete reference.
 - Emails are feature-flagged: `EMAIL_NOTIFICATIONS_ENABLED` defaults to `false`
 - Queue is optional: `EMAIL_QUEUE_ENABLED` defaults to `false` (sync send)
 - Resend is recommended over SMTP for reliability
+- Default FROM: `info@dixis.gr` (fallback if not set)
 - Existing mailables: order confirmations, producer notifications, status updates, weekly digest
