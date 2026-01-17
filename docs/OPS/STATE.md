@@ -1,8 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-EMAIL-SMOKE-01)
+**Last Updated**: 2026-01-17 (Pass-PROD-UNBLOCK-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass PROD-UNBLOCK-01: Production Auth & Products Verification
+
+**Status**: ✅ CLOSED
+
+Investigated reported production issues ("products not visible" + "register/login not working"). Found all APIs working correctly.
+
+### Root Cause
+
+The perceived auth failure was caused by **shell escaping**, not a server issue:
+- zsh escapes `!` to `\!` in command-line strings
+- JSON payload with `"Password1\!"` is invalid
+- Laravel's `json_decode` fails, `$request->all()` returns empty
+- Testing with passwords without `!` succeeded immediately
+
+### Evidence
+
+| Test | Result |
+|------|--------|
+| Products API | ✅ Returns 5 products |
+| Register | ✅ Creates user, returns token |
+| Login | ✅ Authenticates, returns token |
+| AuthController import | ✅ `Illuminate\Http\Request` |
+
+### Files Verified (MD5 match)
+
+| File | Match |
+|------|-------|
+| AuthController.php | ✅ |
+| routes/api.php | ✅ |
+
+### PRs
+
+- None required (all APIs working, no code changes)
+
+---
 
 ## 2026-01-17 — Pass EMAIL-SMOKE-01: VPS → Resend End-to-End Smoke Test
 
