@@ -1,8 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-17 (Pass-60.1-EMAIL-VERIFY)
+**Last Updated**: 2026-01-17 (Pass-EMAIL-AUTH-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-17 — Pass EMAIL-AUTH-01: Password Reset via Resend
+
+**Status**: ✅ MERGED (email sending BLOCKED pending credentials)
+
+Implemented full password reset flow using Resend email infrastructure.
+
+### Changes
+
+- **Backend**: `PasswordResetController` with forgot/reset endpoints
+- **Email**: `ResetPasswordMail` + Greek template
+- **Frontend**: `/auth/forgot-password` + `/auth/reset-password` pages
+- **i18n**: Greek + English translations
+- **Security**: Token hashing, 1-hour expiry, no user enumeration, force re-login
+
+### API Endpoints
+
+```
+POST /api/v1/auth/password/forgot  (always 200)
+POST /api/v1/auth/password/reset   (200/422)
+```
+
+### Tests
+
+- 13 backend feature tests in `PasswordResetTest.php`
+
+### Blocked Until
+
+Email sending requires VPS credentials:
+- `RESEND_KEY=re_...` + `EMAIL_NOTIFICATIONS_ENABLED=true`
+
+### PRs
+
+- #2274 (feat: Pass EMAIL-AUTH-01 - Password Reset via Resend) — merged
+
+---
 
 ## 2026-01-17 — Pass 60.1: Email Verification Tooling
 
