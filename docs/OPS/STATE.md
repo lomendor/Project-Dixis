@@ -1,14 +1,47 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass-CARD-PAYMENT-SMOKE-01)
+**Last Updated**: 2026-01-18 (Pass-ENV-FRONTEND-PAYMENTS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
 
+## 2026-01-18 — Pass ENV-FRONTEND-PAYMENTS-01: Frontend VPS Env for Card Payments
+
+**Status**: ✅ CLOSED
+
+Configured VPS frontend environment to enable card payments by adding missing Stripe variables.
+
+### Issues Fixed
+
+1. **Permission blocker**: Removed `node_modules/.cache/jiti` (owned by root)
+2. **Missing .env**: Restored after rsync `--delete` removed it
+3. **Missing Stripe vars**: Added `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` and `NEXT_PUBLIC_PAYMENTS_CARD_FLAG`
+
+### Evidence
+
+| Endpoint | Field | Value |
+|----------|-------|-------|
+| /api/healthz | card.flag | enabled |
+| /api/healthz | card.stripe_configured | true |
+| /api/healthz | keys_present.secret | true |
+| /api/healthz | keys_present.public | true |
+
+### Deploy
+
+- Run ID: 21102358766
+- Status: SUCCESS
+- Duration: 3m50s
+
+### PRs
+
+- #2289 (docs: Pass ENV-FRONTEND-PAYMENTS-01 audit trail)
+
+---
+
 ## 2026-01-18 — Pass CARD-PAYMENT-SMOKE-01: Card Payment E2E Smoke Test
 
-**Status**: ✅ CLOSED (with blocker documented)
+**Status**: ✅ CLOSED
 
-Created E2E smoke tests for Stripe card payment infrastructure. Identified blocker: frontend VPS env missing required vars.
+Created E2E smoke tests for Stripe card payment infrastructure.
 
 ### Backend Stripe Config (Verified)
 
@@ -20,23 +53,13 @@ Created E2E smoke tests for Stripe card payment infrastructure. Identified block
 | card.flag via /api/health | enabled |
 | card.stripe_configured | true |
 
-### Frontend Env (BLOCKER)
-
-Missing on VPS:
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`
-
 ### Tests Added
 
 - `card-payment-smoke.spec.ts` - 3 tests (CI-safe with graceful skips)
 
-### Next Step
-
-Add missing frontend env vars to VPS and rebuild Next.js to enable card payments.
-
 ### PRs
 
-- #TBD (feat: Pass CARD-PAYMENT-SMOKE-01) — pending
+- #2288 (feat: Pass CARD-PAYMENT-SMOKE-01) — merged
 
 ---
 
