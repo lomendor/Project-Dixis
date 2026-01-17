@@ -155,6 +155,31 @@
       "submit": "Create account",
       "submitting": "Creating account...",
       "backToProducts": "Back to Products"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "email": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "success": "If an account exists with this email, you will receive a reset link.",
+      "backToLogin": "Back to Login"
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Enter your new password.",
+      "password": "New Password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPlaceholder": "Confirm new password",
+      "submit": "Change Password",
+      "submitting": "Changing...",
+      "success": "Your password has been changed successfully. You can now log in.",
+      "invalidToken": "This reset link is invalid or has expired.",
+      "backToLogin": "Back to Login",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 8 characters."
     }
   },
   "language": {

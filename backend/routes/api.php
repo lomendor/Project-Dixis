@@ -171,6 +171,12 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
     Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 
+    // Pass EMAIL-AUTH-01: Password reset routes (throttled to prevent abuse)
+    Route::post('password/forgot', [App\Http\Controllers\Api\PasswordResetController::class, 'forgot'])
+        ->middleware('throttle:5,1'); // 5 requests per minute
+    Route::post('password/reset', [App\Http\Controllers\Api\PasswordResetController::class, 'reset'])
+        ->middleware('throttle:5,1'); // 5 requests per minute
+
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
