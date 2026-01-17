@@ -5,7 +5,7 @@
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
 ## WIP (1 item only)
-**Pass 60 — Email Infrastructure Enable** (code complete, PR pending)
+_(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, max 3)
 
@@ -71,6 +71,7 @@ Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **Pass 60** — Email Enable (health diagnostic, awaiting credentials) ✅
 - **Pass 52** — Stripe Enable (health diagnostic, Stripe live on prod) ✅
 - **CREDENTIALS-01** — Credential wiring map for Pass 52/60 ✅
 - **PRD-AUDIT-REFRESH-01** — Refresh audit after 8 passes (91% health) ✅

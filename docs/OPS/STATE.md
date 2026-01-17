@@ -6,7 +6,7 @@
 
 ## 2026-01-17 — Pass 60: Email Infrastructure Enable
 
-**Status**: READY FOR CREDENTIALS (code complete)
+**Status**: ✅ CODE COMPLETE (awaiting credentials)
 
 Added email configuration status to health endpoints. Email wiring from Pass 53-55 confirmed complete.
 
@@ -21,13 +21,22 @@ Added email configuration status to health endpoints. Email wiring from Pass 53-
 - `test_health_endpoint_includes_email_status()`
 - `test_healthz_endpoint_includes_email_status()`
 
+### Production Verification
+
+```json
+{
+  "email": {
+    "flag": "disabled",
+    "mailer": "resend",
+    "configured": false,
+    "keys_present": {"resend": false, "smtp_host": false, "smtp_user": false}
+  }
+}
+```
+
 ### Operator Steps
 
-See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement.
-
-### Next
-
-User to provide Resend/SMTP credentials, run operator steps on VPS.
+See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement with Resend key.
 
 ---
 
