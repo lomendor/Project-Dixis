@@ -107,9 +107,18 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                {t('auth.login.password')}
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  {t('auth.login.password')}
+                </label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-sm text-green-600 hover:text-green-500"
+                  data-testid="forgot-password-link"
+                >
+                  {t('auth.forgotPassword.title')}
+                </Link>
+              </div>
               <div className="mt-1">
                 <input
                   id="password"
