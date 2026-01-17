@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-17 (Pass-60.1-EMAIL-VERIFY)
+**Last Updated**: 2026-01-17 (Pass-EMAIL-AUTH-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -9,12 +9,16 @@ _(empty — pick next unblocked item from NEXT)_
 
 ## NEXT (ordered, max 3)
 
-### Blocked (awaiting credentials)
+### Blocked (awaiting operator action)
 
 1. **OPS-EMAIL-ENABLE-01** — VPS env + test send (BLOCKED — needs Resend key OR SMTP creds)
    - Required: `RESEND_KEY` OR (`MAIL_HOST` + `MAIL_USERNAME` + `MAIL_PASSWORD`)
    - Required: `EMAIL_NOTIFICATIONS_ENABLED=true`
    - Runbook: `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md`
+
+2. **OPS-EMAIL-SMOKE-01** — Enable email creds on VPS + smoke test password reset flow
+   - Prereq: OPS-EMAIL-ENABLE-01 complete
+   - Verify: reset email received, token works, password changed
 
 ### Unblocked (ready to start)
 
@@ -74,6 +78,7 @@ Full enablement steps: `docs/AGENT/SOPs/CREDENTIALS.md`
 
 ## Recently Completed (2026-01-14 to 2026-01-17)
 
+- **Pass EMAIL-AUTH-01** — Password Reset via Resend (backend + frontend + tests) ✅
 - **Pass 60.1** — Email Verify Tooling (from_configured + Artisan test command) ✅
 - **Pass 60** — Email Enable (health diagnostic, awaiting credentials) ✅
 - **Pass 52** — Stripe Enable (health diagnostic, Stripe live on prod) ✅
