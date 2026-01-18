@@ -1,9 +1,47 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass PERF-PRODUCTS-AUDIT-01)
+**Last Updated**: 2026-01-19 (Pass PERF-PRODUCTS-CACHE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~300 lines (target ≤250).
+
+## 2026-01-19 — Pass PERF-PRODUCTS-CACHE-01: Products Page Caching
+
+**Status**: ✅ DONE (Production Deployed)
+
+Implemented P1 caching recommendations from PERF-PRODUCTS-AUDIT-01.
+
+### Changes
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Frontend fetch | `cache: 'no-store'` | `next: { revalidate: 60 }` |
+| Backend header | `Cache-Control: no-cache, private` | `Cache-Control: public, s-maxage=60, stale-while-revalidate=30` |
+
+### Evidence
+
+```bash
+curl -sI "https://dixis.gr/api/v1/public/products" | grep cache
+# Cache-Control: public, s-maxage=60, stale-while-revalidate=30
+```
+
+### Expected Impact
+
+- CDN caches public product responses for 60 seconds
+- Repeat requests within cache window served from edge (~20-50ms)
+- ~80% reduction in origin backend load during traffic spikes
+
+### Production Deploy
+
+- **Commit**: `dcd0fdd2`
+- **Backend**: Run 21120676076 (success)
+- **Frontend**: Run 21120676337 (success)
+
+### PRs
+
+- #2317 (perf: Pass PERF-PRODUCTS-CACHE-01 add caching to products) — merged
+
+---
 
 ## 2026-01-19 — Pass PERF-PRODUCTS-AUDIT-01: Products Page Performance Audit
 
