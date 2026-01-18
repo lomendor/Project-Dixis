@@ -353,7 +353,7 @@
 
 ## 🔗 RELATED DOCUMENTATION
 
-- **Implementation**: `docs/AGENT/SUMMARY/Pass-AG35.md`
+- **Implementation**: `docs/AGENT/PASSES/SUMMARY-Pass-AG35.md`
 - **Code Structure**: `docs/reports/2025-10-18/AG35-CODEMAP.md`
 - **Test Details**: `docs/reports/2025-10-18/AG35-TEST-REPORT.md`
 

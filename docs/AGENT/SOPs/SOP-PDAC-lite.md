@@ -13,7 +13,7 @@ Lightweight workflow για structured planning + parallel research + quality ga
 - Αναγνώριση dependencies, risks, test strategy
 
 ### Deliverables
-- `docs/AGENT/TASKS/Pass-<ID>.md` με sections:
+- `docs/AGENT/PASSES/TASK-Pass-<ID>.md` με sections:
   - Στόχος
   - Αποφάσεις (τεχνικές επιλογές)
   - Βήματα που υλοποιήθηκαν (placeholder)

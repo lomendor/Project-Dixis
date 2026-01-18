@@ -62,7 +62,7 @@ params.set('dir', sortDir); // AG33: include dir
 6. Reload page
 7. Assert filters persisted
 
-### 3. `docs/AGENT/SUMMARY/Pass-AG33.md` (NEW)
+### 3. `docs/AGENT/PASSES/SUMMARY-Pass-AG33.md` (NEW)
 **Purpose**: Complete implementation documentation
 
 **Sections**:
