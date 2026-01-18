@@ -128,7 +128,12 @@ class ProductController extends Controller
             return $data;
         });
 
-        return response()->json($products);
+        // Pass PERF-PRODUCTS-CACHE-01: Add cache headers for CDN/proxy caching
+        // - public: allow CDN/proxy caching (this is public product data, no auth)
+        // - s-maxage=60: CDN can cache for 60 seconds
+        // - stale-while-revalidate=30: serve stale while fetching fresh in background
+        return response()->json($products)
+            ->header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
     }
 
     /**
@@ -166,6 +171,8 @@ class ProductController extends Controller
         // Format price consistently
         $data['price'] = number_format($product->price, 2);
 
-        return response()->json($data);
+        // Pass PERF-PRODUCTS-CACHE-01: Add cache headers for CDN/proxy caching
+        return response()->json($data)
+            ->header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
     }
 }

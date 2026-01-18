@@ -18,6 +18,11 @@ type ApiItem = {
 /**
  * Pass SEARCH-FTS-01: Fetch products with optional search parameter.
  * Uses FTS ranking on PostgreSQL backend, ILIKE fallback on others.
+ *
+ * Pass PERF-PRODUCTS-CACHE-01: Added time-based revalidation.
+ * - revalidate: 60 = cache for 60 seconds, then revalidate in background
+ * - Each unique search query gets its own cache entry (Next.js caches by full URL)
+ * - Balance: fresh enough for inventory changes, fast enough for good UX
  */
 async function getData(search?: string): Promise<{ items: ApiItem[]; total: number; isDemo: boolean }> {
   // Use internal URL for SSR to avoid external round-trip timeout (Pass 26 fix)
@@ -36,7 +41,8 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
     const endpoint = url.pathname + url.search;
 
     const res = await fetch(`${base}/public/products${search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : ''}`, {
-      cache: 'no-store',
+      // Pass PERF-PRODUCTS-CACHE-01: Cache response for 60s, revalidate in background
+      next: { revalidate: 60 },
       headers: { 'Content-Type': 'application/json' },
     });
 

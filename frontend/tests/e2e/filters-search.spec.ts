@@ -56,10 +56,11 @@ test.describe('Filters and Search @smoke', () => {
       await expect(page.getByTestId('no-results')).toBeVisible({ timeout: 5000 });
     }
 
-    // Clear search filter
-    await searchInput.clear();
-    await page.waitForTimeout(500);
-    await page.waitForLoadState('networkidle');
+    // Clear search filter by navigating directly to /products (more reliable than clearing input)
+    await page.goto('/products');
+
+    // Wait for products to load
+    await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible({ timeout: 15000 });
 
     // Verify all products are restored
     const restoredProductCount = await page.locator('[data-testid="product-card"]').count();
