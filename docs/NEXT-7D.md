@@ -1,6 +1,6 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01 CLOSED)
+**Last Updated**: 2026-01-18 (Pass PERF-IPV4-PREFER-01 CLOSED)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
@@ -43,6 +43,9 @@ Email is live on production via Resend. Verified 2026-01-17 via `/api/health`:
 
 ## Recently Completed (2026-01-14 to 2026-01-18)
 
+- **Pass PERF-IPV4-PREFER-01** — Fix 9.5s backend latency via IPv4 preference (9.3s → 70-120ms, ~100x faster) ✅
+- **Pass CSP-STRIPE-01** — Fix CSP for Stripe Elements iframe ✅
+- **Pass STRIPE-E2E-TIMEOUT-01** — Make Stripe E2E test deterministic with network interception ✅
 - **Pass PAYMENTS-STRIPE-ELEMENTS-01** — Stripe Elements integration (embedded card form in checkout) ✅
 - **Pass PAYMENTS-CARD-REAL-01** — Card payment E2E with real auth (deploy workflow fixed, GitHub secret added) ✅
 - **Pass ENV-FRONTEND-PAYMENTS-01** — VPS frontend env for card payments (Stripe vars added, deploy fixed) ✅
