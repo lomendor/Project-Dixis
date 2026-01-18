@@ -1,17 +1,17 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01)
+**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01 CLOSED)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
 ## WIP (1 item only)
-- **Pass PAYMENTS-STRIPE-ELEMENTS-01** — Stripe Elements integration (PR pending)
+_(empty — no active pass)_
 
 ## NEXT (ordered, max 3)
 
 ### Unblocked (ready to start)
 
-_(All unblocked passes complete — see docs/PRODUCT/PRD-MUST-V1.md for V1 status)_
+_(No unblocked pass — see docs/PRODUCT/PRD-MUST-V1.md for V1 status)_
 
 See `docs/OPS/STATE.md` for full DoD checklists.
 See `docs/AGENT/SOPs/CREDENTIALS.md` for VPS enablement steps.
@@ -43,6 +43,7 @@ Email is live on production via Resend. Verified 2026-01-17 via `/api/health`:
 
 ## Recently Completed (2026-01-14 to 2026-01-18)
 
+- **Pass PAYMENTS-STRIPE-ELEMENTS-01** — Stripe Elements integration (embedded card form in checkout) ✅
 - **Pass PAYMENTS-CARD-REAL-01** — Card payment E2E with real auth (deploy workflow fixed, GitHub secret added) ✅
 - **Pass ENV-FRONTEND-PAYMENTS-01** — VPS frontend env for card payments (Stripe vars added, deploy fixed) ✅
 - **Pass CARD-PAYMENT-SMOKE-01** — Card payment E2E smoke tests (backend config verified, frontend env blocker identified) ✅

@@ -6,7 +6,7 @@
 
 ## 2026-01-18 — Pass PAYMENTS-STRIPE-ELEMENTS-01: Stripe Elements Integration
 
-**Status**: 🔄 IN PROGRESS
+**Status**: ✅ CLOSED
 
 Replaced Stripe Checkout redirect with embedded Stripe Elements card form.
 
@@ -24,7 +24,7 @@ Checkout form → Submit → initPayment → Stripe Elements → Pay → confirm
 
 ### PRs
 
-- #TBD (feat: Pass PAYMENTS-STRIPE-ELEMENTS-01) — pending
+- #2300 (feat: Pass PAYMENTS-STRIPE-ELEMENTS-01) — merged
 
 ### Files Changed
 
