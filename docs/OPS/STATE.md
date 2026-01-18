@@ -1,8 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass-ENV-FRONTEND-PAYMENTS-01)
+**Last Updated**: 2026-01-18 (Pass-PAYMENTS-CARD-REAL-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-18 — Pass PAYMENTS-CARD-REAL-01: Card Payment E2E with Real Auth
+
+**Status**: ✅ CLOSED
+
+Enabled repeatable card payment E2E verification and fixed deploy workflow env persistence.
+
+### Changes
+
+1. **E2E Test with Real Auth**: UI login with secure credentials
+2. **Deploy Workflow**: Stripe publishable key at build time
+3. **GitHub Secret**: `STRIPE_PUBLIC_KEY` for CI/CD
+
+### Evidence
+
+```
+Payment options: { cod: true, card: true }
+```
+
+Card payment option visible for authenticated users.
+
+### PRs
+
+- #2290 (feat: Pass PAYMENTS-CARD-REAL-01)
+
+---
 
 ## 2026-01-18 — Pass ENV-FRONTEND-PAYMENTS-01: Frontend VPS Env for Card Payments
 
