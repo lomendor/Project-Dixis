@@ -52,6 +52,7 @@ jobs:
           NEXT_PUBLIC_APP_URL: https://dixis.gr
           NEXT_PUBLIC_SITE_URL: https://dixis.gr
           NEXT_PUBLIC_PAYMENTS_CARD_FLAG: 'true'
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
           PRODUCTS_MODE: demo
         run: pnpm build
 
@@ -185,6 +186,19 @@ jobs:
             upsert_env "RESEND_API_KEY" "${RESEND_API_KEY}"
             upsert_env "NODE_OPTIONS" "--max-old-space-size=320"
             upsert_env "INTERNAL_API_URL" "https://dixis.gr/api/v1"
+
+            # Stripe publishable key - read from backend (public key only, safe to expose)
+            # This key is embedded in frontend JS anyway, so reading from backend is fine
+            STRIPE_PK=$(grep "^STRIPE_PUBLIC_KEY=" /var/www/dixis/current/backend/.env 2>/dev/null | cut -d= -f2 || echo "")
+            if [ -n "$STRIPE_PK" ]; then
+              upsert_env "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" "$STRIPE_PK"
+              echo "✅ Stripe publishable key set from backend"
+            else
+              echo "⚠️ Warning: STRIPE_PUBLIC_KEY not found in backend .env"
+            fi
+
+            # Card payments flag (must match build-time value)
+            upsert_env "NEXT_PUBLIC_PAYMENTS_CARD_FLAG" "true"
 
             echo "=== .env keys (workflow-managed updated, others preserved) ==="
             grep -E "^[A-Z_]+=" .env | cut -d= -f1 | head -15
