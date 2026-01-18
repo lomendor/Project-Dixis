@@ -210,7 +210,7 @@ npx playwright test --grep "producer can only edit own products"
 **Scope**: Docs-only
 **Actions**:
 1. ✅ Create this doc (STAGE3-PRODUCER-PRODUCT-CRUD.md)
-2. Update NEXT-7D.md to set WIP=1 to Stage 3
+2. Update AGENT-STATE.md to set WIP=1 to Stage 3
 3. PR with auto-merge
 
 ---

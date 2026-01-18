@@ -48,7 +48,7 @@ Host dixis-vps
 
 ### Symptom
 - Same feature audit repeated 3-4 times (e.g., "check if cart exists")
-- Work starts without checking STATE.md/NEXT-7D.md
+- Work starts without checking STATE.md/AGENT-STATE.md
 - Implement feature → discover it already exists → write verification doc → repeat
 - No clear "start of pass" ritual
 
@@ -63,7 +63,7 @@ Host dixis-vps
 ```bash
 # 1. Read current state (source of truth)
 cat docs/OPS/STATE.md | head -120
-cat docs/NEXT-7D.md | head -60
+cat docs/AGENT-STATE.md | head -60
 
 # 2. Run prod facts (verify baseline)
 ./scripts/prod-facts.sh
@@ -82,7 +82,7 @@ grep -A10 "NEXT.*ordered" docs/OPS/STATE.md
 
 ### Enforcement (what we do every time)
 1. **Start of EVERY pass**: Run rehydration commands (STATE + NEXT + prod-facts)
-2. **Before writing code**: Confirm item has DoD in NEXT-7D.md or create it
+2. **Before writing code**: Confirm item has DoD in AGENT-STATE.md or create it
 3. **WIP=1 gate**: If WIP already occupied, STOP (finish current item first)
 4. **PR requirement**: Every PR must update STATE.md (move from IN PROGRESS → CLOSED/STABLE)
 5. **Auto-reminder**: If STATE.md not updated in 6+ hours, assume work abandoned
@@ -154,7 +154,7 @@ Assistant:
 ```bash
 # PHASE 0 — Rehydrate (5 min max)
 cat docs/OPS/STATE.md | head -120        # Current state
-cat docs/NEXT-7D.md | head -60           # Current WIP/NEXT
+cat docs/AGENT-STATE.md | head -60           # Current WIP/NEXT
 ./scripts/prod-facts.sh                  # Baseline verification
 grep "WIP.*ONLY" docs/OPS/STATE.md       # Enforce WIP=1
 
@@ -168,7 +168,7 @@ grep "WIP.*ONLY" docs/OPS/STATE.md       # Enforce WIP=1
 # - Fix/Implement (code/docs/tests)
 # - Proof (run tests, show output)
 # - Update STATE.md (move from IN PROGRESS → CLOSED/STABLE)
-# - Update NEXT-7D.md (move to DONE, pull next item)
+# - Update AGENT-STATE.md (move to DONE, pull next item)
 
 # PHASE 3 — PR + Auto-Merge
 # - Branch: feat/* or docs/* or chore/*

@@ -243,5 +243,5 @@ User (1) ────────┬──→ (N) Orders (as customer)
 
 **Related Docs:**
 - `docs/OPS/STATE.md` - Current operational state
-- `docs/NEXT-7D.md` - Short-term priorities
+- `docs/AGENT-STATE.md` - Short-term priorities
 - `docs/FEATURES/PRODUCER-PERMISSIONS.md` - Permission audit (upcoming)

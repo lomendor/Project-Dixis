@@ -16,7 +16,7 @@ Docs-only pass. No code changes.
 - [x] Create `docs/PRODUCT/PAGES.md` — All core pages with purpose, sections, data deps, i18n
 - [x] Create `docs/PRODUCT/FLOWS.md` — 5 core user journeys documented
 - [x] Create `docs/PRODUCT/PRD-MUST-V1.md` — V1 must-haves + out of scope list
-- [x] Update STATE.md, NEXT-7D.md, ACTIVE.md
+- [x] Update STATE.md, AGENT-STATE.md, AGENT-STATE.md
 - [x] PR merged
 
 ## Deliverables

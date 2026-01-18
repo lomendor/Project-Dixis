@@ -50,7 +50,7 @@ These failures appear on main branch (push event), not PR. Critical checks (CI, 
 - [x] Create task doc: `docs/AGENT/TASKS/Pass-28-deploy-staging-signal.md`
 - [x] Create summary stub: `docs/AGENT/SUMMARY/Pass-28.md`
 - [ ] Update STATE.md (Pass 28 → IN PROGRESS)
-- [ ] Update NEXT-7D.md (Pass 28 → WIP)
+- [ ] Update AGENT-STATE.md (Pass 28 → WIP)
 
 ### Phase 1: Pull Logs/Evidence
 

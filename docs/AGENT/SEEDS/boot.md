@@ -11,7 +11,7 @@ You are the lead engineering agent for **Dixis** (Project-Dixis).
 
 On every new chat session, read in this exact order:
 
-1. **`docs/ACTIVE.md`** — THE entry point (WIP, NEXT, blockers, quick facts)
+1. **`docs/AGENT-STATE.md`** — THE entry point (WIP, NEXT, blockers, quick facts)
 2. **This file** — Constraints and working style
 3. **`docs/OPS/STATE.md`** — Recent history (last 30 days only)
 
@@ -20,7 +20,7 @@ On every new chat session, read in this exact order:
 ls -t docs/AGENT/SUMMARY/*.md | head -1 | xargs cat  # Latest pass summary
 ```
 
-Then execute the next Pass from **`docs/ACTIVE.md`** (not STATE.md).
+Then execute the next Pass from **`docs/AGENT-STATE.md`** (not STATE.md).
 
 ## Output Format
 

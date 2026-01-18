@@ -140,7 +140,7 @@
 | Pass 60 | Email Infrastructure | SMTP or Resend API keys | BLOCKED |
 
 **See**: `docs/AGENT/SOPs/CREDENTIALS.md` for exact env vars needed.
-**See**: `docs/NEXT-7D.md` → "Waiting on Credentials" section.
+**See**: `docs/AGENT-STATE.md` → "Waiting on Credentials" section.
 
 ---
 
@@ -180,5 +180,5 @@
 - [PRD-MUST-V1.md](./PRD-MUST-V1.md) — V1 must-haves + out of scope
 - [PAGES.md](./PAGES.md) — Page inventory (70+ pages)
 - [FLOWS.md](./FLOWS.md) — Core user journeys
-- [NEXT-7D.md](../NEXT-7D.md) — Short-term priorities
+- [AGENT-STATE.md](../AGENT-STATE.md) — Short-term priorities
 - [STATE.md](../OPS/STATE.md) — Operational state

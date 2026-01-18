@@ -170,13 +170,13 @@ This was already fixed in:
 1. Update `docs/OPS/STATE.md`:
    - Add Pass 9 to CLOSED section: "Pass 9 Producer Dashboard CRUD verification — Audit confirmed existing implementation, 21 authorization tests PASS, frontend proxies to backend API, NO CODE CHANGES REQUIRED"
 
-2. Update `docs/NEXT-7D.md`:
+2. Update `docs/AGENT-STATE.md`:
    - Move Pass 9 from WIP to DONE
    - Evidence: This plan doc + existing verification docs
 
 3. Create PR with docs-only changes:
    - Branch: `docs/pass-9-producer-dashboard-audit`
-   - Files: `STATE.md`, `NEXT-7D.md`, this plan doc
+   - Files: `STATE.md`, `AGENT-STATE.md`, this plan doc
    - Labels: `docs-only`, `ops-only`
 
 **DoD**:
@@ -231,7 +231,7 @@ This was already fixed in:
 - [x] PROD health verified (products=200, api_public_products=200)
 - [x] Plan doc created (this doc)
 - [ ] STATE.md updated (add Pass 9 to CLOSED)
-- [ ] NEXT-7D.md updated (move Pass 9 to DONE)
+- [ ] AGENT-STATE.md updated (move Pass 9 to DONE)
 - [ ] PR created with docs-only changes
 - [ ] PR auto-merged (docs-only, no breaking changes)
 

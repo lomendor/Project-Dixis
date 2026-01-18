@@ -18,7 +18,7 @@
    - Ordered next passes (blocked vs unblocked)
 
 3. **Updated Project Docs**
-   - NEXT-7D.md: Added unblocked pass candidates
+   - AGENT-STATE.md: Added unblocked pass candidates
    - STATE.md: Added PRD-AUDIT-01 entry
 
 ## Feature Health Score

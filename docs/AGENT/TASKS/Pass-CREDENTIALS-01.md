@@ -20,7 +20,7 @@ Docs-only pass. No code changes. No secrets.
   - Where to set (VPS/local/CI)
   - Code references (file:line)
   - Validation checklist
-- [x] Update STATE.md, NEXT-7D.md, ACTIVE.md
+- [x] Update STATE.md, AGENT-STATE.md, AGENT-STATE.md
 - [x] PR merged
 
 ## Deliverables

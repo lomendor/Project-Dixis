@@ -82,7 +82,7 @@ Pass 26 verified auth pages load (200 OK), but functional flow unverified:
 4. `docs/OPS/PROD-AUTH-VERIFICATION-2025-12-23.md` - Verification evidence (NEW)
 5. `docs/AGENT/SUMMARY/Pass-27.md` - This summary (UPDATED)
 6. `docs/OPS/STATE.md` - Pass 27 status update (UPDATED)
-7. `docs/NEXT-7D.md` - Pass 27 moved to DONE (UPDATED)
+7. `docs/AGENT-STATE.md` - Pass 27 moved to DONE (UPDATED)
 
 ---
 

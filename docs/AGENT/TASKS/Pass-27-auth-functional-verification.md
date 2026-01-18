@@ -191,7 +191,7 @@ pnpm playwright test auth-functional-flow.spec.ts --reporter=line
    - Move Pass 27 from IN PROGRESS → CLOSED
    - Update VERIFIED vs NOT VERIFIED bullets
 
-3. **docs/NEXT-7D.md**:
+3. **docs/AGENT-STATE.md**:
    - Add Pass 27 to DONE section
 
 4. **docs/AGENT/SUMMARY/Pass-27.md**:
