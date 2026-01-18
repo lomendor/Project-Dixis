@@ -1,8 +1,53 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01)
+**Last Updated**: 2026-01-18 (Pass-CSP-STRIPE-01 + STRIPE-E2E-TIMEOUT-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-18 — Pass CSP-STRIPE-01: Fix CSP for Stripe Elements
+
+**Status**: ✅ CLOSED
+
+Fixed Content-Security-Policy header that was blocking Stripe Elements iframe.
+
+### Root Cause
+
+CSP in `frontend/next.config.ts` was missing `frame-src` directive, causing iframes to fall back to `default-src 'self'` which blocked Stripe domains.
+
+### Fix
+
+Added minimal Stripe allowlist to CSP:
+- `script-src`: `https://js.stripe.com`
+- `connect-src`: `https://api.stripe.com`, `https://r.stripe.com`
+- `frame-src`: `https://js.stripe.com`, `https://hooks.stripe.com`
+
+### PRs
+
+- #2304 (fix: add Stripe domains to CSP) — merged
+
+---
+
+## 2026-01-18 — Pass STRIPE-E2E-TIMEOUT-01: Deterministic Stripe E2E Test
+
+**Status**: ✅ CLOSED
+
+Made Stripe Elements E2E test deterministic by replacing blind waits with network interception.
+
+### Changes
+
+- Wait for order creation response (201)
+- Wait for payment init response (200) with client_secret validation
+- Extended timeout (90s) for Stripe iframe after payment init
+
+### Evidence
+
+```
+Running 1 test using 1 worker
+  ✓ Stripe Elements card payment flow (2.2m)
+  1 passed
+```
+
+---
 
 ## 2026-01-18 — Pass PAYMENTS-STRIPE-ELEMENTS-01: Stripe Elements Integration
 
