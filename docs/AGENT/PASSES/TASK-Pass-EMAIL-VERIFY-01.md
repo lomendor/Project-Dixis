@@ -90,6 +90,38 @@ Implement end-to-end email verification flow allowing users to verify their emai
 - Existing users unaffected (`email_verified_at` nullable)
 - Registration continues to work without verification enabled
 
+## Production Deploy
+
+**Date**: 2026-01-18
+**Commit**: `04aefc91`
+
+### Commands Executed
+
+```bash
+# 1. Trigger deploys via GitHub Actions
+gh workflow run "Deploy Backend (VPS)" --ref main -f run_migrations=true
+gh workflow run "Deploy Frontend (VPS)" --ref main
+
+# 2. SSH to VPS and run migration (manual step)
+cd /var/www/dixis/current/backend
+php artisan migrate --force
+# Output: 2026_01_18_000001_create_email_verification_tokens_table .... DONE
+
+# 3. Verify endpoints work
+curl -X POST https://dixis.gr/api/v1/auth/email/resend -d '{"email":"test@example.com"}'
+# {"message":"If an account exists with this email and is not yet verified..."}
+
+curl -X POST https://dixis.gr/api/v1/auth/email/verify -d '{"email":"test@example.com","token":"invalid"}'
+# {"message":"Invalid or expired verification token."}
+```
+
+### Deploy Runs
+
+| Workflow | Run ID | Status |
+|----------|--------|--------|
+| Deploy Backend (VPS) | 21118201989 | ✅ Success |
+| Deploy Frontend (VPS) | 21118202544 | ✅ Success |
+
 ---
 
 _Pass: EMAIL-VERIFY-01 | Author: Claude_
