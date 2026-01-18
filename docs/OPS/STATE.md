@@ -1,8 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass-CSP-STRIPE-01 + STRIPE-E2E-TIMEOUT-01)
+**Last Updated**: 2026-01-18 (Pass PERF-IPV4-PREFER-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-18 — Pass PERF-IPV4-PREFER-01: Fix 9.5s Backend Latency
+
+**Status**: ✅ CLOSED
+
+Fixed critical 9.5s backend latency by adding IPv4 preference to bypass broken IPv6 path to Neon DB.
+
+### Root Cause
+
+VPS (Hostinger, Frankfurt) attempted IPv6 connections first to Neon DB (AWS eu-central-1). IPv6 path was broken, causing 9.2s timeout before falling back to IPv4 (which connected in 4ms).
+
+### Fix
+
+Added to `/etc/gai.conf` on VPS:
+```
+precedence ::ffff:0:0/96  100
+```
+
+Then reloaded PHP-FPM to pick up new address resolution settings.
+
+### Results
+
+| Endpoint | BEFORE | AFTER | Improvement |
+|----------|--------|-------|-------------|
+| `/api/health` | 9.27-9.33s | 71-80ms | ~130x faster |
+| `/api/v1/public/products` | 9.30-9.41s | 121-188ms | ~65x faster |
+
+### Rollback
+
+```bash
+cp /etc/gai.conf.backup.perf-ipv4-20260118 /etc/gai.conf && systemctl reload php8.2-fpm
+```
+
+---
 
 ## 2026-01-18 — Pass CSP-STRIPE-01: Fix CSP for Stripe Elements
 
