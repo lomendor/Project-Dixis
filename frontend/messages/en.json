@@ -180,6 +180,22 @@
       "backToLogin": "Back to Login",
       "passwordMismatch": "Passwords do not match.",
       "passwordTooShort": "Password must be at least 8 characters."
+    },
+    "verifyEmail": {
+      "title": "Email Verification",
+      "verifying": "Verifying email...",
+      "success": "Your email has been verified successfully.",
+      "successTitle": "Verification Successful!",
+      "goToLogin": "Sign in to your Account",
+      "error": "Verification failed. The link may be invalid.",
+      "errorTitle": "Verification Error",
+      "expired": "The verification link has expired.",
+      "expiredTitle": "Link Expired",
+      "missingParams": "Missing verification parameters.",
+      "missingTitle": "Invalid Link",
+      "resendButton": "Send new verification link",
+      "resendSuccess": "If an account exists with this email, you will receive a new verification link.",
+      "backToLogin": "Back to Login"
     }
   },
   "language": {

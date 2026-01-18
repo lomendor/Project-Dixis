@@ -1,9 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass PROC-03)
+**Last Updated**: 2026-01-18 (Pass EMAIL-VERIFY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~300 lines (target ≤250).
+
+## 2026-01-18 — Pass EMAIL-VERIFY-01: Email Verification Flow
+
+**Status**: ✅ DONE
+
+Implemented complete email verification flow for user registration.
+
+### Changes
+
+- **Backend**: `EmailVerificationController` with verify/resend endpoints
+- **Mail**: `VerifyEmailMail` with Greek template (via Resend)
+- **DB**: `email_verification_tokens` table (hashed tokens, 24h expiry)
+- **Frontend**: `/auth/verify-email` page with all states
+- **i18n**: Greek + English translations
+- **Tests**: 11 backend + 2 E2E
+
+### Configuration
+
+```env
+EMAIL_VERIFICATION_REQUIRED=true   # Enable verification requirement
+EMAIL_NOTIFICATIONS_ENABLED=true   # Enable email sending (already set)
+```
+
+Default: `EMAIL_VERIFICATION_REQUIRED=false` (backwards compatible, auto-verify)
+
+### PRs
+
+- #TBD (feat: Pass EMAIL-VERIFY-01 email verification flow) — pending
+
+---
 
 ## 2026-01-18 — Pass PERF-IPV4-PREFER-01: Fix 9.5s Backend Latency
 
