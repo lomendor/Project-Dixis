@@ -26,7 +26,13 @@ _(empty — pick from NEXT)_
 
 ## NEXT (top 3 unblocked)
 
-_(No unblocked passes — see `docs/PRODUCT/PRD-MUST-V1.md` for V1 scope)_
+| Priority | Pass ID | Feature |
+|----------|---------|---------|
+| 1 | **EMAIL-VERIFY-01** | Email verification flow (Resend enabled) |
+| 2 | **ORDER-NOTIFY-01** | Order status email notifications |
+| 3 | **CARD-SMOKE-02** | Card payment E2E smoke on production |
+
+See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ---
 
@@ -81,6 +87,7 @@ _(No unblocked passes — see `docs/PRODUCT/PRD-MUST-V1.md` for V1 scope)_
 | `docs/AGENT/PASSES/` | All pass documentation (TASK-*, SUMMARY-*) |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
+| `docs/PRODUCT/PRD-COVERAGE.md` | PRD→Pass mapping |
 
 ---
 

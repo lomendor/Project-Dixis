@@ -132,15 +132,15 @@
 
 ---
 
-## Blocked Items (Need External Resources)
+## Previously Blocked — NOW UNBLOCKED
 
 | Pass | Feature | Blocker | Status |
 |------|---------|---------|--------|
-| Pass 52 | Card Payments | Stripe API keys | BLOCKED |
-| Pass 60 | Email Infrastructure | SMTP or Resend API keys | BLOCKED |
+| Pass 52 | Card Payments | Stripe API keys | ✅ **UNBLOCKED** (keys present) |
+| Pass 60 | Email Infrastructure | Resend API key | ✅ **UNBLOCKED** (Resend enabled) |
 
-**See**: `docs/AGENT/SOPs/CREDENTIALS.md` for exact env vars needed.
-**See**: `docs/AGENT-STATE.md` → "Waiting on Credentials" section.
+**Updated**: 2026-01-18 — Both Stripe and Resend credentials now configured on production.
+**See**: `docs/AGENT-STATE.md` → "Credentials Status" section.
 
 ---
 
@@ -150,17 +150,17 @@
 |----------|--------|
 | Core Storefront | ✅ Ready |
 | Checkout (COD) | ✅ Ready |
-| Checkout (Card) | ⏳ Blocked (Pass 52) |
+| Checkout (Card) | ✅ Ready (Stripe enabled) |
 | Producer Portal | ✅ Ready |
 | Admin Panel | ✅ Ready |
 | Auth (Basic) | ✅ Ready |
-| Auth (Email Verify) | ⏳ Blocked (Pass 60) |
+| Auth (Email Verify) | 🟡 Code needed (Resend enabled) |
 | i18n (EL + EN) | ✅ Ready |
 | Notifications (UI) | ✅ Ready |
-| Notifications (Email) | ⏳ Blocked (Pass 60) |
+| Notifications (Email) | 🟡 Code needed (Resend enabled) |
 | E2E Tests | ✅ Ready |
 
-**V1 Launch Status**: 🟡 READY (with COD only, pending credentials for card payments + email)
+**V1 Launch Status**: ✅ READY — All credentials configured. Email verification + notifications need code passes.
 
 ---
 
@@ -176,6 +176,7 @@
 ## Related Documents
 
 - [CAPABILITIES.md](./CAPABILITIES.md) — Detailed feature matrix
+- [PRD-COVERAGE.md](./PRD-COVERAGE.md) — PRD→Pass mapping table
 - [DATA-DEPENDENCY-MAP.md](./DATA-DEPENDENCY-MAP.md) — Entity relationships
 - [PRD-MUST-V1.md](./PRD-MUST-V1.md) — V1 must-haves + out of scope
 - [PAGES.md](./PAGES.md) — Page inventory (70+ pages)
