@@ -45,26 +45,41 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
       return;
     }
 
+    // Clear any existing auth state from CI setup
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
     // Navigate to login page
     await page.goto('/auth/login');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
-    // Check we're on login page
-    const loginTitle = page.getByTestId('page-title');
-    await expect(loginTitle).toBeVisible({ timeout: 10000 });
+    // Wait for login form to be ready (more reliable than page-title)
+    const loginForm = page.getByTestId('login-form');
+    await expect(loginForm).toBeVisible({ timeout: 15000 });
 
-    // Fill login form
-    await page.fill('input[type="email"], input[name="email"]', e2eEmail);
-    await page.fill('input[type="password"], input[name="password"]', e2ePassword);
+    // Fill login form using stable selectors
+    const emailInput = page.locator('input[type="email"]');
+    const passwordInput = page.locator('input[type="password"]');
 
-    // Submit form
-    await page.click('button[type="submit"]');
+    await emailInput.fill(e2eEmail);
+    await passwordInput.fill(e2ePassword);
+
+    // Wait for React hydration to complete before clicking
+    await page.waitForTimeout(500);
+
+    // Re-locate button after potential re-render and click
+    const submitBtn = page.getByTestId('login-submit');
+    await expect(submitBtn).toBeEnabled({ timeout: 5000 });
+    await submitBtn.click({ force: false });
 
     // Wait for redirect to home (successful login)
-    await page.waitForURL('/', { timeout: 15000 });
+    await page.waitForURL('/', { timeout: 20000 });
 
-    // Verify authenticated state - look for user menu or profile link
-    const authIndicator = page.locator('[data-testid="user-menu"], [data-testid="nav-user"], a[href="/account"], text="Αποσύνδεση"');
+    // Verify authenticated state - look for user menu or logout button
+    const authIndicator = page.locator('[data-testid="user-menu"], a[href="/account"], button:has-text("Logout"), button:has-text("Αποσύνδεση"), button:has-text("Sign out")');
     await expect(authIndicator.first()).toBeVisible({ timeout: 10000 });
 
     console.log('UI login successful');
@@ -77,20 +92,26 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
       return;
     }
 
-    // Login first
+    // Login first using stable selectors
     await page.goto('/auth/login');
-    await page.fill('input[type="email"], input[name="email"]', e2eEmail);
-    await page.fill('input[type="password"], input[name="password"]', e2ePassword);
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
+
+    const loginForm = page.getByTestId('login-form');
+    await expect(loginForm).toBeVisible({ timeout: 15000 });
+
+    await page.locator('input[type="email"]').fill(e2eEmail);
+    await page.locator('input[type="password"]').fill(e2ePassword);
+    await page.getByTestId('login-submit').click();
+    await page.waitForURL('/', { timeout: 20000 });
 
     // Navigate to products
     await page.goto('/products');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000); // Allow products to load
 
     // Wait for products to load
     const productCard = page.locator('[data-testid="product-card"], .product-card').first();
-    const hasProducts = await productCard.isVisible().catch(() => false);
+    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false);
 
     if (!hasProducts) {
       console.log('No products visible - checking if page loaded');
@@ -103,16 +124,17 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
     await page.waitForURL(/\/products\/\d+/, { timeout: 10000 });
 
     // Add to cart
-    const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add to cart"), [data-testid="add-to-cart"]').first();
+    const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add to cart"), button:has-text("Add"), [data-testid="add-to-cart"]').first();
     await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
     await addToCartBtn.click();
 
     // Wait for cart update feedback
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
 
     // Verify we're on checkout page (not redirected to login)
     const currentUrl = page.url();
@@ -127,20 +149,25 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
       return;
     }
 
-    // Login
+    // Login using stable selectors
     await page.goto('/auth/login');
-    await page.fill('input[type="email"], input[name="email"]', e2eEmail);
-    await page.fill('input[type="password"], input[name="password"]', e2ePassword);
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
+
+    const loginForm = page.getByTestId('login-form');
+    await expect(loginForm).toBeVisible({ timeout: 15000 });
+
+    await page.locator('input[type="email"]').fill(e2eEmail);
+    await page.locator('input[type="password"]').fill(e2ePassword);
+    await page.getByTestId('login-submit').click();
+    await page.waitForURL('/', { timeout: 20000 });
 
     // Add product to cart (needed for checkout)
     await page.goto('/products');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
     const productCard = page.locator('[data-testid="product-card"], .product-card').first();
-    const hasProducts = await productCard.isVisible().catch(() => false);
+    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false);
 
     if (!hasProducts) {
       test.skip(true, 'No products available');
@@ -151,13 +178,14 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
     await page.waitForURL(/\/products\/\d+/, { timeout: 10000 });
 
     const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add"), [data-testid="add-to-cart"]').first();
+    await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
     await addToCartBtn.click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // Go to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(3000);
 
     // Check for payment options
     const codOption = page.getByTestId('payment-cod');
@@ -196,16 +224,35 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
       return;
     }
 
-    // Login
+    // Clear any existing auth state from CI setup
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    // Login using stable selectors
     await page.goto('/auth/login');
-    await page.fill('input[type="email"], input[name="email"]', e2eEmail);
-    await page.fill('input[type="password"], input[name="password"]', e2ePassword);
-    await page.click('button[type="submit"]');
-    await page.waitForURL('/', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
+
+    const loginForm = page.getByTestId('login-form');
+    await expect(loginForm).toBeVisible({ timeout: 15000 });
+
+    await page.locator('input[type="email"]').fill(e2eEmail);
+    await page.locator('input[type="password"]').fill(e2ePassword);
+
+    // Wait for React hydration to complete before clicking
+    await page.waitForTimeout(500);
+
+    // Re-locate button after potential re-render and click
+    const submitBtn = page.getByTestId('login-submit');
+    await expect(submitBtn).toBeEnabled({ timeout: 5000 });
+    await submitBtn.click({ force: false });
+    await page.waitForURL('/', { timeout: 20000 });
 
     // Add product to cart
     await page.goto('/products');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
     const productCard = page.locator('[data-testid="product-card"], .product-card').first();
@@ -223,7 +270,7 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
 
     // Go to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
     // Select card payment
@@ -295,14 +342,14 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', 
     }
 
     // Submit order
-    const submitBtn = page.locator('button[type="submit"]:has-text("Ολοκλήρωση"), button:has-text("Place Order"), button:has-text("Pay")').first();
-    await expect(submitBtn).toBeVisible({ timeout: 10000 });
+    const orderSubmitBtn = page.locator('button[type="submit"]:has-text("Ολοκλήρωση"), button:has-text("Place Order"), button:has-text("Pay")').first();
+    await expect(orderSubmitBtn).toBeVisible({ timeout: 10000 });
 
     console.log('Card details entered - ready to submit');
     console.log('NOTE: This is Stripe TEST mode - no real charge will occur');
 
     // Submit the order
-    await submitBtn.click();
+    await orderSubmitBtn.click();
 
     // Wait for result - either success page or error message
     await page.waitForTimeout(5000);

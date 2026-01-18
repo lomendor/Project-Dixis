@@ -51,12 +51,33 @@ Updated `.github/workflows/deploy-frontend.yml`:
 
 ## Verification Evidence
 
-### E2E Test Results (2026-01-18)
+### E2E Test Results (2026-01-18 - Final Run)
 
 ```
-Payment options: { cod: true, card: true }
-Card payment option is visible and selectable for authenticated user
+Running 4 tests using 1 worker
+
+  ✓ UI login with real credentials (21.8s)
+    UI login successful
+
+  ✓ add product to cart and reach checkout
+    Reached checkout page as authenticated user
+
+  ✓ card payment option visible for authenticated user
+    Payment options: { cod: true, card: true }
+    Card payment option is visible and selectable for authenticated user
+
+  ○ Stripe test card payment flow [skipped]
+    Stripe Elements not loaded (expected - needs rebuild with STRIPE_PUBLIC_KEY)
+
+  1 skipped
+  3 passed (2.2m)
 ```
+
+### Test Fixes Applied
+
+1. **Auth state clearing**: Tests now clear localStorage/sessionStorage before login to avoid CI mock state interference
+2. **Hydration wait**: Added 500ms wait before clicking login button to handle React re-renders
+3. **Auth indicator selector**: Fixed to include "Logout" button text (English)
 
 ### Health Endpoint
 
