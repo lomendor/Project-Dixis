@@ -12,21 +12,34 @@ Enabled repeatable card payment E2E verification and fixed deploy workflow env p
 
 ### Changes
 
-1. **E2E Test with Real Auth**: UI login with secure credentials
-2. **Deploy Workflow**: Stripe publishable key at build time
-3. **GitHub Secret**: `STRIPE_PUBLIC_KEY` for CI/CD
+1. **E2E Test with Real Auth**: UI login with secure credentials (e2e-card-test@dixis.gr)
+2. **Deploy Workflow**: Stripe publishable key at build time (line 55)
+3. **GitHub Secret**: `STRIPE_PUBLIC_KEY` for CI/CD build embedding
+4. **Test Stabilization**: Fixed selector issues for CI mock auth state
 
-### Evidence
+### Evidence (Final Run)
 
 ```
-Payment options: { cod: true, card: true }
+Running 4 tests using 1 worker
+
+  ✓ UI login with real credentials (21.8s)
+  ✓ add product to cart and reach checkout
+  ✓ card payment option visible for authenticated user
+    Payment options: { cod: true, card: true }
+  ○ Stripe test card payment flow [skipped - needs rebuild with key]
+
+  1 skipped, 3 passed (2.2m)
 ```
 
-Card payment option visible for authenticated users.
+### Test Fixes Applied
+
+- Auth state clearing before login to avoid CI mock interference
+- Hydration wait (500ms) before clicking login button
+- Auth indicator selector fixed for "Logout" button text
 
 ### PRs
 
-- #2290 (feat: Pass PAYMENTS-CARD-REAL-01)
+- #2290 (feat: Pass PAYMENTS-CARD-REAL-01) — merged
 
 ---
 
