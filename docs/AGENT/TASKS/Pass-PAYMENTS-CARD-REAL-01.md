@@ -138,11 +138,16 @@ BASE_URL=https://dixis.gr npx playwright test card-payment-real-auth.spec.ts
 ## Files Changed
 
 - `.github/workflows/deploy-frontend.yml` - Stripe env at build + runtime
-- `frontend/tests/e2e/card-payment-real-auth.spec.ts` - New E2E test
+- `frontend/tests/e2e/card-payment-real-auth.spec.ts` - New E2E test (stabilized in #2292)
 - `docs/AGENT/TASKS/Pass-PAYMENTS-CARD-REAL-01.md` - This file
 - `docs/AGENT/SUMMARY/Pass-PAYMENTS-CARD-REAL-01.md` - Summary
 - `docs/OPS/STATE.md` - Updated
 - `docs/NEXT-7D.md` - Updated
+
+## PRs
+
+- **#2290** (feat: Pass PAYMENTS-CARD-REAL-01) — merged
+- **#2292** (fix: stabilize card-payment-real-auth E2E tests) — merged
 
 ## References
 
