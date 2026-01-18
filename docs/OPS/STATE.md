@@ -1,9 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass EMAIL-VERIFY-01)
+**Last Updated**: 2026-01-19 (Pass PERF-PRODUCTS-AUDIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~300 lines (target ≤250).
+
+## 2026-01-19 — Pass PERF-PRODUCTS-AUDIT-01: Products Page Performance Audit
+
+**Status**: ✅ DONE (Audit Only)
+
+Audited `/products` page performance. No code changes — findings documented for future FIX passes.
+
+### Key Findings
+
+- Frontend uses `cache: 'no-store'` — every page view hits backend
+- Backend API returns `Cache-Control: no-cache` — no CDN caching
+- TTFB: ~285ms (backend), ~245ms (frontend)
+- Cold start penalty: ~700ms on first request
+
+### Recommended Fixes
+
+1. **P1**: Add `revalidate: 60` to frontend fetch
+2. **P2**: Add `Cache-Control: s-maxage=60` to backend API
+3. **P3**: Redis cache layer (if scale requires)
+
+### Docs
+
+- `docs/AGENT/PASSES/TASK-Pass-PERF-PRODUCTS-AUDIT-01.md`
+- `docs/AGENT/PASSES/SUMMARY-Pass-PERF-PRODUCTS-AUDIT-01.md`
+
+---
 
 ## 2026-01-18 — Pass EMAIL-VERIFY-01: Email Verification Flow
 
