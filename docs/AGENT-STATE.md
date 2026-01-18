@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-01-18 (Pass PROC-01)
+**Updated**: 2026-01-18 (Pass EMAIL-VERIFY-01)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,9 +28,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
-| 1 | **EMAIL-VERIFY-01** | Email verification flow (Resend enabled) |
-| 2 | **ORDER-NOTIFY-01** | Order status email notifications |
-| 3 | **CARD-SMOKE-02** | Card payment E2E smoke on production |
+| 1 | **ORDER-NOTIFY-01** | Order status email notifications |
+| 2 | **CARD-SMOKE-02** | Card payment E2E smoke on production |
+| 3 | **CART-SYNC-01** | Cart persistence to backend |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **EMAIL-VERIFY-01** — Email verification flow (backend + frontend + tests) ✅
 - **PROC-01** — Consolidate entry points into AGENT-STATE.md ✅
 - **PERF-IPV4-PREFER-01** — Fix 9.5s backend latency (9.3s → 70ms, ~100x faster) ✅
 - **CSP-STRIPE-01** — Fix CSP for Stripe Elements iframe ✅
@@ -56,7 +57,6 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 - **ENV-FRONTEND-PAYMENTS-01** — VPS frontend Stripe env ✅
 - **CARD-PAYMENT-SMOKE-01** — Card payment E2E smoke tests ✅
 - **PROD-UNBLOCK-01** — Production auth/products verified ✅
-- **EMAIL-SMOKE-01** — VPS → Resend e2e smoke ✅
 
 ---
 

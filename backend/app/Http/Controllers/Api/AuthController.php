@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyEmailMail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -30,19 +34,45 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // Pass EMAIL-VERIFY-01: Respect email verification config
+        // Auto-verify only if verification is disabled (backwards compatibility)
+        $requireVerification = config('notifications.email_verification_required', false);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'email_verified_at' => now(), // Auto-verify for demo purposes
+            'email_verified_at' => $requireVerification ? null : now(),
         ]);
 
-        // Create token
-        $token = $user->createToken('auth-token')->plainTextToken;
+        // Send verification email if required
+        $verificationSent = false;
+        if ($requireVerification && config('notifications.email_enabled', false)) {
+            $token = Str::random(64);
+
+            DB::table('email_verification_tokens')->insert([
+                'email' => $user->email,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+            $verifyUrl = config('app.frontend_url', 'https://dixis.gr')
+                . '/auth/verify-email?token=' . $token . '&email=' . urlencode($user->email);
+
+            Mail::to($user->email)->send(new VerifyEmailMail($user, $verifyUrl));
+            $verificationSent = true;
+        }
+
+        // Create auth token
+        $authToken = $user->createToken('auth-token')->plainTextToken;
+
+        $message = $verificationSent
+            ? 'User registered successfully. Please check your email to verify your account.'
+            : 'User registered successfully';
 
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => $message,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -52,8 +82,9 @@ class AuthController extends Controller
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
-            'token' => $token,
+            'token' => $authToken,
             'token_type' => 'Bearer',
+            'verification_sent' => $verificationSent,
         ], 201);
     }
 

@@ -51,4 +51,15 @@ return [
     |
     */
     'producer_digest_enabled' => env('PRODUCER_DIGEST_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pass EMAIL-VERIFY-01: Email Verification Required
+    |--------------------------------------------------------------------------
+    |
+    | When true, new users must verify their email before full access.
+    | When false (default), users are auto-verified for backwards compatibility.
+    |
+    */
+    'email_verification_required' => env('EMAIL_VERIFICATION_REQUIRED', false),
 ];
