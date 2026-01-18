@@ -7,7 +7,7 @@
 
 ## 2026-01-18 — Pass EMAIL-VERIFY-01: Email Verification Flow
 
-**Status**: ✅ DONE
+**Status**: ✅ CLOSED (Production Deployed)
 
 Implemented complete email verification flow for user registration.
 
@@ -29,9 +29,33 @@ EMAIL_NOTIFICATIONS_ENABLED=true   # Enable email sending (already set)
 
 Default: `EMAIL_VERIFICATION_REQUIRED=false` (backwards compatible, auto-verify)
 
+### Production Deploy
+
+- **Date**: 2026-01-18 22:35 UTC
+- **Commit**: `04aefc91`
+- **Backend Deploy**: Run ID 21118201989 (success)
+- **Frontend Deploy**: Run ID 21118202544 (success)
+- **Migration**: `php artisan migrate --force` (manual SSH)
+
+### Evidence
+
+```bash
+# Health check
+curl -sf https://dixis.gr/api/healthz
+# {"status":"ok","database":"connected",...}
+
+# Resend endpoint
+curl -X POST https://dixis.gr/api/v1/auth/email/resend -d '{"email":"test@example.com"}'
+# {"message":"If an account exists with this email and is not yet verified, you will receive a verification link."}
+
+# Verify endpoint
+curl -X POST https://dixis.gr/api/v1/auth/email/verify -d '{"email":"test@example.com","token":"invalid"}'
+# {"message":"Invalid or expired verification token."}
+```
+
 ### PRs
 
-- #TBD (feat: Pass EMAIL-VERIFY-01 email verification flow) — pending
+- #2312 (feat: Pass EMAIL-VERIFY-01 email verification flow) — merged
 
 ---
 

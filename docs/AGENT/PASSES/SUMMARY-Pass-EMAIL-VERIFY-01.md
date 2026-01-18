@@ -1,10 +1,15 @@
 # SUMMARY: Pass EMAIL-VERIFY-01 — Email Verification Flow
 
 **Date**: 2026-01-18
-**Status**: ✅ DONE
-**PR**: #TBD
+**Status**: ✅ CLOSED (Production Deployed)
+**PR**: #2312 (merged)
+**Commit**: `04aefc91`
 
 ---
+
+## TL;DR
+
+Email verification flow fully implemented and deployed to production. Users can now verify their email after registration. Endpoints working, migration applied, health OK.
 
 ## What Was Done
 
@@ -38,16 +43,28 @@ Implemented complete email verification flow:
 | `EmailVerificationTest.php` | NEW (11 tests) |
 | `email-verification.spec.ts` | NEW (2 tests) |
 
+## Production Deploy
+
+| Step | Status |
+|------|--------|
+| Backend deploy (Run 21118201989) | ✅ Success |
+| Frontend deploy (Run 21118202544) | ✅ Success |
+| Migration (`php artisan migrate --force`) | ✅ Success |
+
 ## Evidence
 
 ```bash
-# Backend tests
-php artisan test --filter=EmailVerificationTest
-# 11 passed, 0 failed
+# Health check (2026-01-18 22:32 UTC)
+curl -sf https://dixis.gr/api/healthz
+# {"status":"ok","database":"connected",...}
 
-# Frontend build
-npm run build
-# ✓ Compiled successfully
+# Resend endpoint
+curl -X POST https://dixis.gr/api/v1/auth/email/resend -d '{"email":"test@example.com"}'
+# {"message":"If an account exists with this email and is not yet verified, you will receive a verification link."}
+
+# Verify endpoint (invalid token returns proper error, not Server Error)
+curl -X POST https://dixis.gr/api/v1/auth/email/verify -d '{"email":"test@example.com","token":"invalid"}'
+# {"message":"Invalid or expired verification token."}
 ```
 
 ## Enable on Production
