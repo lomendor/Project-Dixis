@@ -47,10 +47,26 @@ Card payment option is visible and selectable for authenticated user
 ## Files
 
 - `.github/workflows/deploy-frontend.yml` (updated)
-- `frontend/tests/e2e/card-payment-real-auth.spec.ts` (new)
+- `frontend/tests/e2e/card-payment-real-auth.spec.ts` (new, stabilized)
+
+## PRs
+
+- **#2290** (feat: Pass PAYMENTS-CARD-REAL-01) — merged
+- **#2292** (fix: stabilize E2E tests) — merged
+
+## Final E2E Results
+
+```
+  ✓ UI login with real credentials
+  ✓ add product to cart and reach checkout
+  ✓ card payment option visible for authenticated user
+  ○ Stripe test card payment flow [skipped - needs rebuild]
+
+  1 skipped, 3 passed (2.2m)
+```
 
 ## Next Steps
 
-1. Trigger deploy to get build-time Stripe key embedded
-2. Re-run E2E test to verify full Stripe Elements flow
+1. Next frontend deploy will embed Stripe key in JS bundle
+2. After deploy, Stripe Elements test should pass
 3. Consider enabling Stripe live keys when ready for real payments

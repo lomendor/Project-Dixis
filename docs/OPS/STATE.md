@@ -40,6 +40,7 @@ Running 4 tests using 1 worker
 ### PRs
 
 - #2290 (feat: Pass PAYMENTS-CARD-REAL-01) — merged
+- #2292 (fix: stabilize E2E tests) — merged
 
 ---
 
