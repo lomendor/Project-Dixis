@@ -3,9 +3,12 @@ import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
+import { paymentApi } from '@/lib/api/payment'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 import { useAuth } from '@/hooks/useAuth'
 import { useTranslations } from '@/contexts/LocaleContext'
+import StripeProvider from '@/components/payment/StripeProvider'
+import StripePaymentForm from '@/components/payment/StripePaymentForm'
 
 function CheckoutContent() {
   const router = useRouter()
@@ -20,6 +23,10 @@ function CheckoutContent() {
   const [cardProcessing, setCardProcessing] = useState(false)
   // Fix React error #418: Prevent hydration mismatch by waiting for client mount
   const [isMounted, setIsMounted] = useState(false)
+  // Stripe Elements state
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
+  const [pendingOrderId, setPendingOrderId] = useState<number | null>(null)
+  const [orderTotal, setOrderTotal] = useState<number>(0)
 
   // Guest checkout: email is required for order confirmation
   const isGuest = !isAuthenticated
@@ -33,6 +40,36 @@ function CheckoutContent() {
   // Calculate subtotal from cart items (for display only)
   const subtotalCents = cartTotalCents(cartItems)
   const subtotal = subtotalCents / 100
+
+  // Handle successful Stripe payment
+  async function handleStripePaymentSuccess(paymentIntentId: string) {
+    if (!pendingOrderId) return
+
+    try {
+      // Confirm payment with backend
+      await paymentApi.confirmPayment(pendingOrderId, paymentIntentId)
+      // Clear cart and redirect to success page
+      clear()
+      router.push(`/thank-you?id=${pendingOrderId}`)
+    } catch (err) {
+      console.error('Payment confirmation failed:', err)
+      setError(t('checkoutPage.cardPaymentError'))
+    }
+  }
+
+  // Handle Stripe payment error
+  function handleStripePaymentError(errorMessage: string) {
+    setError(errorMessage)
+    setCardProcessing(false)
+  }
+
+  // Cancel pending card payment and go back to form
+  function handleCancelPayment() {
+    setStripeClientSecret(null)
+    setPendingOrderId(null)
+    setOrderTotal(0)
+    setCardProcessing(false)
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -99,19 +136,32 @@ function CheckoutContent() {
       // Store customer details for order confirmation/email
       sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer));
 
-      // Handle card payment via Stripe
+      // Handle card payment via Stripe Elements
       if (paymentMethod === 'card') {
         setCardProcessing(true)
         try {
-          const paymentSession = await apiClient.createPaymentCheckout(order.id)
-          clear()
-          // Redirect to Stripe Checkout
-          window.location.href = paymentSession.redirect_url
+          // Initialize payment intent to get client_secret for Stripe Elements
+          const paymentInit = await paymentApi.initPayment(order.id, {
+            customer: {
+              email: body.customer.email,
+              firstName: body.customer.name.split(' ')[0],
+              lastName: body.customer.name.split(' ').slice(1).join(' ') || undefined,
+            },
+            return_url: `${window.location.origin}/thank-you?id=${order.id}`,
+          })
+
+          // Store order info and show Stripe Elements form
+          setPendingOrderId(order.id)
+          setOrderTotal(paymentInit.payment.amount / 100) // amount is in cents
+          setStripeClientSecret(paymentInit.payment.client_secret)
+          setLoading(false)
+          // Don't clear cart yet - wait for payment success
           return
         } catch (paymentErr) {
           console.error('Card payment init failed:', paymentErr)
           setError(t('checkoutPage.cardPaymentError'))
           setCardProcessing(false)
+          setLoading(false)
           return
         }
       }
@@ -138,8 +188,8 @@ function CheckoutContent() {
     )
   }
 
-  // If cart is empty, show message
-  if (Object.keys(cartItems).length === 0) {
+  // If cart is empty and no pending payment, show message
+  if (Object.keys(cartItems).length === 0 && !stripeClientSecret) {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
@@ -147,6 +197,47 @@ function CheckoutContent() {
           <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
             {t('checkoutPage.viewProducts')}
           </a>
+        </div>
+      </main>
+    )
+  }
+
+  // Show Stripe Elements form when we have a client secret
+  if (stripeClientSecret && pendingOrderId) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-xl sm:text-2xl font-bold mb-6">{t('checkout.title')}</h1>
+
+          <div className="bg-white border rounded-xl p-6 mb-6">
+            <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment') || 'Card Payment'}</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              {t('checkoutPage.securePayment') || 'Complete your payment securely with Stripe.'}
+            </p>
+
+            <StripeProvider clientSecret={stripeClientSecret}>
+              <StripePaymentForm
+                amount={orderTotal}
+                onPaymentSuccess={handleStripePaymentSuccess}
+                onPaymentError={handleStripePaymentError}
+                disabled={false}
+              />
+            </StripeProvider>
+
+            {error && (
+              <div className="mt-4 text-red-600 text-sm" data-testid="payment-error">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleCancelPayment}
+              className="mt-4 w-full h-10 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              {t('checkoutPage.cancelPayment') || 'Cancel and go back'}
+            </button>
+          </div>
         </div>
       </main>
     )

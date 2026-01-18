@@ -102,7 +102,7 @@ class PaymentApiClient {
       return_url?: string;
     } = {}
   ): Promise<PaymentIntentResponse> {
-    return this.request<PaymentIntentResponse>(`/orders/${orderId}/payment/init`, {
+    return this.request<PaymentIntentResponse>(`/payments/orders/${orderId}/init`, {
       method: 'POST',
       body: JSON.stringify(options),
     });
@@ -112,20 +112,20 @@ class PaymentApiClient {
     orderId: number,
     paymentIntentId: string
   ): Promise<PaymentConfirmationResponse> {
-    return this.request<PaymentConfirmationResponse>(`/orders/${orderId}/payment/confirm`, {
+    return this.request<PaymentConfirmationResponse>(`/payments/orders/${orderId}/confirm`, {
       method: 'POST',
       body: JSON.stringify({ payment_intent_id: paymentIntentId }),
     });
   }
 
   async cancelPayment(orderId: number): Promise<{ message: string }> {
-    return this.request<{ message: string }>(`/orders/${orderId}/payment/cancel`, {
+    return this.request<{ message: string }>(`/payments/orders/${orderId}/cancel`, {
       method: 'POST',
     });
   }
 
-async getPaymentStatus(orderId: number): Promise<PaymentStatusResponse> {
-    return this.request<PaymentStatusResponse>(`/orders/${orderId}/payment/status`);
+  async getPaymentStatus(orderId: number): Promise<PaymentStatusResponse> {
+    return this.request<PaymentStatusResponse>(`/payments/orders/${orderId}/status`);
   }
 }
 
