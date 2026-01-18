@@ -4,9 +4,12 @@ Historical pass records archived from `docs/OPS/STATE.md`.
 
 ## Archive Files
 
-| File | Period | Passes |
-|------|--------|--------|
-| [STATE-2026-Q1-EARLY.md](STATE-2026-Q1-EARLY.md) | 2026-01-04 to 2026-01-12 | Pass 58, 57, SEC-RCA-01, SEC-CLEANUP-02, SEC-FPM-01, SEC-SMOKE-01, AUTH-CRED-01, OPS-PM2-01, E2E-FULL-01, etc. |
+| File | Period | Notes |
+|------|--------|-------|
+| [STATE-2026-01-17-early.md](STATE-2026-01-17-early.md) | 2026-01-17 | Passes before PROD-UNBLOCK-01 |
+| [STATE-2026-01-16.md](STATE-2026-01-16.md) | 2026-01-16 | NOTIFICATIONS-01, EN-LANGUAGE-01, SEARCH-FTS-01, etc. |
+| [STATE-2026-01-14-15.md](STATE-2026-01-14-15.md) | 2026-01-14 to 2026-01-15 | SEC-* passes, TEST-COVERAGE-01, SEC-UDEV-01 |
+| [STATE-2026-Q1-EARLY.md](STATE-2026-Q1-EARLY.md) | 2026-01-04 to 2026-01-12 | Pass 58, 57, SEC-RCA-01, etc. |
 
 ## Why Archive?
 
