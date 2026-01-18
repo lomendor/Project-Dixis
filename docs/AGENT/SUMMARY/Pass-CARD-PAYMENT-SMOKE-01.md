@@ -69,7 +69,7 @@ Tests skip gracefully when backend/auth unavailable - this is expected CI behavi
 - `docs/AGENT/TASKS/Pass-CARD-PAYMENT-SMOKE-01.md` (new)
 - `docs/AGENT/SUMMARY/Pass-CARD-PAYMENT-SMOKE-01.md` (new)
 - `docs/OPS/STATE.md` (updated)
-- `docs/NEXT-7D.md` (updated)
+- `docs/AGENT-STATE.md` (updated)
 
 ## Blocker for Full Card Payments
 

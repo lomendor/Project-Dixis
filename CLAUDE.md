@@ -2,6 +2,8 @@
 
 **NOTE: Active workspace — use Project-Dixis (not legacy repos).**
 
+> **Agent Entry Point**: `docs/AGENT-STATE.md` — Read this first every session.
+
 ## ⚡ Guardrails & Standards
 - **CI/CD**: NO changes to `.github/workflows/**`
 - **Ports**: 8001 (backend), 3001 (frontend) - LOCKED

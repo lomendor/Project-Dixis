@@ -64,7 +64,7 @@
 - [ ] Create `docs/OPS/PROD-REGRESSION-2025-12-23.md` (incident report)
 - [ ] Create `docs/AGENT/SUMMARY/Pass-26.md` (proof + fix summary)
 - [ ] Update `docs/OPS/STATE.md` (Pass 26 → CLOSED with evidence)
-- [ ] Update `docs/NEXT-7D.md` (Pass 26 → DONE)
+- [ ] Update `docs/AGENT-STATE.md` (Pass 26 → DONE)
 
 ---
 
@@ -157,7 +157,7 @@ rg -n "approval_status|published|active" backend/app/
 - `docs/OPS/PROD-REGRESSION-2025-12-23.md` (incident report)
 - `docs/AGENT/SUMMARY/Pass-26.md` (fix summary)
 - `docs/OPS/STATE.md` (update)
-- `docs/NEXT-7D.md` (update)
+- `docs/AGENT-STATE.md` (update)
 
 ---
 

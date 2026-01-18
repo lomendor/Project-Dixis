@@ -63,7 +63,7 @@ This means:
 - `docs/AGENT/TASKS/Pass-CARD-PAYMENT-SMOKE-01.md` (new)
 - `docs/AGENT/SUMMARY/Pass-CARD-PAYMENT-SMOKE-01.md` (new)
 - `docs/OPS/STATE.md` (updated)
-- `docs/NEXT-7D.md` (updated)
+- `docs/AGENT-STATE.md` (updated)
 
 ## References
 

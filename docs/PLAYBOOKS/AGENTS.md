@@ -19,7 +19,7 @@
 **Docs:**
 - `docs/OS/STATE.md` (current phase status)
 - `docs/ROADMAP/2025Q4.md` (quarterly objectives)
-- `docs/NEXT-7D.md` (immediate priorities)
+- `docs/AGENT-STATE.md` (immediate priorities)
 - `docs/PRODUCT/PRD-INDEX.md` (product requirements)
 - `docs/DECISIONS/` (architectural decisions)
 

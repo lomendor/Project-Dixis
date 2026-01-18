@@ -17,7 +17,7 @@ Docs-only pass. No code changes.
 - [x] Recalculate DONE/PARTIAL/MISSING counts
 - [x] Update health score (88% → 91%)
 - [x] Add pass references to completed items
-- [x] Update STATE.md, NEXT-7D.md, ACTIVE.md
+- [x] Update STATE.md, AGENT-STATE.md, AGENT-STATE.md
 - [x] PR merged
 
 ## Changes Made

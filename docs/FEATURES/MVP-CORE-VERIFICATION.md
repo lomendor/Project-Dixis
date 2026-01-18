@@ -275,7 +275,7 @@
 
 **Process Docs**:
 - `docs/OPS/STATE.md` (current state)
-- `docs/NEXT-7D.md` (WIP + DONE history)
+- `docs/AGENT-STATE.md` (WIP + DONE history)
 - `docs/OPS/DECISION-GATE.md` (process enforcement)
 - `docs/OPS/PROD-FACTS-LAST.md` (latest health check)
 

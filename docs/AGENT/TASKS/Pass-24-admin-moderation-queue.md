@@ -94,7 +94,7 @@
 
 ### Phase E: Docs
 1. Update STATE.md: Pass 24 → WIP (with DoD checklist)
-2. Update NEXT-7D.md: Pass 24 → WIP
+2. Update AGENT-STATE.md: Pass 24 → WIP
 3. Add quality-gates observation note (PR-only, no action)
 4. Fill SUMMARY/Pass-24.md at end
 
@@ -143,7 +143,7 @@
 
 **Docs**:
 - `docs/OPS/STATE.md`
-- `docs/NEXT-7D.md`
+- `docs/AGENT-STATE.md`
 - `docs/AGENT/SUMMARY/Pass-24.md`
 
 ---

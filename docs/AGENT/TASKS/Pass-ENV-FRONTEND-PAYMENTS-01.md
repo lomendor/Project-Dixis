@@ -80,7 +80,7 @@ created at: 2026-01-17T23:16:04.632Z
 - `docs/AGENT/TASKS/Pass-ENV-FRONTEND-PAYMENTS-01.md` (new)
 - `docs/AGENT/SUMMARY/Pass-ENV-FRONTEND-PAYMENTS-01.md` (new)
 - `docs/OPS/STATE.md` (updated)
-- `docs/NEXT-7D.md` (updated)
+- `docs/AGENT-STATE.md` (updated)
 
 ## VPS Changes (not in git)
 

@@ -352,7 +352,7 @@ This document maps all major product capabilities to their implementation status
 
 ## Next Actions
 
-See [NEXT-7D.md](../../NEXT-7D.md) and [NEXT-30D.md](../../NEXT-30D.md) for prioritized roadmap.
+See [AGENT-STATE.md](../../AGENT-STATE.md) and [NEXT-30D.md](../../NEXT-30D.md) for prioritized roadmap.
 
 **Priority 1 (Critical):**
 - Email verification

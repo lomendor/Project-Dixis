@@ -333,7 +333,7 @@ Week X Summary (YYYY-MM-DD)
 
 ## Links
 
-- [Week 1 Roadmap](NEXT-7D.md)
+- [Week 1 Roadmap](AGENT-STATE.md)
 - [Capability Matrix](PRODUCT/CAPABILITIES.md)
 - [Project Status](PROJECT-STATUS-2025-12.md)
 - [PRD Index](PRODUCT/PRD-INDEX.md)

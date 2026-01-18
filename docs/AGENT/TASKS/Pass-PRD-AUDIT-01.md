@@ -19,11 +19,11 @@ Need visibility into feature completeness to prioritize next work. CAPABILITIES.
 
 2. **Cross-Referenced State**
    - `docs/OPS/STATE.md` (recent passes)
-   - `docs/NEXT-7D.md` (blocked items)
+   - `docs/AGENT-STATE.md` (blocked items)
 
 3. **Created Artifacts**
    - `docs/PRODUCT/PRD-AUDIT.md` - Executive summary with gaps and next passes
-   - Updated `docs/NEXT-7D.md` with ordered unblocked passes
+   - Updated `docs/AGENT-STATE.md` with ordered unblocked passes
 
 ## Key Findings
 
@@ -58,7 +58,7 @@ Need visibility into feature completeness to prioritize next work. CAPABILITIES.
 - [x] Gaps identified and prioritized
 - [x] Next passes ordered by priority
 - [x] `docs/PRODUCT/PRD-AUDIT.md` created
-- [x] `docs/NEXT-7D.md` updated
+- [x] `docs/AGENT-STATE.md` updated
 - [x] `docs/OPS/STATE.md` updated
 
 ## PRs

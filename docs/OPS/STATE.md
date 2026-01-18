@@ -821,7 +821,7 @@ Reduced STATE.md from 1009 to ~250 lines. Moved older entries to archive.
 
 ---
 
-## 2026-01-16 — Pass OPS-ACTIVE-01: Create ACTIVE.md Entry Point
+## 2026-01-16 — Pass OPS-ACTIVE-01: Create AGENT-STATE.md Entry Point
 
 **Status**: ✅ CLOSED
 
@@ -829,9 +829,9 @@ Created single entry point file to reduce agent boot time and token consumption.
 
 ### Changes
 
-- `docs/ACTIVE.md` (new) — THE entry point (~90 lines)
+- `docs/AGENT-STATE.md` (new) — THE entry point (~90 lines)
 - `docs/AGENT/SEEDS/boot.md` — Updated startup sequence
-- `docs/AGENT/README.md` — Points to ACTIVE.md
+- `docs/AGENT/README.md` — Points to AGENT-STATE.md
 
 ### Before vs After
 
@@ -842,7 +842,7 @@ Created single entry point file to reduce agent boot time and token consumption.
 
 ### PRs
 
-- #2227 (docs: Pass OPS-ACTIVE-01 create ACTIVE.md entry point) — merged
+- #2227 (docs: Pass OPS-ACTIVE-01 create AGENT-STATE.md entry point) — merged
 
 ---
 

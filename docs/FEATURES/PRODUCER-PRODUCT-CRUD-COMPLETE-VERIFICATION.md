@@ -269,7 +269,7 @@ Route (app)                                 Size  First Load JS
 
 ## Definition of Done - Verification
 
-**From NEXT-7D.md Item #2**: "Stage 3 authorization regression tests (backend)"
+**From AGENT-STATE.md Item #2**: "Stage 3 authorization regression tests (backend)"
 
 - [x] ✅ Add backend tests proving producer product Update/Delete ownership enforcement
       → **49 tests PASSING**, including all ownership scenarios
@@ -337,4 +337,4 @@ Route (app)                                 Size  First Load JS
 
 **Document Owner**: Claude (automated comprehensive audit)
 **Last Updated**: 2025-12-20 02:00 UTC
-**Next Action**: Update STATE.md + NEXT-7D.md, close Stage 3 CRUD item
+**Next Action**: Update STATE.md + AGENT-STATE.md, close Stage 3 CRUD item

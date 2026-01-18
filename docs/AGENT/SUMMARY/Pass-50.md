@@ -83,7 +83,7 @@ Shipping costs were hardcoded in frontend (HOME=€3.50, COURIER=€4.50). Real 
 | `frontend/src/app/(storefront)/checkout/CheckoutClient.tsx` | +45 lines |
 | `backend/tests/Feature/ShippingZoneQuoteTest.php` | New (8 tests) |
 | `frontend/tests/e2e/pass-50-shipping-zones.spec.ts` | New (5 tests) |
-| `docs/NEXT-7D.md` | Updated |
+| `docs/AGENT-STATE.md` | Updated |
 
 ## Evidence
 

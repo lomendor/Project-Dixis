@@ -17,8 +17,8 @@
 
 3. **Added archive links**
    - Archive section at bottom of STATE.md
-   - Reference in ACTIVE.md
-   - Reference in NEXT-7D.md
+   - Reference in AGENT-STATE.md
+   - Reference in AGENT-STATE.md
 
 ## Before vs After
 
@@ -34,5 +34,5 @@
 - `docs/OPS/STATE-ARCHIVE/` — new folder
 - `docs/OPS/STATE-ARCHIVE/INDEX.md` — new
 - `docs/OPS/STATE-ARCHIVE/STATE-2026-Q1-EARLY.md` — new
-- `docs/ACTIVE.md` — archive reference added
-- `docs/NEXT-7D.md` — archive reference added
+- `docs/AGENT-STATE.md` — archive reference added
+- `docs/AGENT-STATE.md` — archive reference added

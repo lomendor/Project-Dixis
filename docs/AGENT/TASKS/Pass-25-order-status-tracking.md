@@ -93,7 +93,7 @@
 
 ### Phase F: Docs
 1. Update STATE.md: Pass 25 → WIP → CLOSED (when DoD met)
-2. Update NEXT-7D.md: Pass 25 → WIP → DONE
+2. Update AGENT-STATE.md: Pass 25 → WIP → DONE
 3. Create SUMMARY/Pass-25.md with proof + risks
 
 ---
@@ -142,7 +142,7 @@
 
 **Docs**:
 - `docs/OPS/STATE.md`
-- `docs/NEXT-7D.md`
+- `docs/AGENT-STATE.md`
 - `docs/AGENT/SUMMARY/Pass-25.md`
 
 ---

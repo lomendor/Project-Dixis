@@ -142,7 +142,7 @@ BASE_URL=https://dixis.gr npx playwright test card-payment-real-auth.spec.ts
 - `docs/AGENT/TASKS/Pass-PAYMENTS-CARD-REAL-01.md` - This file
 - `docs/AGENT/SUMMARY/Pass-PAYMENTS-CARD-REAL-01.md` - Summary
 - `docs/OPS/STATE.md` - Updated
-- `docs/NEXT-7D.md` - Updated
+- `docs/AGENT-STATE.md` - Updated
 
 ## PRs
 

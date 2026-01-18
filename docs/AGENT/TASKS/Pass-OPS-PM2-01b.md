@@ -4,7 +4,7 @@
 
 ## What
 
-Housekeeping pass to close OPS-PM2-01 in STATE.md and NEXT-7D.md.
+Housekeeping pass to close OPS-PM2-01 in STATE.md and AGENT-STATE.md.
 
 ## Why
 

@@ -336,7 +336,7 @@ Based on user's constraint: **"Fix ONLY the first confirmed authorization gap"**
 1. ✅ **PHASE 1 COMPLETE**: Audit documented (this file)
 2. **PHASE 2**: Fix Gap #1 (Update/Delete routes) using Option 1 (proxy to backend)
 3. **PHASE 3**: Add E2E test for producer product CRUD authorization
-4. **PHASE 4**: Update STATE.md + NEXT-7D.md with Stage 3 completion
+4. **PHASE 4**: Update STATE.md + AGENT-STATE.md with Stage 3 completion
 
 **Constraints**:
 - WIP=1 (one fix at a time)

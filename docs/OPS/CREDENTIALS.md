@@ -228,7 +228,7 @@ These are separate from VPS env vars. GitHub secrets are used by workflows:
 
 - `docs/AGENT/SOPs/CREDENTIALS.md` — Original credential inventory
 - `docs/OPS/SECRETS-MAP.md` — GitHub Secrets reference
-- `docs/NEXT-7D.md` → "Waiting on Credentials" section
+- `docs/AGENT-STATE.md` → "Waiting on Credentials" section
 
 ---
 

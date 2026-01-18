@@ -25,7 +25,7 @@ Reduce STATE.md size for faster agent boot. Archive older entries without losing
 - [x] Archive folder created
 - [x] No history lost (moved to archive)
 - [x] Links in STATE.md to archive
-- [x] ACTIVE.md + NEXT-7D.md updated
+- [x] AGENT-STATE.md + AGENT-STATE.md updated
 - [x] PR merged
 
 ## PRs

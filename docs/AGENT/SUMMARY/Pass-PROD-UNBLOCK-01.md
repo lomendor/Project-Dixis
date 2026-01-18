@@ -55,7 +55,7 @@ The perceived auth failure was caused by **shell escaping**, not a server issue:
 - docs/AGENT/TASKS/Pass-PROD-UNBLOCK-01.md (new)
 - docs/AGENT/SUMMARY/Pass-PROD-UNBLOCK-01.md (new)
 - docs/OPS/STATE.md (updated)
-- docs/NEXT-7D.md (updated)
+- docs/AGENT-STATE.md (updated)
 
 ## Result
 

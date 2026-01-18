@@ -39,7 +39,7 @@ $ curl -s -X POST "https://dixis.gr/api/v1/auth/password/forgot" \
 - docs/AGENT/TASKS/Pass-EMAIL-SMOKE-01.md (new)
 - docs/AGENT/SUMMARY/Pass-EMAIL-SMOKE-01.md (new)
 - docs/OPS/STATE.md (updated)
-- docs/NEXT-7D.md (updated)
+- docs/AGENT-STATE.md (updated)
 
 ## Result
 
