@@ -17,7 +17,7 @@ On every new chat session, read in this exact order:
 
 **Optional** (if needed for context):
 ```bash
-ls -t docs/AGENT/SUMMARY/*.md | head -1 | xargs cat  # Latest pass summary
+ls -t docs/AGENT/PASSES/SUMMARY-*.md | head -1 | xargs cat  # Latest pass summary
 ```
 
 Then execute the next Pass from **`docs/AGENT-STATE.md`** (not STATE.md).

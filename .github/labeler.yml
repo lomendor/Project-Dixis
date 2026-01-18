@@ -1,6 +1,6 @@
 ai-pass:
   - changed-files:
-    - any-glob-to-any-file: 'docs/AGENT/SUMMARY/Pass-*.md'
+    - any-glob-to-any-file: 'docs/AGENT/PASSES/SUMMARY-Pass-*.md'
 
 risk-ok:
   - changed-files:

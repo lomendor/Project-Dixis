@@ -139,7 +139,7 @@ test('Lookup shows saved-email hint after reload and hides it after Clear', asyn
 
 ---
 
-### 3. `docs/AGENT/SUMMARY/Pass-AG35.md` (NEW)
+### 3. `docs/AGENT/PASSES/SUMMARY-Pass-AG35.md` (NEW)
 
 **Purpose**: Complete implementation documentation
 

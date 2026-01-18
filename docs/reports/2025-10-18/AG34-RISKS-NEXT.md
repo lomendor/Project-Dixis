@@ -352,7 +352,7 @@ await page.getByTestId('clear-flag').isVisible().catch(() => {
 
 ## 🔗 RELATED DOCUMENTATION
 
-- **Implementation**: `docs/AGENT/SUMMARY/Pass-AG34.md`
+- **Implementation**: `docs/AGENT/PASSES/SUMMARY-Pass-AG34.md`
 - **Code Structure**: `docs/reports/2025-10-18/AG34-CODEMAP.md`
 - **Test Details**: `docs/reports/2025-10-18/AG34-TEST-REPORT.md`
 

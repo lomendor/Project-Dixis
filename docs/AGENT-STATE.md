@@ -67,7 +67,7 @@ _(No unblocked passes — see `docs/PRODUCT/PRD-MUST-V1.md` for V1 scope)_
 
 1. Update this file (WIP → Recently Done)
 2. Add entry to `docs/OPS/STATE.md` (top)
-3. Create pass file in `docs/AGENT/PASSES/{PASS-ID}.md` (or SUMMARY/ for now)
+3. Create pass file in `docs/AGENT/PASSES/SUMMARY-Pass-{PASS-ID}.md`
 4. Verify prod: `curl -sI https://dixis.gr/api/healthz`
 
 ---
@@ -78,6 +78,7 @@ _(No unblocked passes — see `docs/PRODUCT/PRD-MUST-V1.md` for V1 scope)_
 |-----|---------|
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/OPS/STATE-ARCHIVE/` | Older pass history |
+| `docs/AGENT/PASSES/` | All pass documentation (TASK-*, SUMMARY-*) |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
 

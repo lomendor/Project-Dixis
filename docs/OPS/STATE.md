@@ -438,7 +438,7 @@ Operator provides credentials:
 - **Option A (Resend)**: `RESEND_KEY=re_...` + `EMAIL_NOTIFICATIONS_ENABLED=true`
 - **Option B (SMTP)**: `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` + `EMAIL_NOTIFICATIONS_ENABLED=true`
 
-See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement runbook.
+See `docs/AGENT/PASSES/TASK-Pass-60-EMAIL-ENABLE.md` for VPS enablement runbook.
 
 ### PRs
 
@@ -478,7 +478,7 @@ Added email configuration status to health endpoints. Email wiring from Pass 53-
 
 ### Operator Steps
 
-See `docs/AGENT/TASKS/Pass-60-EMAIL-ENABLE.md` for VPS enablement with Resend key.
+See `docs/AGENT/PASSES/TASK-Pass-60-EMAIL-ENABLE.md` for VPS enablement with Resend key.
 
 ---
 
@@ -872,8 +872,8 @@ Audited PRD against repository reality. Created mapping document with gaps and o
 ### Artifacts
 
 - `docs/PRODUCT/PRD-AUDIT.md` — Executive summary + gap analysis
-- `docs/AGENT/TASKS/Pass-PRD-AUDIT-01.md` — Task definition
-- `docs/AGENT/SUMMARY/Pass-PRD-AUDIT-01.md` — Summary
+- `docs/AGENT/PASSES/TASK-Pass-PRD-AUDIT-01.md` — Task definition
+- `docs/AGENT/PASSES/SUMMARY-Pass-PRD-AUDIT-01.md` — Summary
 
 ### PRs
 

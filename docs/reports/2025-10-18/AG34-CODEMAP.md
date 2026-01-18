@@ -114,7 +114,7 @@ test('Lookup — Clear remembered email removes localStorage and clears input af
 
 ---
 
-### 3. `docs/AGENT/SUMMARY/Pass-AG34.md` (NEW)
+### 3. `docs/AGENT/PASSES/SUMMARY-Pass-AG34.md` (NEW)
 
 **Purpose**: Complete implementation documentation
 
