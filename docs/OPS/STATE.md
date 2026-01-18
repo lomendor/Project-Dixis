@@ -1,8 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-18 (Pass-PAYMENTS-CARD-REAL-01)
+**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01)
 
 > **Note**: This file kept ≤250 lines. Older passes in [STATE-ARCHIVE/](STATE-ARCHIVE/).
+
+## 2026-01-18 — Pass PAYMENTS-STRIPE-ELEMENTS-01: Stripe Elements Integration
+
+**Status**: 🔄 IN PROGRESS
+
+Replaced Stripe Checkout redirect with embedded Stripe Elements card form.
+
+### Changes
+
+1. **Checkout page**: Integrated `StripeProvider` + `StripePaymentForm` for inline card payment
+2. **API client**: Fixed paths to match backend (`/payments/orders/{id}/init`)
+3. **E2E test**: Updated to work with new Stripe Elements flow
+
+### Flow
+
+```
+Checkout form → Submit → initPayment → Stripe Elements → Pay → confirmPayment → Success
+```
+
+### PRs
+
+- #TBD (feat: Pass PAYMENTS-STRIPE-ELEMENTS-01) — pending
+
+### Files Changed
+
+- `frontend/src/app/(storefront)/checkout/page.tsx`
+- `frontend/src/lib/api/payment.ts`
+- `frontend/tests/e2e/card-payment-real-auth.spec.ts`
+
+---
 
 ## 2026-01-18 — Pass PAYMENTS-CARD-REAL-01: Card Payment E2E with Real Auth
 

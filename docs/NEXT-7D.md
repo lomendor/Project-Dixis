@@ -1,11 +1,11 @@
 # NEXT 7 DAYS
 
-**Last Updated**: 2026-01-18 (Pass-PAYMENTS-CARD-REAL-01)
+**Last Updated**: 2026-01-18 (Pass-PAYMENTS-STRIPE-ELEMENTS-01)
 
 > **Entry point**: `docs/ACTIVE.md` | **Archive**: `docs/OPS/STATE-ARCHIVE/`
 
 ## WIP (1 item only)
-_(empty — pick next unblocked item from NEXT)_
+- **Pass PAYMENTS-STRIPE-ELEMENTS-01** — Stripe Elements integration (PR pending)
 
 ## NEXT (ordered, max 3)
 
