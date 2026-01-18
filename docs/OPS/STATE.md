@@ -41,6 +41,13 @@ Running 4 tests using 1 worker
 
 - #2290 (feat: Pass PAYMENTS-CARD-REAL-01) — merged
 - #2292 (fix: stabilize E2E tests) — merged
+- #2295 (docs: final state update) — merged
+
+### Note on Stripe Elements Test
+
+The "Stripe test card payment flow" test **correctly skips** because Stripe Elements (actual card input form) is **not yet implemented**. The current scope covers:
+- ✅ Card payment option visible for authenticated users
+- ⏭️ Stripe Elements card form - future pass
 
 ---
 
