@@ -168,8 +168,11 @@ if (!app()->environment('production')) {
 
 // Authentication routes
 Route::prefix('v1/auth')->group(function () {
-    Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register']);
-    Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+    // Pass SEC-AUTH-RL-02: Rate limit auth endpoints to prevent brute force
+    Route::post('register', [App\Http\Controllers\Api\AuthController::class, 'register'])
+        ->middleware('throttle:auth-register'); // 5 requests per minute per IP
+    Route::post('login', [App\Http\Controllers\Api\AuthController::class, 'login'])
+        ->middleware('throttle:auth-login'); // 10 requests per minute per IP+email
 
     // Pass EMAIL-AUTH-01: Password reset routes (throttled to prevent abuse)
     Route::post('password/forgot', [App\Http\Controllers\Api\PasswordResetController::class, 'forgot'])
