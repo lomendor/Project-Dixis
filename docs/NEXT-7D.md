@@ -92,6 +92,25 @@ Pre-launch verification before announcing V1:
 
 ---
 
+### Remaining V1 Verification Tasks
+
+- [ ] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end
+  - Test password reset email delivery
+  - Test order confirmation email delivery
+  - Confirm emails arrive in inbox (not spam)
+
+- [ ] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
+  - Verify `/api/v1/auth/login` rate limited
+  - Verify `/api/v1/auth/register` rate limited
+  - Document limits in security checklist
+
+- [ ] **LOG-REVIEW-24H-01**: Production logs scan
+  - Check Laravel logs for 500 errors (last 24h)
+  - Document any recurring issues
+  - Confirm no critical errors
+
+---
+
 ### Performance (Backlog)
 
 - ✅ **PERF-COLD-START-01** (P3): Investigated ~700ms cold start — **RESOLVED**
@@ -103,4 +122,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass STRIPE-PAYMENT-INIT-01 (2026-01-19)_
+_Last updated by Pass PROD-HEALTH-01 (2026-01-19)_
