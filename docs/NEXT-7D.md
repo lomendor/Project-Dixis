@@ -64,17 +64,22 @@
 
 Pre-launch verification before announcing V1:
 
-### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01
+### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-20)
 
 - [x] **Guest checkout**: Add product → Checkout as guest → COD → Confirm order email
   - Order #86 created, COD payment, shipping to Athens
+  - **API Verified:** status: "processing", payment_method: "COD"
 - [x] **User checkout**: Register → Login → Cart sync works → Card payment → Confirm
   - ~~Order #87 created, but Stripe payment init FAILED (P1 blocker)~~
   - **FIXED**: PR #2327 merged, Order #91 payment init success
+  - **API Verified:** payment_method: "stripe"
 - [x] **Producer flow**: Login as producer → Add product → See it pending → Admin approves
   - Product #7 created, auto-approved (status: available)
+  - **API Verified:** Product #7 status: "available"
 - [x] **Admin flow**: Login as admin → View orders → Update status → Email sent
   - Order #86 updated to "processing" via admin API
+  - **API Verified:** Order #86 status changed to "processing"
+- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01.md`
 
 ### Production Health
 
@@ -144,4 +149,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass LOG-REVIEW-24H-01 (2026-01-19)_
+_Last updated by Pass V1-QA-EXECUTE-01 (2026-01-20)_
