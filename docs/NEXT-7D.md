@@ -80,7 +80,7 @@ Pre-launch verification before announcing V1:
 
 - [x] `https://dixis.gr/api/healthz` returns `{"status":"ok"}`
 - [x] `https://dixis.gr/api/v1/public/products` returns products with cache headers
-- [?] Email delivery works (test password reset or order) - Not verified in this pass
+- [x] Email delivery works (test password reset or order) - **VERIFIED** (Pass EMAIL-PROOF-01, 2026-01-19)
 - [x] Card payment works in Stripe test mode - **FIXED** (PR #2327, Order #91 verified)
 
 ### Performance
@@ -110,12 +110,13 @@ Pre-launch verification before announcing V1:
 
 ### Remaining V1 Verification Tasks (V1-VERIFY-TRIO-01)
 
-- [~] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end
+- [x] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end — **PASS** (2026-01-19)
   - ✅ Resend configured in production (`/api/health` shows `configured: true`)
   - ✅ Runbook created: `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md`
   - ✅ Proof script created: `scripts/email-proof.sh`
-  - ⚠️ Final verification blocked: SSH access required
-  - Action: Run `./scripts/email-proof.sh --send --to=your@email.com` once SSH configured
+  - ✅ Test email sent via `php artisan dixis:email:test --to=kourkoutisp@gmail.com`
+  - ✅ User confirmed receipt in inbox
+  - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-PROOF-01.md`
 
 - [x] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
   - ✅ **FIXED** by Pass SEC-AUTH-RL-02
@@ -141,4 +142,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass OPS-EMAIL-PROOF-01 (2026-01-19)_
+_Last updated by Pass EMAIL-PROOF-01 (2026-01-19)_
