@@ -41,7 +41,17 @@ Implemented the final MVP gap: cart synchronization between localStorage and ser
 
 ### PRs
 
-- #2322 (feat: Pass CART-SYNC-01 backend cart sync for logged-in users) — pending merge
+- #2322 (feat: Pass CART-SYNC-01 backend cart sync for logged-in users) — **merged**
+
+### Post-Merge Proof (2026-01-19)
+
+| Check | Result |
+|-------|--------|
+| Commit | `a5ab5c08` on main |
+| Backend tests | ✅ 23 passed (`php artisan test --filter=CartTest`) |
+| CI E2E | ✅ Passed (PR #2322 all checks green) |
+| Production healthz | ✅ `{"status":"ok","database":"connected",...}` |
+| Endpoint exists | ✅ `POST /api/v1/cart/sync` returns 401 (auth required) |
 
 ---
 
