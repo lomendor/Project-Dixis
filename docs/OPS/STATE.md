@@ -1,9 +1,40 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass OPS-EMAIL-PROOF-01)
+**Last Updated**: 2026-01-19 (Pass EMAIL-PROOF-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~380 lines (target ≤250).
+> **Current size**: ~400 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass EMAIL-PROOF-01: Production Email Verification
+
+**Status**: ✅ PASS
+
+Verified end-to-end email delivery in production via Resend.
+
+### Evidence
+
+| Check | Result |
+|-------|--------|
+| Health endpoint | `configured: true`, `mailer: resend` |
+| VPS dry-run | Configuration valid |
+| Actual send | `[OK] Test email sent successfully` |
+| User receipt | Confirmed in inbox |
+
+### Commands Used
+
+```bash
+# Dry-run validation
+ssh dixis-prod 'cd /var/www/dixis/current/backend && php artisan dixis:email:test --to=test@example.com --dry-run'
+
+# Actual send
+ssh dixis-prod 'cd /var/www/dixis/current/backend && php artisan dixis:email:test --to=kourkoutisp@gmail.com'
+```
+
+### Proof
+
+- Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-PROOF-01.md`
 
 ---
 
