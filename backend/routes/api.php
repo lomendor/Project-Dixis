@@ -247,6 +247,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 requests per minute for cart additions
         Route::patch('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'update']);
         Route::delete('items/{cartItem}', [App\Http\Controllers\Api\CartController::class, 'destroy']);
+        Route::post('sync', [App\Http\Controllers\Api\CartController::class, 'sync'])
+            ->middleware('throttle:10,1'); // 10 syncs per minute (login-triggered)
     });
 
     // Shipping routes

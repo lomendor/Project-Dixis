@@ -24,6 +24,12 @@
   - Consumer + Producer notifications working in production
   - Corrected MVP-CHECKLIST gap count: 2 → 1
 
+- ✅ **CART-SYNC-01**: Backend cart sync for logged-in users
+  - PR #2322 merged
+  - `POST /api/v1/cart/sync` endpoint with transactional merge
+  - Frontend triggers sync on login, replaces localStorage with server cart
+  - **MVP now 100% complete (40/40 requirements)**
+
 ### CI Reliability
 
 - ✅ **SMOKE-FLAKE-01**: Increased healthz probe timeouts
@@ -32,12 +38,9 @@
 
 ## Upcoming Work
 
-### MVP Gaps (1 remaining)
+### MVP Gaps (0 remaining)
 
-- **CART-SYNC-01** (LOW priority): Backend cart sync for logged-in users
-  - Files: New API endpoint + auth integration
-  - Impact: LOW (localStorage works for MVP)
-  - Effort: MEDIUM (2-3 days)
+🟢 **All MVP gaps have been closed. V1 Launch Ready.**
 
 ### Performance (Backlog)
 
@@ -48,4 +51,4 @@
 
 ---
 
-_Last updated by Pass EMAIL-EVENTS-01_
+_Last updated by Pass CART-SYNC-01_

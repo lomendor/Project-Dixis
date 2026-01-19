@@ -29,6 +29,10 @@ type State = {
   clear: () => void
   /** Force-add item after user confirms (clears cart first) */
   forceAdd: (item: Omit<CartItem,'qty'>) => void
+  /** Replace cart with server items (used after sync) */
+  replaceWithServerCart: (serverItems: CartItem[]) => void
+  /** Get items in format suitable for sync API */
+  getItemsForSync: () => { product_id: number; quantity: number }[]
 }
 
 export const useCart = create<State>()(
@@ -81,6 +85,20 @@ export const useCart = create<State>()(
         set({ items })
       },
       clear: () => set({ items: {} }),
+      replaceWithServerCart: (serverItems: CartItem[]) => {
+        const newItems: Record<string, CartItem> = {}
+        for (const item of serverItems) {
+          newItems[item.id] = item
+        }
+        set({ items: newItems })
+      },
+      getItemsForSync: () => {
+        const items = get().items
+        return Object.values(items).map(item => ({
+          product_id: parseInt(item.id, 10),
+          quantity: item.qty,
+        }))
+      },
     }),
     { name: 'dixis:cart:v1' }
   )

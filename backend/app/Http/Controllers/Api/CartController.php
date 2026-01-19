@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
@@ -185,5 +186,82 @@ class CartController extends Controller
         return response()->json([
             'message' => 'Item removed from cart successfully',
         ]);
+    }
+
+    /**
+     * Sync localStorage cart with server cart on login.
+     * Merges client items with existing server cart (sums quantities for same product).
+     * Returns the authoritative server cart.
+     */
+    public function sync(Request $request): JsonResponse
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer',
+        ]);
+
+        $userId = $request->user()->id;
+
+        DB::transaction(function () use ($request, $userId) {
+            foreach ($request->items as $item) {
+                $productId = (int) $item['product_id'];
+                $quantity = (int) $item['quantity'];
+
+                // Clamp quantity to >=1, skip invalid
+                if ($quantity < 1) {
+                    continue;
+                }
+
+                // Verify product exists and is active
+                $product = Product::where('id', $productId)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $product) {
+                    continue; // Skip invalid products silently
+                }
+
+                // Check if item already exists in server cart
+                $existingItem = CartItem::where('user_id', $userId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if ($existingItem) {
+                    // Merge: sum quantities
+                    $newQuantity = $existingItem->quantity + $quantity;
+
+                    // Clamp to stock if available
+                    if ($product->stock !== null && $newQuantity > $product->stock) {
+                        $newQuantity = $product->stock;
+                    }
+
+                    // Clamp to max 100
+                    $newQuantity = min($newQuantity, 100);
+
+                    $existingItem->update(['quantity' => $newQuantity]);
+                } else {
+                    // Create new item
+                    $finalQuantity = $quantity;
+
+                    // Clamp to stock if available
+                    if ($product->stock !== null && $finalQuantity > $product->stock) {
+                        $finalQuantity = $product->stock;
+                    }
+
+                    // Clamp to max 100
+                    $finalQuantity = min($finalQuantity, 100);
+
+                    CartItem::create([
+                        'user_id' => $userId,
+                        'product_id' => $productId,
+                        'quantity' => $finalQuantity,
+                    ]);
+                }
+            }
+        });
+
+        // Return authoritative server cart (same format as index)
+        return $this->index($request);
     }
 }

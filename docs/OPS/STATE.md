@@ -1,9 +1,47 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass EMAIL-EVENTS-01)
+**Last Updated**: 2026-01-19 (Pass CART-SYNC-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~300 lines (target ≤250).
+> **Current size**: ~350 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass CART-SYNC-01: Backend Cart Sync for Logged-in Users
+
+**Status**: ✅ DONE (MVP 100% Complete)
+
+Implemented the final MVP gap: cart synchronization between localStorage and server on user login.
+
+### Changes
+
+| Component | Change |
+|-----------|--------|
+| `CartController.php` | Add `sync()` method with transactional merge logic |
+| `routes/api.php` | Add `POST /api/v1/cart/sync` with auth + throttle (10/min) |
+| `api.ts` | Add `syncCart()` method to API client |
+| `cart.ts` | Add `replaceWithServerCart()` and `getItemsForSync()` |
+| `AuthContext.tsx` | Trigger sync after successful login |
+| `CartTest.php` | 8 new backend tests for sync endpoint |
+| `cart-sync.spec.ts` | 3 E2E acceptance tests |
+
+### Merge Strategy
+
+- If same product exists on server and in payload: `qty = server.qty + payload.qty`
+- If not exists: create with `payload.qty`
+- Invalid/zero/negative qty: skip
+- Inactive products: skip
+- Exceeds stock: clamp to stock limit
+
+### MVP Status
+
+- **Gaps**: 0 (was 1)
+- **MVP completion**: 100% (40/40 requirements)
+- **V1 Launch**: 🟢 READY
+
+### PRs
+
+- #2322 (feat: Pass CART-SYNC-01 backend cart sync for logged-in users) — pending merge
 
 ---
 

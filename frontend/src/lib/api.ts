@@ -558,6 +558,19 @@ class ApiClient {
     });
   }
 
+  // Pass CART-SYNC-01: Sync localStorage cart with server on login
+  async syncCart(items: { product_id: number; quantity: number }[]): Promise<CartResponse> {
+    const response = await this.request<{cart_items: CartItem[], total_items: number, total_amount: string}>('cart/sync', {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+    });
+    return {
+      items: response.cart_items || [],
+      total_items: response.total_items,
+      total_amount: response.total_amount
+    };
+  }
+
   // Shipping methods
   async getShippingQuote(data: ShippingQuoteRequest): Promise<ShippingQuote> {
     return this.request<ShippingQuote>('shipping/quote', {
