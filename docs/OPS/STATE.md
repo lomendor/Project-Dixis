@@ -1,9 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass CART-SYNC-01)
+**Last Updated**: 2026-01-19 (Pass PERF-COLD-START-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass PERF-COLD-START-01: Cold Start Baseline
+
+**Status**: ✅ CLOSED (No Fix Required)
+
+Investigated reported ~700ms cold start penalty. Issue already resolved by prior passes.
+
+### Baseline Results
+
+| Endpoint | TTFB (median) | Status |
+|----------|---------------|--------|
+| `/` | 179ms | HEALTHY |
+| `/products` | 180ms | HEALTHY |
+| `/api/v1/public/products` | 251ms | HEALTHY |
+
+### Root Cause
+
+Cold start was fixed by:
+- PERF-IPV4-PREFER-01 (IPv6 fallback → 9.5s to 80ms)
+- PERF-PRODUCTS-CACHE-01 (ISR caching)
+
+### Artifacts
+
+- `scripts/perf-baseline.sh` - reusable baseline script
 
 ---
 
