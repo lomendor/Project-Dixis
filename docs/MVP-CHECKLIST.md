@@ -2,8 +2,8 @@
 
 **Created**: 2026-01-19
 **Pass**: MVP-CHECKLIST-01
-**Updated**: 2026-01-19 (Pass EMAIL-EVENTS-01 verification)
-**Status**: Gap Analysis Complete
+**Updated**: 2026-01-19 (Pass CART-SYNC-01)
+**Status**: MVP Complete
 
 > **Purpose**: Map MVP requirements from PRD-MUST-V1 against implemented features, identify gaps, and prioritize next passes.
 
@@ -14,7 +14,7 @@
 | Category | Requirements | Implemented | Blocked | Gaps |
 |----------|-------------|-------------|---------|------|
 | Product Catalog | 4 | 4 | 0 | 0 |
-| Shopping Cart | 4 | 3 | 0 | 1 |
+| Shopping Cart | 4 | 4 | 0 | 0 |
 | Checkout Flow | 4 | 4 | 0 | 0 |
 | Order Management | 4 | 4 | 0 | 0 |
 | Producer Portal | 4 | 4 | 0 | 0 |
@@ -23,9 +23,9 @@
 | i18n | 4 | 4 | 0 | 0 |
 | Notifications | 4 | 4 | 0 | 0 |
 | E2E Tests | 3 | 3 | 0 | 0 |
-| **TOTAL** | **40** | **39** | **0** | **1** |
+| **TOTAL** | **40** | **40** | **0** | **0** |
 
-**MVP Status**: 97.5% Complete (39/40 requirements)
+**MVP Status**: 🟢 **100% Complete (40/40 requirements)**
 
 ---
 
@@ -41,13 +41,13 @@
 | Category filtering | ✅ | CategoryStrip component, API filter |
 | Product detail page | ✅ | `/products/[id]` with images, price, description |
 
-#### 2. Shopping Cart (3/4)
+#### 2. Shopping Cart (4/4)
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
 | Add/remove products | ✅ | Cart context, localStorage |
 | Quantity adjustment | ✅ | CartItem component |
 | Persist in localStorage | ✅ | useCart hook |
-| Backend sync for logged-in users | ⚠️ GAP | Not yet implemented |
+| Backend sync for logged-in users | ✅ | Pass CART-SYNC-01, `POST /api/v1/cart/sync` |
 
 #### 3. Checkout Flow (4/4)
 | Requirement | Status | Evidence |
@@ -123,26 +123,35 @@
 
 ---
 
-## GAPS (1 item)
+## GAPS (0 items)
 
-### GAP-01: Cart Backend Sync
-
-**Requirement**: Sync cart with backend for logged-in users
-
-**Current State**: Cart persists only in localStorage. If user logs in on different device, cart is lost.
-
-**Impact**: LOW (localStorage works for MVP, but multi-device UX is poor)
-
-**Effort**: MEDIUM (API endpoints + auth integration)
-
-**Proposed Pass**: `CART-SYNC-01`
-- Add `POST /api/v1/cart/sync` endpoint
-- Merge localStorage cart with server cart on login
-- Optional: real-time sync with debounce
+🟢 **All MVP gaps have been closed.**
 
 ---
 
-## Previously Identified as Gaps (Now Verified Complete)
+## Previously Identified as Gaps (Now Complete)
+
+### ~~GAP-01: Cart Backend Sync~~ ✅ COMPLETE
+
+**Implemented** (Pass CART-SYNC-01, 2026-01-19):
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Sync endpoint | ✅ | `POST /api/v1/cart/sync` |
+| Merge logic | ✅ | `CartController::sync()` (transactional, idempotent) |
+| Frontend integration | ✅ | `AuthContext.tsx` triggers sync on login |
+| localStorage replacement | ✅ | Server cart becomes source of truth |
+| Backend tests | ✅ | 8 tests in `CartTest.php` |
+| E2E tests | ✅ | 3 acceptance tests in `cart-sync.spec.ts` |
+
+**Merge Strategy**:
+- If same product exists on server and in payload: `qty = server.qty + payload.qty`
+- If not exists: create with `payload.qty`
+- Invalid/zero/negative qty: skip
+- Inactive products: skip
+- Exceeds stock: clamp to stock limit
+
+---
 
 ### ~~GAP-02: Email Notifications for Events~~ ✅ COMPLETE
 
@@ -181,13 +190,9 @@ curl -sf "https://dixis.gr/api/healthz" | jq '.email'
 
 ---
 
-## Priority Ranking for Remaining Gap
+## Priority Ranking for Remaining Gaps
 
-| Priority | Gap | Impact | Effort | Next Pass |
-|----------|-----|--------|--------|-----------|
-| 1 | Cart Backend Sync | LOW | MEDIUM | CART-SYNC-01 |
-
-**Recommended Next**: `CART-SYNC-01` (only remaining gap, but LOW priority for MVP)
+🟢 **No remaining gaps. MVP is 100% complete.**
 
 ---
 
@@ -205,19 +210,15 @@ curl -sf "https://dixis.gr/api/healthz" | jq '.email'
 | i18n (Greek/English) | ✅ Ready | Full translation |
 | E2E test coverage | ✅ Ready | CI/CD gates in place |
 | Order confirmation email | ✅ Ready | Pass 53, production enabled |
-| Cart sync | ⚠️ Nice-to-have | CART-SYNC-01 (optional for V1) |
+| Cart sync | ✅ Ready | Pass CART-SYNC-01, multi-device cart support |
 
-**V1 Launch Status**: 🟢 **READY**
+**V1 Launch Status**: 🟢 **READY — 100% MVP COMPLETE**
 
 ---
 
 ## Pass Count to Full MVP
 
-| Pass | Description | Effort | Priority |
-|------|-------------|--------|----------|
-| CART-SYNC-01 | Backend cart sync for logged-in users | 2-3 days | LOW |
-
-**Total**: 1 pass, ~2-3 days to 100% MVP
+🟢 **MVP is 100% complete. No remaining passes required.**
 
 ---
 
@@ -229,8 +230,9 @@ curl -sf "https://dixis.gr/api/healthz" | jq '.email'
 | PERF-PRODUCTS-CACHE-01 | Added 60s ISR caching | 2026-01-19 |
 | SMOKE-FLAKE-01 | Increased CI resilience | 2026-01-19 |
 | EMAIL-EVENTS-01 | Verified order emails working | 2026-01-19 |
+| CART-SYNC-01 | Backend cart sync on login | 2026-01-19 |
 
 ---
 
-_Pass: MVP-CHECKLIST-01 (updated EMAIL-EVENTS-01) | Author: Claude_
-_Lines: ~230 | Last Updated: 2026-01-19_
+_Pass: MVP-CHECKLIST-01 (updated CART-SYNC-01) | Author: Claude_
+_Lines: ~240 | Last Updated: 2026-01-19_
