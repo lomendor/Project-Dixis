@@ -29,6 +29,16 @@ class StripePaymentProvider implements PaymentProviderInterface
         try {
             $customerData = $options['customer'] ?? [];
 
+            // Fallback to order's shipping email or user email if not provided
+            if (empty($customerData['email'])) {
+                $customerData['email'] = $order->shipping_address['email']
+                    ?? $order->user?->email
+                    ?? null;
+            }
+            if (empty($customerData['firstName']) && empty($customerData['lastName'])) {
+                $customerData['firstName'] = $order->shipping_address['name'] ?? $order->user?->name ?? '';
+            }
+
             // Create or retrieve Stripe customer
             $customer = null;
             if (! empty($customerData['email'])) {
