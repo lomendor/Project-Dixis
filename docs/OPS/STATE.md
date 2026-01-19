@@ -1,9 +1,49 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass SEC-AUTH-RL-02)
+**Last Updated**: 2026-01-19 (Pass OPS-EMAIL-PROOF-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~350 lines (target ≤250).
+> **Current size**: ~380 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass OPS-EMAIL-PROOF-01: Email Delivery Verification Runbook
+
+**Status**: ✅ DONE
+
+Created ops runbook and deterministic proof script to unblock EMAIL-PROOF-01 verification.
+
+### Artifacts Created
+
+| Artifact | Purpose |
+|----------|---------|
+| `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md` | Step-by-step ops checklist for setting RESEND_KEY |
+| `scripts/email-proof.sh` | Deterministic proof script with dry-run + send modes |
+
+### Required Env Vars Documented
+
+| Variable | Location | Purpose |
+|----------|----------|---------|
+| `RESEND_KEY` | `config/services.php:28` | Resend API key |
+| `MAIL_MAILER` | `config/mail.php:17` | Set to `resend` |
+| `EMAIL_NOTIFICATIONS_ENABLED` | `config/notifications.php` | Feature flag |
+| `MAIL_FROM_ADDRESS` | `config/mail.php:112` | Sender email |
+
+### Script Usage
+
+```bash
+# Validate config only (dry-run)
+./scripts/email-proof.sh
+
+# Send actual test email
+./scripts/email-proof.sh --send --to=your@email.com
+```
+
+### Next Steps
+
+1. Configure SSH access to production VPS
+2. Run `./scripts/email-proof.sh --send --to=<email>` to complete EMAIL-PROOF-01
+3. Document successful delivery in proof file
 
 ---
 

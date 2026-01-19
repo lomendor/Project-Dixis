@@ -44,6 +44,14 @@
   - PRD cross-reference: 5/5 requirements mapped
   - Gap: Users page shows AdminUser only (nice-to-have for post-V1)
 
+### Ops Runbooks
+
+- ✅ **OPS-EMAIL-PROOF-01**: Email delivery verification runbook + proof script
+  - Created `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md` (ops checklist)
+  - Created `scripts/email-proof.sh` (deterministic proof script)
+  - Documents required env vars: `RESEND_KEY`, `MAIL_MAILER`, `EMAIL_NOTIFICATIONS_ENABLED`
+  - Unblocks EMAIL-PROOF-01 verification once SSH access available
+
 ## Upcoming Work
 
 ### MVP Gaps (0 remaining)
@@ -104,8 +112,10 @@ Pre-launch verification before announcing V1:
 
 - [~] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end
   - ✅ Resend configured in production (`/api/health` shows `configured: true`)
-  - ⚠️ E2E delivery test blocked: RESEND_API_KEY not available locally
-  - Action: Provide API key or SSH access for full verification
+  - ✅ Runbook created: `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md`
+  - ✅ Proof script created: `scripts/email-proof.sh`
+  - ⚠️ Final verification blocked: SSH access required
+  - Action: Run `./scripts/email-proof.sh --send --to=your@email.com` once SSH configured
 
 - [x] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
   - ✅ **FIXED** by Pass SEC-AUTH-RL-02
@@ -131,4 +141,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass ADMIN-IA-01 (2026-01-19)_
+_Last updated by Pass OPS-EMAIL-PROOF-01 (2026-01-19)_
