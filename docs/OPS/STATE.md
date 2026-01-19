@@ -1,9 +1,45 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass SMOKE-FLAKE-01)
+**Last Updated**: 2026-01-19 (Pass EMAIL-EVENTS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~300 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass EMAIL-EVENTS-01: Order Email Verification
+
+**Status**: ✅ DONE (Verification Only)
+
+Verified that order email notifications are already fully implemented via **Pass 53**.
+
+### Findings
+
+The MVP-CHECKLIST-01 incorrectly identified email notifications as a gap. Audit revealed:
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Consumer order email | ✅ | `app/Mail/ConsumerOrderPlaced.php` |
+| Producer order email | ✅ | `app/Mail/ProducerNewOrder.php` |
+| Status change emails | ✅ | `OrderShipped.php`, `OrderDelivered.php` |
+| Service layer | ✅ | `app/Services/OrderEmailService.php` |
+| Controller wiring | ✅ | `OrderController::store()` line 196 |
+| Greek templates | ✅ | `resources/views/emails/orders/*.blade.php` |
+| Feature flag | ✅ | `EMAIL_NOTIFICATIONS_ENABLED=true` (production) |
+| Unit tests | ✅ | 8 tests in `OrderEmailNotificationTest.php` |
+
+### Production Evidence
+
+```bash
+curl -sf "https://dixis.gr/api/healthz" | jq '.email'
+# {"flag":"enabled","mailer":"resend","configured":true,"from_configured":true,...}
+```
+
+### Updated MVP Status
+
+- Gaps reduced: 2 → 1
+- MVP completion: 97.5% (39/40 requirements)
+- Only remaining gap: CART-SYNC-01 (LOW priority)
 
 ---
 
