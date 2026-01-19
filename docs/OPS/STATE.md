@@ -1,9 +1,36 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass PROD-HEALTH-01)
+**Last Updated**: 2026-01-19 (Pass V1-VERIFY-TRIO-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass V1-VERIFY-TRIO-01: V1 Verification Trio
+
+**Status**: ⚠️ PARTIAL (2 blocked, 1 fail)
+
+Attempted three V1 verification tasks.
+
+### Results
+
+| Task | Status | Notes |
+|------|--------|-------|
+| EMAIL-PROOF-01 | BLOCKED | Resend configured, API key not available |
+| SECURITY-AUTH-RL-01 | **FAIL** | Login/register NOT rate limited |
+| LOG-REVIEW-24H-01 | BLOCKED | SSH access required |
+
+### Security Finding (P2)
+
+`/api/v1/auth/login` and `/api/v1/auth/register` endpoints have **no rate limiting**.
+
+- 30 rapid login attempts: all returned 401, no 429
+- Recommendation: Add `throttle:10,1` middleware
+
+### Evidence
+
+- Proof: `docs/AGENT/SUMMARY/Pass-V1-VERIFY-TRIO-01.md`
 
 ---
 

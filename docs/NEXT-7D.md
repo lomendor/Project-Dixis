@@ -76,7 +76,7 @@ Pre-launch verification before announcing V1:
 
 - [x] HTTPS enforced on all endpoints
 - [x] CSP headers present (check Stripe works) - Stripe working (PR #2327)
-- [?] Auth endpoints rate-limited - Not tested
+- [!] Auth endpoints rate-limited - **NOT rate limited** (P2 security gap)
 
 ### Rollback Plan
 
@@ -92,22 +92,23 @@ Pre-launch verification before announcing V1:
 
 ---
 
-### Remaining V1 Verification Tasks
+### Remaining V1 Verification Tasks (V1-VERIFY-TRIO-01)
 
-- [ ] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end
-  - Test password reset email delivery
-  - Test order confirmation email delivery
-  - Confirm emails arrive in inbox (not spam)
+- [~] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end
+  - ✅ Resend configured in production (`/api/health` shows `configured: true`)
+  - ⚠️ E2E delivery test blocked: RESEND_API_KEY not available locally
+  - Action: Provide API key or SSH access for full verification
 
-- [ ] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
-  - Verify `/api/v1/auth/login` rate limited
-  - Verify `/api/v1/auth/register` rate limited
-  - Document limits in security checklist
+- [!] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
+  - ❌ `/api/v1/auth/login` is **NOT rate limited** (30 requests, no 429)
+  - ❌ `/api/v1/auth/register` is **NOT rate limited** (10 requests, no 429)
+  - **P2 Security Gap**: Add `throttle` middleware to auth endpoints
+  - Evidence: `docs/AGENT/SUMMARY/Pass-V1-VERIFY-TRIO-01.md`
 
-- [ ] **LOG-REVIEW-24H-01**: Production logs scan
-  - Check Laravel logs for 500 errors (last 24h)
-  - Document any recurring issues
-  - Confirm no critical errors
+- [~] **LOG-REVIEW-24H-01**: Production logs scan
+  - ⚠️ Blocked: SSH access denied (publickey auth required)
+  - ✅ `/api/health` shows all systems operational
+  - Action: Provide SSH access for log review
 
 ---
 
@@ -122,4 +123,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass PROD-HEALTH-01 (2026-01-19)_
+_Last updated by Pass V1-VERIFY-TRIO-01 (2026-01-19)_
