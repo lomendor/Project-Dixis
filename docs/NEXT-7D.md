@@ -82,11 +82,13 @@ Pre-launch verification before announcing V1:
 
 ### Performance (Backlog)
 
-- **PERF-COLD-START-01** (P3): Warm OPcache on deploy to eliminate ~700ms cold start penalty
-  - Files: Deploy script / cron job
+- ✅ **PERF-COLD-START-01** (P3): Investigated ~700ms cold start — **RESOLVED**
+  - Baseline: All endpoints < 300ms TTFB
+  - No fix needed; issue was resolved by prior passes (IPV4, caching)
+  - Artifact: `scripts/perf-baseline.sh`
 
 - **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
 
 ---
 
-_Last updated by Launch QA Checklist addition (2026-01-19)_
+_Last updated by Pass PERF-COLD-START-01 (2026-01-19)_
