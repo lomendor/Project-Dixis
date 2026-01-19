@@ -1,9 +1,84 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass PERF-COLD-START-01)
+**Last Updated**: 2026-01-19 (Pass PROD-HEALTH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass PROD-HEALTH-01: Production Health Proof
+
+**Status**: ✅ DONE
+
+Production health verification and V1 readiness snapshot.
+
+### Evidence
+
+- PR #2329 (docs: production health proof) — **merged**
+- Proof: `docs/AGENT/SUMMARY/Proof-2026-01-19-prod-health.md`
+
+### Results
+
+| Endpoint | Status | TTFB (median) |
+|----------|--------|---------------|
+| Backend Health | ✅ 200 | - |
+| Products API | ✅ 200 | ~244ms |
+| Products Page | ✅ 200 | ~179ms |
+| Homepage | ✅ 200 | ~179ms |
+
+### V1 Status
+
+- Card checkout P1 blocker: **FIXED** (PR #2327)
+- All core flows verified
+- Production healthy
+
+---
+
+## 2026-01-19 — Pass STRIPE-PAYMENT-INIT-01: Card Checkout Fix
+
+**Status**: ✅ DONE
+
+Fixed P1 blocker where card checkout failed with "Failed to initialize payment".
+
+### Root Cause
+
+Stripe customer creation requires email, but code didn't fallback to order data when customer email not provided in request.
+
+### Fix
+
+Added fallback chain: `options.customer.email` → `order.shipping_address.email` → `order.user.email`
+
+### PRs
+
+- #2327 (fix: fallback to order email for Stripe payment init) — **merged**
+- #2328 (docs: Pass STRIPE-PAYMENT-INIT-01 state update) — **merged**
+
+### Evidence
+
+- Before: Order #89 payment init failed (HTTP 400)
+- After: Order #91 payment init succeeded (HTTP 200)
+
+---
+
+## 2026-01-19 — Pass V1-QA-EXECUTE-01: Manual E2E QA on Production
+
+**Status**: ✅ DONE (with P1 fix)
+
+Executed 4 core flows on production.
+
+### Results
+
+| Flow | Status |
+|------|--------|
+| Guest Checkout (COD) | ✅ Order #86 |
+| Consumer Checkout (Card) | ✅ Order #91 (after fix) |
+| Producer Add Product | ✅ Product #7 |
+| Admin Order Management | ✅ Order #86 updated |
+
+### PRs
+
+- Proof: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01.md`
 
 ---
 
