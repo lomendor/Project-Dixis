@@ -76,7 +76,7 @@ Pre-launch verification before announcing V1:
 
 - [x] HTTPS enforced on all endpoints
 - [x] CSP headers present (check Stripe works) - Stripe working (PR #2327)
-- [!] Auth endpoints rate-limited - **NOT rate limited** (P2 security gap)
+- [x] Auth endpoints rate-limited - **FIXED** (Pass SEC-AUTH-RL-02)
 
 ### Rollback Plan
 
@@ -99,11 +99,11 @@ Pre-launch verification before announcing V1:
   - ⚠️ E2E delivery test blocked: RESEND_API_KEY not available locally
   - Action: Provide API key or SSH access for full verification
 
-- [!] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
-  - ❌ `/api/v1/auth/login` is **NOT rate limited** (30 requests, no 429)
-  - ❌ `/api/v1/auth/register` is **NOT rate limited** (10 requests, no 429)
-  - **P2 Security Gap**: Add `throttle` middleware to auth endpoints
-  - Evidence: `docs/AGENT/SUMMARY/Pass-V1-VERIFY-TRIO-01.md`
+- [x] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
+  - ✅ **FIXED** by Pass SEC-AUTH-RL-02
+  - `/api/v1/auth/login`: 10 req/min per IP+email
+  - `/api/v1/auth/register`: 5 req/min per IP
+  - Evidence: `docs/AGENT/SUMMARY/Pass-SEC-AUTH-RL-02.md`
 
 - [~] **LOG-REVIEW-24H-01**: Production logs scan
   - ⚠️ Blocked: SSH access denied (publickey auth required)
@@ -123,4 +123,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass V1-VERIFY-TRIO-01 (2026-01-19)_
+_Last updated by Pass SEC-AUTH-RL-02 (2026-01-19)_

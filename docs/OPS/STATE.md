@@ -1,9 +1,40 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass V1-VERIFY-TRIO-01)
+**Last Updated**: 2026-01-19 (Pass SEC-AUTH-RL-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤250).
+
+---
+
+## 2026-01-19 — Pass SEC-AUTH-RL-02: Auth Rate Limiting Fix
+
+**Status**: ✅ DONE
+
+Fixed P2 security gap: Added rate limiting to login/register endpoints.
+
+### Changes
+
+| File | Changes |
+|------|---------|
+| `backend/app/Providers/AppServiceProvider.php` | +28 lines (rate limiter config) |
+| `backend/routes/api.php` | +4 lines (throttle middleware) |
+| `backend/tests/Feature/AuthRateLimitTest.php` | +120 lines (new tests) |
+
+### Limits Applied
+
+- `/api/v1/auth/login`: 10 req/min per IP+email
+- `/api/v1/auth/register`: 5 req/min per IP
+
+### Tests
+
+```
+PASS AuthRateLimitTest (4/4 tests, 21 assertions)
+```
+
+### Evidence
+
+- Proof: `docs/AGENT/SUMMARY/Pass-SEC-AUTH-RL-02.md`
 
 ---
 
@@ -18,15 +49,14 @@ Attempted three V1 verification tasks.
 | Task | Status | Notes |
 |------|--------|-------|
 | EMAIL-PROOF-01 | BLOCKED | Resend configured, API key not available |
-| SECURITY-AUTH-RL-01 | **FAIL** | Login/register NOT rate limited |
+| SECURITY-AUTH-RL-01 | ~~FAIL~~ **FIXED** | See Pass SEC-AUTH-RL-02 above |
 | LOG-REVIEW-24H-01 | BLOCKED | SSH access required |
 
-### Security Finding (P2)
+### Security Finding (P2) — RESOLVED
 
-`/api/v1/auth/login` and `/api/v1/auth/register` endpoints have **no rate limiting**.
+~~`/api/v1/auth/login` and `/api/v1/auth/register` endpoints have **no rate limiting**.~~
 
-- 30 rapid login attempts: all returned 401, no 429
-- Recommendation: Add `throttle:10,1` middleware
+**FIXED** by Pass SEC-AUTH-RL-02: Login (10/min), Register (5/min)
 
 ### Evidence
 
