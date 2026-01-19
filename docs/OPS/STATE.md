@@ -1,9 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-19 (Pass PERF-PRODUCTS-CACHE-01)
+**Last Updated**: 2026-01-19 (Pass SMOKE-FLAKE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~300 lines (target ≤250).
+
+---
+
+## CI Reliability Notes
+
+### Smoke Test Flakiness (auth-probe.spec.ts)
+
+**Issue**: GitHub Actions runners occasionally fail to reach `https://dixis.gr/api/healthz` within timeout, causing `smoke` workflow to fail even when production is healthy.
+
+**Root Cause**: Network variability between GitHub Actions runners and production VPS (Hostinger Frankfurt). Production responds in ~250ms from local, but CI can experience 15s+ timeouts.
+
+**Mitigation** (Pass SMOKE-FLAKE-01):
+- Increased readiness check attempts: 6 → 8 (~90s total)
+- Increased per-request timeout: 15s → 20s
+- `auth-probe.spec.ts` already has `retries: 2`
+
+**Verification**: If `smoke` fails but other checks pass, manually verify production health before merging.
+
+---
 
 ## 2026-01-19 — Pass PERF-PRODUCTS-CACHE-01: Products Page Caching
 

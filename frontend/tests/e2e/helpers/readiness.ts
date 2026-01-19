@@ -8,10 +8,10 @@ import { request } from '@playwright/test';
 
 interface ReadinessOptions {
   baseUrl: string;
-  maxAttempts?: number;      // Default: 6 (~60s total with backoff)
+  maxAttempts?: number;      // Default: 8 (~90s total with backoff)
   initialDelayMs?: number;   // Default: 2000
   maxDelayMs?: number;       // Default: 15000
-  timeoutMs?: number;        // Per-request timeout. Default: 10000
+  timeoutMs?: number;        // Per-request timeout. Default: 15000
 }
 
 interface ReadinessResult {
@@ -23,15 +23,17 @@ interface ReadinessResult {
 
 /**
  * Wait for production to be ready by polling /api/healthz
- * Uses exponential backoff: 2s, 4s, 8s, 15s, 15s, 15s (max ~60s total)
+ * Uses exponential backoff: 2s, 4s, 8s, 15s, 15s, 15s, 15s, 15s (max ~90s total)
+ *
+ * Pass SMOKE-FLAKE-01: Increased defaults to handle GitHub Actions network variability
  */
 export async function waitForReadiness(options: ReadinessOptions): Promise<ReadinessResult> {
   const {
     baseUrl,
-    maxAttempts = 6,
+    maxAttempts = 8,
     initialDelayMs = 2000,
     maxDelayMs = 15000,
-    timeoutMs = 10000,
+    timeoutMs = 15000,
   } = options;
 
   const healthzUrl = `${baseUrl}/api/healthz`;

@@ -19,13 +19,14 @@ test.setTimeout(90_000);
 test.describe.configure({ retries: 2 });
 
 // Wait for production to be ready before running any tests
+// Pass SMOKE-FLAKE-01: Increased attempts for GitHub Actions network variability
 test.beforeAll(async () => {
   const result = await waitForReadiness({
     baseUrl: BASE,
-    maxAttempts: 6,      // ~60s total with backoff
+    maxAttempts: 8,      // ~90s total with backoff (was 6)
     initialDelayMs: 2000,
     maxDelayMs: 15000,
-    timeoutMs: 15000,    // Per-request timeout
+    timeoutMs: 20000,    // Per-request timeout (increased from 15s)
   });
 
   if (!result.ready) {
