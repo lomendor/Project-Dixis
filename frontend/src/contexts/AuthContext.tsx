@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, apiClient } from '@/lib/api';
 import { useToast } from './ToastContext';
+import { useCart, CartItem as LocalCartItem } from '@/lib/cart';
 
 interface AuthContextType {
   user: User | null;
@@ -27,6 +28,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
+ * Convert server cart items to local cart format
+ * Pass CART-SYNC-01: Used after sync to update localStorage
+ */
+function serverToLocalCart(serverItems: { id: number; quantity: number; product: { id: number; name: string; price: string; producer?: { id: number; name: string } }; }[]): LocalCartItem[] {
+  return serverItems.map(item => ({
+    id: String(item.product.id),
+    title: item.product.name,
+    priceCents: Math.round(parseFloat(item.product.price) * 100),
+    qty: item.quantity,
+    producerId: item.product.producer?.id ? String(item.product.producer.id) : undefined,
+    producerName: item.product.producer?.name,
+  }));
+}
+
+/**
  * Check if we have a token in localStorage (client-side only)
  * Used for initial hydration to prevent flash to guest state
  */
@@ -47,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [hasTokenOnMount] = useState(initialState.hasToken);
   const [registerLoading, setRegisterLoading] = useState(false);
   const { showToast } = useToast();
+  const { getItemsForSync, replaceWithServerCart } = useCart();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -97,6 +114,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔑 AuthContext: API login response:', response);
       console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
+
+      // Pass CART-SYNC-01: Sync localStorage cart with server after login
+      try {
+        const localItems = getItemsForSync();
+        if (localItems.length > 0) {
+          console.log('🛒 CartSync: Syncing', localItems.length, 'local items to server...');
+          const serverCart = await apiClient.syncCart(localItems);
+          // Replace localStorage with authoritative server cart
+          const localFormat = serverToLocalCart(serverCart.items);
+          replaceWithServerCart(localFormat);
+          console.log('🛒 CartSync: Sync complete, server cart has', serverCart.total_items, 'items');
+        } else {
+          // No local items, fetch server cart to populate localStorage
+          console.log('🛒 CartSync: No local items, fetching server cart...');
+          const serverCart = await apiClient.getCart();
+          if (serverCart.items.length > 0) {
+            const localFormat = serverToLocalCart(serverCart.items);
+            replaceWithServerCart(localFormat);
+            console.log('🛒 CartSync: Loaded', serverCart.total_items, 'items from server');
+          }
+        }
+      } catch (syncError) {
+        // Non-blocking: log error but don't fail login
+        console.error('🛒 CartSync: Failed to sync cart (non-blocking):', syncError);
+      }
+
       showToast('success', `Καλώς ήρθατε πίσω, ${response.user.name}!`);
       console.log('🔑 AuthContext: Login completed successfully');
     } catch (error: any) {

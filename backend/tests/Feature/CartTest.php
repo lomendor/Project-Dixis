@@ -390,4 +390,187 @@ class CartTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['quantity']);
     }
+
+    // Pass CART-SYNC-01: Tests for cart sync endpoint
+
+    public function test_sync_creates_new_cart_items(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Create a second product with sufficient stock
+        $product2 = Product::factory()->create([
+            'producer_id' => $this->producer->id,
+            'price' => 5.25,
+            'stock' => 100,
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 2],
+                ['product_id' => $product2->id, 'quantity' => 3],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'cart_items',
+                'total_items',
+                'total_amount',
+            ])
+            ->assertJson([
+                'total_items' => 5, // 2 + 3
+            ]);
+
+        $this->assertDatabaseHas('cart_items', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'quantity' => 2,
+        ]);
+        $this->assertDatabaseHas('cart_items', [
+            'user_id' => $this->user->id,
+            'product_id' => $product2->id,
+            'quantity' => 3,
+        ]);
+    }
+
+    public function test_sync_merges_quantities_for_existing_items(): void
+    {
+        // Pre-populate server cart
+        CartItem::create([
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'quantity' => 2,
+        ]);
+
+        Sanctum::actingAs($this->user);
+
+        // Sync with additional quantity for same product
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 3],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_items' => 5, // 2 (server) + 3 (sync) = 5
+            ]);
+
+        $this->assertDatabaseHas('cart_items', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'quantity' => 5, // Merged
+        ]);
+    }
+
+    public function test_sync_skips_invalid_products(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Include a non-existent product ID
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 1],
+                ['product_id' => 99999, 'quantity' => 5], // Invalid product
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_items' => 1, // Only valid product
+            ]);
+    }
+
+    public function test_sync_skips_inactive_products(): void
+    {
+        $inactiveProduct = Product::factory()->create([
+            'producer_id' => $this->producer->id,
+            'is_active' => false,
+        ]);
+
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 1],
+                ['product_id' => $inactiveProduct->id, 'quantity' => 2],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_items' => 1, // Only active product
+            ]);
+    }
+
+    public function test_sync_clamps_quantity_to_stock(): void
+    {
+        $this->product->update(['stock' => 5]);
+
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 10], // Exceeds stock
+            ],
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('cart_items', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+            'quantity' => 5, // Clamped to stock
+        ]);
+    }
+
+    public function test_sync_skips_zero_and_negative_quantities(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 0],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'total_items' => 0,
+            ]);
+
+        $this->assertDatabaseMissing('cart_items', [
+            'user_id' => $this->user->id,
+            'product_id' => $this->product->id,
+        ]);
+    }
+
+    public function test_sync_requires_authentication(): void
+    {
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => [
+                ['product_id' => $this->product->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    public function test_sync_validates_request_format(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Empty items
+        $response = $this->postJson('/api/v1/cart/sync', []);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['items']);
+
+        // Invalid items format
+        $response = $this->postJson('/api/v1/cart/sync', [
+            'items' => 'not-an-array',
+        ]);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['items']);
+    }
 }
