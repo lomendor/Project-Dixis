@@ -7,8 +7,9 @@
 
 ## Next Pass Recommendation
 
-- **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
-  - Analytics and feedback loop ready; focus shifts to scaling infrastructure if needed.
+- **ADMIN-500-INVESTIGATE-01**: Fix `/admin` HTTP 500 error (P2 bug)
+  - Found during PERF-SWEEP-PAGES-01: `/admin` returns HTTP 500 instead of redirect or dashboard
+  - All other pages are fast (< 300ms TTFB) — no performance issues found
 
 ---
 
@@ -63,9 +64,14 @@
   - Cookie-less, GDPR-compliant
 
 - ✅ **USER-FEEDBACK-LOOP-01**: Simple feedback loop for early users
-  - PR #TBD pending
+  - PR #2351 merged, commit `8d073fe2`
   - Added "Επικοινωνία / Σχόλια" link to footer
   - Links to existing /contact page (no new backend)
+
+- ✅ **PERF-SWEEP-PAGES-01**: Performance sweep across public pages
+  - All pages fast (< 300ms TTFB) — no performance issues
+  - Bug found: `/admin` returns HTTP 500 (separate investigation)
+  - Evidence: `docs/AGENT/SUMMARY/Pass-PERF-SWEEP-PAGES-01.md`
 
 ### Admin Dashboard Audit
 
