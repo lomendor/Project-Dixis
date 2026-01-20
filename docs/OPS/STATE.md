@@ -1,9 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass EMAIL-UTF8-01)
+**Last Updated**: 2026-01-21 (Pass PROD-EMAIL-UTF8-PROOF-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass PROD-EMAIL-UTF8-PROOF-01: Production Email UTF-8 Verification
+
+**Status**: ⏳ AWAITING HUMAN VERIFICATION
+
+Production verification of Greek email encoding after EMAIL-UTF8-01 fix.
+
+### Action Taken
+
+- Triggered password reset email via `POST https://dixis.gr/api/v1/auth/password/forgot`
+- Target: `kourkoutisp@gmail.com`
+- Timestamp: 2026-01-21 00:00 UTC
+
+### Expected Email
+
+| Element | Greek Text |
+|---------|------------|
+| Subject | Επαναφορά Κωδικού - Dixis |
+| Body | Γεια σας, Λάβαμε αίτημα... |
+
+### Verification Required (Human)
+
+1. Check inbox for email from `no-reply@dixis.gr`
+2. Verify Greek text displays correctly (no mojibake)
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
 
 ---
 
@@ -47,7 +77,7 @@ Created `MailEncodingServiceProvider` that hooks into Laravel's `MessageSending`
 
 ### PRs
 
-- #TBD (feat: Pass EMAIL-UTF8-01) — pending
+- #2357 (feat: Pass EMAIL-UTF8-01) — merged, commit `b52072d4`
 
 ### Artifacts
 

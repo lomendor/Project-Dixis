@@ -80,6 +80,17 @@
   - Bug found: `/admin` returns HTTP 500 (separate investigation)
   - Evidence: `docs/AGENT/SUMMARY/Pass-PERF-SWEEP-PAGES-01.md`
 
+- ✅ **EMAIL-UTF8-01**: Fix Greek email encoding (mojibake)
+  - PR #2357 merged, commit `b52072d4`
+  - Fix: MailEncodingServiceProvider enforces UTF-8 charset on MIME headers
+  - Tests: 3 tests, 15 assertions (Greek characters preserved)
+  - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
+
+- ⏳ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
+  - Password reset triggered to `kourkoutisp@gmail.com`
+  - Awaiting human verification of received email
+  - Evidence: `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
+
 ### Admin Dashboard Audit
 
 - ✅ **ADMIN-IA-01** (docs-only): Admin Dashboard V1 Information Architecture
