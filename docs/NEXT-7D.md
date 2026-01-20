@@ -108,22 +108,23 @@
 
 Pre-launch verification before announcing V1:
 
-### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-20)
+### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-20, re-verified 22:40 UTC)
 
 - [x] **Guest checkout**: Add product → Checkout as guest → COD → Confirm order email
-  - Order #86 created, COD payment, shipping to Athens
-  - **API Verified:** status: "processing", payment_method: "COD"
+  - Order #92 created (2026-01-20 22:29 UTC), COD payment, shipping to Athens
+  - **API Verified:** status: "pending" → "processing", payment_method: "COD"
 - [x] **User checkout**: Register → Login → Cart sync works → Card payment → Confirm
-  - ~~Order #87 created, but Stripe payment init FAILED (P1 blocker)~~
-  - **FIXED**: PR #2327 merged, Order #91 payment init success
-  - **API Verified:** payment_method: "stripe"
+  - Order #93 created, Stripe payment init SUCCESS
+  - Payment Intent: `pi_3SrnTgQ9Xukpkfmb1gJwl9l1` (€19.98)
+  - **API Verified:** payment_method: "CARD", client_secret obtained
 - [x] **Producer flow**: Login as producer → Add product → See it pending → Admin approves
-  - Product #7 created, auto-approved (status: available)
-  - **API Verified:** Product #7 status: "available"
+  - Product #8 created (Green Farm Co.), auto-approved (status: available)
+  - **API Verified:** Product #8 visible in `/api/v1/public/products`
 - [x] **Admin flow**: Login as admin → View orders → Update status → Email sent
-  - Order #86 updated to "processing" via admin API
-  - **API Verified:** Order #86 status changed to "processing"
-- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01.md`
+  - Order #92 updated to "processing" via admin API
+  - **API Verified:** Order #92 status changed to "processing"
+  - Email config: Resend enabled, `configured: true`
+- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-2.md`
 
 ### Production Health
 
@@ -193,4 +194,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass CI-FLAKE-FILTERS-SEARCH-02 (2026-01-20)_
+_Last updated by Pass V1-QA-EXECUTE-01 re-verification (2026-01-20 22:40 UTC)_
