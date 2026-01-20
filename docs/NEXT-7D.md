@@ -41,6 +41,11 @@
   - Fixed: `waitForURL()` timeout due to Next.js soft navigation
   - Fix: Use `waitForResponse()` + `expect.poll()` instead
 
+- ✅ **CI-FLAKE-FILTERS-SEARCH-02**: Further stabilization of filters-search E2E
+  - PR #2346 merged, commit `a82b2b83`
+  - Fixed: `fill()` not reliably triggering React onChange in CI
+  - Fix: Use `keyboard.type()` + multi-signal waits + soft assertions
+
 ### Admin Dashboard Audit
 
 - ✅ **ADMIN-IA-01** (docs-only): Admin Dashboard V1 Information Architecture
@@ -154,4 +159,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass CI-FLAKE-FILTERS-SEARCH-01 (2026-01-20)_
+_Last updated by Pass CI-FLAKE-FILTERS-SEARCH-02 (2026-01-20)_
