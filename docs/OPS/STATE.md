@@ -1,9 +1,41 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass ANALYTICS-BASIC-01)
+**Last Updated**: 2026-01-20 (Pass USER-FEEDBACK-LOOP-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~470 lines (target ≤250).
+> **Current size**: ~490 lines (target ≤250).
+
+---
+
+## 2026-01-20 — Pass USER-FEEDBACK-LOOP-01: Simple Feedback Loop
+
+**Status**: ✅ PASS
+
+Added feedback link to footer, exposing the existing `/contact` page to users.
+
+### Discovery
+
+Found existing robust contact system:
+- **Page**: `/contact` with Greek form, honeypot protection
+- **API**: `/api/contact` with rate limiting, Zod validation, email to info@dixis.gr
+
+### Fix Applied
+
+Added "Επικοινωνία / Σχόλια" link to footer pointing to existing `/contact` page.
+
+| File | Change |
+|------|--------|
+| `frontend/src/components/layout/Footer.tsx` | +5 lines (link + section rename) |
+
+### Evidence
+
+- Build: PASS
+- Link renders in footer: PASS
+- Points to /contact: PASS
+
+### PRs
+
+- #TBD (feat: Pass USER-FEEDBACK-LOOP-01) — pending
 
 ---
 

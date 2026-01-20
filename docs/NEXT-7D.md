@@ -7,8 +7,8 @@
 
 ## Next Pass Recommendation
 
-- **USER-FEEDBACK-LOOP-01**: Set up simple feedback mechanism (form/email) to collect early user input
-  - Analytics infrastructure ready (ANALYTICS-BASIC-01); next step is user feedback collection.
+- **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
+  - Analytics and feedback loop ready; focus shifts to scaling infrastructure if needed.
 
 ---
 
@@ -58,9 +58,14 @@
   - All services healthy, 0 errors on 2026-01-20
 
 - ✅ **ANALYTICS-BASIC-01**: Privacy-friendly analytics infrastructure
-  - PR #TBD pending
+  - PR #2350 merged, commit `8cc2b56b`
   - Plausible/Umami support with feature flags
   - Cookie-less, GDPR-compliant
+
+- ✅ **USER-FEEDBACK-LOOP-01**: Simple feedback loop for early users
+  - PR #TBD pending
+  - Added "Επικοινωνία / Σχόλια" link to footer
+  - Links to existing /contact page (no new backend)
 
 ### Admin Dashboard Audit
 
