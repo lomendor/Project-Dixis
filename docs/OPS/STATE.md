@@ -10,8 +10,8 @@
 ## V1 Launch
 
 - **Status**: APPROVED (all gates PASS)
-- **Release Tag**: v1.0.0 (pending)
-- **Rollback SHA**: (fill after merge)
+- **Release Tag**: v1.0.0
+- **Rollback SHA**: 52c53a96
 - **Release Notes**: `docs/RELEASES/v1.0.0.md`
 - **24h Runbook**: `docs/OPS/RUNBOOK-V1-LAUNCH-24H.md`
 
