@@ -1,9 +1,57 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass ADMIN-500-INVESTIGATE-01)
+**Last Updated**: 2026-01-21 (Pass EMAIL-UTF8-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass EMAIL-UTF8-01: Fix Greek Email Encoding
+
+**Status**: ✅ PASS
+
+Fixed Greek text mojibake in transactional emails by enforcing UTF-8 charset in MIME headers.
+
+### Root Cause
+
+- HTML templates had `<meta charset="UTF-8">` but MIME headers didn't specify charset
+- Some email clients defaulted to ISO-8859-1, causing Greek characters to display as mojibake
+
+### Fix Applied
+
+Created `MailEncodingServiceProvider` that hooks into Laravel's `MessageSending` event to:
+1. Set explicit UTF-8 charset on HTML/text body
+2. Add `X-Dixis-Charset: UTF-8` header for verification
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `backend/app/Providers/MailEncodingServiceProvider.php` | NEW (+45 lines) |
+| `backend/bootstrap/providers.php` | +1 line |
+| `backend/tests/Feature/MailEncodingTest.php` | NEW (+120 lines) |
+
+### Evidence
+
+| Test | Result |
+|------|--------|
+| reset password email has utf8 charset | PASS |
+| email templates use utf8 meta charset | PASS |
+| greek characters preserved in email body | PASS |
+
+### Risk
+
+- **Risk**: LOW — uses standard Laravel event system
+- **Rollback**: Remove provider from `bootstrap/providers.php`
+
+### PRs
+
+- #TBD (feat: Pass EMAIL-UTF8-01) — pending
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
 
 ---
 
