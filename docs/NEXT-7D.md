@@ -7,8 +7,8 @@
 
 ## Next Pass Recommendation
 
-- **POST-V1-MONITORING-01**: 24h post-launch health check (logs, errors, user feedback)
-  - V1 is live; no critical gaps remain. Focus shifts to monitoring and iteration.
+- **USER-FEEDBACK-LOOP-01**: Set up simple feedback mechanism (form/email) to collect early user input
+  - Analytics infrastructure ready (ANALYTICS-BASIC-01); next step is user feedback collection.
 
 ---
 
@@ -52,6 +52,15 @@
   - PR #2346 merged, commit `a82b2b83`
   - Fixed: `fill()` not reliably triggering React onChange in CI
   - Fix: Use `keyboard.type()` + multi-signal waits + soft assertions
+
+- ✅ **POST-V1-MONITORING-01**: 24h post-launch health check
+  - PR #2348 merged, commit `dea61070`
+  - All services healthy, 0 errors on 2026-01-20
+
+- ✅ **ANALYTICS-BASIC-01**: Privacy-friendly analytics infrastructure
+  - PR #TBD pending
+  - Plausible/Umami support with feature flags
+  - Cookie-less, GDPR-compliant
 
 ### Admin Dashboard Audit
 

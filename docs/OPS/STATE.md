@@ -1,9 +1,50 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass OPS-UPTIME-HOUSEKEEPING-01)
+**Last Updated**: 2026-01-20 (Pass ANALYTICS-BASIC-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~460 lines (target ≤250).
+> **Current size**: ~470 lines (target ≤250).
+
+---
+
+## 2026-01-20 — Pass ANALYTICS-BASIC-01: Privacy-Friendly Analytics
+
+**Status**: ✅ PASS
+
+Added privacy-friendly, cookie-less analytics support with Plausible/Umami behind feature flags.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `frontend/src/components/Analytics.tsx` | NEW (+65 lines) - Client component with conditional script |
+| `frontend/src/app/layout.tsx` | MODIFIED (+3 lines) - Import and render Analytics |
+| `frontend/.env.example` | MODIFIED (+11 lines) - Analytics env vars |
+
+### Features
+
+- **Providers**: Plausible (default) or Umami
+- **Privacy**: Cookie-less, GDPR-compliant, no consent banner required
+- **Feature flag**: Only loads when `NEXT_PUBLIC_ANALYTICS_PROVIDER` is set
+- **Zero overhead**: Returns `null` when disabled
+
+### Production Setup
+
+```bash
+# Add to VPS environment to enable
+NEXT_PUBLIC_ANALYTICS_PROVIDER=plausible
+NEXT_PUBLIC_ANALYTICS_DOMAIN=dixis.gr
+```
+
+### Evidence
+
+- Build: PASS
+- Analytics disabled by default: PASS
+- Documentation: PASS
+
+### PRs
+
+- #TBD (feat: Pass ANALYTICS-BASIC-01 privacy-friendly analytics) — pending
 
 ---
 
