@@ -32,10 +32,15 @@ test.describe('Filters and Search @smoke', () => {
     await page.waitForTimeout(500);
     await page.waitForLoadState('networkidle');
 
-    // Verify URL updated with search param
-    await expect(page).toHaveURL(/search=.*%CE%A0%CE%BF%CF%81%CF%84%CE%BF%CE%BA%CE%AC%CE%BB%CE%B9%CE%B1|search=Πορτοκάλια/i, { timeout: 5000 });
+    // Verify URL updated with search param (CI can be slower; accept encoded/decoded Greek)
+    await page.waitForURL(/\/products.*search=/i, { timeout: 15000 });
+    await expect.poll(
+      async () => page.url(),
+      { timeout: 15000, intervals: [250, 500, 1000] }
+    ).toMatch(/\/products.*search=(?:.*%CE%A0%CE%BF%CF%81%CF%84%CE%BF%CE%BA%CE%AC%CE%BB%CE%B9%CE%B1|Πορτοκάλια)/i);
 
-    // Check if results were filtered
+    // Check if results were filtered (at least one card present or no-results)
+    await expect(page.locator('[data-testid="product-card"]').first().or(page.getByTestId('no-results'))).toBeVisible({ timeout: 15000 });
     const filteredProductCount = await page.locator('[data-testid="product-card"]').count();
 
     if (filteredProductCount > 0) {
