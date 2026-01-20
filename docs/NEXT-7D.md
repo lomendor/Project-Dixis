@@ -36,6 +36,11 @@
   - PR #2319 merged
   - maxAttempts: 6 → 8, timeoutMs: 15s → 20s
 
+- ✅ **CI-FLAKE-FILTERS-SEARCH-01**: Stabilized filters-search E2E test
+  - PR #2344 merged, commit `d91bd969`
+  - Fixed: `waitForURL()` timeout due to Next.js soft navigation
+  - Fix: Use `waitForResponse()` + `expect.poll()` instead
+
 ### Admin Dashboard Audit
 
 - ✅ **ADMIN-IA-01** (docs-only): Admin Dashboard V1 Information Architecture
@@ -149,4 +154,4 @@ Pre-launch verification before announcing V1:
 
 ---
 
-_Last updated by Pass V1-QA-EXECUTE-01 (2026-01-20)_
+_Last updated by Pass CI-FLAKE-FILTERS-SEARCH-01 (2026-01-20)_
