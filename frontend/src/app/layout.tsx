@@ -11,6 +11,7 @@ import SkipLink from "@/components/SkipLink";
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import IOSGuard from './IOSGuard';
+import Analytics from '@/components/Analytics';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -121,6 +122,8 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <IOSGuard />
+        {/* Privacy-friendly analytics (only loads if NEXT_PUBLIC_ANALYTICS_PROVIDER is set) */}
+        <Analytics />
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
