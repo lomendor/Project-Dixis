@@ -1,9 +1,19 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass V1-QA-EXECUTE-01)
+**Last Updated**: 2026-01-20 (Pass V1-LAUNCH-OPS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~450 lines (target ≤250).
+> **Current size**: ~460 lines (target ≤250).
+
+---
+
+## V1 Launch
+
+- **Status**: APPROVED (all gates PASS)
+- **Release Tag**: v1.0.0 (pending)
+- **Rollback SHA**: (fill after merge)
+- **Release Notes**: `docs/RELEASES/v1.0.0.md`
+- **24h Runbook**: `docs/OPS/RUNBOOK-V1-LAUNCH-24H.md`
 
 ---
 
