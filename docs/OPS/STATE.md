@@ -1,9 +1,43 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass USER-FEEDBACK-LOOP-01)
+**Last Updated**: 2026-01-20 (Pass PERF-SWEEP-PAGES-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~490 lines (target ≤250).
+> **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-20 — Pass PERF-SWEEP-PAGES-01: Performance Sweep
+
+**Status**: ✅ PASS (Performance OK, Bug Found)
+
+Measured curl timings across key public pages and APIs on production.
+
+### Results
+
+| URL | HTTP | TTFB | Total | Status |
+|-----|------|------|-------|--------|
+| `/` | 200 | 186ms | 248ms | OK |
+| `/products` | 200 | 178ms | 248ms | OK |
+| `/cart` | 200 | 180ms | 192ms | OK |
+| `/login` | 307 | 181ms | 185ms | Redirect |
+| `/register` | 307 | 180ms | 187ms | Redirect |
+| `/admin` | **500** | 179ms | 203ms | **BUG** |
+| `/api/healthz` | 200 | 183ms | 183ms | OK |
+| `/api/v1/public/products` | 200 | 247ms | 247ms | OK |
+
+### Findings
+
+- **Performance**: ✅ ALL PAGES FAST (< 300ms TTFB)
+- **Bug**: `/admin` returns HTTP 500 (needs investigation)
+
+### Evidence
+
+- `docs/AGENT/SUMMARY/Pass-PERF-SWEEP-PAGES-01.md`
+
+### Next Pass
+
+- **ADMIN-500-INVESTIGATE-01**: Fix `/admin` HTTP 500 error
 
 ---
 
