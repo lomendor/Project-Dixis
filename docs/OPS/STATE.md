@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass CI-FLAKE-FILTERS-SEARCH-02)
+**Last Updated**: 2026-01-20 (Pass OPS-UPTIME-HOUSEKEEPING-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤250).
+
+---
+
+## Ops Incidents
+
+### 2026-01-20 — Pass OPS-UPTIME-HOUSEKEEPING-01: Stale Uptime Issues Cleanup
+
+**Status**: ✅ PARTIAL (rate-limited)
+
+Closed stale/transient uptime failure issues. Production verified healthy (HTTP 200, TTFB ~250ms).
+
+**Issues Closed**: ~300+ (from ~520 total)
+**Remaining**: ~220 (will auto-resolve or close in next pass)
+**Cause**: All were transient (Status 000000 = network timeout, 502 = brief backend restart, 404 = pre-deploy)
+**Action**: No incident — production healthy, issues are historical artifacts
+**Note**: Remaining ~220 uptime issues left open intentionally due to rate limits; not a prod incident.
+
+**Evidence**:
+- `docs/AGENT/SUMMARY/Proof-2026-01-20-prod-sanity.md`
+- Healthz: HTTP 200, TTFB 182ms
+- Products: HTTP 200, 6 products, 7361 bytes
+- Perf baseline: all endpoints TTFB < 300ms
 
 ---
 
