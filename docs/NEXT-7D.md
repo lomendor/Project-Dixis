@@ -7,13 +7,20 @@
 
 ## Next Pass Recommendation
 
-- **ADMIN-500-INVESTIGATE-01**: Fix `/admin` HTTP 500 error (P2 bug)
-  - Found during PERF-SWEEP-PAGES-01: `/admin` returns HTTP 500 instead of redirect or dashboard
-  - All other pages are fast (< 300ms TTFB) — no performance issues found
+- No immediate pass recommended — all known issues resolved.
+- Continue monitoring production health.
 
 ---
 
 ## Completed
+
+### Bug Fixes
+
+- ✅ **ADMIN-500-INVESTIGATE-01** (P2): Fix `/admin` HTTP 500 error
+  - PR #TBD merged
+  - Root cause: `requireAdmin()` throws error that bubbled up as 500
+  - Fix: Try-catch with redirect to `/auth/login?from=/admin`
+  - Evidence: `docs/AGENT/SUMMARY/Pass-ADMIN-500-INVESTIGATE-01.md`
 
 ### Performance Fixes (from PERF-PRODUCTS-AUDIT-01)
 
