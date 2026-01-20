@@ -1,9 +1,64 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass PERF-SWEEP-PAGES-01)
+**Last Updated**: 2026-01-20 (Pass ADMIN-500-INVESTIGATE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-20 — Pass ADMIN-500-INVESTIGATE-01: Fix /admin HTTP 500
+
+**Status**: ✅ PASS
+
+Fixed HTTP 500 error when unauthenticated users access `/admin`.
+
+### Root Cause
+
+1. `/admin/page.tsx` calls `requireAdmin()` which throws `AdminError` when not authenticated
+2. Next.js Server Components don't have try-catch — error bubbles up as HTTP 500
+3. The `error.tsx` boundary catches client errors but doesn't prevent the 500 status
+
+### Fix Applied
+
+Wrapped `requireAdmin()` in try-catch and redirect on `AdminError`:
+
+```tsx
+try {
+  await requireAdmin();
+} catch (e) {
+  if (e instanceof AdminError) {
+    redirect('/auth/login?from=/admin');
+  }
+  throw e;
+}
+```
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `frontend/src/app/admin/page.tsx` | +10 lines (try-catch + redirect) |
+
+### Evidence
+
+| Check | Before | After |
+|-------|--------|-------|
+| `curl https://dixis.gr/admin` | HTTP 500 | HTTP 307 → /auth/login |
+| Build | PASS | PASS |
+
+### Risk
+
+- **Risk**: LOW — single-file change, graceful degradation
+- **Rollback**: Revert the commit
+
+### PRs
+
+- #TBD (fix: Pass ADMIN-500-INVESTIGATE-01) — pending
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-ADMIN-500-INVESTIGATE-01.md`
 
 ---
 

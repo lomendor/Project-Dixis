@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db/client';
-import { requireAdmin } from '@/lib/auth/admin';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import Link from 'next/link';
 
 // Type definitions for dashboard data
@@ -27,7 +28,15 @@ const T7 = 1000*60*60*24*7;
 const T30 = 1000*60*60*24*30;
 
 export default async function Page(){
-  await requireAdmin?.();
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) {
+      // Redirect unauthenticated/unauthorized users to login
+      redirect('/auth/login?from=/admin');
+    }
+    throw e; // Re-throw unexpected errors
+  }
 
   const now = new Date();
   const from7 = new Date(now.getTime() - T7);
