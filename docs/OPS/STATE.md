@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-20 (Pass V1-LAUNCH-OPS-01)
+**Last Updated**: 2026-01-20 (Pass CI-FLAKE-FILTERS-SEARCH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤250).
@@ -14,6 +14,53 @@
 - **Rollback SHA**: 52c53a96
 - **Release Notes**: `docs/RELEASES/v1.0.0.md`
 - **24h Runbook**: `docs/OPS/RUNBOOK-V1-LAUNCH-24H.md`
+
+---
+
+## 2026-01-20 — Pass CI-FLAKE-FILTERS-SEARCH-01: E2E Test Stabilization
+
+**Status**: ✅ PASS
+
+Fixed flaky `filters-search.spec.ts` E2E test that was causing E2E (PostgreSQL) CI failures.
+
+### Root Cause
+
+`page.waitForURL()` expects navigation events, but Next.js `router.push()` with `startTransition` performs soft navigation that doesn't fire Playwright's navigation detection.
+
+### Fix Applied
+
+- Removed `waitForURL()` (expects events that never fire)
+- Added `waitForResponse()` for products API as deterministic signal
+- Used `expect.poll()` for URL assertion (works without nav events)
+- Increased timeouts from 15s → 30s for CI buffer
+
+### Evidence
+
+| Check | Result |
+|-------|--------|
+| E2E (PostgreSQL) | PASS (4m13s) |
+| build-and-test | PASS |
+| quality-gates | PASS |
+
+### Files Changed
+
+| File | Changes |
+|------|---------|
+| `frontend/tests/e2e/filters-search.spec.ts` | +31/-11 lines |
+
+### Risk
+
+- **Risk**: LOW (test-only change)
+- **Rollback**: Revert d91bd969
+
+### PRs
+
+- #2344 (test(e2e): stabilize filters-search flake) — **merged**
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-CI-FLAKE-FILTERS-SEARCH-01.md`
+- `docs/AGENT/TASKS/Pass-CI-FLAKE-FILTERS-SEARCH-01.md`
 
 ---
 
