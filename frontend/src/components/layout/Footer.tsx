@@ -44,10 +44,13 @@ export default function Footer() {
             </nav>
           </div>
 
-          {/* Legal - touch-friendly spacing */}
+          {/* Legal & Support - touch-friendly spacing */}
           <div>
-            <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Νομικά</h4>
+            <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Υποστήριξη</h4>
             <nav className="flex flex-col gap-1">
+              <Link href="/contact" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+                Επικοινωνία / Σχόλια
+              </Link>
               <Link href="/legal/terms" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Όροι Χρήσης
               </Link>
