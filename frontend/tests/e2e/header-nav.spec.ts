@@ -83,7 +83,9 @@ test.describe('Header Navigation - Logged-in Consumer @smoke', () => {
   test.beforeEach(async ({ page }) => {
     // Login as consumer
     await page.goto('/auth/login');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for login form to be ready
+    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
 
     await page.fill('[name="email"]', 'consumer@example.com');
     await page.fill('[name="password"]', 'password');
@@ -92,7 +94,7 @@ test.describe('Header Navigation - Logged-in Consumer @smoke', () => {
     // Wait for redirect or auth state change
     await page.waitForURL(/\//, { timeout: 15000 }).catch(() => {});
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('logo is visible after login', async ({ page }) => {
@@ -143,7 +145,9 @@ test.describe('Header Navigation - Producer Role @smoke', () => {
   test.beforeEach(async ({ page }) => {
     // Login as producer
     await page.goto('/auth/login');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for login form to be ready
+    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
 
     await page.fill('[name="email"]', 'producer@example.com');
     await page.fill('[name="password"]', 'password');
@@ -152,7 +156,7 @@ test.describe('Header Navigation - Producer Role @smoke', () => {
     // Wait for redirect
     await page.waitForURL(/\/|\/producer/, { timeout: 15000 }).catch(() => {});
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('producer dashboard link is visible', async ({ page }) => {
@@ -174,7 +178,9 @@ test.describe('Header Navigation - Admin Role @smoke', () => {
   test.beforeEach(async ({ page }) => {
     // Login as admin
     await page.goto('/auth/login');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for login form to be ready
+    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
 
     await page.fill('[name="email"]', 'admin@example.com');
     await page.fill('[name="password"]', 'password');
@@ -183,7 +189,7 @@ test.describe('Header Navigation - Admin Role @smoke', () => {
     // Wait for redirect
     await page.waitForURL(/\/|\/admin/, { timeout: 15000 }).catch(() => {});
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('admin link is visible', async ({ page }) => {
