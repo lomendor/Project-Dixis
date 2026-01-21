@@ -36,9 +36,9 @@ E2E test fix only. Header implementation was already correct.
 ## DoD
 
 - [x] E2E tests pass locally
-- [ ] PR created + CI green
-- [ ] Merged
+- [x] PR created + CI green
+- [x] Merged
 
 ## Result
 
-**PENDING** — Awaiting CI verification.
+**PASS** — PR #2370 merged (commit 84d566c1).
