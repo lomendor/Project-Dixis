@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-21 (V1-QA-EXECUTE-01 re-verification)
+**Updated**: 2026-01-21 (DOCS-LAUNCH-ANNOUNCE-01)
 
 ---
 
@@ -13,6 +13,14 @@
 ---
 
 ## Completed
+
+### Launch Materials
+
+- ✅ **DOCS-LAUNCH-ANNOUNCE-01** (docs-only): V1 Launch Announcement Materials
+  - Created `docs/LAUNCH/V1-ANNOUNCEMENT.md` (social, email, banner — EL + EN)
+  - Created `docs/LAUNCH/CHANGELOG-V1.md` (user-facing feature list)
+  - Updated `README.md` with production URL + feature summary
+  - Evidence: `docs/AGENT/SUMMARY/Pass-DOCS-LAUNCH-ANNOUNCE-01.md`
 
 ### Bug Fixes
 
