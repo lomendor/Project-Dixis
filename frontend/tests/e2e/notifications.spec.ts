@@ -10,8 +10,9 @@ test.describe('Notifications @smoke', () => {
     await page.goto('/products');
     await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
 
-    // Bell should be visible (auth state from storageState)
-    const bell = page.getByTestId('notification-bell');
+    // Bell is rendered twice (desktop + mobile header). Use .first() to target desktop bell.
+    // Both have same testid but only one is visible at a time based on viewport.
+    const bell = page.getByTestId('notification-bell').first();
 
     // Check if bell is visible - depends on auth state
     // If not authenticated, bell won't be visible (which is correct behavior)
@@ -34,7 +35,8 @@ test.describe('Notifications @smoke', () => {
     await page.goto('/products');
     await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
 
-    const bell = page.getByTestId('notification-bell');
+    // Bell is rendered twice (desktop + mobile header). Use .first() to target desktop bell.
+    const bell = page.getByTestId('notification-bell').first();
     const isVisible = await bell.isVisible();
 
     if (isVisible) {
