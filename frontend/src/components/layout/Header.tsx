@@ -16,9 +16,8 @@ export default function Header() {
 
   const navLinks = [
     { href: '/products', label: t('nav.products') },
-    { href: '/orders/lookup', label: t('checkout.orderId') },
+    { href: '/orders/lookup', label: t('nav.trackOrder') },
     { href: '/producers', label: t('producers.title') },
-    { href: '/legal/terms', label: t('errors.forbidden').split(' ')[0] || 'Terms' },
   ];
 
   const handleLogout = async () => {
@@ -37,7 +36,7 @@ export default function Header() {
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo - touch-friendly */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80" data-testid="nav-logo">
           <Logo height={28} title="Dixis" />
         </Link>
 

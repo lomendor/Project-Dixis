@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-21 (DOCS-LAUNCH-ANNOUNCE-01)
+**Updated**: 2026-01-21 (UI-NAV-HEADER-01)
 
 ---
 
@@ -13,6 +13,15 @@
 ---
 
 ## Completed
+
+### UI/UX Fixes
+
+- ✅ **UI-NAV-HEADER-01**: Header Navigation IA Fix
+  - Removed "Απαγορεύεται" from nav (was using error translation)
+  - Changed label "Αριθμός παραγγελίας" → "Παρακολούθηση παραγγελίας"
+  - Added E2E tests: `frontend/tests/e2e/header-nav.spec.ts`
+  - Created nav rules doc: `docs/PRODUCT/HEADER-NAV-V1.md`
+  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-NAV-HEADER-01.md`
 
 ### Launch Materials
 
