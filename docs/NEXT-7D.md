@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-21
+**Updated**: 2026-01-21 (V1-QA-EXECUTE-01 re-verification)
 
 ---
 
@@ -128,23 +128,23 @@
 
 Pre-launch verification before announcing V1:
 
-### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-20, re-verified 22:40 UTC)
+### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-21 10:44 UTC, re-verification 3)
 
 - [x] **Guest checkout**: Add product → Checkout as guest → COD → Confirm order email
-  - Order #92 created (2026-01-20 22:29 UTC), COD payment, shipping to Athens
+  - Order #94 created (2026-01-21 10:41 UTC), COD payment, shipping to Athens
   - **API Verified:** status: "pending" → "processing", payment_method: "COD"
 - [x] **User checkout**: Register → Login → Cart sync works → Card payment → Confirm
-  - Order #93 created, Stripe payment init SUCCESS
-  - Payment Intent: `pi_3SrnTgQ9Xukpkfmb1gJwl9l1` (€19.98)
+  - Order #96 created, Stripe payment init SUCCESS
+  - Payment Intent: `pi_3SrysZQ9Xukpkfmb0wx6f4vt` (€26.98)
   - **API Verified:** payment_method: "CARD", client_secret obtained
 - [x] **Producer flow**: Login as producer → Add product → See it pending → Admin approves
-  - Product #8 created (Green Farm Co.), auto-approved (status: available)
-  - **API Verified:** Product #8 visible in `/api/v1/public/products`
+  - Product #9 created (Green Farm Co.), auto-approved (status: available)
+  - **API Verified:** Product #9 visible in `/api/v1/public/products`
 - [x] **Admin flow**: Login as admin → View orders → Update status → Email sent
-  - Order #92 updated to "processing" via admin API
-  - **API Verified:** Order #92 status changed to "processing"
+  - Order #94 updated to "processing" via admin API
+  - **API Verified:** Order #94 status changed to "processing"
   - Email config: Resend enabled, `configured: true`
-- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-2.md`
+- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-3.md`
 
 ### Production Health
 
