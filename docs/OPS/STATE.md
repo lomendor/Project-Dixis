@@ -1,15 +1,57 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass UI-HEADER-NAV-IA-02)
+**Last Updated**: 2026-01-21 (Pass UI-HEADER-NAV-04)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
 
 ---
 
+## 2026-01-21 — Pass UI-HEADER-NAV-04: Header Layout Cleanup
+
+**Status**: ✅ PASS — CLOSED
+
+Complete header/navbar cleanup for predictable, responsive layout.
+
+### Changes
+
+| Item | Description |
+|------|-------------|
+| Logo | Bigger (h-9 = 36px), always visible, testid `header-logo` |
+| User dropdown | New dropdown for auth users with name + role links + logout |
+| Role links | Moved to dropdown: My Orders, Dashboard, Admin |
+| Track Order | Removed from header (footer only at `/orders/lookup`) |
+| Spec update | Complete rewrite of `HEADER-NAV-V1.md` |
+| E2E tests | 26 tests with mock auth, all new testids |
+
+### Evidence
+
+| Check | Result |
+|-------|--------|
+| E2E tests (local) | 26 passed (31.3s) |
+| E2E tests (production) | 26 passed (27.9s) |
+| CI build-and-test | PASS |
+| CI quality-gates | PASS |
+| CI e2e | PASS |
+| prod-facts.sh | ALL CHECKS PASSED |
+
+**Production verified**: 2026-01-21
+
+### PRs
+
+- #2375 (feat: Pass UI-HEADER-NAV-04) — merged, commit `e165ec16`
+
+### Artifacts
+
+- `docs/PRODUCT/HEADER-NAV-V1.md` (spec)
+- `docs/PRODUCT/PROOF-UI-HEADER-NAV-04.md` (proof)
+- `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-04-PRODPROOF.md`
+
+---
+
 ## 2026-01-21 — Pass UI-HEADER-NAV-IA-02: Header Navigation IA Enhancement
 
-**Status**: IN PROGRESS
+**Status**: ✅ SUPERSEDED by UI-HEADER-NAV-04
 
 Enhanced header/navigation with comprehensive role-based E2E tests.
 
