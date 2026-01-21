@@ -9,29 +9,29 @@
 
 ## 2026-01-21 — Pass PROD-EMAIL-UTF8-PROOF-01: Production Email UTF-8 Verification
 
-**Status**: ⚠️ PARTIAL PASS
+**Status**: ✅ PASS
 
-Production verification revealed that EMAIL-UTF8-01 fix is incomplete.
+Production verification confirms EMAIL-UTF8-01 fix is working correctly.
 
-### Findings
+### Findings (Gmail "Show original")
 
 | Part | Status |
 |------|--------|
 | Subject | ✅ PASS — Greek displays correctly |
-| HTML body | ⚠️ UNKNOWN — visual OK in Gmail |
-| **text/plain body** | ❌ FAIL — mojibake via Gmail API extraction |
+| HTML body | ✅ PASS — `charset=utf-8` + `quoted-printable` encoding verified |
 
-### Impact
+### Evidence
 
-- Text-only email clients will show garbled Greek text
-- Gmail API extraction returns mojibake
-- Screen readers may be affected
+```
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=utf-8
+```
 
-### Follow-Up Required
+### Notes
 
-**Pass EMAIL-UTF8-02** needed to fix text/plain part encoding:
-- Ensure `Content-Type: text/plain; charset=UTF-8`
-- Ensure `Content-Transfer-Encoding: quoted-printable` or `base64`
+- Prior "text/plain mojibake" report was a **false positive** (raw QP content not decoded)
+- Email is single-part `text/html` (no text/plain alternative) — valid structure
+- Optional future: add text/plain part for accessibility (nice-to-have, not blocking)
 
 ### Artifacts
 

@@ -7,9 +7,8 @@
 
 ## Next Pass Recommendation
 
-- **EMAIL-UTF8-02** (P2): Fix text/plain part encoding for Greek emails
-  - PROD-EMAIL-UTF8-PROOF-01 revealed text/plain part shows mojibake
-  - Scope: Ensure proper charset + Content-Transfer-Encoding on all MIME parts
+- No immediate pass recommended — all known issues resolved.
+- Continue monitoring production health.
 
 ---
 
@@ -87,9 +86,9 @@
   - Tests: 3 tests, 15 assertions (Greek characters preserved)
   - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
 
-- ⚠️ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
-  - **PARTIAL PASS**: Subject OK, but text/plain body shows mojibake
-  - Follow-up: EMAIL-UTF8-02 needed for proper MIME encoding
+- ✅ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
+  - **PASS**: Subject + HTML body UTF-8 verified via Gmail "Show original"
+  - Prior "text/plain mojibake" was a false positive (raw QP not decoded)
   - Evidence: `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
 
 ### Admin Dashboard Audit
@@ -203,6 +202,19 @@ Pre-launch verification before announcing V1:
   - Artifact: `scripts/perf-baseline.sh`
 
 - **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
+
+### Email Deliverability (Backlog)
+
+- **DMARC-ALIGNMENT-01**: DMARC fails despite SPF/DKIM pass
+  - Investigate From/Return-Path alignment
+  - Set proper DMARC policy/records on dixis.gr DNS
+  - Not blocking — emails deliver, but may affect deliverability score
+
+### Nice-to-Have (Post-MVP)
+
+- **EMAIL-PLAINTEXT-01**: Add explicit text/plain alternative to transactional emails
+  - Improves accessibility (screen readers, text-only clients)
+  - Not required — current HTML-only emails work in all major clients
 
 ---
 
