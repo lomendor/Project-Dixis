@@ -50,9 +50,9 @@ UI + IA only. No business logic changes.
 - [x] Negative test cases for role isolation
 - [x] Mobile menu tests
 - [x] Documentation updated
-- [ ] PR created + CI green
-- [ ] Merged
+- [x] PR created + CI green
+- [x] Merged
 
 ## Result
 
-**PENDING** — Awaiting CI verification.
+**PASS** — PR #2365 merged, commit `d8f1b41a`.
