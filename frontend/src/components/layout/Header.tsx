@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
@@ -10,9 +10,22 @@ import { locales, type Locale } from '../../../i18n';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
   const t = useTranslations();
   const { locale, setLocale } = useLocale();
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navLinks = [
     { href: '/products', label: t('nav.products') },
@@ -21,6 +34,8 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
+      setUserMenuOpen(false);
+      setMobileMenuOpen(false);
       await logout();
     } catch (error) {
       console.error('Logout failed:', error);
@@ -31,16 +46,23 @@ export default function Header() {
     setLocale(newLocale);
   };
 
+  // Determine if cart should be shown (not for producers)
+  const showCart = !isProducer;
+
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo - touch-friendly, flex-shrink-0 prevents collapse on mobile when auth adds more nav items */}
-        <Link href="/" className="flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80" data-testid="nav-logo">
-          <Logo height={28} title="Dixis" />
+        {/* Logo - bigger (h-9 = 36px), always visible, links to home */}
+        <Link
+          href="/"
+          className="flex-shrink-0 flex items-center hover:opacity-90 transition-opacity touch-manipulation active:opacity-80"
+          data-testid="header-logo"
+        >
+          <Logo height={36} title="Dixis" />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Desktop Primary Navigation */}
+        <nav className="hidden md:flex items-center gap-6 ml-8" data-testid="header-primary-nav">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -50,70 +72,12 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+        </nav>
 
-          {/* Desktop Auth Section */}
-          {isAuthenticated ? (
-            <>
-              {/* Consumer: Show "My Orders" */}
-              {!isProducer && !isAdmin && (
-                <Link
-                  href="/account/orders"
-                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
-                  data-testid="nav-my-orders"
-                >
-                  {t('nav.myOrders')}
-                </Link>
-              )}
-              {isProducer && (
-                <Link
-                  href="/producer/dashboard"
-                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
-                  data-testid="nav-producer-dashboard"
-                >
-                  {t('producers.title')}
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
-                  data-testid="nav-admin"
-                >
-                  Admin
-                </Link>
-              )}
-              <span className="text-sm text-neutral-500" data-testid="nav-user-name">
-                {user?.name}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
-                data-testid="logout-btn"
-              >
-                {t('nav.logout')}
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
-                data-testid="nav-login"
-              >
-                {t('nav.login')}
-              </Link>
-              <Link
-                href="/auth/register"
-                className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-md transition-colors"
-                data-testid="nav-register"
-              >
-                {t('nav.signup')}
-              </Link>
-            </>
-          )}
-
+        {/* Desktop Right Side: Utilities + Auth */}
+        <div className="hidden md:flex items-center gap-3">
           {/* Language Switcher */}
-          <div className="flex items-center gap-1 ml-2 border-l border-neutral-200 pl-4">
+          <div className="flex items-center gap-1">
             {locales.map((loc) => (
               <button
                 key={loc}
@@ -130,11 +94,120 @@ export default function Header() {
               </button>
             ))}
           </div>
-        </nav>
 
-        <div className="flex items-center gap-3">
+          {/* Notification Bell - only for authenticated users */}
+          {isAuthenticated && <NotificationBell />}
+
+          {/* Cart - not for producers */}
+          {showCart && <CartIcon data-testid="header-cart" />}
+
+          {/* Auth Section */}
+          {isAuthenticated ? (
+            /* User Dropdown */
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-neutral-50"
+                data-testid="header-user-menu"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+              >
+                <span className="max-w-[120px] truncate">{user?.name || t('nav.account')}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50">
+                  {/* User Name Display */}
+                  <div className="px-4 py-2 border-b border-neutral-100">
+                    <p className="text-sm font-medium text-neutral-900 truncate" data-testid="user-menu-name">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-neutral-500 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+
+                  {/* Consumer: My Orders */}
+                  {!isProducer && !isAdmin && (
+                    <Link
+                      href="/account/orders"
+                      className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                      data-testid="user-menu-orders"
+                    >
+                      {t('nav.myOrders')}
+                    </Link>
+                  )}
+
+                  {/* Producer: Dashboard */}
+                  {isProducer && (
+                    <Link
+                      href="/producer/dashboard"
+                      className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                      data-testid="user-menu-dashboard"
+                    >
+                      {t('producers.title')}
+                    </Link>
+                  )}
+
+                  {/* Admin: Admin Panel */}
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                      onClick={() => setUserMenuOpen(false)}
+                      data-testid="user-menu-admin"
+                    >
+                      Admin
+                    </Link>
+                  )}
+
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors border-t border-neutral-100 mt-1"
+                    data-testid="user-menu-logout"
+                  >
+                    {t('nav.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Guest: Login + Register */
+            <div className="flex items-center gap-2">
+              <Link
+                href="/auth/login"
+                className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors px-3 py-2"
+                data-testid="nav-login"
+              >
+                {t('nav.login')}
+              </Link>
+              <Link
+                href="/auth/register"
+                className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-md transition-colors"
+                data-testid="nav-register"
+              >
+                {t('nav.signup')}
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Right Side: Utilities + Hamburger */}
+        <div className="flex md:hidden items-center gap-2">
           {/* Mobile Language Switcher */}
-          <div className="flex md:hidden items-center gap-1">
+          <div className="flex items-center gap-1">
             {locales.map((loc) => (
               <button
                 key={loc}
@@ -152,14 +225,15 @@ export default function Header() {
           </div>
 
           {/* Notification Bell - only for authenticated users */}
-          <NotificationBell />
+          {isAuthenticated && <NotificationBell />}
 
-          <CartIcon />
+          {/* Cart - not for producers */}
+          {showCart && <CartIcon data-testid="header-cart" />}
 
-          {/* Mobile Menu Button - 44px touch target */}
+          {/* Mobile Menu Button */}
           <button
             type="button"
-            className="md:hidden p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation"
+            className="p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}
@@ -178,10 +252,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu - generous tap targets */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg" data-testid="mobile-menu">
           <div className="max-w-6xl mx-auto px-4 py-2">
+            {/* Primary Navigation */}
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -193,17 +268,17 @@ export default function Header() {
               </Link>
             ))}
 
-            {/* Mobile Auth Section */}
+            {/* Auth Section */}
             <div className="border-t border-neutral-200 mt-2 pt-2">
               {isAuthenticated ? (
                 <>
-                  {/* Consumer: Show "My Orders" */}
+                  {/* Role-specific links */}
                   {!isProducer && !isAdmin && (
                     <Link
                       href="/account/orders"
                       className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
                       onClick={() => setMobileMenuOpen(false)}
-                      data-testid="mobile-nav-my-orders"
+                      data-testid="mobile-nav-orders"
                     >
                       {t('nav.myOrders')}
                     </Link>
@@ -213,7 +288,7 @@ export default function Header() {
                       href="/producer/dashboard"
                       className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
                       onClick={() => setMobileMenuOpen(false)}
-                      data-testid="mobile-nav-producer-dashboard"
+                      data-testid="mobile-nav-dashboard"
                     >
                       {t('producers.title')}
                     </Link>
@@ -228,13 +303,15 @@ export default function Header() {
                       Admin
                     </Link>
                   )}
-                  <div className="flex items-center justify-between min-h-[48px] py-3 -mx-4 px-4">
-                    <span className="text-base text-neutral-500" data-testid="mobile-nav-user-name">{user?.name}</span>
+
+                  {/* User Section */}
+                  <div
+                    className="flex items-center justify-between min-h-[48px] py-3 -mx-4 px-4 border-t border-neutral-100 mt-2"
+                    data-testid="mobile-user-section"
+                  >
+                    <span className="text-base text-neutral-500">{user?.name}</span>
                     <button
-                      onClick={() => {
-                        handleLogout();
-                        setMobileMenuOpen(false);
-                      }}
+                      onClick={handleLogout}
                       className="text-base font-medium text-neutral-700 hover:text-primary transition-colors"
                       data-testid="mobile-logout-btn"
                     >
