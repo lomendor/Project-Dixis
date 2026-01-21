@@ -83,7 +83,7 @@ export default function Header() {
                   Admin
                 </Link>
               )}
-              <span className="text-sm text-neutral-500">
+              <span className="text-sm text-neutral-500" data-testid="nav-user-name">
                 {user?.name}
               </span>
               <button
@@ -230,7 +230,7 @@ export default function Header() {
                     </Link>
                   )}
                   <div className="flex items-center justify-between min-h-[48px] py-3 -mx-4 px-4">
-                    <span className="text-base text-neutral-500">{user?.name}</span>
+                    <span className="text-base text-neutral-500" data-testid="mobile-nav-user-name">{user?.name}</span>
                     <button
                       onClick={() => {
                         handleLogout();
