@@ -1,7 +1,7 @@
 # Pass: UI-HEADER-NAV-IA-02
 
 **Date (UTC):** 2026-01-21
-**Commit:** TBD (pending PR merge)
+**Commit:** `d8f1b41a` (PR #2365)
 **Environment:** Frontend UI + E2E Tests
 
 ---
@@ -75,7 +75,7 @@ Updated `docs/PRODUCT/HEADER-NAV-V1.md`:
 - `frontend/src/components/layout/Header.tsx` — User name testids
 - `frontend/tests/e2e/header-nav.spec.ts` — Comprehensive E2E tests
 - `docs/PRODUCT/HEADER-NAV-V1.md` — Updated nav rules doc
-- PR: TBD
+- PR: #2365 (merged)
 
 ---
 

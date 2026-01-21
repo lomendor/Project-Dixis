@@ -14,18 +14,21 @@
 
 ## In Progress
 
+(none)
+
+---
+
+## Completed
+
 ### UI/UX Improvements
 
-- **UI-HEADER-NAV-IA-02**: Header Navigation IA Enhancement
+- ✅ **UI-HEADER-NAV-IA-02**: Header Navigation IA Enhancement
+  - PR #2365 merged, commit `d8f1b41a`
   - Added user name testids (`nav-user-name`, `mobile-nav-user-name`)
   - Comprehensive E2E tests with negative cases for role isolation
   - Mobile viewport tests (375x667)
   - Updated `docs/PRODUCT/HEADER-NAV-V1.md` with complete testid reference
   - Evidence: `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-IA-02.md`
-
----
-
-## Completed
 
 ### CI Reliability
 
