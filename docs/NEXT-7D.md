@@ -80,6 +80,17 @@
   - Bug found: `/admin` returns HTTP 500 (separate investigation)
   - Evidence: `docs/AGENT/SUMMARY/Pass-PERF-SWEEP-PAGES-01.md`
 
+- ✅ **EMAIL-UTF8-01**: Fix Greek email encoding (mojibake)
+  - PR #2357 merged, commit `b52072d4`
+  - Fix: MailEncodingServiceProvider enforces UTF-8 charset on MIME headers
+  - Tests: 3 tests, 15 assertions (Greek characters preserved)
+  - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
+
+- ✅ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
+  - **PASS**: Subject + HTML body UTF-8 verified via Gmail "Show original"
+  - Prior "text/plain mojibake" was a false positive (raw QP not decoded)
+  - Evidence: `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
+
 ### Admin Dashboard Audit
 
 - ✅ **ADMIN-IA-01** (docs-only): Admin Dashboard V1 Information Architecture
@@ -191,6 +202,19 @@ Pre-launch verification before announcing V1:
   - Artifact: `scripts/perf-baseline.sh`
 
 - **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
+
+### Email Deliverability (Backlog)
+
+- **DMARC-ALIGNMENT-01**: DMARC fails despite SPF/DKIM pass
+  - Investigate From/Return-Path alignment
+  - Set proper DMARC policy/records on dixis.gr DNS
+  - Not blocking — emails deliver, but may affect deliverability score
+
+### Nice-to-Have (Post-MVP)
+
+- **EMAIL-PLAINTEXT-01**: Add explicit text/plain alternative to transactional emails
+  - Improves accessibility (screen readers, text-only clients)
+  - Not required — current HTML-only emails work in all major clients
 
 ---
 

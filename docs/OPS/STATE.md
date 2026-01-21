@@ -1,9 +1,41 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass EMAIL-UTF8-01)
+**Last Updated**: 2026-01-21 (Pass PROD-EMAIL-UTF8-PROOF-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass PROD-EMAIL-UTF8-PROOF-01: Production Email UTF-8 Verification
+
+**Status**: ✅ PASS
+
+Production verification confirms EMAIL-UTF8-01 fix is working correctly.
+
+### Findings (Gmail "Show original")
+
+| Part | Status |
+|------|--------|
+| Subject | ✅ PASS — Greek displays correctly |
+| HTML body | ✅ PASS — `charset=utf-8` + `quoted-printable` encoding verified |
+
+### Evidence
+
+```
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=utf-8
+```
+
+### Notes
+
+- Prior "text/plain mojibake" report was a **false positive** (raw QP content not decoded)
+- Email is single-part `text/html` (no text/plain alternative) — valid structure
+- Optional future: add text/plain part for accessibility (nice-to-have, not blocking)
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
 
 ---
 
@@ -47,7 +79,7 @@ Created `MailEncodingServiceProvider` that hooks into Laravel's `MessageSending`
 
 ### PRs
 
-- #TBD (feat: Pass EMAIL-UTF8-01) — pending
+- #2357 (feat: Pass EMAIL-UTF8-01) — merged, commit `b52072d4`
 
 ### Artifacts
 
