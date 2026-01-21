@@ -1,9 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass PROD-EMAIL-UTF8-PROOF-01)
+**Last Updated**: 2026-01-21 (Pass PRODUCER-IA-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass PRODUCER-IA-01: Producer Dashboard V1 Information Architecture
+
+**Status**: ✅ PASS (docs-only)
+
+Documented Producer Dashboard V1 IA and verified role-based navigation entrypoints.
+
+### What Was Done
+
+1. Created `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md`:
+   - 10 producer routes documented
+   - Navigation model with role gating
+   - PRD requirement mapping
+   - Gaps analysis
+
+2. Verified existing role-based navigation:
+   - Producer: `/producer/dashboard` link in Header.tsx (desktop + mobile)
+   - Admin: `/admin` link in Header.tsx (desktop + mobile)
+   - Both protected by `isProducer` / `isAdmin` guards
+
+### Findings
+
+| Component | Status |
+|-----------|--------|
+| Producer routes | ✅ 10 routes implemented |
+| Role-based nav | ✅ Exists in Header.tsx |
+| AuthGuard protection | ✅ All pages protected |
+| UI changes needed | ❌ None |
+
+### Artifacts
+
+- `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md`
+- `docs/AGENT/SUMMARY/Pass-PRODUCER-IA-01.md`
 
 ---
 
