@@ -1,7 +1,7 @@
 # Pass: UI-HEADER-LOGO-NAV-01
 
 **Date (UTC):** 2026-01-21
-**Commit:** TBD (pending PR merge)
+**Commit:** 84d566c1
 **Environment:** Frontend E2E Tests
 
 ---
@@ -82,7 +82,7 @@ Running 3 tests using 1 worker
 
 - `frontend/tests/e2e/header-nav.spec.ts` — Fixed selector
 - `docs/AGENT/PLANS/Pass-UI-HEADER-LOGO-NAV-01.md`
-- PR: TBD
+- PR: #2370 (merged)
 
 ---
 
