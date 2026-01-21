@@ -1,8 +1,9 @@
 # Producer Dashboard V1 - Information Architecture
 
 **Created:** 2026-01-21
-**Pass:** PRODUCER-IA-01
-**Status:** Implemented
+**Updated:** 2026-01-21 (Pass PRODUCER-DASHBOARD-IA-01)
+**Pass:** PRODUCER-IA-01, PRODUCER-DASHBOARD-IA-01
+**Status:** Implemented & Verified
 
 ---
 
@@ -178,23 +179,32 @@ The Producer Dashboard provides back-office functionality for producers to manag
 
 **File:** `frontend/src/components/layout/Header.tsx`
 
-Desktop Navigation (lines 69-77):
+Desktop Navigation (User Dropdown, lines 152-161):
 ```tsx
 {isProducer && (
-  <Link href="/producer/dashboard" data-testid="nav-producer-dashboard">
+  <Link
+    href="/producer/dashboard"
+    data-testid="user-menu-dashboard"
+  >
     {t('producers.title')}
   </Link>
 )}
 ```
 
-Mobile Navigation (lines 213-222):
+Mobile Navigation (lines 286-295):
 ```tsx
 {isProducer && (
-  <Link href="/producer/dashboard" data-testid="mobile-nav-producer-dashboard">
+  <Link
+    href="/producer/dashboard"
+    data-testid="mobile-nav-dashboard"
+  >
     {t('producers.title')}
   </Link>
 )}
 ```
+
+**E2E Test Coverage:**
+- `frontend/tests/e2e/header-nav.spec.ts` - Tests `user-menu-dashboard` visibility for producer role
 
 ### Role Gating
 
@@ -261,4 +271,37 @@ No blocking gaps for V1 launch.
 
 ---
 
-_Pass: PRODUCER-IA-01 | Generated: 2026-01-21 | Author: Claude_
+---
+
+## Verification (Pass PRODUCER-DASHBOARD-IA-01)
+
+**Date:** 2026-01-21
+
+### Entry Points Verified
+
+| Entry Point | Location | TestID | Status |
+|-------------|----------|--------|--------|
+| Desktop dropdown | Header.tsx line 154 | `user-menu-dashboard` | VERIFIED |
+| Mobile menu | Header.tsx line 288 | `mobile-nav-dashboard` | VERIFIED |
+
+### E2E Test Coverage
+
+| Test | File | Status |
+|------|------|--------|
+| Producer dashboard link in user dropdown | `header-nav.spec.ts:140` | PASS |
+| Admin/my-orders NOT in dropdown for producer | `header-nav.spec.ts:148` | PASS |
+
+### What We Know Now
+
+1. **10 producer routes exist** - All functional with AuthGuard protection
+2. **Entry point is in user dropdown** - `user-menu-dashboard` testid, links to `/producer/dashboard`
+3. **No missing links** - Producer can access dashboard via header dropdown
+4. **Route mismatch in quick actions** - Dashboard links to `/my/products/create` (functional, redirects work)
+
+### Next Step
+
+None blocking. Producer dashboard is fully functional for V1.
+
+---
+
+_Pass: PRODUCER-IA-01 | Updated: PRODUCER-DASHBOARD-IA-01 | 2026-01-21 | Author: Claude_

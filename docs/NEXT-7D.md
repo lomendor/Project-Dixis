@@ -7,8 +7,14 @@
 
 ## Next Pass Recommendation
 
-- No immediate pass recommended — all known issues resolved.
-- Continue monitoring production health.
+- **PRODUCER-DASHBOARD-IA-01**: Audit and spec producer dashboard routes/entry points
+- Continue with role-based dashboard features after IA clarity
+
+---
+
+## Backlog (Post-V1)
+
+- **Language toggle position**: Remove from header; place in footer or settings page (toggle shifting position is undesirable on mobile)
 
 ---
 
