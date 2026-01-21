@@ -261,8 +261,32 @@ test.describe('Header Navigation - Mobile Menu @smoke', () => {
     await expect(page.locator('[data-testid="mobile-nav-register"]')).toBeVisible();
   });
 
-  test('logo is visible on mobile', async ({ page }) => {
+  test('logo is visible on mobile (guest)', async ({ page }) => {
     const logo = page.locator('[data-testid="nav-logo"]');
     await expect(logo).toBeVisible();
+  });
+
+  test('logo is visible on mobile with mock auth (UI-HEADER-NAV-03)', async ({ page }) => {
+    // This is a regression test for the bug where logo was hidden on mobile when logged in.
+    // The logo had width:0, height:0 due to flex layout issues when NotificationBell renders.
+    // Fix: Added flex-shrink-0 to logo Link to prevent collapse.
+    await page.evaluate(() => {
+      localStorage.setItem('auth_token', 'mock_token');
+      localStorage.setItem('user_id', '1');
+      localStorage.setItem('user_role', 'consumer');
+      localStorage.setItem('user_name', 'E2E Test Consumer');
+      localStorage.setItem('e2e_mode', 'true');
+    });
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+
+    const logo = page.locator('[data-testid="nav-logo"]');
+    await expect(logo).toBeVisible({ timeout: 10000 });
+
+    // Also verify it has non-zero dimensions
+    const boundingBox = await logo.boundingBox();
+    expect(boundingBox).not.toBeNull();
+    expect(boundingBox!.width).toBeGreaterThan(0);
+    expect(boundingBox!.height).toBeGreaterThan(0);
   });
 });
