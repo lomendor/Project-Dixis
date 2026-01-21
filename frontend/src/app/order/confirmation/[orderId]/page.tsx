@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { labelFor } from '@/lib/shipping/format';
 import { useTranslations } from '@/contexts/LocaleContext';
 
+const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' });
+
 interface Order {
   id: string;
   status: string;
@@ -200,7 +202,7 @@ export default function OrderConfirmationPage() {
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-2">{t('orderConfirmation.orderTotal')}</h3>
               <p className="text-xl font-bold text-green-600" data-testid="order-total">
-                €{order.total.toFixed(2)}
+                {fmtEUR.format(order.total)}
               </p>
             </div>
           </div>
@@ -214,11 +216,11 @@ export default function OrderConfirmationPage() {
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{item.name}</p>
                     <p className="text-sm text-gray-600">
-                      {t('orderConfirmation.quantity')}: {item.quantity} × €{item.price.toFixed(2)}
+                      {t('orderConfirmation.quantity')}: {item.quantity} × {fmtEUR.format(item.price)}
                     </p>
                   </div>
                   <p className="font-medium text-gray-900">
-                    €{(item.price * item.quantity).toFixed(2)}
+                    {fmtEUR.format(item.price * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -252,7 +254,7 @@ export default function OrderConfirmationPage() {
                   {t('orderConfirmation.method')} (<span data-testid="order-shipping-label">{labelFor(order.shippingMethod)}</span>):
                 </span>
                 <span className="text-sm text-gray-600" data-testid="order-shipping">
-                  €{Number(order.computedShipping || 0).toFixed(2)}
+                  {fmtEUR.format(Number(order.computedShipping || 0))}
                 </span>
               </div>
             </div>
