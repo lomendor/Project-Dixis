@@ -34,8 +34,8 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo - touch-friendly */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80" data-testid="nav-logo">
+        {/* Logo - touch-friendly, flex-shrink-0 prevents collapse on mobile when auth adds more nav items */}
+        <Link href="/" className="flex-shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity touch-manipulation active:opacity-80" data-testid="nav-logo">
           <Logo height={28} title="Dixis" />
         </Link>
 

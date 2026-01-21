@@ -1,7 +1,7 @@
 # Header Navigation V1 Rules
 
 **Created:** 2026-01-21
-**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-02)
+**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-03)
 **Status:** Canonical source of truth for header/navbar behavior
 
 ---
@@ -141,6 +141,7 @@ Mobile-specific testids:
 - Role checks via `useAuth()` hook (`isProducer`, `isAdmin`, `isAuthenticated`)
 - Cart component: `@/components/cart/CartIcon`
 - Logo component: `@/components/brand/Logo`
+- **Logo flex-shrink-0** (UI-HEADER-NAV-03): Logo Link uses `flex-shrink-0` to prevent collapse on mobile when NotificationBell renders for authenticated users
 
 ---
 
@@ -152,7 +153,15 @@ Tests in `frontend/tests/e2e/header-nav.spec.ts`:
 - Producer: Producer Dashboard visible, no admin/my-orders links
 - Admin: Admin link visible, no producer/my-orders links
 - Mobile: Hamburger menu works, logo visible
+- **Mobile + Auth**: Logo visible with mock auth on mobile viewport (regression test UI-HEADER-NAV-03)
+
+Tests in `frontend/tests/e2e/logo-repro.spec.ts`:
+- Logo visible for GUEST
+- Logo visible with MOCK AUTH (desktop)
+- Logo visible on MOBILE viewport (guest)
+- Logo visible on MOBILE viewport with MOCK AUTH (regression test for UI-HEADER-NAV-03)
+- Track Order NOT in top nav (UI-HEADER-NAV-02)
 
 ---
 
-_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-02)_
+_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-03)_
