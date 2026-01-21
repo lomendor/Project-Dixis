@@ -1,7 +1,9 @@
 # Pass: UI-NAV-HEADER-01
 
 **Date (UTC):** 2026-01-21
-**Commit:** TBD (pending PR merge)
+**Commit:** 0d31b905
+**PR:** [#2362](https://github.com/lomendor/Project-Dixis/pull/2362)
+**CI Run:** [21208002402](https://github.com/lomendor/Project-Dixis/actions/runs/21208002402)
 **Environment:** Frontend UI
 
 ---
@@ -67,7 +69,7 @@ New test file: `frontend/tests/e2e/header-nav.spec.ts`
 
 - `docs/PRODUCT/HEADER-NAV-V1.md` — Canonical nav rules
 - `frontend/tests/e2e/header-nav.spec.ts` — E2E tests
-- PR: TBD
+- PR: [#2362](https://github.com/lomendor/Project-Dixis/pull/2362)
 
 ---
 

@@ -17,6 +17,7 @@
 ### UI/UX Fixes
 
 - ✅ **UI-NAV-HEADER-01**: Header Navigation IA Fix
+  - PR #2362 merged, commit `0d31b905`
   - Removed "Απαγορεύεται" from nav (was using error translation)
   - Changed label "Αριθμός παραγγελίας" → "Παρακολούθηση παραγγελίας"
   - Added E2E tests: `frontend/tests/e2e/header-nav.spec.ts`
