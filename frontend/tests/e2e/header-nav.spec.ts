@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Header Navigation E2E Tests (Pass UI-HEADER-NAV-IA-02)
+ * Header Navigation E2E Tests (Pass UI-HEADER-NAV-02)
  *
  * Validates header/navbar behavior per docs/PRODUCT/HEADER-NAV-V1.md
- * - Logo always visible and links to home
+ * - Logo always visible and links to home (guest + logged-in)
  * - Role-based nav items (Guest, Consumer, Producer, Admin)
  * - No dev/debug links (Απαγορεύεται / Forbidden)
+ * - No "Track Order" in top nav (removed per UI-HEADER-NAV-02)
  * - Mobile hamburger menu works correctly
  */
 
@@ -33,9 +34,6 @@ test.describe('Header Navigation - Guest @smoke', () => {
     // Should show Products link (use exact link, not aria-label which might match cart)
     await expect(page.locator('header nav').getByRole('link', { name: /προϊόντα|products/i })).toBeVisible();
 
-    // Should show Track Order link
-    await expect(page.locator('header nav').getByRole('link', { name: /παρακολούθηση|track/i })).toBeVisible();
-
     // Should show Producers link
     await expect(page.locator('header nav').getByRole('link', { name: /παραγωγοί|producers/i })).toBeVisible();
 
@@ -47,6 +45,13 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
     // Should show Cart
     await expect(page.locator('[data-testid="nav-cart-guest"]')).toBeVisible();
+  });
+
+  test('Track Order link is NOT visible in top nav (UI-HEADER-NAV-02)', async ({ page }) => {
+    // Track Order was removed from top nav per Pass UI-HEADER-NAV-02
+    // It should NOT appear in the header navigation
+    const trackOrderLink = page.locator('header nav').getByRole('link', { name: /παρακολούθηση|track order/i });
+    await expect(trackOrderLink).not.toBeVisible();
   });
 
   test('Απαγορεύεται / Forbidden link is NOT visible', async ({ page }) => {

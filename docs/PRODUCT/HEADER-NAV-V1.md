@@ -1,7 +1,7 @@
 # Header Navigation V1 Rules
 
 **Created:** 2026-01-21
-**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-IA-02)
+**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-02)
 **Status:** Canonical source of truth for header/navbar behavior
 
 ---
@@ -13,6 +13,7 @@
 3. **Predictable by role** — Menu items are determined by authentication state and user role
 4. **EL-first with EN toggle** — Greek labels by default, language switcher available
 5. **Mobile-first** — Hamburger menu on mobile with 48px touch targets
+6. **No Track Order in top nav** — "Παρακολούθηση παραγγελίας" is NOT a top-level nav item (accessible via footer or direct URL)
 
 ---
 
@@ -24,7 +25,6 @@
 |------|------------|------------|-------|--------|
 | Logo | Dixis | Dixis | `/` | `nav-logo` |
 | Products | Προϊόντα | Products | `/products` | — |
-| Track Order | Παρακολούθηση παραγγελίας | Track Order | `/orders/lookup` | — |
 | Producers | Παραγωγοί | Producers | `/producers` | — |
 | Login | Είσοδος | Login | `/auth/login` | `nav-login` |
 | Register | Εγγραφή | Sign Up | `/auth/register` | `nav-register` |
@@ -45,7 +45,6 @@
 |------|------------|------------|-------|--------|
 | Logo | Dixis | Dixis | `/` | `nav-logo` |
 | Products | Προϊόντα | Products | `/products` | — |
-| Track Order | Παρακολούθηση παραγγελίας | Track Order | `/orders/lookup` | — |
 | Producers | Παραγωγοί | Producers | `/producers` | — |
 | My Orders | Οι Παραγγελίες μου | My Orders | `/account/orders` | `nav-my-orders` |
 | User Name | (display) | (display) | — | `nav-user-name` |
@@ -67,9 +66,8 @@
 |------|------------|------------|-------|--------|
 | Logo | Dixis | Dixis | `/` | `nav-logo` |
 | Products | Προϊόντα | Products | `/products` | — |
-| Track Order | Παρακολούθηση παραγγελίας | Track Order | `/orders/lookup` | — |
 | Producers | Παραγωγοί | Producers | `/producers` | — |
-| Producer Dashboard | Παραγωγοί | Producers | `/producer/dashboard` | `nav-producer-dashboard` |
+| Producer Dashboard | Πίνακας Ελέγχου | Dashboard | `/producer/dashboard` | `nav-producer-dashboard` |
 | User Name | (display) | (display) | — | `nav-user-name` |
 | Logout | Αποσύνδεση | Logout | — | `logout-btn` |
 | Language | EL/EN | EL/EN | — | `lang-el`, `lang-en` |
@@ -89,7 +87,6 @@
 |------|------------|------------|-------|--------|
 | Logo | Dixis | Dixis | `/` | `nav-logo` |
 | Products | Προϊόντα | Products | `/products` | — |
-| Track Order | Παρακολούθηση παραγγελίας | Track Order | `/orders/lookup` | — |
 | Producers | Παραγωγοί | Producers | `/producers` | — |
 | Admin | Admin | Admin | `/admin` | `nav-admin` |
 | User Name | (display) | (display) | — | `nav-user-name` |
@@ -130,6 +127,7 @@ Mobile-specific testids:
 ## Items That Must NEVER Appear
 
 - "Απαγορεύεται" / "Forbidden" — This is an error message, not a nav item
+- "Παρακολούθηση παραγγελίας" / "Track Order" — Not a top-nav item (use footer or direct URL `/orders/lookup`)
 - `/legal/terms` link with error label — Removed from nav
 - Any route that returns 403/404 by design
 - Debug/test links
@@ -157,4 +155,4 @@ Tests in `frontend/tests/e2e/header-nav.spec.ts`:
 
 ---
 
-_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-IA-02)_
+_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-02)_

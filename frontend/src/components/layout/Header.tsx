@@ -16,7 +16,6 @@ export default function Header() {
 
   const navLinks = [
     { href: '/products', label: t('nav.products') },
-    { href: '/orders/lookup', label: t('nav.trackOrder') },
     { href: '/producers', label: t('producers.title') },
   ];
 
