@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass V1-QA-EXECUTE-01)
+**Last Updated**: 2026-01-21 (Pass DOCS-LAUNCH-ANNOUNCE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass DOCS-LAUNCH-ANNOUNCE-01: V1 Launch Announcement Materials
+
+**Status**: ✅ PASS — CLOSED
+
+Prepared V1 launch announcement materials in Greek and English.
+
+### Deliverables
+
+| File | Description |
+|------|-------------|
+| `docs/LAUNCH/V1-ANNOUNCEMENT.md` | Social, email, banner copy (EL + EN) |
+| `docs/LAUNCH/CHANGELOG-V1.md` | User-facing changelog |
+| `README.md` | Added production URL + feature summary |
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-DOCS-LAUNCH-ANNOUNCE-01.md`
 
 ---
 

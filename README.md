@@ -8,7 +8,15 @@
 [![Uptime Monitoring](https://github.com/lomendor/Project-Dixis/actions/workflows/uptime-ping.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/uptime-ping.yml)
 [![E2E Prod Smoke](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-prod-smoke.yml/badge.svg)](https://github.com/lomendor/Project-Dixis/actions/workflows/e2e-prod-smoke.yml)
 
+**Production:** https://dixis.gr
+
 **Modern Laravel 11 API** for agricultural marketplace connecting producers and consumers.
+
+### What Dixis Does
+
+- **For Consumers:** Browse local Greek products, add to cart, and checkout with card or cash on delivery
+- **For Producers:** List products, manage orders, and track sales through a dedicated dashboard
+- **Secure & Reliable:** Stripe payments, email notifications, and comprehensive QA verification
 
 ## 📋 Overview
 
