@@ -1,7 +1,7 @@
 # Pass: UI-A11Y-EL-01
 
 **Date (UTC):** 2026-01-21
-**Commit:** TBD (pending PR merge)
+**Commit:** `3ed150cf` (PR #2367)
 **Environment:** Frontend UI
 
 ---
@@ -62,7 +62,7 @@ Added to `messages/el.json`:
 - `frontend/src/components/layout/Header.tsx`
 - `frontend/src/app/order/confirmation/[orderId]/page.tsx`
 - `frontend/messages/el.json`
-- PR: TBD
+- PR: #2367 (merged)
 
 ---
 
