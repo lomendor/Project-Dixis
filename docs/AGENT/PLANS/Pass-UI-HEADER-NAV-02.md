@@ -2,7 +2,7 @@
 
 **Created:** 2026-01-21
 **Author:** Claude (Release Lead)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ---
 
@@ -69,16 +69,16 @@ const navLinks = [
 - [x] E2E tests updated
 - [x] Mini-spec updated
 - [x] Build passes
-- [ ] PR created + CI green
-- [ ] Merged
+- [x] PR created + CI green
+- [x] Merged
 
 ---
 
 ## Evidence
 
 - Build: PASS
-- PR: TBD
-- Commit: TBD
+- PR: #2372 (merged)
+- Commit: 18e19441
 
 ---
 
