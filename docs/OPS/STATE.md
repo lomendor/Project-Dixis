@@ -1,15 +1,36 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass CI-FLAKE-LOCALE-01)
+**Last Updated**: 2026-01-21 (Pass UI-HEADER-NAV-IA-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
 
 ---
 
-## 2026-01-21 — Pass CI-FLAKE-LOCALE-01: Stabilize Flaky Locale Test
+## 2026-01-21 — Pass UI-HEADER-NAV-IA-02: Header Navigation IA Enhancement
 
 **Status**: IN PROGRESS
+
+Enhanced header/navigation with comprehensive role-based E2E tests.
+
+### Changes
+
+| Item | Description |
+|------|-------------|
+| User name testid | Added `nav-user-name` and `mobile-nav-user-name` |
+| E2E tests | Comprehensive tests with negative cases for role isolation |
+| Mobile tests | Added mobile viewport tests (375x667) |
+| Documentation | Updated HEADER-NAV-V1.md with complete testid reference |
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-IA-02.md`
+
+---
+
+## 2026-01-21 — Pass CI-FLAKE-LOCALE-01: Stabilize Flaky Locale Test
+
+**Status**: ✅ PASS — CLOSED
 
 Stabilizing flaky `locale.spec.ts` Playwright test that fails in CI due to React hydration timing.
 

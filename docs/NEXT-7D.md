@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-21 (CI-FLAKE-LOCALE-01)
+**Updated**: 2026-01-21 (UI-HEADER-NAV-IA-02)
 
 ---
 
@@ -14,17 +14,26 @@
 
 ## In Progress
 
-### CI Reliability
+### UI/UX Improvements
 
-- **CI-FLAKE-LOCALE-01**: Stabilize `locale.spec.ts` flaky test
-  - Root cause: React hydration timing in CI
-  - Fix: Use `networkidle` + `login-form` wait + `expect.poll()` for resilient assertion
-  - Remove fixed `waitForTimeout(1500)` sleep
-  - Evidence: `docs/AGENT/SUMMARY/Pass-CI-FLAKE-LOCALE-01.md`
+- **UI-HEADER-NAV-IA-02**: Header Navigation IA Enhancement
+  - Added user name testids (`nav-user-name`, `mobile-nav-user-name`)
+  - Comprehensive E2E tests with negative cases for role isolation
+  - Mobile viewport tests (375x667)
+  - Updated `docs/PRODUCT/HEADER-NAV-V1.md` with complete testid reference
+  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-IA-02.md`
 
 ---
 
 ## Completed
+
+### CI Reliability
+
+- ✅ **CI-FLAKE-LOCALE-01**: Stabilize `locale.spec.ts` flaky test
+  - PR #2364 merged, commit `74a13747`
+  - Root cause: React hydration timing + auth storage state in CI
+  - Fix: Clear localStorage/sessionStorage before test, use flexible polling
+  - Evidence: `docs/AGENT/SUMMARY/Pass-CI-FLAKE-LOCALE-01.md`
 
 ### UI/UX Fixes
 
