@@ -24,7 +24,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
         href="/cart"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
         data-testid={isMobile ? "mobile-nav-cart-guest" : "nav-cart-guest"}
-        aria-label={`View cart with ${cartItemCount} items`}
+        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
       >
         <span className="flex items-center" data-testid="cart-icon-guest">
           🛒 Καλάθι
@@ -49,7 +49,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
         href="/cart"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
         data-testid={isMobile ? "mobile-nav-cart" : "nav-cart"}
-        aria-label={`View cart with ${cartItemCount} items`}
+        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
       >
         <span className="flex items-center" data-testid="cart-icon-active">
           Cart
@@ -74,7 +74,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
         href="/cart"
         className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
         data-testid={isMobile ? "mobile-nav-cart-admin" : "nav-cart-admin"}
-        aria-label={`View cart with ${cartItemCount} items`}
+        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
       >
         <span className="flex items-center" data-testid="cart-icon-admin">
           🛒 Cart
@@ -112,7 +112,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
       href="/cart"
       className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
       data-testid={isMobile ? "mobile-nav-cart-fallback" : "nav-cart-fallback"}
-      aria-label={`View cart with ${cartItemCount} items`}
+      aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
     >
       <span className="flex items-center" data-testid="cart-icon-fallback">
         🛒 Cart

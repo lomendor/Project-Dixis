@@ -12,8 +12,10 @@ type Props = {
   image?: string | null
 }
 
+const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
+
 export function ProductCard({ id, title, producer, producerId, priceCents, image }: Props) {
-  const price = typeof priceCents === 'number' ? (priceCents / 100).toFixed(2) + '€' : '—'
+  const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
 
