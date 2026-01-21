@@ -40,9 +40,9 @@ UI/a11y only. No business logic changes.
 - [x] All aria-labels are in Greek
 - [x] Missing translation keys added
 - [x] `pnpm lint` passes
-- [ ] PR created + CI green
-- [ ] Merged
+- [x] PR created + CI green
+- [x] Merged
 
 ## Result
 
-**PENDING** — Awaiting CI verification.
+**PASS** — PR #2367 merged, commit `3ed150cf`.

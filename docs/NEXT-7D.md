@@ -16,6 +16,15 @@
 
 (none)
 
+### Recently Completed
+
+- ✅ **UI-A11Y-EL-01**: Greek localization and accessibility fixes
+  - PR #2367 merged, commit `3ed150cf`
+  - EUR price formatting to el-GR locale (12,50 € instead of 12.50€)
+  - Greek aria-labels for CartIcon and Header mobile menu
+  - Added missing checkout Stripe translation keys
+  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-A11Y-EL-01.md`
+
 ---
 
 ## Completed
