@@ -1,9 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass UI-HEADER-NAV-04)
+**Last Updated**: 2026-01-21 (Pass PRODUCER-DASHBOARD-IA-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass PRODUCER-DASHBOARD-IA-01: Producer Dashboard IA Audit
+
+**Status**: ✅ PASS — CLOSED (docs-only)
+
+Audited and documented producer dashboard routes, entry points, and E2E test coverage.
+
+### Findings
+
+| Item | Status |
+|------|--------|
+| Producer routes | 10 routes exist (dashboard, products, orders, analytics, settings, onboarding) |
+| Entry point | `/producer/dashboard` via `user-menu-dashboard` testid in Header dropdown |
+| Mobile entry | `mobile-nav-dashboard` in mobile menu |
+| AuthGuard | All pages protected with `requireRole="producer"` |
+| E2E tests | `header-nav.spec.ts:140` verifies dropdown link |
+
+### What We Know Now
+
+- Producer dashboard is fully functional for V1
+- Entry points exist and are E2E tested
+- Minor issue: Quick actions link to `/my/` routes (functional via redirects)
+
+### Artifacts
+
+- `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md` (updated)
+- `docs/AGENT/SUMMARY/Pass-PRODUCER-DASHBOARD-IA-01.md`
 
 ---
 
