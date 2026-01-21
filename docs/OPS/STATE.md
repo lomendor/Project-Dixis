@@ -9,27 +9,29 @@
 
 ## 2026-01-21 — Pass PROD-EMAIL-UTF8-PROOF-01: Production Email UTF-8 Verification
 
-**Status**: ⏳ AWAITING HUMAN VERIFICATION
+**Status**: ⚠️ PARTIAL PASS
 
-Production verification of Greek email encoding after EMAIL-UTF8-01 fix.
+Production verification revealed that EMAIL-UTF8-01 fix is incomplete.
 
-### Action Taken
+### Findings
 
-- Triggered password reset email via `POST https://dixis.gr/api/v1/auth/password/forgot`
-- Target: `kourkoutisp@gmail.com`
-- Timestamp: 2026-01-21 00:00 UTC
+| Part | Status |
+|------|--------|
+| Subject | ✅ PASS — Greek displays correctly |
+| HTML body | ⚠️ UNKNOWN — visual OK in Gmail |
+| **text/plain body** | ❌ FAIL — mojibake via Gmail API extraction |
 
-### Expected Email
+### Impact
 
-| Element | Greek Text |
-|---------|------------|
-| Subject | Επαναφορά Κωδικού - Dixis |
-| Body | Γεια σας, Λάβαμε αίτημα... |
+- Text-only email clients will show garbled Greek text
+- Gmail API extraction returns mojibake
+- Screen readers may be affected
 
-### Verification Required (Human)
+### Follow-Up Required
 
-1. Check inbox for email from `no-reply@dixis.gr`
-2. Verify Greek text displays correctly (no mojibake)
+**Pass EMAIL-UTF8-02** needed to fix text/plain part encoding:
+- Ensure `Content-Type: text/plain; charset=UTF-8`
+- Ensure `Content-Transfer-Encoding: quoted-printable` or `base64`
 
 ### Artifacts
 

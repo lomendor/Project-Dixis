@@ -7,8 +7,9 @@
 
 ## Next Pass Recommendation
 
-- No immediate pass recommended — all known issues resolved.
-- Continue monitoring production health.
+- **EMAIL-UTF8-02** (P2): Fix text/plain part encoding for Greek emails
+  - PROD-EMAIL-UTF8-PROOF-01 revealed text/plain part shows mojibake
+  - Scope: Ensure proper charset + Content-Transfer-Encoding on all MIME parts
 
 ---
 
@@ -86,9 +87,9 @@
   - Tests: 3 tests, 15 assertions (Greek characters preserved)
   - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
 
-- ⏳ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
-  - Password reset triggered to `kourkoutisp@gmail.com`
-  - Awaiting human verification of received email
+- ⚠️ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
+  - **PARTIAL PASS**: Subject OK, but text/plain body shows mojibake
+  - Follow-up: EMAIL-UTF8-02 needed for proper MIME encoding
   - Evidence: `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
 
 ### Admin Dashboard Audit
