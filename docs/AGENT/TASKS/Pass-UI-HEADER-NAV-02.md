@@ -42,9 +42,9 @@ Frontend header/nav UI + E2E tests + docs only. No business logic changes.
 ## DoD
 
 - [x] Build passes (TypeScript)
-- [ ] PR created + CI green
-- [ ] Merged
+- [x] PR created + CI green
+- [x] Merged
 
 ## Result
 
-**PENDING** — Awaiting CI verification.
+**PASS** — PR #2372 merged (commit 18e19441).

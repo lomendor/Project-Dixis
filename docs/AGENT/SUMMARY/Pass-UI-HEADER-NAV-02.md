@@ -1,7 +1,7 @@
 # Pass: UI-HEADER-NAV-02
 
 **Date (UTC):** 2026-01-21
-**Commit:** TBD (pending PR merge)
+**Commit:** 18e19441
 **Environment:** Frontend E2E Tests
 
 ---
@@ -67,7 +67,7 @@ No code change needed — logo was already correct.
 
 - `docs/AGENT/PLANS/Pass-UI-HEADER-NAV-02.md`
 - `docs/AGENT/TASKS/Pass-UI-HEADER-NAV-02.md`
-- PR: TBD
+- PR: #2372 (merged)
 
 ---
 
