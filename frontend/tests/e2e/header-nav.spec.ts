@@ -30,14 +30,14 @@ test.describe('Header Navigation - Guest @smoke', () => {
   });
 
   test('guest nav shows correct items', async ({ page }) => {
-    // Should show Products link
-    await expect(page.locator('header').getByRole('link', { name: /προϊόντα|products/i })).toBeVisible();
+    // Should show Products link (use exact link, not aria-label which might match cart)
+    await expect(page.locator('header nav').getByRole('link', { name: /προϊόντα|products/i })).toBeVisible();
 
     // Should show Track Order link
-    await expect(page.locator('header').getByRole('link', { name: /παρακολούθηση|track/i })).toBeVisible();
+    await expect(page.locator('header nav').getByRole('link', { name: /παρακολούθηση|track/i })).toBeVisible();
 
     // Should show Producers link
-    await expect(page.locator('header').getByRole('link', { name: /παραγωγοί|producers/i })).toBeVisible();
+    await expect(page.locator('header nav').getByRole('link', { name: /παραγωγοί|producers/i })).toBeVisible();
 
     // Should show Login link
     await expect(page.locator('[data-testid="nav-login"]')).toBeVisible();
