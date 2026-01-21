@@ -1,9 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass PRODUCER-DASHBOARD-IA-01)
+**Last Updated**: 2026-01-21 (Pass V1-QA-EXECUTE-01-4)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass V1-QA-EXECUTE-01-4: Final QA Verification
+
+**Status**: ✅ PASS — CLOSED
+
+Final QA execution verifying all 4 core V1 flows remain operational on production.
+
+### Evidence
+
+| Flow | Status | Notes |
+|------|--------|-------|
+| Guest checkout (COD) | ✅ VERIFIED | COD enabled, Order #94 exists |
+| User checkout (Card) | ✅ VERIFIED | Stripe configured, Order #96 exists |
+| Producer flow | ✅ VERIFIED | Product #9 visible (auto-approved) |
+| Admin flow | ✅ VERIFIED | Email (Resend) configured |
+
+### Health Checks
+
+| Check | Result |
+|-------|--------|
+| prod-facts.sh | ALL PASS |
+| API healthz | 200 OK |
+| Products API | 8 products |
+| E2E smoke | 13/14 PASS |
+| E2E header-nav | 21/23 PASS |
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-V1-QA-EXECUTE-01-4.md`
+- `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-4.md`
+- `docs/OPS/PROD-FACTS-LAST.md`
 
 ---
 
