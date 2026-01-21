@@ -1,167 +1,193 @@
 # Header Navigation V1 Rules
 
 **Created:** 2026-01-21
-**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-03)
+**Updated:** 2026-01-21 (Pass UI-HEADER-NAV-04)
 **Status:** Canonical source of truth for header/navbar behavior
 
 ---
 
-## Core Principles
+## Core Layout Principles
 
-1. **Logo always visible** — The Dixis logo must appear in all states (guest + logged-in) and link to `/`
-2. **No dev/test links** — Error pages like "Απαγορεύεται" or "Forbidden" must NEVER appear in navigation
-3. **Predictable by role** — Menu items are determined by authentication state and user role
-4. **EL-first with EN toggle** — Greek labels by default, language switcher available
-5. **Mobile-first** — Hamburger menu on mobile with 48px touch targets
-6. **No Track Order in top nav** — "Παρακολούθηση παραγγελίας" is NOT a top-level nav item (accessible via footer or direct URL)
+1. **Logo always visible** — Dixis logo (h-9, ~36px) must appear in all states and link to `/`
+2. **Minimal primary nav** — Max 2-3 links in the header (Products, Producers)
+3. **No Track Order** — "Παρακολούθηση παραγγελίας" is NOT in header (footer or `/orders/lookup`)
+4. **No username as nav item** — User name appears ONLY inside user dropdown, not as top-level text
+5. **User dropdown for actions** — Logout, My Orders, Dashboard links go in dropdown
+6. **Clean icon utilities** — Language switcher, notifications (auth only), cart
 
----
+### Desktop Layout (≥md / 768px)
 
-## Navigation by Role
+```
+[Logo]  [Products] [Producers]                    [EL|EN] [🔔?] [🛒] [User ▼]
+  ↑         ↑                                        ↑      ↑     ↑     ↑
+  h-9    primary nav                            lang  bell  cart  dropdown
+```
 
-### Guest (Not Logged In)
+### Mobile Layout (<md)
 
-| Item | Label (EL) | Label (EN) | Route | testid |
-|------|------------|------------|-------|--------|
-| Logo | Dixis | Dixis | `/` | `nav-logo` |
-| Products | Προϊόντα | Products | `/products` | — |
-| Producers | Παραγωγοί | Producers | `/producers` | — |
-| Login | Είσοδος | Login | `/auth/login` | `nav-login` |
-| Register | Εγγραφή | Sign Up | `/auth/register` | `nav-register` |
-| Cart | Καλάθι | Cart | `/cart` | `nav-cart-guest` |
-| Language | EL/EN | EL/EN | — | `lang-el`, `lang-en` |
-
-**NOT visible to Guest:**
-- Admin link (`nav-admin`)
-- Producer Dashboard (`nav-producer-dashboard`)
-- My Orders (`nav-my-orders`)
-- Logout (`logout-btn`)
+```
+[Logo]                                          [EL|EN] [🔔?] [🛒] [☰]
+```
+- Hamburger opens: Products, Producers, role-specific links, user section with logout
 
 ---
 
-### Consumer (Logged In, No Special Role)
+## Navigation by State
 
+### A) Guest (Not Logged In)
+
+**Primary Nav:**
 | Item | Label (EL) | Label (EN) | Route | testid |
 |------|------------|------------|-------|--------|
-| Logo | Dixis | Dixis | `/` | `nav-logo` |
+| Logo | Dixis | Dixis | `/` | `header-logo` |
 | Products | Προϊόντα | Products | `/products` | — |
 | Producers | Παραγωγοί | Producers | `/producers` | — |
-| My Orders | Οι Παραγγελίες μου | My Orders | `/account/orders` | `nav-my-orders` |
-| User Name | (display) | (display) | — | `nav-user-name` |
-| Logout | Αποσύνδεση | Logout | — | `logout-btn` |
-| Cart | Cart | Cart | `/cart` | `nav-cart` |
-| Language | EL/EN | EL/EN | — | `lang-el`, `lang-en` |
 
-**NOT visible to Consumer:**
-- Login (`nav-login`)
-- Register (`nav-register`)
-- Admin link (`nav-admin`)
-- Producer Dashboard (`nav-producer-dashboard`)
+**Utility Icons:**
+| Item | testid |
+|------|--------|
+| Language Toggle | `lang-el`, `lang-en` |
+| Cart | `header-cart` |
+
+**Auth Buttons (right side):**
+| Item | Label (EL) | Route | testid |
+|------|------------|-------|--------|
+| Login | Είσοδος | `/auth/login` | `nav-login` |
+| Register | Εγγραφή | `/auth/register` | `nav-register` |
+
+**NOT visible:**
+- User dropdown
+- Notification bell
+- My Orders
+- Admin/Producer Dashboard
+- Logout
 
 ---
 
-### Producer Role
+### B) Logged-in Consumer
 
-| Item | Label (EL) | Label (EN) | Route | testid |
-|------|------------|------------|-------|--------|
-| Logo | Dixis | Dixis | `/` | `nav-logo` |
-| Products | Προϊόντα | Products | `/products` | — |
-| Producers | Παραγωγοί | Producers | `/producers` | — |
-| Producer Dashboard | Πίνακας Ελέγχου | Dashboard | `/producer/dashboard` | `nav-producer-dashboard` |
-| User Name | (display) | (display) | — | `nav-user-name` |
-| Logout | Αποσύνδεση | Logout | — | `logout-btn` |
-| Language | EL/EN | EL/EN | — | `lang-el`, `lang-en` |
+**Primary Nav:** Same as Guest (Products, Producers)
 
-**NOT visible to Producer:**
-- Login (`nav-login`)
-- Register (`nav-register`)
-- Admin link (`nav-admin`)
-- My Orders (`nav-my-orders`)
-- Cart (shows message instead)
+**Utility Icons:**
+| Item | testid |
+|------|--------|
+| Language Toggle | `lang-el`, `lang-en` |
+| Notification Bell | `notification-bell` |
+| Cart | `header-cart` |
+
+**User Dropdown** (`header-user-menu`):
+| Item | Label (EL) | Route | testid |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| My Orders | Οι Παραγγελίες μου | `/account/orders` | `user-menu-orders` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
+
+**NOT visible (top level):**
+- Login/Register buttons
+- User name as standalone text
+- Admin/Producer Dashboard links
 
 ---
 
-### Admin Role
+### C) Logged-in Producer
 
-| Item | Label (EL) | Label (EN) | Route | testid |
-|------|------------|------------|-------|--------|
-| Logo | Dixis | Dixis | `/` | `nav-logo` |
-| Products | Προϊόντα | Products | `/products` | — |
-| Producers | Παραγωγοί | Producers | `/producers` | — |
-| Admin | Admin | Admin | `/admin` | `nav-admin` |
-| User Name | (display) | (display) | — | `nav-user-name` |
-| Logout | Αποσύνδεση | Logout | — | `logout-btn` |
-| Cart | Cart | Cart | `/cart` | `nav-cart-admin` |
-| Language | EL/EN | EL/EN | — | `lang-el`, `lang-en` |
+**Primary Nav:** Same as Guest (Products, Producers)
 
-**NOT visible to Admin:**
-- Login (`nav-login`)
-- Register (`nav-register`)
-- Producer Dashboard (`nav-producer-dashboard`)
-- My Orders (`nav-my-orders`)
+**Utility Icons:**
+| Item | testid |
+|------|--------|
+| Language Toggle | `lang-el`, `lang-en` |
+| Notification Bell | `notification-bell` |
+
+**User Dropdown** (`header-user-menu`):
+| Item | Label (EL) | Route | testid |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| Dashboard | Πίνακας Ελέγχου | `/producer/dashboard` | `user-menu-dashboard` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
+
+**NOT visible:**
+- Cart (producers don't shop)
+- My Orders
+- Login/Register
+
+---
+
+### D) Logged-in Admin
+
+**Primary Nav:** Same as Guest (Products, Producers)
+
+**Utility Icons:**
+| Item | testid |
+|------|--------|
+| Language Toggle | `lang-el`, `lang-en` |
+| Notification Bell | `notification-bell` |
+| Cart | `header-cart` |
+
+**User Dropdown** (`header-user-menu`):
+| Item | Label (EL) | Route | testid |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| Admin Panel | Admin | `/admin` | `user-menu-admin` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
+
+**NOT visible:**
+- My Orders
+- Producer Dashboard
+- Login/Register
 
 ---
 
 ## Mobile Navigation
 
-Mobile uses a hamburger menu (`mobile-menu-button`) that expands to show:
-- Same items as desktop
-- 48px minimum touch targets
-- Full-width tap areas
-- Clear visual separation between sections
+**Visible always:** Logo, language toggle, notification bell (if auth), cart (if applicable), hamburger
 
-Mobile-specific testids:
+**Hamburger Menu Contents:**
+- Primary nav links (Products, Producers)
+- Role-specific links (My Orders / Dashboard / Admin)
+- User section with name + logout button
+- Guest: Login and Register buttons
+
+**Mobile-specific testids:**
 - `mobile-menu-button` — Hamburger icon
-- `mobile-menu` — Expanded menu container
-- `mobile-nav-login` — Mobile login link
-- `mobile-nav-register` — Mobile register link
-- `mobile-nav-my-orders` — Mobile my orders link
-- `mobile-nav-producer-dashboard` — Mobile producer dashboard link
-- `mobile-nav-admin` — Mobile admin link
-- `mobile-nav-user-name` — Mobile user name display
-- `mobile-logout-btn` — Mobile logout button
-- `mobile-lang-el`, `mobile-lang-en` — Mobile language switcher
+- `mobile-menu` — Expanded container
+- `mobile-nav-login`, `mobile-nav-register` — Guest auth
+- `mobile-nav-orders`, `mobile-nav-dashboard`, `mobile-nav-admin` — Role links
+- `mobile-user-section` — User info + logout
 
 ---
 
-## Items That Must NEVER Appear
+## Items NEVER in Header
 
-- "Απαγορεύεται" / "Forbidden" — This is an error message, not a nav item
-- "Παρακολούθηση παραγγελίας" / "Track Order" — Not a top-nav item (use footer or direct URL `/orders/lookup`)
-- `/legal/terms` link with error label — Removed from nav
-- Any route that returns 403/404 by design
+- "Απαγορεύεται" / "Forbidden"
+- "Παρακολούθηση παραγγελίας" / "Track Order"
 - Debug/test links
+- User name as standalone nav text (must be in dropdown only)
 
 ---
 
 ## Implementation Notes
 
-- Navigation items defined in `Header.tsx` via `navLinks` array
+- Navigation defined in `Header.tsx`
+- Logo: `h-9` (36px), `flex-shrink-0`, links to `/`
+- User dropdown: click to toggle, contains name + role links + logout
 - Translations in `messages/el.json` and `messages/en.json`
-- Role checks via `useAuth()` hook (`isProducer`, `isAdmin`, `isAuthenticated`)
-- Cart component: `@/components/cart/CartIcon`
-- Logo component: `@/components/brand/Logo`
-- **Logo flex-shrink-0** (UI-HEADER-NAV-03): Logo Link uses `flex-shrink-0` to prevent collapse on mobile when NotificationBell renders for authenticated users
+- Role checks via `useAuth()` hook
 
 ---
 
 ## E2E Test Coverage
 
 Tests in `frontend/tests/e2e/header-nav.spec.ts`:
-- Guest: Logo visible, correct items, no admin/producer links
-- Consumer: My Orders visible, no admin/producer links
-- Producer: Producer Dashboard visible, no admin/my-orders links
-- Admin: Admin link visible, no producer/my-orders links
-- Mobile: Hamburger menu works, logo visible
-- **Mobile + Auth**: Logo visible with mock auth on mobile viewport (regression test UI-HEADER-NAV-03)
+- Guest: logo visible, primary nav, no Track Order
+- Consumer: user dropdown works, My Orders in dropdown
+- Producer: Dashboard in dropdown, no cart
+- Admin: Admin link in dropdown
+- Mobile: hamburger works, logo visible, user section correct
 
 Tests in `frontend/tests/e2e/logo-repro.spec.ts`:
-- Logo visible for GUEST
-- Logo visible with MOCK AUTH (desktop)
-- Logo visible on MOBILE viewport (guest)
-- Logo visible on MOBILE viewport with MOCK AUTH (regression test for UI-HEADER-NAV-03)
-- Track Order NOT in top nav (UI-HEADER-NAV-02)
+- Logo visible all states (guest, auth, mobile)
 
 ---
 
-_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-03)_
+_Document: HEADER-NAV-V1.md | Updated: 2026-01-21 (Pass UI-HEADER-NAV-04)_
