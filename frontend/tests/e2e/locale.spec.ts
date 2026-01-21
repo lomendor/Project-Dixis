@@ -35,12 +35,22 @@ test.describe('Locale @smoke', () => {
       path: '/',
     }]);
 
-    // Navigate to login page
-    await page.goto('/auth/login');
-    await expect(page.getByTestId('page-title')).toBeVisible({ timeout: 15000 });
+    // Navigate to login page and wait for full load
+    await page.goto('/auth/login', { waitUntil: 'networkidle' });
 
-    // Title should be in Greek when cookie is set to 'el'
-    await expect(page.getByTestId('page-title')).toContainText('Σύνδεση');
+    // Wait for login form to be visible (stable indicator that hydration is complete)
+    await expect(page.getByTestId('login-form')).toBeVisible({ timeout: 15000 });
+
+    // Now check page title - use polling to handle hydration timing
+    await expect.poll(
+      async () => {
+        const title = page.getByTestId('page-title');
+        const isVisible = await title.isVisible().catch(() => false);
+        if (!isVisible) return '';
+        return await title.textContent() || '';
+      },
+      { timeout: 10000, message: 'Waiting for Greek page title to render' }
+    ).toContain('Σύνδεση');
   });
 
   test('locale cookie is respected when set', async ({ page, context }) => {
@@ -52,9 +62,11 @@ test.describe('Locale @smoke', () => {
       path: '/',
     }]);
 
-    // Navigate to products page
-    await page.goto('/products');
-    await page.waitForTimeout(1500); // Wait for hydration and locale detection
+    // Navigate to products page and wait for stable state
+    await page.goto('/products', { waitUntil: 'networkidle' });
+
+    // Wait for page content to be visible (indicates hydration complete)
+    await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
 
     // Cookie should still be there
     const cookies = await context.cookies();
