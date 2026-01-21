@@ -1,9 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass V1-QA-EXECUTE-01-4)
+**Last Updated**: 2026-01-21 (Pass CI-FLAKE-NOTIFICATIONS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass CI-FLAKE-NOTIFICATIONS-01: Fix Notification Bell Flaky Test
+
+**Status**: ✅ PASS — CLOSED
+
+Fixed E2E smoke test failure caused by duplicate `notification-bell` testid.
+
+### Root Cause
+
+`NotificationBell` renders twice in Header.tsx (desktop + mobile), both with same testid.
+Playwright strict mode requires unique selectors.
+
+### Fix
+
+Test-only: Use `.first()` to target desktop bell.
+
+### Evidence
+
+| Check | Before | After |
+|-------|--------|-------|
+| E2E (PostgreSQL) | FAIL | PASS |
+| notifications.spec.ts | 0/3 | 3/3 |
+
+### PR
+
+- #2379 merged, commit `7a1d1408`
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-CI-FLAKE-NOTIFICATIONS-01.md`
+- `docs/AGENT/SUMMARY/Pass-CI-FLAKE-NOTIFICATIONS-01.md`
 
 ---
 
