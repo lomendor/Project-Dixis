@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass DOCS-LAUNCH-ANNOUNCE-01)
+**Last Updated**: 2026-01-21 (Pass UI-NAV-HEADER-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass UI-NAV-HEADER-01: Header Navigation IA Fix
+
+**Status**: ✅ PASS — CLOSED
+
+Fixed header/navbar to follow consistent IA rules.
+
+### Changes
+
+| Item | Description |
+|------|-------------|
+| Removed "Απαγορεύεται" | No longer appears in nav (was using error translation) |
+| Added logo testid | `data-testid="nav-logo"` for E2E testing |
+| Track Order label | "Αριθμός παραγγελίας" → "Παρακολούθηση παραγγελίας" |
+| E2E tests | `frontend/tests/e2e/header-nav.spec.ts` |
+| Nav rules doc | `docs/PRODUCT/HEADER-NAV-V1.md` |
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-UI-NAV-HEADER-01.md`
 
 ---
 
