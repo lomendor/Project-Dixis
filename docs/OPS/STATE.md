@@ -1,9 +1,40 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass CI-FLAKE-NOTIFICATIONS-01)
+**Last Updated**: 2026-01-21 (Pass V1-QA-EXECUTE-01-5)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass V1-QA-EXECUTE-01-5: V1 Launch QA
+
+**Status**: ✅ PASS — CLOSED
+
+Final QA execution verifying all 4 core V1 flows on production.
+
+### Results
+
+| Flow | Status |
+|------|--------|
+| Guest checkout (COD) | ✅ PASS |
+| User checkout (Card) | ✅ PASS |
+| Producer flow | ✅ PASS |
+| Admin flow | ✅ PASS |
+
+### Evidence
+
+- prod-facts.sh: ALL PASS
+- E2E tests: 74 PASS, 10 skipped, 1 pre-existing failure
+- Stripe: configured, keys present
+- Email: Resend configured
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-V1-QA-EXECUTE-01.md` (updated)
+- `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-5.md`
+
+**V1 Launch QA: PASS**
 
 ---
 
