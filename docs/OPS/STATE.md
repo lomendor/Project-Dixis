@@ -1,9 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-21 (Pass UI-NAV-HEADER-01)
+**Last Updated**: 2026-01-21 (Pass CI-FLAKE-LOCALE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-21 — Pass CI-FLAKE-LOCALE-01: Stabilize Flaky Locale Test
+
+**Status**: IN PROGRESS
+
+Stabilizing flaky `locale.spec.ts` Playwright test that fails in CI due to React hydration timing.
+
+### Changes
+
+| Item | Description |
+|------|-------------|
+| Navigation | Added `waitUntil: 'networkidle'` for stable page load |
+| Wait strategy | Wait for `login-form` before checking `page-title` |
+| Assertion | Use `expect.poll()` instead of direct `toContainText()` |
+| Fixed sleep | Removed `waitForTimeout(1500)`, use element waits |
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Pass-CI-FLAKE-LOCALE-01.md`
 
 ---
 

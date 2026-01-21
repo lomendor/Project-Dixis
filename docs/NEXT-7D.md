@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-21 (UI-NAV-HEADER-01)
+**Updated**: 2026-01-21 (CI-FLAKE-LOCALE-01)
 
 ---
 
@@ -12,11 +12,24 @@
 
 ---
 
+## In Progress
+
+### CI Reliability
+
+- **CI-FLAKE-LOCALE-01**: Stabilize `locale.spec.ts` flaky test
+  - Root cause: React hydration timing in CI
+  - Fix: Use `networkidle` + `login-form` wait + `expect.poll()` for resilient assertion
+  - Remove fixed `waitForTimeout(1500)` sleep
+  - Evidence: `docs/AGENT/SUMMARY/Pass-CI-FLAKE-LOCALE-01.md`
+
+---
+
 ## Completed
 
 ### UI/UX Fixes
 
 - ✅ **UI-NAV-HEADER-01**: Header Navigation IA Fix
+  - PR #2362 merged, commit `0d31b905`
   - Removed "Απαγορεύεται" from nav (was using error translation)
   - Changed label "Αριθμός παραγγελίας" → "Παρακολούθηση παραγγελίας"
   - Added E2E tests: `frontend/tests/e2e/header-nav.spec.ts`
