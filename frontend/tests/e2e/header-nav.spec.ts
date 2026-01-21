@@ -84,12 +84,17 @@ test.describe('Header Navigation - Logged-in Consumer @smoke', () => {
     // Login as consumer
     await page.goto('/auth/login');
 
-    // Wait for login form to be ready
-    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
+    // Wait for login form to be ready and hydration to complete
+    const emailInput = page.locator('[name="email"]');
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
 
-    await page.fill('[name="email"]', 'consumer@example.com');
-    await page.fill('[name="password"]', 'password');
-    await page.click('button[type="submit"]');
+    // Wait for React hydration to stabilize before interacting
+    await page.waitForTimeout(500);
+
+    // Use locator-based fill which handles re-attaching elements
+    await emailInput.fill('consumer@example.com');
+    await page.locator('[name="password"]').fill('password');
+    await page.locator('button[type="submit"]').click();
 
     // Wait for redirect or auth state change
     await page.waitForURL(/\//, { timeout: 15000 }).catch(() => {});
@@ -146,12 +151,17 @@ test.describe('Header Navigation - Producer Role @smoke', () => {
     // Login as producer
     await page.goto('/auth/login');
 
-    // Wait for login form to be ready
-    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
+    // Wait for login form to be ready and hydration to complete
+    const emailInput = page.locator('[name="email"]');
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
 
-    await page.fill('[name="email"]', 'producer@example.com');
-    await page.fill('[name="password"]', 'password');
-    await page.click('button[type="submit"]');
+    // Wait for React hydration to stabilize before interacting
+    await page.waitForTimeout(500);
+
+    // Use locator-based fill which handles re-attaching elements
+    await emailInput.fill('producer@example.com');
+    await page.locator('[name="password"]').fill('password');
+    await page.locator('button[type="submit"]').click();
 
     // Wait for redirect
     await page.waitForURL(/\/|\/producer/, { timeout: 15000 }).catch(() => {});
@@ -179,12 +189,17 @@ test.describe('Header Navigation - Admin Role @smoke', () => {
     // Login as admin
     await page.goto('/auth/login');
 
-    // Wait for login form to be ready
-    await expect(page.locator('[name="email"]')).toBeVisible({ timeout: 15000 });
+    // Wait for login form to be ready and hydration to complete
+    const emailInput = page.locator('[name="email"]');
+    await expect(emailInput).toBeVisible({ timeout: 15000 });
 
-    await page.fill('[name="email"]', 'admin@example.com');
-    await page.fill('[name="password"]', 'password');
-    await page.click('button[type="submit"]');
+    // Wait for React hydration to stabilize before interacting
+    await page.waitForTimeout(500);
+
+    // Use locator-based fill which handles re-attaching elements
+    await emailInput.fill('admin@example.com');
+    await page.locator('[name="password"]').fill('password');
+    await page.locator('button[type="submit"]').click();
 
     // Wait for redirect
     await page.waitForURL(/\/|\/admin/, { timeout: 15000 }).catch(() => {});
