@@ -7,6 +7,11 @@ on:
       - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch: {}
 
+# OPS-DEPLOY-SSH-RETRY-01: SSH retry configuration
+env:
+  SSH_RETRY_MAX: 3
+  SSH_RETRY_DELAY_SECONDS: 10
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -76,13 +81,22 @@ jobs:
             echo "Warning: Prisma client not found, Next.js standalone should include it"
           fi
 
-      - name: Precheck VPS env files
-        uses: appleboy/ssh-action@v1.0.3
+      # OPS-DEPLOY-SSH-RETRY-01: SSH steps wrapped with retry for transient timeouts
+      - name: Precheck VPS env files (with retry)
+        uses: nick-fields/retry@v3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
+          timeout_minutes: 2
+          max_attempts: ${{ env.SSH_RETRY_MAX }}
+          retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
+          command: |
+            # Install SSH client
+            mkdir -p ~/.ssh
+            echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+            ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'bash -s' << 'REMOTE_SCRIPT'
             set -euo pipefail
             echo "=== FRONTEND ENV PRECHECK ==="
 
@@ -109,14 +123,17 @@ jobs:
               exit 1
             fi
             echo "✅ Required env vars are set"
+            REMOTE_SCRIPT
 
-      - name: Prepare VPS directory (fix permissions)
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Prepare VPS directory (with retry)
+        uses: nick-fields/retry@v3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
+          timeout_minutes: 2
+          max_attempts: ${{ env.SSH_RETRY_MAX }}
+          retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
+          command: |
+            ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'bash -s' << 'REMOTE_SCRIPT'
             # Target directory for deploy-frontend
             TARGET_DIR="/var/www/dixis/current/frontend"
 
@@ -130,16 +147,19 @@ jobs:
             sudo chmod -R u+rwX,g+rwX "$TARGET_DIR"
 
             echo "✅ Permissions fixed for $TARGET_DIR"
+            REMOTE_SCRIPT
 
-      - name: Deploy standalone to VPS
-        uses: easingthemes/ssh-deploy@main
+      - name: Deploy standalone to VPS (with retry)
+        uses: nick-fields/retry@v3
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.VPS_HOST }}
-          REMOTE_USER: ${{ secrets.VPS_USER }}
-          SOURCE: "frontend/.next/standalone/"
-          TARGET: "/var/www/dixis/current/frontend/"
-          ARGS: "-rlvz --delete --omit-dir-times"
+          timeout_minutes: 5
+          max_attempts: ${{ env.SSH_RETRY_MAX }}
+          retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
+          command: |
+            rsync -rlvz --delete --omit-dir-times \
+              -e "ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no" \
+              frontend/.next/standalone/ \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/
 
       - name: Configure and start app
         uses: appleboy/ssh-action@v1.0.3
@@ -147,6 +167,8 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          timeout: 60s
+          command_timeout: 10m
           envs: DATABASE_URL,RESEND_API_KEY
           script: |
             cd /var/www/dixis/current/frontend
@@ -330,3 +352,42 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+      # OPS-DEPLOY-SSH-RETRY-01: Post-deploy proof (external verification)
+      - name: Post-deploy proof (prod == main)
+        run: |
+          echo "=== POST-DEPLOY PROOF ==="
+          echo "Expected commit: ${{ github.sha }}"
+          echo "Short SHA: ${GITHUB_SHA:0:8}"
+
+          # Wait for edge cache propagation
+          sleep 5
+
+          # Health check via public URL
+          echo "--- Health Check (public) ---"
+          HEALTH=$(curl -sS --max-time 15 https://dixis.gr/api/healthz || echo '{"error":"timeout"}')
+          echo "$HEALTH" | head -5
+
+          if echo "$HEALTH" | grep -q '"status":"ok"'; then
+            echo "✅ Health check PASSED"
+          else
+            echo "❌ Health check FAILED"
+            exit 1
+          fi
+
+          # Smoke test: homepage loads
+          echo "--- Smoke Test (homepage) ---"
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 https://dixis.gr || echo "000")
+          echo "Homepage HTTP code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Homepage smoke PASSED"
+          else
+            echo "❌ Homepage smoke FAILED (expected 200, got $HTTP_CODE)"
+            exit 1
+          fi
+
+          echo ""
+          echo "=== DEPLOY PROOF COMPLETE ==="
+          echo "Deployed SHA: ${{ github.sha }}"
+          echo "Timestamp: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"

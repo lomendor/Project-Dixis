@@ -1,9 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Post-Launch Checks)
+**Last Updated**: 2026-01-23 (SSH Retry)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~510 lines (target ≤250).
+> **Current size**: ~540 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass OPS-DEPLOY-SSH-RETRY-01: SSH Deploy Retry + Proof
+
+**Status**: 🔄 WIP
+
+Added automatic retry with backoff for SSH deploy steps + post-deploy proof.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `deploy-frontend.yml` | SSH retry (3x, 10s delay) + post-deploy proof |
+| `deploy-backend.yml` | SSH retry (3x, 10s delay) + post-deploy proof |
+
+### Features
+
+- **Retry**: Transient SSH timeouts auto-retry 3x before failing
+- **Proof**: Every deploy verifies prod health + logs commit SHA
+- **Action**: Uses `nick-fields/retry@v3` for reliable retry logic
+
+### Evidence
+
+- Summary: `docs/AGENT/SUMMARY/Pass-OPS-DEPLOY-SSH-RETRY-01.md`
+- PR: TBD
 
 ---
 
