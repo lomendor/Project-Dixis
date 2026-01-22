@@ -1,9 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass V1-QA-EXECUTE-01-6)
+**Last Updated**: 2026-01-22 (Pass POST-LAUNCH-CHECKS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass POST-LAUNCH-CHECKS-01: Post-Launch Monitoring
+
+**Status**: ✅ PASS — CLOSED
+
+Post-launch health checks and VPS hygiene documentation.
+
+### Health Results (2026-01-22 00:34 UTC)
+
+| Check | Status |
+|-------|--------|
+| prod-facts.sh | ✅ ALL CHECKS PASSED |
+| perf-baseline.sh | ✅ All < 300ms TTFB |
+| All endpoints | ✅ 200 OK |
+
+### Performance
+
+| Endpoint | Median TTFB |
+|----------|-------------|
+| `/` | 183ms |
+| `/products` | 179ms |
+| `/api/v1/public/products` | 258ms |
+
+### Deliverables
+
+- VPS hygiene checklist: `docs/OPS/RUNBOOKS/VPS-HYGIENE-CHECKLIST.md`
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-POST-LAUNCH-CHECKS-01.md`
+- `docs/AGENT/SUMMARY/Pass-POST-LAUNCH-CHECKS-01.md`
+
+**Post-Launch Monitoring: PASS**
 
 ---
 
