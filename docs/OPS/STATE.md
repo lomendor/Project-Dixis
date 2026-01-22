@@ -1,9 +1,58 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass POST-LAUNCH-CHECKS-01)
+**Last Updated**: 2026-01-22 (Pass VPS-MAINT-WINDOW-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass VPS-MAINT-WINDOW-01: VPS Maintenance Window
+
+**Status**: ✅ PASS — CLOSED
+
+Executed VPS hygiene checklist (read-only checks) on production VPS.
+
+### VPS Resource Metrics
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Disk | 13% used (12G/96G) | OK |
+| Memory | 40% used (3.1G/7.8G) | OK |
+| CPU Load | 0.03 | OK |
+| Uptime | 8 days, 3:34 | Stable |
+
+### Service Health
+
+| Service | Status | Notes |
+|---------|--------|-------|
+| Nginx | Running | 8+ days uptime |
+| PHP-FPM | Running | 4+ days uptime, 16318 requests |
+
+### Pending Updates
+
+| Package | Type | Action |
+|---------|------|--------|
+| cloud-init | System | Deferred (non-critical) |
+| libgd3 | Library | Deferred (non-critical) |
+
+**Reboot Required**: NO
+
+### Production Health
+
+```
+healthz: ok
+database: connected
+stripe: configured
+email: configured (resend)
+```
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-VPS-MAINT-WINDOW-01.md`
+- `docs/AGENT/SUMMARY/Pass-VPS-MAINT-WINDOW-01.md`
+
+**VPS Hygiene Checks: PASS**
 
 ---
 
