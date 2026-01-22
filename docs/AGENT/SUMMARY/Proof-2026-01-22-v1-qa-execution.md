@@ -52,7 +52,7 @@
 - Payment Intent ID
 - Amount (cents)
 
-**Status**: PENDING
+**Status**: ✅ PASS
 
 ---
 
@@ -137,8 +137,51 @@ curl -sf "https://dixis.gr/api/v1/public/orders/99"
 
 ### Flow B: Auth User Checkout (Card)
 
+**Result**: ✅ PASS
+**Executed**: 2026-01-22T12:09:01Z
+
+| Field | Value |
+|-------|-------|
+| User ID | 11 |
+| Order ID | 102 |
+| Order Number | ORD-000102 |
+| Status | pending |
+| Payment Method | CARD |
+| Total | €26.99 EUR |
+| Created At | 2026-01-22T12:09:02.000000Z |
+| Payment Intent | `pi_3SsMh9Q9Xukpkfmb2vwY2ktn` |
+| PI Amount | 2699 cents (eur) |
+| PI Status | requires_payment_method |
+
+**API Calls**:
+```bash
+# Login
+curl -sf -X POST "https://dixis.gr/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"consumer@example.com","password":"***"}'
+
+# Create order
+curl -sf -X POST "https://dixis.gr/api/v1/orders" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"product_id":10,"quantity":1}],"currency":"EUR","shipping_method":"HOME","payment_method":"CARD","shipping_address":{...}}'
+
+# Init payment
+curl -sf -X POST "https://dixis.gr/api/v1/payments/orders/102/init" \
+  -H "Authorization: Bearer $TOKEN"
 ```
-(to be filled)
+
+**Response snippet** (no PII):
+```json
+{
+  "message": "Payment initialized successfully",
+  "payment": {
+    "payment_intent_id": "pi_3SsMh9Q9Xukpkfmb2vwY2ktn",
+    "amount": 2699,
+    "currency": "eur",
+    "status": "requires_payment_method"
+  }
+}
 ```
 
 ### Flow C: Producer Flow
@@ -166,7 +209,7 @@ curl -sf "https://dixis.gr/api/v1/public/orders/99"
 | Flow | Status | Evidence |
 |------|--------|----------|
 | A. Guest COD | ✅ PASS | Order #99, ORD-000099, €19.99 |
-| B. Auth Card | PENDING | - |
+| B. Auth Card | ✅ PASS | Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn` |
 | C. Producer | PENDING | - |
 | D. Admin | PENDING | - |
 
