@@ -87,7 +87,7 @@
 - Old status → New status
 - Updated timestamp
 
-**Status**: PENDING
+**Status**: ✅ PASS
 
 ---
 
@@ -237,9 +237,50 @@ curl -sf "https://dixis.gr/api/v1/public/products/11"
 
 ### Flow D: Admin Flow
 
+**Result**: ✅ PASS
+**Executed**: 2026-01-22T12:41:54Z
+
+| Field | Value |
+|-------|-------|
+| Admin User ID | 9 |
+| Target Order ID | 99 |
+| Status BEFORE | pending |
+| Status AFTER | processing |
+| Updated At BEFORE | 2026-01-22T11:53:26.000000Z |
+| Updated At AFTER | 2026-01-22T12:41:55.000000Z |
+| Email Notification | Code-verified (OrderEmailService called) |
+
+**API Calls**:
+```bash
+# Login as admin
+curl -sf -X POST "https://dixis.gr/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"***"}'
+
+# Get orders list
+curl -sf "https://dixis.gr/api/v1/admin/orders" \
+  -H "Authorization: Bearer $TOKEN"
+
+# Update order status
+curl -sf -X PATCH "https://dixis.gr/api/v1/admin/orders/99/status" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"processing","note":"QA V1 Flow D test"}'
 ```
-(to be filled)
+
+**Response snippet** (no PII):
+```json
+{
+  "message": "Order status updated successfully",
+  "order": {
+    "id": 99,
+    "status": "processing",
+    "updated_at": "2026-01-22T12:41:55.000000Z"
+  }
+}
 ```
+
+**Email Proof Note**: Email notification is triggered via `OrderEmailService::sendOrderStatusNotification()` at AdminOrderController:142. Direct email delivery verification requires inbox check or Resend dashboard access.
 
 ---
 
@@ -256,7 +297,7 @@ curl -sf "https://dixis.gr/api/v1/public/products/11"
 | A. Guest COD | ✅ PASS | Order #99, ORD-000099, €19.99 |
 | B. Auth Card | ✅ PASS | Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn` |
 | C. Producer | ✅ PASS | Product #11, Green Farm Co., publicly visible |
-| D. Admin | PENDING | - |
+| D. Admin | ✅ PASS | Order #99, pending → processing, email code-verified |
 
 ---
 
