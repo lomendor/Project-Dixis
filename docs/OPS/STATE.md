@@ -7,6 +7,33 @@
 
 ---
 
+## 2026-01-22 — Pass V1-QA-PROD-PROOF-01: V1 Production QA Proof
+
+**Status**: ✅ PASS — CLOSED
+
+Created deterministic curl-based production QA script and executed proof.
+
+### Results
+
+| Check | Result |
+|-------|--------|
+| Backend health | ✅ PASS |
+| Products API (30 products) | ✅ PASS |
+| Products page (HTTP 200) | ✅ PASS |
+| Login endpoint | ✅ PASS (422 expected) |
+| Register endpoint | ✅ PASS (422 expected) |
+| Password reset | ✅ PASS |
+
+### Evidence
+
+- **Script**: `scripts/prod-qa-v1.sh`
+- **Summary**: `docs/AGENT/SUMMARY/Pass-V1-QA-PROD-PROOF-01.md`
+- **Commit**: `4ecb6020`
+
+**V1 Production QA: ALL PASS (6/6)**
+
+---
+
 ## 2026-01-22 — Pass PERF-BASELINE-CAPTURE-01: Performance Baseline Capture
 
 **Status**: ✅ PASS — CLOSED
