@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
-import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function OrdersList() {
@@ -77,8 +76,6 @@ export default function OrdersList() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import { formatShippingAddress, hasShippingAddress } from '@/lib/orderUtils';
-import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function OrderDetails() {
@@ -77,8 +76,6 @@ export default function OrderDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-6">

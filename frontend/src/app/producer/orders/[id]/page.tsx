@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
-import Navigation from '@/components/Navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { formatCurrency } from '@/env';
 
@@ -145,8 +144,6 @@ export default function ProducerOrderDetailsPage() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
-
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Link */}
           <Link

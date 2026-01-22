@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
-import Navigation from '@/components/Navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { formatCurrency } from '@/env';
 import { useTranslations } from '@/contexts/LocaleContext';
@@ -156,8 +155,6 @@ export default function ProducerOrdersPage() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
       <div className="min-h-screen bg-gray-50" data-testid="producer-orders-page">
-        <Navigation />
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-6">
