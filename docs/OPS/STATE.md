@@ -1,9 +1,43 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass UI-HEADER-NAV-CLARITY-01)
+**Last Updated**: 2026-01-22 (Monitoring Proof)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Monitoring Proof (Routine)
+
+**Status**: ✅ ALL PASS
+
+Routine production health monitoring.
+
+### prod-facts.sh (10:30 UTC)
+
+| Check | Status |
+|-------|--------|
+| Backend Health | ✅ 200 |
+| Products API | ✅ 200 |
+| Products Page | ✅ 200 |
+| Product Detail | ✅ 200 |
+| Login Page | ✅ 200 |
+
+### perf-baseline.sh
+
+| Endpoint | Median TTFB |
+|----------|-------------|
+| `/` | 184ms |
+| `/products` | 181ms |
+| `/api/v1/public/products` | 263ms |
+
+All under 300ms threshold.
+
+### Artifacts
+
+- `docs/AGENT/SUMMARY/Proof-2026-01-22-monitoring.md`
+
+**Production: HEALTHY**
 
 ---
 
