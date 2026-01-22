@@ -1,9 +1,33 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass LAUNCH-EXECUTE-01)
+**Last Updated**: 2026-01-22 (Pass V1-QA-EXECUTE-01-6)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass V1-QA-EXECUTE-01-6: V1 QA (Re-verification 6)
+
+**Status**: ✅ PASS — CLOSED
+
+Executed all 4 core V1 flows via API with evidence capture.
+
+### Flow Results
+
+| Flow | Status | Evidence |
+|------|--------|----------|
+| A. Guest checkout (COD) | ✅ PASS | Order #97 |
+| B. Auth user checkout (CARD) | ✅ PASS | Order #98 + PI `pi_3SsBW3Q9Xukpkfmb2nyMQwaK` |
+| C. Producer flow | ✅ PASS | Product #10 created, publicly visible |
+| D. Admin flow | ✅ PASS | Order #97 → processing |
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-V1-QA-EXECUTE-01-6.md`
+- `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-6.md`
+
+**V1 QA: ALL 4 FLOWS PASS**
 
 ---
 
