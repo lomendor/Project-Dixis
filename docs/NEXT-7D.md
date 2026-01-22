@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-22 (VPS-MAINT-WINDOW-01)
+**Updated**: 2026-01-22 (UI-HEADER-NAV-CLARITY-01)
 
 ---
 
@@ -16,7 +16,7 @@
 
 ## Backlog (Post-V1)
 
-- **Language toggle position**: Remove from header; place in footer or settings page (toggle shifting position is undesirable on mobile)
+- ~~**Language toggle position**: Remove from header; place in footer~~ — **DONE** (Pass UI-HEADER-NAV-CLARITY-01)
 
 ---
 
@@ -25,6 +25,12 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **UI-HEADER-NAV-CLARITY-01**: Move language switcher to footer
+  - PR #2387 merged, commit `9014f00a`
+  - Header no longer shifts on mobile
+  - Language switcher now in footer
+  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-CLARITY-01.md`
 
 - ✅ **VPS-MAINT-WINDOW-01**: VPS maintenance window (read-only checks)
   - Disk: 13% used (OK)

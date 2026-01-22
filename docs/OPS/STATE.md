@@ -1,9 +1,45 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass VPS-MAINT-WINDOW-01)
+**Last Updated**: 2026-01-22 (Pass UI-HEADER-NAV-CLARITY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass UI-HEADER-NAV-CLARITY-01: Move Language Switcher to Footer
+
+**Status**: ✅ PASS — CLOSED
+
+Moved language switcher (EL/EN) from header to footer for stable, non-shifting mobile UI.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `Header.tsx` | Removed language switcher (desktop + mobile) |
+| `Footer.tsx` | Added language switcher with `footer-lang-el`, `footer-lang-en` testids |
+| E2E tests | Updated to verify lang NOT in header, IS in footer |
+
+### Evidence
+
+| Check | Result |
+|-------|--------|
+| Build | PASS |
+| TypeScript | PASS |
+| E2E (PostgreSQL) | PASS |
+| All CI checks | PASS |
+
+### PR
+
+- #2387 merged, commit `9014f00a`
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-UI-HEADER-NAV-CLARITY-01.md`
+- `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-CLARITY-01.md`
+
+**Language Switcher Moved to Footer: PASS**
 
 ---
 
