@@ -1,7 +1,16 @@
+'use client';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
+import { useLocale, useTranslations } from '@/contexts/LocaleContext';
+import { locales, type Locale } from '../../../i18n';
 
 export default function Footer() {
+  const { locale, setLocale } = useLocale();
+  const t = useTranslations();
+
+  const handleLocaleChange = (newLocale: Locale) => {
+    setLocale(newLocale);
+  };
   return (
     <footer className="border-t border-neutral-200 bg-white mt-auto">
       {/* Mobile-first padding */}
@@ -67,6 +76,24 @@ export default function Footer() {
             © {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
           </p>
           <div className="flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1" data-testid="footer-language-switcher">
+              {locales.map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => handleLocaleChange(loc)}
+                  className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+                    locale === loc
+                      ? 'bg-primary text-white'
+                      : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
+                  }`}
+                  data-testid={`footer-lang-${loc}`}
+                  aria-label={t(`language.${loc}`)}
+                >
+                  {loc.toUpperCase()}
+                </button>
+              ))}
+            </div>
             <span className="text-xs text-neutral-400">Made with Cyprus Green</span>
           </div>
         </div>
