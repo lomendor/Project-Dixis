@@ -1,7 +1,17 @@
 # PROD FACTS - Last Check
 
-**Last Updated**: 2026-01-22 11:44:13 UTC
-**Status**: ✅ ALL SYSTEMS OPERATIONAL
+**Last Updated**: 2026-01-22 12:48:38 UTC
+**Main HEAD**: `ad16783a`
+**Status**: ⚠️ PARTIAL (1 display issue, APIs OK)
+
+---
+
+## V1 QA Status
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| V1 QA Execution | ✅ 4/4 PASS | PR #2395 |
+| Proof Document | ✅ Complete | `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md` |
 
 ---
 
@@ -11,7 +21,7 @@
 |----------|--------|---------|
 | Backend Health | ✅ 200 | `/api/healthz` returns OK |
 | Products API | ✅ 200 | `/api/v1/public/products` returns data |
-| Products List | ✅ 200 | `/products` displays products (not empty) |
+| Products List | ⚠️ 200 | `/products` shows "0 συνολικά" (display issue, API has data) |
 | Product Detail | ✅ 200 | `/products/1` shows product content |
 | Login Page | ✅ 200 | `/login` accessible (redirects to `https://dixis.gr/auth/login`) |
 
@@ -21,7 +31,7 @@
 
 - ✅ Backend health endpoint returns `"ok"`
 - ✅ Products API contains `"data"` field
-- ✅ Products list page shows products (no empty state)
+- ⚠️ Products list page shows "0 συνολικά" (UI display issue, backend data OK)
 - ✅ Product detail page contains expected content
 - ✅ Login page accessible (with or without redirect)
 

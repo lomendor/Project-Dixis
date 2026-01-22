@@ -7,11 +7,14 @@
 
 ## Next Pass Recommendation
 
-- **V1 QA Consolidation: COMPLETE** — Runbook created at `docs/PRODUCT/QA-V1-RUNBOOK.md`
-- **Monitoring 2026-01-22 10:30 UTC: ALL PASS** — Production healthy
-- **VPS Maintenance: PASS** — All metrics healthy, no reboot required
-- **V1 QA: ALL 4 FLOWS PASS** — Re-verification 6 complete
+- **V1 QA Re-verification: 4/4 PASS** — PR #2395 merged (`ad16783a`)
+- **Evidence**: `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md`
+- **Monitoring 2026-01-22 12:48 UTC**: Backend + API healthy, Products list display issue (outside QA scope)
 - Production stable. Continue monitoring per POST-LAUNCH-CHECKS.md schedule.
+
+### Known Issue (Non-Blocking)
+
+- `/products` page shows "0 συνολικά" — Products API returns data; display-only issue (UI scope, not QA)
 
 ---
 
@@ -26,6 +29,14 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **V1-QA-EXECUTE-01 Re-verification**: All 4 flows PASS (2026-01-22)
+  - Flow A: Order #99, COD, €19.99
+  - Flow B: Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn`
+  - Flow C: Product #11, Green Farm Co.
+  - Flow D: Order #99, pending → processing
+  - PR #2395 merged (`ad16783a`)
+  - Evidence: `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md`
 
 - ✅ **V1-QA-EXECUTE-01 Consolidation**: QA runbook created
   - Created `docs/PRODUCT/QA-V1-RUNBOOK.md` (reusable QA runbook)
