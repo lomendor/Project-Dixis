@@ -7,6 +7,36 @@
 
 ---
 
+## 2026-01-22 — Pass V1-QA-EXECUTE-01 Re-verification (4 flows PASS)
+
+**Status**: ✅ PASS — CLOSED
+
+Re-executed all 4 V1 QA flows with reproducible API scripts and evidence capture.
+
+### Flow Results
+
+| Flow | Status | Evidence |
+|------|--------|----------|
+| A. Guest COD | ✅ PASS | Order #99, ORD-000099, €19.99 |
+| B. Auth Card | ✅ PASS | Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn` |
+| C. Producer | ✅ PASS | Product #11, Green Farm Co., publicly visible |
+| D. Admin | ✅ PASS | Order #99, pending → processing |
+
+### Evidence
+
+- **Proof Document**: `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md`
+- **PR**: #2395 (merged `ad16783a`)
+
+### Risks/Next
+
+- Email delivery is **code-verified** (OrderEmailService::sendOrderStatusNotification called)
+- Inbox verification is external/manual (does not block merge)
+- Products list page shows "0 συνολικά" — display issue, API data OK (outside QA scope)
+
+**V1 QA Re-verification: ALL 4 FLOWS PASS**
+
+---
+
 ## 2026-01-22 — Pass V1-QA-EXECUTE-01 Consolidation: QA Runbook Creation
 
 **Status**: ✅ PASS — CLOSED
