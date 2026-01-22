@@ -86,6 +86,10 @@
     "title": "Our Producers",
     "subtitle": "Meet the local producers"
   },
+  "producer": {
+    "dashboard": "Producer Dashboard",
+    "orders": "Producer Orders"
+  },
   "products": {
     "title": "Products",
     "empty": "No products available.",

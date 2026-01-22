@@ -152,6 +152,14 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
     await expect(page.locator('[data-testid="user-menu-dashboard"]')).toBeVisible();
   });
 
+  test('producer orders link in user dropdown (per UX-DASHBOARD-ENTRYPOINTS-01)', async ({ page }) => {
+    const userMenu = page.locator('[data-testid="header-user-menu"]');
+    await expect(userMenu).toBeVisible({ timeout: 10000 });
+    await userMenu.click();
+
+    await expect(page.locator('[data-testid="user-menu-producer-orders"]')).toBeVisible();
+  });
+
   test('admin/my-orders NOT in dropdown for producer', async ({ page }) => {
     const userMenu = page.locator('[data-testid="header-user-menu"]');
     await userMenu.click();

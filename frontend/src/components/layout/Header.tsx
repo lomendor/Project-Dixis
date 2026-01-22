@@ -123,16 +123,26 @@ export default function Header() {
                     </Link>
                   )}
 
-                  {/* Producer: Dashboard */}
+                  {/* Producer: Dashboard + Orders */}
                   {isProducer && (
-                    <Link
-                      href="/producer/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
-                      onClick={() => setUserMenuOpen(false)}
-                      data-testid="user-menu-dashboard"
-                    >
-                      {t('producers.title')}
-                    </Link>
+                    <>
+                      <Link
+                        href="/producer/dashboard"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                        data-testid="user-menu-dashboard"
+                      >
+                        {t('producer.dashboard')}
+                      </Link>
+                      <Link
+                        href="/producer/orders"
+                        className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                        data-testid="user-menu-producer-orders"
+                      >
+                        {t('producer.orders')}
+                      </Link>
+                    </>
                   )}
 
                   {/* Admin: Admin Panel */}
@@ -241,14 +251,24 @@ export default function Header() {
                     </Link>
                   )}
                   {isProducer && (
-                    <Link
-                      href="/producer/dashboard"
-                      className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
-                      onClick={() => setMobileMenuOpen(false)}
-                      data-testid="mobile-nav-dashboard"
-                    >
-                      {t('producers.title')}
-                    </Link>
+                    <>
+                      <Link
+                        href="/producer/dashboard"
+                        className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                        onClick={() => setMobileMenuOpen(false)}
+                        data-testid="mobile-nav-dashboard"
+                      >
+                        {t('producer.dashboard')}
+                      </Link>
+                      <Link
+                        href="/producer/orders"
+                        className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                        onClick={() => setMobileMenuOpen(false)}
+                        data-testid="mobile-nav-producer-orders"
+                      >
+                        {t('producer.orders')}
+                      </Link>
+                    </>
                   )}
                   {isAdmin && (
                     <Link

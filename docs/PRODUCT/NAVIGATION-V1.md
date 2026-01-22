@@ -99,6 +99,7 @@ The header and navigation elements vary based on user authentication state and r
 |---------|--------|-------------|
 | User Name/Email | Display only | `user-menu-name` |
 | Producer Dashboard | `/producer/dashboard` | `user-menu-dashboard` |
+| Producer Orders | `/producer/orders` | `user-menu-producer-orders` |
 | Logout | Logout action | `user-menu-logout` |
 
 ### Mobile Menu (Producer)
@@ -108,6 +109,7 @@ The header and navigation elements vary based on user authentication state and r
 | Products | `/products` | - |
 | Producers | `/producers` | - |
 | Producer Dashboard | `/producer/dashboard` | `mobile-nav-dashboard` |
+| Producer Orders | `/producer/orders` | `mobile-nav-producer-orders` |
 | User Name + Logout | Display + action | `mobile-user-section`, `mobile-logout-btn` |
 
 ---
