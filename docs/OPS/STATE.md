@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Monitoring Proof)
+**Last Updated**: 2026-01-22 (Prod Facts Hygiene)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass OPS-PROD-FACTS-HYGIENE-01: Prod Facts Output Hygiene
+
+**Status**: ✅ PASS — CLOSED
+
+Stopped `docs/OPS/PROD-FACTS-LAST.md` from dirtying the git working tree on every run.
+
+### Changes
+
+| Item | Before | After |
+|------|--------|-------|
+| Output path | `docs/OPS/PROD-FACTS-LAST.md` (tracked) | `docs/OPS/.local/PROD-FACTS-LAST.md` (gitignored) |
+| Working tree | Dirty after script run | Clean after script run |
+
+### Evidence
+
+- **Summary**: `docs/AGENT/SUMMARY/Pass-OPS-PROD-FACTS-HYGIENE-01.md`
+- **Files changed**: `scripts/prod-facts.sh`, `.gitignore`, `docs/OPS/PROD-FACTS-LAST.example.md`
+
+**Working Tree Hygiene: FIXED**
 
 ---
 

@@ -2,10 +2,16 @@
 set -euo pipefail
 
 # PROD FACTS Monitoring Script
-# Checks production endpoints and writes report to docs/OPS/PROD-FACTS-LAST.md
+# Checks production endpoints and writes report to docs/OPS/.local/PROD-FACTS-LAST.md
 # Exits non-zero if any check fails (for CI detection)
+#
+# Output: docs/OPS/.local/PROD-FACTS-LAST.md (untracked - see .gitignore)
+# For committed evidence, copy output to docs/AGENT/SUMMARY/ with a pass ID.
 
-REPORT_FILE="docs/OPS/PROD-FACTS-LAST.md"
+# Ensure output directory exists (untracked by git)
+mkdir -p docs/OPS/.local
+
+REPORT_FILE="docs/OPS/.local/PROD-FACTS-LAST.md"
 TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 EXIT_CODE=0
 

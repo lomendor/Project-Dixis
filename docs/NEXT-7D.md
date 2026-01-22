@@ -1,12 +1,13 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-22 (Monitoring Proof)
+**Updated**: 2026-01-22 (Prod Facts Hygiene)
 
 ---
 
 ## Next Pass Recommendation
 
+- **Prod Facts Hygiene: DONE** — Working tree now stays clean after script runs
 - **V1 QA Prod Proof: 6/6 PASS** — All deterministic checks pass
 - **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
 - Production stable. Continue monitoring per POST-LAUNCH-CHECKS.md schedule.
@@ -24,6 +25,11 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **OPS-PROD-FACTS-HYGIENE-01**: Fix prod-facts.sh output hygiene (2026-01-22)
+  - Output now goes to `docs/OPS/.local/` (gitignored)
+  - Working tree stays clean after script runs
+  - Summary: `docs/AGENT/SUMMARY/Pass-OPS-PROD-FACTS-HYGIENE-01.md`
 
 - ✅ **PERF-BASELINE-CAPTURE-01**: Performance baseline capture (2026-01-22)
   - All endpoints < 300ms median TTFB
