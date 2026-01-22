@@ -1,9 +1,41 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (V1 QA Runbook)
+**Last Updated**: 2026-01-22 (V1 QA Execute)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass V1-QA-EXECUTE-01: V1 QA Execution
+
+**Status**: ✅ PASS — CLOSED
+
+Executed V1 QA runbook end-to-end with production baseline verification.
+
+### Results
+
+| Flow | Status | Evidence |
+|------|--------|----------|
+| A: Guest COD | PASS | Order #99, ORD-000099 |
+| B: Auth Card | PASS | Order #102, PI `pi_3SsMh9Q9Xukpkfmb...` |
+| C: Producer | PASS | Product #11, publicly visible |
+| D: Admin | PASS | Order #99, pending → processing |
+
+### Production Baseline
+
+| Script | Result |
+|--------|--------|
+| prod-facts.sh | 5/5 PASS |
+| perf-baseline.sh | All < 300ms |
+| prod-qa-v1.sh | 6/6 PASS |
+
+### Evidence
+
+- **Proof**: `docs/AGENT/SUMMARY/Proof-V1-QA-EXECUTE-01-2026-01-22.md`
+- **CI Run**: https://github.com/lomendor/Project-Dixis/actions/runs/21255677474
+
+**V1 QA EXECUTION: ALL 4 FLOWS PASS**
 
 ---
 
