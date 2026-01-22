@@ -1,13 +1,14 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-22 (Prod Facts Hygiene)
+**Updated**: 2026-01-22 (V1 QA Runbook)
 
 ---
 
 ## Next Pass Recommendation
 
-- **Prod Facts Hygiene: DONE** — Working tree now stays clean after script runs
+- **V1 QA Runbook: DONE** — Consolidated runbook + E2E plan documented
+- **Prod Facts Hygiene: DONE** — Working tree stays clean after script runs
 - **V1 QA Prod Proof: 6/6 PASS** — All deterministic checks pass
 - **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
 - Production stable. Continue monitoring per POST-LAUNCH-CHECKS.md schedule.
@@ -25,6 +26,12 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **V1-QA-RUNBOOK-AND-E2E-PLAN-01**: QA runbook + E2E plan (2026-01-22)
+  - Runbook: `docs/OPS/RUNBOOK-V1-QA.md`
+  - E2E Plan: `docs/OPS/E2E-V1-AUTOMATION-PLAN.md`
+  - 355 existing E2E tests cover all 4 V1 flows
+  - No new tests required
 
 - ✅ **OPS-PROD-FACTS-HYGIENE-01**: Fix prod-facts.sh output hygiene (2026-01-22)
   - Output now goes to `docs/OPS/.local/` (gitignored)

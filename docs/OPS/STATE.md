@@ -1,9 +1,41 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Prod Facts Hygiene)
+**Last Updated**: 2026-01-22 (V1 QA Runbook)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass V1-QA-RUNBOOK-AND-E2E-PLAN-01: QA Runbook + E2E Plan
+
+**Status**: ✅ PASS — CLOSED
+
+Created consolidated V1 QA runbook and E2E automation plan.
+
+### Deliverables
+
+| Document | Path |
+|----------|------|
+| RUNBOOK-V1-QA.md | `docs/OPS/RUNBOOK-V1-QA.md` |
+| E2E-V1-AUTOMATION-PLAN.md | `docs/OPS/E2E-V1-AUTOMATION-PLAN.md` |
+
+### V1 Flow Coverage
+
+| Flow | E2E Status |
+|------|------------|
+| A: Guest COD | COMPLETE |
+| B: Auth Card | PARTIAL (Stripe mocked) |
+| C: Producer | COMPLETE |
+| D: Admin | COMPLETE |
+
+### Key Finding
+
+- **355 E2E test files** already exist
+- **No new tests required** for V1
+- **Stripe mocking is intentional** (avoids real payments in CI)
+
+**V1 QA Execution Path: DEFINED**
 
 ---
 
