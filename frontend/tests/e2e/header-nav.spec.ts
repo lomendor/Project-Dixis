@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Header Navigation E2E Tests (Pass UI-HEADER-NAV-04)
+ * Header Navigation E2E Tests (Pass UI-HEADER-NAV-04, UX-NAV-ROLES-HEADER-01)
  *
- * Validates header/navbar behavior per docs/PRODUCT/HEADER-NAV-V1.md
+ * Validates header/navbar behavior per docs/PRODUCT/NAVIGATION-V1.md
  * - Logo always visible (h-9, 36px) and links to home
  * - Primary nav: Products, Producers (max 2-3 links)
  * - User dropdown for authenticated users (name + role links + logout)
@@ -65,6 +65,11 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
   test('user dropdown NOT visible for guest', async ({ page }) => {
     await expect(page.locator('[data-testid="header-user-menu"]')).not.toBeVisible();
+  });
+
+  test('cart icon is VISIBLE for guest (per NAVIGATION-V1.md)', async ({ page }) => {
+    // Cart should be visible in header for guests
+    await expect(page.locator('[data-testid="header-cart"]')).toBeVisible();
   });
 });
 
@@ -154,6 +159,11 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
     await expect(page.locator('[data-testid="user-menu-admin"]')).not.toBeVisible();
     await expect(page.locator('[data-testid="user-menu-orders"]')).not.toBeVisible();
   });
+
+  test('cart icon is HIDDEN for producer (per NAVIGATION-V1.md)', async ({ page }) => {
+    // Cart should NOT be visible in header for producers
+    await expect(page.locator('[data-testid="header-cart"]')).not.toBeVisible();
+  });
 });
 
 test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
@@ -185,6 +195,11 @@ test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
 
     await expect(page.locator('[data-testid="user-menu-dashboard"]')).not.toBeVisible();
     await expect(page.locator('[data-testid="user-menu-orders"]')).not.toBeVisible();
+  });
+
+  test('cart icon is VISIBLE for admin (per NAVIGATION-V1.md)', async ({ page }) => {
+    // Cart should be visible in header for admin
+    await expect(page.locator('[data-testid="header-cart"]')).toBeVisible();
   });
 });
 
