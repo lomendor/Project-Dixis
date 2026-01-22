@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import ProductImage from '@/components/product/ProductImage';
 import { apiClient, Product } from '@/lib/api';
-import Navigation from '@/components/Navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorState from '@/components/ErrorState';
 import EmptyState from '@/components/EmptyState';
@@ -266,8 +265,6 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           }}
         />
       )}
-      
-      <Navigation />
       
       <main id="main-content" data-testid="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section - Mobile First */}

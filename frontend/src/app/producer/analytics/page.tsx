@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
 import ProducerAnalyticsDashboard from '@/components/producer/ProducerAnalyticsDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -40,8 +39,6 @@ export default function ProducerAnalytics() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-8" data-testid="breadcrumb">

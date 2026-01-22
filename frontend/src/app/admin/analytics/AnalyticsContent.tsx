@@ -1,14 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
 import AnalyticsDashboard from '@/components/analytics/AnalyticsDashboard';
 
 export default function AnalyticsContent() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-8" data-testid="breadcrumb">

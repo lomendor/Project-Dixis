@@ -46,17 +46,17 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo - bigger (h-9 = 36px), always visible, links to home */}
+        {/* Logo - 44px height, always visible, links to home */}
         <Link
           href="/"
           className="flex-shrink-0 flex items-center hover:opacity-90 transition-opacity touch-manipulation active:opacity-80"
           data-testid="header-logo"
         >
-          <Logo height={36} title="Dixis" />
+          <Logo height={44} title="Dixis" />
         </Link>
 
-        {/* Desktop Primary Navigation */}
-        <nav className="hidden md:flex items-center gap-6 ml-8" data-testid="header-primary-nav">
+        {/* Desktop Primary Navigation - centered with flex-1 */}
+        <nav className="hidden md:flex items-center justify-center flex-1 gap-8" data-testid="header-primary-nav">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -69,7 +69,7 @@ export default function Header() {
         </nav>
 
         {/* Desktop Right Side: Utilities + Auth */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4">
           {/* Notification Bell - only for authenticated users */}
           {isAuthenticated && <NotificationBell />}
 

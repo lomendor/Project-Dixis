@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Navigation from '@/components/Navigation';
 import { useErrorBoundaryTest } from '@/components/ErrorBoundary';
 import { useAnalytics } from '@/lib/analytics';
 import { usePageAnalytics } from '@/hooks/usePageAnalytics';
@@ -61,8 +60,6 @@ export default function TestErrorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">

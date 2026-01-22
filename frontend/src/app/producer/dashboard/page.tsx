@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
-import Navigation from '@/components/Navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
@@ -99,8 +98,6 @@ export default function ProducerDashboard() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
-
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="producer-dashboard">
         {/* Header */}
         <div className="mb-8">
