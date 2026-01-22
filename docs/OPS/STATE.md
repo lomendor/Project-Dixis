@@ -1,9 +1,46 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (Pass DOCS-LAUNCH-PACKAGE-01)
+**Last Updated**: 2026-01-22 (Pass LAUNCH-EXECUTE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass LAUNCH-EXECUTE-01: V1 Launch Execution
+
+**Status**: ✅ PASS — CLOSED
+
+V1 Launch Execution (ops verification) with evidence capture.
+
+### Verification Results
+
+| Check | Status |
+|-------|--------|
+| prod-facts.sh | ✅ ALL CHECKS PASSED |
+| perf-baseline.sh | ✅ All < 300ms TTFB |
+| Launch docs | ✅ All 3 present |
+
+### Performance (perf-baseline.sh)
+
+| Endpoint | Median TTFB |
+|----------|-------------|
+| `/` | 181ms |
+| `/products` | 183ms |
+| `/api/v1/public/products` | 259ms |
+
+### Evidence
+
+- `/tmp/prod-facts.log`
+- `/tmp/perf-baseline.log`
+- `docs/OPS/PROD-FACTS-LAST.md`
+
+### Artifacts
+
+- `docs/AGENT/TASKS/Pass-LAUNCH-EXECUTE-01.md`
+- `docs/AGENT/SUMMARY/Pass-LAUNCH-EXECUTE-01.md`
+
+**V1 Launch Execution: PASS**
 
 ---
 
