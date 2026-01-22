@@ -1,12 +1,13 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-22 (Post-Launch Checks)
+**Updated**: 2026-01-23 (SSH Retry)
 
 ---
 
 ## Next Pass Recommendation
 
+- **OPS-DEPLOY-SSH-RETRY-01: WIP** — SSH retry + post-deploy proof (PR pending)
 - **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
 - **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
 - **V1 QA Runbook: DONE** — Consolidated runbook + E2E plan documented
@@ -23,7 +24,10 @@
 
 ## In Progress
 
-(none)
+- 🔄 **OPS-DEPLOY-SSH-RETRY-01**: SSH deploy retry + post-deploy proof
+  - SSH retry: 3 attempts, 10s delay
+  - Post-deploy proof: health check + homepage smoke
+  - Affected: `deploy-frontend.yml`, `deploy-backend.yml`
 
 ### Recently Completed
 
