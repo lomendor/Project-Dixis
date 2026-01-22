@@ -14,8 +14,17 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Calculate total from subtotal + shipping if total is not set
-        $total = $this->total ?? $this->total_amount ?? ($this->subtotal + ($this->shipping_cost ?? 0));
+        // Calculate total from subtotal + shipping if total is not set or is zero
+        // Use ?: instead of ?? to handle 0 values (0 is falsy but not null)
+        $subtotal = (float) ($this->subtotal ?? 0);
+        $shippingCost = (float) ($this->shipping_cost ?? $this->shipping_amount ?? 0);
+        $taxAmount = (float) ($this->tax_amount ?? 0);
+        $calculatedTotal = $subtotal + $shippingCost + $taxAmount;
+
+        // Prefer stored total if > 0, otherwise use calculated
+        $total = ((float) $this->total > 0) ? $this->total
+               : (((float) $this->total_amount > 0) ? $this->total_amount
+               : $calculatedTotal);
 
         // Shipping method labels (Greek)
         $shippingMethodLabels = [
