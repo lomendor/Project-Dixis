@@ -196,3 +196,7 @@ junit-*.xml
 dixis-skill_v*.zip
 pr-cleanup-reports/
 frontend/prisma/ci.db
+
+# Local ops outputs (untracked - use for dev/CI artifacts)
+docs/OPS/.local/
+docs/OPS/PROD-FACTS-LAST.md
