@@ -9,7 +9,7 @@
 
 ## 2026-01-23 — Pass OPS-DEPLOY-SSH-RETRY-01: SSH Deploy Retry + Proof
 
-**Status**: 🔄 WIP
+**Status**: ✅ PASS — CLOSED
 
 Added automatic retry with backoff for SSH deploy steps + post-deploy proof.
 
@@ -26,10 +26,18 @@ Added automatic retry with backoff for SSH deploy steps + post-deploy proof.
 - **Proof**: Every deploy verifies prod health + logs commit SHA
 - **Action**: Uses `nick-fields/retry@v3` for reliable retry logic
 
+### First Deploy Results
+
+| Workflow | Run ID | Status |
+|----------|--------|--------|
+| Deploy Frontend | 21268269263 | SUCCESS (3m47s) |
+| Deploy Backend | 21268269271 | SUCCESS (17s) |
+
 ### Evidence
 
 - Summary: `docs/AGENT/SUMMARY/Pass-OPS-DEPLOY-SSH-RETRY-01.md`
-- PR: TBD
+- Proof: `docs/AGENT/SUMMARY/Proof-OPS-DEPLOY-SSH-RETRY-01.md`
+- PR: #2408 (merged `6f7e1499`)
 
 ---
 

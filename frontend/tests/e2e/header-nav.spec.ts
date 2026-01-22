@@ -69,7 +69,9 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
   test('cart icon is VISIBLE for guest (per NAVIGATION-V1.md)', async ({ page }) => {
     // Cart should be visible in header for guests
-    await expect(page.locator('[data-testid="header-cart"]')).toBeVisible();
+    // CartIcon uses role-specific testids: nav-cart-guest for guests
+    // Use .first() to avoid strict mode violation (desktop + mobile both have this testid)
+    await expect(page.locator('[data-testid="nav-cart-guest"]').first()).toBeVisible();
   });
 });
 

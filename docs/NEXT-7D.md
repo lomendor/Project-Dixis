@@ -7,29 +7,34 @@
 
 ## Next Pass Recommendation
 
-- **OPS-DEPLOY-SSH-RETRY-01: WIP** — SSH retry + post-deploy proof (PR pending)
+- **CI-E2E-HEADER-NAV-01: QUEUED** — Fix pre-existing E2E test failure (header-cart testid)
+- **OPS-DEPLOY-SSH-RETRY-01: DONE** — SSH retry + post-deploy proof deployed
 - **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
 - **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
-- **V1 QA Runbook: DONE** — Consolidated runbook + E2E plan documented
 - **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
-- Production stable. V1 QA COMPLETE. Monitoring automated.
+- Production stable. Deploy infrastructure hardened.
 
 ---
 
 ## Backlog (Post-V1)
 
 - ~~**Language toggle position**: Remove from header; place in footer~~ — **DONE** (Pass UI-HEADER-NAV-CLARITY-01)
+- **CI-E2E-HEADER-NAV-01**: Fix `header-nav.spec.ts` test (uses wrong testid `header-cart` → `nav-cart-guest`)
 
 ---
 
 ## In Progress
 
-- 🔄 **OPS-DEPLOY-SSH-RETRY-01**: SSH deploy retry + post-deploy proof
-  - SSH retry: 3 attempts, 10s delay
-  - Post-deploy proof: health check + homepage smoke
-  - Affected: `deploy-frontend.yml`, `deploy-backend.yml`
+(none)
 
 ### Recently Completed
+
+- ✅ **OPS-DEPLOY-SSH-RETRY-01**: SSH deploy retry + post-deploy proof (2026-01-23)
+  - PR #2408 merged (`6f7e1499`)
+  - Deploy Frontend run 21268269263: SUCCESS
+  - Deploy Backend run 21268269271: SUCCESS
+  - prod-facts: ALL PASS
+  - Proof: `docs/AGENT/SUMMARY/Proof-OPS-DEPLOY-SSH-RETRY-01.md`
 
 - ✅ **OPS-POST-LAUNCH-CHECKS-01**: Scheduled production monitoring (2026-01-22)
   - NEW: `post-launch-checks.yml` - daily comprehensive checks
