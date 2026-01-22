@@ -242,12 +242,42 @@ echo "=== Check Complete ==="
 
 ---
 
+## Automated Workflows
+
+### GitHub Actions Workflows
+
+| Workflow | Schedule | Scripts | Purpose |
+|----------|----------|---------|---------|
+| `post-launch-checks.yml` | Daily 05:30 UTC | prod-facts.sh, perf-baseline.sh, prod-qa-v1.sh | Comprehensive daily health check |
+| `prod-facts.yml` | Daily 07:00 UTC | prod-facts.sh | Production endpoint validation |
+| `monitor-uptime.yml` | Every 5 min | inline curl | Quick uptime ping |
+
+### Manual Trigger
+
+```bash
+# Trigger post-launch checks manually
+gh workflow run post-launch-checks.yml
+
+# Trigger prod-facts manually
+gh workflow run prod-facts.yml
+```
+
+### Interpreting Failures
+
+1. **Check workflow artifacts** for detailed logs
+2. **Run scripts locally** for debugging: `./scripts/prod-facts.sh`
+3. **Review GitHub Issues** auto-created on failure
+4. **Update STATE.md** if issue requires tracking
+
+---
+
 ## References
 
 - **Release Notes:** `docs/PRODUCT/RELEASE-NOTES-V1.md`
 - **Launch Runbook:** `docs/OPS/LAUNCH-RUNBOOK-V1.md`
 - **24h Monitoring:** `docs/OPS/RUNBOOK-V1-LAUNCH-24H.md`
+- **V1 QA Runbook:** `docs/OPS/RUNBOOK-V1-QA.md`
 
 ---
 
-_Post-Launch Checks: V1 | 2026-01-22_
+_Post-Launch Checks: V1 | Updated 2026-01-22_

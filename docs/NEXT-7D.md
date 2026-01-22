@@ -1,17 +1,17 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-22 (V1 QA Execute)
+**Updated**: 2026-01-22 (Post-Launch Checks)
 
 ---
 
 ## Next Pass Recommendation
 
+- **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
 - **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
 - **V1 QA Runbook: DONE** — Consolidated runbook + E2E plan documented
-- **Prod Facts Hygiene: DONE** — Working tree stays clean after script runs
 - **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
-- Production stable. V1 QA COMPLETE.
+- Production stable. V1 QA COMPLETE. Monitoring automated.
 
 ---
 
@@ -26,6 +26,12 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **OPS-POST-LAUNCH-CHECKS-01**: Scheduled production monitoring (2026-01-22)
+  - NEW: `post-launch-checks.yml` - daily comprehensive checks
+  - FIX: `prod-facts.yml` - updated for output hygiene
+  - Automated artifact upload + failure alerting
+  - Summary: `docs/AGENT/SUMMARY/Pass-OPS-POST-LAUNCH-CHECKS-01.md`
 
 - ✅ **V1-QA-EXECUTE-01**: V1 QA runbook execution (2026-01-22)
   - Flow A (Guest COD): PASS - Order #99

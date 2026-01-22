@@ -1,9 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-22 (V1 QA Execute)
+**Last Updated**: 2026-01-22 (Post-Launch Checks)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~510 lines (target ≤250).
+
+---
+
+## 2026-01-22 — Pass OPS-POST-LAUNCH-CHECKS-01: Scheduled Prod Monitoring
+
+**Status**: ✅ PASS — CLOSED
+
+Added automated, scheduled production monitoring workflows.
+
+### Workflows
+
+| Workflow | Schedule | Scripts |
+|----------|----------|---------|
+| `post-launch-checks.yml` | Daily 05:30 UTC | prod-facts, perf-baseline, prod-qa-v1 |
+| `prod-facts.yml` | Daily 07:00 UTC | prod-facts |
+
+### Changes
+
+- NEW: `.github/workflows/post-launch-checks.yml`
+- FIX: `.github/workflows/prod-facts.yml` (output path updated for hygiene pass)
+- UPDATE: `docs/OPS/POST-LAUNCH-CHECKS.md` (workflows section)
+
+### Features
+
+- Non-blocking (not in required checks)
+- Artifact upload for logs
+- Auto-creates GitHub Issue on failure
+- Manual trigger via `workflow_dispatch`
+
+**Automated Monitoring: ENABLED**
 
 ---
 
