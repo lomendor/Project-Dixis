@@ -12,17 +12,14 @@ test.describe('Locale @smoke', () => {
     // Wait for page to load
     await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
 
-    // Check that language switcher buttons exist (either desktop or mobile)
-    const desktopEl = page.getByTestId('lang-el');
-    const desktopEn = page.getByTestId('lang-en');
-    const mobileEl = page.getByTestId('mobile-lang-el');
-    const mobileEn = page.getByTestId('mobile-lang-en');
+    // Check that language switcher buttons exist in footer
+    const footerEl = page.getByTestId('footer-lang-el');
+    const footerEn = page.getByTestId('footer-lang-en');
 
-    // At least one set should be visible
-    const desktopVisible = await desktopEl.isVisible() && await desktopEn.isVisible();
-    const mobileVisible = await mobileEl.isVisible() && await mobileEn.isVisible();
-
-    expect(desktopVisible || mobileVisible).toBe(true);
+    // Footer language switcher should be visible (scroll down if needed)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(footerEl).toBeVisible({ timeout: 5000 });
+    await expect(footerEn).toBeVisible({ timeout: 5000 });
   });
 
   test('locale cookie sets Greek when explicitly set', async ({ page, context }) => {

@@ -51,14 +51,16 @@ test.describe('Header Navigation - Guest @smoke', () => {
     await expect(forbiddenLink).not.toBeVisible();
   });
 
-  test('language toggle is visible', async ({ page }) => {
-    const desktopEl = page.locator('[data-testid="lang-el"]');
-    const mobileEl = page.locator('[data-testid="mobile-lang-el"]');
-    await expect.poll(async () => {
-      const desktopVisible = await desktopEl.isVisible().catch(() => false);
-      const mobileVisible = await mobileEl.isVisible().catch(() => false);
-      return desktopVisible || mobileVisible;
-    }, { timeout: 10000 }).toBe(true);
+  test('language toggle is NOT in header (moved to footer)', async ({ page }) => {
+    // Language switcher has been moved to footer per UI-HEADER-NAV-CLARITY-01
+    const headerLangEl = page.locator('header [data-testid="lang-el"]');
+    const headerLangEn = page.locator('header [data-testid="lang-en"]');
+    await expect(headerLangEl).not.toBeVisible();
+    await expect(headerLangEn).not.toBeVisible();
+
+    // Verify it's in the footer instead
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.getByTestId('footer-lang-el')).toBeVisible({ timeout: 5000 });
   });
 
   test('user dropdown NOT visible for guest', async ({ page }) => {

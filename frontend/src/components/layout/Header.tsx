@@ -5,8 +5,7 @@ import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocale, useTranslations } from '@/contexts/LocaleContext';
-import { locales, type Locale } from '../../../i18n';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,7 +13,6 @@ export default function Header() {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
   const t = useTranslations();
-  const { locale, setLocale } = useLocale();
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -40,10 +38,6 @@ export default function Header() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  };
-
-  const handleLocaleChange = (newLocale: Locale) => {
-    setLocale(newLocale);
   };
 
   // Determine if cart should be shown (not for producers)
@@ -76,25 +70,6 @@ export default function Header() {
 
         {/* Desktop Right Side: Utilities + Auth */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Language Switcher */}
-          <div className="flex items-center gap-1">
-            {locales.map((loc) => (
-              <button
-                key={loc}
-                onClick={() => handleLocaleChange(loc)}
-                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
-                  locale === loc
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
-                }`}
-                data-testid={`lang-${loc}`}
-                aria-label={t(`language.${loc}`)}
-              >
-                {loc.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
           {/* Notification Bell - only for authenticated users */}
           {isAuthenticated && <NotificationBell />}
 
@@ -206,24 +181,6 @@ export default function Header() {
 
         {/* Mobile Right Side: Utilities + Hamburger */}
         <div className="flex md:hidden items-center gap-2">
-          {/* Mobile Language Switcher */}
-          <div className="flex items-center gap-1">
-            {locales.map((loc) => (
-              <button
-                key={loc}
-                onClick={() => handleLocaleChange(loc)}
-                className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
-                  locale === loc
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-                data-testid={`mobile-lang-${loc}`}
-              >
-                {loc.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
           {/* Notification Bell - only for authenticated users */}
           {isAuthenticated && <NotificationBell />}
 
