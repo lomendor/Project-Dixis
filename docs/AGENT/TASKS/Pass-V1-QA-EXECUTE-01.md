@@ -8,34 +8,59 @@ Execute final V1 QA flows in production and capture evidence for launch sign-off
 
 Verification only (no server/code changes beyond docs).
 
-## Flows Verified (Re-verification 5 — 2026-01-21 23:09 UTC)
+## Latest: Consolidation Pass (2026-01-22)
 
-1. **Guest checkout (COD)**: E2E tests PASS, COD enabled — PASS
-2. **Logged-in checkout (Card)**: Stripe configured, prior Order #96 exists — PASS
-3. **Producer flow (add product)**: Product #9 visible, dashboard accessible — PASS
-4. **Admin flow (update order status)**: Email (Resend) configured, nav tests PASS — PASS
+This pass consolidates previous verifications and creates a reusable QA runbook.
+
+### Consolidation Deliverables
+
+1. **QA-V1-RUNBOOK.md**: Reusable runbook with step-by-step instructions for all 4 flows
+   - Path: `docs/PRODUCT/QA-V1-RUNBOOK.md`
+   - Includes: UI steps, API commands, expected results, troubleshooting
+
+2. **Re-verification 6 Evidence** (2026-01-22 00:14 UTC):
+   - Order #97 (guest COD)
+   - Order #98 (auth card) + PI `pi_3SsBW3Q9Xukpkfmb2nyMQwaK`
+   - Product #10 (producer)
+   - Order #97 → processing (admin)
+
+3. **Monitoring** (2026-01-22 10:30 UTC):
+   - prod-facts.sh: ALL 5 CHECKS PASS
+   - All systems operational
+
+## Flows Verified (Re-verification 6 — 2026-01-22 00:14 UTC)
+
+1. **Guest checkout (COD)**: Order #97 created — PASS
+2. **Logged-in checkout (Card)**: Order #98 + Stripe PI — PASS
+3. **Producer flow (add product)**: Product #10 visible publicly — PASS
+4. **Admin flow (update order status)**: Order #97 → processing — PASS
 
 ## DoD
 
-- [x] Guest checkout (COD): PASS with evidence (E2E: 2/2 PASS)
-- [x] Logged-in checkout (card): PASS with evidence (Stripe config verified via /api/health)
-- [x] Producer flow (add product): PASS with evidence (Product #9 visible, 5/5 nav tests)
-- [x] Admin flow (update order status): PASS with evidence (Email configured, 4/4 nav tests)
+- [x] Guest checkout (COD): PASS with evidence
+- [x] Logged-in checkout (card): PASS with evidence
+- [x] Producer flow (add product): PASS with evidence
+- [x] Admin flow (update order status): PASS with evidence
 - [x] Production health verified (prod-facts.sh ALL PASS)
-- [x] E2E smoke tests: 74 PASS, 10 skipped, 1 pre-existing failure
+- [x] QA-V1-RUNBOOK.md created
 - [x] NEXT-7D + STATE updated
 
 ## Evidence Summary
 
 | Check | Result |
 |-------|--------|
-| prod-facts.sh | ALL PASS |
-| E2E smoke + header-nav | 62 PASS |
-| guest-checkout tests | 2/2 PASS |
-| card-payment-smoke | 1/1 PASS |
-| producer nav tests | 5/5 PASS |
-| admin nav tests | 4/4 PASS |
+| prod-facts.sh | ALL PASS (10:30 UTC) |
+| Flow A: Guest COD | Order #97 |
+| Flow B: Auth Card | Order #98 + Stripe PI |
+| Flow C: Producer | Product #10 |
+| Flow D: Admin | Order #97 → processing |
 
 ## Result
 
 **V1 Launch QA: PASS** — All 4 core flows verified operational. V1 GO/NO-GO: ✅ GO
+
+## Artifacts
+
+- `docs/PRODUCT/QA-V1-RUNBOOK.md` — Reusable QA runbook
+- `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-6.md` — Latest verification evidence
+- `docs/OPS/PROD-FACTS-LAST.md` — Production health snapshot
