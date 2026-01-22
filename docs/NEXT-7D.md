@@ -8,13 +8,9 @@
 ## Next Pass Recommendation
 
 - **V1 QA Re-verification: 4/4 PASS** — PR #2395 merged (`ad16783a`)
-- **Evidence**: `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md`
-- **Monitoring 2026-01-22 12:48 UTC**: Backend + API healthy, Products list display issue (outside QA scope)
+- **Monitoring Regex Fix: PASS** — PR #2397 (pending)
+- **prod-facts.sh: ALL PASS** — All 5 checks pass
 - Production stable. Continue monitoring per POST-LAUNCH-CHECKS.md schedule.
-
-### Known Issue (Non-Blocking)
-
-- `/products` page shows "0 συνολικά" — Products API returns data; display-only issue (UI scope, not QA)
 
 ---
 
@@ -29,6 +25,12 @@
 (none)
 
 ### Recently Completed
+
+- ✅ **MONITORING-REGEX-01**: Fix prod-facts.sh false positive (2026-01-22)
+  - Root cause: `grep "0 συνολικά"` matched substring in "10 συνολικά"
+  - Fix: Use `grep -qE '\b0 συνολικά'` with word boundary
+  - PR #2397 (pending merge)
+  - This was NOT a UI bug — the page correctly shows "10 συνολικά"
 
 - ✅ **V1-QA-EXECUTE-01 Re-verification**: All 4 flows PASS (2026-01-22)
   - Flow A: Order #99, COD, €19.99

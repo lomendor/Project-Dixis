@@ -69,7 +69,8 @@ if [[ "$status" == "200" ]]; then
     echo "✅ Products List Page: $status"
 
     # Check for empty state indicators
-    if echo "$response" | grep -q "0 συνολικά"; then
+    # Use word boundary (\b) to avoid matching "10 συνολικά" as "0 συνολικά"
+    if echo "$response" | grep -qE '\b0 συνολικά'; then
         echo "  ❌ Content check FAILED: Page shows '0 συνολικά' (no products)"
         EXIT_CODE=1
     elif echo "$response" | grep -q "Δεν υπάρχουν"; then
