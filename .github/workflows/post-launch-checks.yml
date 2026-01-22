@@ -1,0 +1,116 @@
+name: Post-Launch Checks
+
+on:
+  # Daily at 07:30 Europe/Athens (05:30 UTC)
+  schedule:
+    - cron: '30 5 * * *'
+
+  # Manual trigger
+  workflow_dispatch:
+
+# Non-blocking: not added to required checks
+# This is informational monitoring only
+
+jobs:
+  production-health:
+    name: Production Health Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create output directory
+        run: mkdir -p ./ci-artifacts
+
+      - name: Run prod-facts.sh
+        id: prod-facts
+        continue-on-error: true
+        run: |
+          echo "=== Running prod-facts.sh ===" | tee ./ci-artifacts/prod-facts.log
+          bash scripts/prod-facts.sh 2>&1 | tee -a ./ci-artifacts/prod-facts.log
+          echo "EXIT_CODE=$?" >> $GITHUB_OUTPUT
+
+      - name: Run perf-baseline.sh
+        id: perf-baseline
+        continue-on-error: true
+        run: |
+          echo "=== Running perf-baseline.sh ===" | tee ./ci-artifacts/perf-baseline.log
+          bash scripts/perf-baseline.sh 2>&1 | tee -a ./ci-artifacts/perf-baseline.log
+          echo "EXIT_CODE=$?" >> $GITHUB_OUTPUT
+
+      - name: Run prod-qa-v1.sh
+        id: prod-qa
+        continue-on-error: true
+        run: |
+          echo "=== Running prod-qa-v1.sh ===" | tee ./ci-artifacts/prod-qa-v1.log
+          if [ -f scripts/prod-qa-v1.sh ]; then
+            bash scripts/prod-qa-v1.sh 2>&1 | tee -a ./ci-artifacts/prod-qa-v1.log
+            echo "EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          else
+            echo "Script not found, skipping" | tee -a ./ci-artifacts/prod-qa-v1.log
+            echo "EXIT_CODE=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate summary
+        run: |
+          echo "# Post-Launch Checks Summary" > ./ci-artifacts/summary.md
+          echo "" >> ./ci-artifacts/summary.md
+          echo "**Timestamp**: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> ./ci-artifacts/summary.md
+          echo "**Run**: ${{ github.run_id }}" >> ./ci-artifacts/summary.md
+          echo "" >> ./ci-artifacts/summary.md
+          echo "## Results" >> ./ci-artifacts/summary.md
+          echo "" >> ./ci-artifacts/summary.md
+          echo "| Script | Status |" >> ./ci-artifacts/summary.md
+          echo "|--------|--------|" >> ./ci-artifacts/summary.md
+
+          # Check prod-facts
+          if grep -q "ALL CHECKS PASSED" ./ci-artifacts/prod-facts.log 2>/dev/null; then
+            echo "| prod-facts.sh | PASS |" >> ./ci-artifacts/summary.md
+          else
+            echo "| prod-facts.sh | FAIL |" >> ./ci-artifacts/summary.md
+          fi
+
+          # Check perf-baseline
+          if grep -q "Baseline complete" ./ci-artifacts/perf-baseline.log 2>/dev/null; then
+            echo "| perf-baseline.sh | PASS |" >> ./ci-artifacts/summary.md
+          else
+            echo "| perf-baseline.sh | FAIL |" >> ./ci-artifacts/summary.md
+          fi
+
+          # Check prod-qa-v1
+          if grep -q "ALL PASS" ./ci-artifacts/prod-qa-v1.log 2>/dev/null; then
+            echo "| prod-qa-v1.sh | PASS |" >> ./ci-artifacts/summary.md
+          else
+            echo "| prod-qa-v1.sh | FAIL/SKIP |" >> ./ci-artifacts/summary.md
+          fi
+
+          echo "" >> ./ci-artifacts/summary.md
+          cat ./ci-artifacts/summary.md
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-launch-checks-${{ github.run_id }}
+          path: ./ci-artifacts/
+          retention-days: 30
+
+      - name: Check for failures
+        run: |
+          FAILED=0
+
+          if ! grep -q "ALL CHECKS PASSED" ./ci-artifacts/prod-facts.log 2>/dev/null; then
+            echo "::warning::prod-facts.sh did not pass all checks"
+            FAILED=1
+          fi
+
+          # perf-baseline and prod-qa are informational, don't fail the workflow
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::Some production checks failed. Review artifacts for details."
+            exit 1
+          fi
+
+          echo "All critical checks passed"
