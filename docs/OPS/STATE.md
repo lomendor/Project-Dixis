@@ -7,6 +7,30 @@
 
 ---
 
+## 2026-01-22 — Pass PERF-BASELINE-CAPTURE-01: Performance Baseline Capture
+
+**Status**: ✅ PASS — CLOSED
+
+Captured production performance baseline for future comparison.
+
+### Results
+
+| Endpoint | Median TTFB | Status |
+|----------|-------------|--------|
+| `/` | 184ms | PASS (< 300ms) |
+| `/products` | 182ms | PASS (< 300ms) |
+| `/api/v1/public/products` | 261ms | PASS (< 300ms) |
+
+### Evidence
+
+- **Baseline**: `docs/OPS/PERF-BASELINES/2026-01-22.md`
+- **Commit**: `6a9baef3`
+- **Samples**: 10 per endpoint
+
+**Performance Baseline: ALL PASS**
+
+---
+
 ## 2026-01-22 — Pass MONITORING-REGEX-01: Fix prod-facts.sh false positive
 
 **Status**: ✅ PASS — CLOSED

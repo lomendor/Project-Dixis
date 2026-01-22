@@ -7,9 +7,9 @@
 
 ## Next Pass Recommendation
 
-- **V1 QA Re-verification: 4/4 PASS** — PR #2395 merged (`ad16783a`)
-- **Monitoring Regex Fix: PASS** — PR #2397 (pending)
-- **prod-facts.sh: ALL PASS** — All 5 checks pass
+- **V1 QA Re-verification: 4/4 PASS** — PR #2395 merged
+- **Monitoring Regex Fix: PASS** — PR #2397 merged (`6a9baef3`)
+- **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
 - Production stable. Continue monitoring per POST-LAUNCH-CHECKS.md schedule.
 
 ---
@@ -26,11 +26,15 @@
 
 ### Recently Completed
 
+- ✅ **PERF-BASELINE-CAPTURE-01**: Performance baseline capture (2026-01-22)
+  - All endpoints < 300ms median TTFB
+  - Baseline: `docs/OPS/PERF-BASELINES/2026-01-22.md`
+  - Commit: `6a9baef3`
+
 - ✅ **MONITORING-REGEX-01**: Fix prod-facts.sh false positive (2026-01-22)
   - Root cause: `grep "0 συνολικά"` matched substring in "10 συνολικά"
   - Fix: Use `grep -qE '\b0 συνολικά'` with word boundary
-  - PR #2397 (pending merge)
-  - This was NOT a UI bug — the page correctly shows "10 συνολικά"
+  - PR #2397 merged (`6a9baef3`)
 
 - ✅ **V1-QA-EXECUTE-01 Re-verification**: All 4 flows PASS (2026-01-22)
   - Flow A: Order #99, COD, €19.99
