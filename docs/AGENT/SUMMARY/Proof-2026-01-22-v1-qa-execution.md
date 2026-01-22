@@ -70,7 +70,7 @@
 - Producer ID/name
 - Public visibility confirmed
 
-**Status**: PENDING
+**Status**: ✅ PASS
 
 ---
 
@@ -186,8 +186,53 @@ curl -sf -X POST "https://dixis.gr/api/v1/payments/orders/102/init" \
 
 ### Flow C: Producer Flow
 
+**Result**: ✅ PASS
+**Executed**: 2026-01-22T12:18:58Z
+
+| Field | Value |
+|-------|-------|
+| Producer User ID | 10 |
+| Product ID | 11 |
+| Product Name | QA Flow C Product 1769084338 |
+| Price | €15.99 |
+| Status | available (auto-approved) |
+| Is Active | true |
+| Producer | Green Farm Co. |
+| Public Visibility | YES |
+| Created At | 2026-01-22T12:18:59.000000Z |
+
+**API Calls**:
+```bash
+# Login as producer
+curl -sf -X POST "https://dixis.gr/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"producer@example.com","password":"***"}'
+
+# Create product
+curl -sf -X POST "https://dixis.gr/api/v1/products" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"QA Flow C Product...","price":15.99,"description":"...","category_id":1,"stock":50,"unit":"kg","is_active":true}'
+
+# Verify public visibility
+curl -sf "https://dixis.gr/api/v1/public/products/11"
 ```
-(to be filled)
+
+**Response snippet** (no PII):
+```json
+{
+  "data": {
+    "id": 11,
+    "name": "QA Flow C Product 1769084338",
+    "price": "15.99",
+    "status": "available",
+    "is_active": true,
+    "producer": {
+      "id": 1,
+      "name": "Green Farm Co."
+    }
+  }
+}
 ```
 
 ### Flow D: Admin Flow
@@ -210,7 +255,7 @@ curl -sf -X POST "https://dixis.gr/api/v1/payments/orders/102/init" \
 |------|--------|----------|
 | A. Guest COD | ✅ PASS | Order #99, ORD-000099, €19.99 |
 | B. Auth Card | ✅ PASS | Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn` |
-| C. Producer | PENDING | - |
+| C. Producer | ✅ PASS | Product #11, Green Farm Co., publicly visible |
 | D. Admin | PENDING | - |
 
 ---
