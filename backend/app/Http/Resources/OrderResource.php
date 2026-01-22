@@ -14,17 +14,38 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Calculate total from subtotal + shipping if total is not set or is zero
-        // Use ?: instead of ?? to handle 0 values (0 is falsy but not null)
+        // Extract financial fields, preferring non-zero stored values
         $subtotal = (float) ($this->subtotal ?? 0);
-        $shippingCost = (float) ($this->shipping_cost ?? $this->shipping_amount ?? 0);
         $taxAmount = (float) ($this->tax_amount ?? 0);
+
+        // Shipping: prefer whichever field has a positive value
+        // shipping_cost is the new field, shipping_amount is legacy
+        $storedShippingCost = (float) ($this->shipping_cost ?? 0);
+        $storedShippingAmount = (float) ($this->shipping_amount ?? 0);
+        $shippingCost = ($storedShippingCost > 0) ? $storedShippingCost
+                      : (($storedShippingAmount > 0) ? $storedShippingAmount : 0);
+
+        // Total: prefer stored if > 0
+        $storedTotal = (float) ($this->total ?? 0);
+        $storedTotalAmount = (float) ($this->total_amount ?? 0);
         $calculatedTotal = $subtotal + $shippingCost + $taxAmount;
 
-        // Prefer stored total if > 0, otherwise use calculated
-        $total = ((float) $this->total > 0) ? $this->total
-               : (((float) $this->total_amount > 0) ? $this->total_amount
-               : $calculatedTotal);
+        // Check for legacy orders with hidden shipping in total
+        // If stored total > calculated breakdown AND shipping shows 0, infer the hidden shipping
+        $total = ($storedTotal > 0) ? $storedTotal
+               : (($storedTotalAmount > 0) ? $storedTotalAmount : $calculatedTotal);
+
+        // Invariant check: if total doesn't match breakdown, shipping may be hidden in total
+        // Infer the actual shipping to maintain invariant: total = subtotal + tax + shipping
+        $breakdownTotal = $subtotal + $taxAmount + $shippingCost;
+        $impliedShipping = $shippingCost;
+        if (abs($total - $breakdownTotal) > 0.01 && $shippingCost == 0) {
+            // Legacy order: shipping was added to total but not stored separately
+            $impliedShipping = $total - $subtotal - $taxAmount;
+            if ($impliedShipping < 0) {
+                $impliedShipping = 0; // Sanity check
+            }
+        }
 
         // Shipping method labels (Greek)
         $shippingMethodLabels = [
@@ -49,10 +70,11 @@ class OrderResource extends JsonResource
             // Delivery notes
             'notes' => $this->notes,
             // Financial fields - use both new and legacy field names for frontend compatibility
-            'subtotal' => number_format((float) ($this->subtotal ?? 0), 2),
-            'tax_amount' => number_format((float) ($this->tax_amount ?? 0), 2),
-            'shipping_amount' => number_format((float) ($this->shipping_cost ?? $this->shipping_amount ?? 0), 2),
-            'shipping_cost' => number_format((float) ($this->shipping_cost ?? $this->shipping_amount ?? 0), 2),
+            // Use implied shipping to maintain invariant: total = subtotal + tax + shipping
+            'subtotal' => number_format($subtotal, 2),
+            'tax_amount' => number_format($taxAmount, 2),
+            'shipping_amount' => number_format($impliedShipping, 2),
+            'shipping_cost' => number_format($impliedShipping, 2),
             'total' => number_format((float) $total, 2),
             'total_amount' => number_format((float) $total, 2), // Alias for frontend compatibility
             'currency' => $this->currency ?? 'EUR',
