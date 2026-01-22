@@ -7,6 +7,37 @@
 
 ---
 
+## 2026-01-22 — Pass MONITORING-REGEX-01: Fix prod-facts.sh false positive
+
+**Status**: ✅ PASS — CLOSED
+
+Fixed false positive in prod-facts.sh where "10 συνολικά" was incorrectly flagged as "0 συνολικά".
+
+### Root Cause
+
+The grep pattern `"0 συνολικά"` did substring matching, so it matched the "0" within "10 συνολικά".
+
+### Fix
+
+Changed from: `grep -q "0 συνολικά"`
+Changed to: `grep -qE '\b0 συνολικά'`
+
+The `\b` word boundary ensures we only match when "0" is at the start of a word.
+
+### Evidence
+
+- **PR**: #2397
+- **Before**: prod-facts.sh falsely reported "0 συνολικά" when page showed "10 συνολικά"
+- **After**: prod-facts.sh correctly passes
+
+### Notes
+
+This was **NOT** a UI display bug. The `/products` page correctly shows "10 συνολικά" when there are 10 products. The issue was in the monitoring script's regex.
+
+**Monitoring Script Fix: PASS**
+
+---
+
 ## 2026-01-22 — Pass V1-QA-EXECUTE-01 Re-verification (4 flows PASS)
 
 **Status**: ✅ PASS — CLOSED
@@ -31,7 +62,6 @@ Re-executed all 4 V1 QA flows with reproducible API scripts and evidence capture
 
 - Email delivery is **code-verified** (OrderEmailService::sendOrderStatusNotification called)
 - Inbox verification is external/manual (does not block merge)
-- Products list page shows "0 συνολικά" — display issue, API data OK (outside QA scope)
 
 **V1 QA Re-verification: ALL 4 FLOWS PASS**
 
