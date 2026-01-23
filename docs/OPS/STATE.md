@@ -1,9 +1,33 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (Order Totals Verification)
+**Last Updated**: 2026-01-23 (CI Neon Compute Audit)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass CI-NEON-COMPUTE-01: Neon Compute Audit
+
+**Status**: ✅ VERIFIED — Already Optimized (No changes needed)
+
+Audit of CI workflows for Neon usage.
+
+### Finding
+
+**Neon is NOT used for CI E2E tests.** Current architecture:
+- `e2e-postgres.yml` → SQLite (`.env.ci`)
+- `pg-e2e.yml` → GitHub Actions postgres service (label-gated)
+- Neon only for production/staging **deployments**
+
+### Misleading Name
+
+The job "E2E (PostgreSQL)" is misleading - it uses SQLite, not PostgreSQL.
+
+### Evidence
+- `grep` of all workflows shows no Neon secrets in test jobs
+- `.env.ci` has `DATABASE_URL=file:./test.db`
+- Docs: `docs/AGENT/SUMMARY/Pass-CI-NEON-COMPUTE-01.md`
 
 ---
 
