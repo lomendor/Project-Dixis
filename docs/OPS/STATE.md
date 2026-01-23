@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (ORD-TOTALS-SHIPPING-01)
+**Last Updated**: 2026-01-23 (UX-DASHBOARD-VISIBILITY-SMOKE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass UX-DASHBOARD-VISIBILITY-SMOKE-01: Dashboard Visibility Smoke Tests
+
+**Status**: ✅ PASS — PR Pending
+
+Added E2E smoke tests proving admin and producer users can navigate to their dashboards.
+
+### Tests Added
+
+| Test | Description | Status |
+|------|-------------|--------|
+| Producer navigation | Home → menu → `/producer/dashboard` + content | ✅ |
+| Producer negative | Dashboard link hidden for consumer | ✅ |
+| Admin navigation | Home → menu → `/admin` (route exists) | ✅ |
+| Admin negative | Admin link hidden for consumer | ✅ |
+
+### Evidence
+- **Test file**: `frontend/tests/e2e/dashboard-visibility-smoke.spec.ts`
+- **Local run**: 4 passed (7.1s)
+- **Summary**: `docs/AGENT/SUMMARY/Pass-UX-DASHBOARD-VISIBILITY-SMOKE-01.md`
 
 ---
 
