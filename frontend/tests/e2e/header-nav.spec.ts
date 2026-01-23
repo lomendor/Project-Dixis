@@ -171,8 +171,11 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
   });
 
   test('cart icon is HIDDEN for producer (per NAVIGATION-V1.md)', async ({ page }) => {
-    // Cart should NOT be visible in header for producers
-    await expect(page.locator('[data-testid="header-cart"]')).not.toBeVisible();
+    // Cart should NOT be visible in header for producers (returns null)
+    // Check that none of the cart testids are visible
+    await expect(page.locator('[data-testid="nav-cart-guest"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="nav-cart"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="nav-cart-admin"]')).not.toBeVisible();
   });
 });
 
@@ -208,8 +211,8 @@ test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
   });
 
   test('cart icon is VISIBLE for admin (per NAVIGATION-V1.md)', async ({ page }) => {
-    // Cart should be visible in header for admin
-    await expect(page.locator('[data-testid="header-cart"]')).toBeVisible();
+    // Cart should be visible in header for admin (uses nav-cart-admin testid)
+    await expect(page.locator('[data-testid="nav-cart-admin"]').first()).toBeVisible();
   });
 });
 
