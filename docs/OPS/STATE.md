@@ -1,9 +1,26 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (DASH-ENTRYPOINTS-01)
+**Last Updated**: 2026-01-24 (UI-SHELL-HEADER-FOOTER-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~155 lines (target ≤250). ✅
+> **Current size**: ~170 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass UI-SHELL-HEADER-FOOTER-01: UI Shell Stabilization
+
+**Status**: ✅ PASS — PR Pending
+
+Stabilized Header/Footer. Removed "Παρακολούθηση Παραγγελίας" from footer. Made cart visible for ALL roles (including producers). 6 E2E tests verify per-role visibility.
+
+**Changes**:
+- Footer: Removed order tracking link
+- CartIcon: Cart now visible for producers too
+- New: `ui-shell-header-footer.spec.ts` (6 tests)
+
+**E2E Tests**: 6/6 pass
+
+**Evidence**: Footer.tsx, CartIcon.tsx | Summary: `Pass-UI-SHELL-HEADER-FOOTER-01.md`
 
 ---
 

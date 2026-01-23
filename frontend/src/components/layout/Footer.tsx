@@ -27,15 +27,12 @@ export default function Footer() {
           {/* Quick Links - touch-friendly spacing */}
           <div>
             <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Γρήγοροι Σύνδεσμοι</h4>
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-1" data-testid="footer-quick-links">
               <Link href="/products" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Προϊόντα
               </Link>
               <Link href="/producers" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Παραγωγοί
-              </Link>
-              <Link href="/orders/lookup" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
-                Παρακολούθηση Παραγγελίας
               </Link>
             </nav>
           </div>
