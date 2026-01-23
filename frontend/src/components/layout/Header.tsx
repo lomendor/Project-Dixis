@@ -3,17 +3,14 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
-import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
-import { useLocale, useTranslations } from '@/contexts/LocaleContext';
-import { locales, type Locale } from '../../../i18n';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
-  const { locale, setLocale } = useLocale();
   const t = useTranslations();
 
   // Close user menu when clicking outside
@@ -42,8 +39,7 @@ export default function Header() {
     }
   };
 
-  // Determine if cart should be shown (not for producers)
-  const showCart = !isProducer;
+  // Cart visible for all roles (producers can also shop as customers)
 
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
@@ -79,30 +75,8 @@ export default function Header() {
 
         {/* Desktop Right Side: Utilities + Auth */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Language Switcher - fixed width to prevent layout shift */}
-          <div className="flex items-center gap-1" data-testid="header-language-switcher">
-            {locales.map((loc) => (
-              <button
-                key={loc}
-                onClick={() => setLocale(loc)}
-                className={`text-xs font-medium px-2 py-1 rounded transition-colors min-w-[32px] ${
-                  locale === loc
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
-                }`}
-                data-testid={`lang-${loc}`}
-                aria-label={t(`language.${loc}`)}
-              >
-                {loc.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* Notification Bell - only for authenticated users */}
-          {isAuthenticated && <NotificationBell />}
-
-          {/* Cart - not for producers */}
-          {showCart && <CartIcon data-testid="header-cart" />}
+          {/* Cart - visible for all roles */}
+          <CartIcon data-testid="header-cart" />
 
           {/* Auth Section */}
           {isAuthenticated ? (
@@ -217,32 +191,10 @@ export default function Header() {
           )}
         </div>
 
-        {/* Mobile Right Side: Utilities + Hamburger - tight spacing for narrow screens */}
-        <div className="flex md:hidden items-center gap-1 sm:gap-2">
-          {/* Language Switcher - compact for mobile */}
-          <div className="flex items-center">
-            {locales.map((loc) => (
-              <button
-                key={loc}
-                onClick={() => setLocale(loc)}
-                className={`text-[10px] sm:text-xs font-medium px-1 sm:px-1.5 py-0.5 sm:py-1 rounded transition-colors ${
-                  locale === loc
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-500'
-                }`}
-                data-testid={`mobile-lang-${loc}`}
-                aria-label={t(`language.${loc}`)}
-              >
-                {loc.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* Notification Bell - only for authenticated users */}
-          {isAuthenticated && <NotificationBell />}
-
-          {/* Cart - not for producers */}
-          {showCart && <CartIcon isMobile />}
+        {/* Mobile Right Side: Utilities + Hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          {/* Cart - visible for all roles */}
+          <CartIcon isMobile />
 
           {/* Mobile Menu Button */}
           <button

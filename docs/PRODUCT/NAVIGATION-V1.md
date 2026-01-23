@@ -1,7 +1,7 @@
 # Navigation V1 — Unified Specification
 
 **Created**: 2026-01-22
-**Updated**: 2026-01-23 (UI-NAV-SPEC-01)
+**Updated**: 2026-01-23 (NAV-ENTRYPOINTS-01)
 **Status**: CANONICAL — Source of truth for all navigation behavior
 
 > **Purpose**: Define exactly what appears in Header, Footer, and mobile navigation per user role. Stops "random UI" and inconsistent links.
@@ -42,13 +42,13 @@
 | Logo | Dixis | `/` | ✅ | `header-logo` |
 | Products | Προϊόντα | `/products` | ✅ | — |
 | Producers | Παραγωγοί | `/producers` | ✅ | — |
-| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
 | Cart | 🛒 | `/cart` | ✅ | `header-cart` |
 | Login | Είσοδος | `/auth/login` | ✅ | `nav-login` |
 | Register | Εγγραφή | `/auth/register` | ✅ | `nav-register` |
 
 **NOT visible for Guest**:
-- ❌ Notification bell
+- ❌ Language switcher (footer only)
+- ❌ Notification bell (out of scope for V1)
 - ❌ User dropdown
 - ❌ Track Order in header (footer only)
 - ❌ Dashboard links
@@ -62,8 +62,6 @@
 | Logo | Dixis | `/` | ✅ | `header-logo` |
 | Products | Προϊόντα | `/products` | ✅ | — |
 | Producers | Παραγωγοί | `/producers` | ✅ | — |
-| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
-| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
 | Cart | 🛒 | `/cart` | ✅ | `header-cart` |
 | User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
@@ -75,6 +73,8 @@
 | Logout | Αποσύνδεση | — | `user-menu-logout` |
 
 **NOT visible for Consumer**:
+- ❌ Language switcher (footer only)
+- ❌ Notification bell (out of scope for V1)
 - ❌ Login/Register buttons
 - ❌ Dashboard link
 - ❌ Admin link
@@ -89,8 +89,7 @@
 | Logo | Dixis | `/` | ✅ | `header-logo` |
 | Products | Προϊόντα | `/products` | ✅ | — |
 | Producers | Παραγωγοί | `/producers` | ✅ | — |
-| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
-| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
+| Cart | 🛒 | `/cart` | ✅ | `header-cart` |
 | User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
 **User Dropdown Contents**:
@@ -102,10 +101,13 @@
 | Logout | Αποσύνδεση | — | `user-menu-logout` |
 
 **NOT visible for Producer**:
-- ❌ Cart (producers don't shop)
+- ❌ Language switcher (footer only)
+- ❌ Notification bell (out of scope for V1)
 - ❌ Login/Register buttons
 - ❌ Admin link
 - ❌ Consumer "My Orders" (`/account/orders`)
+
+**Note**: Cart IS visible for Producer (producers can also shop as customers).
 
 ---
 
@@ -116,8 +118,6 @@
 | Logo | Dixis | `/` | ✅ | `header-logo` |
 | Products | Προϊόντα | `/products` | ✅ | — |
 | Producers | Παραγωγοί | `/producers` | ✅ | — |
-| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
-| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
 | Cart | 🛒 | `/cart` | ✅ | `header-cart` |
 | User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
@@ -129,6 +129,8 @@
 | Logout | Αποσύνδεση | — | `user-menu-logout` |
 
 **NOT visible for Admin**:
+- ❌ Language switcher (footer only)
+- ❌ Notification bell (out of scope for V1)
 - ❌ Login/Register buttons
 - ❌ Producer Dashboard link
 - ❌ Consumer "My Orders"
@@ -162,13 +164,13 @@ Footer is **identical for all roles** — no role-based visibility.
 
 | Rule | Description |
 |------|-------------|
-| **Header position** | Right-aligned, before notification bell (if visible) |
+| **Header** | ❌ NOT in header (removed in NAV-ENTRYPOINTS-01) |
 | **Footer position** | Bottom bar, right side |
 | **Fixed position** | Must NOT shift/jump when clicked |
-| **TestIDs** | Header: `lang-el`, `lang-en` / Footer: `footer-lang-el`, `footer-lang-en` |
+| **TestIDs** | Footer only: `footer-lang-el`, `footer-lang-en` |
 | **Active state** | Highlighted button for current locale |
 
-**Decision**: Language switcher appears in BOTH header and footer for V1. Footer is the primary location; header is convenience.
+**Decision (NAV-ENTRYPOINTS-01)**: Language switcher appears ONLY in footer. Simpler header, footer always visible.
 
 ---
 
@@ -178,8 +180,10 @@ Footer is **identical for all roles** — no role-based visibility.
 |------|--------------|--------|
 | Guest | ✅ Yes | Can add items before login |
 | Consumer | ✅ Yes | Primary shopper |
-| Producer | ❌ No | Producers sell, don't shop |
+| Producer | ✅ Yes | Producers can also shop as customers |
 | Admin | ✅ Yes | May test checkout flow |
+
+**Decision (NAV-ENTRYPOINTS-01)**: Cart visible for ALL roles.
 
 ---
 
@@ -190,10 +194,12 @@ Footer is **identical for all roles** — no role-based visibility.
 | Element | Notes |
 |---------|-------|
 | Logo | `h-9` (36px), links to `/` |
-| Language Switcher | EL/EN |
-| Notification Bell | If authenticated |
-| Cart | If applicable (not producer) |
+| Cart | Visible for all roles |
 | Hamburger Menu | `mobile-menu-button` |
+
+**NOT in mobile header bar**:
+- ❌ Language switcher (footer only)
+- ❌ Notification bell (out of scope for V1)
 
 ### 6.2 Hamburger Menu Contents
 
@@ -338,6 +344,7 @@ const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
 |------|--------|---------|
 | 2026-01-22 | Initial spec | UX-NAV-ROLES-HEADER-01 |
 | 2026-01-23 | Comprehensive update: footer spec, mobile rules, non-goals, resolved decisions | UI-NAV-SPEC-01 |
+| 2026-01-23 | Remove language switcher from header (footer-only), remove notification bell (V1 scope), cart visible for all roles | NAV-ENTRYPOINTS-01 |
 
 ---
 
