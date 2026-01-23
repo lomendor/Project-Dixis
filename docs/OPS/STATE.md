@@ -1,15 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (UI-HEADER-POLISH-02)
+**Last Updated**: 2026-01-23 (NAV-ENTRYPOINTS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~140 lines (target ≤250). ✅
 
 ---
 
-## 2026-01-23 — Pass UI-HEADER-POLISH-02: Header Layout Polish
+## 2026-01-23 — Pass NAV-ENTRYPOINTS-01: Navigation Simplification
 
 **Status**: ✅ PASS — PR Pending
+
+Removed language switcher from header (footer-only), removed notification bell (V1 scope), cart visible for all roles.
+
+**Evidence**: Header.tsx, NAVIGATION-V1.md | Summary: `Pass-NAV-ENTRYPOINTS-01.md`
+
+---
+
+## 2026-01-23 — Pass UI-HEADER-POLISH-02: Header Layout Polish
+
+**Status**: ✅ PASS — MERGED (PR #2431)
 
 Responsive logo (48px desktop, 36px mobile) + tightened mobile spacing. No feature changes.
 
