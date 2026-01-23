@@ -1,9 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (SSH Retry)
+**Last Updated**: 2026-01-23 (Order Totals Invariants)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~540 lines (target ≤250).
+> **Current size**: ~560 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass ORDER-TOTALS-INVARIANTS-01: Fix Totals Breakdown Mismatch
+
+**Status**: ✅ PASS — CLOSED
+
+Fixed display bug where order totals didn't match breakdown (€26.99 total but €0.00 shipping shown).
+
+### Root Cause
+Legacy orders had €5.00 shipping embedded in `total_amount` but not in `shipping_cost` field.
+
+### Fix
+Infer hidden shipping when `total ≠ subtotal + tax + shipping`.
+
+### Results
+- **Before**: 16/100 orders with mismatch
+- **After**: 0/100 mismatches (100% invariant compliance)
+
+### Evidence
+- **PR**: #2412 (merged `1c1ee2d4`)
+- **Summary**: `docs/AGENT/SUMMARY/Pass-ORDER-TOTALS-INVARIANTS-01.md`
+- **Proof**: `docs/AGENT/SUMMARY/Proof-ORDER-TOTALS-INVARIANTS-01.md`
 
 ---
 
