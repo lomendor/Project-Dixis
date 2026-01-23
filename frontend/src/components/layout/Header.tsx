@@ -46,13 +46,13 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo - 44px height, always visible, links to home */}
+        {/* Logo - 48px height, always visible, links to home */}
         <Link
           href="/"
           className="flex-shrink-0 flex items-center hover:opacity-90 transition-opacity touch-manipulation active:opacity-80"
           data-testid="header-logo"
         >
-          <Logo height={44} title="Dixis" />
+          <Logo height={48} title="Dixis" />
         </Link>
 
         {/* Desktop Primary Navigation - centered with flex-1 */}
@@ -195,7 +195,7 @@ export default function Header() {
           {isAuthenticated && <NotificationBell />}
 
           {/* Cart - not for producers */}
-          {showCart && <CartIcon data-testid="header-cart" />}
+          {showCart && <CartIcon isMobile />}
 
           {/* Mobile Menu Button */}
           <button

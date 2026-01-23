@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { getCartMessage } from '@/lib/auth/helpers';
 import { useCart, cartCount } from '@/lib/cart';
 
 interface CartIconProps {
@@ -10,6 +9,15 @@ interface CartIconProps {
   isMobile?: boolean;
 }
 
+/**
+ * CartIcon - Clean, unified cart icon for header
+ *
+ * Visibility rules:
+ * - Guest: visible (guest checkout supported)
+ * - Consumer: visible
+ * - Admin: visible
+ * - Producer: HIDDEN (returns null)
+ */
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
   const { isGuest, isConsumer, isProducer, isAdmin } = useAuth();
 
@@ -17,115 +25,55 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
   const items = useCart(state => state.items);
   const cartItemCount = cartCount(items);
 
-  // Guest users - show cart link (guest checkout supported)
-  if (isGuest) {
-    return (
-      <Link
-        href="/cart"
-        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart-guest" : "nav-cart-guest"}
-        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
-      >
-        <span className="flex items-center" data-testid="cart-icon-guest">
-          🛒 Καλάθι
-          {cartItemCount > 0 && (
-            <span
-              className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
-              data-testid="cart-item-count-guest"
-              aria-label="cart-count"
-            >
-              {cartItemCount}
-            </span>
-          )}
-        </span>
-      </Link>
-    );
-  }
-
-  // Consumer users - full cart access
-  if (isConsumer) {
-    return (
-      <Link
-        href="/cart"
-        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart" : "nav-cart"}
-        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
-      >
-        <span className="flex items-center" data-testid="cart-icon-active">
-          Cart
-          {cartItemCount > 0 && (
-            <span
-              className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
-              data-testid="cart-item-count"
-              aria-label="cart-count"
-            >
-              {cartItemCount}
-            </span>
-          )}
-        </span>
-      </Link>
-    );
-  }
-
-  // Admin users - full cart access (same as consumers)
-  if (isAdmin) {
-    return (
-      <Link
-        href="/cart"
-        className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-        data-testid={isMobile ? "mobile-nav-cart-admin" : "nav-cart-admin"}
-        aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
-      >
-        <span className="flex items-center" data-testid="cart-icon-admin">
-          🛒 Cart
-          {cartItemCount > 0 && (
-            <span
-              className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
-              data-testid="cart-item-count-admin"
-              aria-label="cart-count"
-            >
-              {cartItemCount}
-            </span>
-          )}
-        </span>
-      </Link>
-    );
-  }
-
-  // Producer users - limited cart access with message
+  // Producer users - no cart access, hide completely
   if (isProducer) {
-    return (
-      <div
-        className={`text-gray-500 px-3 py-2 rounded-md text-sm font-medium ${className}`}
-        data-testid="cart-producer-mode"
-      >
-        <span data-testid="cart-producer-message" title="Producers have limited cart access">
-          {getCartMessage('producer')}
-        </span>
-      </div>
-    );
+    return null;
   }
 
-  // Fallback - show cart link for safety (defensive programming)
+  // Determine testid based on role
+  const getTestId = () => {
+    if (isMobile) {
+      if (isGuest) return 'mobile-nav-cart-guest';
+      if (isAdmin) return 'mobile-nav-cart-admin';
+      return 'mobile-nav-cart';
+    }
+    if (isGuest) return 'nav-cart-guest';
+    if (isAdmin) return 'nav-cart-admin';
+    return 'nav-cart';
+  };
+
+  // Unified cart icon for all visible roles
   return (
     <Link
       href="/cart"
-      className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium relative ${className}`}
-      data-testid={isMobile ? "mobile-nav-cart-fallback" : "nav-cart-fallback"}
-      aria-label={`Προβολή καλαθιού με ${cartItemCount} προϊόντα`}
+      className={`relative flex items-center justify-center p-2 text-neutral-600 hover:text-primary transition-colors rounded-md hover:bg-neutral-50 ${className}`}
+      data-testid={getTestId()}
+      aria-label={`Καλάθι${cartItemCount > 0 ? ` με ${cartItemCount} προϊόντα` : ''}`}
     >
-      <span className="flex items-center" data-testid="cart-icon-fallback">
-        🛒 Cart
-        {cartItemCount > 0 && (
-          <span
-            className="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-green-600 rounded-full"
-            data-testid="cart-item-count-fallback"
-            aria-label="cart-count"
-          >
-            {cartItemCount}
-          </span>
-        )}
-      </span>
+      {/* Cart SVG Icon */}
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
+        />
+      </svg>
+      {/* Badge - only show if items > 0 */}
+      {cartItemCount > 0 && (
+        <span
+          className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-primary rounded-full"
+          data-testid="cart-item-count"
+          aria-label="cart-count"
+        >
+          {cartItemCount > 99 ? '99+' : cartItemCount}
+        </span>
+      )}
     </Link>
   );
 }

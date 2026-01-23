@@ -1,9 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (Header IA Verification)
+**Last Updated**: 2026-01-23 (Header UX Polish)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass UI-HEADER-POLISH-01: Header UX Improvements
+
+**Status**: ✅ PASS — PENDING CI
+
+Implementation pass for header UX improvements.
+
+### Changes
+- Logo: 44px → 48px for better visibility
+- CartIcon: Unified clean SVG + badge, no text clutter
+- Producer cart: Completely hidden (null) instead of message div
+
+### Cart Visibility Rules
+| Role | Cart | TestID |
+|------|------|--------|
+| Guest | ✅ | nav-cart-guest |
+| Consumer | ✅ | nav-cart |
+| Admin | ✅ | nav-cart-admin |
+| Producer | ❌ | (hidden) |
+
+### Evidence
+- **PR**: #2415 (auto-merge enabled)
+- **Files**: CartIcon.tsx, Header.tsx, auth-cart-flow.spec.ts, header-screenshot-proof.spec.ts
 
 ---
 
