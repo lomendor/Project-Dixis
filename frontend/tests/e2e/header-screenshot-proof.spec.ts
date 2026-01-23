@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  * - Guest: nav-cart-guest
  * - Consumer: nav-cart
  * - Admin: nav-cart-admin
- * - Producer: cart-producer-mode (message, not link)
+ * - Producer: HIDDEN (returns null, no element rendered)
  */
 
 const SCREENSHOT_DIR = 'test-results/header-proof';
@@ -104,15 +104,15 @@ test.describe('Header Screenshot Proof @evidence', () => {
     await expect(page.locator('[data-testid="header-logo"]')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('[data-testid="header-user-menu"]')).toBeVisible();
 
-    // Cart should show producer-mode message (not a clickable cart)
-    // Check that cart-producer-mode exists OR that no cart link exists
-    const producerCartMode = page.locator('[data-testid="cart-producer-mode"]');
+    // Cart is completely hidden for producers (returns null)
     const guestCart = page.locator('[data-testid="nav-cart-guest"]');
     const consumerCart = page.locator('[data-testid="nav-cart"]');
+    const adminCart = page.locator('[data-testid="nav-cart-admin"]');
 
-    // Producer should not see regular cart
+    // Producer should not see any cart
     await expect(guestCart).not.toBeVisible();
     await expect(consumerCart).not.toBeVisible();
+    await expect(adminCart).not.toBeVisible();
 
     // Capture screenshot (closed menu)
     await page.screenshot({ path: `${SCREENSHOT_DIR}/header-producer-closed.png`, fullPage: false });

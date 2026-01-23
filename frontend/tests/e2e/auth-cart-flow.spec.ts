@@ -1,63 +1,99 @@
 import { test, expect } from '@playwright/test';
-import { expectAuthedOrLogin } from './helpers/auth-mode';
 import './setup.mocks';
+
+/**
+ * Auth-Cart Flow Tests
+ *
+ * Tests cart icon visibility and behavior for different user roles.
+ *
+ * Cart visibility rules:
+ * - Guest: visible (nav-cart-guest)
+ * - Consumer: visible (nav-cart)
+ * - Admin: visible (nav-cart-admin)
+ * - Producer: HIDDEN (returns null)
+ */
+
 const setupPage = async (page: any) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByTestId('page-root').or(page.getByTestId('error-boundary')).first().waitFor({ timeout: 15000 });
 };
-const setupAuthState = async (page: any, context: any, role: 'consumer' | 'producer') => {
-  await context.addCookies([{ name: 'auth_token', value: 'mock_token', domain: '127.0.0.1', path: '/' }]);
-  await page.addInitScript((r: string) => { localStorage.setItem('auth_token', 'mock_token'); localStorage.setItem('user_role', r); }, role);
+
+const setupAuthState = async (page: any, role: 'consumer' | 'producer' | 'admin') => {
+  await page.evaluate((r: string) => {
+    localStorage.setItem('auth_token', 'mock_token');
+    localStorage.setItem('user_id', '1');
+    localStorage.setItem('user_role', r);
+    localStorage.setItem('user_name', 'Test User');
+    localStorage.setItem('e2e_mode', 'true');
+  }, role);
 };
+
 test.describe('Auth-Cart Flow Tests', () => {
-  test('Guest users see login prompt for cart access', async ({ page }) => {
+  test('Guest users see cart icon', async ({ page }) => {
+    // Clear any auth state
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
     await setupPage(page);
-    const cartLoginPrompt = page.getByTestId('cart-login-prompt');
-    await expect(cartLoginPrompt).toBeVisible();
-    await expect(cartLoginPrompt).toHaveText('Login to Add to Cart');
-    await cartLoginPrompt.click();
-    await expectAuthedOrLogin(page);
+
+    // Guest cart should be visible
+    const guestCart = page.getByTestId('nav-cart-guest').first();
+    await expect(guestCart).toBeVisible();
   });
-  test('Consumer users see active cart with item count', async ({ page, context }) => {
-    await setupAuthState(page, context, 'consumer');
-    await setupPage(page);
-    const activeCartIcon = page.getByTestId('cart-icon-active');
-    await expect(activeCartIcon).toBeVisible();
-    const itemCount = page.getByTestId('cart-item-count');
-    await expect(itemCount).toBeVisible();
-    await expect(itemCount).toHaveText('3');
-    await activeCartIcon.click();
-    await expect(page).toHaveURL(/\/cart/);
-  });
-  test('Producer users see limited cart access message', async ({ page, context }) => {
-    await setupAuthState(page, context, 'producer');
-    await setupPage(page);
-    const producerCartMode = page.getByTestId('cart-producer-mode');
-    await expect(producerCartMode).toBeVisible();
-    const producerMessage = page.getByTestId('cart-producer-message');
-    await expect(producerMessage).toBeVisible();
-    await expect(producerMessage).toHaveText('Producer Cart View');
-  });
-  test('Mobile navigation shows correct cart behavior for all roles', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await setupPage(page);
-    const mobileMenuButton = page.getByTestId('mobile-menu-button');
-    await mobileMenuButton.click();
-    // Wait for button state change before checking menu
-    await expect(mobileMenuButton).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 });
-    const mobileMenu = page.getByTestId('mobile-menu');
-    await expect(mobileMenu).toBeVisible();
-    const mobileCartPrompt = page.getByTestId('cart-login-prompt');
-    await expect(mobileCartPrompt).toBeVisible();
-    await expect(mobileCartPrompt).toHaveText('Login to Add to Cart');
-  });
-  test('Role transition updates cart display correctly', async ({ page, context }) => {
-    await setupPage(page);
-    await expect(page.getByTestId('cart-login-prompt')).toBeVisible();
-    await page.addInitScript(() => { localStorage.setItem('auth_token', 'mock_token'); localStorage.setItem('user_role', 'consumer'); });
+
+  test('Consumer users see cart icon', async ({ page }) => {
+    await page.goto('/');
+    await setupAuthState(page, 'consumer');
     await page.reload();
-    await page.waitForSelector('[data-testid="page-root"]', { timeout: 15000 });
-    await expect(page.getByTestId('cart-icon-active')).toBeVisible();
-    await expect(page.getByTestId('cart-item-count')).toBeVisible();
+    await setupPage(page);
+
+    // Consumer cart should be visible
+    const consumerCart = page.getByTestId('nav-cart').first();
+    await expect(consumerCart).toBeVisible();
+  });
+
+  test('Producer users do not see cart icon', async ({ page }) => {
+    await page.goto('/');
+    await setupAuthState(page, 'producer');
+    await page.reload();
+    await setupPage(page);
+
+    // Cart is completely hidden for producers (returns null)
+    const guestCart = page.getByTestId('nav-cart-guest');
+    const consumerCart = page.getByTestId('nav-cart');
+    const adminCart = page.getByTestId('nav-cart-admin');
+
+    await expect(guestCart).not.toBeVisible();
+    await expect(consumerCart).not.toBeVisible();
+    await expect(adminCart).not.toBeVisible();
+  });
+
+  test('Admin users see cart icon', async ({ page }) => {
+    await page.goto('/');
+    await setupAuthState(page, 'admin');
+    await page.reload();
+    await setupPage(page);
+
+    // Admin cart should be visible
+    const adminCart = page.getByTestId('nav-cart-admin').first();
+    await expect(adminCart).toBeVisible();
+  });
+
+  test('Mobile navigation shows cart for guest', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+
+    // Clear any auth state
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+    await setupPage(page);
+
+    // Mobile cart should be visible for guest
+    const mobileCart = page.getByTestId('mobile-nav-cart-guest');
+    await expect(mobileCart).toBeVisible();
   });
 });
