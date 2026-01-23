@@ -9,7 +9,7 @@
 
 ## 2026-01-23 — Pass ORDERS-TOTALS-01: Order Totals Pattern Investigation
 
-**Status**: ✅ VERIFIED — NO BUG (PR #2420 pending)
+**Status**: ✅ VERIFIED — MERGED (PR #2420, commit 3b890c65)
 
 Investigation pass for reported "€26.99 pattern" in orders.
 
