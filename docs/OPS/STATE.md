@@ -1,9 +1,36 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (Producer IA Verification)
+**Last Updated**: 2026-01-23 (Order Totals Verification)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass ORDERS-TOTALS-01: Order Totals Pattern Investigation
+
+**Status**: ✅ VERIFIED — NO BUG (PR #2420 pending)
+
+Investigation pass for reported "€26.99 pattern" in orders.
+
+### Finding
+
+**No bug exists.** The €26.99 pattern is explained by:
+- QA tests use same test product (€19.99)
+- With shipping (€5) + tax (€2) = €26.99
+- Real orders have 10+ unique totals
+
+### Tests Added
+
+| Test | Purpose |
+|------|---------|
+| `Orders have diverse totals` | Proves ≥3 unique totals |
+| `Order list total matches detail total` | List=Detail consistency |
+
+### Evidence
+- **PR**: #2420 (pending)
+- **Test**: `order-totals-regression.spec.ts`
+- **API Check**: 10 unique totals across 15 orders
 
 ---
 
