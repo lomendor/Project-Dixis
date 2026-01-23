@@ -1,7 +1,7 @@
 # Producer Dashboard V1 - Information Architecture
 
 **Created:** 2026-01-21
-**Updated:** 2026-01-21 (Pass PRODUCER-DASHBOARD-IA-01)
+**Updated:** 2026-01-23 (Pass PRODUCER-IA-01)
 **Pass:** PRODUCER-IA-01, PRODUCER-DASHBOARD-IA-01
 **Status:** Implemented & Verified
 
@@ -288,8 +288,9 @@ No blocking gaps for V1 launch.
 
 | Test | File | Status |
 |------|------|--------|
-| Producer dashboard link in user dropdown | `header-nav.spec.ts:140` | PASS |
-| Admin/my-orders NOT in dropdown for producer | `header-nav.spec.ts:148` | PASS |
+| Producer dashboard link navigates to /producer/dashboard | `header-nav.spec.ts:149` | PASS |
+| Producer orders link in user dropdown | `header-nav.spec.ts:165` | PASS |
+| Admin/my-orders NOT in dropdown for producer | `header-nav.spec.ts:173` | PASS |
 
 ### What We Know Now
 
@@ -304,4 +305,4 @@ None blocking. Producer dashboard is fully functional for V1.
 
 ---
 
-_Pass: PRODUCER-IA-01 | Updated: PRODUCER-DASHBOARD-IA-01 | 2026-01-21 | Author: Claude_
+_Pass: PRODUCER-IA-01 | Updated: 2026-01-23 | Author: Claude_

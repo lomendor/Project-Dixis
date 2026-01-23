@@ -1,9 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (Order Totals Verification)
+**Last Updated**: 2026-01-23 (Producer IA Verification)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass PRODUCER-IA-01: Producer Dashboard Entry Points
+
+**Status**: ✅ PASS — PENDING CI
+
+Audit + verification pass for producer dashboard navigation.
+
+### Finding
+
+Producer dashboard entry points **already implemented** correctly:
+- Desktop: `user-menu-dashboard` testid → `/producer/dashboard`
+- Mobile: `mobile-nav-dashboard` testid → `/producer/dashboard`
+- All 10 producer routes documented in `PRODUCER-DASHBOARD-V1.md`
+
+### Test Enhancement
+
+Added navigation verification to existing E2E test:
+- Verifies `href="/producer/dashboard"` attribute
+- Clicks link and confirms URL contains `/producer/dashboard`
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `header-nav.spec.ts` | Enhanced test to verify navigation |
+| `PRODUCER-DASHBOARD-V1.md` | Updated E2E coverage table |
+
+### Evidence
+- **PR**: #2418 (pending)
+- **Test**: `header-nav.spec.ts:149`
+- **Doc**: `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md`
 
 ---
 

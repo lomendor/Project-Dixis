@@ -146,12 +146,21 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
     await page.waitForLoadState('domcontentloaded');
   });
 
-  test('producer dashboard link in user dropdown', async ({ page }) => {
+  test('producer dashboard link in user dropdown navigates to /producer/dashboard (PRODUCER-IA-01)', async ({ page }) => {
     const userMenu = page.locator('[data-testid="header-user-menu"]');
     await expect(userMenu).toBeVisible({ timeout: 10000 });
     await userMenu.click();
 
-    await expect(page.locator('[data-testid="user-menu-dashboard"]')).toBeVisible();
+    const dashboardLink = page.locator('[data-testid="user-menu-dashboard"]');
+    await expect(dashboardLink).toBeVisible();
+
+    // Verify link href points to producer dashboard
+    await expect(dashboardLink).toHaveAttribute('href', '/producer/dashboard');
+
+    // Click and verify navigation
+    await dashboardLink.click();
+    await page.waitForURL('**/producer/dashboard', { timeout: 10000 });
+    expect(page.url()).toContain('/producer/dashboard');
   });
 
   test('producer orders link in user dropdown (per UX-DASHBOARD-ENTRYPOINTS-01)', async ({ page }) => {
