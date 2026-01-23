@@ -9,7 +9,7 @@
 
 ## 2026-01-23 — Pass PRODUCER-IA-01: Producer Dashboard Entry Points
 
-**Status**: ✅ PASS — PENDING CI
+**Status**: ✅ PASS — MERGED (PR #2418, commit fd336414)
 
 Audit + verification pass for producer dashboard navigation.
 
@@ -34,7 +34,7 @@ Added navigation verification to existing E2E test:
 | `PRODUCER-DASHBOARD-V1.md` | Updated E2E coverage table |
 
 ### Evidence
-- **PR**: #2418 (pending)
+- **PR**: #2418 (merged fd336414)
 - **Test**: `header-nav.spec.ts:149`
 - **Doc**: `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md`
 
