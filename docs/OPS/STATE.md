@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (DOCS-STATE-HYGIENE-01)
+**Last Updated**: 2026-01-23 (UI-NAV-SPEC-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~250 lines (target ≤250). ✅
+> **Current size**: ~130 lines (target ≤250). ✅
+
+---
+
+## 2026-01-23 — Pass UI-NAV-SPEC-01: Navigation Specification
+
+**Status**: ✅ PASS — PR Pending
+
+Comprehensive navigation spec defining Header/Footer/Mobile per role. Stops "random UI" with single source of truth.
+
+**Evidence**: `docs/PRODUCT/NAVIGATION-V1.md` | Summary: `Pass-UI-NAV-SPEC-01.md`
+
+---
+
+## 2026-01-23 — Pass DOCS-NEXT7D-HYGIENE-01: NEXT-7D Hygiene
+
+**Status**: ✅ PASS — MERGED (PR #2428)
+
+NEXT-7D.md condensed 405→108 lines. Created `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`.
+
+**Evidence**: Archive contains all completed items with PR/summary links
 
 ---
 
