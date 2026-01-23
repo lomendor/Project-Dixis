@@ -90,6 +90,9 @@
     "dashboard": "Producer Dashboard",
     "orders": "Producer Orders"
   },
+  "admin": {
+    "dashboard": "Admin Dashboard"
+  },
   "products": {
     "title": "Products",
     "empty": "No products available.",

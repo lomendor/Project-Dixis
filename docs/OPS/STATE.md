@@ -1,9 +1,21 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (E2E-TEST-COVERAGE-AUDIT-01)
+**Last Updated**: 2026-01-23 (DASH-ENTRYPOINTS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~140 lines (target ≤250). ✅
+> **Current size**: ~155 lines (target ≤250). ✅
+
+---
+
+## 2026-01-23 — Pass DASH-ENTRYPOINTS-01: Dashboard Entry Points
+
+**Status**: ✅ PASS — PR Pending
+
+Added Greek translations for dashboard entry points in account menu. Producer: "Πίνακας Παραγωγού", Admin: "Διαχείριση (Admin)".
+
+**E2E Tests**: 4/4 pass (dashboard-visibility-smoke.spec.ts)
+
+**Evidence**: Header.tsx, messages/el.json, messages/en.json | Summary: `Pass-DASH-ENTRYPOINTS-01.md`
 
 ---
 
