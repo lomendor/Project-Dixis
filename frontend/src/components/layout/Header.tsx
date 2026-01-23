@@ -5,13 +5,15 @@ import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
-import { useTranslations } from '@/contexts/LocaleContext';
+import { useLocale, useTranslations } from '@/contexts/LocaleContext';
+import { locales, type Locale } from '../../../i18n';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
+  const { locale, setLocale } = useLocale();
   const t = useTranslations();
 
   // Close user menu when clicking outside
@@ -70,6 +72,25 @@ export default function Header() {
 
         {/* Desktop Right Side: Utilities + Auth */}
         <div className="hidden md:flex items-center gap-4">
+          {/* Language Switcher - fixed width to prevent layout shift */}
+          <div className="flex items-center gap-1" data-testid="header-language-switcher">
+            {locales.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => setLocale(loc)}
+                className={`text-xs font-medium px-2 py-1 rounded transition-colors min-w-[32px] ${
+                  locale === loc
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
+                }`}
+                data-testid={`lang-${loc}`}
+                aria-label={t(`language.${loc}`)}
+              >
+                {loc.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           {/* Notification Bell - only for authenticated users */}
           {isAuthenticated && <NotificationBell />}
 
@@ -191,6 +212,25 @@ export default function Header() {
 
         {/* Mobile Right Side: Utilities + Hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          {/* Language Switcher - compact for mobile */}
+          <div className="flex items-center gap-0.5">
+            {locales.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => setLocale(loc)}
+                className={`text-xs font-medium px-1.5 py-1 rounded transition-colors ${
+                  locale === loc
+                    ? 'bg-primary text-white'
+                    : 'text-neutral-500'
+                }`}
+                data-testid={`mobile-lang-${loc}`}
+                aria-label={t(`language.${loc}`)}
+              >
+                {loc.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           {/* Notification Bell - only for authenticated users */}
           {isAuthenticated && <NotificationBell />}
 
