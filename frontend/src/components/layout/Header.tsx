@@ -48,13 +48,20 @@ export default function Header() {
   return (
     <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo - 48px height, always visible, links to home */}
+        {/* Logo - Desktop: 48px, Mobile: 36px (per NAVIGATION-V1.md) */}
         <Link
           href="/"
           className="flex-shrink-0 flex items-center hover:opacity-90 transition-opacity touch-manipulation active:opacity-80"
           data-testid="header-logo"
         >
-          <Logo height={48} title="Dixis" />
+          {/* Desktop logo (hidden on mobile) */}
+          <span className="hidden md:block">
+            <Logo height={48} title="Dixis" />
+          </span>
+          {/* Mobile logo (hidden on desktop) */}
+          <span className="block md:hidden">
+            <Logo height={36} title="Dixis" />
+          </span>
         </Link>
 
         {/* Desktop Primary Navigation - centered with flex-1 */}
@@ -210,15 +217,15 @@ export default function Header() {
           )}
         </div>
 
-        {/* Mobile Right Side: Utilities + Hamburger */}
-        <div className="flex md:hidden items-center gap-2">
+        {/* Mobile Right Side: Utilities + Hamburger - tight spacing for narrow screens */}
+        <div className="flex md:hidden items-center gap-1 sm:gap-2">
           {/* Language Switcher - compact for mobile */}
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center">
             {locales.map((loc) => (
               <button
                 key={loc}
                 onClick={() => setLocale(loc)}
-                className={`text-xs font-medium px-1.5 py-1 rounded transition-colors ${
+                className={`text-[10px] sm:text-xs font-medium px-1 sm:px-1.5 py-0.5 sm:py-1 rounded transition-colors ${
                   locale === loc
                     ? 'bg-primary text-white'
                     : 'text-neutral-500'

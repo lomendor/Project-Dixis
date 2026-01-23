@@ -1,15 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (UI-NAV-ALIGN-01)
+**Last Updated**: 2026-01-23 (UI-HEADER-POLISH-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~140 lines (target ≤250). ✅
 
 ---
 
-## 2026-01-23 — Pass UI-NAV-ALIGN-01: Header Spec Alignment
+## 2026-01-23 — Pass UI-HEADER-POLISH-02: Header Layout Polish
 
 **Status**: ✅ PASS — PR Pending
+
+Responsive logo (48px desktop, 36px mobile) + tightened mobile spacing. No feature changes.
+
+**Evidence**: Header.tsx | Summary: `Pass-UI-HEADER-POLISH-02.md`
+
+---
+
+## 2026-01-23 — Pass UI-NAV-ALIGN-01: Header Spec Alignment
+
+**Status**: ✅ PASS — MERGED (PR #2430)
 
 Added language switcher to Header (desktop + mobile) per NAVIGATION-V1.md spec. Fixed-width buttons prevent layout shift.
 
