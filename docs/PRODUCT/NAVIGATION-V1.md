@@ -1,201 +1,334 @@
-# Navigation Specification V1
+# Navigation V1 — Unified Specification
 
-**Document**: Navigation and Header Specification for Dixis V1
 **Created**: 2026-01-22
-**Pass ID**: UX-NAV-ROLES-HEADER-01
+**Updated**: 2026-01-23 (UI-NAV-SPEC-01)
+**Status**: CANONICAL — Source of truth for all navigation behavior
+
+> **Purpose**: Define exactly what appears in Header, Footer, and mobile navigation per user role. Stops "random UI" and inconsistent links.
 
 ---
 
-## Overview
+## Quick Reference
 
-This document defines the **canonical navigation structure** for Dixis V1 marketplace.
-The header and navigation elements vary based on user authentication state and role.
-
----
-
-## User States
-
-| State | Description | Detection |
-|-------|-------------|-----------|
-| **Guest** | Not authenticated | `isAuthenticated === false` |
-| **Consumer** | Authenticated user without producer/admin role | `isAuthenticated && !isProducer && !isAdmin` |
-| **Producer** | Authenticated user with producer role | `isAuthenticated && isProducer === true` |
-| **Admin** | Authenticated user with admin role | `isAuthenticated && isAdmin === true` |
+| Component | Canonical Doc |
+|-----------|--------------|
+| Header (detailed) | `HEADER-NAV-V1.md` |
+| Producer Dashboard | `PRODUCER-DASHBOARD-V1.md` |
+| Admin Dashboard | `ADMIN-DASHBOARD-V1.md` |
+| **This doc** | Unified navigation spec across all components |
 
 ---
 
-## A) Guest (Not Logged In)
+## 1. Logo Behavior
 
-### Header Elements
+| Rule | Description |
+|------|-------------|
+| **Always visible** | Logo appears in Header on all viewports, all states |
+| **Always links to home** | `href="/"` — never changes |
+| **Size** | Desktop: `h-12` (48px), Mobile: `h-9` (36px) |
+| **Position** | Left-aligned, first element in header |
+| **TestID** | `header-logo` |
 
-| Element | Location | Target | data-testid |
-|---------|----------|--------|-------------|
-| Logo | Left | `/` | `header-logo` |
-| Products | Primary Nav | `/products` | - |
-| Producers | Primary Nav | `/producers` | - |
-| Cart Icon | Right | Opens cart drawer | `header-cart` |
-| Login | Right | `/auth/login` | `nav-login` |
-| Register (CTA) | Right | `/auth/register` | `nav-register` |
-
-### Mobile Menu (Guest)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| Products | `/products` | - |
-| Producers | `/producers` | - |
-| Login | `/auth/login` | `mobile-nav-login` |
-| Register (CTA) | `/auth/register` | `mobile-nav-register` |
+**Non-negotiable**: Logo must NEVER be hidden, replaced, or link elsewhere.
 
 ---
 
-## B) Consumer (Logged-In User)
+## 2. Header Navigation by Role
 
-### Header Elements
+### 2.1 Guest (Not Logged In)
 
-| Element | Location | Target | data-testid |
-|---------|----------|--------|-------------|
-| Logo | Left | `/` | `header-logo` |
-| Products | Primary Nav | `/products` | - |
-| Producers | Primary Nav | `/producers` | - |
-| Notification Bell | Right | Opens notifications | - |
-| Cart Icon | Right | Opens cart drawer | `header-cart` |
-| User Menu | Right (dropdown) | See below | `header-user-menu` |
+| Element | Label (EL) | Route | Visible | TestID |
+|---------|------------|-------|---------|--------|
+| Logo | Dixis | `/` | ✅ | `header-logo` |
+| Products | Προϊόντα | `/products` | ✅ | — |
+| Producers | Παραγωγοί | `/producers` | ✅ | — |
+| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
+| Cart | 🛒 | `/cart` | ✅ | `header-cart` |
+| Login | Είσοδος | `/auth/login` | ✅ | `nav-login` |
+| Register | Εγγραφή | `/auth/register` | ✅ | `nav-register` |
 
-### User Menu Dropdown (Consumer)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| User Name/Email | Display only | `user-menu-name` |
-| My Orders | `/account/orders` | `user-menu-orders` |
-| Logout | Logout action | `user-menu-logout` |
-
-### Mobile Menu (Consumer)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| Products | `/products` | - |
-| Producers | `/producers` | - |
-| My Orders | `/account/orders` | `mobile-nav-orders` |
-| User Name + Logout | Display + action | `mobile-user-section`, `mobile-logout-btn` |
+**NOT visible for Guest**:
+- ❌ Notification bell
+- ❌ User dropdown
+- ❌ Track Order in header (footer only)
+- ❌ Dashboard links
 
 ---
 
-## C) Producer
+### 2.2 Consumer (Logged-in Customer)
 
-### Header Elements
+| Element | Label (EL) | Route | Visible | TestID |
+|---------|------------|-------|---------|--------|
+| Logo | Dixis | `/` | ✅ | `header-logo` |
+| Products | Προϊόντα | `/products` | ✅ | — |
+| Producers | Παραγωγοί | `/producers` | ✅ | — |
+| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
+| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
+| Cart | 🛒 | `/cart` | ✅ | `header-cart` |
+| User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
-| Element | Location | Target | data-testid |
-|---------|----------|--------|-------------|
-| Logo | Left | `/` | `header-logo` |
-| Products | Primary Nav | `/products` | - |
-| Producers | Primary Nav | `/producers` | - |
-| Notification Bell | Right | Opens notifications | - |
-| Cart Icon | **HIDDEN** | N/A | N/A |
-| User Menu | Right (dropdown) | See below | `header-user-menu` |
+**User Dropdown Contents**:
+| Item | Label (EL) | Route | TestID |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| My Orders | Οι Παραγγελίες μου | `/account/orders` | `user-menu-orders` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
 
-### User Menu Dropdown (Producer)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| User Name/Email | Display only | `user-menu-name` |
-| Producer Dashboard | `/producer/dashboard` | `user-menu-dashboard` |
-| Producer Orders | `/producer/orders` | `user-menu-producer-orders` |
-| Logout | Logout action | `user-menu-logout` |
-
-### Mobile Menu (Producer)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| Products | `/products` | - |
-| Producers | `/producers` | - |
-| Producer Dashboard | `/producer/dashboard` | `mobile-nav-dashboard` |
-| Producer Orders | `/producer/orders` | `mobile-nav-producer-orders` |
-| User Name + Logout | Display + action | `mobile-user-section`, `mobile-logout-btn` |
+**NOT visible for Consumer**:
+- ❌ Login/Register buttons
+- ❌ Dashboard link
+- ❌ Admin link
+- ❌ Track Order in header
 
 ---
 
-## D) Admin
+### 2.3 Producer (Logged-in)
 
-### Header Elements
+| Element | Label (EL) | Route | Visible | TestID |
+|---------|------------|-------|---------|--------|
+| Logo | Dixis | `/` | ✅ | `header-logo` |
+| Products | Προϊόντα | `/products` | ✅ | — |
+| Producers | Παραγωγοί | `/producers` | ✅ | — |
+| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
+| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
+| User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
-| Element | Location | Target | data-testid |
-|---------|----------|--------|-------------|
-| Logo | Left | `/` | `header-logo` |
-| Products | Primary Nav | `/products` | - |
-| Producers | Primary Nav | `/producers` | - |
-| Notification Bell | Right | Opens notifications | - |
-| Cart Icon | Right | Opens cart drawer | `header-cart` |
-| User Menu | Right (dropdown) | See below | `header-user-menu` |
+**User Dropdown Contents**:
+| Item | Label (EL) | Route | TestID |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| Dashboard | Πίνακας Ελέγχου | `/producer/dashboard` | `user-menu-dashboard` |
+| My Orders | Παραγγελίες | `/producer/orders` | `user-menu-producer-orders` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
 
-### User Menu Dropdown (Admin)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| User Name/Email | Display only | `user-menu-name` |
-| Admin Panel | `/admin` | `user-menu-admin` |
-| Logout | Logout action | `user-menu-logout` |
-
-### Mobile Menu (Admin)
-
-| Element | Target | data-testid |
-|---------|--------|-------------|
-| Products | `/products` | - |
-| Producers | `/producers` | - |
-| Admin Panel | `/admin` | `mobile-nav-admin` |
-| User Name + Logout | Display + action | `mobile-user-section`, `mobile-logout-btn` |
+**NOT visible for Producer**:
+- ❌ Cart (producers don't shop)
+- ❌ Login/Register buttons
+- ❌ Admin link
+- ❌ Consumer "My Orders" (`/account/orders`)
 
 ---
 
-## Elements NOT in Header
+### 2.4 Admin (Logged-in)
 
-The following elements are intentionally **NOT** in the header:
+| Element | Label (EL) | Route | Visible | TestID |
+|---------|------------|-------|---------|--------|
+| Logo | Dixis | `/` | ✅ | `header-logo` |
+| Products | Προϊόντα | `/products` | ✅ | — |
+| Producers | Παραγωγοί | `/producers` | ✅ | — |
+| Language Switcher | EL/EN | — | ✅ | `lang-el`, `lang-en` |
+| Notification Bell | 🔔 | — | ✅ | `notification-bell` |
+| Cart | 🛒 | `/cart` | ✅ | `header-cart` |
+| User Dropdown | ▼ | — | ✅ | `header-user-menu` |
 
-| Element | Location | Rationale |
-|---------|----------|-----------|
-| Language Switcher | Footer | Pass UI-HEADER-NAV-CLARITY-01 moved to footer |
-| Order Tracking Link | Footer | Guest order lookup via `/orders/lookup` |
-| Search Bar | N/A | Products page has search |
+**User Dropdown Contents**:
+| Item | Label (EL) | Route | TestID |
+|------|------------|-------|--------|
+| User Name | (display) | — | `user-menu-name` |
+| Admin Panel | Διαχείριση | `/admin` | `user-menu-admin` |
+| Logout | Αποσύνδεση | — | `user-menu-logout` |
+
+**NOT visible for Admin**:
+- ❌ Login/Register buttons
+- ❌ Producer Dashboard link
+- ❌ Consumer "My Orders"
 
 ---
 
-## Implementation Reference
+## 3. Footer Navigation (All Roles)
 
-**File**: `frontend/src/components/layout/Header.tsx`
+Footer is **identical for all roles** — no role-based visibility.
 
-### Key Hooks
+### 3.1 Footer Columns
+
+| Column | Header (EL) | Links |
+|--------|-------------|-------|
+| **Brand** | — | Logo + tagline |
+| **Γρήγοροι Σύνδεσμοι** | Quick Links | Προϊόντα (`/products`), Παραγωγοί (`/producers`), **Παρακολούθηση Παραγγελίας** (`/orders/lookup`) |
+| **Για Παραγωγούς** | For Producers | Γίνε Παραγωγός (`/producers`), Σύνδεση Παραγωγού (`/producers/login`) |
+| **Υποστήριξη** | Support | Επικοινωνία/Σχόλια (`/contact`), Όροι Χρήσης (`/legal/terms`), Πολιτική Απορρήτου (`/legal/privacy`) |
+
+### 3.2 Footer Bottom Bar
+
+| Element | Position | TestID | Notes |
+|---------|----------|--------|-------|
+| Copyright | Left | — | `© {year} Dixis` |
+| Language Switcher | Right | `footer-language-switcher` | EL/EN buttons |
+| Tagline | Right | — | "Made with Cyprus Green" |
+
+---
+
+## 4. Language Switcher Rules
+
+| Rule | Description |
+|------|-------------|
+| **Header position** | Right-aligned, before notification bell (if visible) |
+| **Footer position** | Bottom bar, right side |
+| **Fixed position** | Must NOT shift/jump when clicked |
+| **TestIDs** | Header: `lang-el`, `lang-en` / Footer: `footer-lang-el`, `footer-lang-en` |
+| **Active state** | Highlighted button for current locale |
+
+**Decision**: Language switcher appears in BOTH header and footer for V1. Footer is the primary location; header is convenience.
+
+---
+
+## 5. Cart Visibility Rules
+
+| Role | Cart Visible | Reason |
+|------|--------------|--------|
+| Guest | ✅ Yes | Can add items before login |
+| Consumer | ✅ Yes | Primary shopper |
+| Producer | ❌ No | Producers sell, don't shop |
+| Admin | ✅ Yes | May test checkout flow |
+
+---
+
+## 6. Mobile Navigation
+
+### 6.1 Always Visible (Mobile Header Bar)
+
+| Element | Notes |
+|---------|-------|
+| Logo | `h-9` (36px), links to `/` |
+| Language Switcher | EL/EN |
+| Notification Bell | If authenticated |
+| Cart | If applicable (not producer) |
+| Hamburger Menu | `mobile-menu-button` |
+
+### 6.2 Hamburger Menu Contents
+
+**Guest**:
+- Products, Producers
+- Login button (`mobile-nav-login`)
+- Register button (`mobile-nav-register`)
+
+**Consumer**:
+- Products, Producers
+- My Orders (`mobile-nav-orders`)
+- User section with name + Logout (`mobile-user-section`, `mobile-logout-btn`)
+
+**Producer**:
+- Products, Producers
+- Dashboard (`mobile-nav-dashboard`)
+- My Orders (producer) (`mobile-nav-producer-orders`)
+- User section with name + Logout
+
+**Admin**:
+- Products, Producers
+- Admin Panel (`mobile-nav-admin`)
+- User section with name + Logout
+
+### 6.3 Mobile TestIDs
+
+| Element | TestID |
+|---------|--------|
+| Hamburger button | `mobile-menu-button` |
+| Menu container | `mobile-menu` |
+| User section | `mobile-user-section` |
+| User name | `mobile-nav-user-name` |
+
+---
+
+## 7. Items NEVER in Header
+
+| Item | Reason | Where Instead |
+|------|--------|---------------|
+| Παρακολούθηση Παραγγελίας | Clutters header | Footer → `/orders/lookup` |
+| User name as top-level text | Confusing | Inside user dropdown only |
+| "Απαγορεύεται" / "Forbidden" | Error text, not nav | Nowhere |
+| Debug/test links | Dev-only | Remove entirely |
+| Search bar | Products page handles this | `/products` has search |
+
+---
+
+## 8. Items NEVER in Footer
+
+| Item | Reason |
+|------|--------|
+| Login/Logout buttons | Auth actions belong in header |
+| Cart icon | Footer is for information, not actions |
+| Role-specific dashboard links | Footer is universal |
+| Notification bell | Header-only element |
+
+---
+
+## 9. Non-Goals (Out of Scope for V1)
+
+This spec does **NOT** cover:
+
+| Non-Goal | Rationale |
+|----------|-----------|
+| Full UI redesign | V1 scope frozen; cosmetic changes deferred |
+| Mega-menus / dropdowns in primary nav | Not needed for current product count |
+| Search bar in header | Products page has search; revisit in V2 |
+| Breadcrumbs | Page-level concern, not global nav |
+| Sidebar navigation | Dashboard-internal, covered by dashboard specs |
+| Notification dropdown content | Separate spec if needed |
+| Dark mode nav variants | Post-V1 enhancement |
+
+---
+
+## 10. Implementation Files
+
+| Component | File |
+|-----------|------|
+| Header | `frontend/src/components/layout/Header.tsx` |
+| Footer | `frontend/src/components/layout/Footer.tsx` |
+| Logo | `frontend/src/components/brand/Logo.tsx` |
+| Auth hooks | `frontend/src/hooks/useAuth.ts` |
+| Translations | `frontend/messages/el.json`, `frontend/messages/en.json` |
+
+### Key Implementation Logic
 
 ```typescript
-const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
-```
-
-### Cart Visibility Logic
-
-```typescript
+// Cart visibility (Header.tsx)
 const showCart = !isProducer;  // Cart hidden for producers
+
+// Role detection hierarchy
+const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
+// 1. Check isAdmin first
+// 2. Check isProducer second
+// 3. Default to Consumer if authenticated but neither
 ```
-
-### Role Detection Hierarchy
-
-1. Check `isAdmin` first
-2. Check `isProducer` second
-3. Default to Consumer if authenticated but neither
 
 ---
 
-## E2E Test Coverage
+## 11. E2E Test Coverage
 
 | Test File | Coverage |
 |-----------|----------|
-| `header.spec.ts` | Logo, navigation links, auth buttons |
-| `auth.spec.ts` | Login/logout flows, role-based menu items |
-| `mobile-navigation.spec.ts` | Mobile menu, touch interactions |
+| `header-nav.spec.ts` | Header links, user dropdown, role visibility |
+| `dashboard-visibility-smoke.spec.ts` | Dashboard entry points |
+| `auth-cart-flow.spec.ts` | Cart visibility by role |
+| `logo-repro.spec.ts` | Logo always visible |
 
 ### Required Test Assertions
 
-1. **Guest**: Logo visible, Login/Register visible, Cart visible
-2. **Consumer**: Logo visible, My Orders in menu, Cart visible
-3. **Producer**: Logo visible, Dashboard in menu, Cart HIDDEN
-4. **Admin**: Logo visible, Admin in menu, Cart visible
+1. **Guest**: Logo visible, Login/Register visible, Cart visible, no dropdown
+2. **Consumer**: Logo visible, My Orders in dropdown, Cart visible
+3. **Producer**: Logo visible, Dashboard in dropdown, Cart HIDDEN
+4. **Admin**: Logo visible, Admin in dropdown, Cart visible
+
+---
+
+## 12. Resolved Decisions
+
+| Question | Decision | Pass |
+|----------|----------|------|
+| Track Order in header? | **NO** — footer only | UI-HEADER-NAV-CLARITY-01 |
+| Language switcher location? | **Both** header + footer | Current impl |
+| Producer sees cart? | **NO** — hidden | UI-HEADER-POLISH-01 |
+| User name in header top-level? | **NO** — dropdown only | HEADER-NAV-V1 |
+
+---
+
+## 13. Follow-up Passes (If Needed)
+
+| Pass ID | Trigger | Scope |
+|---------|---------|-------|
+| UI-NAV-ALIGN-01 | If Header.tsx doesn't match this spec | Align implementation |
+| UI-FOOTER-CLEANUP-01 | If Footer.tsx links are wrong | Align implementation |
+| UI-MOBILE-NAV-01 | If mobile menu is broken | Fix hamburger menu |
 
 ---
 
@@ -203,8 +336,9 @@ const showCart = !isProducer;  // Cart hidden for producers
 
 | Date | Change | Pass ID |
 |------|--------|---------|
-| 2026-01-22 | Initial spec documenting current implementation | UX-NAV-ROLES-HEADER-01 |
+| 2026-01-22 | Initial spec | UX-NAV-ROLES-HEADER-01 |
+| 2026-01-23 | Comprehensive update: footer spec, mobile rules, non-goals, resolved decisions | UI-NAV-SPEC-01 |
 
 ---
 
-_Navigation Specification V1 | Dixis Marketplace_
+_Pass: UI-NAV-SPEC-01 | Updated: 2026-01-23 | Author: Agent_
