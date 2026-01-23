@@ -9,9 +9,16 @@
 
 ## 2026-01-23 — Pass NAV-ENTRYPOINTS-01: Navigation Simplification
 
-**Status**: ✅ PASS — PR Pending
+**Status**: ✅ PASS — MERGED (PR #2432) — **PROD VERIFIED**
 
 Removed language switcher from header (footer-only), removed notification bell (V1 scope), cart visible for all roles.
+
+**Production Proof** (2026-01-23):
+- ✅ No language switcher in header (footer only)
+- ✅ No notification bell in header
+- ✅ Logo visible, links to home
+- ✅ Cart visible for all roles
+- ✅ E2E: 25/25 tests pass against dixis.gr
 
 **Evidence**: Header.tsx, NAVIGATION-V1.md | Summary: `Pass-NAV-ENTRYPOINTS-01.md`
 
