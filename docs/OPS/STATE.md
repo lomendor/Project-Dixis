@@ -1,9 +1,36 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (CI Neon Compute Audit)
+**Last Updated**: 2026-01-23 (ORD-TOTALS-SHIPPING-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass ORD-TOTALS-SHIPPING-01: Order Totals/Shipping Investigation
+
+**Status**: ✅ VERIFIED — NO BUG FOUND
+
+Investigation pass for reported order totals issues (0€, repeated €26.99, shipping mismatch).
+
+### Finding
+
+**No bug exists.** All issues investigated:
+- "0€ totals" → NOT REPRODUCIBLE (all orders have correct totals)
+- "Repeated €26.99" → EXPLAINED (QA test data uses same product)
+- "Shipping mismatch" → NOT REPRODUCIBLE (invariant holds for ALL orders)
+
+### Evidence
+
+| Check | Result |
+|-------|--------|
+| Invariant: subtotal + tax + shipping = total | ✅ ALL orders pass |
+| Data diversity | ✅ 10 unique totals |
+| Regression tests | ✅ 5/5 pass |
+
+### Docs
+- Plan: `docs/AGENT/PLANS/Pass-ORD-TOTALS-SHIPPING-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-ORD-TOTALS-SHIPPING-01.md`
 
 ---
 
