@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-23 (DASH-ENTRYPOINTS-01)
+**Updated**: 2026-01-24 (UI-SHELL-HEADER-FOOTER-01)
 
 > **Archive**: Older completed items moved to `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
 > **Target size**: ≤250 lines. Current: ~150 lines. ✅
@@ -26,11 +26,11 @@
 
 | Pass | Description | Status |
 |------|-------------|--------|
-| DASH-ENTRYPOINTS-01 | Dashboard entry points translations | ✅ PR Pending |
+| UI-SHELL-HEADER-FOOTER-01 | UI shell stabilization (6 E2E tests) | ✅ PR Pending |
+| DASH-ENTRYPOINTS-01 | Dashboard entry points translations | ✅ PR #2435 |
 | E2E-TEST-COVERAGE-AUDIT-01 | E2E test coverage matrix | ✅ PR #2434 |
 | NAV-ENTRYPOINTS-01 | Header simplification (prod verified) | ✅ PR #2432 |
 | UI-HEADER-POLISH-02 | Responsive logo + mobile spacing | ✅ PR #2431 |
-| DOCS-STATE-HYGIENE-01 | STATE.md condensed 311→118 lines | ✅ PR #2427 |
 
 For full history, see: `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
 

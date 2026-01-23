@@ -12,11 +12,11 @@ interface CartIconProps {
 /**
  * CartIcon - Clean, unified cart icon for header
  *
- * Visibility rules:
+ * Visibility rules (UI-SHELL-HEADER-FOOTER-01):
  * - Guest: visible (guest checkout supported)
  * - Consumer: visible
  * - Admin: visible
- * - Producer: HIDDEN (returns null)
+ * - Producer: visible (producers can also shop as customers)
  */
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
   const { isGuest, isConsumer, isProducer, isAdmin } = useAuth();
@@ -25,10 +25,7 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
   const items = useCart(state => state.items);
   const cartItemCount = cartCount(items);
 
-  // Producer users - no cart access, hide completely
-  if (isProducer) {
-    return null;
-  }
+  // Cart is visible for ALL roles (including producers who can shop)
 
   // Determine testid based on role
   const getTestId = () => {
