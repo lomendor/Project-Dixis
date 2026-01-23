@@ -155,7 +155,7 @@ export default function Header() {
                       onClick={() => setUserMenuOpen(false)}
                       data-testid="user-menu-admin"
                     >
-                      Admin
+                      {t('admin.dashboard')}
                     </Link>
                   )}
 
@@ -276,7 +276,7 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       data-testid="mobile-nav-admin"
                     >
-                      Admin
+                      {t('admin.dashboard')}
                     </Link>
                   )}
 
