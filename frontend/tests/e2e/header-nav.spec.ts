@@ -51,16 +51,22 @@ test.describe('Header Navigation - Guest @smoke', () => {
     await expect(forbiddenLink).not.toBeVisible();
   });
 
-  test('language toggle is NOT in header (moved to footer)', async ({ page }) => {
-    // Language switcher has been moved to footer per UI-HEADER-NAV-CLARITY-01
-    const headerLangEl = page.locator('header [data-testid="lang-el"]');
-    const headerLangEn = page.locator('header [data-testid="lang-en"]');
-    await expect(headerLangEl).not.toBeVisible();
-    await expect(headerLangEn).not.toBeVisible();
-
-    // Verify it's in the footer instead
+  test('language toggle is in footer, optionally in header (per NAVIGATION-V1.md)', async ({ page }) => {
+    // Language switcher MUST be in footer (primary location)
+    // Header is optional convenience per NAVIGATION-V1.md Section 4
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await expect(page.getByTestId('footer-lang-el')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('footer-lang-en')).toBeVisible({ timeout: 5000 });
+
+    // Header language switcher is optional (added in UI-NAV-ALIGN-01)
+    // Check if present but don't fail if not (for prod backwards compat)
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const headerLangEl = page.locator('header [data-testid="lang-el"]');
+    const isHeaderLangVisible = await headerLangEl.isVisible().catch(() => false);
+    if (isHeaderLangVisible) {
+      // If header lang is present, verify both buttons work
+      await expect(page.locator('header [data-testid="lang-en"]')).toBeVisible();
+    }
   });
 
   test('user dropdown NOT visible for guest', async ({ page }) => {

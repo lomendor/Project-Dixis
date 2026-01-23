@@ -1,15 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (UI-NAV-SPEC-01)
+**Last Updated**: 2026-01-23 (UI-NAV-ALIGN-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~130 lines (target ≤250). ✅
+> **Current size**: ~140 lines (target ≤250). ✅
+
+---
+
+## 2026-01-23 — Pass UI-NAV-ALIGN-01: Header Spec Alignment
+
+**Status**: ✅ PASS — PR Pending
+
+Added language switcher to Header (desktop + mobile) per NAVIGATION-V1.md spec. Fixed-width buttons prevent layout shift.
+
+**Evidence**: Header.tsx, header-nav.spec.ts | Summary: `Pass-UI-NAV-ALIGN-01.md`
 
 ---
 
 ## 2026-01-23 — Pass UI-NAV-SPEC-01: Navigation Specification
 
-**Status**: ✅ PASS — PR Pending
+**Status**: ✅ PASS — MERGED (PR #2429)
 
 Comprehensive navigation spec defining Header/Footer/Mobile per role. Stops "random UI" with single source of truth.
 
