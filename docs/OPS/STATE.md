@@ -1,9 +1,43 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-23 (Header UX Polish)
+**Last Updated**: 2026-01-23 (Order Totals Verification)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤250).
+
+---
+
+## 2026-01-23 — Pass ORDERS-TOTALS-FIX-01: Order Totals Verification
+
+**Status**: ✅ VERIFIED — NO BUG FOUND
+
+Investigation pass for reported "0€ / ίδια totals" issue.
+
+### Finding
+
+**No bug exists** - API returns correct values:
+- `total_amount` and `total` both populated correctly
+- Totals invariant holds: `total == subtotal + tax + shipping`
+- UI uses correct fields (`safeMoney(order.total_amount)`)
+
+### API Evidence (Order #102)
+```
+subtotal: 19.99
+tax_amount: 2.00
+shipping_amount: 5.00
+total: 26.99
+total_amount: 26.99
+```
+
+### Regression Test Added
+- `order-totals-regression.spec.ts` - 3 API-level tests
+  - Non-zero totals when subtotal > 0
+  - Total breakdown invariant
+  - Item price calculations
+
+### Evidence
+- **PR**: #2416 (pending)
+- **Test File**: `frontend/tests/e2e/order-totals-regression.spec.ts`
 
 ---
 
