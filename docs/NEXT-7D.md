@@ -7,7 +7,7 @@
 
 ## Next Pass Recommendation
 
-- **CI-E2E-HEADER-NAV-01: QUEUED** — Fix pre-existing E2E test failure (header-cart testid)
+- ~~**CI-E2E-HEADER-NAV-01: DONE**~~ — Test already uses correct testids (resolved by prior passes)
 - **OPS-DEPLOY-SSH-RETRY-01: DONE** — SSH retry + post-deploy proof deployed
 - **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
 - **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
@@ -19,7 +19,7 @@
 ## Backlog (Post-V1)
 
 - ~~**Language toggle position**: Remove from header; place in footer~~ — **DONE** (Pass UI-HEADER-NAV-CLARITY-01)
-- **CI-E2E-HEADER-NAV-01**: Fix `header-nav.spec.ts` test (uses wrong testid `header-cart` → `nav-cart-guest`)
+- ~~**CI-E2E-HEADER-NAV-01**: Fix `header-nav.spec.ts` test~~ — **DONE** (test already uses correct testids, resolved by prior passes)
 
 ---
 
