@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-23 (SSH Retry)
+**Updated**: 2026-01-23 (STATE Hygiene)
 
 ---
 
@@ -9,6 +9,8 @@
 
 - ~~**CI-E2E-HEADER-NAV-01: DONE**~~ — Test already uses correct testids (resolved by prior passes)
 - **OPS-DEPLOY-SSH-RETRY-01: DONE** — SSH retry + post-deploy proof deployed
+- **UX-DASHBOARD-VISIBILITY-SMOKE-01: DONE** — Dashboard navigation smoke tests (PR #2426)
+- **DOCS-STATE-HYGIENE-01: DONE** — STATE.md condensed 311→118 lines
 - **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
 - **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
 - **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
