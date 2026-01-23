@@ -1,27 +1,18 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-23 (STATE Hygiene)
+**Updated**: 2026-01-23 (DOCS-NEXT7D-HYGIENE-01)
+
+> **Archive**: Older completed items moved to `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
+> **Target size**: ≤250 lines. Current: ~150 lines. ✅
 
 ---
 
-## Next Pass Recommendation
+## Current Status
 
-- ~~**CI-E2E-HEADER-NAV-01: DONE**~~ — Test already uses correct testids (resolved by prior passes)
-- **OPS-DEPLOY-SSH-RETRY-01: DONE** — SSH retry + post-deploy proof deployed
-- **UX-DASHBOARD-VISIBILITY-SMOKE-01: DONE** — Dashboard navigation smoke tests (PR #2426)
-- **DOCS-STATE-HYGIENE-01: DONE** — STATE.md condensed 311→118 lines
-- **Post-Launch Checks: ENABLED** — Automated daily monitoring via GitHub Actions
-- **V1 QA Execute: ALL 4 FLOWS PASS** — Full runbook execution complete
-- **Perf Baseline: ALL PASS** — All endpoints < 300ms TTFB
-- Production stable. Deploy infrastructure hardened.
+**Production**: ✅ STABLE — All V1 flows verified, monitoring enabled.
 
----
-
-## Backlog (Post-V1)
-
-- ~~**Language toggle position**: Remove from header; place in footer~~ — **DONE** (Pass UI-HEADER-NAV-CLARITY-01)
-- ~~**CI-E2E-HEADER-NAV-01**: Fix `header-nav.spec.ts` test~~ — **DONE** (test already uses correct testids, resolved by prior passes)
+**MVP**: 100% complete (40/40 requirements)
 
 ---
 
@@ -29,376 +20,89 @@
 
 (none)
 
-### Recently Completed
+---
 
-- ✅ **OPS-DEPLOY-SSH-RETRY-01**: SSH deploy retry + post-deploy proof (2026-01-23)
-  - PR #2408 merged (`6f7e1499`)
-  - Deploy Frontend run 21268269263: SUCCESS
-  - Deploy Backend run 21268269271: SUCCESS
-  - prod-facts: ALL PASS
-  - Proof: `docs/AGENT/SUMMARY/Proof-OPS-DEPLOY-SSH-RETRY-01.md`
+## Recently Completed (Last 5)
 
-- ✅ **OPS-POST-LAUNCH-CHECKS-01**: Scheduled production monitoring (2026-01-22)
-  - NEW: `post-launch-checks.yml` - daily comprehensive checks
-  - FIX: `prod-facts.yml` - updated for output hygiene
-  - Automated artifact upload + failure alerting
-  - Summary: `docs/AGENT/SUMMARY/Pass-OPS-POST-LAUNCH-CHECKS-01.md`
+| Pass | Description | Status |
+|------|-------------|--------|
+| DOCS-STATE-HYGIENE-01 | STATE.md condensed 311→118 lines | ✅ PR #2427 |
+| UX-DASHBOARD-VISIBILITY-SMOKE-01 | Dashboard navigation smoke tests | ✅ PR #2426 |
+| ORD-TOTALS-SHIPPING-01 | Order totals investigation (no bug) | ✅ Verified |
+| CI-NEON-COMPUTE-01 | Neon compute audit (already optimized) | ✅ Verified |
+| ORDERS-TOTALS-01 | Order totals pattern verification | ✅ PR #2420 |
 
-- ✅ **V1-QA-EXECUTE-01**: V1 QA runbook execution (2026-01-22)
-  - Flow A (Guest COD): PASS - Order #99
-  - Flow B (Auth Card): PASS - Order #102, PI `pi_3SsMh9Q9Xukpkfmb...`
-  - Flow C (Producer): PASS - Product #11
-  - Flow D (Admin): PASS - Order #99 status update
-  - Proof: `docs/AGENT/SUMMARY/Proof-V1-QA-EXECUTE-01-2026-01-22.md`
-
-- ✅ **V1-QA-RUNBOOK-AND-E2E-PLAN-01**: QA runbook + E2E plan (2026-01-22)
-  - Runbook: `docs/OPS/RUNBOOK-V1-QA.md`
-  - E2E Plan: `docs/OPS/E2E-V1-AUTOMATION-PLAN.md`
-  - 355 existing E2E tests cover all 4 V1 flows
-  - No new tests required
-
-- ✅ **OPS-PROD-FACTS-HYGIENE-01**: Fix prod-facts.sh output hygiene (2026-01-22)
-  - Output now goes to `docs/OPS/.local/` (gitignored)
-  - Working tree stays clean after script runs
-  - Summary: `docs/AGENT/SUMMARY/Pass-OPS-PROD-FACTS-HYGIENE-01.md`
-
-- ✅ **PERF-BASELINE-CAPTURE-01**: Performance baseline capture (2026-01-22)
-  - All endpoints < 300ms median TTFB
-  - Baseline: `docs/OPS/PERF-BASELINES/2026-01-22.md`
-  - Commit: `6a9baef3`
-
-- ✅ **MONITORING-REGEX-01**: Fix prod-facts.sh false positive (2026-01-22)
-  - Root cause: `grep "0 συνολικά"` matched substring in "10 συνολικά"
-  - Fix: Use `grep -qE '\b0 συνολικά'` with word boundary
-  - PR #2397 merged (`6a9baef3`)
-
-- ✅ **V1-QA-EXECUTE-01 Re-verification**: All 4 flows PASS (2026-01-22)
-  - Flow A: Order #99, COD, €19.99
-  - Flow B: Order #102, PI `pi_3SsMh9Q9Xukpkfmb2vwY2ktn`
-  - Flow C: Product #11, Green Farm Co.
-  - Flow D: Order #99, pending → processing
-  - PR #2395 merged (`ad16783a`)
-  - Evidence: `docs/AGENT/SUMMARY/Proof-2026-01-22-v1-qa-execution.md`
-
-- ✅ **V1-QA-EXECUTE-01 Consolidation**: QA runbook created
-  - Created `docs/PRODUCT/QA-V1-RUNBOOK.md` (reusable QA runbook)
-  - Includes all 4 flows: Guest COD, Auth Card, Producer, Admin
-  - UI + API steps, troubleshooting, test accounts
-  - Evidence: `docs/AGENT/TASKS/Pass-V1-QA-EXECUTE-01.md`
-
-- ✅ **UI-HEADER-NAV-CLARITY-01**: Move language switcher to footer
-  - PR #2387 merged, commit `9014f00a`
-  - Header no longer shifts on mobile
-  - Language switcher now in footer
-  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-CLARITY-01.md`
-
-- ✅ **VPS-MAINT-WINDOW-01**: VPS maintenance window (read-only checks)
-  - Disk: 13% used (OK)
-  - Memory: 40% used (OK)
-  - CPU: 0.03 load (OK)
-  - Services: nginx + php-fpm running
-  - Updates: 2 non-critical deferred
-  - Reboot: NOT required
-  - Evidence: `docs/AGENT/SUMMARY/Pass-VPS-MAINT-WINDOW-01.md`
-
-- ✅ **POST-LAUNCH-CHECKS-01**: Post-launch monitoring
-  - prod-facts.sh: ALL CHECKS PASSED
-  - perf-baseline.sh: All endpoints < 300ms TTFB
-  - VPS hygiene checklist: `docs/OPS/RUNBOOKS/VPS-HYGIENE-CHECKLIST.md`
-  - Evidence: `docs/AGENT/SUMMARY/Pass-POST-LAUNCH-CHECKS-01.md`
-
-- ✅ **V1-QA-EXECUTE-01-6**: V1 QA (re-verification 6)
-  - Flow A: Guest checkout (COD) → Order #97
-  - Flow B: Auth user checkout (CARD) → Order #98 + Stripe PI
-  - Flow C: Producer flow → Product #10 visible publicly
-  - Flow D: Admin flow → Order #97 status updated
-  - Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-6.md`
-
-- ✅ **LAUNCH-EXECUTE-01**: V1 Launch Execution verification
-  - prod-facts.sh: ALL CHECKS PASSED
-  - perf-baseline.sh: All endpoints < 300ms TTFB
-  - Evidence: `docs/AGENT/SUMMARY/Pass-LAUNCH-EXECUTE-01.md`
-
-- ✅ **DOCS-LAUNCH-PACKAGE-01**: V1 Launch Package documentation
-  - Created `docs/PRODUCT/RELEASE-NOTES-V1.md`
-  - Created `docs/OPS/LAUNCH-RUNBOOK-V1.md`
-  - Created `docs/OPS/POST-LAUNCH-CHECKS.md`
-  - Evidence: `docs/AGENT/SUMMARY/Pass-DOCS-LAUNCH-PACKAGE-01.md`
-
-- ✅ **V1-QA-EXECUTE-01-5**: Final QA verification (re-verification 5)
-  - All 4 core flows verified on production
-  - prod-facts.sh: ALL PASS
-  - E2E tests: 74 PASS, 10 skipped, 1 pre-existing failure
-  - Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-5.md`
-
-- ✅ **CI-FLAKE-NOTIFICATIONS-01**: Fix notification bell flaky test
-  - PR #2379 merged, commit `7a1d1408`
-  - E2E (PostgreSQL): FAIL → PASS
-  - Evidence: `docs/AGENT/SUMMARY/Pass-CI-FLAKE-NOTIFICATIONS-01.md`
-
-- ✅ **PRODUCER-DASHBOARD-IA-01**: Producer Dashboard IA Audit (docs-only)
-  - 10 producer routes documented
-  - Entry points verified in Header.tsx
-  - Evidence: `docs/AGENT/SUMMARY/Pass-PRODUCER-DASHBOARD-IA-01.md`
-
-- ✅ **UI-A11Y-EL-01**: Greek localization and accessibility fixes
-  - PR #2367 merged, commit `3ed150cf`
-  - EUR price formatting to el-GR locale (12,50 € instead of 12.50€)
-  - Greek aria-labels for CartIcon and Header mobile menu
-  - Added missing checkout Stripe translation keys
-  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-A11Y-EL-01.md`
+For full history, see: `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
 
 ---
 
-## Completed
+## Active Backlog
 
-### UI/UX Improvements
+### CI/Tests/Docs (Priority)
 
-- ✅ **UI-HEADER-NAV-IA-02**: Header Navigation IA Enhancement
-  - PR #2365 merged, commit `d8f1b41a`
-  - Added user name testids (`nav-user-name`, `mobile-nav-user-name`)
-  - Comprehensive E2E tests with negative cases for role isolation
-  - Mobile viewport tests (375x667)
-  - Updated `docs/PRODUCT/HEADER-NAV-V1.md` with complete testid reference
-  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-HEADER-NAV-IA-02.md`
+| Item | Description | Priority |
+|------|-------------|----------|
+| E2E-TEST-COVERAGE-AUDIT-01 | Document E2E test coverage matrix | P3 |
+| DOCS-ARCHIVE-CLEANUP-01 | Archive old AGENT/SUMMARY files | P4 |
 
-### CI Reliability
+### Performance (Deferred)
 
-- ✅ **CI-FLAKE-LOCALE-01**: Stabilize `locale.spec.ts` flaky test
-  - PR #2364 merged, commit `74a13747`
-  - Root cause: React hydration timing + auth storage state in CI
-  - Fix: Clear localStorage/sessionStorage before test, use flexible polling
-  - Evidence: `docs/AGENT/SUMMARY/Pass-CI-FLAKE-LOCALE-01.md`
+| Item | Description | Notes |
+|------|-------------|-------|
+| PERF-PRODUCTS-REDIS-01 | Redis cache for products | Defer unless scale requires |
 
-### UI/UX Fixes
+### Email Deliverability (Deferred)
 
-- ✅ **UI-NAV-HEADER-01**: Header Navigation IA Fix
-  - PR #2362 merged, commit `0d31b905`
-  - Removed "Απαγορεύεται" from nav (was using error translation)
-  - Changed label "Αριθμός παραγγελίας" → "Παρακολούθηση παραγγελίας"
-  - Added E2E tests: `frontend/tests/e2e/header-nav.spec.ts`
-  - Created nav rules doc: `docs/PRODUCT/HEADER-NAV-V1.md`
-  - Evidence: `docs/AGENT/SUMMARY/Pass-UI-NAV-HEADER-01.md`
-
-### Launch Materials
-
-- ✅ **DOCS-LAUNCH-ANNOUNCE-01** (docs-only): V1 Launch Announcement Materials
-  - Created `docs/LAUNCH/V1-ANNOUNCEMENT.md` (social, email, banner — EL + EN)
-  - Created `docs/LAUNCH/CHANGELOG-V1.md` (user-facing feature list)
-  - Updated `README.md` with production URL + feature summary
-  - Evidence: `docs/AGENT/SUMMARY/Pass-DOCS-LAUNCH-ANNOUNCE-01.md`
-
-### Bug Fixes
-
-- ✅ **ADMIN-500-INVESTIGATE-01** (P2): Fix `/admin` HTTP 500 error
-  - PR #TBD merged
-  - Root cause: `requireAdmin()` throws error that bubbled up as 500
-  - Fix: Try-catch with redirect to `/auth/login?from=/admin`
-  - Evidence: `docs/AGENT/SUMMARY/Pass-ADMIN-500-INVESTIGATE-01.md`
-
-### Performance Fixes (from PERF-PRODUCTS-AUDIT-01)
-
-- ✅ **PERF-PRODUCTS-CACHE-01** (P1): Add `revalidate: 60` to frontend fetch + `Cache-Control` headers to backend API
-  - PR #2317 merged, commit `dcd0fdd2`
-  - Production deployed (Backend Run 21120676076, Frontend Run 21120676337)
-
-### MVP Verification
-
-- ✅ **MVP-CHECKLIST-01**: Gap analysis of MVP requirements
-  - PR #2320 merged
-  - 40 requirements mapped, 39 implemented (97.5%)
-
-- ✅ **EMAIL-EVENTS-01**: Order email verification
-  - Verified Pass 53 already implements order emails
-  - Consumer + Producer notifications working in production
-  - Corrected MVP-CHECKLIST gap count: 2 → 1
-
-- ✅ **CART-SYNC-01**: Backend cart sync for logged-in users
-  - PR #2322 merged
-  - `POST /api/v1/cart/sync` endpoint with transactional merge
-  - Frontend triggers sync on login, replaces localStorage with server cart
-  - **MVP now 100% complete (40/40 requirements)**
-
-### CI Reliability
-
-- ✅ **SMOKE-FLAKE-01**: Increased healthz probe timeouts
-  - PR #2319 merged
-  - maxAttempts: 6 → 8, timeoutMs: 15s → 20s
-
-- ✅ **CI-FLAKE-FILTERS-SEARCH-01**: Stabilized filters-search E2E test
-  - PR #2344 merged, commit `d91bd969`
-  - Fixed: `waitForURL()` timeout due to Next.js soft navigation
-  - Fix: Use `waitForResponse()` + `expect.poll()` instead
-
-- ✅ **CI-FLAKE-FILTERS-SEARCH-02**: Further stabilization of filters-search E2E
-  - PR #2346 merged, commit `a82b2b83`
-  - Fixed: `fill()` not reliably triggering React onChange in CI
-  - Fix: Use `keyboard.type()` + multi-signal waits + soft assertions
-
-- ✅ **POST-V1-MONITORING-01**: 24h post-launch health check
-  - PR #2348 merged, commit `dea61070`
-  - All services healthy, 0 errors on 2026-01-20
-
-- ✅ **ANALYTICS-BASIC-01**: Privacy-friendly analytics infrastructure
-  - PR #2350 merged, commit `8cc2b56b`
-  - Plausible/Umami support with feature flags
-  - Cookie-less, GDPR-compliant
-
-- ✅ **USER-FEEDBACK-LOOP-01**: Simple feedback loop for early users
-  - PR #2351 merged, commit `8d073fe2`
-  - Added "Επικοινωνία / Σχόλια" link to footer
-  - Links to existing /contact page (no new backend)
-
-- ✅ **PERF-SWEEP-PAGES-01**: Performance sweep across public pages
-  - All pages fast (< 300ms TTFB) — no performance issues
-  - Bug found: `/admin` returns HTTP 500 (separate investigation)
-  - Evidence: `docs/AGENT/SUMMARY/Pass-PERF-SWEEP-PAGES-01.md`
-
-- ✅ **EMAIL-UTF8-01**: Fix Greek email encoding (mojibake)
-  - PR #2357 merged, commit `b52072d4`
-  - Fix: MailEncodingServiceProvider enforces UTF-8 charset on MIME headers
-  - Tests: 3 tests, 15 assertions (Greek characters preserved)
-  - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-UTF8-01.md`
-
-- ✅ **PROD-EMAIL-UTF8-PROOF-01**: Production verification of Greek email encoding
-  - **PASS**: Subject + HTML body UTF-8 verified via Gmail "Show original"
-  - Prior "text/plain mojibake" was a false positive (raw QP not decoded)
-  - Evidence: `docs/AGENT/SUMMARY/Pass-PROD-EMAIL-UTF8-PROOF-01.md`
-
-### Admin Dashboard Audit
-
-- ✅ **ADMIN-IA-01** (docs-only): Admin Dashboard V1 Information Architecture
-  - Created `docs/PRODUCT/ADMIN-DASHBOARD-V1.md`
-  - Inventory: 10 admin pages found, 9/9 sections ready for V1
-  - PRD cross-reference: 5/5 requirements mapped
-  - Gap: Users page shows AdminUser only (nice-to-have for post-V1)
-
-### Producer Dashboard Audit
-
-- ✅ **PRODUCER-IA-01** (docs-only): Producer Dashboard V1 Information Architecture
-  - Created `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md`
-  - Inventory: 10 producer routes found, all functional
-  - Role-based navigation verified in Header.tsx (desktop + mobile)
-  - AuthGuard protection confirmed on all producer pages
-  - No UI changes needed — discoverability already implemented
-
-### Ops Runbooks
-
-- ✅ **OPS-EMAIL-PROOF-01**: Email delivery verification runbook + proof script
-  - Created `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md` (ops checklist)
-  - Created `scripts/email-proof.sh` (deterministic proof script)
-  - Documents required env vars: `RESEND_KEY`, `MAIL_MAILER`, `EMAIL_NOTIFICATIONS_ENABLED`
-  - Unblocks EMAIL-PROOF-01 verification once SSH access available
-
-## Upcoming Work
-
-### MVP Gaps (0 remaining)
-
-🟢 **All MVP gaps have been closed. V1 Launch Ready.**
+| Item | Description | Notes |
+|------|-------------|-------|
+| DMARC-ALIGNMENT-01 | DMARC alignment investigation | Not blocking; emails deliver |
+| EMAIL-PLAINTEXT-01 | Add text/plain alternative | Nice-to-have |
 
 ---
 
-## V1 Launch QA Checklist
+## Automated Monitoring
 
-Pre-launch verification before announcing V1:
-
-### Core Flows (Manual Smoke) - V1-QA-EXECUTE-01 — **PASS** (2026-01-21 10:44 UTC, re-verification 3)
-
-- [x] **Guest checkout**: Add product → Checkout as guest → COD → Confirm order email
-  - Order #94 created (2026-01-21 10:41 UTC), COD payment, shipping to Athens
-  - **API Verified:** status: "pending" → "processing", payment_method: "COD"
-- [x] **User checkout**: Register → Login → Cart sync works → Card payment → Confirm
-  - Order #96 created, Stripe payment init SUCCESS
-  - Payment Intent: `pi_3SrysZQ9Xukpkfmb0wx6f4vt` (€26.98)
-  - **API Verified:** payment_method: "CARD", client_secret obtained
-- [x] **Producer flow**: Login as producer → Add product → See it pending → Admin approves
-  - Product #9 created (Green Farm Co.), auto-approved (status: available)
-  - **API Verified:** Product #9 visible in `/api/v1/public/products`
-- [x] **Admin flow**: Login as admin → View orders → Update status → Email sent
-  - Order #94 updated to "processing" via admin API
-  - **API Verified:** Order #94 status changed to "processing"
-  - Email config: Resend enabled, `configured: true`
-- Evidence: `docs/AGENT/SUMMARY/Pass-V1-QA-EXECUTE-01-3.md`
-
-### Production Health
-
-- [x] `https://dixis.gr/api/healthz` returns `{"status":"ok"}`
-- [x] `https://dixis.gr/api/v1/public/products` returns products with cache headers
-- [x] Email delivery works (test password reset or order) - **VERIFIED** (Pass EMAIL-PROOF-01, 2026-01-19)
-- [x] Card payment works in Stripe test mode - **FIXED** (PR #2327, Order #91 verified)
-
-### Performance
-
-- [x] Products page loads < 2s (check with Lighthouse or curl) - ~180ms TTFB
-- [x] No 500 errors in Laravel logs for 24h - **VERIFIED** (Pass LOG-REVIEW-24H-01, 6 errors all explained/fixed)
-
-### Security
-
-- [x] HTTPS enforced on all endpoints
-- [x] CSP headers present (check Stripe works) - Stripe working (PR #2327)
-- [x] Auth endpoints rate-limited - **FIXED** (Pass SEC-AUTH-RL-02)
-
-### Rollback Plan
-
-- [x] Previous deploy SHA documented: `06850e79`
-- [x] Rollback command ready: `git revert HEAD && git push`
-
-### Known Blockers (P1)
-
-- ~~**STRIPE-PAYMENT-INIT**: Card payments fail with "Failed to initialize payment"~~
-  - **RESOLVED**: PR #2327 merged (commit `cbec8d96`)
-  - Fix: Fallback to order.shipping_address.email when customer data not provided
-  - Verified: Order #91 payment init succeeded
+| Workflow | Schedule | Purpose |
+|----------|----------|---------|
+| `post-launch-checks.yml` | Daily 05:30 UTC | Comprehensive prod checks |
+| `prod-facts.yml` | Daily 07:00 UTC | Health facts collection |
 
 ---
 
-### Remaining V1 Verification Tasks (V1-VERIFY-TRIO-01)
+## V1 Launch Status
 
-- [x] **EMAIL-PROOF-01**: Verify Resend delivery end-to-end — **PASS** (2026-01-19)
-  - ✅ Resend configured in production (`/api/health` shows `configured: true`)
-  - ✅ Runbook created: `docs/OPS/RUNBOOKS/EMAIL-PROOF-01.md`
-  - ✅ Proof script created: `scripts/email-proof.sh`
-  - ✅ Test email sent via `php artisan dixis:email:test --to=kourkoutisp@gmail.com`
-  - ✅ User confirmed receipt in inbox
-  - Evidence: `docs/AGENT/SUMMARY/Pass-EMAIL-PROOF-01.md`
+**Status**: ✅ LAUNCHED (2026-01-19)
 
-- [x] **SECURITY-AUTH-RL-01**: Auth rate limiting proof
-  - ✅ **FIXED** by Pass SEC-AUTH-RL-02
-  - `/api/v1/auth/login`: 10 req/min per IP+email
-  - `/api/v1/auth/register`: 5 req/min per IP
-  - Evidence: `docs/AGENT/SUMMARY/Pass-SEC-AUTH-RL-02.md`
+All core flows verified:
+- Guest checkout (COD): ✅
+- User checkout (Card): ✅
+- Producer flow: ✅
+- Admin flow: ✅
 
-- [x] **LOG-REVIEW-24H-01**: Production logs scan — **PASS** (2026-01-19)
-  - ✅ SSH access working
-  - ✅ Nginx: Clean (no errors)
-  - ✅ PHP-FPM: Warnings only (pool tuning, non-blocking)
-  - ✅ Laravel: 6 errors (all explained/fixed - Stripe init pre-fix)
-  - Evidence: `docs/AGENT/SUMMARY/Pass-LOG-REVIEW-24H-01.md`
+Evidence: `docs/AGENT/SUMMARY/Proof-V1-QA-EXECUTE-01-2026-01-22.md`
 
 ---
 
-### Performance (Backlog)
+## Key Artifacts
 
-- ✅ **PERF-COLD-START-01** (P3): Investigated ~700ms cold start — **RESOLVED**
-  - Baseline: All endpoints < 300ms TTFB
-  - No fix needed; issue was resolved by prior passes (IPV4, caching)
-  - Artifact: `scripts/perf-baseline.sh`
-
-- **PERF-PRODUCTS-REDIS-01**: Redis cache layer for product list (defer unless scale requires)
-
-### Email Deliverability (Backlog)
-
-- **DMARC-ALIGNMENT-01**: DMARC fails despite SPF/DKIM pass
-  - Investigate From/Return-Path alignment
-  - Set proper DMARC policy/records on dixis.gr DNS
-  - Not blocking — emails deliver, but may affect deliverability score
-
-### Nice-to-Have (Post-MVP)
-
-- **EMAIL-PLAINTEXT-01**: Add explicit text/plain alternative to transactional emails
-  - Improves accessibility (screen readers, text-only clients)
-  - Not required — current HTML-only emails work in all major clients
+| Document | Location |
+|----------|----------|
+| STATE.md | `docs/OPS/STATE.md` |
+| V1 Release Notes | `docs/PRODUCT/RELEASE-NOTES-V1.md` |
+| Launch Runbook | `docs/OPS/LAUNCH-RUNBOOK-V1.md` |
+| QA Runbook | `docs/OPS/RUNBOOK-V1-QA.md` |
+| Header Nav Spec | `docs/PRODUCT/HEADER-NAV-V1.md` |
+| Producer Dashboard Spec | `docs/PRODUCT/PRODUCER-DASHBOARD-V1.md` |
+| Admin Dashboard Spec | `docs/PRODUCT/ADMIN-DASHBOARD-V1.md` |
+| Perf Baseline | `docs/OPS/PERF-BASELINES/2026-01-22.md` |
 
 ---
 
-_Last updated by Pass PRODUCER-IA-01 (2026-01-21)_
+## Rollback Plan
+
+- Previous deploy SHA: `06850e79`
+- Command: `git revert HEAD && git push`
+
+---
+
+_Last updated by DOCS-NEXT7D-HYGIENE-01 (2026-01-23)_
