@@ -1,7 +1,7 @@
 # Next 7 Days
 
 **Period**: 2026-01-19 to 2026-01-26
-**Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-PLAN-01)
+**Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-ENABLE-01)
 
 > **Archive**: Older completed items moved to `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
 > **Target size**: ≤250 lines. Current: ~150 lines. ✅
@@ -26,11 +26,11 @@
 
 | Pass | Description | Status |
 |------|-------------|--------|
-| SHIP-MULTI-PRODUCER-PLAN-01 | Multi-producer & shipping planning | ✅ PR Pending |
+| SHIP-MULTI-PRODUCER-ENABLE-01 | Enable multi-producer carts | ✅ PR #2444 Pending |
+| SHIP-MULTI-PRODUCER-PLAN-01 | Multi-producer & shipping planning | ✅ MERGED #2443 |
 | DOCS-ARCHIVE-CLEANUP-01 | Archived 50 old Pass files | ✅ MERGED #2442 |
 | UI-ROLE-NAV-SHELL-01 | UI shell verification (8 new tests) | ✅ MERGED #2441 |
 | SHIP-MULTI-DISCOVERY-01 | Shipping & multi-producer discovery (4 specs) | ✅ MERGED #2440 |
-| UI-SHELL-HEADER-FOOTER-01 | UI shell stabilization (6 E2E tests) | ✅ MERGED #2437 |
 
 For full history, see: `docs/ARCHIVE/NEXT-7D-ARCHIVE-2026-01.md`
 

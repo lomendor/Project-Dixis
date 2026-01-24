@@ -14,11 +14,10 @@ export type CartItem = {
 /**
  * Result from attempting to add an item to cart
  * - 'added': Item was added successfully
- * - 'conflict': Item from different producer, needs user confirmation
+ *
+ * Note: Multi-producer carts are now allowed (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
  */
-export type AddResult =
-  | { status: 'added' }
-  | { status: 'conflict'; currentProducerId: string; currentProducerName: string; newProducerId: string; newProducerName: string }
+export type AddResult = { status: 'added' }
 
 type State = {
   items: Record<string, CartItem>
@@ -41,21 +40,7 @@ export const useCart = create<State>()(
       items: {},
       add: (p): AddResult => {
         const items = { ...get().items }
-        const existing = Object.values(items)[0]
-
-        // Option A Guard: One producer per order
-        // If cart has items from a different producer, return conflict
-        if (existing && p.producerId && existing.producerId && existing.producerId !== p.producerId) {
-          return {
-            status: 'conflict',
-            currentProducerId: existing.producerId,
-            currentProducerName: existing.producerName || 'Παραγωγός',
-            newProducerId: p.producerId,
-            newProducerName: p.producerName || 'Παραγωγός',
-          }
-        }
-
-        // Same producer or empty cart - proceed with add
+        // Multi-producer carts allowed (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
         const cur = items[p.id]
         items[p.id] = cur ? { ...cur, qty: cur.qty + 1 } : { ...p, qty: 1 }
         set({ items })
