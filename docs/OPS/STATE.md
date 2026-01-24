@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-E2E-01)
+**Last Updated**: 2026-01-24 (HOTFIX-MP-CHECKOUT-GUARD-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~250 lines (target ≤250). ✅
+> **Current size**: ~265 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-24 — Pass HOTFIX-MP-CHECKOUT-GUARD-01: Block Multi-Producer Checkout
+
+**Status**: 🔄 PENDING — PR #2448 (auto-merge enabled)
+
+HOTFIX to prevent broken multi-producer checkout until order splitting is implemented.
+
+**Problem**: Multi-producer carts enabled (PR #2444) but checkout broken:
+- Emails sent before payment selection
+- 400 errors on payment API
+- React #418 errors
+
+**Fix**:
+- Frontend: Block checkout with Greek message when ≥2 producers
+- Backend: Server guard returns 422 `MULTI_PRODUCER_NOT_SUPPORTED_YET`
+- Email: Only send for COD at creation, for CARD after payment confirmation
+
+**Evidence**: Summary: `Pass-HOTFIX-MP-CHECKOUT-GUARD-01.md`
 
 ---
 
