@@ -1,7 +1,7 @@
 'use client'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCart, cartTotalCents } from '@/lib/cart'
+import { useCart, cartTotalCents, isMultiProducerCart, getProducerIds } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
 import { paymentApi } from '@/lib/api/payment'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
@@ -197,6 +197,43 @@ function CheckoutContent() {
           <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
             {t('checkoutPage.viewProducts')}
           </a>
+        </div>
+      </main>
+    )
+  }
+
+  // HOTFIX: Block multi-producer checkout (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
+  // Multi-producer order splitting is not yet implemented.
+  const multiProducer = isMultiProducerCart(cartItems)
+  if (multiProducer && !stripeClientSecret) {
+    const producerCount = getProducerIds(cartItems).size
+    return (
+      <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center" data-testid="multi-producer-blocked">
+          <div className="text-amber-600 text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-4">Πολλαπλοί Παραγωγοί στο Καλάθι</h2>
+          <p className="text-gray-600 mb-6">
+            Το καλάθι σας περιέχει προϊόντα από {producerCount} διαφορετικούς παραγωγούς.
+            <br /><br />
+            <strong>Προς το παρόν η ολοκλήρωση αγοράς γίνεται ανά παραγωγό.</strong>
+            <br />
+            Χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/cart"
+              className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation"
+              data-testid="back-to-cart"
+            >
+              Επιστροφή στο Καλάθι
+            </a>
+            <a
+              href="/products"
+              className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
+            >
+              Συνέχεια Αγορών
+            </a>
+          </div>
         </div>
       </main>
     )

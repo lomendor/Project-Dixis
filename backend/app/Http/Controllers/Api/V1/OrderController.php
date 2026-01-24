@@ -128,8 +128,21 @@ class OrderController extends Controller
                     }
                 }
 
-                // Pass SHIP-MULTI-PRODUCER-ENABLE-01: Multi-producer carts now allowed
-                // Producer attribution preserved in order_items.producer_id
+                // HOTFIX: Block multi-producer checkout (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
+                // Multi-producer order splitting is not yet implemented.
+                // Defense in depth: validates even if frontend guard is bypassed.
+                $producerIds = collect($productData)
+                    ->pluck('product.producer_id')
+                    ->filter() // Remove nulls
+                    ->unique();
+
+                if ($producerIds->count() > 1) {
+                    abort(422, json_encode([
+                        'error' => 'MULTI_PRODUCER_NOT_SUPPORTED_YET',
+                        'message' => 'Η ολοκλήρωση αγοράς με προϊόντα από πολλαπλούς παραγωγούς δεν υποστηρίζεται ακόμα. Παρακαλώ χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.',
+                        'producer_count' => $producerIds->count(),
+                    ]));
+                }
 
                 // Create the order
                 // Use authenticated user's ID if available, otherwise allow guest orders
@@ -177,9 +190,10 @@ class OrderController extends Controller
                 return new OrderResource($order);
             });
 
-            // Pass 53: Send email notifications AFTER transaction commits
-            // This ensures we never send emails for orders that failed to save
-            if ($createdOrder) {
+            // Pass 53 + HOTFIX: Send email notifications AFTER transaction commits
+            // HOTFIX-MP-CHECKOUT-GUARD-01: Only send for COD orders.
+            // Card payments send email after payment confirmation (in PaymentController).
+            if ($createdOrder && $createdOrder->payment_method === 'COD') {
                 try {
                     $emailService->sendOrderPlacedNotifications($createdOrder);
                 } catch (\Exception $e) {

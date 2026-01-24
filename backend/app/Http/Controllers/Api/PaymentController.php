@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\Payment\PaymentProviderFactory;
+use App\Services\OrderEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -125,6 +126,19 @@ class PaymentController extends Controller
                     'error_message' => $result['error_message'] ?? 'Payment failed',
                     'payment_intent_id' => $result['payment_intent_id'],
                 ], 400);
+            }
+
+            // HOTFIX-MP-CHECKOUT-GUARD-01: Send email after successful card payment
+            // This ensures emails are only sent after payment is confirmed.
+            try {
+                $emailService = app(OrderEmailService::class);
+                $emailService->sendOrderPlacedNotifications($order->fresh());
+            } catch (\Exception $e) {
+                Log::error('Email notification failed after payment confirmation', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+                // Don't fail the response - payment was successful
             }
 
             return response()->json([

@@ -94,3 +94,27 @@ export const cartCount = (items: Record<string, CartItem>) =>
 
 export const cartTotalCents = (items: Record<string, CartItem>) =>
   Object.values(items).reduce((sum, it) => sum + it.priceCents * it.qty, 0)
+
+/**
+ * Returns the set of unique producer IDs in the cart.
+ * Used to detect multi-producer carts for checkout blocking.
+ * (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
+ */
+export const getProducerIds = (items: Record<string, CartItem>): Set<string> => {
+  const ids = new Set<string>()
+  for (const item of Object.values(items)) {
+    if (item.producerId) {
+      ids.add(item.producerId)
+    }
+  }
+  return ids
+}
+
+/**
+ * Returns true if cart contains items from more than one producer.
+ * Multi-producer checkout is not yet supported.
+ * (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
+ */
+export const isMultiProducerCart = (items: Record<string, CartItem>): boolean => {
+  return getProducerIds(items).size > 1
+}
