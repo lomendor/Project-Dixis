@@ -1,9 +1,26 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (DOCS-ARCHIVE-CLEANUP-01)
+**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-PLAN-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~210 lines (target ≤250). ✅
+> **Current size**: ~225 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass SHIP-MULTI-PRODUCER-PLAN-01: Multi-Producer & Shipping Planning
+
+**Status**: ✅ PASS — PR Pending
+
+Planning pass for multi-producer checkout and realistic shipping calculation. Defined 4 implementation phases.
+
+**Key Decisions**:
+- Multi-producer: Remove ~20 LOC guards, group cart by producer
+- Shipping: Per-producer calculation, per-order free threshold (€35)
+- Neon: Pause preview branches, staging auto-suspend, connection pooling
+
+**Deliverables**: PLAN, TASKS, SUMMARY docs
+
+**Evidence**: Summary: `Pass-SHIP-MULTI-PRODUCER-PLAN-01.md`
 
 ---
 
@@ -21,7 +38,7 @@ The `E2E (PostgreSQL)` workflow failed but is **non-required** for merge. PRs me
 
 ## 2026-01-24 — Pass DOCS-ARCHIVE-CLEANUP-01: Agent Docs Housekeeping
 
-**Status**: ✅ PASS — PR Pending
+**Status**: ✅ PASS — MERGED (PR #2442)
 
 Archived 50 old Pass files (pre-2026-01-22) to `docs/ARCHIVE/AGENT-2026-01/`.
 
