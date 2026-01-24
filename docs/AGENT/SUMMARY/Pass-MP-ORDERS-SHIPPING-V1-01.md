@@ -58,11 +58,7 @@ New table `order_shipping_lines`:
 
 ## Next Phase
 
-Phase 2 (Backend): Update `OrderController.php` to:
-- Remove checkout block for multi-producer
-- Calculate per-producer shipping
-- Store `order_shipping_lines`
-- Return breakdown in API response
+~~Phase 2 (Backend)~~ ✅ **COMPLETED** - See Pass-MP-ORDERS-SHIPPING-V1-02.md
 
 ---
 
