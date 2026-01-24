@@ -3,7 +3,8 @@ import { useCart } from '@/lib/cart';
 import { useState } from 'react';
 
 interface AddProps {
-  product: { id: string; title: string; price: number };
+  // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producerId for multi-producer cart detection
+  product: { id: string; title: string; price: number; producerId?: string | number | null; producerName?: string | null };
   translations: {
     addToCart: string;
     cartAdded: string;
@@ -21,10 +22,13 @@ export default function Add({ product, translations }: AddProps) {
     // Convert price to cents for consistency with products list
     const priceCents = Math.round(Number(product.price || 0) * 100);
 
+    // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producerId for multi-producer cart detection
     add({
       id: String(product.id),
       title: product.title,
       priceCents: priceCents,
+      producerId: product.producerId ? String(product.producerId) : undefined,
+      producerName: product.producerName || undefined,
     });
 
     setAdded(true);
