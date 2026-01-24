@@ -72,6 +72,15 @@ class Order extends Model
     }
 
     /**
+     * Get the shipping lines for multi-producer orders.
+     * Pass MP-ORDERS-SHIPPING-V1: Per-producer shipping breakdown.
+     */
+    public function shippingLines()
+    {
+        return $this->hasMany(OrderShippingLine::class);
+    }
+
+    /**
      * Scope orders to include only those with items from a specific producer.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query

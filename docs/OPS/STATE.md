@@ -1,9 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (HOTFIX-MP-CHECKOUT-GUARD-01 + producerId fix)
+**Last Updated**: 2026-01-24 (MP-ORDERS-SHIPPING-V1-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~280 lines (target ≤250). ⚠️
+> **Current size**: ~295 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-24 — Pass MP-ORDERS-SHIPPING-V1-01: Schema for Per-Producer Shipping
+
+**Status**: 🔄 PENDING — PR Pending
+
+Phase 1 of enabling multi-producer checkout: Create `order_shipping_lines` table.
+
+**Changes**:
+- New table: `order_shipping_lines` (per-producer shipping breakdown)
+- New model: `OrderShippingLine`
+- New relation: `Order->shippingLines()`
+- Unit tests: 4 tests, all pass
+
+**Evidence**: Summary: `Pass-MP-ORDERS-SHIPPING-V1-01.md`
 
 ---
 
