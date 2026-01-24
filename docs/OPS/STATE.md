@@ -1,9 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (UI-SHELL-HEADER-FOOTER-01)
+**Last Updated**: 2026-01-24 (SHIP-MULTI-DISCOVERY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~170 lines (target ≤250). ✅
+> **Current size**: ~180 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass SHIP-MULTI-DISCOVERY-01: Shipping & Multi-Producer Discovery
+
+**Status**: ✅ PASS — PR Pending
+
+Discovery audit for shipping calculation and multi-producer checkout capability. Created 4 spec documents.
+
+**Key Findings**:
+- Shipping engine adequate for MVP (zone-based, €35 free threshold)
+- Multi-producer: Schema supports it, application blocks it (~20 LOC guards)
+- To enable multi-producer: Remove client+server guards
+
+**Deliverables**:
+- `docs/PRODUCT/SHIPPING/SHIPPING-FACTS.md`
+- `docs/PRODUCT/SHIPPING/SHIPPING-ENGINE-MVP-SPEC.md`
+- `docs/PRODUCT/ORDERS/MULTI-PRODUCER-FACTS.md`
+- `docs/PRODUCT/ORDERS/MULTI-PRODUCER-MVP-SPEC.md`
+
+**Evidence**: Summary: `Pass-SHIP-MULTI-DISCOVERY-01.md`
 
 ---
 
