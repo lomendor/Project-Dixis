@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (MP-ORDERS-SHIPPING-V1-02)
+**Last Updated**: 2026-01-24 (MP-CHECKOUT-PAYMENT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~295 lines (target ≤250). ⚠️
+> **Current size**: ~310 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-24 — Pass MP-CHECKOUT-PAYMENT-01: Payment Success Toast Timing
+
+**Status**: ✅ PASS — MERGED (PR #2460)
+
+Fix premature success feedback in Stripe payment flow.
+
+**Problem**: StripePaymentForm showed success toast BEFORE backend confirmed payment. If backend failed, user already saw success - misleading UX.
+
+**Changes**:
+- StripePaymentForm: Remove premature success toast
+- checkout/page: Add success toast AFTER backend `confirmPayment` succeeds
+- 3 new email trigger rule tests (COD vs Card behavior)
+
+**Verified**:
+- Email rules already correct: COD at creation, Card after confirmation
+- API returns correct shipping_amount for display
+- Backend handles 400 errors correctly
+
+**Evidence**: Plan: `Pass-MP-CHECKOUT-PAYMENT-01.md`
 
 ---
 
