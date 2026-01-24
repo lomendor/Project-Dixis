@@ -1,9 +1,24 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (SHIP-MULTI-DISCOVERY-01)
+**Last Updated**: 2026-01-24 (UI-ROLE-NAV-SHELL-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~180 lines (target ≤250). ✅
+> **Current size**: ~195 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass UI-ROLE-NAV-SHELL-01: UI Role Navigation Verification
+
+**Status**: ✅ PASS — PR Pending
+
+Audited UI shell — already compliant from previous passes. Added 8 new E2E tests for logo behavior, mobile stability, and footer correctness.
+
+**Changes**:
+- New: `ui-role-nav-shell.spec.ts` (8 tests)
+
+**E2E Tests**: 8/8 pass (14 total UI shell tests)
+
+**Evidence**: Summary: `Pass-UI-ROLE-NAV-SHELL-01.md`
 
 ---
 
