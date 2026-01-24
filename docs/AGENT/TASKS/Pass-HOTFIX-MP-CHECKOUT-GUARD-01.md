@@ -106,4 +106,30 @@ $emailService->sendOrderPlacedNotifications($order->fresh());
 
 ---
 
-_Pass-HOTFIX-MP-CHECKOUT-GUARD-01 | 2026-01-24_
+## Follow-up: PR #2449 (producerId Fix)
+
+**Bug Found**: Product detail page was NOT passing `producerId` to cart.
+
+| Task | Status |
+|------|--------|
+| Map `producer_id` in product detail page | ✅ |
+| Pass `producerId` to cart `add()` | ✅ |
+| TypeScript + build verification | ✅ |
+| Production deployment | ✅ |
+| Production E2E verification | ✅ 3/3 pass |
+
+---
+
+## Production Verification (2026-01-24)
+
+```
+Running 3 tests using 1 worker
+✅ MPBLOCK1: Multi-producer cart correctly blocked at checkout (new UI)
+✅ MPBLOCK2: No API calls made for multi-producer checkout
+✅ MPBLOCK3: Single-producer checkout works correctly
+3 passed (18.7s)
+```
+
+---
+
+_Pass-HOTFIX-MP-CHECKOUT-GUARD-01 | 2026-01-24 | PRs #2448, #2449_
