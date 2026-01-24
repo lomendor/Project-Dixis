@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (MP-MULTI-PRODUCER-CHECKOUT-02)
+**Last Updated**: 2026-01-24 (MP-CHECKOUT-PROD-TRUTH-03)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~330 lines (target ≤250). ⚠️
+> **Current size**: ~350 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-24 — Pass MP-CHECKOUT-PROD-TRUTH-03: HOTFIX Bypass Critical Fix
+
+**Status**: ✅ PASS — MERGED (PR #2465)
+
+**CRITICAL FIX**: HOTFIX blocking multi-producer checkout was being bypassed.
+
+**Root Cause**:
+- Render-time check `if (multiProducer && !stripeClientSecret)` was ineffective
+- Order was created in `handleSubmit()` BEFORE `stripeClientSecret` was set
+- After payment init, HOTFIX check was bypassed → multi-producer orders got through
+
+**Fix**:
+- Added multi-producer check at START of `handleSubmit()`
+- Blocks BEFORE `apiClient.createOrder()` is called
+- Prevents order creation for multi-producer carts
+
+**Evidence**: Summary: `Pass-MP-CHECKOUT-PROD-TRUTH-03.md`
 
 ---
 
