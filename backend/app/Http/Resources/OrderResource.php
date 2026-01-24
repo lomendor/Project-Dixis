@@ -85,6 +85,22 @@ class OrderResource extends JsonResource
                 'items' => OrderItemResource::collection($this->orderItems ?? []),
                 'order_items' => OrderItemResource::collection($this->orderItems ?? []), // Alias
             ]),
+            // Pass MP-ORDERS-SHIPPING-V1-02: Include per-producer shipping breakdown
+            $this->mergeWhen($this->relationLoaded('shippingLines'), [
+                'shipping_lines' => $this->shippingLines->map(fn ($line) => [
+                    'producer_id' => $line->producer_id,
+                    'producer_name' => $line->producer_name,
+                    'subtotal' => number_format((float) $line->subtotal, 2),
+                    'shipping_cost' => number_format((float) $line->shipping_cost, 2),
+                    'shipping_method' => $line->shipping_method,
+                    'free_shipping_applied' => (bool) $line->free_shipping_applied,
+                ]),
+                'shipping_total' => number_format(
+                    $this->shippingLines->sum('shipping_cost'),
+                    2
+                ),
+                'is_multi_producer' => $this->shippingLines->count() > 1,
+            ]),
         ];
     }
 }

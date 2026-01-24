@@ -1,15 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (MP-ORDERS-SHIPPING-V1-01)
+**Last Updated**: 2026-01-24 (MP-ORDERS-SHIPPING-V1-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~295 lines (target ≤250). ⚠️
 
 ---
 
+## 2026-01-24 — Pass MP-ORDERS-SHIPPING-V1-02: Backend Multi-Producer Shipping
+
+**Status**: 🔄 PENDING — PR #2458 Pending
+
+Phase 2 of enabling multi-producer checkout: Backend calculates per-producer shipping.
+
+**Changes**:
+- OrderController: Calculate per-producer shipping (€3.50 flat, free >= €35)
+- OrderController: Create OrderShippingLine records per producer
+- OrderResource: Add shipping_lines[], shipping_total, is_multi_producer
+- Feature tests: 5 tests, all pass (42 assertions)
+
+**Evidence**: Summary: `Pass-MP-ORDERS-SHIPPING-V1-02.md`
+
+---
+
 ## 2026-01-24 — Pass MP-ORDERS-SHIPPING-V1-01: Schema for Per-Producer Shipping
 
-**Status**: 🔄 PENDING — PR Pending
+**Status**: ✅ PASS — MERGED (PR #2456)
 
 Phase 1 of enabling multi-producer checkout: Create `order_shipping_lines` table.
 

@@ -7,6 +7,8 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderShippingLine;
+use App\Models\Producer;
 use App\Models\Product;
 use App\Services\InventoryService;
 use App\Services\OrderEmailService;
@@ -33,7 +35,7 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 15);
 
         $query = Order::query()
-            ->with('orderItems.producer') // Eager-load items + producer for list view
+            ->with(['orderItems.producer', 'shippingLines']) // Eager-load items + producer + shipping lines
             ->withCount('orderItems')
             ->orderBy('created_at', 'desc');
 
@@ -64,7 +66,8 @@ class OrderController extends Controller
      */
     public function show(Order $order): OrderResource
     {
-        $order->load('orderItems.producer')->loadCount('orderItems');
+        // Pass MP-ORDERS-SHIPPING-V1-02: Include shipping lines
+        $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
 
         return new OrderResource($order);
     }
@@ -128,40 +131,81 @@ class OrderController extends Controller
                     }
                 }
 
-                // HOTFIX: Block multi-producer checkout (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
-                // Multi-producer order splitting is not yet implemented.
-                // Defense in depth: validates even if frontend guard is bypassed.
-                $producerIds = collect($productData)
-                    ->pluck('product.producer_id')
-                    ->filter() // Remove nulls
-                    ->unique();
-
-                if ($producerIds->count() > 1) {
-                    abort(422, json_encode([
-                        'error' => 'MULTI_PRODUCER_NOT_SUPPORTED_YET',
-                        'message' => 'Η ολοκλήρωση αγοράς με προϊόντα από πολλαπλούς παραγωγούς δεν υποστηρίζεται ακόμα. Παρακαλώ χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.',
-                        'producer_count' => $producerIds->count(),
-                    ]));
-                }
+                // Pass MP-ORDERS-SHIPPING-V1-02: Multi-producer checkout enabled
+                // Group items by producer for per-producer shipping calculation
+                $producerGroups = collect($productData)->groupBy(fn ($item) => $item['product']->producer_id ?? 0);
+                $producerIds = $producerGroups->keys()->filter()->values();
 
                 // Create the order
                 // Use authenticated user's ID if available, otherwise allow guest orders
                 $userId = auth()->id() ?? $validated['user_id'] ?? null;
 
-                // Pass 48: Use shipping_cost from frontend, default to 0
-                $shippingCost = $validated['shipping_cost'] ?? 0;
-                $totalWithShipping = $orderTotal + $shippingCost;
+                // Pass MP-ORDERS-SHIPPING-V1-02: Calculate per-producer shipping
+                $shippingMethod = $validated['shipping_method'] ?? 'HOME';
+                $isMultiProducer = $producerIds->count() > 1;
+
+                // V1 Shipping calculation constants
+                $freeShippingThreshold = 35.00; // €35 per producer
+                $flatShippingRate = 3.50; // €3.50 per producer shipment
+                $isPickup = in_array(strtoupper($shippingMethod), ['PICKUP', 'STORE_PICKUP']);
+
+                // Calculate shipping per producer
+                $shippingLines = [];
+                $totalShippingCost = 0;
+
+                foreach ($producerGroups as $producerId => $items) {
+                    if (! $producerId) {
+                        continue; // Skip items without producer
+                    }
+
+                    // Calculate subtotal for this producer
+                    $producerSubtotal = collect($items)->sum('total_price');
+
+                    // Get producer name
+                    $producer = Producer::find($producerId);
+                    $producerName = $producer?->name ?? 'Unknown Producer';
+
+                    // Calculate shipping for this producer
+                    // PICKUP is always free, otherwise check threshold
+                    $producerShipping = 0;
+                    $freeShippingApplied = false;
+
+                    if ($isPickup) {
+                        // Pickup is free
+                        $freeShippingApplied = true;
+                    } elseif ($producerSubtotal >= $freeShippingThreshold) {
+                        // Free shipping - subtotal meets threshold
+                        $freeShippingApplied = true;
+                    } else {
+                        // Charge flat rate
+                        $producerShipping = $flatShippingRate;
+                    }
+
+                    $totalShippingCost += $producerShipping;
+
+                    $shippingLines[] = [
+                        'producer_id' => $producerId,
+                        'producer_name' => $producerName,
+                        'subtotal' => $producerSubtotal,
+                        'shipping_cost' => $producerShipping,
+                        'shipping_method' => $shippingMethod,
+                        'free_shipping_applied' => $freeShippingApplied,
+                    ];
+                }
+
+                // Total with shipping
+                $totalWithShipping = $orderTotal + $totalShippingCost;
 
                 $order = Order::create([
                     'user_id' => $userId,
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'payment_method' => $validated['payment_method'] ?? 'COD',
-                    'shipping_method' => $validated['shipping_method'],
+                    'shipping_method' => $shippingMethod,
                     'shipping_address' => $validated['shipping_address'] ?? null,
                     'currency' => $validated['currency'],
                     'subtotal' => $orderTotal,
-                    'shipping_cost' => $shippingCost,
+                    'shipping_cost' => $totalShippingCost, // Pass MP-ORDERS-SHIPPING-V1-02: Sum of per-producer shipping
                     'total' => $totalWithShipping,
                     'total_amount' => $totalWithShipping, // Legacy alias for frontend compatibility
                     'notes' => $validated['notes'] ?? null,
@@ -181,8 +225,21 @@ class OrderController extends Controller
                     ]);
                 }
 
+                // Pass MP-ORDERS-SHIPPING-V1-02: Create per-producer shipping lines
+                foreach ($shippingLines as $line) {
+                    OrderShippingLine::create([
+                        'order_id' => $order->id,
+                        'producer_id' => $line['producer_id'],
+                        'producer_name' => $line['producer_name'],
+                        'subtotal' => $line['subtotal'],
+                        'shipping_cost' => $line['shipping_cost'],
+                        'shipping_method' => $line['shipping_method'],
+                        'free_shipping_applied' => $line['free_shipping_applied'],
+                    ]);
+                }
+
                 // Load relationships for response
-                $order->load('orderItems.producer')->loadCount('orderItems');
+                $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
 
                 // Store order for email sending after commit
                 $createdOrder = $order;
