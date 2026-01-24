@@ -1,9 +1,26 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (MP-CHECKOUT-PAYMENT-01)
+**Last Updated**: 2026-01-24 (MP-MULTI-PRODUCER-CHECKOUT-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~310 lines (target ≤250). ⚠️
+> **Current size**: ~330 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-24 — Pass MP-MULTI-PRODUCER-CHECKOUT-02: Multi-Producer Shipping Display
+
+**Status**: ✅ PASS — MERGED (PR #2463)
+
+Frontend displays correct multi-producer shipping total from API.
+
+**Problem**: Thank-you page used `shipping_amount` which doesn't reflect multi-producer breakdown. API provides `shipping_total` = sum of per-producer shipping.
+
+**Changes**:
+- api.ts: Added `ShippingLine` interface, `shipping_total`, `shipping_lines`, `is_multi_producer` to Order type
+- thank-you/page.tsx: Prefers `shipping_total` when available, shows "Μεταφορικά (σύνολο):" for multi-producer
+- 3 new backend tests for shipping total correctness
+
+**Evidence**: Summary: `Pass-MP-MULTI-PRODUCER-CHECKOUT-02.md`
 
 ---
 
