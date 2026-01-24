@@ -78,6 +78,15 @@ function CheckoutContent() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    // CRITICAL FIX (Pass-MP-CHECKOUT-PROD-TRUTH-03): Check multi-producer BEFORE order creation
+    // The render-time HOTFIX was bypassed because order was created before stripeClientSecret was set.
+    // This check prevents order creation for multi-producer carts.
+    if (isMultiProducerCart(cartItems)) {
+      setError('Δεν υποστηρίζεται ακόμη η ολοκλήρωση αγοράς από πολλαπλούς παραγωγούς. Χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.')
+      return
+    }
+
     setError('')
     setLoading(true)
 
