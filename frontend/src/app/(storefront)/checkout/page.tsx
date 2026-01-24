@@ -7,6 +7,7 @@ import { paymentApi } from '@/lib/api/payment'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 import { useAuth } from '@/hooks/useAuth'
 import { useTranslations } from '@/contexts/LocaleContext'
+import { useToast } from '@/contexts/ToastContext'
 import StripeProvider from '@/components/payment/StripeProvider'
 import StripePaymentForm from '@/components/payment/StripePaymentForm'
 
@@ -16,6 +17,7 @@ function CheckoutContent() {
   const clear = useCart(s => s.clear)
   const { isAuthenticated, user } = useAuth()
   const t = useTranslations()
+  const { showToast } = useToast()
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -48,6 +50,9 @@ function CheckoutContent() {
     try {
       // Confirm payment with backend
       await paymentApi.confirmPayment(pendingOrderId, paymentIntentId)
+      // Show success toast ONLY after backend confirms payment
+      // (Fix: Previously toast was shown in StripePaymentForm before backend confirmation)
+      showToast('success', 'Η πληρωμή ολοκληρώθηκε επιτυχώς')
       // Clear cart and redirect to success page
       clear()
       router.push(`/thank-you?id=${pendingOrderId}`)
