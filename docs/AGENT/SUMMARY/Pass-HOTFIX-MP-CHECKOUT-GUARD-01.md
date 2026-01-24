@@ -72,6 +72,28 @@ When cart has items from multiple producers, checkout page shows:
 
 ---
 
+## Follow-up PR #2449
+
+**Bug Found**: Product detail page was NOT passing `producerId` to cart, making `isMultiProducerCart()` always return `false`.
+
+**Fix**:
+- `frontend/src/app/(storefront)/products/[id]/page.tsx` - Map `producer_id` from API
+- `frontend/src/app/(storefront)/products/[id]/ui/Add.tsx` - Pass `producerId` to cart
+
+---
+
+## Production Verification (2026-01-24)
+
+| Test | Result |
+|------|--------|
+| MPBLOCK1: Multi-producer blocked | ✅ Greek message shown |
+| MPBLOCK2: No API calls | ✅ No order/payment requests |
+| MPBLOCK3: Single-producer works | ✅ Checkout form shown |
+
+**Deployed commits**: Frontend `70dbe384`, Backend `bc65e630`
+
+---
+
 ## Next Steps
 
 This hotfix is temporary. Full solution requires:
@@ -81,4 +103,4 @@ This hotfix is temporary. Full solution requires:
 
 ---
 
-_Pass-HOTFIX-MP-CHECKOUT-GUARD-01 | 2026-01-24_
+_Pass-HOTFIX-MP-CHECKOUT-GUARD-01 | 2026-01-24 | PRs #2448, #2449_

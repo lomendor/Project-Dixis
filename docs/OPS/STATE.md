@@ -1,15 +1,15 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (HOTFIX-MP-CHECKOUT-GUARD-01)
+**Last Updated**: 2026-01-24 (HOTFIX-MP-CHECKOUT-GUARD-01 + producerId fix)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~265 lines (target ≤250). ⚠️
+> **Current size**: ~280 lines (target ≤250). ⚠️
 
 ---
 
 ## 2026-01-24 — Pass HOTFIX-MP-CHECKOUT-GUARD-01: Block Multi-Producer Checkout
 
-**Status**: 🔄 PENDING — PR #2448 (auto-merge enabled)
+**Status**: ✅ PASS — MERGED (PR #2448, #2449) — **PROD VERIFIED**
 
 HOTFIX to prevent broken multi-producer checkout until order splitting is implemented.
 
@@ -22,6 +22,14 @@ HOTFIX to prevent broken multi-producer checkout until order splitting is implem
 - Frontend: Block checkout with Greek message when ≥2 producers
 - Backend: Server guard returns 422 `MULTI_PRODUCER_NOT_SUPPORTED_YET`
 - Email: Only send for COD at creation, for CARD after payment confirmation
+
+**Follow-up PR #2449**: Fixed `producerId` not being passed to cart from product detail page.
+
+**Production Proof** (2026-01-24):
+- ✅ MPBLOCK1: Multi-producer cart blocked with Greek message
+- ✅ MPBLOCK2: No API calls made for blocked checkout
+- ✅ MPBLOCK3: Single-producer checkout still works
+- ✅ Deployed: Frontend `70dbe384`, Backend `bc65e630`
 
 **Evidence**: Summary: `Pass-HOTFIX-MP-CHECKOUT-GUARD-01.md`
 
