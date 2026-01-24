@@ -1,9 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-PLAN-01)
+**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-ENABLE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~225 lines (target ≤250). ✅
+> **Current size**: ~240 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass SHIP-MULTI-PRODUCER-ENABLE-01: Enable Multi-Producer Carts
+
+**Status**: ✅ PASS — PR #2444 (auto-merge pending)
+
+Removed all guards blocking multi-producer carts. Customers can now add products from different producers to the same cart.
+
+**Changes**:
+- Removed client guard in `cart.ts` (conflict check removed)
+- Removed server guard in `OrderController.php` (422 abort removed)
+- Simplified both `AddToCartButton` components (no modal)
+- Added 3 E2E tests for multi-producer flow
+
+**Evidence**: Summary: `Pass-SHIP-MULTI-PRODUCER-ENABLE-01.md`
 
 ---
 
