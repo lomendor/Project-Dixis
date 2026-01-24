@@ -47,8 +47,9 @@ export default function StripePaymentForm({
         onPaymentError(errorMessage);
         showToast('error', errorMessage);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Don't show success toast here - let parent confirm with backend first
+        // Parent's onPaymentSuccess handler will show success after backend confirmation
         onPaymentSuccess(paymentIntent.id);
-        showToast('success', 'Η πληρωμή ολοκληρώθηκε επιτυχώς');
       } else {
         onPaymentError('Η πληρωμή απαιτεί επιπλέον ενέργειες');
       }
