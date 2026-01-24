@@ -1,15 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-ENABLE-01)
+**Last Updated**: 2026-01-24 (SHIP-MULTI-PRODUCER-E2E-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~240 lines (target ≤250). ✅
+> **Current size**: ~250 lines (target ≤250). ✅
+
+---
+
+## 2026-01-24 — Pass SHIP-MULTI-PRODUCER-E2E-01: E2E Test Robustness
+
+**Status**: ✅ PASS — MERGED (PR #2445)
+
+Follow-up to SHIP-MULTI-PRODUCER-ENABLE-01. Fixed E2E tests for production compatibility.
+
+**Changes**:
+- API endpoint: Try `/api/v1/public/products` first (production), fallback to local
+- Locators: Multiple fallback selectors for add-to-cart buttons
+- Production proof: 3/3 tests pass on dixis.gr
+
+**Evidence**: Summary: `Pass-SHIP-MULTI-PRODUCER-E2E-01.md`
 
 ---
 
 ## 2026-01-24 — Pass SHIP-MULTI-PRODUCER-ENABLE-01: Enable Multi-Producer Carts
 
-**Status**: ✅ PASS — PR #2444 (auto-merge pending)
+**Status**: ✅ PASS — MERGED (PR #2444)
 
 Removed all guards blocking multi-producer carts. Customers can now add products from different producers to the same cart.
 
