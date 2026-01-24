@@ -68,6 +68,16 @@ export interface ShippingAddress {
   country?: string;
 }
 
+// Pass MP-MULTI-PRODUCER-CHECKOUT-02: Per-producer shipping breakdown
+export interface ShippingLine {
+  producer_id: number;
+  producer_name: string;
+  subtotal: string;
+  shipping_cost: string;
+  shipping_method: string;
+  free_shipping_applied: boolean;
+}
+
 export interface OrderItemProducer {
   id: number;
   name: string;
@@ -98,6 +108,10 @@ export interface Order {
   created_at: string;
   items: OrderItem[];
   order_items: OrderItem[];
+  // Pass MP-MULTI-PRODUCER-CHECKOUT-02: Multi-producer shipping breakdown
+  shipping_total?: string; // Sum of shipping_lines when order has multiple producers
+  shipping_lines?: ShippingLine[]; // Per-producer shipping breakdown
+  is_multi_producer?: boolean; // True when order spans 2+ producers
 }
 
 export interface OrderItem {
