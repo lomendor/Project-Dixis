@@ -35,7 +35,10 @@ async function getProductById(id: string) {
       isActive: raw.is_active !== false,
       category: raw.category,
       imageUrl: raw.image_url,
-      producer: raw.producer ? { name: raw.producer.name } : null
+      producer: raw.producer ? { name: raw.producer.name } : null,
+      // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
+      producerId: raw.producer_id || raw.producer?.id || null,
+      producerName: raw.producer?.name || null
     };
   } catch {
     return null;
