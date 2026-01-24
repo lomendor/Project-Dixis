@@ -20,6 +20,7 @@ interface Order {
   email: string | null
   name: string | null
   items: OrderItem[]
+  isMultiProducer?: boolean
 }
 
 export default function ThankYouPage({ searchParams }: { searchParams?: Record<string, string | undefined> }) {
@@ -45,16 +46,23 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
         // Transform Laravel order format to thank-you page format
         const orderItems = laravelOrder.items || laravelOrder.order_items || []
+        // Pass MP-MULTI-PRODUCER-CHECKOUT-02: Prefer shipping_total (multi-producer sum)
+        // over shipping_amount (single-producer). Backend provides shipping_total when
+        // order has multiple producers with separate shipments.
+        const shippingAmount = laravelOrder.shipping_total
+          ? parseFloat(laravelOrder.shipping_total)
+          : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
         const transformedOrder: Order = {
           id: String(laravelOrder.id),
           status: laravelOrder.status,
           total: parseFloat(laravelOrder.total_amount) || 0,
           subtotal: parseFloat(laravelOrder.subtotal) || 0,
-          shipping: parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0,
+          shipping: shippingAmount,
           vat: parseFloat(laravelOrder.tax_amount) || 0,
           zone: 'mainland', // Default, could be derived from shipping_address if needed
           email: null, // Not exposed in public order response for privacy
           name: null,
+          isMultiProducer: laravelOrder.is_multi_producer || false,
           items: orderItems.map((item) => ({
             id: String(item.id),
             qty: item.quantity,
@@ -134,7 +142,11 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                   <span>{fmt.format(order.subtotal || 0)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Αποστολή ({order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):</span>
+                  <span>
+                    {order.isMultiProducer
+                      ? 'Μεταφορικά (σύνολο):'
+                      : `Αποστολή (${order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):`}
+                  </span>
                   <span>{fmt.format(order.shipping || 0)}</span>
                 </div>
                 <div className="flex justify-between">
