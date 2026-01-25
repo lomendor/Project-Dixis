@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Resources\CheckoutSessionResource;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderShippingLine;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Services\CheckoutService;
 use App\Services\InventoryService;
 use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
@@ -75,23 +78,24 @@ class OrderController extends Controller
     /**
      * Create a new order with atomic transactions and stock validation.
      * Pass 53: Sends email notifications after transaction commits.
+     * Pass MP-ORDERS-SPLIT-01: Multi-producer carts create CheckoutSession + N child orders.
      */
     public function store(
         StoreOrderRequest $request,
         InventoryService $inventoryService,
-        OrderEmailService $emailService
-    ): OrderResource {
+        OrderEmailService $emailService,
+        CheckoutService $checkoutService
+    ): JsonResource {
         $requestId = uniqid('order_', true); // Request tracking ID
 
         try {
             $this->authorize('create', Order::class);
 
-            // Store order reference for afterCommit callback
-            $createdOrder = null;
+            // Store result for afterCommit callback
+            $checkoutResult = null;
 
-            $result = DB::transaction(function () use ($request, $inventoryService, $requestId, &$createdOrder) {
+            $result = DB::transaction(function () use ($request, $inventoryService, $checkoutService, $requestId, &$checkoutResult) {
                 $validated = $request->validated();
-                $orderTotal = 0;
                 $productData = [];
 
                 // Validate products and check stock
@@ -112,7 +116,6 @@ class OrderController extends Controller
 
                     $unitPrice = $product->price;
                     $totalPrice = $unitPrice * $itemData['quantity'];
-                    $orderTotal += $totalPrice;
 
                     $productData[] = [
                         'product' => $product,
@@ -131,134 +134,48 @@ class OrderController extends Controller
                     }
                 }
 
-                // Pass MP-ORDERS-SHIPPING-V1-02: Multi-producer checkout enabled
-                // Group items by producer for per-producer shipping calculation
-                $producerGroups = collect($productData)->groupBy(fn ($item) => $item['product']->producer_id ?? 0);
-                $producerIds = $producerGroups->keys()->filter()->values();
-
-                // Create the order
                 // Use authenticated user's ID if available, otherwise allow guest orders
                 $userId = auth()->id() ?? $validated['user_id'] ?? null;
 
-                // Pass MP-ORDERS-SHIPPING-V1-02: Calculate per-producer shipping
-                $shippingMethod = $validated['shipping_method'] ?? 'HOME';
-                $isMultiProducer = $producerIds->count() > 1;
-
-                // V1 Shipping calculation constants
-                $freeShippingThreshold = 35.00; // €35 per producer
-                $flatShippingRate = 3.50; // €3.50 per producer shipment
-                $isPickup = in_array(strtoupper($shippingMethod), ['PICKUP', 'STORE_PICKUP']);
-
-                // Calculate shipping per producer
-                $shippingLines = [];
-                $totalShippingCost = 0;
-
-                foreach ($producerGroups as $producerId => $items) {
-                    if (! $producerId) {
-                        continue; // Skip items without producer
-                    }
-
-                    // Calculate subtotal for this producer
-                    $producerSubtotal = collect($items)->sum('total_price');
-
-                    // Get producer name
-                    $producer = Producer::find($producerId);
-                    $producerName = $producer?->name ?? 'Unknown Producer';
-
-                    // Calculate shipping for this producer
-                    // PICKUP is always free, otherwise check threshold
-                    $producerShipping = 0;
-                    $freeShippingApplied = false;
-
-                    if ($isPickup) {
-                        // Pickup is free
-                        $freeShippingApplied = true;
-                    } elseif ($producerSubtotal >= $freeShippingThreshold) {
-                        // Free shipping - subtotal meets threshold
-                        $freeShippingApplied = true;
-                    } else {
-                        // Charge flat rate
-                        $producerShipping = $flatShippingRate;
-                    }
-
-                    $totalShippingCost += $producerShipping;
-
-                    $shippingLines[] = [
-                        'producer_id' => $producerId,
-                        'producer_name' => $producerName,
-                        'subtotal' => $producerSubtotal,
-                        'shipping_cost' => $producerShipping,
-                        'shipping_method' => $shippingMethod,
-                        'free_shipping_applied' => $freeShippingApplied,
-                    ];
-                }
-
-                // Total with shipping
-                $totalWithShipping = $orderTotal + $totalShippingCost;
-
-                $order = Order::create([
-                    'user_id' => $userId,
-                    'status' => 'pending',
-                    'payment_status' => 'pending',
+                // Pass MP-ORDERS-SPLIT-01: Use CheckoutService for order creation
+                $checkoutResult = $checkoutService->processCheckout($userId, $productData, [
+                    'shipping_method' => $validated['shipping_method'] ?? 'HOME',
                     'payment_method' => $validated['payment_method'] ?? 'COD',
-                    'shipping_method' => $shippingMethod,
-                    'shipping_address' => $validated['shipping_address'] ?? null,
                     'currency' => $validated['currency'],
-                    'subtotal' => $orderTotal,
-                    'shipping_cost' => $totalShippingCost, // Pass MP-ORDERS-SHIPPING-V1-02: Sum of per-producer shipping
-                    'total' => $totalWithShipping,
-                    'total_amount' => $totalWithShipping, // Legacy alias for frontend compatibility
+                    'shipping_address' => $validated['shipping_address'] ?? null,
                     'notes' => $validated['notes'] ?? null,
                 ]);
 
-                // Create order items
-                foreach ($productData as $data) {
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $data['product']->id,
-                        'producer_id' => $data['product']->producer_id,
-                        'quantity' => $data['quantity'],
-                        'unit_price' => $data['unit_price'],
-                        'total_price' => $data['total_price'],
-                        'product_name' => $data['product']->name,
-                        'product_unit' => $data['product']->unit,
-                    ]);
+                // Return appropriate resource based on checkout type
+                if ($checkoutResult['checkout_session']) {
+                    // Multi-producer: return CheckoutSession with child orders
+                    return new CheckoutSessionResource($checkoutResult['checkout_session']);
                 }
 
-                // Pass MP-ORDERS-SHIPPING-V1-02: Create per-producer shipping lines
-                foreach ($shippingLines as $line) {
-                    OrderShippingLine::create([
-                        'order_id' => $order->id,
-                        'producer_id' => $line['producer_id'],
-                        'producer_name' => $line['producer_name'],
-                        'subtotal' => $line['subtotal'],
-                        'shipping_cost' => $line['shipping_cost'],
-                        'shipping_method' => $line['shipping_method'],
-                        'free_shipping_applied' => $line['free_shipping_applied'],
-                    ]);
-                }
-
-                // Load relationships for response
-                $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
-
-                // Store order for email sending after commit
-                $createdOrder = $order;
-
-                return new OrderResource($order);
+                // Single-producer: return the single Order (backward compatible)
+                return new OrderResource($checkoutResult['orders'][0]);
             });
 
             // Pass 53 + HOTFIX: Send email notifications AFTER transaction commits
             // HOTFIX-MP-CHECKOUT-GUARD-01: Only send for COD orders.
             // Card payments send email after payment confirmation (in PaymentController).
-            if ($createdOrder && $createdOrder->payment_method === 'COD') {
-                try {
-                    $emailService->sendOrderPlacedNotifications($createdOrder);
-                } catch (\Exception $e) {
-                    // Log but don't fail the order creation
-                    \Log::error('Pass 53: Email notification failed (order still created)', [
-                        'order_id' => $createdOrder->id,
-                        'error' => $e->getMessage(),
-                    ]);
+            if ($checkoutResult) {
+                $paymentMethod = $checkoutResult['orders'][0]->payment_method ?? 'COD';
+
+                if ($paymentMethod === 'COD') {
+                    try {
+                        // Send email for each order (for multi-producer, each producer gets their own email)
+                        foreach ($checkoutResult['orders'] as $order) {
+                            $emailService->sendOrderPlacedNotifications($order);
+                        }
+                    } catch (\Exception $e) {
+                        // Log but don't fail the order creation
+                        \Log::error('Pass 53: Email notification failed (order still created)', [
+                            'checkout_session_id' => $checkoutResult['checkout_session']?->id,
+                            'order_count' => count($checkoutResult['orders']),
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
             }
 

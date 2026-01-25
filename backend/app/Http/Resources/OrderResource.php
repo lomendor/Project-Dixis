@@ -58,6 +58,9 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'order_number' => 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT),
+            // Pass MP-ORDERS-SPLIT-01: Child order indicator
+            'checkout_session_id' => $this->checkout_session_id,
+            'is_child_order' => (bool) $this->is_child_order,
             'status' => $this->status ?? 'pending',
             'payment_status' => $this->payment_status ?? 'pending',
             'payment_method' => $this->payment_method ?? 'cod', // Default: Cash on Delivery
