@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-SHIPPING-BREAKDOWN-TRUTH-01)
+**Last Updated**: 2026-01-25 (PROD-DEPLOY-VERIFY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~350 lines (target ≤250). ⚠️
+> **Current size**: ~370 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass PROD-DEPLOY-VERIFY-01: Production Deploy + Verification
+
+**Status**: ✅ VERIFIED
+
+Deployed PR #2479 (multi-producer checkout) to production and verified with E2E tests.
+
+**Evidence**:
+- Deploy workflow `21339083020` SUCCESS (3m42s)
+- `https://dixis.gr/api/healthz` → status: ok, database: connected
+- E2E tests: 3/3 PASS (17.2s)
+  - MPC1: Multi-producer checkout form accessible
+  - MPC2: Single-producer checkout works
+  - MPC3: Multi-producer COD checkout completes
+
+**Docs**:
+- Plan: `docs/AGENT/PLANS/Pass-PROD-DEPLOY-VERIFY-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PROD-DEPLOY-VERIFY-01.md`
 
 ---
 
