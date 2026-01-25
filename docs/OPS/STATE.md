@@ -1,9 +1,37 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (ORDERS-500-HYDRATION-01)
+**Last Updated**: 2026-01-25 (GUARDRAILS-CRITICAL-FLOWS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~400 lines (target ≤250). ⚠️
+> **Current size**: ~430 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass GUARDRAILS-CRITICAL-FLOWS-01: Checkout Regression Guardrails
+
+**Status**: ✅ COMPLETE (PR #2484)
+
+Added automated guardrails to catch checkout regressions before users see broken flows.
+
+**Problem**: Despite `curl` returning HTTP 200, production order data was incorrect:
+- Order #103: `is_multi_producer: false` for 2-producer order
+- `shipping_lines: []` empty
+- `shipping_total: "0.00"` instead of €7.00
+
+**Solution**:
+- GUARDRAIL #1: `prod-sanity-orders.yml` workflow (daily + manual)
+- GUARDRAIL #2: `checkout-golden-path.spec.ts` E2E tests (@smoke)
+- Documentation: `SHIPPING-AND-TAXES-MVP.md` spec
+
+**Evidence**:
+- Workflow checks order data integrity (not just HTTP 200)
+- E2E tests verify shipping_lines populated for multi-producer orders
+- Spec documents €3.50/producer shipping + VAT rules
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-GUARDRAILS-CRITICAL-FLOWS-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-GUARDRAILS-CRITICAL-FLOWS-01.md`
+- Spec: `docs/PRODUCT/SHIPPING-AND-TAXES-MVP.md`
 
 ---
 

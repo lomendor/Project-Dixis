@@ -1,7 +1,8 @@
 # Tasks: Pass-GUARDRAILS-CRITICAL-FLOWS-01
 
 **Date**: 2026-01-25
-**Status**: IN PROGRESS
+**Status**: COMPLETE
+**PR**: #2484
 **Goal**: Establish guardrails to catch checkout regressions BEFORE users see broken flows
 
 ---
@@ -58,13 +59,13 @@ The code in `CheckoutService.php` calculates per-producer shipping, but:
 | 1 | Bootstrap - read STATE.md, NEXT-7D.md, AGENT/README.md | DONE |
 | 2 | Run prod-facts.sh and capture output | DONE |
 | 3 | Document evidence of broken checkout flow | DONE |
-| 4 | GUARDRAIL #1: prod-sanity workflow (non-mutating) | TODO |
-| 5 | GUARDRAIL #2: checkout-golden-path E2E test | TODO |
-| 6 | Create shipping/VAT spec document | TODO |
-| 7 | PR #1: prod-sanity workflow + docs | TODO |
-| 8 | PR #2: Playwright checkout tests | TODO |
-| 9 | Update STATE.md | TODO |
-| 10 | Create SUMMARY doc | TODO |
+| 4 | GUARDRAIL #1: prod-sanity workflow (non-mutating) | DONE |
+| 5 | GUARDRAIL #2: checkout-golden-path E2E test | DONE |
+| 6 | Create shipping/VAT spec document | DONE |
+| 7 | PR #1: prod-sanity workflow + docs + E2E tests | DONE (#2484) |
+| 8 | ~~PR #2: Playwright checkout tests~~ | N/A (combined into PR #1) |
+| 9 | Update STATE.md | DONE |
+| 10 | Create SUMMARY doc | DONE |
 
 ---
 
