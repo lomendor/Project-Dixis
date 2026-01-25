@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (DOCS-STATE-HYGIENE-01)
+**Last Updated**: 2026-01-25 (MP-PAY-EMAIL-TRUTH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~200 lines (target ≤250). ✅
+> **Current size**: ~220 lines (target ≤250). ✅
+
+---
+
+## 2026-01-25 — Pass MP-PAY-EMAIL-TRUTH-01: Production Truth Verification
+
+**Status**: ✅ VERIFIED — NO BUG ON PRODUCTION
+
+Verified with observable evidence: multi-producer checkout IS blocked on dixis.gr.
+
+**Test Method**: Playwright E2E against production
+- Created cart with 2 items from 2 different producers
+- Navigated to checkout
+- Observed blocking message, no checkout form
+
+**Evidence**:
+- Screenshot: Greek blocking message "Πολλαπλοί Παραγωγοί στο Καλάθι" displayed
+- API calls: NO order creation attempted
+- JS bundle: Submit-time block present (`Δεν υποστηρίζεται ακόμη...`)
+
+**Conclusion**: User's reported bug was from BEFORE PR #2465 deployment. Current production is protected by render-time AND submit-time blocks.
+
+**Evidence**: Summary: `Pass-MP-PAY-EMAIL-TRUTH-01.md`
 
 ---
 
