@@ -1,9 +1,33 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-ORDERS-SPLIT-01)
+**Last Updated**: 2026-01-25 (MP-PAYMENT-EMAIL-TRUTH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~280 lines (target ≤250). ⚠️
+> **Current size**: ~300 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass MP-PAYMENT-EMAIL-TRUTH-01: Payment Email Timing
+
+**Status**: ✅ COMPLETE
+
+Ensures emails only sent after successful payment confirmation for CARD payments.
+
+**Changes**:
+- MODIFIED: `StripeWebhookController` handles multi-producer CheckoutSessions
+- MODIFIED: `PaymentController` sends emails for all sibling orders
+- NEW: `MultiProducerPaymentEmailTest` with 8 tests
+
+**Email Rules**:
+- COD: Email at creation (immediate)
+- CARD single: Email after payment confirmation
+- CARD multi-producer: Email for all sibling orders after confirmation
+
+**Tests**: 8 passed (24 assertions) + all 23 multi-producer tests pass
+
+**Evidence**:
+- Tasks: `docs/AGENT/TASKS/Pass-MP-PAYMENT-EMAIL-TRUTH-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-MP-PAYMENT-EMAIL-TRUTH-01.md`
 
 ---
 
