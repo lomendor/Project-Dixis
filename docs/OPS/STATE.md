@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-PAY-EMAIL-TRUTH-01)
+**Last Updated**: 2026-01-25 (MP-ORDERS-SHIPPING-V1-PLAN-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~220 lines (target ≤250). ✅
+> **Current size**: ~240 lines (target ≤250). ✅
+
+---
+
+## 2026-01-25 — Pass MP-ORDERS-SHIPPING-V1-PLAN-01: Multi-Producer Order Plan
+
+**Status**: ✅ COMPLETE (plan-only)
+
+Comprehensive plan for multi-producer order splitting with per-producer shipping.
+
+**Key Decisions**:
+- Parent-child architecture: `checkout_sessions` → N child `orders`
+- Single PaymentIntent for total amount (better UX)
+- Email timing: COD at creation, CARD after webhook
+- 5-phase implementation (~500 LOC total)
+- Feature flag for gradual rollout
+
+**Files**:
+- Plan: `docs/AGENT/PLANS/Pass-MP-ORDERS-SHIPPING-V1-PLAN-01.md`
+- Tasks: `docs/AGENT/TASKS/Pass-MP-ORDERS-SHIPPING-V1-PLAN-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-MP-ORDERS-SHIPPING-V1-PLAN-01.md`
 
 ---
 
