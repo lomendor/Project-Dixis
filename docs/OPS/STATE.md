@@ -1,9 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-ORDERS-SHIPPING-V1-PLAN-01)
+**Last Updated**: 2026-01-25 (MP-ORDERS-SCHEMA-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~240 lines (target ≤250). ✅
+> **Current size**: ~260 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass MP-ORDERS-SCHEMA-01: Schema + Model (Phase 1)
+
+**Status**: ✅ COMPLETE
+
+Phase 1 of multi-producer order splitting: Database schema and models.
+
+**Changes**:
+- NEW table: `checkout_sessions` (parent entity for multi-producer checkout)
+- NEW columns on `orders`: `checkout_session_id` FK, `is_child_order` boolean
+- NEW model: `CheckoutSession` with relations and helpers
+- MODIFIED: `Order` model with `checkoutSession()` relation
+
+**Tests**: 11 passed (35 assertions)
+
+**Evidence**:
+- Tasks: `docs/AGENT/TASKS/Pass-MP-ORDERS-SCHEMA-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-MP-ORDERS-SCHEMA-01.md`
 
 ---
 
