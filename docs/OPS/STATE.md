@@ -1,9 +1,31 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-PAYMENT-EMAIL-TRUTH-01)
+**Last Updated**: 2026-01-25 (CI-SMOKE-E2E-STABILIZE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~300 lines (target ≤250). ⚠️
+> **Current size**: ~320 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass CI-SMOKE-E2E-STABILIZE-01: E2E Test Stabilization
+
+**Status**: ✅ COMPLETE
+
+Fixed failing CI smoke/E2E tests to make required checks green.
+
+**Changes**:
+- FIXED: `notifications.spec.ts` - accept mock auth state in CI
+- FIXED: `i18n-checkout-orders.spec.ts` - dynamic cookie domain from baseURL
+- FIXED: `smoke.spec.ts` - accept `timestamp` or `ts` field in healthz
+- REMOVED: `pass-56-single-producer-cart.spec.ts` - obsolete (cart conflict modal removed in PR #2444)
+- FIXED: `card-payment-real-auth.spec.ts` - removed @smoke tag (requires real credentials)
+
+**Results**: 89 passed, 6 skipped, 0 failed (38s)
+
+**Evidence**:
+- Plan: `docs/AGENT/PLANS/Pass-CI-SMOKE-E2E-STABILIZE-01.md`
+- Tasks: `docs/AGENT/TASKS/Pass-CI-SMOKE-E2E-STABILIZE-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-CI-SMOKE-E2E-STABILIZE-01.md`
 
 ---
 

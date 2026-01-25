@@ -16,7 +16,9 @@ import * as path from 'path';
  * Run: BASE_URL=https://dixis.gr npx playwright test card-payment-real-auth.spec.ts
  */
 
-test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth @smoke', () => {
+// Pass CI-SMOKE-E2E-STABILIZE-01: Removed @smoke tag - this test requires real credentials
+// which are not available in CI. Run manually with BASE_URL=https://dixis.gr
+test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
   // Read credentials from secure file (never log them)
   let e2eEmail: string;
   let e2ePassword: string;
