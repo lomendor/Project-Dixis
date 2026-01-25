@@ -1,9 +1,36 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (MP-ORDERS-SCHEMA-01)
+**Last Updated**: 2026-01-25 (MP-ORDERS-SPLIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~260 lines (target ≤250). ⚠️
+> **Current size**: ~280 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass MP-ORDERS-SPLIT-01: Order Splitting (Phase 2)
+
+**Status**: ✅ COMPLETE
+
+Phase 2 of multi-producer order splitting: Backend order splitting implementation.
+
+**Changes**:
+- NEW: `CheckoutService` handles order splitting logic
+- NEW: `CheckoutSessionResource` for API response
+- MODIFIED: `OrderController` uses CheckoutService
+- MODIFIED: `OrderResource` includes checkout_session_id, is_child_order
+
+**Behavior**:
+- Multi-producer carts → CheckoutSession + N child Orders
+- Single-producer carts → Order (backward compatible)
+
+**Tests**: 23 passed (118 assertions)
+- MultiProducerOrderSplitTest: 7 tests
+- MultiProducerOrderTest: 5 tests (updated)
+- CheckoutSessionTest: 11 tests
+
+**Evidence**:
+- Tasks: `docs/AGENT/TASKS/Pass-MP-ORDERS-SPLIT-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-MP-ORDERS-SPLIT-01.md`
 
 ---
 
