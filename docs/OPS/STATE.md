@@ -1,9 +1,38 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (PROD-DEPLOY-VERIFY-01)
+**Last Updated**: 2026-01-25 (ORDERS-500-HYDRATION-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~370 lines (target ≤250). ⚠️
+> **Current size**: ~400 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass ORDERS-500-HYDRATION-01: Fix Orders Endpoint 500 Error
+
+**Status**: ✅ FIXED
+
+**Incident**: `GET /api/v1/public/orders` returned HTTP 500 with HTML error page instead of JSON.
+
+**Root Cause**: `vps-migrate.yml` workflow used wrong path `/var/www/dixis/backend` instead of `/var/www/dixis/current/backend`. Migrations from multi-producer checkout (PR #2456, #2476, #2477) never ran on production.
+
+**Missing Tables/Columns**:
+- `order_shipping_lines` table
+- `checkout_sessions` table
+- `orders.checkout_session_id` column
+- `orders.is_child_order` column
+
+**Fix**:
+- PR #2482: Corrected path in `vps-migrate.yml`
+- Ran `vps-migrate` workflow with `migrate` action
+
+**Evidence**:
+- Before: 3 migrations PENDING
+- After: All migrations RAN (batch 7)
+- `curl https://dixis.gr/api/v1/public/orders` → HTTP 200 + valid JSON
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-ORDERS-500-HYDRATION-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-ORDERS-500-HYDRATION-01.md`
 
 ---
 
