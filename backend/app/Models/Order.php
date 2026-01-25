@@ -11,6 +11,8 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'checkout_session_id',
+        'is_child_order',
         'status',
         'payment_status',
         'payment_method',
@@ -39,6 +41,7 @@ class Order extends Model
         'shipping_cost' => 'decimal:2',
         'total' => 'decimal:2',
         'refunded_at' => 'datetime',
+        'is_child_order' => 'boolean',
         // Legacy fields - keep for backward compatibility
         'tax_amount' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
@@ -53,6 +56,23 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the checkout session this order belongs to (for multi-producer orders).
+     * Pass MP-ORDERS-SCHEMA-01: Parent-child order relationship.
+     */
+    public function checkoutSession()
+    {
+        return $this->belongsTo(CheckoutSession::class);
+    }
+
+    /**
+     * Check if this order is part of a multi-producer checkout.
+     */
+    public function isChildOrder(): bool
+    {
+        return $this->is_child_order === true;
     }
 
     /**
