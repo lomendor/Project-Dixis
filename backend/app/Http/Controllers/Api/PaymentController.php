@@ -128,14 +128,31 @@ class PaymentController extends Controller
                 ], 400);
             }
 
-            // HOTFIX-MP-CHECKOUT-GUARD-01: Send email after successful card payment
+            // Pass MP-PAYMENT-EMAIL-TRUTH-01: Send email after successful card payment
             // This ensures emails are only sent after payment is confirmed.
+            // For multi-producer: Send to all sibling orders in the same checkout session.
             try {
                 $emailService = app(OrderEmailService::class);
-                $emailService->sendOrderPlacedNotifications($order->fresh());
+                $freshOrder = $order->fresh();
+
+                if ($freshOrder->checkout_session_id) {
+                    // Multi-producer: Send email for all orders in the session
+                    $siblingOrders = Order::where('checkout_session_id', $freshOrder->checkout_session_id)->get();
+                    foreach ($siblingOrders as $siblingOrder) {
+                        $emailService->sendOrderPlacedNotifications($siblingOrder);
+                    }
+                    Log::info('Payment confirmed: Multi-producer emails sent', [
+                        'checkout_session_id' => $freshOrder->checkout_session_id,
+                        'order_count' => $siblingOrders->count(),
+                    ]);
+                } else {
+                    // Single-producer: Send email for this order only
+                    $emailService->sendOrderPlacedNotifications($freshOrder);
+                }
             } catch (\Exception $e) {
                 Log::error('Email notification failed after payment confirmation', [
                     'order_id' => $order->id,
+                    'checkout_session_id' => $order->checkout_session_id,
                     'error' => $e->getMessage(),
                 ]);
                 // Don't fail the response - payment was successful
