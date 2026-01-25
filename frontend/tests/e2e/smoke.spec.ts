@@ -1,12 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 // @smoke — Health endpoint should respond quickly without SSR/DB deps
+// Pass CI-SMOKE-E2E-STABILIZE-01: Fixed to check 'timestamp' field (production uses 'timestamp', not 'ts')
 test('@smoke healthz responds', async ({ request }) => {
   const res = await request.get('/api/healthz', { timeout: 10000 });
   expect(res.status()).toBe(200);
   const json = await res.json();
   expect(json.status).toBe('ok');
-  expect(typeof json.ts).toBe('string');
+  // Accept either 'timestamp' (production) or 'ts' (local/CI mock) for compatibility
+  const hasTimestamp = typeof json.timestamp === 'string' || typeof json.ts === 'string';
+  expect(hasTimestamp).toBe(true);
 });
 
 // @smoke — Mock products API returns data in CI

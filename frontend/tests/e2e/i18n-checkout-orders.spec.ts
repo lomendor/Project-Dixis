@@ -3,14 +3,33 @@ import { test, expect } from '@playwright/test';
 /**
  * Pass EN-LANGUAGE-02: i18n for checkout and orders pages
  * Tests that checkout and producer orders pages respect locale settings
+ *
+ * Pass CI-SMOKE-E2E-STABILIZE-01: Fixed cookie domain to work with both
+ * local (127.0.0.1) and production (dixis.gr) environments.
  */
 test.describe('i18n Checkout and Orders @smoke', () => {
-  test('checkout page renders in English with EN locale cookie', async ({ page, context }) => {
+  /**
+   * Get the cookie domain from the base URL.
+   * CI uses dixis.gr, local uses 127.0.0.1
+   */
+  const getCookieDomain = (baseURL: string | undefined): string => {
+    if (!baseURL) return '127.0.0.1';
+    try {
+      const url = new URL(baseURL);
+      return url.hostname;
+    } catch {
+      return '127.0.0.1';
+    }
+  };
+
+  test('checkout page renders in English with EN locale cookie', async ({ page, context, baseURL }) => {
+    const domain = getCookieDomain(baseURL);
+
     // Set locale cookie to English
     await context.addCookies([{
       name: 'dixis_locale',
       value: 'en',
-      domain: '127.0.0.1',
+      domain,
       path: '/',
     }]);
 
@@ -43,12 +62,14 @@ test.describe('i18n Checkout and Orders @smoke', () => {
     }
   });
 
-  test('checkout page renders in Greek with EL locale cookie', async ({ page, context }) => {
+  test('checkout page renders in Greek with EL locale cookie', async ({ page, context, baseURL }) => {
+    const domain = getCookieDomain(baseURL);
+
     // Set locale cookie to Greek
     await context.addCookies([{
       name: 'dixis_locale',
       value: 'el',
-      domain: '127.0.0.1',
+      domain,
       path: '/',
     }]);
 
@@ -103,12 +124,14 @@ test.describe('i18n Checkout and Orders @smoke', () => {
     expect(currentUrl.includes('/producer/orders') || currentUrl.includes('/auth/login')).toBe(true);
   });
 
-  test('producer orders page uses i18n in English locale', async ({ page, context }) => {
+  test('producer orders page uses i18n in English locale', async ({ page, context, baseURL }) => {
+    const domain = getCookieDomain(baseURL);
+
     // Set locale cookie to English
     await context.addCookies([{
       name: 'dixis_locale',
       value: 'en',
-      domain: '127.0.0.1',
+      domain,
       path: '/',
     }]);
 
