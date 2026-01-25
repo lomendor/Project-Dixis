@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { apiClient, Order as ApiOrder } from '@/lib/api'
+import { apiClient, ShippingLine } from '@/lib/api'
 
 interface OrderItem {
   id: string
@@ -9,6 +9,7 @@ interface OrderItem {
   titleSnap: string
 }
 
+// Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Enhanced order interface for multi-producer checkout
 interface Order {
   id: string
   status: string
@@ -21,6 +22,7 @@ interface Order {
   name: string | null
   items: OrderItem[]
   isMultiProducer?: boolean
+  shippingLines?: ShippingLine[] // Per-producer shipping breakdown
 }
 
 export default function ThankYouPage({ searchParams }: { searchParams?: Record<string, string | undefined> }) {
@@ -52,6 +54,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
         const shippingAmount = laravelOrder.shipping_total
           ? parseFloat(laravelOrder.shipping_total)
           : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
+        // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Include per-producer shipping lines
         const transformedOrder: Order = {
           id: String(laravelOrder.id),
           status: laravelOrder.status,
@@ -63,6 +66,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           email: null, // Not exposed in public order response for privacy
           name: null,
           isMultiProducer: laravelOrder.is_multi_producer || false,
+          shippingLines: laravelOrder.shipping_lines || [],
           items: orderItems.map((item) => ({
             id: String(item.id),
             qty: item.quantity,
@@ -141,14 +145,33 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                   <span>Υποσύνολο:</span>
                   <span>{fmt.format(order.subtotal || 0)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>
-                    {order.isMultiProducer
-                      ? 'Μεταφορικά (σύνολο):'
-                      : `Αποστολή (${order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):`}
-                  </span>
-                  <span>{fmt.format(order.shipping || 0)}</span>
-                </div>
+                {/* Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Show per-producer shipping for multi-producer orders */}
+                {order.isMultiProducer && order.shippingLines && order.shippingLines.length > 1 ? (
+                  <>
+                    <div className="text-gray-600 font-medium pt-1">Μεταφορικά ανά παραγωγό:</div>
+                    {order.shippingLines.map((line, idx) => (
+                      <div key={idx} className="flex justify-between pl-3 text-gray-600">
+                        <span>{line.producer_name}:</span>
+                        <span>
+                          {line.free_shipping_applied
+                            ? 'Δωρεάν'
+                            : fmt.format(parseFloat(line.shipping_cost) || 0)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
+                      <span>Σύνολο μεταφορικών:</span>
+                      <span>{fmt.format(order.shipping || 0)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between">
+                    <span>
+                      Αποστολή ({order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):
+                    </span>
+                    <span>{fmt.format(order.shipping || 0)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>ΦΠΑ (24%):</span>
                   <span>{fmt.format(order.vat || 0)}</span>
