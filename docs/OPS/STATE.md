@@ -1,9 +1,35 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (CI-SMOKE-E2E-STABILIZE-01)
+**Last Updated**: 2026-01-25 (MP-SHIPPING-BREAKDOWN-TRUTH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~320 lines (target ≤250). ⚠️
+> **Current size**: ~350 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-25 — Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Enable Multi-Producer Checkout
+
+**Status**: ✅ COMPLETE
+
+Enabled multi-producer checkout by removing HOTFIX blocks. Backend CheckoutService handles order splitting with per-producer shipping.
+
+**Changes**:
+- REMOVED: Frontend HOTFIX blocks in `checkout/page.tsx` (render-time + submit-time)
+- ADDED: Per-producer shipping breakdown display in `thank-you/page.tsx`
+- REPLACED: `multi-producer-checkout-blocked.spec.ts` → `multi-producer-checkout.spec.ts`
+
+**Behavior**:
+- Multi-producer carts → CheckoutSession + N child Orders (one per producer)
+- Single-producer carts → Single Order (backward compatible)
+- Email timing: COD at creation, CARD after payment confirmation
+- Shipping: €3.50 per producer, free if subtotal >= €35
+
+**Tests**: 34 backend tests (157 assertions) + 3 E2E tests
+
+**Evidence**:
+- Plan: `docs/AGENT/PLANS/Pass-MP-SHIPPING-BREAKDOWN-TRUTH-01.md`
+- Tasks: `docs/AGENT/TASKS/Pass-MP-SHIPPING-BREAKDOWN-TRUTH-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-MP-SHIPPING-BREAKDOWN-TRUTH-01.md`
 
 ---
 

@@ -1,7 +1,7 @@
 'use client'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCart, cartTotalCents, isMultiProducerCart, getProducerIds } from '@/lib/cart'
+import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
 import { paymentApi } from '@/lib/api/payment'
 import PaymentMethodSelector, { type PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
@@ -79,13 +79,8 @@ function CheckoutContent() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    // CRITICAL FIX (Pass-MP-CHECKOUT-PROD-TRUTH-03): Check multi-producer BEFORE order creation
-    // The render-time HOTFIX was bypassed because order was created before stripeClientSecret was set.
-    // This check prevents order creation for multi-producer carts.
-    if (isMultiProducerCart(cartItems)) {
-      setError('Δεν υποστηρίζεται ακόμη η ολοκλήρωση αγοράς από πολλαπλούς παραγωγούς. Χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.')
-      return
-    }
+    // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Multi-producer checkout now enabled.
+    // Backend CheckoutService handles order splitting with per-producer shipping.
 
     setError('')
     setLoading(true)
@@ -216,42 +211,8 @@ function CheckoutContent() {
     )
   }
 
-  // HOTFIX: Block multi-producer checkout (Pass HOTFIX-MP-CHECKOUT-GUARD-01)
-  // Multi-producer order splitting is not yet implemented.
-  const multiProducer = isMultiProducerCart(cartItems)
-  if (multiProducer && !stripeClientSecret) {
-    const producerCount = getProducerIds(cartItems).size
-    return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center" data-testid="multi-producer-blocked">
-          <div className="text-amber-600 text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold mb-4">Πολλαπλοί Παραγωγοί στο Καλάθι</h2>
-          <p className="text-gray-600 mb-6">
-            Το καλάθι σας περιέχει προϊόντα από {producerCount} διαφορετικούς παραγωγούς.
-            <br /><br />
-            <strong>Προς το παρόν η ολοκλήρωση αγοράς γίνεται ανά παραγωγό.</strong>
-            <br />
-            Χωρίστε το καλάθι σε ξεχωριστές παραγγελίες.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="/cart"
-              className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation"
-              data-testid="back-to-cart"
-            >
-              Επιστροφή στο Καλάθι
-            </a>
-            <a
-              href="/products"
-              className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
-            >
-              Συνέχεια Αγορών
-            </a>
-          </div>
-        </div>
-      </main>
-    )
-  }
+  // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Multi-producer checkout enabled.
+  // Backend CheckoutService creates CheckoutSession + N child Orders with per-producer shipping.
 
   // Show Stripe Elements form when we have a client secret
   if (stripeClientSecret && pendingOrderId) {
