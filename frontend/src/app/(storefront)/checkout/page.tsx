@@ -28,6 +28,8 @@ function CheckoutContent() {
   // Stripe Elements state
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
   const [pendingOrderId, setPendingOrderId] = useState<number | null>(null)
+  // Pass PAYMENT-INIT-ORDER-ID-01: Store checkout session ID for thank-you redirect
+  const [pendingThankYouId, setPendingThankYouId] = useState<number | null>(null)
   const [orderTotal, setOrderTotal] = useState<number>(0)
 
   // Guest checkout: email is required for order confirmation
@@ -55,7 +57,7 @@ function CheckoutContent() {
       showToast('success', 'Η πληρωμή ολοκληρώθηκε επιτυχώς')
       // Clear cart and redirect to success page
       clear()
-      router.push(`/thank-you?id=${pendingOrderId}`)
+      router.push(`/thank-you?id=${pendingThankYouId ?? pendingOrderId}`)
     } catch (err) {
       console.error('Payment confirmation failed:', err)
       setError(t('checkoutPage.cardPaymentError'))
@@ -72,6 +74,7 @@ function CheckoutContent() {
   function handleCancelPayment() {
     setStripeClientSecret(null)
     setPendingOrderId(null)
+    setPendingThankYouId(null)
     setOrderTotal(0)
     setCardProcessing(false)
   }
@@ -142,6 +145,12 @@ function CheckoutContent() {
 
       const order = await apiClient.createOrder(orderData);
 
+      // Pass PAYMENT-INIT-ORDER-ID-01: Get correct order ID for payment init
+      // For multi-producer checkout, API returns CheckoutSession with payment_order_id
+      // For single-producer, use order.id directly
+      const paymentOrderId = order.payment_order_id ?? order.id;
+      const thankYouId = order.id; // Use checkout session ID for thank-you page
+
       // Store customer details for order confirmation/email
       sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer));
 
@@ -150,17 +159,19 @@ function CheckoutContent() {
         setCardProcessing(true)
         try {
           // Initialize payment intent to get client_secret for Stripe Elements
-          const paymentInit = await paymentApi.initPayment(order.id, {
+          const paymentInit = await paymentApi.initPayment(paymentOrderId, {
             customer: {
               email: body.customer.email,
               firstName: body.customer.name.split(' ')[0],
               lastName: body.customer.name.split(' ').slice(1).join(' ') || undefined,
             },
-            return_url: `${window.location.origin}/thank-you?id=${order.id}`,
+            return_url: `${window.location.origin}/thank-you?id=${thankYouId}`,
           })
 
           // Store order info and show Stripe Elements form
-          setPendingOrderId(order.id)
+          // Use paymentOrderId for payment operations, thankYouId for navigation
+          setPendingOrderId(paymentOrderId)
+          setPendingThankYouId(thankYouId)
           setOrderTotal(paymentInit.payment.amount / 100) // amount is in cents
           setStripeClientSecret(paymentInit.payment.client_secret)
           setLoading(false)
@@ -177,10 +188,22 @@ function CheckoutContent() {
 
       // COD: Clear cart and redirect to thank-you page
       clear()
-      router.push(`/thank-you?id=${order.id}`)
-    } catch (err) {
+      router.push(`/thank-you?id=${thankYouId}`)
+    } catch (err: any) {
       console.error('Order creation failed:', err)
-      setError(t('checkoutPage.orderError'))
+      // Pass PAYMENT-INIT-ORDER-ID-01: Handle specific error codes
+      // 409 = stock conflict, 400 = validation error
+      if (err?.status === 409) {
+        setError(t('checkoutPage.stockError') || 'Κάποια προϊόντα δεν είναι διαθέσιμα. Ελέγξτε το καλάθι σας.')
+      } else if (err?.status === 400) {
+        setError(err?.message || t('checkoutPage.orderError'))
+      } else {
+        setError(t('checkoutPage.orderError'))
+      }
+      // Clear any stale payment state on error
+      setPendingOrderId(null)
+      setPendingThankYouId(null)
+      setStripeClientSecret(null)
     } finally {
       setLoading(false)
     }

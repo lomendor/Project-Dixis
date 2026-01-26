@@ -112,6 +112,10 @@ export interface Order {
   shipping_total?: string; // Sum of shipping_lines when order has multiple producers
   shipping_lines?: ShippingLine[]; // Per-producer shipping breakdown
   is_multi_producer?: boolean; // True when order spans 2+ producers
+  // Pass PAYMENT-INIT-ORDER-ID-01: Multi-producer checkout session support
+  type?: 'checkout_session'; // Present for multi-producer orders
+  payment_order_id?: number; // Canonical order ID for payment init (first child order)
+  orders?: Order[]; // Child orders for multi-producer checkout
 }
 
 export interface OrderItem {
