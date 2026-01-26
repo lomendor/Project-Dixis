@@ -153,12 +153,15 @@ class CheckoutService
             'order_count' => count($orders),
         ]);
 
-        // Load relationships on all orders
-        foreach ($orders as $order) {
-            $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
-        }
+        // Pass PROD-CHECKOUT-SAFETY-01: Load relationships on checkout session
+        // Use nested eager loading to ensure shippingLines is available when CheckoutSessionResource
+        // aggregates them at the top level
+        $checkoutSession->load(['orders.orderItems.producer', 'orders.shippingLines']);
 
-        $checkoutSession->load('orders');
+        // Also update the $orders array for email sending (needs shippingLines)
+        foreach ($orders as $order) {
+            $order->load('shippingLines')->loadCount('orderItems');
+        }
 
         return [
             'checkout_session' => $checkoutSession,

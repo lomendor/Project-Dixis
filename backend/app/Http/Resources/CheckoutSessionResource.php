@@ -43,6 +43,23 @@ class CheckoutSessionResource extends JsonResource
             $this->mergeWhen($this->relationLoaded('orders'), [
                 'orders' => OrderResource::collection($this->orders ?? []),
             ]),
+
+            // Pass PROD-CHECKOUT-SAFETY-01: Aggregate shipping_lines from all child orders
+            // Flattens all shipping lines from N orders into a single array at checkout session level
+            'shipping_lines' => $this->when($this->relationLoaded('orders'), function () {
+                return $this->orders
+                    ->filter(fn ($order) => $order->relationLoaded('shippingLines'))
+                    ->flatMap(fn ($order) => $order->shippingLines->map(fn ($line) => [
+                        'producer_id' => $line->producer_id,
+                        'producer_name' => $line->producer_name,
+                        'subtotal' => number_format((float) $line->subtotal, 2),
+                        'shipping_cost' => number_format((float) $line->shipping_cost, 2),
+                        'shipping_method' => $line->shipping_method,
+                        'free_shipping_applied' => (bool) $line->free_shipping_applied,
+                    ]))
+                    ->values()
+                    ->all();
+            }, []),
         ];
     }
 }
