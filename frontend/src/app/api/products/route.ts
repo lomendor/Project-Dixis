@@ -28,11 +28,17 @@ export async function GET(req: Request) {
       })
     ])
 
+    // Pass CI-SMOKE-STABILIZE-001: Include producer_id and stock for E2E tests
     const items = rows.map(p => ({
       id: p.id,
       title: p.title,
+      name: p.title, // Alias for compatibility with checkout-golden-path.spec.ts
+      producer_id: p.producerId, // Required for multi-producer checkout tests
+      producerId: p.producerId, // Alias
       producerName: p.producer?.name ?? 'Παραγωγός',
+      price: p.price,
       priceCents: Math.round(p.price * 100),
+      stock: p.stock ?? 0, // Required for add-to-cart visibility
       imageUrl: p.imageUrl ?? '',
     }))
 

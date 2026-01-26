@@ -11,10 +11,13 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // Deterministic IDs for stable test selectors
-const CI_PRODUCER_ID = 'ci-producer-001'
+// Pass CI-SMOKE-STABILIZE-001: Two producers for multi-producer checkout testing
+const CI_PRODUCER_A_ID = 'ci-producer-001'
+const CI_PRODUCER_B_ID = 'ci-producer-002'
 const CI_CONSUMER_ID = 'ci-consumer-001'
 
-const CI_PRODUCTS = [
+// Producer A products
+const CI_PRODUCTS_A = [
   {
     id: 'ci-product-001',
     slug: 'ci-tomatoes-organic',
@@ -35,6 +38,10 @@ const CI_PRODUCTS = [
     stock: 50,
     description: 'CI Test Product - Thyme honey',
   },
+]
+
+// Producer B products (for multi-producer checkout tests)
+const CI_PRODUCTS_B = [
   {
     id: 'ci-product-003',
     slug: 'ci-olive-oil-1l',
@@ -43,7 +50,17 @@ const CI_PRODUCTS = [
     price: 15.00,
     unit: 'bottle',
     stock: 30,
-    description: 'CI Test Product - Extra virgin olive oil',
+    description: 'CI Test Product - Extra virgin olive oil (Producer B)',
+  },
+  {
+    id: 'ci-product-004',
+    slug: 'ci-feta-cheese-500g',
+    title: 'Φέτα ΠΟΠ 500g',
+    category: 'Τυροκομικά',
+    price: 8.50,
+    unit: 'pack',
+    stock: 40,
+    description: 'CI Test Product - PDO Feta cheese (Producer B)',
   },
 ]
 
@@ -56,33 +73,57 @@ async function main() {
     throw new Error('SAFETY: Refusing to seed on production DATABASE_URL')
   }
 
-  // 1. Create CI Producer
-  const producer = await prisma.producer.upsert({
-    where: { id: CI_PRODUCER_ID },
+  // 1. Create CI Producers (two for multi-producer checkout tests)
+  const producerA = await prisma.producer.upsert({
+    where: { id: CI_PRODUCER_A_ID },
     update: {
-      name: 'CI Test Producer',
-      slug: 'ci-test-producer',
+      name: 'CI Test Producer A',
+      slug: 'ci-test-producer-a',
       region: 'Αττική',
       category: 'Λαχανικά',
-      description: 'Deterministic CI test producer for E2E',
+      description: 'Deterministic CI test producer A for E2E',
       isActive: true,
       approvalStatus: 'approved',
     },
     create: {
-      id: CI_PRODUCER_ID,
-      slug: 'ci-test-producer',
-      name: 'CI Test Producer',
+      id: CI_PRODUCER_A_ID,
+      slug: 'ci-test-producer-a',
+      name: 'CI Test Producer A',
       region: 'Αττική',
       category: 'Λαχανικά',
-      description: 'Deterministic CI test producer for E2E',
+      description: 'Deterministic CI test producer A for E2E',
       isActive: true,
       approvalStatus: 'approved',
     },
   })
-  console.log(`✅ Producer: ${producer.name} (${producer.id})`)
+  console.log(`✅ Producer A: ${producerA.name} (${producerA.id})`)
 
-  // 2. Create CI Products
-  for (const p of CI_PRODUCTS) {
+  const producerB = await prisma.producer.upsert({
+    where: { id: CI_PRODUCER_B_ID },
+    update: {
+      name: 'CI Test Producer B',
+      slug: 'ci-test-producer-b',
+      region: 'Κρήτη',
+      category: 'Τυροκομικά',
+      description: 'Deterministic CI test producer B for E2E multi-producer',
+      isActive: true,
+      approvalStatus: 'approved',
+    },
+    create: {
+      id: CI_PRODUCER_B_ID,
+      slug: 'ci-test-producer-b',
+      name: 'CI Test Producer B',
+      region: 'Κρήτη',
+      category: 'Τυροκομικά',
+      description: 'Deterministic CI test producer B for E2E multi-producer',
+      isActive: true,
+      approvalStatus: 'approved',
+    },
+  })
+  console.log(`✅ Producer B: ${producerB.name} (${producerB.id})`)
+
+  // 2. Create CI Products for Producer A
+  for (const p of CI_PRODUCTS_A) {
     const product = await prisma.product.upsert({
       where: { id: p.id },
       update: {
@@ -94,7 +135,7 @@ async function main() {
         stock: p.stock,
         description: p.description,
         isActive: true,
-        producerId: CI_PRODUCER_ID,
+        producerId: CI_PRODUCER_A_ID,
       },
       create: {
         id: p.id,
@@ -106,10 +147,41 @@ async function main() {
         stock: p.stock,
         description: p.description,
         isActive: true,
-        producerId: CI_PRODUCER_ID,
+        producerId: CI_PRODUCER_A_ID,
       },
     })
-    console.log(`✅ Product: ${product.title} (€${product.price})`)
+    console.log(`✅ Product (A): ${product.title} (€${product.price})`)
+  }
+
+  // 3. Create CI Products for Producer B
+  for (const p of CI_PRODUCTS_B) {
+    const product = await prisma.product.upsert({
+      where: { id: p.id },
+      update: {
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
+        price: p.price,
+        unit: p.unit,
+        stock: p.stock,
+        description: p.description,
+        isActive: true,
+        producerId: CI_PRODUCER_B_ID,
+      },
+      create: {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
+        price: p.price,
+        unit: p.unit,
+        stock: p.stock,
+        description: p.description,
+        isActive: true,
+        producerId: CI_PRODUCER_B_ID,
+      },
+    })
+    console.log(`✅ Product (B): ${product.title} (€${product.price})`)
   }
 
   // 3. Create CI Consumer (for authenticated tests)

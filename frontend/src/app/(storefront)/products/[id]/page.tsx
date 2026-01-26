@@ -10,12 +10,24 @@ export const revalidate = 0;
 
 // Helper to fetch product from API
 async function getProductById(id: string) {
-  // Use internal URL for SSR to avoid external round-trip timeout
-  // CRITICAL: No localhost fallback - use relative URL if not configured
+  // Pass CI-SMOKE-STABILIZE-001: In CI mode, use internal Next.js API
+  // which reads from Prisma DB (seeded with ci:seed)
+  const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const isServer = typeof window === 'undefined';
-  const base = isServer
-    ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1')
-    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
+
+  // Determine base URL:
+  // 1. CI mode: use localhost:3001 to hit Next.js internal API
+  // 2. Server: use INTERNAL_API_URL or NEXT_PUBLIC_API_BASE_URL
+  // 3. Client: use NEXT_PUBLIC_API_BASE_URL
+  let base: string;
+  if (isCI && isServer) {
+    // In CI SSR, we need absolute URL to Next.js server
+    base = 'http://127.0.0.1:3001/api/v1';
+  } else if (isServer) {
+    base = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  } else {
+    base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  }
 
   try {
     const res = await fetch(`${base}/public/products/${id}`, { cache: 'no-store' });
