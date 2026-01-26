@@ -35,6 +35,12 @@ class CheckoutSessionResource extends JsonResource
             // Stripe payment (will be set in Phase 3)
             'stripe_payment_intent_id' => $this->stripe_payment_intent_id,
 
+            // Pass PAYMENT-INIT-ORDER-ID-01: Canonical order ID for payment initialization
+            // For multi-producer, use first child order ID (all share same PaymentIntent)
+            'payment_order_id' => $this->when($this->relationLoaded('orders') && $this->orders->isNotEmpty(), function () {
+                return $this->orders->first()->id;
+            }),
+
             // Timestamps
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
