@@ -237,7 +237,7 @@
     "viewProducts": "View Products",
     "orderDetails": "Order Details",
     "subtotal": "Subtotal",
-    "shippingNote": "Shipping: €3.50 per producer (free over €35)",
+    "shippingNote": "Shipping will be calculated at checkout (may vary per producer)",
     "shippingDetails": "Shipping Details",
     "guestNotice": "Guest checkout — Enter your email to receive order confirmation.",
     "fullName": "Full Name",
