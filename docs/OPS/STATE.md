@@ -1,9 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (PAYMENT-INIT-ORDER-ID-01)
+**Last Updated**: 2026-01-26 (MULTI-PRODUCER-SHIPPING-AUDIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~550 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass MULTI-PRODUCER-SHIPPING-AUDIT-01: Investigation Complete
+
+**Status**: ✅ AUDIT COMPLETE (Read-Only)
+
+**Findings Summary**:
+
+| Aspect | Current State |
+|--------|--------------|
+| **Shipping** | €3.50 flat per producer, free ≥€35 per producer |
+| **Tax/VAT** | NOT IMPLEMENTED (always 0.00) |
+| **Order Split** | 1 CheckoutSession → N child Orders (one per producer) |
+| **UI Message** | Stale - claims VAT "calculated next step" but it never is |
+
+**Key Discovery**: `TaxService` exists (`backend/app/Services/TaxService.php`) but is **never called** from `CheckoutService`. All orders have `tax_amount: 0.00`.
+
+**Recommendations**:
+1. Update UI message to remove VAT mention (or implement VAT)
+2. Add E2E test for 2-producer shipping (€7.00 = 2 × €3.50)
+
+**Report**: `docs/AGENT/FINDINGS/Pass-MULTI-PRODUCER-SHIPPING-AUDIT-01.md`
 
 ---
 
