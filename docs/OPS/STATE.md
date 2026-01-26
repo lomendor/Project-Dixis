@@ -1,9 +1,56 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (Pass-2498-HYDRATION-418)
+**Last Updated**: 2026-01-27 (Pass-PAY-INIT-404-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~600 lines (target ≤250). ⚠️
+> **Current size**: ~650 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-27 — Pass-PAY-INIT-404-01: Fix Payment Init 404 for Guest Orders
+
+**Status**: ✅ FIXED — MERGED (PR #2500) — PROD DEPLOYED & VERIFIED
+
+**Symptom**: `POST /api/v1/payments/orders/{id}/init` returned 404 "Order not found" for guest checkout orders.
+
+**Root Cause**:
+PaymentController authorization check was:
+```php
+if ($order->user_id !== $request->user()->id) {
+    return response()->json(['message' => 'Order not found'], 404);
+}
+```
+Guest orders have `user_id = null`. The comparison `null !== <any_user_id>` always evaluates to `true`, rejecting ALL guest orders with 404.
+
+**Fix** (PR #2500, commit `e6b91105`):
+Updated authorization to allow guest orders:
+```php
+// Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
+if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
+    return response()->json(['message' => 'Order not found'], 404);
+}
+```
+Applied to all 4 payment endpoints: `initPayment`, `confirmPayment`, `cancelPayment`, `getPaymentStatus`.
+
+**Tests Added**: `PaymentInitAuthorizationTest.php` with 6 tests:
+- Own order access (OK)
+- Other user's order (404)
+- Guest order access (OK)
+- Unauthenticated (401)
+- Nonexistent order (404)
+- Already paid order (400)
+
+**Evidence**:
+
+| Check | Result |
+|-------|--------|
+| Deploy Backend (VPS) run #21376262793 | ✅ SUCCESS |
+| Unauthenticated request | 401 (not 404) ✅ |
+| Tests | 6/6 PASSED |
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-PAY-INIT-404-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PAY-INIT-404-01.md`
 
 ---
 
