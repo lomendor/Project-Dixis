@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart, cartCount } from '@/lib/cart';
@@ -17,13 +18,21 @@ interface CartIconProps {
  * - Consumer: visible
  * - Admin: visible
  * - Producer: visible (producers can also shop as customers)
+ *
+ * Fix React #418: Uses mounted pattern to prevent hydration mismatch
+ * when Zustand persist loads cart from localStorage on client.
  */
 export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
   const { isGuest, isConsumer, isProducer, isAdmin } = useAuth();
+  // Fix React #418: Prevent hydration mismatch by waiting for client mount
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true) }, []);
 
   // Use Zustand cart for all users (guests and authenticated)
   const items = useCart(state => state.items);
-  const cartItemCount = cartCount(items);
+  // Fix React #418: Show 0 items during SSR/hydration, actual count after mount
+  const cartItemCount = mounted ? cartCount(items) : 0;
 
   // Cart is visible for ALL roles (including producers who can shop)
 
