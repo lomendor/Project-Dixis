@@ -126,10 +126,8 @@ function CheckoutContent() {
         country: 'GR'
       };
 
-      // Calculate shipping cost based on postal code zone (simplified: €3.50 default for HOME)
-      // TODO: Call /api/v1/public/shipping/quote for accurate zone-based pricing
-      const shippingCost = 3.50;
-
+      // Shipping is calculated by backend (CheckoutService) based on per-producer rules.
+      // Do NOT send shipping_cost - backend is the single source of truth.
       const orderData = {
         items: Object.values(cartItems).map(item => ({
           product_id: parseInt(item.id.toString()),
@@ -139,7 +137,6 @@ function CheckoutContent() {
         shipping_method: 'HOME' as const,
         payment_method: paymentMethod === 'card' ? 'CARD' as const : 'COD' as const,
         shipping_address: shippingAddress,
-        shipping_cost: shippingCost,
         notes: ''
       };
 

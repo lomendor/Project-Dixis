@@ -172,10 +172,13 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                     <span>{fmt.format(order.shipping || 0)}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span>ΦΠΑ (24%):</span>
-                  <span>{fmt.format(order.vat || 0)}</span>
-                </div>
+{/* VAT only shown when implemented (currently not calculated by backend) */}
+                {order.vat && order.vat > 0 && (
+                  <div className="flex justify-between">
+                    <span>ΦΠΑ (24%):</span>
+                    <span>{fmt.format(order.vat)}</span>
+                  </div>
+                )}
               </div>
 
               <div className="border-t mt-3 pt-3">
