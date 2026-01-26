@@ -1,9 +1,61 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (CHECKOUT-COPY-02)
+**Last Updated**: 2026-01-26 (MP-SHIPPING-BREAKDOWN-TRUTH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~550 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Backend Single Source of Truth for Shipping
+
+**Status**: ✅ FIXED — MERGED (PR #2496) — PROD DEPLOYED & VERIFIED
+
+**Problem**:
+- Frontend had hardcoded `shipping_cost: 3.50` in order creation
+- Dead code `lib/checkout/totals.ts` had conflicting €25 threshold (backend uses €35)
+- Thank-you page showed "ΦΠΑ (24%): €0.00" even though VAT not implemented
+
+**Fix** (PR #2496):
+1. Frontend: Removed hardcoded `shipping_cost` from checkout - backend calculates
+2. Frontend: Deleted dead `lib/checkout/totals.ts` (conflicting threshold)
+3. Frontend: Thank-you page only shows VAT when > 0
+4. Backend: Added `CheckoutServiceShippingTest` with 6 test cases
+
+**Shipping Rules (Canonical - CheckoutService.php)**:
+- €3.50 flat rate per producer
+- Free shipping when producer subtotal ≥ €35
+- Pickup is always free
+
+**Evidence (Production API, 2026-01-26 20:37)**:
+
+Test 1: Two producers, both below €35:
+```json
+{
+  "is_multi_producer": true,
+  "subtotal": "8.50",
+  "shipping_total": "7.00",  // €3.50 + €3.50 ✅
+  "shipping_lines": [
+    {"producer_name": "Test Producer B", "subtotal": "5.00", "shipping_cost": "3.50"},
+    {"producer_name": "Green Farm Co.", "subtotal": "3.50", "shipping_cost": "3.50"}
+  ]
+}
+```
+
+Test 2: Two producers, one above €35:
+```json
+{
+  "is_multi_producer": true,
+  "subtotal": "41.00",
+  "shipping_total": "3.50",  // €0.00 + €3.50 ✅
+  "shipping_lines": [
+    {"producer_name": "Test Producer B", "subtotal": "5.00", "shipping_cost": "3.50", "free_shipping_applied": false},
+    {"producer_name": "Green Farm Co.", "subtotal": "36.00", "shipping_cost": "0.00", "free_shipping_applied": true}
+  ]
+}
+```
+
+**PR**: https://github.com/lomendor/Project-Dixis/pull/2496
 
 ---
 
