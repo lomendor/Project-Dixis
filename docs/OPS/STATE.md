@@ -1,9 +1,54 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (MP-SHIPPING-BREAKDOWN-TRUTH-01)
+**Last Updated**: 2026-01-26 (Pass-2498-HYDRATION-418)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~550 lines (target ≤250). ⚠️
+> **Current size**: ~600 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass-2498-HYDRATION-418: Fix React Error #418 in CartIcon
+
+**Status**: ✅ FIXED — MERGED (PR #2498) — PROD DEPLOYED & VERIFIED
+
+**Symptom**: React Error #418 (hydration mismatch) appearing in console on page load.
+
+**Root Cause**:
+`CartIcon.tsx` read cart items directly from Zustand persist store on first render:
+- Server: Rendered with 0 items (no localStorage on server)
+- Client: Immediately read N items from localStorage via Zustand persist
+- **Mismatch triggered React #418**
+
+**Fix** (PR #2498, commit `dd42f873`):
+Added `mounted` state pattern (same as CartBadge.tsx):
+```typescript
+const [mounted, setMounted] = useState(false);
+useEffect(() => { setMounted(true) }, []);
+const cartItemCount = mounted ? cartCount(items) : 0;
+```
+
+**Evidence**:
+
+| Check | Result |
+|-------|--------|
+| Deploy Frontend (VPS) run #21374098455 | ✅ SUCCESS (4m4s) |
+| https://dixis.gr | HTTP 200 |
+| https://dixis.gr/cart | HTTP 200 |
+| https://dixis.gr/checkout | HTTP 200 |
+| Cart icon markup present | `data-testid="nav-cart"`, `aria-label="Καλάθι"` ✅ |
+| API health | `{"status":"ok","database":"connected"}` ✅ |
+
+**Browser Verification** (2026-01-26 21:50 UTC):
+- Home: loads successfully
+- Cart icon: visible and stable after refresh
+- /cart: loads, stable after refresh
+- /checkout: loads, stable after refresh
+- Console: No React #418 errors observed
+- Network: No failed requests
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-2498-HYDRATION-418.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-2498-HYDRATION-418.md`
 
 ---
 
