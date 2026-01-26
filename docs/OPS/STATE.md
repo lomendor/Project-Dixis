@@ -1,9 +1,49 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (PROD-CHECKOUT-SAFETY-01)
+**Last Updated**: 2026-01-26 (PAYMENT-INIT-ORDER-ID-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~500 lines (target ≤250). ⚠️
+> **Current size**: ~550 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass PAYMENT-INIT-ORDER-ID-01: Fix 404 on Payment Init (Multi-Producer)
+
+**Status**: ✅ FIXED — MERGED (PR #2490) — PROD DEPLOYED
+
+**Problem**:
+`POST /api/v1/payments/orders/{id}/init` was called with CheckoutSession ID instead of Order ID, returning 404 "Order not found".
+
+**Root Cause**:
+- Multi-producer checkout returns `CheckoutSession` (id=6) with child `Orders` (id=115, 116)
+- Frontend treated `checkout_session.id` as `order.id` for payment initialization
+- Backend `Order::findOrFail(6)` failed because no Order with ID 6 exists
+
+**Fix** (PR #2490):
+- Backend: Add `payment_order_id` to `CheckoutSessionResource` (first child order ID)
+- Frontend: Use `payment_order_id` for `initPayment`, CheckoutSession ID for thank-you redirect
+- Frontend: Handle 409 (stock conflict) with Greek error message
+- Frontend: Clear stale payment state on order creation failure
+
+**Evidence** (Production API, 2026-01-26):
+```json
+{
+  "id": 6,
+  "type": "checkout_session",
+  "is_multi_producer": true,
+  "payment_order_id": 115,
+  "first_child_order_id": 115
+}
+```
+
+**Verification**:
+- ✅ PR merged: https://github.com/lomendor/Project-Dixis/pull/2490
+- ✅ Deploy Backend (VPS): success
+- ✅ `payment_order_id` matches `first_child_order_id`
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-PAYMENT-INIT-ORDER-ID-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PAYMENT-INIT-ORDER-ID-01.md`
 
 ---
 
