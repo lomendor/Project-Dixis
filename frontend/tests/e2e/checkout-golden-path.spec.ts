@@ -3,13 +3,17 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E Test: Checkout Golden Path
  * Pass-GUARDRAILS-CRITICAL-FLOWS-01
+ * Pass-CI-SMOKE-STABILIZE-001: Changed from @smoke to @prod
  *
  * Verifies critical checkout flows produce correct order data:
  * - Order creation succeeds
  * - Shipping calculations are correct
  * - Multi-producer orders have shipping_lines populated
  *
- * These tests are @smoke tagged to run on every PR preview.
+ * NOTE: These tests require FULL backend (Laravel) to run.
+ * They are tagged @prod and run only against production/staging,
+ * NOT in CI-only environments where only Next.js is running.
+ * For CI smoke tests, see reload-and-css.smoke.spec.ts
  */
 
 // Helper to fetch products from API
@@ -58,7 +62,7 @@ async function fillCheckoutForm(page: any, overrides: Record<string, string> = {
   return testData;
 }
 
-test.describe('Checkout Golden Path @smoke', () => {
+test.describe('Checkout Golden Path @prod', () => {
 
   test('GP1: Single-producer COD checkout creates order with correct shipping', async ({ page, request }) => {
     const products = await fetchProducts(request);
