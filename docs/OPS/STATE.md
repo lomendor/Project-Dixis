@@ -1,9 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-25 (GUARDRAILS-CRITICAL-FLOWS-01)
+**Last Updated**: 2026-01-26 (MULTI-PRODUCER-ROOT-CAUSE-ANALYSIS)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~430 lines (target ≤250). ⚠️
+> **Current size**: ~470 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Analysis: Multi-Producer Order Data Issues
+
+**Status**: ✅ ANALYZED — NO CODE BUG (Legacy Data Issue)
+
+**Investigation Summary**:
+Orders 94-103 show incorrect data (`is_multi_producer: false`, `shipping_lines: []`) because they were created **before** CheckoutService deployment (#2476, #2479).
+
+**Evidence**:
+- Order #103 created at `2026-01-24T10:47:22` (before CheckoutService merge)
+- CheckoutService merged on 2026-01-25 (PR #2476, #2479)
+- All 23 backend multi-producer tests pass (122 assertions)
+- Production sanity workflow run #21349228961: PASSED with warning for legacy order
+
+**Backend Tests Verified**:
+```
+✓ multi_producer_checkout_creates_checkout_session
+✓ multi_producer_checkout_creates_child_orders
+✓ each_child_order_has_shipping_line
+✓ shipping_total_equals_sum_of_line_costs
+```
+
+**Conclusion**:
+- Current code is CORRECT
+- New multi-producer orders will have proper data
+- Legacy orders (94-103) have incorrect data (expected, pre-feature)
+
+**Follow-up**: Optional data migration for legacy orders if business requires.
 
 ---
 
