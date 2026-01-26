@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Pass CHECKOUT-COPY-01: Regression test for checkout shipping note copy
- * Ensures the shipping note does NOT mention VAT (since VAT is not implemented)
+ * Checkout Copy Regression Test
+ *
+ * Ensures the shipping note:
+ * - Does NOT mention VAT/ΦΠΑ (not implemented)
+ * - Does NOT contain hardcoded prices (€3.50, €35, "free shipping")
+ * - IS truthful and generic (no false promises)
  */
 test.describe('Checkout Copy Regression', () => {
-  test('shipping note does NOT mention VAT', async ({ page }) => {
+  test('shipping note is truthful (no VAT, no hardcoded prices)', async ({ page }) => {
     // Add item to cart first (required for checkout to show content)
     await page.goto('/products');
 
@@ -40,15 +44,19 @@ test.describe('Checkout Copy Regression', () => {
     const shippingNote = page.locator('.text-xs.text-gray-500.mt-2');
     await expect(shippingNote).toBeVisible();
 
-    const noteText = await shippingNote.textContent();
+    const noteText = await shippingNote.textContent() || '';
     console.log('Shipping note text:', noteText);
 
-    // Assert: Note should NOT mention VAT/ΦΠΑ (since VAT is not implemented)
+    // Assert: Note should NOT mention VAT/ΦΠΑ (not implemented)
     expect(noteText).not.toMatch(/VAT|ΦΠΑ/i);
 
-    // Assert: Note SHOULD mention shipping per producer
-    expect(noteText).toMatch(/€3\.50|ανά παραγωγό|per producer/i);
+    // Assert: Note should NOT contain hardcoded prices (not business-approved)
+    expect(noteText).not.toMatch(/€3\.50|€35|δωρεάν μεταφορικά|free shipping/i);
 
-    console.log('✅ Shipping note copy is correct (no VAT mention)');
+    // Assert: Note SHOULD mention shipping and checkout
+    expect(noteText).toMatch(/shipping|μεταφορικά/i);
+    expect(noteText).toMatch(/checkout|παραγωγό/i);
+
+    console.log('✅ Shipping note is truthful (no VAT, no hardcoded prices)');
   });
 });

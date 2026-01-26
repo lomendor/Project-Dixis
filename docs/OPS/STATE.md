@@ -1,25 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (CHECKOUT-COPY-01)
+**Last Updated**: 2026-01-26 (CHECKOUT-COPY-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~550 lines (target ≤250). ⚠️
 
 ---
 
+## 2026-01-26 — Pass CHECKOUT-COPY-02: Remove Hardcoded Prices from Note
+
+**Status**: ✅ COMPLETE (i18n fix)
+
+**Problem**: Previous fix (CHECKOUT-COPY-01) added hardcoded "€3.50 / free over €35" which is NOT business-approved policy.
+
+**Fix**:
+- EL: "Τα μεταφορικά θα υπολογιστούν στο checkout (ενδέχεται να διαφέρουν ανά παραγωγό)"
+- EN: "Shipping will be calculated at checkout (may vary per producer)"
+- Test now asserts NO hardcoded prices + NO VAT mention
+
+**Next**: Shipping Settings v1 (per-producer configurable rates)
+
+---
+
 ## 2026-01-26 — Pass CHECKOUT-COPY-01: Fix Misleading Shipping/VAT Note
 
-**Status**: ✅ COMPLETE (i18n + test)
+**Status**: ⚠️ SUPERSEDED by CHECKOUT-COPY-02
 
 **Problem**: Checkout note claimed "VAT will be calculated next step" but VAT is not implemented.
 
-**Fix**:
-- Updated `frontend/messages/el.json` + `en.json`: removed VAT mention
-- Before: "Shipping and VAT will be calculated in the next step"
-- After: "Shipping: €3.50 per producer (free over €35)"
-- Added regression test: `checkout-copy-regression.spec.ts`
-
-**Docs**: `docs/AGENT/SUMMARY/Pass-CHECKOUT-COPY-01.md`
+**Issue**: Fix introduced hardcoded prices (€3.50/€35) which are not business-approved.
 
 ---
 
