@@ -1,9 +1,48 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (MULTI-PRODUCER-ROOT-CAUSE-ANALYSIS)
+**Last Updated**: 2026-01-26 (PROD-CHECKOUT-SAFETY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~470 lines (target ≤250). ⚠️
+> **Current size**: ~500 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass PROD-CHECKOUT-SAFETY-01: Multi-Producer shipping_lines Aggregation
+
+**Status**: ✅ FIXED — MERGED (PR #2488) — PROD VERIFIED
+
+**Title**: Multi-producer shipping_lines aggregation at top-level response
+
+**Root Cause**:
+`CheckoutSessionResource` returned child orders with their own `shipping_lines`, but the **top-level response** did not aggregate them. Frontend/tests accessed `data.shipping_lines` expecting aggregated data, got `[]`.
+
+**Fix** (PR #2488, commit `7b0eca26`):
+- `CheckoutSessionResource.php`: Added `shipping_lines` field that aggregates all shipping lines from child orders
+- `CheckoutService.php`: Use nested eager loading (`orders.shippingLines`) to ensure relation is available
+
+**Evidence** (Production API canary, 2026-01-26T09:40 UTC):
+```json
+{
+  "type": "checkout_session",
+  "is_multi_producer": true,
+  "order_count": 2,
+  "shipping_lines_count": 2,
+  "shipping_lines": [
+    {"producer_id": 1, "producer_name": "Green Farm Co.", "shipping_cost": "3.50"},
+    {"producer_id": 4, "producer_name": "Test Producer B", "shipping_cost": "3.50"}
+  ],
+  "shipping_total": "7.00"
+}
+```
+
+**Verification**:
+- ✅ `shipping_lines_count == 2` (= number of producers)
+- ✅ `shipping_total == "7.00"` (= 2 × €3.50)
+- ✅ CI required checks: `build-and-test`, `Analyze (javascript)`, `quality-gates` all PASS
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-PROD-CHECKOUT-SAFETY-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PROD-CHECKOUT-SAFETY-01.md`
 
 ---
 
