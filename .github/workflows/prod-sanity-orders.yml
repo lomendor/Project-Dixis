@@ -1,0 +1,138 @@
+name: PROD Sanity - Order Data Integrity
+
+# Pass-GUARDRAILS-CRITICAL-FLOWS-01
+# Verifies that production orders have correct data structure
+# Non-mutating checks only - NO order creation
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run daily at 06:00 UTC
+    - cron: '0 6 * * *'
+
+jobs:
+  sanity-check:
+    name: Order Data Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check healthz
+        run: |
+          echo "=== Healthz Check ==="
+          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/api/healthz)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ FAIL: healthz returned $HTTP_CODE"
+            exit 1
+          fi
+          echo "✅ healthz: 200"
+
+      - name: Check orders endpoint returns JSON
+        run: |
+          echo "=== Orders API Check ==="
+          RESPONSE=$(curl -sS --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/api/v1/public/orders)
+
+          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/api/v1/public/orders)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ FAIL: orders API returned $HTTP_CODE (expected 200)"
+            echo "Response: $RESPONSE" | head -c 500
+            exit 1
+          fi
+
+          # Verify it's JSON with "data" key
+          if ! echo "$RESPONSE" | jq -e '.data' > /dev/null 2>&1; then
+            echo "❌ FAIL: orders API response missing 'data' key or invalid JSON"
+            echo "Response: $RESPONSE" | head -c 500
+            exit 1
+          fi
+
+          echo "✅ orders API: 200 with valid JSON"
+
+      - name: Verify recent order data integrity
+        run: |
+          echo "=== Order Data Integrity Check ==="
+
+          # Fetch first order from API
+          ORDER=$(curl -sS --connect-timeout 10 --max-time 20 \
+            https://dixis.gr/api/v1/public/orders | jq -r '.data[0]')
+
+          if [ "$ORDER" = "null" ] || [ -z "$ORDER" ]; then
+            echo "⚠️ WARNING: No orders found - skipping data integrity check"
+            exit 0
+          fi
+
+          ORDER_ID=$(echo "$ORDER" | jq -r '.id')
+          echo "Checking order #$ORDER_ID"
+
+          # Check required fields exist
+          FIELDS_OK=true
+
+          # shipping_amount must be >= 0
+          SHIPPING=$(echo "$ORDER" | jq -r '.shipping_amount // "null"')
+          if [ "$SHIPPING" = "null" ]; then
+            echo "❌ FAIL: shipping_amount is null"
+            FIELDS_OK=false
+          else
+            echo "✅ shipping_amount: $SHIPPING"
+          fi
+
+          # total_amount must be > 0
+          TOTAL=$(echo "$ORDER" | jq -r '.total_amount // .total // "null"')
+          if [ "$TOTAL" = "null" ] || [ "$TOTAL" = "0" ] || [ "$TOTAL" = "0.00" ]; then
+            echo "❌ FAIL: total_amount is null or zero: $TOTAL"
+            FIELDS_OK=false
+          else
+            echo "✅ total_amount: $TOTAL"
+          fi
+
+          # items must exist and have length > 0
+          ITEMS_COUNT=$(echo "$ORDER" | jq -r '.items | length')
+          if [ "$ITEMS_COUNT" = "0" ]; then
+            echo "❌ FAIL: order has 0 items"
+            FIELDS_OK=false
+          else
+            echo "✅ items count: $ITEMS_COUNT"
+          fi
+
+          # Check is_multi_producer consistency with items
+          IS_MULTI=$(echo "$ORDER" | jq -r '.is_multi_producer // false')
+
+          # Count unique producers in items
+          UNIQUE_PRODUCERS=$(echo "$ORDER" | jq -r '[.items[].producer.id // empty] | unique | length')
+
+          echo "is_multi_producer: $IS_MULTI"
+          echo "unique producers: $UNIQUE_PRODUCERS"
+
+          # If >=2 unique producers, is_multi_producer should be true
+          if [ "$UNIQUE_PRODUCERS" -ge 2 ] && [ "$IS_MULTI" = "false" ]; then
+            echo "⚠️ WARNING: Order has $UNIQUE_PRODUCERS producers but is_multi_producer=false"
+            echo "This may indicate a legacy order or incorrect flag setting"
+          fi
+
+          if [ "$FIELDS_OK" = "false" ]; then
+            echo ""
+            echo "❌ FAIL: Order data integrity check failed"
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ PASS: Order data integrity verified"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "================================"
+          echo "PROD Sanity Check Summary"
+          echo "================================"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Non-mutating checks completed"
+          echo ""
+          echo "For more details, run locally:"
+          echo "  curl -sS https://dixis.gr/api/v1/public/orders | jq '.data[0]'"
