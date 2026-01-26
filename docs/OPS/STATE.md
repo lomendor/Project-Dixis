@@ -1,9 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-26 (MULTI-PRODUCER-SHIPPING-AUDIT-01)
+**Last Updated**: 2026-01-26 (CHECKOUT-COPY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~550 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-26 — Pass CHECKOUT-COPY-01: Fix Misleading Shipping/VAT Note
+
+**Status**: ✅ COMPLETE (i18n + test)
+
+**Problem**: Checkout note claimed "VAT will be calculated next step" but VAT is not implemented.
+
+**Fix**:
+- Updated `frontend/messages/el.json` + `en.json`: removed VAT mention
+- Before: "Shipping and VAT will be calculated in the next step"
+- After: "Shipping: €3.50 per producer (free over €35)"
+- Added regression test: `checkout-copy-regression.spec.ts`
+
+**Docs**: `docs/AGENT/SUMMARY/Pass-CHECKOUT-COPY-01.md`
 
 ---
 
