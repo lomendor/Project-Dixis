@@ -14,11 +14,17 @@ class PaymentController extends Controller
 {
     /**
      * Initialize payment for an order.
+     *
+     * Authorization rules (Pass PAY-INIT-404-01):
+     * - Guest orders (user_id = null): Allow if order exists and not paid
+     * - Authenticated orders: Only owner can init payment
      */
     public function initPayment(Request $request, Order $order): JsonResponse
     {
-        // Ensure user can only initialize payment for their own orders
-        if ($order->user_id !== $request->user()->id) {
+        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
+        // Guest orders (user_id = null) can be paid by anyone with the order ID
+        // Authenticated orders require the owner to init payment
+        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
@@ -97,8 +103,8 @@ class PaymentController extends Controller
      */
     public function confirmPayment(Request $request, Order $order): JsonResponse
     {
-        // Ensure user can only confirm payment for their own orders
-        if ($order->user_id !== $request->user()->id) {
+        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
+        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
@@ -194,8 +200,8 @@ class PaymentController extends Controller
      */
     public function cancelPayment(Request $request, Order $order): JsonResponse
     {
-        // Ensure user can only cancel payment for their own orders
-        if ($order->user_id !== $request->user()->id) {
+        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
+        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
@@ -250,8 +256,8 @@ class PaymentController extends Controller
      */
     public function getPaymentStatus(Request $request, Order $order): JsonResponse
     {
-        // Ensure user can only check payment status for their own orders
-        if ($order->user_id !== $request->user()->id) {
+        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
+        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Order not found'], 404);
         }
 
