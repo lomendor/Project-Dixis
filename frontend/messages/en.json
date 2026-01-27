@@ -254,7 +254,13 @@
     "orderError": "Error creating order. Please try again.",
     "cardPayment": "Card Payment",
     "securePayment": "Complete your payment securely with Stripe.",
-    "cancelPayment": "Cancel and go back"
+    "cancelPayment": "Cancel and go back",
+    "shipping": "Shipping",
+    "shippingCalculating": "Calculating...",
+    "shippingEnterPostal": "Enter postal code",
+    "shippingFree": "Free",
+    "shippingZone": "Zone",
+    "total": "Total"
   },
   "orderConfirmation": {
     "loadError": "Error loading order",

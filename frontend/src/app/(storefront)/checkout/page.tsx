@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
@@ -10,6 +10,14 @@ import { useTranslations } from '@/contexts/LocaleContext'
 import { useToast } from '@/contexts/ToastContext'
 import StripeProvider from '@/components/payment/StripeProvider'
 import StripePaymentForm from '@/components/payment/StripePaymentForm'
+
+// Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state type
+interface ShippingQuote {
+  price_eur: number;
+  zone_name: string | null;
+  free_shipping: boolean;
+  source: string;
+}
 
 function CheckoutContent() {
   const router = useRouter()
@@ -31,6 +39,10 @@ function CheckoutContent() {
   // Pass PAYMENT-INIT-ORDER-ID-01: Store checkout session ID for thank-you redirect
   const [pendingThankYouId, setPendingThankYouId] = useState<number | null>(null)
   const [orderTotal, setOrderTotal] = useState<number>(0)
+  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state
+  const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
+  const [shippingLoading, setShippingLoading] = useState(false)
+  const [postalCode, setPostalCode] = useState('')
 
   // Guest checkout: email is required for order confirmation
   const isGuest = !isAuthenticated
@@ -42,8 +54,46 @@ function CheckoutContent() {
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
   // Calculate subtotal from cart items (for display only)
+  // Must be calculated before fetchShippingQuote since it's used in the callback
   const subtotalCents = cartTotalCents(cartItems)
   const subtotal = subtotalCents / 100
+
+  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Fetch shipping quote when postal code is valid (5 digits)
+  const fetchShippingQuote = useCallback(async (postal: string) => {
+    // Validate Greek postal code format
+    if (!postal || !/^\d{5}$/.test(postal)) {
+      setShippingQuote(null)
+      return
+    }
+
+    // Need cart items to calculate shipping
+    const itemCount = Object.keys(cartItems).length
+    if (itemCount === 0) {
+      setShippingQuote(null)
+      return
+    }
+
+    setShippingLoading(true)
+    try {
+      const quote = await apiClient.getZoneShippingQuote({
+        postal_code: postal,
+        method: 'HOME',
+        subtotal: subtotal,
+      })
+      setShippingQuote({
+        price_eur: quote.price_eur,
+        zone_name: quote.zone_name,
+        free_shipping: quote.free_shipping,
+        source: quote.source,
+      })
+    } catch (err) {
+      console.error('[Checkout] Shipping quote failed:', err)
+      // Fallback: don't show error, just hide shipping until order is placed
+      setShippingQuote(null)
+    } finally {
+      setShippingLoading(false)
+    }
+  }, [cartItems, subtotal])
 
   // Handle successful Stripe payment
   // Pass PAY-CARD-CONFIRM-GUARD-01: Only call backend confirm with valid Stripe result
@@ -322,14 +372,55 @@ function CheckoutContent() {
             ))}
           </div>
 
-          <div className="border-t pt-3">
-            <div className="flex justify-between font-medium">
+          <div className="border-t pt-3 space-y-2">
+            <div className="flex justify-between">
               <span>{t('checkoutPage.subtotal')}:</span>
               <span>{fmt.format(subtotal)}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              {t('checkoutPage.shippingNote')}
-            </p>
+
+            {/* Pass CHECKOUT-SHIPPING-DISPLAY-01: Show shipping cost */}
+            <div className="flex justify-between" data-testid="shipping-line">
+              <span>{t('checkoutPage.shipping')}:</span>
+              {shippingLoading ? (
+                <span className="text-gray-400 text-sm" data-testid="shipping-loading">
+                  {t('checkoutPage.shippingCalculating')}
+                </span>
+              ) : shippingQuote ? (
+                <span
+                  className={shippingQuote.free_shipping ? 'text-emerald-600 font-medium' : ''}
+                  data-testid="shipping-cost"
+                >
+                  {shippingQuote.free_shipping ? t('checkoutPage.shippingFree') : fmt.format(shippingQuote.price_eur)}
+                </span>
+              ) : (
+                <span className="text-gray-400 text-sm" data-testid="shipping-pending">
+                  {t('checkoutPage.shippingEnterPostal')}
+                </span>
+              )}
+            </div>
+
+            {/* Show zone info if available */}
+            {shippingQuote?.zone_name && (
+              <p className="text-xs text-gray-500" data-testid="shipping-zone">
+                {t('checkoutPage.shippingZone')}: {shippingQuote.zone_name}
+              </p>
+            )}
+
+            {/* Total with shipping */}
+            <div className="flex justify-between font-bold text-lg pt-2 border-t" data-testid="total-line">
+              <span>{t('checkoutPage.total')}:</span>
+              <span data-testid="checkout-total">
+                {shippingQuote
+                  ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur))
+                  : fmt.format(subtotal)}
+              </span>
+            </div>
+
+            {!shippingQuote && (
+              <p className="text-xs text-gray-500 mt-1">
+                {t('checkoutPage.shippingNote')}
+              </p>
+            )}
           </div>
         </div>
 
@@ -428,6 +519,17 @@ function CheckoutContent() {
                 pattern="[0-9]{5}"
                 autoComplete="postal-code"
                 placeholder="10671"
+                value={postalCode}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 5)
+                  setPostalCode(val)
+                  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Fetch quote on valid postal code
+                  if (val.length === 5) {
+                    fetchShippingQuote(val)
+                  } else {
+                    setShippingQuote(null)
+                  }
+                }}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-postal"
               />

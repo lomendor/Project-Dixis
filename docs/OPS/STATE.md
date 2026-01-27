@@ -1,9 +1,39 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-27 (Pass-SHIP-CALC-V2-PR1)
+**Last Updated**: 2026-01-28 (Pass-CHECKOUT-SHIPPING-DISPLAY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-28 — Pass-CHECKOUT-SHIPPING-DISPLAY-01: Show Shipping Cost in Checkout
+
+**Status**: 🟡 PR #2515 — IN REVIEW
+
+**Branch**: `fix/passCHECKOUT-SHIPPING-DISPLAY-01`
+
+**Problem**: PROD-ACCEPTANCE-01 audit (G5) found checkout page does NOT display shipping costs. Users see subtotal but NO shipping line. API `POST /api/v1/public/shipping/quote` works correctly but checkout UI never calls it.
+
+**Fix**:
+- Call shipping quote API when user enters valid 5-digit Greek postal code
+- Display shipping cost line with zone info (e.g., "Ζώνη: Αττική")
+- Show "Δωρεάν" for free shipping threshold
+- Update total dynamically to include shipping
+
+**Changes** (3 files, ~370 lines):
+- `frontend/src/app/(storefront)/checkout/page.tsx`: Add `fetchShippingQuote` callback, state management, UI display
+- `frontend/tests/e2e/checkout-shipping-display.spec.ts`: 7 E2E scenarios with API mocking
+- `frontend/messages/{el,en}.json`: i18n keys for shipping display
+
+**DoD**:
+- [x] Build passes (Next.js 15.5.9)
+- [x] i18n keys added (EL/EN)
+- [x] E2E tests created (7 scenarios)
+- [x] No hardcoded Greek strings in code
+- [ ] CI checks pass
+
+**Evidence**: PR https://github.com/lomendor/Project-Dixis/pull/2515
 
 ---
 
