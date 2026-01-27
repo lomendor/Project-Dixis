@@ -254,7 +254,13 @@
     "orderError": "Σφάλμα κατά τη δημιουργία παραγγελίας. Παρακαλώ δοκιμάστε ξανά.",
     "cardPayment": "Πληρωμή με Κάρτα",
     "securePayment": "Ολοκληρώστε την πληρωμή σας με ασφάλεια μέσω Stripe.",
-    "cancelPayment": "Ακύρωση και επιστροφή"
+    "cancelPayment": "Ακύρωση και επιστροφή",
+    "shipping": "Μεταφορικά",
+    "shippingCalculating": "Υπολογισμός...",
+    "shippingEnterPostal": "Εισάγετε Τ.Κ.",
+    "shippingFree": "Δωρεάν",
+    "shippingZone": "Ζώνη",
+    "total": "Σύνολο"
   },
   "orderConfirmation": {
     "loadError": "Σφάλμα κατά τη φόρτωση της παραγγελίας",

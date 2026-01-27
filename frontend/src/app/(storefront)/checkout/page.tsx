@@ -380,21 +380,21 @@ function CheckoutContent() {
 
             {/* Pass CHECKOUT-SHIPPING-DISPLAY-01: Show shipping cost */}
             <div className="flex justify-between" data-testid="shipping-line">
-              <span>Μεταφορικά:</span>
+              <span>{t('checkoutPage.shipping')}:</span>
               {shippingLoading ? (
                 <span className="text-gray-400 text-sm" data-testid="shipping-loading">
-                  Υπολογισμός...
+                  {t('checkoutPage.shippingCalculating')}
                 </span>
               ) : shippingQuote ? (
                 <span
                   className={shippingQuote.free_shipping ? 'text-emerald-600 font-medium' : ''}
                   data-testid="shipping-cost"
                 >
-                  {shippingQuote.free_shipping ? 'Δωρεάν' : fmt.format(shippingQuote.price_eur)}
+                  {shippingQuote.free_shipping ? t('checkoutPage.shippingFree') : fmt.format(shippingQuote.price_eur)}
                 </span>
               ) : (
                 <span className="text-gray-400 text-sm" data-testid="shipping-pending">
-                  Εισάγετε Τ.Κ.
+                  {t('checkoutPage.shippingEnterPostal')}
                 </span>
               )}
             </div>
@@ -402,13 +402,13 @@ function CheckoutContent() {
             {/* Show zone info if available */}
             {shippingQuote?.zone_name && (
               <p className="text-xs text-gray-500" data-testid="shipping-zone">
-                Ζώνη: {shippingQuote.zone_name}
+                {t('checkoutPage.shippingZone')}: {shippingQuote.zone_name}
               </p>
             )}
 
             {/* Total with shipping */}
             <div className="flex justify-between font-bold text-lg pt-2 border-t" data-testid="total-line">
-              <span>Σύνολο:</span>
+              <span>{t('checkoutPage.total')}:</span>
               <span data-testid="checkout-total">
                 {shippingQuote
                   ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur))
