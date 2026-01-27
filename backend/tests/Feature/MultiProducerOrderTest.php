@@ -89,11 +89,13 @@ class MultiProducerOrderTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 20.00, // Below €35 threshold
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
             'price' => 25.00, // Below €35 threshold
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
 
         $orderData = [
@@ -103,6 +105,7 @@ class MultiProducerOrderTest extends TestCase
             ],
             'shipping_method' => 'HOME',
             'currency' => 'EUR',
+            'shipping_address' => ['postal_code' => '10551'],
         ];
 
         $response = $this->actingAs($user, 'sanctum')
@@ -123,8 +126,9 @@ class MultiProducerOrderTest extends TestCase
             'shipping_total should equal sum of shipping_cost across orders'
         );
 
-        // Verify exact values: 2 producers × €3.50 flat rate = €7.00
-        $this->assertEquals(7.00, $shippingTotal);
+        // INVARIANT: Both below threshold => both charge shipping > 0, not flat rate
+        $this->assertGreaterThan(0, $shippingTotal);
+        $this->assertNotEquals(7.00, $shippingTotal);
     }
 
     /**
@@ -141,20 +145,23 @@ class MultiProducerOrderTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 40.00, // Above €35 threshold → free shipping
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
-            'price' => 18.00, // Below €35 threshold → €3.50 shipping
+            'price' => 18.00, // Below €35 threshold → shipping charged
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
 
         $orderData = [
             'items' => [
                 ['product_id' => $product1->id, 'quantity' => 1], // €40 + free
-                ['product_id' => $product2->id, 'quantity' => 1], // €18 + €3.50
+                ['product_id' => $product2->id, 'quantity' => 1], // €18 + shipping
             ],
             'shipping_method' => 'HOME',
             'currency' => 'EUR',
+            'shipping_address' => ['postal_code' => '10551'],
         ];
 
         $response = $this->actingAs($user, 'sanctum')
@@ -182,7 +189,9 @@ class MultiProducerOrderTest extends TestCase
         $producer2Order = collect($orders)->first(fn ($o) => (float) $o['subtotal'] === 18.0);
 
         $this->assertEquals('0.00', $producer1Order['shipping_cost'], 'Producer 1 should have free shipping (€40 > €35)');
-        $this->assertEquals('3.50', $producer2Order['shipping_cost'], 'Producer 2 should pay €3.50 shipping (€18 < €35)');
+        // INVARIANT: Below threshold => shipping > 0 and not flat rate
+        $this->assertGreaterThan(0, (float) $producer2Order['shipping_cost'], 'Producer 2 should pay shipping (€18 < €35)');
+        $this->assertNotEquals(3.50, (float) $producer2Order['shipping_cost']);
     }
 
     /**

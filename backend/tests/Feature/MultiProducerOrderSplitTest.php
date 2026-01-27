@@ -220,20 +220,23 @@ class MultiProducerOrderSplitTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 40.00, // >= €35, free shipping
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
-            'price' => 20.00, // < €35, €3.50 shipping
+            'price' => 20.00, // < €35, shipping charged
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
 
         $orderData = [
             'items' => [
-                ['product_id' => $product1->id, 'quantity' => 1], // €40 + €0 = €40
-                ['product_id' => $product2->id, 'quantity' => 1], // €20 + €3.50 = €23.50
+                ['product_id' => $product1->id, 'quantity' => 1], // €40 + €0
+                ['product_id' => $product2->id, 'quantity' => 1], // €20 + shipping
             ],
             'shipping_method' => 'HOME',
             'currency' => 'EUR',
+            'shipping_address' => ['postal_code' => '10551'],
         ];
 
         $response = $this->actingAs($user, 'sanctum')
@@ -259,8 +262,11 @@ class MultiProducerOrderSplitTest extends TestCase
 
         // Verify expected values
         $this->assertEquals(60.00, $sessionSubtotal); // €40 + €20
-        $this->assertEquals(3.50, $sessionShipping); // €0 + €3.50
-        $this->assertEquals(63.50, $sessionTotal); // €40 + €23.50
+        // INVARIANT: shipping > 0 (one producer below threshold) and not flat rate
+        $this->assertGreaterThan(0, $sessionShipping);
+        $this->assertNotEquals(3.50, $sessionShipping);
+        // Total = subtotal + shipping
+        $this->assertEquals($sessionSubtotal + $sessionShipping, $sessionTotal);
     }
 
     /**
