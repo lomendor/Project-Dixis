@@ -1,9 +1,47 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-27 (Pass-PAY-GUEST-CARD-GATE-01)
+**Last Updated**: 2026-01-27 (Pass-PAY-CARD-CONFIRM-GUARD-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~700 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-27 — Pass-PAY-CARD-CONFIRM-GUARD-01: Card Payment Confirmation Guards
+
+**Status**: ✅ FIXED — MERGED (PR #2504) — FRONTEND ONLY
+
+**Symptom**: Users reported runtime error "Cannot read properties of null (reading 'o')" during card payment, plus backend returning 400 on confirm endpoint.
+
+**Root Cause**:
+StripePaymentForm had weak guards:
+- Combined null check for `stripe || elements`
+- Generic catch-all for non-succeeded status
+- No validation of paymentIntentId before backend call
+
+**Fix** (PR #2504, commit `8f368c08`) — Frontend Only:
+
+1. **StripePaymentForm**: Separate null checks, handle all paymentIntent statuses explicitly
+2. **Checkout page**: Validate paymentIntentId format (must start with `pi_`)
+3. **Logging**: Added console logs for debugging production issues
+
+**Evidence**:
+
+| Check | Result |
+|-------|--------|
+| TypeScript compile | PASS |
+| quality-gates | PASS |
+| build-and-test | PASS |
+| E2E (PostgreSQL) | PASS |
+
+**Files Changed**:
+- `frontend/src/components/payment/StripePaymentForm.tsx` (+57/-11 lines)
+- `frontend/src/app/(storefront)/checkout/page.tsx` (+15/-3 lines)
+- `frontend/tests/e2e/card-payment-confirm-guards.spec.ts` (NEW: 325 lines)
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-PAY-CARD-CONFIRM-GUARD-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PAY-CARD-CONFIRM-GUARD-01.md`
 
 ---
 
