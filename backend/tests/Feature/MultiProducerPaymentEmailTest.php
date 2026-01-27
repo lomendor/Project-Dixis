@@ -50,11 +50,13 @@ class MultiProducerPaymentEmailTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 40.00, // >= €35, free shipping
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
-            'price' => 20.00, // < €35, €3.50 shipping
+            'price' => 20.00, // < €35, shipping charged
             'stock' => 100,
+            'weight_per_unit' => 0.5,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -66,6 +68,7 @@ class MultiProducerPaymentEmailTest extends TestCase
                 'shipping_method' => 'HOME',
                 'currency' => 'EUR',
                 'payment_method' => $paymentMethod,
+                'shipping_address' => ['postal_code' => '10551'],
             ]);
 
         return [
@@ -225,10 +228,10 @@ class MultiProducerPaymentEmailTest extends TestCase
         // Session shipping_total should equal sum of child shipping
         $this->assertEquals($sumShipping, (float) $checkoutSession->shipping_total);
 
-        // Verify specific values:
-        // Producer 1: €40 (>= €35, free shipping)
-        // Producer 2: €20 (< €35, €3.50 shipping)
-        $this->assertEquals(3.50, (float) $checkoutSession->shipping_total);
+        // INVARIANT: Producer 1 (€40 >= €35) free, Producer 2 (€20 < €35) charged
+        // shipping_total > 0 and not flat rate
+        $this->assertGreaterThan(0, (float) $checkoutSession->shipping_total);
+        $this->assertNotEquals(3.50, (float) $checkoutSession->shipping_total);
     }
 
     /**

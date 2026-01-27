@@ -11,15 +11,22 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Pass MP-ORDERS-SPLIT-01: Checkout Service
+ * Pass SHIP-CALC-V2-01: Wire ShippingService for weight/zone-based calculation
  *
  * Handles multi-producer order splitting. Creates a CheckoutSession parent
  * with N child Orders (one per producer) when cart has items from multiple producers.
  */
 class CheckoutService
 {
-    // V1 Shipping calculation constants
+    private ShippingService $shippingService;
+
+    // V1 Shipping calculation constants - UNCHANGED POLICY
     private const FREE_SHIPPING_THRESHOLD = 35.00; // €35 per producer
-    private const FLAT_SHIPPING_RATE = 3.50; // €3.50 per producer shipment
+
+    public function __construct(ShippingService $shippingService)
+    {
+        $this->shippingService = $shippingService;
+    }
 
     /**
      * Process checkout and create orders.
@@ -88,8 +95,9 @@ class CheckoutService
             $producer = Producer::find($producerId);
             $producerName = $producer?->name ?? 'Unknown Producer';
 
-            // Calculate shipping for this producer
-            $shippingCost = $this->calculateProducerShipping($producerSubtotal, $isPickup);
+            // Calculate shipping for this producer using ShippingService
+            $itemsArray = collect($items)->toArray();
+            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
             $freeShippingApplied = $shippingCost === 0.0;
 
             $orderTotal = $producerSubtotal + $shippingCost;
@@ -192,7 +200,9 @@ class CheckoutService
             $producer = Producer::find($producerId);
             $producerName = $producer?->name ?? 'Unknown Producer';
 
-            $shippingCost = $this->calculateProducerShipping($producerSubtotal, $isPickup);
+            // Calculate shipping using ShippingService
+            $itemsArray = collect($items)->toArray();
+            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
             $freeShippingApplied = $shippingCost === 0.0;
 
             $totalShippingCost += $shippingCost;
@@ -263,18 +273,40 @@ class CheckoutService
     }
 
     /**
-     * Calculate shipping cost for a producer based on subtotal.
+     * Calculate shipping cost for a producer using ShippingService.
+     *
+     * Pass SHIP-CALC-V2-01: Use weight/zone-based calculation.
      */
-    private function calculateProducerShipping(float $subtotal, bool $isPickup): float
+    private function calculateProducerShipping(array $items, float $subtotal, array $options, bool $isPickup): float
     {
         if ($isPickup) {
             return 0.0;
         }
 
+        // Free shipping if above threshold
         if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
             return 0.0;
         }
 
-        return self::FLAT_SHIPPING_RATE;
+        // Calculate total weight from items (default 0.5kg per item)
+        $totalWeightKg = 0.0;
+        foreach ($items as $item) {
+            $product = $item['product'];
+            $qty = $item['quantity'] ?? 1;
+            $weightPerUnit = $product->weight_per_unit ?? 0.5; // Default 0.5kg
+            $totalWeightKg += $weightPerUnit * $qty;
+        }
+
+        // Get postal code from shipping address
+        $shippingAddress = $options['shipping_address'] ?? [];
+        $postalCode = $shippingAddress['postal_code'] ?? $shippingAddress['postalCode'] ?? '10551';
+
+        // Get zone from postal code
+        $zoneCode = $this->shippingService->getZoneByPostalCode($postalCode);
+
+        // Calculate shipping using ShippingService
+        $result = $this->shippingService->calculateShippingCost($totalWeightKg, $zoneCode);
+
+        return $result['cost_eur'];
     }
 }
