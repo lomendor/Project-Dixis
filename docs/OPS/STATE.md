@@ -1,9 +1,54 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-27 (Pass-PAY-CARD-CONFIRM-GUARD-01)
+**Last Updated**: 2026-01-27 (Pass-SHIP-CALC-V2-PR1)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~700 lines (target ≤250). ⚠️
+> **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-27 — Pass-SHIP-CALC-V2-PR1: Wire ShippingService into Checkout
+
+**Status**: ✅ MERGED — PR #2507 — BACKEND ONLY
+
+**Commit**: `aadb5627`
+
+**Problem**: Checkout used hardcoded €3.50 flat shipping rate. ShippingService exists with weight/zone-based calculation but wasn't wired into checkout flow.
+
+**Fix** (PR #2507):
+- `CheckoutService.php`: Calls `ShippingService.calculateShippingCost()` instead of hardcoded €3.50
+- 4 test files updated with deterministic weights (0.5kg) and postal codes (10551)
+- All assertions use invariants (`assertGreaterThan(0, ...)`, `assertNotEquals(3.50, ...)`) not exact amounts
+
+**Constraints Honored**:
+- ✅ NO migrations
+- ✅ NO model changes
+- ✅ NO new ShippingService methods
+- ✅ FREE_SHIPPING_THRESHOLD = €35 unchanged
+
+**Evidence**:
+
+| Check | Result |
+|-------|--------|
+| CheckoutServiceShippingTest | 7 tests, 26 assertions PASS |
+| MultiProducerOrderSplitTest | 7 tests, 44 assertions PASS |
+| MultiProducerOrderTest | 5 tests, 40 assertions PASS |
+| MultiProducerPaymentEmailTest | 8 tests, 33 assertions PASS |
+| **Shipping-related failures** | **ZERO** |
+
+**Pre-existing Failures (NOT this PR)**:
+- Bucket A (10 tests): Missing `features` table
+- Bucket B (3 tests): Orders API PII exposure
+- Bucket C (1 test): FrontendSmokeTest
+
+**Files Changed** (5 files, +222/-81):
+- `backend/app/Services/CheckoutService.php` (already wired in previous session)
+- `backend/tests/Unit/CheckoutServiceShippingTest.php` (7 tests, guardrail)
+- `backend/tests/Feature/MultiProducerOrderSplitTest.php` (+15 lines)
+- `backend/tests/Feature/MultiProducerOrderTest.php` (+20 lines)
+- `backend/tests/Feature/MultiProducerPaymentEmailTest.php` (+15 lines)
+
+**PR**: https://github.com/lomendor/Project-Dixis/pull/2507
 
 ---
 
