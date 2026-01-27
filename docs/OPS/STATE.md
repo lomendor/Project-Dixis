@@ -1,9 +1,46 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-27 (Pass-PAY-INIT-404-01)
+**Last Updated**: 2026-01-27 (Pass-PAY-GUEST-CARD-GATE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~650 lines (target ≤250). ⚠️
+> **Current size**: ~700 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-27 — Pass-PAY-GUEST-CARD-GATE-01: Gate Card Payment for Guests
+
+**Status**: ✅ FIXED — MERGED (PR #2502) — FRONTEND ONLY
+
+**Symptom**: Guest users could theoretically attempt card payment, but `POST /api/v1/payments/orders/{id}/init` requires `auth:sanctum` → 401 Unauthenticated.
+
+**Root Cause**:
+- Order creation: `POST /api/v1/public/orders` uses `auth.optional` (allows guests)
+- Payment init: `POST /api/v1/payments/orders/{id}/init` requires `auth:sanctum`
+- Mismatch: guests can create orders but not init card payments
+
+**Fix** (PR #2502, commit `c3346ea1`) — Frontend Only:
+1. **PaymentMethodSelector**: Already hides card for guests (verified working)
+2. **Visible notice**: Added amber box with login link for guests
+3. **Submit hard-guard**: Block if `isGuest && paymentMethod === 'card'`
+
+**Evidence (Production E2E)**:
+
+| Test | Result |
+|------|--------|
+| GATE1: Guest card option visibility | NOT visible ✅ |
+| GATE2: Guest COD checkout | 201 + no payment init call ✅ |
+| Real-auth: Payment init | 200 + client_secret ✅ |
+| All related tests | 6/6 PASSED ✅ |
+
+**Files Changed**:
+- `frontend/src/app/(storefront)/checkout/page.tsx` (+7 lines)
+- `frontend/src/components/checkout/PaymentMethodSelector.tsx` (+4/-5 lines)
+- `frontend/tests/e2e/card-payment-real-auth.spec.ts` (+7/-4 lines)
+- `frontend/tests/e2e/guest-checkout-card-gate.spec.ts` (NEW: 152 lines)
+
+**Docs**:
+- Tasks: `docs/AGENT/TASKS/Pass-PAY-GUEST-CARD-GATE-01.md`
+- Summary: `docs/AGENT/SUMMARY/Pass-PAY-GUEST-CARD-GATE-01.md`
 
 ---
 
