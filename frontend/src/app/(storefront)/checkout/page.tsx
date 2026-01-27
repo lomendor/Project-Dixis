@@ -46,8 +46,26 @@ function CheckoutContent() {
   const subtotal = subtotalCents / 100
 
   // Handle successful Stripe payment
+  // Pass PAY-CARD-CONFIRM-GUARD-01: Only call backend confirm with valid Stripe result
   async function handleStripePaymentSuccess(paymentIntentId: string) {
-    if (!pendingOrderId) return
+    // Guard 1: Must have pending order ID
+    if (!pendingOrderId) {
+      console.error('[Checkout] handleStripePaymentSuccess called without pendingOrderId');
+      setError('Σφάλμα: Δεν βρέθηκε η παραγγελία. Παρακαλώ δοκιμάστε ξανά.');
+      return;
+    }
+
+    // Guard 2: Must have valid paymentIntentId from Stripe
+    if (!paymentIntentId || typeof paymentIntentId !== 'string' || !paymentIntentId.startsWith('pi_')) {
+      console.error('[Checkout] Invalid paymentIntentId:', paymentIntentId);
+      setError('Σφάλμα: Μη έγκυρο αναγνωριστικό πληρωμής. Παρακαλώ δοκιμάστε ξανά.');
+      return;
+    }
+
+    console.log('[Checkout] Confirming payment with backend:', {
+      orderId: pendingOrderId,
+      paymentIntentId: `${paymentIntentId.substring(0, 10)}...`,
+    });
 
     try {
       // Confirm payment with backend
@@ -59,8 +77,10 @@ function CheckoutContent() {
       clear()
       router.push(`/thank-you?id=${pendingThankYouId ?? pendingOrderId}`)
     } catch (err) {
-      console.error('Payment confirmation failed:', err)
-      setError(t('checkoutPage.cardPaymentError'))
+      console.error('[Checkout] Payment confirmation failed:', err)
+      // Pass PAY-CARD-CONFIRM-GUARD-01: Show specific error from backend if available
+      const errorMessage = err instanceof Error ? err.message : t('checkoutPage.cardPaymentError');
+      setError(errorMessage);
     }
   }
 

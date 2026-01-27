@@ -25,15 +25,26 @@ export default function StripePaymentForm({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements) {
-      onPaymentError('Stripe δεν έχει φορτώσει ακόμα');
+    // Pass PAY-CARD-CONFIRM-GUARD-01: Strict null guards before Stripe call
+    if (!stripe) {
+      console.error('[StripePaymentForm] stripe is null - not loaded');
+      onPaymentError('Stripe δεν έχει φορτώσει ακόμα. Παρακαλώ περιμένετε.');
+      return;
+    }
+
+    if (!elements) {
+      console.error('[StripePaymentForm] elements is null - not initialized');
+      onPaymentError('Η φόρμα πληρωμής δεν έχει φορτώσει. Παρακαλώ ανανεώστε τη σελίδα.');
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
+      // Pass PAY-CARD-CONFIRM-GUARD-01: Log before Stripe call for debugging
+      console.log('[StripePaymentForm] Calling stripe.confirmPayment...');
+
+      const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/orders/confirmation`,
@@ -41,21 +52,64 @@ export default function StripePaymentForm({
         redirect: 'if_required',
       });
 
+      // Pass PAY-CARD-CONFIRM-GUARD-01: Destructure after call with logging
+      const { error, paymentIntent } = result;
+      console.log('[StripePaymentForm] confirmPayment result:', {
+        hasError: !!error,
+        errorType: error?.type,
+        errorCode: error?.code,
+        hasPaymentIntent: !!paymentIntent,
+        paymentIntentStatus: paymentIntent?.status,
+        paymentIntentId: paymentIntent?.id ? `${paymentIntent.id.substring(0, 10)}...` : null,
+      });
+
+      // Case 1: Stripe returned an error
       if (error) {
-        console.error('Payment error:', error);
+        console.error('[StripePaymentForm] Payment error:', error.type, error.code, error.message);
         const errorMessage = error.message || 'Σφάλμα κατά την επεξεργασία πληρωμής';
         onPaymentError(errorMessage);
         showToast('error', errorMessage);
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Don't show success toast here - let parent confirm with backend first
-        // Parent's onPaymentSuccess handler will show success after backend confirmation
-        onPaymentSuccess(paymentIntent.id);
-      } else {
-        onPaymentError('Η πληρωμή απαιτεί επιπλέον ενέργειες');
+        return;
       }
+
+      // Case 2: No error but paymentIntent is null/undefined
+      // This can happen with certain Stripe configurations - treat as error
+      if (!paymentIntent) {
+        console.error('[StripePaymentForm] No error but paymentIntent is null');
+        onPaymentError('Η πληρωμή δεν ολοκληρώθηκε. Παρακαλώ δοκιμάστε ξανά.');
+        return;
+      }
+
+      // Case 3: PaymentIntent exists but has no ID (malformed)
+      if (!paymentIntent.id) {
+        console.error('[StripePaymentForm] paymentIntent has no id:', paymentIntent);
+        onPaymentError('Η πληρωμή δεν ολοκληρώθηκε σωστά. Παρακαλώ δοκιμάστε ξανά.');
+        return;
+      }
+
+      // Case 4: PaymentIntent succeeded - call backend to confirm
+      if (paymentIntent.status === 'succeeded') {
+        console.log('[StripePaymentForm] Payment succeeded, calling onPaymentSuccess');
+        onPaymentSuccess(paymentIntent.id);
+        return;
+      }
+
+      // Case 5: PaymentIntent has a status that requires action (3D Secure, etc.)
+      if (paymentIntent.status === 'requires_action') {
+        console.warn('[StripePaymentForm] requires_action - 3D Secure or additional verification needed');
+        onPaymentError('Η πληρωμή απαιτεί επιπλέον επαλήθευση (3D Secure). Παρακαλώ δοκιμάστε ξανά.');
+        return;
+      }
+
+      // Case 6: Other statuses (processing, requires_payment_method, etc.)
+      console.warn('[StripePaymentForm] Unexpected paymentIntent status:', paymentIntent.status);
+      onPaymentError(`Η πληρωμή είναι σε κατάσταση: ${paymentIntent.status}. Παρακαλώ δοκιμάστε ξανά.`);
+
     } catch (err) {
-      console.error('Payment processing error:', err);
-      onPaymentError('Απροσδόκητο σφάλμα κατά την επεξεργασία πληρωμής');
+      // Pass PAY-CARD-CONFIRM-GUARD-01: Better error logging for unexpected errors
+      console.error('[StripePaymentForm] Unexpected error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Απροσδόκητο σφάλμα';
+      onPaymentError(`Απροσδόκητο σφάλμα κατά την επεξεργασία πληρωμής: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
