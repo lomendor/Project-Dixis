@@ -93,12 +93,15 @@ export default function PaymentMethodSelector({
         </label>
       )}
 
-      {/* Message for guests when card flag is enabled but user not logged in */}
+      {/* Pass PAY-GUEST-CARD-GATE-01: Message for guests when card flag is enabled but user not logged in */}
       {/* Only render after auth loading completes to avoid hydration mismatch */}
-      {!authLoading && !isAuthenticated && cardEnabled === false && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
-        <p className="text-sm text-gray-500 mt-2">
-          💡 <a href="/login?redirect=/checkout" className="text-emerald-600 hover:underline">Συνδεθείτε</a> για να πληρώσετε με κάρτα
-        </p>
+      {!authLoading && !isAuthenticated && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
+        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="guest-card-notice">
+          <p className="text-sm text-amber-800">
+            Για πληρωμή με κάρτα απαιτείται σύνδεση.{' '}
+            <a href="/login?redirect=/checkout" className="font-medium text-emerald-600 hover:underline">Συνδεθείτε</a>
+          </p>
+        </div>
       )}
     </fieldset>
   )

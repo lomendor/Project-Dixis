@@ -80,11 +80,14 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
     // Wait for redirect to home (successful login)
     await page.waitForURL('/', { timeout: 20000 });
 
-    // Verify authenticated state - look for user menu or logout button
-    const authIndicator = page.locator('[data-testid="user-menu"], a[href="/account"], button:has-text("Logout"), button:has-text("Αποσύνδεση"), button:has-text("Sign out")');
-    await expect(authIndicator.first()).toBeVisible({ timeout: 10000 });
+    // Pass PAY-GUEST-CARD-GATE-01: Use stable proof of auth - verify auth_token exists in localStorage
+    // UI elements may vary, but auth_token is set consistently on successful login
+    const hasAuthToken = await page.evaluate(() => {
+      return !!localStorage.getItem('auth_token');
+    });
+    expect(hasAuthToken, 'auth_token should be set in localStorage after login').toBe(true);
 
-    console.log('UI login successful');
+    console.log('UI login successful - auth_token verified in localStorage');
   });
 
   test('add product to cart and reach checkout', async ({ page }) => {
