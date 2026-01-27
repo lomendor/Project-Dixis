@@ -68,8 +68,8 @@ class OrderResource extends JsonResource
             'payment_reference' => $this->payment_reference, // Pass 51: external session/transaction ID
             'shipping_method' => $shippingMethodCode,
             'shipping_method_label' => $shippingMethodLabels[$shippingMethodCode] ?? $shippingMethodCode,
-            // Shipping address (structured object, null if not set)
-            'shipping_address' => $this->shipping_address,
+            // PII REMOVED: shipping_address is not exposed in API responses (GDPR/security)
+            // Internal use only via Order model; emails use OrderEmailService which reads model directly
             // Delivery notes
             'notes' => $this->notes,
             // Financial fields - use both new and legacy field names for frontend compatibility
