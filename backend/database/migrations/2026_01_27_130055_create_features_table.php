@@ -11,6 +11,11 @@ return new class extends PennantMigration
      */
     public function up(): void
     {
+        // Skip if table already exists (idempotent)
+        if (Schema::hasTable('features')) {
+            return;
+        }
+
         Schema::create('features', function (Blueprint $table) {
             $table->id();
             $table->string('name');

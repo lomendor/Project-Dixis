@@ -16,6 +16,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if columns already exist (idempotent)
+        if (Schema::hasColumn('orders', 'total_cents')) {
+            return;
+        }
+
         Schema::table('orders', function (Blueprint $table) {
             $table->bigInteger('total_cents')->nullable()->after('total_amount');
             $table->string('channel', 20)->nullable()->after('total_cents');
