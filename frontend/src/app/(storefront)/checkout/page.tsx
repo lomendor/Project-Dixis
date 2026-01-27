@@ -82,6 +82,13 @@ function CheckoutContent() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
+    // Pass PAY-GUEST-CARD-GATE-01: Hard-guard against guest + card payment
+    // Payment init endpoint requires auth:sanctum - guests cannot use card
+    if (isGuest && paymentMethod === 'card') {
+      setError('Για πληρωμή με κάρτα απαιτείται σύνδεση.')
+      return
+    }
+
     // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Multi-producer checkout now enabled.
     // Backend CheckoutService handles order splitting with per-producer shipping.
 
