@@ -34,6 +34,9 @@ class Order extends Model
         'shipping_address',
         'billing_address',
         'notes',
+        // Commission preview fields
+        'total_cents',
+        'channel',
     ];
 
     protected $casts = [
