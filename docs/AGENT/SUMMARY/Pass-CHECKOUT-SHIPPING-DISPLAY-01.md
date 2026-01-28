@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-28
 **PR**: #2515
-**Result**: IN REVIEW
+**Result**: ✅ MERGED & DEPLOYED
 
 ## What
 
@@ -47,6 +47,23 @@ Critical UX gap: users saw subtotal but no shipping line.
 | Wrong quote | Uses same API as order creation |
 | i18n missing | Added all keys in both languages |
 
+## Production Evidence
+
+**Merged**: 2026-01-27T23:37:31Z
+**Deployed**: Deploy Frontend (VPS) workflow SUCCESS
+
+### Verified on https://dixis.gr/checkout:
+
+| State | Shipping Display | Total |
+|-------|------------------|-------|
+| Before postal code | "Εισάγετε Τ.Κ." (gray) | 64,48 € |
+| After postal code 10671 | "Δωρεάν" (emerald green) | 64,48 € |
+
+Screenshots captured via browser automation confirming:
+- Shipping line appears in order summary
+- Free shipping threshold triggers correctly (subtotal > threshold)
+- i18n keys render properly in Greek
+
 ## Follow-up
 
-None required. Feature is self-contained.
+None required. Feature is self-contained and verified on production.
