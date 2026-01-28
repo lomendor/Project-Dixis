@@ -9,9 +9,9 @@
 
 ## 2026-01-28 — Pass-PRODUCER-THRESHOLD-POSTALCODE-01: Per-Producer Free Shipping Threshold
 
-**Status**: ✅ MERGED — PR #2527 (commit pending)
+**Status**: 🟡 OPEN — PR #2527
 
-**Branch**: `fix/passORDERS-PAYMENT-STATUS-CHECK-01`
+**Branch**: `feat/passPRODUCER-THRESHOLD-POSTALCODE-01`
 
 **Objective**: Per-producer free shipping threshold + checkout postal code single source of truth.
 

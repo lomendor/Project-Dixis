@@ -2,7 +2,8 @@
 
 **Pass ID**: PRODUCER-THRESHOLD-POSTALCODE-01
 **PR**: #2527
-**Branch**: `fix/passORDERS-PAYMENT-STATUS-CHECK-01`
+**Branch**: `feat/passPRODUCER-THRESHOLD-POSTALCODE-01`
+**Status**: 🟡 OPEN
 
 ## Objective
 
