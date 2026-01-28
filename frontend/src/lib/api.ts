@@ -654,6 +654,7 @@ class ApiClient {
 
   // Direct order creation via Laravel API (Pass 44 - Single Source of Truth)
   // Pass 48: Added shipping_cost parameter
+  // Pass ORDER-SHIPPING-SPLIT-01: Added quoted_shipping for mismatch detection
   async createOrder(data: {
     items: { product_id: number; quantity: number }[];
     currency: 'EUR' | 'USD';
@@ -662,6 +663,8 @@ class ApiClient {
     shipping_cost?: number; // Pass 48: Shipping cost in EUR
     payment_method?: 'COD' | 'CARD' | 'BANK_TRANSFER';
     notes?: string;
+    quoted_shipping?: number; // Pass ORDER-SHIPPING-SPLIT-01: Quoted shipping for mismatch
+    quoted_at?: string; // Pass ORDER-SHIPPING-SPLIT-01: Quote timestamp
   }): Promise<Order> {
     const response = await this.request<{ data: Order }>('public/orders', {
       method: 'POST',
@@ -802,6 +805,35 @@ class ApiClient {
     source: 'zone' | 'fallback' | 'threshold' | 'pickup';
   }> {
     return this.request('public/shipping/quote', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Pass ORDER-SHIPPING-SPLIT-01: Get per-producer shipping breakdown for cart
+  async getCartShippingQuote(data: {
+    postal_code: string;
+    method: 'HOME' | 'COURIER' | 'PICKUP';
+    items: { product_id: number; quantity: number }[];
+  }): Promise<{
+    producers: {
+      producer_id: number;
+      producer_name: string;
+      subtotal: number;
+      shipping_cost: number;
+      is_free: boolean;
+      free_reason: 'threshold' | 'pickup' | null;
+      threshold?: number;
+      zone: string | null;
+      weight_grams: number;
+    }[];
+    total_shipping: number;
+    quoted_at: string;
+    currency: string;
+    zone_name: string | null;
+    method: string;
+  }> {
+    return this.request('public/shipping/quote-cart', {
       method: 'POST',
       body: JSON.stringify(data),
     });

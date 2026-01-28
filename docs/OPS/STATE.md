@@ -1,9 +1,56 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-28 (Pass-CI-HYGIENE-REPAIR-02)
+**Last Updated**: 2026-01-28 (Pass-ORDER-SHIPPING-SPLIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-28 — Pass-ORDER-SHIPPING-SPLIT-01: Per-Producer Shipping Breakdown
+
+**Status**: 🔄 IN PROGRESS
+
+**Branch**: `feat/passORDER-SHIPPING-SPLIT-01`
+
+**Objective**: Implement per-producer shipping breakdown in checkout with quote-lock verification.
+
+**Scope**:
+- Per-producer shipping quote API endpoint
+- Checkout UI with producer-level shipping breakdown
+- HARD_BLOCK modal when quote ≠ lock on order placement
+- Lock fields on OrderShippingLine (zone, weight_grams, quoted_at, locked_at)
+
+**Policy** (UNCHANGED):
+- Free shipping threshold: €35 per producer
+- Confirm mechanism: HARD_BLOCK modal (user must accept new amount)
+- Storage: PRODUCER_SHIPMENTS (one record per producer)
+
+**Changes**:
+
+| File | Change |
+|------|--------|
+| `backend/database/migrations/2026_01_28_100000_add_lock_fields_to_order_shipping_lines_table.php` | Add zone, weight_grams, quoted_at, locked_at |
+| `backend/app/Models/OrderShippingLine.php` | Add fillable fields and casts |
+| `backend/app/Http/Controllers/Api/V1/ShippingQuoteController.php` | Add quoteCart() for per-producer quotes |
+| `backend/routes/api.php` | Add quote-cart route |
+| `backend/app/Services/CheckoutService.php` | Add mismatch detection, populate lock fields |
+| `backend/app/Exceptions/ShippingChangedException.php` | New exception for mismatch |
+| `backend/app/Http/Controllers/Api/V1/OrderController.php` | Handle ShippingChangedException |
+| `frontend/src/components/checkout/ShippingBreakdownDisplay.tsx` | New breakdown component |
+| `frontend/src/components/checkout/ShippingChangedModal.tsx` | New HARD_BLOCK modal |
+| `frontend/src/app/(storefront)/checkout/page.tsx` | Integrate breakdown + modal |
+| `frontend/src/lib/api.ts` | Add getCartShippingQuote(), quoted_shipping params |
+| `frontend/messages/el.json`, `en.json` | Add i18n keys |
+| `frontend/tests/e2e/checkout-shipping-split.spec.ts` | E2E tests |
+
+**DoD**:
+- [ ] CI green
+- [ ] e2e-postgres passes
+- [ ] Single producer shows single-line shipping
+- [ ] Multi-producer shows breakdown with total
+- [ ] Mismatch triggers HARD_BLOCK modal
+- [ ] Lock fields populated on order placement
 
 ---
 

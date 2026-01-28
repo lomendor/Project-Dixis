@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
@@ -10,13 +10,36 @@ import { useTranslations } from '@/contexts/LocaleContext'
 import { useToast } from '@/contexts/ToastContext'
 import StripeProvider from '@/components/payment/StripeProvider'
 import StripePaymentForm from '@/components/payment/StripePaymentForm'
+import ShippingBreakdownDisplay from '@/components/checkout/ShippingBreakdownDisplay'
+import ShippingChangedModal from '@/components/checkout/ShippingChangedModal'
 
-// Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state type
+// Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state type (legacy single-quote)
 interface ShippingQuote {
   price_eur: number;
   zone_name: string | null;
   free_shipping: boolean;
   source: string;
+}
+
+// Pass ORDER-SHIPPING-SPLIT-01: Per-producer shipping breakdown
+interface ProducerShipping {
+  producer_id: number;
+  producer_name: string;
+  subtotal: number;
+  shipping_cost: number;
+  is_free: boolean;
+  free_reason: string | null;
+  zone: string;
+  weight_grams: number;
+}
+
+interface CartShippingQuote {
+  producers: ProducerShipping[];
+  total_shipping: number;
+  quoted_at: string;
+  currency: string;
+  zone_name: string | null;
+  method: string;
 }
 
 function CheckoutContent() {
@@ -39,10 +62,20 @@ function CheckoutContent() {
   // Pass PAYMENT-INIT-ORDER-ID-01: Store checkout session ID for thank-you redirect
   const [pendingThankYouId, setPendingThankYouId] = useState<number | null>(null)
   const [orderTotal, setOrderTotal] = useState<number>(0)
-  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state
+  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state (legacy single-producer)
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
   const [shippingLoading, setShippingLoading] = useState(false)
   const [postalCode, setPostalCode] = useState('')
+  // Pass ORDER-SHIPPING-SPLIT-01: Per-producer cart shipping quote
+  const [cartShippingQuote, setCartShippingQuote] = useState<CartShippingQuote | null>(null)
+  const [cartShippingError, setCartShippingError] = useState<string | null>(null)
+  // Pass ORDER-SHIPPING-SPLIT-01: Shipping changed modal state
+  const [shippingMismatch, setShippingMismatch] = useState<{
+    oldAmount: number;
+    newAmount: number;
+  } | null>(null)
+  // Debounce ref for postal code input
+  const postalDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Guest checkout: email is required for order confirmation
   const isGuest = !isAuthenticated
@@ -58,10 +91,12 @@ function CheckoutContent() {
   const subtotalCents = cartTotalCents(cartItems)
   const subtotal = subtotalCents / 100
 
-  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Fetch shipping quote when postal code is valid (5 digits)
-  const fetchShippingQuote = useCallback(async (postal: string) => {
+  // Pass ORDER-SHIPPING-SPLIT-01: Fetch per-producer cart shipping quote
+  const fetchCartShippingQuote = useCallback(async (postal: string) => {
     // Validate Greek postal code format
     if (!postal || !/^\d{5}$/.test(postal)) {
+      setCartShippingQuote(null)
+      setCartShippingError(null)
       setShippingQuote(null)
       return
     }
@@ -69,31 +104,72 @@ function CheckoutContent() {
     // Need cart items to calculate shipping
     const itemCount = Object.keys(cartItems).length
     if (itemCount === 0) {
+      setCartShippingQuote(null)
+      setCartShippingError(null)
       setShippingQuote(null)
       return
     }
 
     setShippingLoading(true)
+    setCartShippingError(null)
     try {
-      const quote = await apiClient.getZoneShippingQuote({
+      // Convert cart items to API format
+      const items = Object.values(cartItems).map(item => ({
+        product_id: parseInt(item.id.toString()),
+        quantity: item.qty
+      }))
+
+      const quote = await apiClient.getCartShippingQuote({
         postal_code: postal,
         method: 'HOME',
-        subtotal: subtotal,
+        items,
       })
+
+      setCartShippingQuote(quote)
+      // Also set legacy shippingQuote for total calculation compatibility
       setShippingQuote({
-        price_eur: quote.price_eur,
+        price_eur: quote.total_shipping,
         zone_name: quote.zone_name,
-        free_shipping: quote.free_shipping,
-        source: quote.source,
+        free_shipping: quote.total_shipping === 0,
+        source: 'cart_quote',
       })
-    } catch (err) {
-      console.error('[Checkout] Shipping quote failed:', err)
-      // Fallback: don't show error, just hide shipping until order is placed
-      setShippingQuote(null)
+    } catch (err: any) {
+      console.error('[Checkout] Cart shipping quote failed:', err)
+      // Pass ORDER-SHIPPING-SPLIT-01: Handle zone unavailable (HARD_BLOCK)
+      if (err?.code === 'ZONE_UNAVAILABLE') {
+        setCartShippingError(t('checkoutPage.shippingUnavailable'))
+        setCartShippingQuote(null)
+        setShippingQuote(null)
+      } else {
+        // Other errors: fall back to legacy quote
+        setCartShippingQuote(null)
+        setCartShippingError(null)
+        // Try legacy single quote as fallback
+        try {
+          const legacyQuote = await apiClient.getZoneShippingQuote({
+            postal_code: postal,
+            method: 'HOME',
+            subtotal: subtotal,
+          })
+          setShippingQuote({
+            price_eur: legacyQuote.price_eur,
+            zone_name: legacyQuote.zone_name,
+            free_shipping: legacyQuote.free_shipping,
+            source: legacyQuote.source,
+          })
+        } catch {
+          setShippingQuote(null)
+        }
+      }
     } finally {
       setShippingLoading(false)
     }
-  }, [cartItems, subtotal])
+  }, [cartItems, subtotal, t])
+
+  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Legacy fetch (now wraps cart quote)
+  const fetchShippingQuote = useCallback(async (postal: string) => {
+    fetchCartShippingQuote(postal)
+  }, [fetchCartShippingQuote])
 
   // Handle successful Stripe payment
   // Pass PAY-CARD-CONFIRM-GUARD-01: Only call backend confirm with valid Stripe result
@@ -204,7 +280,7 @@ function CheckoutContent() {
       };
 
       // Shipping is calculated by backend (CheckoutService) based on per-producer rules.
-      // Do NOT send shipping_cost - backend is the single source of truth.
+      // Pass ORDER-SHIPPING-SPLIT-01: Include quoted_shipping for mismatch detection
       const orderData = {
         items: Object.values(cartItems).map(item => ({
           product_id: parseInt(item.id.toString()),
@@ -214,7 +290,10 @@ function CheckoutContent() {
         shipping_method: 'HOME' as const,
         payment_method: paymentMethod === 'card' ? 'CARD' as const : 'COD' as const,
         shipping_address: shippingAddress,
-        notes: ''
+        notes: '',
+        // Pass ORDER-SHIPPING-SPLIT-01: Include quoted shipping for mismatch detection
+        quoted_shipping: cartShippingQuote?.total_shipping ?? shippingQuote?.price_eur ?? undefined,
+        quoted_at: cartShippingQuote?.quoted_at ?? undefined,
       };
 
       const order = await apiClient.createOrder(orderData);
@@ -265,6 +344,16 @@ function CheckoutContent() {
       router.push(`/thank-you?id=${thankYouId}`)
     } catch (err: any) {
       console.error('Order creation failed:', err)
+      // Pass ORDER-SHIPPING-SPLIT-01: Handle SHIPPING_CHANGED response (HARD_BLOCK)
+      if (err?.code === 'SHIPPING_CHANGED' && err?.quoted_total != null && err?.locked_total != null) {
+        setShippingMismatch({
+          oldAmount: err.quoted_total,
+          newAmount: err.locked_total,
+        })
+        // Don't show error - modal will handle it
+        setLoading(false)
+        return
+      }
       // Pass PAYMENT-INIT-ORDER-ID-01: Handle specific error codes
       // 409 = stock conflict, 400 = validation error
       if (err?.status === 409) {
@@ -281,6 +370,22 @@ function CheckoutContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Pass ORDER-SHIPPING-SPLIT-01: Handle shipping mismatch modal actions
+  function handleShippingAccept() {
+    // User accepts new shipping cost - re-fetch quote with new amount and re-submit
+    setShippingMismatch(null)
+    // Re-trigger quote fetch to get updated amount
+    if (postalCode.length === 5) {
+      fetchCartShippingQuote(postalCode)
+    }
+    // User can now click submit again with awareness of new price
+  }
+
+  function handleShippingCancel() {
+    // User cancels - close modal and stay on checkout
+    setShippingMismatch(null)
   }
 
   // Fix React error #418: Show loading during SSR/hydration
@@ -378,29 +483,17 @@ function CheckoutContent() {
               <span>{fmt.format(subtotal)}</span>
             </div>
 
-            {/* Pass CHECKOUT-SHIPPING-DISPLAY-01: Show shipping cost */}
-            <div className="flex justify-between" data-testid="shipping-line">
-              <span>{t('checkoutPage.shipping')}:</span>
-              {shippingLoading ? (
-                <span className="text-gray-400 text-sm" data-testid="shipping-loading">
-                  {t('checkoutPage.shippingCalculating')}
-                </span>
-              ) : shippingQuote ? (
-                <span
-                  className={shippingQuote.free_shipping ? 'text-emerald-600 font-medium' : ''}
-                  data-testid="shipping-cost"
-                >
-                  {shippingQuote.free_shipping ? t('checkoutPage.shippingFree') : fmt.format(shippingQuote.price_eur)}
-                </span>
-              ) : (
-                <span className="text-gray-400 text-sm" data-testid="shipping-pending">
-                  {t('checkoutPage.shippingEnterPostal')}
-                </span>
-              )}
-            </div>
+            {/* Pass ORDER-SHIPPING-SPLIT-01: Per-producer shipping breakdown */}
+            <ShippingBreakdownDisplay
+              producers={cartShippingQuote?.producers ?? null}
+              totalShipping={cartShippingQuote?.total_shipping ?? shippingQuote?.price_eur ?? null}
+              isLoading={shippingLoading}
+              isPending={!postalCode || postalCode.length < 5}
+              error={cartShippingError ?? undefined}
+            />
 
-            {/* Show zone info if available */}
-            {shippingQuote?.zone_name && (
+            {/* Show zone info if available (fallback for single-producer) */}
+            {!cartShippingQuote && shippingQuote?.zone_name && (
               <p className="text-xs text-gray-500" data-testid="shipping-zone">
                 {t('checkoutPage.shippingZone')}: {shippingQuote.zone_name}
               </p>
@@ -523,11 +616,18 @@ function CheckoutContent() {
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '').slice(0, 5)
                   setPostalCode(val)
-                  // Pass CHECKOUT-SHIPPING-DISPLAY-01: Fetch quote on valid postal code
+                  // Pass ORDER-SHIPPING-SPLIT-01: Debounced fetch (300ms) on valid postal code
+                  if (postalDebounceRef.current) {
+                    clearTimeout(postalDebounceRef.current)
+                  }
                   if (val.length === 5) {
-                    fetchShippingQuote(val)
+                    postalDebounceRef.current = setTimeout(() => {
+                      fetchCartShippingQuote(val)
+                    }, 300)
                   } else {
+                    setCartShippingQuote(null)
                     setShippingQuote(null)
+                    setCartShippingError(null)
                   }
                 }}
                 className="w-full h-11 px-4 border rounded-lg text-base"
@@ -552,7 +652,7 @@ function CheckoutContent() {
 
             <button
               type="submit"
-              disabled={loading || cardProcessing}
+              disabled={loading || cardProcessing || !!cartShippingError}
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
               data-testid="checkout-submit"
             >
@@ -567,6 +667,14 @@ function CheckoutContent() {
           </div>
         </form>
       </div>
+      {/* Pass ORDER-SHIPPING-SPLIT-01: Shipping changed hard-block modal */}
+      <ShippingChangedModal
+        isOpen={shippingMismatch !== null}
+        oldAmount={shippingMismatch?.oldAmount ?? 0}
+        newAmount={shippingMismatch?.newAmount ?? 0}
+        onAccept={handleShippingAccept}
+        onCancel={handleShippingCancel}
+      />
     </main>
   )
 }
