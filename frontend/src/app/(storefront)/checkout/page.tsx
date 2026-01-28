@@ -76,6 +76,14 @@ function CheckoutContent() {
   } | null>(null)
   // Debounce ref for postal code input
   const postalDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Saved address for pre-fill
+  const [savedAddress, setSavedAddress] = useState<{
+    name?: string;
+    line1?: string;
+    city?: string;
+    postal_code?: string;
+    phone?: string;
+  } | null>(null)
 
   // Guest checkout: email is required for order confirmation
   const isGuest = !isAuthenticated
@@ -83,6 +91,25 @@ function CheckoutContent() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Fetch saved address for logged-in users
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiClient.getShippingAddress()
+        .then((data) => {
+          if (data.address) {
+            setSavedAddress(data.address)
+            // Pre-fill postal code and trigger shipping quote
+            if (data.address.postal_code && /^\d{5}$/.test(data.address.postal_code)) {
+              setPostalCode(data.address.postal_code)
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('[Checkout] Failed to fetch saved address:', err)
+        })
+    }
+  }, [isAuthenticated])
 
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
@@ -170,6 +197,14 @@ function CheckoutContent() {
   const fetchShippingQuote = useCallback(async (postal: string) => {
     fetchCartShippingQuote(postal)
   }, [fetchCartShippingQuote])
+
+  // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Auto-fetch shipping quote when postal code is pre-filled
+  // This runs when savedAddress is loaded and postalCode is set
+  useEffect(() => {
+    if (postalCode && postalCode.length === 5 && !shippingQuote && !shippingLoading) {
+      fetchCartShippingQuote(postalCode)
+    }
+  }, [postalCode, savedAddress]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle successful Stripe payment
   // Pass PAY-CARD-CONFIRM-GUARD-01: Only call backend confirm with valid Stripe result
@@ -528,6 +563,15 @@ function CheckoutContent() {
             </div>
           )}
 
+          {/* Pass PRODUCER-THRESHOLD-POSTALCODE-01: Show saved address notice */}
+          {savedAddress && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg" data-testid="saved-address-notice">
+              <p className="text-sm text-green-800">
+                Χρησιμοποιείται η αποθηκευμένη διεύθυνση αποστολής σας.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">{t('checkoutPage.fullName')}</label>
@@ -536,6 +580,7 @@ function CheckoutContent() {
                 name="name"
                 required
                 autoComplete="name"
+                defaultValue={savedAddress?.name || user?.name || ''}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-name"
               />
@@ -551,6 +596,7 @@ function CheckoutContent() {
                 required
                 autoComplete="tel"
                 placeholder="+30 210 1234567"
+                defaultValue={savedAddress?.phone || ''}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-phone"
               />
@@ -585,6 +631,7 @@ function CheckoutContent() {
                 name="address"
                 required
                 autoComplete="street-address"
+                defaultValue={savedAddress?.line1 || ''}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-address"
               />
@@ -597,6 +644,7 @@ function CheckoutContent() {
                 name="city"
                 required
                 autoComplete="address-level2"
+                defaultValue={savedAddress?.city || ''}
                 className="w-full h-11 px-4 border rounded-lg text-base"
                 data-testid="checkout-city"
               />

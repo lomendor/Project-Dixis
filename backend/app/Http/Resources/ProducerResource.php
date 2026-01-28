@@ -36,6 +36,8 @@ class ProducerResource extends JsonResource
             'verified' => $this->verified,
             'is_verified' => $this->is_verified,
             'uses_custom_shipping_rates' => $this->uses_custom_shipping_rates,
+            // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
+            'free_shipping_threshold_eur' => $this->free_shipping_threshold_eur,
             'status' => $this->status,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),

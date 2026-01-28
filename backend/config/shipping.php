@@ -22,6 +22,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Free Shipping Threshold
+    |--------------------------------------------------------------------------
+    |
+    | Pass PRODUCER-THRESHOLD-POSTALCODE-01: Default free shipping threshold.
+    | Each producer can override this via their free_shipping_threshold_eur field.
+    | Value in EUR, applied PER PRODUCER (not per cart total).
+    |
+    */
+    'default_free_shipping_threshold_eur' => env('DEFAULT_FREE_SHIPPING_THRESHOLD_EUR', 35.00),
+
+    /*
+    |--------------------------------------------------------------------------
     | Delivery Options
     |--------------------------------------------------------------------------
     |
