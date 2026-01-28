@@ -9,37 +9,41 @@
 
 ## 2026-01-28 — Pass-CI-HYGIENE-REPAIR-02: Harden Test + Restore Prod Facts
 
-**Status**: 🟡 IN REVIEW — PR #TBD
+**Status**: ✅ MERGED — PR #2521
 
 **Branch**: `fix/passCI-HYGIENE-REPAIR-02`
 
 **Problem**: Damage audit found:
-1. PR #2518 made `filters-search.spec.ts` test too lenient (only checked `expect(searchInput).toBeTruthy()`)
+1. PR #2518 made `filters-search.spec.ts` tests too lenient (only checked `expect(searchInput).toBeTruthy()`)
 2. `prod-facts.yml` was disabled due to ghost push triggers - lost daily monitoring
 
 **Fix**:
 
-**(A) Test hardening** (`filters-search.spec.ts`):
-- Added meaningful invariant: search must trigger API call OR URL change
-- Added assertion: input must retain typed value
-- Tolerates demo fallback (logs warning) but verifies search was processed
+**(A) Test hardening** (`filters-search.spec.ts`) - BOTH search tests:
+- `should apply search filter with Greek text normalization` (lines 16-103)
+- `should show no results for nonsense search query` (lines 111-175)
+
+Each test now has two hard invariants:
+1. `expect(inputValue).toContain(searchQuery)` - input retains typed value
+2. `expect(searchWasProcessed).toBe(true)` - API call OR URL change occurred
+
+Demo fallback behavior is tolerated (logs info) but search functionality is verified.
 
 **(B) Prod Facts v2** (`.github/workflows/prod-facts-v2.yml`):
-- New workflow file with fresh workflow ID (avoids ghost entry)
-- Schedule-only: `schedule` + `workflow_dispatch`
+- New workflow file with fresh workflow ID (227760108)
+- Schedule-only: `schedule` (07:00 UTC) + `workflow_dispatch`
 - Job-level guard: `if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'`
-- Same functionality as original
 
 **Changes** (2 files):
-- `frontend/tests/e2e/filters-search.spec.ts`: Hard invariants added
+- `frontend/tests/e2e/filters-search.spec.ts`: Hard invariants added to both search tests
 - `.github/workflows/prod-facts-v2.yml`: New clean workflow
 
 **DoD**:
-- [ ] CI green on PR
-- [ ] e2e-postgres passes with hardened test
-- [ ] prod-facts-v2 workflow visible in Actions (schedule-only)
+- [x] CI green on main (run 21421868908)
+- [x] e2e-postgres passes with hardened tests (run 21421868913)
+- [x] prod-facts-v2 workflow active in Actions (ID 227760108)
 
-**Evidence**: TBD
+**Evidence**: https://github.com/lomendor/Project-Dixis/actions/runs/21421868913
 
 ---
 
