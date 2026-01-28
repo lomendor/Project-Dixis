@@ -3,7 +3,7 @@
 **Pass ID**: PRODUCER-THRESHOLD-POSTALCODE-01
 **PR**: #2527
 **Branch**: `feat/passPRODUCER-THRESHOLD-POSTALCODE-01`
-**Status**: 🟡 OPEN
+**Status**: ✅ MERGED (commit `82e871d8`)
 
 ## Objective
 

@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-28
 **PR**: #2527
-**Result**: 🟡 OPEN (PR #2527)
+**Result**: ✅ MERGED (commit `82e871d8`)
 
 ## What
 
