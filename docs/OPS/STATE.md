@@ -1,15 +1,67 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-28 (Pass-CI-FLAKE-FILTERS-SEARCH-03)
+**Last Updated**: 2026-01-28 (Pass-ORDERS-E2E-SANITY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
 
 ---
 
+## 2026-01-28 — Pass-ORDERS-E2E-SANITY-01: Production E2E Order Sanity Check
+
+**Status**: ✅ VERIFIED
+
+**Date**: 2026-01-28T01:23:49Z
+
+**Objective**: Verify end-to-end customer can complete order on production (dixis.gr) without errors.
+
+**CI (main branch)**: All required workflows SUCCESS
+
+| Workflow | Run ID | Status |
+|----------|--------|--------|
+| CI | 21420463224 | ✅ SUCCESS |
+| e2e-postgres | 21420463226 | ✅ SUCCESS |
+| Deploy Frontend | 21420463229 | ✅ SUCCESS |
+| Uptime Smoke | 21421098882 | ✅ SUCCESS |
+
+**Production Endpoints**:
+
+| Endpoint | HTTP | Latency |
+|----------|------|---------|
+| /api/healthz | 200 | <1s |
+| /checkout | 200 | 0.35s |
+| /products | 200 | 0.49s |
+
+**E2E Sanity Checklist**:
+
+| Step | Result | Evidence |
+|------|--------|----------|
+| A) /products loads with products | ✅ | 10 products visible, "Προσθήκη" buttons functional |
+| B) Add product to cart | ✅ | JavaScript click, cart localStorage updated |
+| C) /checkout before postal code | ✅ | "Εισάγετε Τ.Κ." displayed (pending state) |
+| D) /checkout after TK 10671 | ✅ | "Δωρεάν" (Free) shipping in emerald green |
+| E) Complete COD order | ✅ | Order #11 created, thank-you page shown |
+
+**Order Evidence**:
+- URL: `https://dixis.gr/thank-you?id=11`
+- Order ID: **11**
+- Customer: QA Test Customer (qa-test@dixis.gr)
+- Product: Organic Tomatoes x 1 = 3,50 €
+- Shipping: 0,00 € (Free - Ηπειρωτική Ελλάδα)
+- Total: 3,50 €
+- Payment: Αντικαταβολή (COD)
+
+**Limitations**:
+- Browser automation click unsupported; used JavaScript `element.click()` instead
+- Order is real COD order on production (can be cancelled by admin)
+
+**Conclusion**: Production checkout flow is fully functional. No blocking bugs found.
+
+---
+
 ## 2026-01-28 — Pass-CI-FLAKE-FILTERS-SEARCH-03: Fix E2E Flaky Test
 
-**Status**: 🟡 IN REVIEW — PR #TBD
+**Status**: ✅ MERGED — PR #2518
 
 **Branch**: `fix/passCI-HYGIENE-01`
 
