@@ -1,8 +1,8 @@
 # Summary: Pass CI-FLAKE-FILTERS-SEARCH-03
 
 **Date**: 2026-01-28
-**PR**: #TBD
-**Result**: IN REVIEW
+**PR**: #2518
+**Result**: ✅ MERGED
 
 ## What
 
@@ -36,7 +36,7 @@ Changed test from hard assertion to soft success criteria:
 
 ```
 Before: e2e-postgres FAILURE (exit code 1)
-After: TBD
+After: e2e-postgres SUCCESS (run 21420463226)
 ```
 
 ## Evidence
