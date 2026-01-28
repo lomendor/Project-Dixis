@@ -1,9 +1,45 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-28 (Pass-ORDERS-E2E-SANITY-01)
+**Last Updated**: 2026-01-28 (Pass-CI-HYGIENE-REPAIR-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-28 — Pass-CI-HYGIENE-REPAIR-02: Harden Test + Restore Prod Facts
+
+**Status**: 🟡 IN REVIEW — PR #TBD
+
+**Branch**: `fix/passCI-HYGIENE-REPAIR-02`
+
+**Problem**: Damage audit found:
+1. PR #2518 made `filters-search.spec.ts` test too lenient (only checked `expect(searchInput).toBeTruthy()`)
+2. `prod-facts.yml` was disabled due to ghost push triggers - lost daily monitoring
+
+**Fix**:
+
+**(A) Test hardening** (`filters-search.spec.ts`):
+- Added meaningful invariant: search must trigger API call OR URL change
+- Added assertion: input must retain typed value
+- Tolerates demo fallback (logs warning) but verifies search was processed
+
+**(B) Prod Facts v2** (`.github/workflows/prod-facts-v2.yml`):
+- New workflow file with fresh workflow ID (avoids ghost entry)
+- Schedule-only: `schedule` + `workflow_dispatch`
+- Job-level guard: `if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'`
+- Same functionality as original
+
+**Changes** (2 files):
+- `frontend/tests/e2e/filters-search.spec.ts`: Hard invariants added
+- `.github/workflows/prod-facts-v2.yml`: New clean workflow
+
+**DoD**:
+- [ ] CI green on PR
+- [ ] e2e-postgres passes with hardened test
+- [ ] prod-facts-v2 workflow visible in Actions (schedule-only)
+
+**Evidence**: TBD
 
 ---
 
