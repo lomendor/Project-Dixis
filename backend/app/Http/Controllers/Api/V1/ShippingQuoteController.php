@@ -3,17 +3,27 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Producer;
+use App\Models\Product;
 use App\Models\ShippingZone;
 use App\Models\ShippingRate;
+use App\Services\ShippingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Pass 50: Shipping quote API for zone-based pricing
+ * Pass ORDER-SHIPPING-SPLIT-01: Added per-producer cart quote endpoint
  */
 class ShippingQuoteController extends Controller
 {
+    private ShippingService $shippingService;
+
+    public function __construct(ShippingService $shippingService)
+    {
+        $this->shippingService = $shippingService;
+    }
     // Fallback prices if zone lookup fails (backwards compatible with Pass 48)
     private const FALLBACK_PRICES = [
         'HOME' => 3.50,
@@ -122,6 +132,188 @@ class ShippingQuoteController extends Controller
             'method' => $method,
             'free_shipping' => false,
             'source' => 'fallback',
+        ]);
+    }
+
+    /**
+     * POST /api/v1/public/shipping/quote-cart
+     *
+     * Pass ORDER-SHIPPING-SPLIT-01: Per-producer shipping breakdown for cart
+     *
+     * Request body:
+     * - postal_code: string (5 digits)
+     * - method: string (HOME|COURIER|PICKUP)
+     * - items: array of {product_id: int, quantity: int}
+     *
+     * Response:
+     * - producers: array of {producer_id, producer_name, subtotal, shipping_cost, is_free, zone, weight_grams}
+     * - total_shipping: float
+     * - quoted_at: ISO timestamp
+     * - currency: EUR
+     */
+    public function quoteCart(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'postal_code' => 'required|string|regex:/^\d{5}$/',
+            'method' => 'required|string|in:HOME,COURIER,PICKUP',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $postalCode = $validated['postal_code'];
+        $method = $validated['method'];
+        $isPickup = $method === 'PICKUP';
+        $quotedAt = now();
+
+        // Fetch products with producer info
+        $productIds = collect($validated['items'])->pluck('product_id')->toArray();
+        $products = Product::with('producer')
+            ->whereIn('id', $productIds)
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('id');
+
+        // Validate all products exist
+        $missingProducts = array_diff($productIds, $products->keys()->toArray());
+        if (!empty($missingProducts)) {
+            return response()->json([
+                'error' => 'PRODUCTS_NOT_FOUND',
+                'message' => 'Some products are not available',
+                'missing_product_ids' => array_values($missingProducts),
+            ], 400);
+        }
+
+        // Get zone for shipping calculation
+        $zone = ShippingZone::findByPostalCode($postalCode);
+        $zoneName = $zone?->name;
+        $zoneCode = $this->shippingService->getZoneByPostalCode($postalCode);
+
+        // Group items by producer
+        $producerGroups = [];
+        foreach ($validated['items'] as $item) {
+            $product = $products[$item['product_id']];
+            $producerId = $product->producer_id ?? 0;
+
+            if (!isset($producerGroups[$producerId])) {
+                $producer = $product->producer;
+                $producerGroups[$producerId] = [
+                    'producer_id' => $producerId,
+                    'producer_name' => $producer?->name ?? 'Unknown Producer',
+                    'items' => [],
+                    'subtotal' => 0,
+                    'weight_grams' => 0,
+                ];
+            }
+
+            $quantity = $item['quantity'];
+            $itemTotal = $product->price * $quantity;
+            $weightPerUnit = ($product->weight_per_unit ?? 0.5) * 1000; // Convert kg to grams
+
+            $producerGroups[$producerId]['items'][] = [
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+                'unit_price' => $product->price,
+                'total_price' => $itemTotal,
+            ];
+            $producerGroups[$producerId]['subtotal'] += $itemTotal;
+            $producerGroups[$producerId]['weight_grams'] += (int) ($weightPerUnit * $quantity);
+        }
+
+        // Calculate shipping per producer
+        $producersResult = [];
+        $totalShipping = 0;
+        $hasUnavailableZone = false;
+        $unavailableProducers = [];
+
+        foreach ($producerGroups as $producerId => $group) {
+            // Skip items without producer (legacy data handling)
+            if ($producerId === 0) {
+                continue;
+            }
+
+            $subtotal = round($group['subtotal'], 2);
+            $weightKg = $group['weight_grams'] / 1000;
+
+            // PICKUP is always free
+            if ($isPickup) {
+                $producersResult[] = [
+                    'producer_id' => $producerId,
+                    'producer_name' => $group['producer_name'],
+                    'subtotal' => $subtotal,
+                    'shipping_cost' => 0.00,
+                    'is_free' => true,
+                    'free_reason' => 'pickup',
+                    'zone' => null,
+                    'weight_grams' => $group['weight_grams'],
+                ];
+                continue;
+            }
+
+            // Free shipping if above threshold (per producer)
+            if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+                $producersResult[] = [
+                    'producer_id' => $producerId,
+                    'producer_name' => $group['producer_name'],
+                    'subtotal' => $subtotal,
+                    'shipping_cost' => 0.00,
+                    'is_free' => true,
+                    'free_reason' => 'threshold',
+                    'threshold' => self::FREE_SHIPPING_THRESHOLD,
+                    'zone' => $zoneName,
+                    'weight_grams' => $group['weight_grams'],
+                ];
+                continue;
+            }
+
+            // Calculate shipping using ShippingService
+            $shippingResult = $this->shippingService->calculateShippingCost($weightKg, $zoneCode);
+            $shippingCost = round($shippingResult['cost_eur'], 2);
+
+            // Check if zone is unavailable (fail-safe)
+            if ($shippingResult['source'] === 'error' || ($zoneCode === 'UNKNOWN' && !$zone)) {
+                $hasUnavailableZone = true;
+                $unavailableProducers[] = $group['producer_name'];
+            }
+
+            $producersResult[] = [
+                'producer_id' => $producerId,
+                'producer_name' => $group['producer_name'],
+                'subtotal' => $subtotal,
+                'shipping_cost' => $shippingCost,
+                'is_free' => $shippingCost === 0.0,
+                'free_reason' => null,
+                'zone' => $zoneName,
+                'weight_grams' => $group['weight_grams'],
+            ];
+
+            $totalShipping += $shippingCost;
+        }
+
+        // Fail-safe: Block checkout if zone unavailable for any producer
+        if ($hasUnavailableZone) {
+            return response()->json([
+                'error' => 'ZONE_UNAVAILABLE',
+                'message' => 'Shipping is not available to your area for some producers',
+                'unavailable_producers' => $unavailableProducers,
+            ], 422);
+        }
+
+        // Log quote for audit (no PII)
+        Log::info('Per-producer shipping quote', [
+            'producer_count' => count($producersResult),
+            'total_shipping' => $totalShipping,
+            'zone' => $zoneName,
+            'method' => $method,
+        ]);
+
+        return response()->json([
+            'producers' => $producersResult,
+            'total_shipping' => round($totalShipping, 2),
+            'quoted_at' => $quotedAt->toIso8601String(),
+            'currency' => 'EUR',
+            'zone_name' => $zoneName,
+            'method' => $method,
         ]);
     }
 }

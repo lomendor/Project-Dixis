@@ -1,9 +1,67 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-28 (Pass-CI-HYGIENE-REPAIR-02)
+**Last Updated**: 2026-01-28 (Pass-ORDER-SHIPPING-SPLIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-28 — Pass-ORDER-SHIPPING-SPLIT-01: Per-Producer Shipping Breakdown
+
+**Status**: ✅ CI GREEN — PR #2524
+
+**Branch**: `feat/passORDER-SHIPPING-SPLIT-01`
+
+**Objective**: Implement per-producer shipping breakdown in checkout with quote-lock verification.
+
+**Scope**:
+- Per-producer shipping quote API endpoint (`/api/v1/public/shipping/quote-cart`)
+- Checkout UI with producer-level shipping breakdown
+- HARD_BLOCK modal when quote ≠ lock on order placement (>0.01€ diff)
+- Lock fields on OrderShippingLine: `zone`, `weight_grams`, `quoted_at`, `locked_at`
+
+**Policy** (UNCHANGED):
+- Free shipping threshold: €35 per producer
+- Confirm mechanism: HARD_BLOCK modal (user must accept new shipping, then re-submit)
+- Storage: PRODUCER_SHIPMENTS (one OrderShippingLine record per producer)
+
+**HARD_BLOCK Flow**:
+1. Frontend sends `quoted_shipping` + `quoted_at` with order request
+2. Backend compares quoted vs calculated (locked) shipping
+3. If |quoted - locked| > 0.01€, throws `ShippingChangedException`
+4. Controller returns 409 `SHIPPING_CHANGED` with `quoted_total`, `locked_total`
+5. Frontend shows `ShippingChangedModal` with Accept/Cancel
+6. On Accept: re-fetch quote → user clicks Submit again with fresh quote
+
+**Changes** (16 files, +1146/-49):
+
+| File | Change |
+|------|--------|
+| `backend/database/migrations/2026_01_28_100000_*` | Add lock fields to order_shipping_lines |
+| `backend/app/Models/OrderShippingLine.php` | Fillable + casts for new fields |
+| `backend/app/Http/Controllers/Api/V1/ShippingQuoteController.php` | `quoteCart()` endpoint |
+| `backend/routes/api.php` | Route for quote-cart |
+| `backend/app/Services/CheckoutService.php` | Mismatch detection + lock field population |
+| `backend/app/Exceptions/ShippingChangedException.php` | Exception with amounts |
+| `backend/app/Http/Controllers/Api/V1/OrderController.php` | Catch and return SHIPPING_CHANGED |
+| `backend/app/Http/Requests/StoreOrderRequest.php` | Validate quoted_shipping, quoted_at |
+| `frontend/src/components/checkout/ShippingBreakdownDisplay.tsx` | Breakdown UI |
+| `frontend/src/components/checkout/ShippingChangedModal.tsx` | HARD_BLOCK modal |
+| `frontend/src/app/(storefront)/checkout/page.tsx` | Integration + 300ms debounce |
+| `frontend/src/lib/api.ts` | `getCartShippingQuote()`, order params |
+| `frontend/messages/el.json`, `en.json` | i18n keys |
+| `frontend/tests/e2e/checkout-shipping-split.spec.ts` | 5 E2E tests |
+
+**DoD**:
+- [x] CI green (21 checks passing)
+- [x] e2e-postgres passes (run 21432871589)
+- [x] Single producer shows single-line shipping
+- [x] Multi-producer shows breakdown with total
+- [x] Mismatch triggers HARD_BLOCK modal
+- [x] Lock fields populated on order placement
+
+**Evidence**: https://github.com/lomendor/Project-Dixis/pull/2524
 
 ---
 

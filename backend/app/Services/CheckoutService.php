@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\OrderShippingLine;
 use App\Models\Producer;
 use Illuminate\Support\Facades\DB;
+use App\Exceptions\ShippingChangedException;
 
 /**
  * Pass MP-ORDERS-SPLIT-01: Checkout Service
@@ -34,10 +35,13 @@ class CheckoutService
      * For single-producer carts: Creates a standalone Order (backward compatible).
      * For multi-producer carts: Creates a CheckoutSession with N child Orders.
      *
+     * Pass ORDER-SHIPPING-SPLIT-01: Added quoted_shipping parameter for mismatch detection.
+     *
      * @param int|null $userId
      * @param array $productData Array of ['product' => Product, 'quantity' => int, 'unit_price' => float, 'total_price' => float]
-     * @param array $options ['shipping_method', 'payment_method', 'currency', 'shipping_address', 'notes']
+     * @param array $options ['shipping_method', 'payment_method', 'currency', 'shipping_address', 'notes', 'quoted_shipping']
      * @return array ['checkout_session' => CheckoutSession|null, 'orders' => Order[]]
+     * @throws ShippingChangedException If quoted shipping doesn't match locked shipping
      */
     public function processCheckout(?int $userId, array $productData, array $options): array
     {
@@ -49,12 +53,44 @@ class CheckoutService
         $shippingMethod = $options['shipping_method'] ?? 'HOME';
         $isPickup = in_array(strtoupper($shippingMethod), ['PICKUP', 'STORE_PICKUP']);
 
+        // Pass ORDER-SHIPPING-SPLIT-01: Calculate total locked shipping first for mismatch check
+        $quotedShipping = $options['quoted_shipping'] ?? null;
+        if ($quotedShipping !== null) {
+            $lockedShipping = $this->calculateTotalShipping($producerGroups, $options, $isPickup);
+            // Allow small rounding difference (1 cent)
+            if (abs($quotedShipping - $lockedShipping) > 0.01) {
+                throw new ShippingChangedException($quotedShipping, $lockedShipping);
+            }
+        }
+
         if ($isMultiProducer) {
             return $this->createMultiProducerCheckout($userId, $producerGroups, $options, $isPickup);
         }
 
         // Single producer: create standalone order (backward compatible)
         return $this->createSingleProducerOrder($userId, $productData, $producerGroups, $options, $isPickup);
+    }
+
+    /**
+     * Calculate total shipping across all producers (for mismatch check).
+     * Pass ORDER-SHIPPING-SPLIT-01
+     */
+    private function calculateTotalShipping($producerGroups, array $options, bool $isPickup): float
+    {
+        $totalShipping = 0.0;
+
+        foreach ($producerGroups as $producerId => $items) {
+            if (!$producerId) {
+                continue;
+            }
+
+            $producerSubtotal = collect($items)->sum('total_price');
+            $itemsArray = collect($items)->toArray();
+            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
+            $totalShipping += $shippingCost;
+        }
+
+        return $totalShipping;
     }
 
     /**
@@ -96,8 +132,10 @@ class CheckoutService
             $producerName = $producer?->name ?? 'Unknown Producer';
 
             // Calculate shipping for this producer using ShippingService
+            // Pass ORDER-SHIPPING-SPLIT-01: Get full shipping details for lock fields
             $itemsArray = collect($items)->toArray();
-            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingCost = $shippingDetails['cost'];
             $freeShippingApplied = $shippingCost === 0.0;
 
             $orderTotal = $producerSubtotal + $shippingCost;
@@ -135,6 +173,7 @@ class CheckoutService
             }
 
             // Create shipping line for this order
+            // Pass ORDER-SHIPPING-SPLIT-01: Include zone, weight, quoted_at, locked_at
             OrderShippingLine::create([
                 'order_id' => $order->id,
                 'producer_id' => $producerId,
@@ -142,7 +181,11 @@ class CheckoutService
                 'subtotal' => $producerSubtotal,
                 'shipping_cost' => $shippingCost,
                 'shipping_method' => $shippingMethod,
+                'zone' => $shippingDetails['zone'],
+                'weight_grams' => $shippingDetails['weight_grams'],
                 'free_shipping_applied' => $freeShippingApplied,
+                'quoted_at' => $options['quoted_at'] ?? null,
+                'locked_at' => now(),
             ]);
 
             // Accumulate session totals
@@ -201,8 +244,10 @@ class CheckoutService
             $producerName = $producer?->name ?? 'Unknown Producer';
 
             // Calculate shipping using ShippingService
+            // Pass ORDER-SHIPPING-SPLIT-01: Get full shipping details for lock fields
             $itemsArray = collect($items)->toArray();
-            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingCost = $shippingDetails['cost'];
             $freeShippingApplied = $shippingCost === 0.0;
 
             $totalShippingCost += $shippingCost;
@@ -213,6 +258,8 @@ class CheckoutService
                 'subtotal' => $producerSubtotal,
                 'shipping_cost' => $shippingCost,
                 'shipping_method' => $shippingMethod,
+                'zone' => $shippingDetails['zone'],
+                'weight_grams' => $shippingDetails['weight_grams'],
                 'free_shipping_applied' => $freeShippingApplied,
             ];
         }
@@ -252,6 +299,7 @@ class CheckoutService
         }
 
         // Create shipping lines
+        // Pass ORDER-SHIPPING-SPLIT-01: Include zone, weight, quoted_at, locked_at
         foreach ($shippingLines as $line) {
             OrderShippingLine::create([
                 'order_id' => $order->id,
@@ -260,7 +308,11 @@ class CheckoutService
                 'subtotal' => $line['subtotal'],
                 'shipping_cost' => $line['shipping_cost'],
                 'shipping_method' => $line['shipping_method'],
+                'zone' => $line['zone'],
+                'weight_grams' => $line['weight_grams'],
                 'free_shipping_applied' => $line['free_shipping_applied'],
+                'quoted_at' => $options['quoted_at'] ?? null,
+                'locked_at' => now(),
             ]);
         }
 
@@ -308,5 +360,57 @@ class CheckoutService
         $result = $this->shippingService->calculateShippingCost($totalWeightKg, $zoneCode);
 
         return $result['cost_eur'];
+    }
+
+    /**
+     * Calculate shipping cost with full details for lock fields.
+     * Pass ORDER-SHIPPING-SPLIT-01: Returns zone, weight_grams alongside cost.
+     *
+     * @return array{cost: float, zone: string|null, weight_grams: int}
+     */
+    private function calculateProducerShippingWithDetails(array $items, float $subtotal, array $options, bool $isPickup): array
+    {
+        // Calculate total weight from items (default 0.5kg per item)
+        $totalWeightKg = 0.0;
+        foreach ($items as $item) {
+            $product = $item['product'];
+            $qty = $item['quantity'] ?? 1;
+            $weightPerUnit = $product->weight_per_unit ?? 0.5; // Default 0.5kg
+            $totalWeightKg += $weightPerUnit * $qty;
+        }
+        $weightGrams = (int) round($totalWeightKg * 1000);
+
+        // Get postal code from shipping address
+        $shippingAddress = $options['shipping_address'] ?? [];
+        $postalCode = $shippingAddress['postal_code'] ?? $shippingAddress['postalCode'] ?? '10551';
+
+        // Get zone from postal code
+        $zoneCode = $this->shippingService->getZoneByPostalCode($postalCode);
+
+        if ($isPickup) {
+            return [
+                'cost' => 0.0,
+                'zone' => 'PICKUP',
+                'weight_grams' => $weightGrams,
+            ];
+        }
+
+        // Free shipping if above threshold
+        if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+            return [
+                'cost' => 0.0,
+                'zone' => $zoneCode,
+                'weight_grams' => $weightGrams,
+            ];
+        }
+
+        // Calculate shipping using ShippingService
+        $result = $this->shippingService->calculateShippingCost($totalWeightKg, $zoneCode);
+
+        return [
+            'cost' => $result['cost_eur'],
+            'zone' => $zoneCode,
+            'weight_grams' => $weightGrams,
+        ];
     }
 }

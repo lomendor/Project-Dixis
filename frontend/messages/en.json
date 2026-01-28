@@ -260,7 +260,15 @@
     "shippingEnterPostal": "Enter postal code",
     "shippingFree": "Free",
     "shippingZone": "Zone",
-    "total": "Total"
+    "total": "Total",
+    "shippingFrom": "From {producer}",
+    "totalShipping": "Total shipping",
+    "shippingUnavailable": "Shipping unavailable for {producer} in your area",
+    "shippingChanged": "Shipping changed",
+    "shippingChangedMessage": "Shipping cost changed from {old} to {new}. Please confirm to continue.",
+    "shippingAccept": "Accept",
+    "shippingCancel": "Cancel",
+    "stockError": "Some products are not available. Please check your cart."
   },
   "orderConfirmation": {
     "loadError": "Error loading order",

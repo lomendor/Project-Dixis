@@ -260,7 +260,15 @@
     "shippingEnterPostal": "Εισάγετε Τ.Κ.",
     "shippingFree": "Δωρεάν",
     "shippingZone": "Ζώνη",
-    "total": "Σύνολο"
+    "total": "Σύνολο",
+    "shippingFrom": "Από {producer}",
+    "totalShipping": "Σύνολο μεταφορικών",
+    "shippingUnavailable": "Δεν είναι διαθέσιμη αποστολή για {producer} στην περιοχή σας",
+    "shippingChanged": "Αλλαγή μεταφορικών",
+    "shippingChangedMessage": "Τα μεταφορικά άλλαξαν από {old} σε {new}. Παρακαλώ επιβεβαιώστε για να συνεχίσετε.",
+    "shippingAccept": "Αποδέχομαι",
+    "shippingCancel": "Ακύρωση",
+    "stockError": "Κάποια προϊόντα δεν είναι διαθέσιμα. Ελέγξτε το καλάθι σας."
   },
   "orderConfirmation": {
     "loadError": "Σφάλμα κατά τη φόρτωση της παραγγελίας",

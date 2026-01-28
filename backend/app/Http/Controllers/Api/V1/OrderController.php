@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Services\CheckoutService;
 use App\Services\InventoryService;
 use App\Services\OrderEmailService;
+use App\Exceptions\ShippingChangedException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -138,12 +139,15 @@ class OrderController extends Controller
                 $userId = auth()->id() ?? $validated['user_id'] ?? null;
 
                 // Pass MP-ORDERS-SPLIT-01: Use CheckoutService for order creation
+                // Pass ORDER-SHIPPING-SPLIT-01: Include quoted_shipping for mismatch detection
                 $checkoutResult = $checkoutService->processCheckout($userId, $productData, [
                     'shipping_method' => $validated['shipping_method'] ?? 'HOME',
                     'payment_method' => $validated['payment_method'] ?? 'COD',
                     'currency' => $validated['currency'],
                     'shipping_address' => $validated['shipping_address'] ?? null,
                     'notes' => $validated['notes'] ?? null,
+                    'quoted_shipping' => $validated['quoted_shipping'] ?? null,
+                    'quoted_at' => $validated['quoted_at'] ?? null,
                 ]);
 
                 // Return appropriate resource based on checkout type
@@ -180,6 +184,14 @@ class OrderController extends Controller
             }
 
             return $result;
+        } catch (ShippingChangedException $e) {
+            // Pass ORDER-SHIPPING-SPLIT-01: Return SHIPPING_CHANGED for frontend hard-block modal
+            \Log::info('Order shipping mismatch detected', [
+                'request_id' => $requestId,
+                'quoted_total' => $e->quotedTotal,
+                'locked_total' => $e->lockedTotal,
+            ]);
+            return response()->json($e->toArray(), 409);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             // Log authorization failures (guest trying to create order when not allowed)
             \Log::warning('Order creation authorization failed', [

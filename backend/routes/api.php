@@ -241,6 +241,11 @@ Route::prefix('v1')->group(function () {
         Route::post('shipping/quote', [App\Http\Controllers\Api\V1\ShippingQuoteController::class, 'quote'])
             ->name('api.v1.public.shipping.quote')
             ->middleware('throttle:60,1'); // 60 quote requests per minute
+
+        // Pass ORDER-SHIPPING-SPLIT-01: Per-producer shipping quote for cart
+        Route::post('shipping/quote-cart', [App\Http\Controllers\Api\V1\ShippingQuoteController::class, 'quoteCart'])
+            ->name('api.v1.public.shipping.quote-cart')
+            ->middleware('throttle:30,1'); // 30 cart quote requests per minute (heavier endpoint)
     });
 
     // Cart (authenticated)

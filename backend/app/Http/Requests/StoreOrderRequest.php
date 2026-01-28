@@ -44,6 +44,9 @@ class StoreOrderRequest extends FormRequest
             'shipping_cost' => 'nullable|numeric|min:0|max:100',
             // Payment method (optional, defaults to COD)
             'payment_method' => 'nullable|string|in:COD,CARD,BANK_TRANSFER',
+            // Pass ORDER-SHIPPING-SPLIT-01: Quoted shipping for mismatch detection
+            'quoted_shipping' => 'nullable|numeric|min:0|max:200',
+            'quoted_at' => 'nullable|date',
         ];
     }
 
