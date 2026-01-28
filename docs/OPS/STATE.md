@@ -1,9 +1,54 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-28 (Pass-ORDER-SHIPPING-SPLIT-01)
+**Last Updated**: 2026-01-28 (Pass-PRODUCER-THRESHOLD-POSTALCODE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~750 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-28 — Pass-PRODUCER-THRESHOLD-POSTALCODE-01: Per-Producer Free Shipping Threshold
+
+**Status**: ✅ MERGED — PR #2527 (commit pending)
+
+**Branch**: `fix/passORDERS-PAYMENT-STATUS-CHECK-01`
+
+**Objective**: Per-producer free shipping threshold + checkout postal code single source of truth.
+
+**Scope**:
+- Per-producer `free_shipping_threshold_eur` column (nullable, default NULL = use system €35)
+- Producer settings UI to configure threshold
+- Checkout address pre-fill for logged-in users (from saved address)
+- `threshold_eur` returned in quote-cart API per producer
+
+**Changes** (11 files, +366/-15):
+
+| File | Change |
+|------|--------|
+| `backend/database/migrations/2026_01_28_120000_*` | Add `free_shipping_threshold_eur` to producers |
+| `backend/app/Models/Producer.php` | fillable + casts |
+| `backend/config/shipping.php` | `default_free_shipping_threshold_eur` config |
+| `backend/app/Services/CheckoutService.php` | `getProducerThreshold()` helper |
+| `backend/app/Http/Controllers/Api/V1/ShippingQuoteController.php` | Per-producer threshold logic |
+| `backend/app/Http/Controllers/Api/AuthController.php` | `shippingAddress()` endpoint |
+| `backend/routes/api.php` | Route for shipping-address |
+| `frontend/src/app/(storefront)/checkout/page.tsx` | Address pre-fill on mount |
+| `frontend/src/app/producer/settings/page.tsx` | Threshold input field |
+| `frontend/src/lib/api.ts` | `getShippingAddress()` |
+| `backend/tests/Unit/ProducerFreeShippingThresholdTest.php` | 5 unit tests |
+| `backend/tests/Feature/Api/ShippingQuoteCartThresholdTest.php` | 3 feature tests |
+
+**DoD**:
+- [x] Migration adds nullable threshold column
+- [x] Producer settings shows threshold field
+- [x] quote-cart returns `threshold_eur` per producer
+- [x] Checkout pre-fills address for logged-in users
+- [x] 8 new tests (5 unit + 3 feature)
+- [x] CI green (existing 10 CommissionServiceTest failures pre-exist on main)
+
+**Evidence**: https://github.com/lomendor/Project-Dixis/pull/2527
+
+**Baseline Test Failures Note**: 10 CommissionServiceTest failures exist on origin/main (missing `features` table) - not introduced by this pass.
 
 ---
 
