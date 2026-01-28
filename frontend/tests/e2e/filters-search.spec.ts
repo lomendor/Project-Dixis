@@ -121,6 +121,7 @@ test.describe('Filters and Search @smoke', () => {
    * Pass SEARCH-FTS-01: Test nonsense search returns no results.
    * CI-FLAKE-FILTERS-SEARCH-02: Use pressSequentially for reliable React onChange trigger.
    * CI-FLAKE-FILTERS-SEARCH-03: Made resilient to demo fallback that may return all products.
+   * CI-HYGIENE-REPAIR-02: Added meaningful invariant - must see API call OR URL change.
    */
   test('should show no results for nonsense search query', async ({ page }) => {
     // Navigate to products page
@@ -139,12 +140,15 @@ test.describe('Filters and Search @smoke', () => {
     await searchInput.clear();
 
     // Search for nonsense - use keyboard.type() for reliable input
-    await page.keyboard.type('xyz123nonexistent', { delay: 20 });
+    const searchQuery = 'xyz123nonexistent';
+    await page.keyboard.type(searchQuery, { delay: 20 });
 
     // Wait for debounce (300ms) to trigger
     await page.waitForTimeout(500);
 
-    // Wait for API response OR URL change - don't fail if neither happens
+    // INVARIANT: Search must trigger at least ONE of:
+    // 1. API call to products endpoint (with 200 response)
+    // 2. URL change to include search param
     const searchSignal = await Promise.race([
       page.waitForResponse(
         (response) =>
@@ -152,50 +156,37 @@ test.describe('Filters and Search @smoke', () => {
           response.url().includes('products') &&
           response.status() === 200,
         { timeout: 10000 }
-      ).then(() => 'api'),
-      page.waitForURL(/search=/i, { timeout: 10000 }).then(() => 'url'),
-      page.waitForTimeout(5000).then(() => 'timeout')
-    ]).catch(() => 'error');
+      ).then(() => 'api' as const),
+      page.waitForURL(/search=/i, { timeout: 10000 }).then(() => 'url' as const),
+    ]).catch(() => 'none' as const);
 
     // Additional wait for UI to settle
     await page.waitForTimeout(500);
 
-    // Check current state - don't use hard assertion that can fail
+    // Check current state
     const currentCount = await page.locator('[data-testid="product-card"]').count();
     const noResults = await page.getByTestId('no-results').isVisible().catch(() => false);
     const urlHasSearch = page.url().includes('search=');
+    const inputValue = await searchInput.inputValue();
 
     // Log the search outcome for debugging
     console.log(`[nonsense-search] Signal: ${searchSignal}, Count: ${initialCount}→${currentCount}, NoResults: ${noResults}, URL: ${urlHasSearch}`);
 
-    // SUCCESS CRITERIA (any of these is acceptable):
-    // 1. No products shown (ideal case for nonsense search)
-    // 2. Product count decreased
-    // 3. no-results element visible
-    // 4. URL has search param (search was processed, even if demo fallback returned products)
-    // 5. Search signal received (API or URL changed)
-    const searchWorked =
-      currentCount === 0 ||
-      currentCount < initialCount ||
-      noResults ||
-      urlHasSearch ||
-      searchSignal === 'api' ||
-      searchSignal === 'url';
+    // HARD INVARIANT 1: Input must retain the typed value
+    expect(inputValue).toContain(searchQuery);
 
-    if (searchWorked) {
-      // Search was processed - verify expected state
-      if (currentCount === 0) {
-        await expect(page.getByTestId('no-results')).toBeVisible({ timeout: 5000 });
-      }
-    } else {
-      // Search didn't appear to work - this is acceptable in CI with demo fallback
-      // Log warning but don't fail the test
-      console.log('⚠️ [CI-FLAKE-TOLERANT] Nonsense search did not filter - demo fallback likely active');
+    // HARD INVARIANT 2: Search must have been processed (API call OR URL change)
+    // This ensures the search functionality actually works, even if demo fallback returns all products
+    const searchWasProcessed = searchSignal === 'api' || searchSignal === 'url' || urlHasSearch;
+    expect(searchWasProcessed).toBe(true);
+
+    // SOFT CHECK: If search actually filtered, verify expected state
+    if (currentCount === 0) {
+      await expect(page.getByTestId('no-results')).toBeVisible({ timeout: 5000 });
+    } else if (currentCount === initialCount && !noResults) {
+      // Demo fallback returned all products - log but don't fail
+      console.log('ℹ️ [DEMO-FALLBACK] Search processed but demo returned all products');
     }
-
-    // SOFT ASSERTION: Test passes as long as search input was functional
-    // The actual filtering behavior depends on backend/demo mode
-    expect(searchInput).toBeTruthy();
   });
 
 test('filters and search - category filter', async ({ page }) => {
