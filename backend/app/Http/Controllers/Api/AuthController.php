@@ -160,16 +160,93 @@ class AuthController extends Controller
      */
     public function profile(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Include default shipping address
+        $defaultAddress = $user->addresses()
+            ->where('type', 'shipping')
+            ->orWhere('type', 'default')
+            ->first();
+
         return response()->json([
             'user' => [
-                'id' => $request->user()->id,
-                'name' => $request->user()->name,
-                'email' => $request->user()->email,
-                'role' => $request->user()->role,
-                'email_verified_at' => $request->user()->email_verified_at,
-                'created_at' => $request->user()->created_at,
-                'updated_at' => $request->user()->updated_at,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'email_verified_at' => $user->email_verified_at,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
             ],
+            // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Default shipping address for checkout
+            'shipping_address' => $defaultAddress ? [
+                'name' => $defaultAddress->name,
+                'line1' => $defaultAddress->line1,
+                'line2' => $defaultAddress->line2,
+                'city' => $defaultAddress->city,
+                'postal_code' => $defaultAddress->postal_code,
+                'country' => $defaultAddress->country,
+                'phone' => $defaultAddress->phone,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Get user's default shipping address
+     * Used for checkout postal code pre-fill
+     */
+    public function shippingAddress(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Try to get shipping address, fallback to most recent order's address
+        $address = $user->addresses()
+            ->where('type', 'shipping')
+            ->orWhere('type', 'default')
+            ->first();
+
+        if (!$address) {
+            // Fallback: Get address from most recent order
+            $lastOrder = $user->orders()
+                ->whereNotNull('shipping_address')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($lastOrder && $lastOrder->shipping_address) {
+                $shippingAddress = is_array($lastOrder->shipping_address)
+                    ? $lastOrder->shipping_address
+                    : json_decode($lastOrder->shipping_address, true);
+
+                return response()->json([
+                    'address' => [
+                        'name' => $shippingAddress['name'] ?? $user->name,
+                        'line1' => $shippingAddress['line1'] ?? '',
+                        'city' => $shippingAddress['city'] ?? '',
+                        'postal_code' => $shippingAddress['postal_code'] ?? '',
+                        'country' => $shippingAddress['country'] ?? 'GR',
+                        'phone' => $shippingAddress['phone'] ?? '',
+                    ],
+                    'source' => 'last_order',
+                ]);
+            }
+
+            return response()->json([
+                'address' => null,
+                'source' => null,
+            ]);
+        }
+
+        return response()->json([
+            'address' => [
+                'name' => $address->name,
+                'line1' => $address->line1,
+                'line2' => $address->line2,
+                'city' => $address->city,
+                'postal_code' => $address->postal_code,
+                'country' => $address->country,
+                'phone' => $address->phone,
+            ],
+            'source' => 'saved_address',
         ]);
     }
 }

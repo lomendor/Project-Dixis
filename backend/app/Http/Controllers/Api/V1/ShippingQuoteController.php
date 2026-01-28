@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Pass 50: Shipping quote API for zone-based pricing
  * Pass ORDER-SHIPPING-SPLIT-01: Added per-producer cart quote endpoint
+ * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
  */
 class ShippingQuoteController extends Controller
 {
@@ -24,6 +25,7 @@ class ShippingQuoteController extends Controller
     {
         $this->shippingService = $shippingService;
     }
+
     // Fallback prices if zone lookup fails (backwards compatible with Pass 48)
     private const FALLBACK_PRICES = [
         'HOME' => 3.50,
@@ -31,11 +33,28 @@ class ShippingQuoteController extends Controller
         'PICKUP' => 0.00,
     ];
 
-    // Free shipping threshold (€)
-    private const FREE_SHIPPING_THRESHOLD = 35.00;
-
     // Default weight if not provided (kg)
     private const DEFAULT_WEIGHT_KG = 1.0;
+
+    /**
+     * Get the free shipping threshold for a producer.
+     * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold with fallback to config default.
+     */
+    private function getProducerThreshold(?Producer $producer): float
+    {
+        if ($producer && $producer->free_shipping_threshold_eur !== null) {
+            return (float) $producer->free_shipping_threshold_eur;
+        }
+        return (float) config('shipping.default_free_shipping_threshold_eur', 35.00);
+    }
+
+    /**
+     * Get the default free shipping threshold from config.
+     */
+    private function getDefaultThreshold(): float
+    {
+        return (float) config('shipping.default_free_shipping_threshold_eur', 35.00);
+    }
 
     /**
      * POST /api/v1/shipping/quote
@@ -71,15 +90,16 @@ class ShippingQuoteController extends Controller
             ]);
         }
 
-        // Check free shipping threshold
-        if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+        // Check free shipping threshold (uses system default for non-producer-specific quotes)
+        $defaultThreshold = $this->getDefaultThreshold();
+        if ($subtotal >= $defaultThreshold) {
             return response()->json([
                 'price_eur' => 0.00,
                 'zone_name' => null,
                 'method' => $method,
                 'free_shipping' => true,
                 'free_shipping_reason' => 'threshold',
-                'threshold' => self::FREE_SHIPPING_THRESHOLD,
+                'threshold' => $defaultThreshold,
                 'source' => 'threshold',
             ]);
         }
@@ -200,6 +220,7 @@ class ShippingQuoteController extends Controller
                 $producerGroups[$producerId] = [
                     'producer_id' => $producerId,
                     'producer_name' => $producer?->name ?? 'Unknown Producer',
+                    'producer' => $producer, // Store producer object for threshold lookup
                     'items' => [],
                     'subtotal' => 0,
                     'weight_grams' => 0,
@@ -235,6 +256,10 @@ class ShippingQuoteController extends Controller
             $subtotal = round($group['subtotal'], 2);
             $weightKg = $group['weight_grams'] / 1000;
 
+            // Get per-producer threshold
+            $producer = $group['producer'] ?? null;
+            $threshold = $this->getProducerThreshold($producer);
+
             // PICKUP is always free
             if ($isPickup) {
                 $producersResult[] = [
@@ -244,6 +269,7 @@ class ShippingQuoteController extends Controller
                     'shipping_cost' => 0.00,
                     'is_free' => true,
                     'free_reason' => 'pickup',
+                    'threshold_eur' => $threshold,
                     'zone' => null,
                     'weight_grams' => $group['weight_grams'],
                 ];
@@ -251,7 +277,7 @@ class ShippingQuoteController extends Controller
             }
 
             // Free shipping if above threshold (per producer)
-            if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+            if ($subtotal >= $threshold) {
                 $producersResult[] = [
                     'producer_id' => $producerId,
                     'producer_name' => $group['producer_name'],
@@ -259,7 +285,7 @@ class ShippingQuoteController extends Controller
                     'shipping_cost' => 0.00,
                     'is_free' => true,
                     'free_reason' => 'threshold',
-                    'threshold' => self::FREE_SHIPPING_THRESHOLD,
+                    'threshold_eur' => $threshold,
                     'zone' => $zoneName,
                     'weight_grams' => $group['weight_grams'],
                 ];
@@ -290,6 +316,7 @@ class ShippingQuoteController extends Controller
                 'shipping_cost' => $shippingCost,
                 'is_free' => $shippingCost === 0.0,
                 'free_reason' => null,
+                'threshold_eur' => $threshold,
                 'zone' => $zoneName,
                 'weight_grams' => $group['weight_grams'],
             ];

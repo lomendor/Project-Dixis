@@ -191,6 +191,8 @@ Route::prefix('v1/auth')->group(function () {
         Route::post('logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
         Route::post('logout-all', [App\Http\Controllers\Api\AuthController::class, 'logoutAll']);
         Route::get('profile', [App\Http\Controllers\Api\AuthController::class, 'profile']);
+        // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Get user's default shipping address for checkout
+        Route::get('shipping-address', [App\Http\Controllers\Api\AuthController::class, 'shippingAddress']);
     });
 });
 

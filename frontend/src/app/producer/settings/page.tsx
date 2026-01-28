@@ -20,6 +20,8 @@ interface SettingsFormData {
   tax_id: string;
   tax_office: string;
   social_media: string[];
+  // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
+  free_shipping_threshold_eur: string; // String for form input, converted on submit
 }
 
 export default function ProducerSettingsPage() {
@@ -54,6 +56,7 @@ function ProducerSettingsContent() {
     tax_id: '',
     tax_office: '',
     social_media: [''],
+    free_shipping_threshold_eur: '', // Empty means use system default
   });
 
   // Load current producer data
@@ -80,6 +83,10 @@ function ProducerSettingsContent() {
           social_media: producer.social_media && producer.social_media.length > 0
             ? producer.social_media
             : [''],
+          // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Load per-producer threshold
+          free_shipping_threshold_eur: producer.free_shipping_threshold_eur != null
+            ? String(producer.free_shipping_threshold_eur)
+            : '',
         });
         setLoading(false);
       })
@@ -96,10 +103,14 @@ function ProducerSettingsContent() {
     setBusy(true);
 
     try {
-      // Filter out empty social media links
+      // Filter out empty social media links and convert threshold to number or null
       const cleanedData = {
         ...formData,
         social_media: formData.social_media.filter((link) => link.trim() !== ''),
+        // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Convert threshold to number or null
+        free_shipping_threshold_eur: formData.free_shipping_threshold_eur.trim() !== ''
+          ? parseFloat(formData.free_shipping_threshold_eur)
+          : null,
       };
 
       const response = await fetch('/api/v1/producer/profile', {
@@ -385,6 +396,32 @@ function ProducerSettingsContent() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="π.χ. Κρήτη, Ελλάδα"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping Settings - Pass PRODUCER-THRESHOLD-POSTALCODE-01 */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Ρυθμίσεις Αποστολής</h2>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="free_shipping_threshold_eur" className="block text-sm font-medium text-gray-700 mb-1">
+                    Όριο Δωρεάν Αποστολής (€)
+                  </label>
+                  <input
+                    id="free_shipping_threshold_eur"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="9999.99"
+                    value={formData.free_shipping_threshold_eur}
+                    onChange={(e) => setFormData({ ...formData, free_shipping_threshold_eur: e.target.value })}
+                    className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="35.00"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    Αφήστε κενό για χρήση του προεπιλεγμένου ορίου (€35). Οι πελάτες θα έχουν δωρεάν αποστολή όταν η παραγγελία τους από εσάς ξεπερνά αυτό το ποσό.
+                  </p>
                 </div>
               </div>
             </div>

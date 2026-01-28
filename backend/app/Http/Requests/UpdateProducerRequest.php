@@ -45,6 +45,8 @@ class UpdateProducerRequest extends FormRequest
             'verified' => 'nullable|boolean',
             'is_verified' => 'nullable|boolean',
             'uses_custom_shipping_rates' => 'nullable|boolean',
+            // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
+            'free_shipping_threshold_eur' => 'nullable|numeric|min:0|max:9999.99',
             'status' => 'nullable|string|in:active,inactive,pending',
             'is_active' => 'nullable|boolean',
             'user_id' => 'nullable|exists:users,id',

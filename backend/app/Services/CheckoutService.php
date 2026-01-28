@@ -13,6 +13,7 @@ use App\Exceptions\ShippingChangedException;
 /**
  * Pass MP-ORDERS-SPLIT-01: Checkout Service
  * Pass SHIP-CALC-V2-01: Wire ShippingService for weight/zone-based calculation
+ * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
  *
  * Handles multi-producer order splitting. Creates a CheckoutSession parent
  * with N child Orders (one per producer) when cart has items from multiple producers.
@@ -21,12 +22,21 @@ class CheckoutService
 {
     private ShippingService $shippingService;
 
-    // V1 Shipping calculation constants - UNCHANGED POLICY
-    private const FREE_SHIPPING_THRESHOLD = 35.00; // €35 per producer
-
     public function __construct(ShippingService $shippingService)
     {
         $this->shippingService = $shippingService;
+    }
+
+    /**
+     * Get the free shipping threshold for a producer.
+     * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold with fallback to config default.
+     */
+    private function getProducerThreshold(?Producer $producer): float
+    {
+        if ($producer && $producer->free_shipping_threshold_eur !== null) {
+            return (float) $producer->free_shipping_threshold_eur;
+        }
+        return (float) config('shipping.default_free_shipping_threshold_eur', 35.00);
     }
 
     /**
@@ -84,9 +94,10 @@ class CheckoutService
                 continue;
             }
 
+            $producer = Producer::find($producerId);
             $producerSubtotal = collect($items)->sum('total_price');
             $itemsArray = collect($items)->toArray();
-            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingCost = $this->calculateProducerShipping($itemsArray, $producerSubtotal, $options, $isPickup, $producer);
             $totalShipping += $shippingCost;
         }
 
@@ -133,8 +144,9 @@ class CheckoutService
 
             // Calculate shipping for this producer using ShippingService
             // Pass ORDER-SHIPPING-SPLIT-01: Get full shipping details for lock fields
+            // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold
             $itemsArray = collect($items)->toArray();
-            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup, $producer);
             $shippingCost = $shippingDetails['cost'];
             $freeShippingApplied = $shippingCost === 0.0;
 
@@ -245,8 +257,9 @@ class CheckoutService
 
             // Calculate shipping using ShippingService
             // Pass ORDER-SHIPPING-SPLIT-01: Get full shipping details for lock fields
+            // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold
             $itemsArray = collect($items)->toArray();
-            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup);
+            $shippingDetails = $this->calculateProducerShippingWithDetails($itemsArray, $producerSubtotal, $options, $isPickup, $producer);
             $shippingCost = $shippingDetails['cost'];
             $freeShippingApplied = $shippingCost === 0.0;
 
@@ -328,15 +341,17 @@ class CheckoutService
      * Calculate shipping cost for a producer using ShippingService.
      *
      * Pass SHIP-CALC-V2-01: Use weight/zone-based calculation.
+     * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold support.
      */
-    private function calculateProducerShipping(array $items, float $subtotal, array $options, bool $isPickup): float
+    private function calculateProducerShipping(array $items, float $subtotal, array $options, bool $isPickup, ?Producer $producer = null): float
     {
         if ($isPickup) {
             return 0.0;
         }
 
-        // Free shipping if above threshold
-        if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+        // Free shipping if above threshold (per-producer)
+        $threshold = $this->getProducerThreshold($producer);
+        if ($subtotal >= $threshold) {
             return 0.0;
         }
 
@@ -365,10 +380,11 @@ class CheckoutService
     /**
      * Calculate shipping cost with full details for lock fields.
      * Pass ORDER-SHIPPING-SPLIT-01: Returns zone, weight_grams alongside cost.
+     * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer threshold support.
      *
-     * @return array{cost: float, zone: string|null, weight_grams: int}
+     * @return array{cost: float, zone: string|null, weight_grams: int, threshold_eur: float}
      */
-    private function calculateProducerShippingWithDetails(array $items, float $subtotal, array $options, bool $isPickup): array
+    private function calculateProducerShippingWithDetails(array $items, float $subtotal, array $options, bool $isPickup, ?Producer $producer = null): array
     {
         // Calculate total weight from items (default 0.5kg per item)
         $totalWeightKg = 0.0;
@@ -387,20 +403,25 @@ class CheckoutService
         // Get zone from postal code
         $zoneCode = $this->shippingService->getZoneByPostalCode($postalCode);
 
+        // Get producer-specific threshold
+        $threshold = $this->getProducerThreshold($producer);
+
         if ($isPickup) {
             return [
                 'cost' => 0.0,
                 'zone' => 'PICKUP',
                 'weight_grams' => $weightGrams,
+                'threshold_eur' => $threshold,
             ];
         }
 
-        // Free shipping if above threshold
-        if ($subtotal >= self::FREE_SHIPPING_THRESHOLD) {
+        // Free shipping if above threshold (per-producer)
+        if ($subtotal >= $threshold) {
             return [
                 'cost' => 0.0,
                 'zone' => $zoneCode,
                 'weight_grams' => $weightGrams,
+                'threshold_eur' => $threshold,
             ];
         }
 
@@ -411,6 +432,7 @@ class CheckoutService
             'cost' => $result['cost_eur'],
             'zone' => $zoneCode,
             'weight_grams' => $weightGrams,
+            'threshold_eur' => $threshold,
         ];
     }
 }

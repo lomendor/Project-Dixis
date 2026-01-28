@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-01-18 (Pass EMAIL-VERIFY-01)
+**Updated**: 2026-01-28 (Pass PRODUCER-THRESHOLD-POSTALCODE-01)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PRODUCER-THRESHOLD-POSTALCODE-01** — Per-producer free shipping threshold + checkout address prefill ✅
 - **EMAIL-VERIFY-01** — Email verification flow (backend + frontend + tests) ✅
 - **PROC-01** — Consolidate entry points into AGENT-STATE.md ✅
 - **PERF-IPV4-PREFER-01** — Fix 9.5s backend latency (9.3s → 70ms, ~100x faster) ✅

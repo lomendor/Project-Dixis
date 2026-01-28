@@ -864,6 +864,22 @@ class ApiClient {
     });
   }
 
+  // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Get user's saved shipping address for checkout
+  async getShippingAddress(): Promise<{
+    address: {
+      name?: string;
+      line1?: string;
+      line2?: string;
+      city?: string;
+      postal_code?: string;
+      country?: string;
+      phone?: string;
+    } | null;
+    source: 'saved_address' | 'last_order' | null;
+  }> {
+    return this.request('auth/shipping-address');
+  }
+
   // Pass 61: Admin orders list with filters/pagination/stats
   async getAdminOrders(params?: {
     status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
