@@ -1,34 +1,39 @@
 # Summary: Pass CI-HYGIENE-REPAIR-02
 
 **Date**: 2026-01-28
-**PR**: #TBD
-**Result**: IN REVIEW
+**PR**: #2521
+**Result**: ✅ MERGED
 
 ## What
 
-Damage audit repair: harden overly-lenient test + restore prod-facts monitoring.
+Damage audit repair: harden overly-lenient tests + restore prod-facts monitoring.
 
 ## Why
 
-1. PR #2518 made `filters-search.spec.ts` test too soft - passed even when nothing happened
+1. PR #2518 made `filters-search.spec.ts` tests too soft - passed even when nothing happened
 2. `prod-facts.yml` was disabled due to ghost workflow triggers - lost daily health collection
 
 ## How
 
 ### (A) Test Hardening
 
-Changed `should show no results for nonsense search query` from:
-- **Before**: Only `expect(searchInput).toBeTruthy()` - passes always
-- **After**: Two hard invariants:
-  1. `expect(inputValue).toContain(searchQuery)` - input retains value
-  2. `expect(searchWasProcessed).toBe(true)` - API call OR URL change occurred
+Changed BOTH search tests from lenient to meaningful:
+
+**Tests fixed**:
+- `should apply search filter with Greek text normalization` (lines 16-103)
+- `should show no results for nonsense search query` (lines 111-175)
+
+**Before**: Only `expect(searchInput).toBeTruthy()` - passes always
+**After**: Two hard invariants per test:
+1. `expect(inputValue).toContain(searchQuery)` - input retains value
+2. `expect(searchWasProcessed).toBe(true)` - API call OR URL change occurred
 
 Demo fallback behavior is still tolerated (logs info) but search functionality is verified.
 
 ### (B) Prod Facts v2
 
 Created new workflow file `prod-facts-v2.yml`:
-- Fresh workflow ID (avoids ghost entry issues)
+- Fresh workflow ID (227760108)
 - Triggers: `schedule` (daily 07:00 UTC) + `workflow_dispatch` only
 - Job-level guard: `if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'`
 - Same jobs/steps as original
@@ -37,22 +42,22 @@ Created new workflow file `prod-facts-v2.yml`:
 
 | File | Change |
 |------|--------|
-| `frontend/tests/e2e/filters-search.spec.ts` | Add meaningful invariants |
+| `frontend/tests/e2e/filters-search.spec.ts` | Add meaningful invariants to BOTH search tests |
 | `.github/workflows/prod-facts-v2.yml` | New clean schedule-only workflow |
 | `docs/OPS/STATE.md` | Document pass |
 
 ## Proof
 
 ```
-Before: Test passed with no real assertion
-After: Test requires API/URL signal + input value check
+Before: Tests passed with no real assertion
+After: Tests require API/URL signal + input value check
 ```
 
 ## Evidence
 
-- Damage audit showed PR #2518 test changes were too lenient
-- 5 disabled workflows identified (stale duplicates except prod-facts)
-- prod-facts-v2 created to restore monitoring without ghost triggers
+- CI (main): https://github.com/lomendor/Project-Dixis/actions/runs/21421868908
+- e2e-postgres (main): https://github.com/lomendor/Project-Dixis/actions/runs/21421868913
+- prod-facts-v2 active: workflow ID 227760108
 
 ## Risks & Mitigations
 
