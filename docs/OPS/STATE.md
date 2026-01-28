@@ -9,7 +9,7 @@
 
 ## 2026-01-28 — Pass-PRODUCER-THRESHOLD-POSTALCODE-01: Per-Producer Free Shipping Threshold
 
-**Status**: 🟡 OPEN — PR #2527
+**Status**: ✅ MERGED — PR #2527 (commit `82e871d8`)
 
 **Branch**: `feat/passPRODUCER-THRESHOLD-POSTALCODE-01`
 
