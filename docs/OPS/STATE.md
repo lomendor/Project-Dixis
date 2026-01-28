@@ -9,9 +9,9 @@
 
 ## 2026-01-28 — Pass-CHECKOUT-SHIPPING-DISPLAY-01: Show Shipping Cost in Checkout
 
-**Status**: 🟡 PR #2515 — IN REVIEW
+**Status**: ✅ MERGED & DEPLOYED — PR #2515
 
-**Branch**: `fix/passCHECKOUT-SHIPPING-DISPLAY-01`
+**Merged**: 2026-01-27T23:37:31Z | **Branch**: `fix/passCHECKOUT-SHIPPING-DISPLAY-01` (deleted)
 
 **Problem**: PROD-ACCEPTANCE-01 audit (G5) found checkout page does NOT display shipping costs. Users see subtotal but NO shipping line. API `POST /api/v1/public/shipping/quote` works correctly but checkout UI never calls it.
 
@@ -31,7 +31,9 @@
 - [x] i18n keys added (EL/EN)
 - [x] E2E tests created (7 scenarios)
 - [x] No hardcoded Greek strings in code
-- [ ] CI checks pass
+- [x] CI checks pass (16 SUCCESS)
+- [x] Deploy Frontend (VPS) SUCCESS
+- [x] PROD verification: https://dixis.gr/checkout shows shipping line
 
 **Evidence**: PR https://github.com/lomendor/Project-Dixis/pull/2515
 
