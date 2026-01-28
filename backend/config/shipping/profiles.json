@@ -1,10 +1,12 @@
 {
+  "_NOTICE": "This config file is NOT used by runtime. See CheckoutService.php for actual shipping logic. Kept for future config-driven shipping feature.",
+  "_RUNTIME_THRESHOLD": "FREE_SHIPPING_THRESHOLD = 35.00 EUR per producer (CheckoutService.php:25)",
   "default_profile": {
     "name": "Default Shipping Profile",
     "description": "Standard shipping rates using zone-based pricing",
     "type": "zone_based",
     "enabled": true,
-    "free_shipping_threshold": 50.00,
+    "free_shipping_threshold": 35.00,
     "pickup_available": true,
     "pickup_locations": [
       {

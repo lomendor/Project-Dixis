@@ -9,7 +9,7 @@
 
 ## 2026-01-28 — Pass-ORDER-SHIPPING-SPLIT-01: Per-Producer Shipping Breakdown
 
-**Status**: ✅ CI GREEN — PR #2524
+**Status**: ✅ MERGED — PR #2524 (commit `57850e51`)
 
 **Branch**: `feat/passORDER-SHIPPING-SPLIT-01`
 
@@ -62,6 +62,10 @@
 - [x] Lock fields populated on order placement
 
 **Evidence**: https://github.com/lomendor/Project-Dixis/pull/2524
+
+**Post-Merge Note**: Backend deploy pending. Frontend live, but `/api/v1/public/shipping/quote-cart` returns 404 until backend is deployed. Fallback to legacy quote endpoint works.
+
+**Config Cleanup**: Legacy `profiles.json` had €50 threshold (unused). Aligned to €35 with notice in Pass SHIPPING-THRESHOLD-CONFIG-ALIGN-01.
 
 ---
 

@@ -267,11 +267,18 @@ class ShippingQuoteController extends Controller
             }
 
             // Calculate shipping using ShippingService
-            $shippingResult = $this->shippingService->calculateShippingCost($weightKg, $zoneCode);
-            $shippingCost = round($shippingResult['cost_eur'], 2);
+            try {
+                $shippingResult = $this->shippingService->calculateShippingCost($weightKg, $zoneCode);
+                $shippingCost = round($shippingResult['cost_eur'], 2);
+            } catch (\Exception $e) {
+                // Zone calculation failed - mark as unavailable
+                $hasUnavailableZone = true;
+                $unavailableProducers[] = $group['producer_name'];
+                continue;
+            }
 
-            // Check if zone is unavailable (fail-safe)
-            if ($shippingResult['source'] === 'error' || ($zoneCode === 'UNKNOWN' && !$zone)) {
+            // Check if zone is unavailable (fail-safe for unknown zones)
+            if ($zoneCode === 'UNKNOWN' && !$zone) {
                 $hasUnavailableZone = true;
                 $unavailableProducers[] = $group['producer_name'];
             }
