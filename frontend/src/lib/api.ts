@@ -679,7 +679,25 @@ class ApiClient {
   }
 
   async getProducerStats(): Promise<ProducerStats> {
-    return this.request<ProducerStats>('producer/dashboard/stats');
+    // Backend canonical endpoint is /producer/dashboard/kpi (authenticated).
+    // FE previously called /producer/dashboard/stats which does not exist (404).
+    const kpi = await this.request<{
+      total_products?: number;
+      active_products: number;
+      total_orders: number;
+      revenue: number | string;
+    }>('producer/dashboard/kpi');
+
+    const totalOrders = Number(kpi.total_orders ?? 0);
+    const revenueNum = typeof kpi.revenue === 'string' ? Number(kpi.revenue) : Number(kpi.revenue ?? 0);
+    const avg = totalOrders > 0 ? (revenueNum / totalOrders) : 0;
+
+    return {
+      total_orders: totalOrders,
+      total_revenue: String(revenueNum),
+      active_products: Number(kpi.active_products ?? 0),
+      average_order_value: String(avg),
+    };
   }
 
   async getProducerTopProducts(limit?: number): Promise<{ data: Product[] }> {
