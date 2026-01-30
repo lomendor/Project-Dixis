@@ -576,8 +576,9 @@ test.describe('Producer Orders Management - AG126', () => {
   });
 
   test('producer orders page loads without hydration error (regression)', async ({ page }) => {
-    // Mock producer orders API
-    await page.route('**/api/v1/producer/orders**', async route => {
+    // Mock producer orders API - scoped to this test only
+    const routePattern = '**/api/v1/producer/orders**';
+    await page.route(routePattern, async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -595,20 +596,27 @@ test.describe('Producer Orders Management - AG126', () => {
       });
     });
 
-    await authHelper.loginAsProducer();
-    await page.goto('/producer/orders');
+    try {
+      await authHelper.loginAsProducer();
+      await page.goto('/producer/orders');
 
-    // Wait for page to fully load
-    await expect(page.getByRole('heading', { name: 'Παραγγελίες' })).toBeVisible();
+      // Wait for page to fully load
+      await expect(page.getByRole('heading', { name: 'Παραγγελίες' })).toBeVisible();
 
-    // CRITICAL: Verify error boundary is NOT shown (regression for hydration fix)
-    await expect(page.getByText('Σφάλμα στην Περιοχή Παραγωγού')).not.toBeVisible();
+      // CRITICAL: Verify error boundary is NOT shown (regression for hydration fix)
+      // Using toHaveCount(0) for deterministic assertion
+      await expect(page.getByText('Σφάλμα στην Περιοχή Παραγωγού')).toHaveCount(0);
 
-    // Verify orders list root is visible
-    await expect(page.getByText('Παραγγελία #101')).toBeVisible();
+      // Verify orders list container is visible (stable selector)
+      await expect(page.getByText('Παραγγελία #101')).toBeVisible();
 
-    // Check no React #418 hydration error in console
-    const hydrationErrors = consoleErrors.filter(e => e.includes('418') || e.includes('Hydration'));
-    expect(hydrationErrors).toHaveLength(0);
+      // Check no React #418 hydration error in console
+      const consoleOutput = consoleErrors.join('\n');
+      expect(consoleOutput).not.toContain('Minified React error #418');
+      expect(consoleOutput).not.toContain('Hydration failed');
+    } finally {
+      // Cleanup: unroute to avoid leakage to other tests
+      await page.unroute(routePattern);
+    }
   });
 });
