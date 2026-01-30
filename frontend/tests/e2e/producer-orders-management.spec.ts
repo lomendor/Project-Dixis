@@ -619,4 +619,75 @@ test.describe('Producer Orders Management - AG126', () => {
       await page.unroute(routePattern);
     }
   });
+
+  test('producer orders page handles snake_case order_items from API (regression)', async ({ page }) => {
+    // Mock orders with snake_case order_items (as backend actually returns)
+    const snakeCaseOrders = [
+      {
+        id: 201,
+        user_id: 301,
+        status: 'pending',
+        payment_status: 'completed',
+        payment_method: 'card',
+        subtotal: '25.00',
+        shipping_cost: '5.00',
+        total: '30.00',
+        currency: 'EUR',
+        created_at: '2025-12-01T10:00:00Z',
+        updated_at: '2025-12-01T10:00:00Z',
+        user: { id: 301, name: 'Snake Case Test', email: 'snake@test.com' },
+        // CRITICAL: Use snake_case order_items (not orderItems)
+        order_items: [
+          {
+            id: 2001,
+            product_id: 10,
+            quantity: 1,
+            unit_price: '25.00',
+            total_price: '25.00',
+            product_name: 'Snake Case Product',
+            product_unit: 'piece',
+            product: { name: 'Snake Case Product' }
+          }
+        ]
+      }
+    ];
+
+    const routePattern = '**/api/v1/producer/orders**';
+    await page.route(routePattern, async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          orders: snakeCaseOrders,
+          meta: { total: 1, pending: 1, processing: 0, shipped: 0, delivered: 0 }
+        })
+      });
+    });
+
+    try {
+      await authHelper.loginAsProducer();
+      await page.goto('/producer/orders');
+
+      // Wait for page to fully load
+      await expect(page.getByRole('heading', { name: 'Παραγγελίες' })).toBeVisible();
+
+      // CRITICAL: Verify error boundary is NOT shown
+      await expect(page.getByText('Σφάλμα στην Περιοχή Παραγωγού')).toHaveCount(0);
+
+      // Verify order card renders with product count (uses orderItems.length)
+      await expect(page.getByText('Παραγγελία #201')).toBeVisible();
+      await expect(page.getByText('Προϊόντα (1)')).toBeVisible();
+
+      // Verify product name renders (from order_items array)
+      await expect(page.getByText('Snake Case Product')).toBeVisible();
+
+      // Check no TypeError in console (reading 'length' of undefined)
+      const consoleOutput = consoleErrors.join('\n');
+      expect(consoleOutput).not.toContain("Cannot read properties of undefined (reading 'length')");
+      expect(consoleOutput).not.toContain('Minified React error');
+    } finally {
+      await page.unroute(routePattern);
+    }
+  });
 });

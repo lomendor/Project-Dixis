@@ -131,6 +131,29 @@ export interface OrderItem {
   producer?: OrderItemProducer; // Producer info for marketplace grouping
 }
 
+// Raw API response may use snake_case (order_items) or camelCase (orderItems)
+export interface ProducerOrderRaw {
+  id: number;
+  user_id: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  payment_status: string;
+  payment_method: string;
+  subtotal: string;
+  shipping_cost: string;
+  total: string;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  orderItems?: OrderItem[];
+  order_items?: OrderItem[];
+}
+
+// Normalized type always has orderItems (camelCase)
 export interface ProducerOrder {
   id: number;
   user_id: number;
@@ -769,24 +792,48 @@ class ApiClient {
   // Producer order management methods
   async getProducerOrders(status?: 'pending' | 'processing' | 'shipped' | 'delivered'): Promise<ProducerOrdersResponse> {
     const endpoint = `producer/orders${status ? `?status=${status}` : ''}`;
-    return this.request<ProducerOrdersResponse>(endpoint);
+    const raw = await this.request<{ success: boolean; orders: ProducerOrderRaw[]; meta: ProducerOrdersResponse['meta'] }>(endpoint);
+
+    // Normalize snake_case (order_items) to camelCase (orderItems)
+    const orders: ProducerOrder[] = raw.orders.map(order => ({
+      ...order,
+      orderItems: order.orderItems ?? order.order_items ?? [],
+    }));
+
+    return { ...raw, orders };
   }
 
   async getProducerOrder(orderId: number): Promise<{ success: boolean; order: ProducerOrder }> {
-    return this.request<{ success: boolean; order: ProducerOrder }>(`producer/orders/${orderId}`);
+    const raw = await this.request<{ success: boolean; order: ProducerOrderRaw }>(`producer/orders/${orderId}`);
+
+    // Normalize snake_case (order_items) to camelCase (orderItems)
+    const order: ProducerOrder = {
+      ...raw.order,
+      orderItems: raw.order.orderItems ?? raw.order.order_items ?? [],
+    };
+
+    return { ...raw, order };
   }
 
   async updateProducerOrderStatus(
     orderId: number,
     status: 'processing' | 'shipped' | 'delivered'
   ): Promise<{ success: boolean; message: string; order: ProducerOrder }> {
-    return this.request<{ success: boolean; message: string; order: ProducerOrder }>(
+    const raw = await this.request<{ success: boolean; message: string; order: ProducerOrderRaw }>(
       `producer/orders/${orderId}/status`,
       {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       }
     );
+
+    // Normalize snake_case (order_items) to camelCase (orderItems)
+    const order: ProducerOrder = {
+      ...raw.order,
+      orderItems: raw.order.orderItems ?? raw.order.order_items ?? [],
+    };
+
+    return { ...raw, order };
   }
 
   // Pass 57: Export producer orders to CSV
