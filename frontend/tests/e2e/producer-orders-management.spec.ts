@@ -101,10 +101,19 @@ const mockOrders = [
 
 test.describe('Producer Orders Management - AG126', () => {
   let authHelper: AuthHelper;
+  let consoleErrors: string[] = [];
 
   test.beforeEach(async ({ page }) => {
     authHelper = new AuthHelper(page);
     await authHelper.clearAuthState();
+
+    // Capture console errors for hydration regression check
+    consoleErrors = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
 
     // Mock producer authentication
     await page.route('**/api/v1/auth/profile', async route => {
@@ -564,5 +573,50 @@ test.describe('Producer Orders Management - AG126', () => {
 
     // Verify retry button is visible
     await expect(page.getByRole('button', { name: 'Επανάληψη' })).toBeVisible();
+  });
+
+  test('producer orders page loads without hydration error (regression)', async ({ page }) => {
+    // Mock producer orders API - scoped to this test only
+    const routePattern = '**/api/v1/producer/orders**';
+    await page.route(routePattern, async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          orders: mockOrders,
+          meta: {
+            total: mockOrders.length,
+            pending: 1,
+            processing: 1,
+            shipped: 1,
+            delivered: 0
+          }
+        })
+      });
+    });
+
+    try {
+      await authHelper.loginAsProducer();
+      await page.goto('/producer/orders');
+
+      // Wait for page to fully load
+      await expect(page.getByRole('heading', { name: 'Παραγγελίες' })).toBeVisible();
+
+      // CRITICAL: Verify error boundary is NOT shown (regression for hydration fix)
+      // Using toHaveCount(0) for deterministic assertion
+      await expect(page.getByText('Σφάλμα στην Περιοχή Παραγωγού')).toHaveCount(0);
+
+      // Verify orders list container is visible (stable selector)
+      await expect(page.getByText('Παραγγελία #101')).toBeVisible();
+
+      // Check no React #418 hydration error in console
+      const consoleOutput = consoleErrors.join('\n');
+      expect(consoleOutput).not.toContain('Minified React error #418');
+      expect(consoleOutput).not.toContain('Hydration failed');
+    } finally {
+      // Cleanup: unroute to avoid leakage to other tests
+      await page.unroute(routePattern);
+    }
   });
 });

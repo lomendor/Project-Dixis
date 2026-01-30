@@ -37,6 +37,12 @@ export default function ProducerOrdersPage() {
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Hydration fix: defer date rendering until client-side mount
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     loadOrders();
@@ -98,15 +104,21 @@ export default function ProducerOrdersPage() {
             <p className="text-sm text-gray-600 mt-1">
               {order.user?.name || t('producerOrders.guest')}
             </p>
-            <p className="text-sm text-gray-500">
-              {new Date(order.created_at).toLocaleDateString('el-GR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
+            <time
+              dateTime={order.created_at}
+              suppressHydrationWarning
+              className="block text-sm text-gray-500"
+            >
+              {mounted
+                ? new Date(order.created_at).toLocaleString('el-GR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : ''}
+            </time>
           </div>
           <div className="text-right">
             <span
