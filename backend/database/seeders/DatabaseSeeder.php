@@ -92,7 +92,8 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
-        $products = Product::take(3)->get();
+        // Load products with producer relationship to get producer_id
+        $products = Product::with('producer')->take(3)->get();
 
         if ($products->count() > 0) {
             // Create first demo order
@@ -107,13 +108,14 @@ class DatabaseSeeder extends Seeder
                 'shipping_method' => 'HOME',
             ]);
 
-            // Add order items
+            // Add order items - ALWAYS set producer_id from product
             foreach ($products->take(2) as $index => $product) {
                 $quantity = $index + 1;
                 $unitPrice = $product->price ?? 15.00;
                 OrderItem::create([
                     'order_id' => $order1->id,
                     'product_id' => $product->id,
+                    'producer_id' => $product->producer_id, // CRITICAL: set producer_id
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'total_price' => $quantity * $unitPrice,
@@ -139,6 +141,7 @@ class DatabaseSeeder extends Seeder
                 OrderItem::create([
                     'order_id' => $order2->id,
                     'product_id' => $product->id,
+                    'producer_id' => $product->producer_id, // CRITICAL: set producer_id
                     'quantity' => 1,
                     'unit_price' => $product->price ?? 25.00,
                     'total_price' => $product->price ?? 25.00,
@@ -220,7 +223,7 @@ class DatabaseSeeder extends Seeder
                     'updated_at' => $orderDate->copy()->addHours(rand(1, 48)),
                 ]);
 
-                // Create order items
+                // Create order items - ALWAYS set producer_id from product
                 foreach ($selectedProducts as $product) {
                     $quantity = rand(1, 5);
                     $unitPrice = $product->price;
@@ -230,6 +233,7 @@ class DatabaseSeeder extends Seeder
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $product->id,
+                        'producer_id' => $product->producer_id, // CRITICAL: set producer_id
                         'quantity' => $quantity,
                         'unit_price' => $unitPrice,
                         'total_price' => $totalPrice,
