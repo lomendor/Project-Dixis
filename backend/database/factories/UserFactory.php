@@ -30,6 +30,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role' => 'consumer',
+            'is_seed' => false,
         ];
     }
 
@@ -70,6 +71,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Mark user as a seed/test account (blocked from login).
+     */
+    public function seed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_seed' => true,
         ]);
     }
 }
