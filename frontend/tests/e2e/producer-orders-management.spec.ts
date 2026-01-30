@@ -101,10 +101,19 @@ const mockOrders = [
 
 test.describe('Producer Orders Management - AG126', () => {
   let authHelper: AuthHelper;
+  let consoleErrors: string[] = [];
 
   test.beforeEach(async ({ page }) => {
     authHelper = new AuthHelper(page);
     await authHelper.clearAuthState();
+
+    // Capture console errors for hydration regression check
+    consoleErrors = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
 
     // Mock producer authentication
     await page.route('**/api/v1/auth/profile', async route => {
@@ -564,5 +573,42 @@ test.describe('Producer Orders Management - AG126', () => {
 
     // Verify retry button is visible
     await expect(page.getByRole('button', { name: 'Επανάληψη' })).toBeVisible();
+  });
+
+  test('producer orders page loads without hydration error (regression)', async ({ page }) => {
+    // Mock producer orders API
+    await page.route('**/api/v1/producer/orders**', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          orders: mockOrders,
+          meta: {
+            total: mockOrders.length,
+            pending: 1,
+            processing: 1,
+            shipped: 1,
+            delivered: 0
+          }
+        })
+      });
+    });
+
+    await authHelper.loginAsProducer();
+    await page.goto('/producer/orders');
+
+    // Wait for page to fully load
+    await expect(page.getByRole('heading', { name: 'Παραγγελίες' })).toBeVisible();
+
+    // CRITICAL: Verify error boundary is NOT shown (regression for hydration fix)
+    await expect(page.getByText('Σφάλμα στην Περιοχή Παραγωγού')).not.toBeVisible();
+
+    // Verify orders list root is visible
+    await expect(page.getByText('Παραγγελία #101')).toBeVisible();
+
+    // Check no React #418 hydration error in console
+    const hydrationErrors = consoleErrors.filter(e => e.includes('418') || e.includes('Hydration'));
+    expect(hydrationErrors).toHaveLength(0);
   });
 });
