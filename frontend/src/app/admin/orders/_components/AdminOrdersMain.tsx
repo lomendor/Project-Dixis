@@ -53,7 +53,7 @@ export default function AdminOrdersMain() {
   const [fromDate, setFromDate] = React.useState<string>('');
   const [toDate, setToDate] = React.useState<string>('');
 
-  const [rows, setRows]   = React.useState<Row[]>(LOCAL_DEMO);
+  const [rows, setRows]   = React.useState<Row[]>([]);
   const [facetTotals, setFacetTotals] = React.useState<Record<string, number> | null>(null);
   const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
   const [isFacetLoading, setIsFacetLoading] = React.useState(false);
@@ -129,7 +129,7 @@ export default function AdminOrdersMain() {
   const visible = COLS.filter(c => cols[c.key as ColKey]);
   const grid = visible.map(c=>c.width).join(' ');
 
-  const [count, setCount] = React.useState<number>(LOCAL_DEMO.length);
+  const [count, setCount] = React.useState<number>(0);
   const [usingApi, setUsingApi] = React.useState(false);
 
   const fetchFacets = async () => {
@@ -197,22 +197,26 @@ export default function AdminOrdersMain() {
       const startTime=Date.now();
       try {
         const url = new URL(window.location.href);
-        const useApi = url.searchParams.get('useApi') === '1';
-        setUsingApi(useApi);
+        // Default to API; only use demo when explicitly set via ?mode=demo
+        const forceDemo = url.searchParams.get('mode') === 'demo';
         setErrNote(null);
-        if (!useApi) {
+
+        if (forceDemo) {
+          // Explicit demo mode requested
+          setUsingApi(false);
           let demo = LOCAL_DEMO.filter(o => !active || o.status===active);
           if (q) {
             const qq = q.toLowerCase();
             demo = demo.filter(o => o.id.toLowerCase().includes(qq) || o.customer.toLowerCase().includes(qq));
           }
-          // (τοπικό demo: αγνοούμε from/to για απλότητα δεδομένων)
           const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
           setRows(res); setCount(demo.length);
           const delay1=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay1));
           setIsLoading(false);
           return;
         }
+
+        // Default: fetch from real API
         const qs = new URLSearchParams();
         if (active) qs.set('status', active);
         if (q) qs.set('q', q);
@@ -221,25 +225,29 @@ export default function AdminOrdersMain() {
         qs.set('page', String(page));
         qs.set('pageSize', String(pageSize));
         qs.set('sort', sort);
-        if (mode === 'demo' || mode === 'auto') qs.set('demo','1');
 
-        const res = await fetch(`/api/admin/orders?${qs.toString()}`, { cache:'no-store' });
+        const res = await fetch(`/api/admin/orders?${qs.toString()}`, { cache:'no-store', credentials:'include' });
+        if (res.status === 401 || res.status === 403) {
+          // Unauthenticated - redirect to login
+          setErrNote('Απαιτείται σύνδεση διαχειριστή');
+          setUsingApi(false);
+          setRows([]); setCount(0);
+          const delay2=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay2));
+          setIsLoading(false);
+          return;
+        }
         if (!res.ok) throw new Error(`API ${res.status}`);
         const json = await res.json();
         const items = Array.isArray(json.items) ? json.items as Row[] : [];
         setRows(items); setCount(typeof json.count==='number' ? json.count : items.length);
-        const delay2=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay2));
+        setUsingApi(true);
+        const delay3=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay3));
         setIsLoading(false);
       } catch (e:any) {
         setErrNote(e?.message || 'API error'); setUsingApi(false);
-        let demo = LOCAL_DEMO.filter(o => !active || o.status===active);
-        if (q) {
-          const qq = q.toLowerCase();
-          demo = demo.filter(o => o.id.toLowerCase().includes(qq) || o.customer.toLowerCase().includes(qq));
-        }
-        const start = (page-1)*pageSize; const res = demo.slice(start, start+pageSize);
-        setRows(res); setCount(demo.length);
-        const delay3=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay3));
+        // On API error, show empty state (no demo fallback in production)
+        setRows([]); setCount(0);
+        const delay4=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay4));
         setIsLoading(false);
       }
     };
@@ -283,7 +291,7 @@ export default function AdminOrdersMain() {
 
   return (
     <main style={{padding:16}}>
-      <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες {usingApi ? `(API${mode!=='auto'?':'+mode:''})` : '(τοπικό demo)'}</h2>
+      <h2 style={{margin:'0 0 12px 0'}}>Παραγγελίες{usingApi ? '' : (mode === 'demo' ? ' (demo)' : '')}</h2>
 
       <form onSubmit={onSubmitFilters} style={{display:'flex', gap:12, alignItems:'center', flexWrap:'wrap', margin:'8px 0 12px 0'}}>
         <FilterChips options={options as any} active={active} onChange={onChangeStatus} />
