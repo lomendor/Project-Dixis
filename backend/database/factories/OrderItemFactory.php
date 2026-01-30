@@ -22,15 +22,33 @@ class OrderItemFactory extends Factory
         $unitPrice = fake()->randomFloat(2, 5, 25);
         $totalPrice = $unitPrice * $quantity;
 
+        // Get a product with producer to derive producer_id
+        $product = Product::inRandomOrder()->first() ?? Product::factory()->create();
+
         return [
             'order_id' => Order::factory(),
-            'product_id' => 1, // Will be overridden by seeder with existing products
-            'producer_id' => null, // Will be set by seeder from product's producer
+            'product_id' => $product->id,
+            'producer_id' => $product->producer_id, // CRITICAL: derive from product
             'quantity' => $quantity,
-            'unit_price' => $unitPrice,
-            'total_price' => $totalPrice,
-            'product_name' => fake()->words(2, true),
-            'product_unit' => fake()->randomElement(['kg', 'piece', 'bottle', 'box']),
+            'unit_price' => $product->price ?? $unitPrice,
+            'total_price' => ($product->price ?? $unitPrice) * $quantity,
+            'product_name' => $product->name ?? fake()->words(2, true),
+            'product_unit' => $product->unit ?? fake()->randomElement(['kg', 'piece', 'bottle', 'box']),
         ];
+    }
+
+    /**
+     * Configure the factory to use a specific product.
+     */
+    public function forProduct(Product $product): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'product_id' => $product->id,
+            'producer_id' => $product->producer_id,
+            'product_name' => $product->name,
+            'product_unit' => $product->unit ?? 'piece',
+            'unit_price' => $product->price,
+            'total_price' => $product->price * $attributes['quantity'],
+        ]);
     }
 }

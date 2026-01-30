@@ -12,13 +12,15 @@ class ProductSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * Distributes products across multiple producers for realistic testing.
      */
     public function run(): void
     {
-        // Get the first producer (created in ProducerSeeder)
-        $producer = Producer::first();
+        // Get all producers (created in ProducerSeeder)
+        $producers = Producer::all();
 
-        if (! $producer) {
+        if ($producers->isEmpty()) {
             $this->command->warn('No producers found. Skipping product seeding.');
 
             return;
@@ -29,12 +31,20 @@ class ProductSeeder extends Seeder
         $fruits = Category::where('slug', 'fruits')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
         $herbs = Category::where('slug', 'herbs-spices')->first();
+        $dairy = Category::where('slug', 'dairy')->first();
+        $honey = Category::where('slug', 'honey')->first();
 
-        // Create products with categories and images
+        // Get producers by slug for explicit assignment, with fallbacks
+        $greenFarm = $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
+        $cretanHoney = $producers->firstWhere('slug', 'cretan-honey') ?? $producers->skip(1)->first() ?? $greenFarm;
+        $olympusDairy = $producers->firstWhere('slug', 'mount-olympus-dairy') ?? $producers->skip(2)->first() ?? $greenFarm;
+
+        // Create products distributed across producers
         $productsData = [
+            // GREEN FARM CO. products (vegetables, herbs)
             [
                 'product_data' => [
-                    'producer_id' => $producer->id,
+                    'producer_id' => $greenFarm->id,
                     'name' => 'Organic Tomatoes',
                     'slug' => 'organic-tomatoes',
                     'description' => 'Fresh organic tomatoes grown without pesticides',
@@ -56,7 +66,7 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $producer->id,
+                    'producer_id' => $greenFarm->id,
                     'name' => 'Fresh Lettuce',
                     'slug' => 'fresh-lettuce',
                     'description' => 'Crispy fresh lettuce perfect for salads',
@@ -77,7 +87,29 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $producer->id,
+                    'producer_id' => $greenFarm->id,
+                    'name' => 'Greek Oregano',
+                    'slug' => 'greek-oregano',
+                    'description' => 'Aromatic Greek oregano, dried and packaged',
+                    'price' => 5.50,
+                    'weight_per_unit' => 0.050,
+                    'unit' => 'packet',
+                    'stock' => 30,
+                    'category' => 'Herbs',
+                    'is_organic' => true,
+                    'image_url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9',
+                    'status' => 'available',
+                    'is_active' => true,
+                ],
+                'categories' => [$herbs],
+                'images' => [
+                    ['url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9', 'is_primary' => true, 'sort_order' => 0],
+                ],
+            ],
+            // CRETAN HONEY products (oil, honey)
+            [
+                'product_data' => [
+                    'producer_id' => $cretanHoney->id,
                     'name' => 'Extra Virgin Olive Oil',
                     'slug' => 'extra-virgin-olive-oil',
                     'description' => 'Premium Greek olive oil from Crete',
@@ -99,7 +131,29 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $producer->id,
+                    'producer_id' => $cretanHoney->id,
+                    'name' => 'Cretan Thyme Honey',
+                    'slug' => 'cretan-thyme-honey',
+                    'description' => 'Pure thyme honey from the mountains of Crete',
+                    'price' => 15.00,
+                    'weight_per_unit' => 0.500,
+                    'unit' => 'jar',
+                    'stock' => 40,
+                    'category' => 'Honey',
+                    'is_organic' => true,
+                    'image_url' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38',
+                    'status' => 'available',
+                    'is_active' => true,
+                ],
+                'categories' => [$honey ?? $oliveOil],
+                'images' => [
+                    ['url' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38', 'is_primary' => true, 'sort_order' => 0],
+                ],
+            ],
+            // MOUNT OLYMPUS DAIRY products (fruits, dairy)
+            [
+                'product_data' => [
+                    'producer_id' => $olympusDairy->id,
                     'name' => 'Fresh Apples',
                     'slug' => 'fresh-apples',
                     'description' => 'Crispy red apples from local orchards',
@@ -111,7 +165,7 @@ class ProductSeeder extends Seeder
                     'is_organic' => false,
                     'image_url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
                     'status' => 'available',
-                    'is_active' => false, // Mix of active/inactive
+                    'is_active' => true,
                 ],
                 'categories' => [$fruits],
                 'images' => [
@@ -120,23 +174,23 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Greek Oregano',
-                    'slug' => 'greek-oregano',
-                    'description' => 'Aromatic Greek oregano, dried and packaged',
-                    'price' => 5.50,
-                    'weight_per_unit' => 0.050,
-                    'unit' => 'packet',
-                    'stock' => 30,
-                    'category' => 'Herbs',
-                    'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9',
+                    'producer_id' => $olympusDairy->id,
+                    'name' => 'Greek Feta Cheese',
+                    'slug' => 'greek-feta-cheese',
+                    'description' => 'Traditional PDO feta cheese from Thessaly',
+                    'price' => 8.50,
+                    'weight_per_unit' => 0.400,
+                    'unit' => 'piece',
+                    'stock' => 60,
+                    'category' => 'Dairy',
+                    'is_organic' => false,
+                    'image_url' => 'https://images.unsplash.com/photo-1626957341926-98752fc2ba90',
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$herbs],
+                'categories' => [$dairy ?? $vegetables],
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9', 'is_primary' => true, 'sort_order' => 0],
+                    ['url' => 'https://images.unsplash.com/photo-1626957341926-98752fc2ba90', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
         ];
