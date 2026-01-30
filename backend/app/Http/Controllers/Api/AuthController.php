@@ -107,6 +107,14 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // Block seed/test accounts from login (data hygiene)
+        if ($user->is_seed) {
+            return response()->json([
+                'message' => 'Account disabled',
+                'error' => 'This is a seed/test account and cannot be used for login.',
+            ], 403);
+        }
+
         // Revoke existing tokens (optional - for single device login)
         // $user->tokens()->delete();
 
