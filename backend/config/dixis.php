@@ -22,4 +22,17 @@ return [
         // VAT rate applied to platform fees (24% Greek VAT)
         'fee_vat_rate' => env('DIXIS_FEE_VAT_RATE', 0.24),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Data Hygiene Settings
+    |--------------------------------------------------------------------------
+    |
+    | Controls for seed/test account handling in production.
+    |
+    */
+
+    // Block seed users (is_seed=true) from logging in
+    // Set to true after running `php artisan users:mark-seed` to mark seed accounts
+    'block_seed_logins' => env('DIXIS_BLOCK_SEED_LOGINS', false),
 ];

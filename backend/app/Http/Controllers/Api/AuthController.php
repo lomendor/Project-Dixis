@@ -108,7 +108,9 @@ class AuthController extends Controller
         }
 
         // Block seed/test accounts from login (data hygiene)
-        if ($user->is_seed) {
+        // Feature flag: DIXIS_BLOCK_SEED_LOGINS (default: false for gradual rollout)
+        $blockSeedLogins = config('dixis.block_seed_logins', false);
+        if ($blockSeedLogins && $user->is_seed) {
             return response()->json([
                 'message' => 'Account disabled',
                 'error' => 'This is a seed/test account and cannot be used for login.',
