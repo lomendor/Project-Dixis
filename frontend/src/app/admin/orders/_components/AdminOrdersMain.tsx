@@ -216,19 +216,24 @@ export default function AdminOrdersMain() {
           return;
         }
 
-        // Default: fetch from real API
+        // Default: fetch from real Laravel API (Issue #2540)
         const qs = new URLSearchParams();
         if (active) qs.set('status', active);
         if (q) qs.set('q', q);
-        if (fromDate) qs.set('fromDate', fromDate);
-        if (toDate) qs.set('toDate', toDate);
+        if (fromDate) qs.set('from_date', fromDate);
+        if (toDate) qs.set('to_date', toDate);
         qs.set('page', String(page));
-        qs.set('pageSize', String(pageSize));
-        qs.set('sort', sort);
+        qs.set('per_page', String(pageSize));
+        qs.set('sort', sort === 'createdAt' ? 'created_at' : '-created_at');
 
-        const res = await fetch(`/api/admin/orders?${qs.toString()}`, { cache:'no-store', credentials:'include' });
+        // Build headers with Authorization from localStorage
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/v1/admin/orders?${qs.toString()}`, { cache:'no-store', headers });
         if (res.status === 401 || res.status === 403) {
-          // Unauthenticated - redirect to login
+          // Unauthenticated - show clear message
           setErrNote('Απαιτείται σύνδεση διαχειριστή');
           setUsingApi(false);
           setRows([]); setCount(0);
@@ -238,8 +243,16 @@ export default function AdminOrdersMain() {
         }
         if (!res.ok) throw new Error(`API ${res.status}`);
         const json = await res.json();
-        const items = Array.isArray(json.items) ? json.items as Row[] : [];
-        setRows(items); setCount(typeof json.count==='number' ? json.count : items.length);
+        // Transform Laravel response to frontend format
+        const orders = json.orders || json.data || [];
+        const items: Row[] = orders.map((o: Record<string, unknown>) => ({
+          id: `A-${o.id}`,
+          customer: (o.user as Record<string, unknown>)?.name || (o.user as Record<string, unknown>)?.email || 'N/A',
+          total: `€${Number(o.total_amount || 0).toFixed(2)}`,
+          status: o.status as Status,
+        }));
+        const totalCount = json.meta?.total ?? json.total ?? items.length;
+        setRows(items); setCount(totalCount);
         setUsingApi(true);
         const delay3=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay3));
         setIsLoading(false);
@@ -365,7 +378,7 @@ export default function AdminOrdersMain() {
         </div>
       </div>
 
-      {errNote && <div style={{fontSize:12,color:'#a33',margin:'6px 0'}}>Σημείωση: {errNote} — έγινε fallback.</div>}
+      {errNote && <div style={{fontSize:12,color:'#a33',margin:'6px 0'}}>{errNote}</div>}
 
 
       {/* Quick totals (τρέχουσα σελίδα) */}
