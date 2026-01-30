@@ -37,6 +37,12 @@ export default function ProducerOrdersPage() {
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Hydration fix: defer date rendering until client-side mount
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     loadOrders();
@@ -99,13 +105,15 @@ export default function ProducerOrdersPage() {
               {order.user?.name || t('producerOrders.guest')}
             </p>
             <p className="text-sm text-gray-500">
-              {new Date(order.created_at).toLocaleDateString('el-GR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {mounted
+                ? new Date(order.created_at).toLocaleDateString('el-GR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : '\u00A0' /* non-breaking space placeholder during SSR */}
             </p>
           </div>
           <div className="text-right">
