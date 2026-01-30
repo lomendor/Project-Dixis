@@ -137,10 +137,10 @@ export default function ProducerOrdersPage() {
         {/* Order Items */}
         <div className="border-t pt-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">
-            {t('producerOrders.products')} ({order.orderItems.length})
+            {t('producerOrders.products')} ({(order.orderItems ?? []).length})
           </h4>
           <div className="space-y-2">
-            {order.orderItems.map((item) => (
+            {(order.orderItems ?? []).map((item) => (
               <div
                 key={item.id}
                 className="flex justify-between items-center text-sm"
