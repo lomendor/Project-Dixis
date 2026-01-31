@@ -31,8 +31,8 @@ class ProductSeeder extends Seeder
         $fruits = Category::where('slug', 'fruits')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
         $herbs = Category::where('slug', 'herbs-spices')->first();
-        $dairy = Category::where('slug', 'dairy')->first();
-        $honey = Category::where('slug', 'honey')->first();
+        $dairy = Category::where('slug', 'dairy-products')->first();
+        $honey = Category::where('slug', 'honey-preserves')->first();
 
         // Get producers by slug for explicit assignment, with fallbacks
         $greenFarm = $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
