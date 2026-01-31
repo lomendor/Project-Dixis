@@ -252,16 +252,16 @@ function ProducerProductsContent() {
                   </div>
                 </div>
               ) : (
-                // Profile rejected
+                // Profile inactive/suspended
                 <div>
                   <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">❌</span>
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="rejected-title">
-                    Αίτηση Απορρίφθηκε
+                    Λογαριασμός Ανενεργός
                   </h2>
                   <p className="text-gray-600 mb-6" data-testid="rejected-message">
-                    Δυστυχώς η αίτησή σας δεν μπορεί να εγκριθεί αυτή τη στιγμή. Επικοινωνήστε μαζί μας για περισσότερες πληροφορίες.
+                    Ο λογαριασμός σας είναι προσωρινά ανενεργός. Επικοινωνήστε μαζί μας για περισσότερες πληροφορίες.
                   </p>
                   <div className="space-y-3">
                     <button
