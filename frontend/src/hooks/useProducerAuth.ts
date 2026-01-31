@@ -143,13 +143,13 @@ export function useProducerRouteGuard() {
         };
       }
 
-      // Products route requires approval
+      // Products route requires active status
       if (path.startsWith('/producer/products')) {
         if (!canAccessProducts) {
           return {
             hasAccess: false,
             redirectTo: '/producer/onboarding',
-            reason: 'Απαιτείται έγκριση για πρόσβαση στα προϊόντα',
+            reason: 'Ολοκληρώστε το προφίλ σας για πρόσβαση στα προϊόντα',
           };
         }
       }
