@@ -1,9 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-31 (Pass-TAXONOMY-AUDIT-01)
+**Last Updated**: 2026-01-31 (Pass-PRODUCER-STATUS-COPY-CLARITY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~800 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-31 — Pass-PRODUCER-STATUS-COPY-CLARITY-01: Fix misleading approval UI copy
+
+**Status**: ✅ MERGED — PR #2561
+
+**Branch**: `fix/producer-status-copy-clarity`
+
+**Objective**: Remove confusion from UI that implied "producer approval" when system only has operational status.
+
+**Root Cause**:
+UI messaging used terms like "Αναμένεται Έγκριση" (Awaiting Approval) implying an admin approval gate. In reality:
+- Producer `status` is an **operational state** (active/inactive/pending)
+- There is NO admin approval gate for producers
+- Product moderation (`approval_status`) exists separately on products, not producers
+
+**Changes** (4 files, UI copy only):
+
+| File | Change |
+|------|--------|
+| `frontend/src/lib/auth-helpers.ts` | Updated PRODUCER_STATUS_LABELS |
+| `frontend/src/app/producer/onboarding/page.tsx` | Replaced approval messaging |
+| `frontend/src/app/my/products/page.tsx` | Updated pending state copy |
+| `frontend/src/hooks/useProducerAuth.ts` | Fixed redirect reason |
+
+**Copy Changes**:
+- "Εγκεκριμένος" → "Ενεργός" (Approved → Active)
+- "Αναμένεται Έγκριση" → "Ολοκληρώστε το Προφίλ σας" (Awaiting Approval → Complete Your Profile)
+
+**Scope**: UI copy only. No auth/ownership logic changes.
+
+**Evidence**:
+- PR: https://github.com/lomendor/Project-Dixis/pull/2561
+- Cross-producer protection: `ProductPolicy::update()` already enforces ownership
 
 ---
 

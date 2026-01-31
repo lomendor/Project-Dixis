@@ -147,11 +147,15 @@ export function requiresPermission(path: string): {
 
 /**
  * Producer status descriptions in Greek
+ * Note: These reflect operational status, NOT an admin approval gate.
+ * - pending: Profile setup not complete
+ * - active: Fully operational, can manage products
+ * - inactive: Account suspended or deactivated
  */
 export const PRODUCER_STATUS_LABELS: Record<string, string> = {
-  pending: 'Εκκρεμότητα',
-  active: 'Εγκεκριμένος',
-  inactive: 'Απορρίφθηκε',
+  pending: 'Σε Εκκρεμότητα',
+  active: 'Ενεργός',
+  inactive: 'Ανενεργός',
 };
 
 /**

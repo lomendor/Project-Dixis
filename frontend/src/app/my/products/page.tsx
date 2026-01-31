@@ -222,16 +222,16 @@ function ProducerProductsContent() {
                   </button>
                 </div>
               ) : producerStatus.status === 'pending' ? (
-                // Profile submitted, awaiting approval
+                // Profile not yet complete/activated
                 <div>
                   <div className="w-16 h-16 mx-auto mb-4 bg-yellow-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">⏳</span>
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="pending-approval-title">
-                    Αναμένεται Έγκριση
+                    Ολοκληρώστε το Προφίλ σας
                   </h2>
                   <p className="text-gray-600 mb-6" data-testid="pending-approval-message">
-                    Η αίτησή σας έχει υποβληθεί και βρίσκεται υπό εξέταση. Θα μπορέσετε να διαχειρίζεστε προϊόντα μόλις εγκριθείτε.
+                    Το προφίλ σας δεν έχει ενεργοποιηθεί ακόμα. Ολοκληρώστε τη ρύθμιση για να διαχειρίζεστε προϊόντα.
                   </p>
                   <div className="space-y-3">
                     <button
