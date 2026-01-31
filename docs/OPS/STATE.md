@@ -1,9 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-30 (Pass-PRODUCER-ORDERS-ITEMS-SHAPE-01)
+**Last Updated**: 2026-01-31 (Pass-TAXONOMY-AUDIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~800 lines (target ≤250). ⚠️
+
+---
+
+## 2026-01-31 — Pass-TAXONOMY-AUDIT-01: Taxonomy seed slugs + guardrails
+
+**Status**: ✅ MERGED — PR #2557 (commit `9f883231bfb0f1df5cc8aeff1075c303037ce68e`)
+
+**Branch**: `fix/taxonomy-guardrails-2553`
+
+**Objective**: Fix category slug mismatches in seeders and add taxonomy guardrail tests.
+
+**Root Cause**:
+Seeders looked up non-existent slugs:
+- `dairy` instead of `dairy-products`
+- `honey` instead of `honey-preserves`
+
+This produced NULL category associations in the pivot table (products silently had no categories).
+
+**Changes** (3 files, +232/-5):
+
+| File | Change |
+|------|--------|
+| `backend/database/seeders/ProductSeeder.php` | Corrected slug lookups |
+| `backend/database/seeders/GreekProductSeeder.php` | Canonical slug lookups + safe fallbacks |
+| `backend/tests/Feature/TaxonomyGuardrailTest.php` | 8 tests documenting canonical slugs |
+
+**Canonical Category Slugs**:
+- `fruits`, `vegetables`, `herbs-spices`, `grains-cereals`
+- `dairy-products`, `olive-oil-olives`, `wine-beverages`, `honey-preserves`
+
+**Scope**: Seed/demo + tests only. No production data modifications.
+
+**Evidence**:
+- PR: https://github.com/lomendor/Project-Dixis/pull/2557
+- Issue: #2553
 
 ---
 
