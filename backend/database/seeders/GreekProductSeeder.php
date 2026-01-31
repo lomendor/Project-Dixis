@@ -24,11 +24,13 @@ class GreekProductSeeder extends Seeder
             return;
         }
 
-        // Get categories for assignment
+        // Get categories for assignment (use canonical slugs from CategorySeeder)
         $vegetables = Category::where('slug', 'vegetables')->first();
         $fruits = Category::where('slug', 'fruits')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
         $herbs = Category::where('slug', 'herbs-spices')->first();
+        $dairy = Category::where('slug', 'dairy-products')->first();
+        $honey = Category::where('slug', 'honey-preserves')->first();
 
         // Create Greek products for testing Greek normalization
         $greekProductsData = [
@@ -132,7 +134,7 @@ class GreekProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$herbs],
+                'categories' => [$honey ?? $herbs],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62', 'is_primary' => true, 'sort_order' => 0],
                 ],
@@ -153,7 +155,7 @@ class GreekProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$vegetables], // Using vegetables category as dairy might not exist
+                'categories' => [$dairy ?? $vegetables],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7', 'is_primary' => true, 'sort_order' => 0],
                 ],
