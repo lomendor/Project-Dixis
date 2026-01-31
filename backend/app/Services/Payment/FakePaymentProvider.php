@@ -60,9 +60,10 @@ class FakePaymentProvider implements PaymentProviderInterface
         }
 
         // Default to success
+        // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
         $order->update([
             'payment_status' => 'paid',
-            'status' => 'paid',
+            'status' => 'confirmed',
         ]);
 
         return [

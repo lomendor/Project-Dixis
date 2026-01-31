@@ -109,9 +109,11 @@ class StripePaymentProvider implements PaymentProviderInterface
             $paymentIntent = $this->stripe->paymentIntents->retrieve($paymentIntentId);
 
             if ($paymentIntent->status === 'succeeded') {
+                // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
+                // which allows: pending|confirmed|processing|shipped|completed|delivered|cancelled
                 $order->update([
                     'payment_status' => 'paid',
-                    'status' => 'paid',
+                    'status' => 'confirmed',
                 ]);
 
                 return [
@@ -406,9 +408,10 @@ class StripePaymentProvider implements PaymentProviderInterface
         if ($orderId) {
             $order = Order::find($orderId);
             if ($order && $order->payment_status !== 'paid') {
+                // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
                 $order->update([
                     'payment_status' => 'paid',
-                    'status' => 'paid',
+                    'status' => 'confirmed',
                 ]);
 
                 Log::info('Order payment confirmed via webhook', ['order_id' => $orderId]);
