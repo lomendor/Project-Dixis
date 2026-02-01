@@ -1,9 +1,58 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-01 (Pass-FIX-STOCK-GUARD-01)
+**Last Updated**: 2026-02-01 (Pass-FIX-ADMIN-DASHBOARD-418-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~800 lines (target ≤250). ⚠️
+
+---
+
+## 2026-02-01 — Pass-FIX-ADMIN-DASHBOARD-418-01: Fix Admin Dashboard Hydration Crash
+
+**Status**: 🔄 PR PENDING — Branch `feat/passFIX-ADMIN-DASHBOARD-418-01`
+
+**Objective**: Fix production admin dashboard crash/redirect caused by React hydration error #418 (args=HTML).
+
+**Symptom**:
+- Admin users hitting `/admin` saw crash or redirect
+- Console error: "Minified React error #418; args: HTML"
+- Error boundary triggered: "Σφάλμα στον Πίνακα Διαχείρισης"
+
+**Root Cause**:
+Server Components using `toLocaleString()` / `toLocaleDateString()` for date formatting:
+- Server: Renders with UTC timezone
+- Client: Renders with user's local timezone (e.g., Europe/Athens)
+- Mismatch triggers React hydration error #418
+
+**Files with issue**:
+- `src/app/admin/page.tsx` line 99: `new Date(o.createdAt).toLocaleString('el-GR')`
+- `src/app/admin/users/page.tsx` line 74: `new Date(user.createdAt).toLocaleDateString('el-GR')`
+
+**Fix**:
+Added `formatDateStable()` function that uses ISO-based format (YYYY-MM-DD HH:MM) instead of locale-dependent formatting. This produces identical output on server and client.
+
+**Changes** (2 files, +22/-2 lines):
+
+| File | Change |
+|------|--------|
+| `frontend/src/app/admin/page.tsx` | Added `formatDateStable()`, replaced `toLocaleString()` |
+| `frontend/src/app/admin/users/page.tsx` | Added `formatDateStable()`, replaced `toLocaleDateString()` |
+
+**How to reproduce**:
+1. Login as admin user
+2. Navigate to `/admin`
+3. If timezone differs from server, hydration error occurs
+
+**How to verify**:
+1. Navigate to `/admin` dashboard
+2. No console errors matching "hydration" or "#418"
+3. Recent orders table renders dates correctly
+
+**DoD**:
+- [x] Identified root cause (locale-dependent date formatting in Server Components)
+- [x] Fixed both affected files
+- [ ] CI green
+- [ ] PR merged
 
 ---
 

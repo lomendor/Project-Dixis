@@ -4,6 +4,16 @@ import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import Link from 'next/link';
 
+/**
+ * Pass FIX-ADMIN-DASHBOARD-418-01: Deterministic date formatter for Server Components.
+ * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ */
+function formatDateStable(date: Date | string): string {
+  const d = new Date(date);
+  // Format: YYYY-MM-DD HH:MM (stable across server/client)
+  return d.toISOString().slice(0, 16).replace('T', ' ');
+}
+
 // Type definitions for dashboard data
 interface OrderSummary {
   id: string;
@@ -96,7 +106,7 @@ export default async function Page(){
             {latest.map((o: RecentOrder)=>(
               <tr key={o.id} style={{borderTop:'1px solid #eee'}}>
                 <td><Link href={`/admin/orders/${o.id}`}>#{o.id}</Link></td>
-                <td>{new Date(o.createdAt).toLocaleString('el-GR')}</td>
+                <td>{formatDateStable(o.createdAt)}</td>
                 <td>{o.buyerName||'—'}</td>
                 <td>{fmtMoney(Number(o.total||0))}</td>
                 <td>{String(o.status)}</td>
