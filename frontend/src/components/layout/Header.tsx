@@ -10,8 +10,12 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const { user, logout, isAuthenticated, isProducer, isAdmin } = useAuth();
+  const { user, logout, isAuthenticated, isProducer, isAdmin, isHydrated, loading } = useAuth();
   const t = useTranslations();
+
+  // Pass FIX-HOMEPAGE-HYDRATION-01: Don't render auth-dependent UI until hydration is complete.
+  // This prevents hydration mismatch where server renders "guest" but client tries to render "authenticated".
+  const showAuthUI = isHydrated && !loading;
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -78,8 +82,11 @@ export default function Header() {
           {/* Cart - visible for all roles */}
           <CartIcon data-testid="header-cart" />
 
-          {/* Auth Section */}
-          {isAuthenticated ? (
+          {/* Auth Section - Pass FIX-HOMEPAGE-HYDRATION-01: Gate until hydrated */}
+          {!showAuthUI ? (
+            /* Loading placeholder - same width as auth buttons to prevent layout shift */
+            <div className="w-[140px] h-10 bg-neutral-100 rounded-md animate-pulse" aria-hidden="true" />
+          ) : isAuthenticated ? (
             /* User Dropdown */
             <div className="relative" ref={userMenuRef}>
               <button
@@ -234,9 +241,14 @@ export default function Header() {
               </Link>
             ))}
 
-            {/* Auth Section */}
+            {/* Auth Section - Pass FIX-HOMEPAGE-HYDRATION-01: Gate until hydrated */}
             <div className="border-t border-neutral-200 mt-2 pt-2">
-              {isAuthenticated ? (
+              {!showAuthUI ? (
+                /* Loading placeholder for mobile */
+                <div className="flex items-center justify-center min-h-[48px] py-3">
+                  <div className="w-24 h-6 bg-neutral-100 rounded animate-pulse" aria-hidden="true" />
+                </div>
+              ) : isAuthenticated ? (
                 <>
                   {/* Role-specific links */}
                   {!isProducer && !isAdmin && (

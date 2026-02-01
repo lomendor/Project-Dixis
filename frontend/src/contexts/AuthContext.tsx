@@ -9,6 +9,11 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   registerLoading?: boolean;
+  /**
+   * Pass FIX-HOMEPAGE-HYDRATION-01: Indicates hydration is complete.
+   * Use this to gate auth-dependent UI that would cause hydration mismatch.
+   */
+  isHydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     name: string;
@@ -20,6 +25,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isProducer: boolean;
+  isAdmin: boolean;
   setIntendedDestination?: (destination: string) => void;
   getIntendedDestination?: () => string | null;
   clearIntendedDestination?: () => void;
@@ -43,29 +49,29 @@ function serverToLocalCart(serverItems: { id: number; quantity: number; product:
 }
 
 /**
- * Check if we have a token in localStorage (client-side only)
- * Used for initial hydration to prevent flash to guest state
+ * Pass FIX-HOMEPAGE-HYDRATION-01: Removed getInitialAuthState() that read localStorage during render.
+ * This caused hydration mismatch because server rendered with hasToken=false but client rendered
+ * with hasToken=true when user was logged in.
+ *
+ * New approach: Always render as "loading/unknown" on first render (both server and client),
+ * then update state in useEffect after hydration completes.
  */
-function getInitialAuthState(): { hasToken: boolean } {
-  if (typeof window === 'undefined') {
-    return { hasToken: false };
-  }
-  const token = localStorage.getItem('auth_token');
-  return { hasToken: !!token && token !== '' };
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // AUTH-01 Fix: Initialize with token check to prevent flash to guest state
-  // If token exists, assume authenticated until profile loads (prevents UI flash)
-  const initialState = getInitialAuthState();
+  // Pass FIX-HOMEPAGE-HYDRATION-01: Start with null user and loading=true on BOTH server and client.
+  // This ensures SSR output matches initial client render, preventing hydration mismatch.
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hasTokenOnMount] = useState(initialState.hasToken);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const { showToast } = useToast();
   const { getItemsForSync, replaceWithServerCart } = useCart();
 
   useEffect(() => {
+    // Pass FIX-HOMEPAGE-HYDRATION-01: Mark as hydrated immediately.
+    // This allows components to know when it's safe to render auth-dependent UI.
+    setIsHydrated(true);
+
     const initAuth = async () => {
       // MSW Bridge: Short-circuit authentication in MSW mode for smoke tests
       if (typeof window !== 'undefined' && localStorage.getItem('auth_token') === 'mock_token') {
@@ -89,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Normal auth flow
       apiClient.refreshToken();
       const token = apiClient.getToken();
-      
+
       if (token) {
         try {
           const userData = await apiClient.getProfile();
@@ -100,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           apiClient.setToken(null);
         }
       }
-      
+
       setLoading(false);
     };
 
@@ -247,19 +253,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
-  // AUTH-01 Fix: During loading, use hasTokenOnMount to prevent flash to guest state
-  // This ensures header doesn't briefly show "Σύνδεση/Εγγραφή" before profile loads
-  const isAuthenticated = loading ? hasTokenOnMount : !!user;
+  // Pass FIX-HOMEPAGE-HYDRATION-01: isAuthenticated is now simple - just based on user presence.
+  // The UI flash issue is handled by Header showing loading state until isHydrated && !loading.
+  const isAuthenticated = !!user;
 
   const value: AuthContextType = {
     user,
     loading,
     registerLoading,
+    isHydrated,
     login,
     register,
     logout,
     isAuthenticated,
     isProducer: user?.role === 'producer',
+    isAdmin: user?.role === 'admin',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
