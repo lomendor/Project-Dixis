@@ -5,6 +5,10 @@ import { useState } from 'react'
 /**
  * AddToCartButton - Multi-producer carts now supported
  * (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
+ *
+ * Pass FIX-STOCK-GUARD-01: Added stock awareness
+ * - Disables button when stock <= 0
+ * - Shows "Εξαντλήθηκε" (Out of Stock) label
  */
 export default function AddToCartButton(props: {
   id: string | number
@@ -13,11 +17,18 @@ export default function AddToCartButton(props: {
   imageUrl?: string
   producerId?: string
   producerName?: string
+  stock?: number | null
 }) {
   const add = useCart(s => s.add)
   const [isAdded, setIsAdded] = useState(false)
 
+  // Pass FIX-STOCK-GUARD-01: Check if product is out of stock
+  const isOutOfStock = typeof props.stock === 'number' && props.stock <= 0
+
   const handleClick = () => {
+    // Pass FIX-STOCK-GUARD-01: Prevent adding OOS items
+    if (isOutOfStock) return
+
     const item = {
       id: String(props.id),
       title: props.title,
@@ -30,6 +41,22 @@ export default function AddToCartButton(props: {
     add(item)
     setIsAdded(true)
     setTimeout(() => setIsAdded(false), 900)
+  }
+
+  // Pass FIX-STOCK-GUARD-01: Show OOS state with distinct styling
+  if (isOutOfStock) {
+    return (
+      <button
+        className="h-11 px-4 rounded text-sm bg-red-100 text-red-600 cursor-not-allowed"
+        disabled
+        aria-label={`${props.title} - Εξαντλήθηκε`}
+        aria-live="polite"
+        data-testid="add-to-cart-button"
+        data-oos="true"
+      >
+        Εξαντλήθηκε
+      </button>
+    )
   }
 
   return (

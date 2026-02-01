@@ -3,6 +3,9 @@ import React from 'react'
 import Link from 'next/link'
 import AddToCartButton from '@/components/AddToCartButton'
 
+/**
+ * Pass FIX-STOCK-GUARD-01: Added stock prop for OOS awareness
+ */
 type Props = {
   id: string | number
   title: string
@@ -10,11 +13,12 @@ type Props = {
   producerId?: string | number | null
   priceCents: number
   image?: string | null
+  stock?: number | null
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, priceCents, image }: Props) {
+export function ProductCard({ id, title, producer, producerId, priceCents, image, stock }: Props) {
   const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
@@ -54,7 +58,8 @@ export function ProductCard({ id, title, producer, producerId, priceCents, image
       <div className="px-4 pb-4 mt-auto flex items-center justify-between pt-2 border-t border-neutral-100">
         <span data-testid="product-card-price" className="text-lg font-bold text-neutral-900">{price}</span>
         <div data-testid="product-card-add">
-          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} />
+          {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
+          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} stock={stock} />
         </div>
       </div>
     </div>

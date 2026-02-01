@@ -4,6 +4,9 @@ import { CategoryStrip } from '@/components/CategoryStrip';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
 
+/**
+ * Pass FIX-STOCK-GUARD-01: Added stock field for OOS awareness
+ */
 type ApiItem = {
   id: string | number;
   title: string;
@@ -13,6 +16,7 @@ type ApiItem = {
   priceFormatted?: string;
   imageUrl?: string;
   categorySlug?: string;
+  stock?: number | null;
 };
 
 /**
@@ -63,6 +67,7 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
     }
 
     // Map backend format to frontend format
+    // Pass FIX-STOCK-GUARD-01: Include stock for OOS check
     const items = products.map((p: any) => ({
       id: p.id,
       title: p.name,
@@ -71,6 +76,7 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
       priceCents: Math.round(parseFloat(p.price) * 100),
       imageUrl: p.image_url,
       categorySlug: p.category?.slug || null,
+      stock: typeof p.stock === 'number' ? p.stock : null,
     }));
 
     return { items, total: items.length, isDemo: false };
@@ -174,6 +180,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         {items.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
             {items.map((p: ApiItem) => (
               <ProductCard
                 key={p.id}
@@ -183,6 +190,7 @@ export default async function Page({ searchParams }: PageProps) {
                 producerId={p.producerId}
                 priceCents={p.priceCents}
                 image={p.imageUrl}
+                stock={p.stock}
               />
             ))}
           </div>
