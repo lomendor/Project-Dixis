@@ -1,5 +1,16 @@
 import StatusBadge from '@/components/admin/StatusBadge'
 
+/**
+ * Pass FIX-ADMIN-DASHBOARD-418-02: Deterministic date formatter for Server Components.
+ * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ */
+function formatDateStable(date: string | Date | null): string {
+  if (!date) return '—';
+  const d = new Date(date);
+  // Format: YYYY-MM-DD HH:MM (stable across server/client)
+  return d.toISOString().slice(0, 16).replace('T', ' ');
+}
+
 async function fetchData(token:string){
   const base = process.env.NEXT_PUBLIC_SITE_URL || ''
   const res = await fetch(`${base}/api/track/${token}`, { cache:'no-store' })
@@ -19,7 +30,7 @@ export default async function TrackPage({ params }:{ params:{ token:string } }){
         <span style={{opacity:0.7}}>Κατάσταση:</span><StatusBadge status={data.status}/>
       </div>
       <div style={{opacity:0.8, marginTop:6}}>
-        <div>Ημ/νία: {data.createdAt ? new Date(data.createdAt).toLocaleString('el-GR') : '—'}</div>
+        <div>Ημ/νία: {formatDateStable(data.createdAt)}</div>
         <div>Πελάτης: {data.buyerName || '—'}</div>
         <div>Σύνολο: {typeof data.total === 'number' ? fmt(data.total) : '—'}</div>
       </div>
