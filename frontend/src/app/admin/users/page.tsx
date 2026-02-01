@@ -3,6 +3,16 @@ import { prisma } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/auth/admin';
 import Link from 'next/link';
 
+/**
+ * Pass FIX-ADMIN-DASHBOARD-418-01: Deterministic date formatter for Server Components.
+ * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ */
+function formatDateStable(date: Date | string): string {
+  const d = new Date(date);
+  // Format: YYYY-MM-DD (stable across server/client)
+  return d.toISOString().slice(0, 10);
+}
+
 interface AdminUser {
   id: string;
   phone: string;
@@ -71,7 +81,7 @@ export default async function AdminUsersPage() {
                     <StatusBadge isActive={user.isActive} />
                   </td>
                   <td style={{ padding: '12px 8px', color: '#6b7280', fontSize: 14 }}>
-                    {new Date(user.createdAt).toLocaleDateString('el-GR')}
+                    {formatDateStable(user.createdAt)}
                   </td>
                 </tr>
               ))
