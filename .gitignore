@@ -200,3 +200,9 @@ frontend/prisma/ci.db
 # Local ops outputs (untracked - use for dev/CI artifacts)
 docs/OPS/.local/
 docs/OPS/PROD-FACTS-LAST.md
+
+# Pass verification reports (local-only, not committed)
+docs/PROD-*.md
+docs/PR*-REPORT.md
+docs/PR*-VERIFICATION-REPORT.md
+docs/AGENT/SUMMARY/Pass-*.md
