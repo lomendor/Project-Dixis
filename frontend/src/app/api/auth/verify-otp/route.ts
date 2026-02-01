@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { setSessionCookie } from '@/lib/auth/cookies';
 import { verifyOtp } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed } from '@/lib/env';
+import { prisma } from '@/lib/db/client';
 
 /**
  * POST /api/auth/verify-otp
@@ -25,9 +26,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Pass FIX-ADMIN-WHITELIST-SYNC-01: Normalize phone for consistent matching
+    const phoneNorm = phone.trim();
+
     // Check admin bypass (non-production only)
     const adminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
-    const isAdmin = adminPhones.includes(phone);
+    const isAdmin = adminPhones.includes(phoneNorm);
     const bypassCode = process.env.OTP_BYPASS;
 
     // SECURITY: Never allow bypass in production
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed() && !isProd) {
       // Admin bypass - only in dev/staging, NEVER in production
-      console.log(`[Auth] Admin login bypass for ${phone} (non-production)`);
+      console.log(`[Auth] Admin login bypass for ${phoneNorm} (non-production)`);
       isValid = true;
     } else {
       // Normal OTP verification
@@ -61,17 +65,33 @@ export async function POST(req: NextRequest) {
 
     const sessionType = isAdmin ? 'admin' : 'user';
     const sessionToken = jwt.sign(
-      { phone, type: sessionType, iat: Math.floor(Date.now() / 1000) },
+      { phone: phoneNorm, type: sessionType, iat: Math.floor(Date.now() / 1000) },
       JWT_SECRET,
-      { expiresIn: '7d', algorithm: 'HS256', issuer: 'dixis-auth', subject: phone }
+      { expiresIn: '7d', algorithm: 'HS256', issuer: 'dixis-auth', subject: phoneNorm }
     );
 
-    console.log(`[Auth] Successful ${sessionType} login for ${phone}`);
+    console.log(`[Auth] Successful ${sessionType} login for ${phoneNorm}`);
+
+    // Pass FIX-ADMIN-WHITELIST-SYNC-01: Sync admin to database whitelist
+    // This ensures requireAdmin() database check passes for admins in ADMIN_PHONES
+    if (isAdmin) {
+      try {
+        await prisma.adminUser.upsert({
+          where: { phone: phoneNorm },
+          update: { isActive: true },
+          create: { phone: phoneNorm, role: 'admin', isActive: true }
+        });
+        console.log(`[Auth] AdminUser synced for ${phoneNorm}`);
+      } catch (dbError) {
+        // Log but don't fail login - admin can still use JWT type check
+        console.error('[Auth] Failed to sync AdminUser:', dbError);
+      }
+    }
 
     const response = NextResponse.json({
       success: true,
       message: 'Επιτυχής σύνδεση',
-      phone
+      phone: phoneNorm
     });
 
     // Set secure session cookie
