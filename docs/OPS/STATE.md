@@ -1,9 +1,54 @@
 # OPS STATE
 
-**Last Updated**: 2026-01-31 (Pass-PRODUCER-STATUS-COPY-CLARITY-01)
+**Last Updated**: 2026-02-01 (Pass-FIX-STOCK-GUARD-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~800 lines (target ≤250). ⚠️
+
+---
+
+## 2026-02-01 — Pass-FIX-STOCK-GUARD-01: Block Add-to-Cart for Out-of-Stock Products
+
+**Status**: 🔄 PR PENDING — Branch `feat/passFIX-STOCK-GUARD-01`
+
+**Branch**: `feat/passFIX-STOCK-GUARD-01`
+
+**Objective**: Prevent customers from adding out-of-stock (OOS) products to cart. Backend already validates at checkout (409), but frontend allowed adding OOS items, causing confusion and failed checkouts.
+
+**Root Cause**:
+Production audit (PROD-CHECKOUT-409-STOCK-TRIAGE-01) found:
+- Checkout failed with 409: "Insufficient stock for product 'QA Flow C Product'. Available: 0, requested: 1"
+- Product detail page showed "Μη διαθέσιμο (0)" but "Προσθήκη στο Καλάθι" button was still active
+- Users could add OOS items, only to fail at checkout
+
+**Changes** (5 files):
+
+| File | Change |
+|------|--------|
+| `frontend/src/components/AddToCartButton.tsx` | Added `stock` prop; when stock ≤ 0, render disabled red button with "Εξαντλήθηκε" |
+| `frontend/src/components/ProductCard.tsx` | Added `stock` prop, pass to AddToCartButton |
+| `frontend/src/app/(storefront)/products/page.tsx` | Include `stock` in ApiItem type and API mapping |
+| `frontend/src/app/(storefront)/products/[id]/ui/Add.tsx` | Check stock before allowing add-to-cart on PDP |
+| `frontend/tests/storefront/stock-guard.spec.ts` | NEW: 4 Playwright E2E tests for OOS behavior |
+
+**UX Changes**:
+- OOS button: Red background (`bg-red-100`), red text (`text-red-600`), disabled, shows "Εξαντλήθηκε"
+- OOS button has `data-oos="true"` attribute for testing
+- In-stock button: Unchanged green "Προσθήκη" behavior
+
+**DoD**:
+- [x] Frontend passes stock through component hierarchy
+- [x] OOS products show disabled button with Greek text
+- [x] PDP blocks add-to-cart for stock=0
+- [x] Lint passes (existing warnings only)
+- [x] TypeScript passes (pre-existing Prisma errors unrelated)
+- [x] E2E tests added (stock-guard.spec.ts)
+- [ ] CI green
+- [ ] PR merged
+
+**Evidence**:
+- Commit: `4a1143fa` (cherry-picked from `69c86eaa`)
+- Production issue: Console error "Insufficient stock for product... Available: 0, requested: 1"
 
 ---
 
