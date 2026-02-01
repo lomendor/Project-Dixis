@@ -3,6 +3,16 @@ import { renderSMS } from '@/lib/notify/templates';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Pass FIX-ADMIN-DASHBOARD-418-02: Deterministic date formatter for Server Components.
+ * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ */
+function formatDateStable(date: Date | string | null): string {
+  if (!date) return '—';
+  const d = new Date(date);
+  return d.toISOString().slice(0, 16).replace('T', ' ');
+}
+
 function maskPhone(v:string){
   if(!v) return '';
   const digits = v.replace(/\D/g,'');
@@ -35,7 +45,7 @@ export default async function Page(){
         <tbody>
           {rows.map((n: any)=>(
             <tr key={n.id} style={{borderTop:'1px solid #eee'}}>
-              <td style={{padding:'0.5rem'}}>{new Date(n.createdAt as any).toLocaleString()}</td>
+              <td style={{padding:'0.5rem'}}>{formatDateStable(n.createdAt)}</td>
               <td style={{padding:'0.5rem'}}>{n.channel}</td>
               <td style={{padding:'0.5rem'}}>{maskPhone(n.to as any)}</td>
               <td style={{padding:'0.5rem'}}>{n.template}</td>
