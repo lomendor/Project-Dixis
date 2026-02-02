@@ -1,7 +1,7 @@
 # Pass P0-PROD-SMOKE-404-01: Fix prod smoke 404 console error
 
 **Created**: 2026-02-02
-**Status**: IN_PROGRESS
+**Status**: ✅ MERGED — PR #2586
 **Priority**: P0
 
 ## Problem
@@ -19,5 +19,5 @@ Updated `page.tsx` to use existing `/logo.png` for OG/Twitter images.
 - [x] Identify exact 404 URL (og-products.jpg, twitter-products.jpg)
 - [x] Fix root cause (updated metadata to use logo.png)
 - [x] Smoke remains strict for real errors
-- [ ] CI green (required checks) + PR merged
+- [x] CI green (required checks) + PR merged
 - [x] STATE + SUMMARY updated
