@@ -205,4 +205,4 @@ docs/OPS/PROD-FACTS-LAST.md
 docs/PROD-*.md
 docs/PR*-REPORT.md
 docs/PR*-VERIFICATION-REPORT.md
-docs/AGENT/SUMMARY/Pass-*.md
+# NOTE: Pass summaries ARE committed for repo continuity (removed ignore rule)
