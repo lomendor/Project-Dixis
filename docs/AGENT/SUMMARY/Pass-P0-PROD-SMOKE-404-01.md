@@ -1,8 +1,8 @@
 # Pass P0-PROD-SMOKE-404-01 Summary
 
-**Status**: IN_PROGRESS
+**Status**: MERGED
 **Date**: 2026-02-02
-**PR**: TBD
+**PR**: [#2586](https://github.com/lomendor/Project-Dixis/pull/2586)
 
 ## Problem
 

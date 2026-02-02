@@ -9,7 +9,7 @@
 
 ## 2026-02-02 — Pass-P0-PROD-SMOKE-404-01: Fix prod smoke 404 console error
 
-**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-PROD-SMOKE-404-01`
+**Status**: ✅ MERGED — [#2586](https://github.com/lomendor/Project-Dixis/pull/2586) (2026-02-02T11:17:29Z)
 
 **Objective**: Eliminate missing OG images (404) that cause console errors in prod smoke test.
 
@@ -27,8 +27,8 @@ until dedicated social images are created.
 **DoD**:
 - [x] Identified 404 URLs via curl against production
 - [x] Updated metadata to use existing asset
-- [ ] CI green (required checks)
-- [ ] PR merged
+- [x] CI green (required checks)
+- [x] PR merged
 
 ---
 
