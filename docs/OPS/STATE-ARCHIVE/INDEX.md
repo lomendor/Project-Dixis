@@ -6,6 +6,7 @@ Historical pass records archived from `docs/OPS/STATE.md`.
 
 | File | Period | Notes |
 |------|--------|-------|
+| [STATE-2026-01-24-28.md](STATE-2026-01-24-28.md) | 2026-01-24 to 2026-01-28 | Multi-producer checkout, shipping, payment fixes |
 | [STATE-2026-01-24-early.md](STATE-2026-01-24-early.md) | 2026-01-24 | CI Note, DOCS-ARCHIVE, UI-ROLE-NAV, SHIP-MULTI-DISCOVERY, UI-SHELL |
 | [STATE-2026-01-17-early.md](STATE-2026-01-17-early.md) | 2026-01-17 | Passes before PROD-UNBLOCK-01 |
 | [STATE-2026-01-16.md](STATE-2026-01-16.md) | 2026-01-16 | NOTIFICATIONS-01, EN-LANGUAGE-01, SEARCH-FTS-01, etc. |
