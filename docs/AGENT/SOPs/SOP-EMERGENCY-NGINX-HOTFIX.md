@@ -12,6 +12,25 @@ Use this when:
 - Always keep a **revert plan** and **proof** (curl 200).
 - Document the hotfix in `docs/OPS/STATE.md` with DEBT/REVERT PLAN section.
 
+## Pre-flight checklist (30 seconds)
+Before doing *anything*, confirm:
+- [ ] **P0 πραγματικό**: user-facing break (όχι "nice-to-have").
+- [ ] **CI/CD όντως μπλοκαρισμένο** από εξωτερικό outage (όχι απλά αργό).
+- [ ] **Safe change**: μόνο public static assets/docs (κανένα secret/PII).
+- [ ] **Δεν υπάρχει πιο απλό/ασφαλές workaround** (rollback/feature flag).
+- [ ] **Υπάρχει DEBT/REVERT plan** + αντικειμενικό proof (curl 200).
+
+## Operational rules (μειώνει loops)
+- **No more pushes rule**: Αφού εφαρμοστεί hotfix, *σταματάμε* pushes στο σχετικό PR εκτός αν είναι απολύτως απαραίτητο.
+  Κάθε push ξαναρίχνει CI runs και μπορεί να μας κρατήσει πίσω όσο υπάρχει outage.
+- Keep changes minimal: exact-match `location = /path` μόνο, χωρίς broad routing αλλαγές.
+
+## Reminders / Follow-up tracking (μην μείνει "temporary")
+- Δημιούργησε **GitHub issue**: "Cleanup emergency nginx hotfix after PR deploy".
+- Πρόσθεσε entry στο `docs/NEXT-7D.md` για cleanup (owner + trigger + link στο SOP).
+- Όταν γίνει deploy από normal CI/CD, τρέξε το cleanup script και κλείσε το issue.
+
+
 ---
 
 ## Procedure (copy/paste)
