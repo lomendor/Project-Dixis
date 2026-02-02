@@ -132,7 +132,8 @@ test.describe('Filters and Search @smoke', () => {
 
     const initialCount = await page.locator('[data-testid="product-card"]').count();
 
-    const searchInput = page.getByTestId('search-input');
+    // Use first() to handle duplicate search-input elements (EN + Greek versions)
+    const searchInput = page.getByTestId('search-input').first();
     await expect(searchInput).toBeVisible({ timeout: 5000 });
 
     // Focus and clear input first
