@@ -1,15 +1,37 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-OPS-DEPLOY-GUARD-01)
+**Last Updated**: 2026-02-02 (Pass-P0-ONBOARDING-REAL-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~316 lines (target ≤350). ✅
+> **Current size**: ~350 lines (target ≤350). ✅
+
+---
+
+## 2026-02-02 — Pass-P0-ONBOARDING-REAL-01: Producer Order Status API Security Smoke Tests
+
+**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-ONBOARDING-REAL-01`
+
+**Objective**: Add comprehensive E2E smoke tests for producer order status API ownership verification.
+
+**Problem**:
+P0-SEC-01 fixed auth, but tests only cover unauthenticated requests. Need to verify:
+1. Unauthenticated → 401 JSON ✅ (existing)
+2. Authenticated producer, non-owned order → 403/404 JSON (NEW)
+3. Authenticated producer, owned order → 200 (NEW, if fixture exists)
+
+**DoD**:
+- [ ] Playwright @smoke test verifies auth + ownership
+- [ ] Tests stable in CI (no flake)
+- [ ] No production behavior changes
+- [ ] PR merged with ai-pass label
+
+**Next**: P0-PRODUCER-DASHBOARD-POLISH-01 (placeholder)
 
 ---
 
 ## 2026-02-02 — Pass-OPS-DEPLOY-GUARD-01: VPS Frontend Deploy Guardrails
 
-**Status**: 🔄 PR OPEN — [#2580](https://github.com/lomendor/Project-Dixis/pull/2580)
+**Status**: ✅ MERGED — [#2580](https://github.com/lomendor/Project-Dixis/pull/2580)
 
 **Objective**: Codify manual VPS fixes into automated workflow guardrails to prevent recurring deploy failures.
 
@@ -49,9 +71,7 @@ After P0-SEC-01 security fix deploy, manual interventions required:
 - [x] Workflow adds security smoke test
 - [x] Runbook created with architecture + troubleshooting
 - [x] CI green (build-and-test, quality-gates, CodeQL)
-- [ ] PR merged
-
-**Next**: P0-ONBOARDING-REAL-01 (placeholder)
+- [x] PR merged (2026-02-02T10:13:51Z)
 
 **Related**:
 - P0-SEC-01: Security fix that exposed deploy issues
