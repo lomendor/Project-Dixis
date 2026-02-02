@@ -53,10 +53,11 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: `${siteUrl}/og-products.jpg`,
-        width: 1200,
-        height: 630,
-        alt: 'Fresh local products from Greek producers',
+        // Use logo.png as OG image until dedicated og-products.jpg is created
+        url: `${siteUrl}/logo.png`,
+        width: 400,
+        height: 400,
+        alt: 'Dixis - Fresh local products from Greek producers',
       },
     ],
   },
@@ -67,7 +68,8 @@ export const metadata: Metadata = {
     description: LANDING_MODE
       ? "Η νέα πλατφόρμα που συνδέει παραγωγούς με καταναλωτές."
       : "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers.",
-    images: [`${siteUrl}/twitter-products.jpg`],
+    // Use logo.png as Twitter card image until dedicated twitter-products.jpg is created
+    images: [`${siteUrl}/logo.png`],
   },
 };
 

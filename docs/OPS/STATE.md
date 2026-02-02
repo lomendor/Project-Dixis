@@ -1,9 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-P0-PROD-AUTH-CATALOGUE-01)
+**Last Updated**: 2026-02-02 (Pass-P0-PROD-SMOKE-404-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤350). ✅
+
+---
+
+## 2026-02-02 — Pass-P0-PROD-SMOKE-404-01: Fix prod smoke 404 console error
+
+**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-PROD-SMOKE-404-01`
+
+**Objective**: Eliminate missing OG images (404) that cause console errors in prod smoke test.
+
+**Root Cause**:
+Homepage metadata referenced non-existent OG images:
+- `og-products.jpg` → 404
+- `twitter-products.jpg` → 404
+
+The smoke test `reload-and-css.smoke.spec.ts` captures console errors and fails on these 404s.
+
+**Fix**:
+Updated `frontend/src/app/page.tsx` to use existing `/logo.png` for OG/Twitter images
+until dedicated social images are created.
+
+**DoD**:
+- [x] Identified 404 URLs via curl against production
+- [x] Updated metadata to use existing asset
+- [ ] CI green (required checks)
+- [ ] PR merged
 
 ---
 
