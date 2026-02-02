@@ -1,9 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-P0-PROD-SMOKE-404-02)
+**Last Updated**: 2026-02-02 (Pass-P0-PROD-OG-ASSETS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤350). ✅
+
+---
+
+## 2026-02-02 — Pass-P0-PROD-OG-ASSETS-01: Add missing OG images to stop prod 404
+
+**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-PROD-OG-ASSETS-01`
+
+**Objective**: Eliminate 404s for `og-products.jpg` and `twitter-products.jpg` on production homepage.
+
+**Problem**: Cached production HTML still references old URLs. Adding actual image files ensures
+no 404 regardless of which metadata version (old or new) is being served.
+
+**Fix**:
+- Added real JPEG assets in `frontend/public/`:
+  - `og-products.jpg` (1200x630, 45KB)
+  - `twitter-products.jpg` (1200x600, 42KB)
+- Generated from existing `assets/logo.png` with white background
+
+**DoD**:
+- [ ] PR merged
+- [ ] Deploy completed
+- [ ] `curl -I` shows 200 for both assets on production
+- [ ] Prod smoke no longer fails on 404 console error
 
 ---
 
