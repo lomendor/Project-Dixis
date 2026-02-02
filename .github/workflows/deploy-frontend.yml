@@ -98,20 +98,25 @@ jobs:
             ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no \
               ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'bash -s' << 'REMOTE_SCRIPT'
             set -euo pipefail
-            echo "=== FRONTEND ENV PRECHECK ==="
+            echo "=== FRONTEND ENV PRECHECK (P0-PROD-SMOKE-404-02) ==="
 
-            ENV_FILE="/var/www/dixis/current/frontend/.env"
+            # P0-PROD-SMOKE-404-02: Check SHARED source, not symlink target
+            # The symlink at /current/frontend/.env is recreated AFTER rsync --delete
+            # So we precheck the shared source that will be linked post-rsync
+            SHARED_ENV="/var/www/dixis/shared/frontend.env"
 
-            if [ ! -f "$ENV_FILE" ]; then
-              echo "❌ FATAL: .env file not found at $ENV_FILE"
+            if [ ! -f "$SHARED_ENV" ]; then
+              echo "❌ FATAL: Shared env source not found at $SHARED_ENV"
+              echo "Please create $SHARED_ENV with required env vars."
+              echo "See: docs/OPS/RUNBOOKS/vps-frontend-deploy.md"
               exit 1
             fi
-            echo "✅ .env file exists"
+            echo "✅ Shared env source exists: $SHARED_ENV"
 
-            # Check for placeholder values
+            # Check for placeholder values in SHARED source
             MISSING_ENVS=""
             for VAR in NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY; do
-              VALUE=$(grep "^${VAR}=" "$ENV_FILE" | cut -d= -f2- || echo "")
+              VALUE=$(grep "^${VAR}=" "$SHARED_ENV" | cut -d= -f2- || echo "")
               if [ -z "$VALUE" ] || [ "$VALUE" = "__FILL_ME__" ]; then
                 MISSING_ENVS="$MISSING_ENVS $VAR"
               fi
@@ -119,10 +124,10 @@ jobs:
 
             if [ -n "$MISSING_ENVS" ]; then
               echo "❌ FATAL: Missing or placeholder values for:$MISSING_ENVS"
-              echo "Please fill these in /var/www/dixis/current/frontend/.env before deploying"
+              echo "Please fill these in $SHARED_ENV before deploying"
               exit 1
             fi
-            echo "✅ Required env vars are set"
+            echo "✅ Required env vars verified in shared source"
             REMOTE_SCRIPT
 
       - name: Prepare VPS directory (with retry)
