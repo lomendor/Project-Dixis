@@ -1,9 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-P0-PROD-SMOKE-404-01)
+**Last Updated**: 2026-02-02 (Pass-P0-PROD-SMOKE-404-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤350). ✅
+
+---
+
+## 2026-02-02 — Pass-P0-PROD-SMOKE-404-02: Fix deploy precheck blocking on missing symlink
+
+**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-PROD-SMOKE-404-02`
+
+**Objective**: Fix deploy workflow precheck that blocks on missing `.env` symlink (caused by rsync --delete).
+
+**Root Cause**:
+The deploy workflow precheck looked for `/var/www/dixis/current/frontend/.env`, but this is a symlink
+that gets deleted by `rsync --delete` during deploy. The symlink restore happens AFTER rsync,
+so the precheck fails on every deploy after the first deletion.
+
+**Fix**:
+Updated precheck to verify the SHARED source (`/var/www/dixis/shared/frontend.env`) instead of
+the symlink target. The symlink will be recreated after rsync by the existing restore step.
+
+**DoD**:
+- [x] Identified root cause (precheck checks wrong path)
+- [x] Fixed workflow to check shared source
+- [ ] CI green (required checks)
+- [ ] PR merged
+- [ ] Deploy succeeds and P0-PROD-SMOKE-404-01 fix reaches production
+- [ ] Prod smoke passes
 
 ---
 
