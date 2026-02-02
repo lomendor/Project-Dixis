@@ -9,7 +9,7 @@
 
 ## 2026-02-02 — Pass-P0-PROD-OG-ASSETS-01: Add missing OG images to stop prod 404
 
-**Status**: 🔄 IN_PROGRESS — Branch `feat/pass-P0-PROD-OG-ASSETS-01`
+**Status**: ⏸️ BLOCKED (GitHub Actions outage) — [PR #2594](https://github.com/lomendor/Project-Dixis/pull/2594)
 
 **Objective**: Eliminate 404s for `og-products.jpg` and `twitter-products.jpg` on production homepage.
 
@@ -20,10 +20,16 @@ no 404 regardless of which metadata version (old or new) is being served.
 - Added real JPEG assets in `frontend/public/`:
   - `og-products.jpg` (1200x630, 45KB)
   - `twitter-products.jpg` (1200x600, 42KB)
-- Generated from existing `assets/logo.png` with white background
+- Generated from existing `assets/logo.png` with white background using PIL
+
+**Blocker**:
+- **GitHub Actions Major Outage** (2026-02-02 ~19:03 UTC)
+- All CI checks stuck in "queued" state for extended periods
+- Self-hosted runners not affected, but this repo uses hosted runners
+- Status: https://www.githubstatus.com/
 
 **DoD**:
-- [ ] PR merged
+- [ ] PR merged (blocked by CI outage)
 - [ ] Deploy completed
 - [ ] `curl -I` shows 200 for both assets on production
 - [ ] Prod smoke no longer fails on 404 console error
