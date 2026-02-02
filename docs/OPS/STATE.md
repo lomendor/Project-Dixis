@@ -1,9 +1,59 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-01 (Pass-FIX-ADMIN-DASHBOARD-418-01)
+**Last Updated**: 2026-02-02 (Pass-OPS-DEPLOY-GUARD-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~800 lines (target ≤250). ⚠️
+
+---
+
+## 2026-02-02 — Pass-OPS-DEPLOY-GUARD-01: VPS Frontend Deploy Guardrails
+
+**Status**: 🔄 PR PENDING — Branch `feat/pass-OPS-DEPLOY-GUARD-01`
+
+**Objective**: Codify manual VPS fixes into automated workflow guardrails to prevent recurring deploy failures.
+
+**Problem**:
+After P0-SEC-01 security fix deploy, manual interventions required:
+1. `.env` symlink deleted by `rsync --delete` - had to recreate manually
+2. nginx routing `/api/producer/*` to Laravel instead of Next.js - API returned 404 HTML
+3. pm2 orphan process holding port 3000 - EADDRINUSE crash loop
+
+**Solution** (3 new workflow steps):
+
+| Step | Purpose |
+|------|---------|
+| Restore .env symlink | Recreates symlink after rsync, verifies required keys |
+| Verify nginx config | Checks `/api/producer/*` routes to Next.js port 3000 |
+| Security smoke test | POST to `/api/producer/orders/*/status` must return 401 JSON, not 404 HTML |
+
+**Changes** (3 files):
+
+| File | Change |
+|------|--------|
+| `.github/workflows/deploy-frontend.yml` | +3 guardrail steps (lines 164-524) |
+| `docs/AGENT/TASKS/Pass-OPS-DEPLOY-GUARD-01.md` | Task specification |
+| `docs/OPS/RUNBOOKS/vps-frontend-deploy.md` | Comprehensive runbook |
+
+**Runbook Contents**:
+- Architecture diagram (CloudFlare → nginx → Next.js/Laravel)
+- Path/file inventory
+- nginx configuration requirements
+- Verification commands
+- Troubleshooting procedures
+- Emergency rollback steps
+
+**DoD**:
+- [x] Workflow adds .env symlink restore step
+- [x] Workflow adds nginx config verification step
+- [x] Workflow adds security smoke test
+- [x] Runbook created with architecture + troubleshooting
+- [ ] CI green
+- [ ] PR merged
+
+**Related**:
+- P0-SEC-01: Security fix that exposed deploy issues
+- OPS-DEPLOY-SSH-RETRY-01: SSH retry config (already in workflow)
 
 ---
 

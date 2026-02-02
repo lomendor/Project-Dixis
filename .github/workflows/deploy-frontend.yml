@@ -161,6 +161,105 @@ jobs:
               frontend/.next/standalone/ \
               ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/
 
+      # OPS-DEPLOY-GUARD-01: Recreate .env symlink after rsync (rsync --delete removes it)
+      - name: Restore .env symlink (OPS-DEPLOY-GUARD-01)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 1
+          max_attempts: ${{ env.SSH_RETRY_MAX }}
+          retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
+          command: |
+            ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'bash -s' << 'REMOTE_SCRIPT'
+            set -euo pipefail
+            echo "=== OPS-DEPLOY-GUARD-01: Restore .env symlink ==="
+
+            SOURCE="/var/www/dixis/shared/frontend.env"
+            TARGET="/var/www/dixis/current/frontend/.env"
+
+            # Verify source exists
+            if [ ! -f "$SOURCE" ]; then
+              echo "FATAL: Shared env source not found: $SOURCE"
+              echo "Please create $SOURCE with required env vars."
+              echo "See: docs/OPS/RUNBOOKS/vps-frontend-deploy.md"
+              exit 1
+            fi
+
+            # Create symlink (overwrite if exists)
+            ln -sfn "$SOURCE" "$TARGET"
+
+            # Verify symlink created
+            if [ -L "$TARGET" ]; then
+              echo "Symlink created: $TARGET -> $SOURCE"
+            else
+              echo "FATAL: Failed to create symlink"
+              exit 1
+            fi
+
+            # Verify required keys exist
+            REQUIRED_KEYS="NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+            for KEY in $REQUIRED_KEYS; do
+              if ! grep -q "^${KEY}=" "$TARGET"; then
+                echo "FATAL: Missing required key: $KEY"
+                exit 1
+              fi
+            done
+            echo "Required env vars verified"
+            REMOTE_SCRIPT
+
+      # OPS-DEPLOY-GUARD-01: Verify nginx has Next.js API routes configured
+      - name: Verify nginx config (OPS-DEPLOY-GUARD-01)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 1
+          max_attempts: ${{ env.SSH_RETRY_MAX }}
+          retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
+          command: |
+            ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'bash -s' << 'REMOTE_SCRIPT'
+            set -euo pipefail
+            echo "=== OPS-DEPLOY-GUARD-01: Verify nginx config ==="
+
+            NGINX_CONF="/etc/nginx/sites-enabled/dixis.gr"
+
+            # Check config file exists
+            if [ ! -f "$NGINX_CONF" ]; then
+              echo "FATAL: nginx config not found: $NGINX_CONF"
+              exit 1
+            fi
+
+            # Verify /api/producer route goes to Next.js (not Laravel)
+            if grep -q "location.*api/producer.*proxy_pass.*127.0.0.1:3000" "$NGINX_CONF"; then
+              echo "nginx: /api/producer/ routes to Next.js (port 3000)"
+            else
+              echo "FATAL: nginx missing /api/producer/ route to Next.js!"
+              echo ""
+              echo "This will cause API auth to fail (requests go to Laravel instead)."
+              echo "Please add the following to nginx config BEFORE the /api Laravel block:"
+              echo ""
+              echo '    location ^~ /api/producer/ {'
+              echo '        proxy_pass http://127.0.0.1:3000;'
+              echo '        proxy_http_version 1.1;'
+              echo '        proxy_set_header Host $host;'
+              echo '        proxy_set_header X-Real-IP $remote_addr;'
+              echo '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;'
+              echo '        proxy_set_header X-Forwarded-Proto $scheme;'
+              echo '    }'
+              echo ""
+              echo "See: docs/OPS/RUNBOOKS/vps-frontend-deploy.md"
+              exit 1
+            fi
+
+            # Verify /api/healthz route (optional but recommended)
+            if grep -q "location.*api/healthz.*proxy_pass.*127.0.0.1:3000" "$NGINX_CONF"; then
+              echo "nginx: /api/healthz routes to Next.js (port 3000)"
+            else
+              echo "Warning: /api/healthz not explicitly routed to Next.js"
+            fi
+
+            echo "nginx config verification PASSED"
+            REMOTE_SCRIPT
+
       - name: Configure and start app
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -385,6 +484,43 @@ jobs:
           else
             echo "❌ Homepage smoke FAILED (expected 200, got $HTTP_CODE)"
             exit 1
+          fi
+
+          # OPS-DEPLOY-GUARD-01: Security smoke test - verify API auth is working
+          # This catches nginx routing issues where /api/producer/* goes to Laravel instead of Next.js
+          echo "--- Security Smoke Test (P0-SEC-01 regression check) ---"
+          SECURITY_RESP=$(curl -sS -w "\nHTTP_CODE:%{http_code}" --max-time 15 \
+            -X POST "https://dixis.gr/api/producer/orders/deploy-test/status" \
+            -H "Content-Type: application/json" \
+            -d '{"status":"shipped"}' || echo "HTTP_CODE:000")
+
+          SECURITY_CODE=$(echo "$SECURITY_RESP" | grep "HTTP_CODE:" | cut -d: -f2)
+          SECURITY_BODY=$(echo "$SECURITY_RESP" | grep -v "HTTP_CODE:")
+
+          echo "Response code: $SECURITY_CODE"
+          echo "Response body: $SECURITY_BODY"
+
+          # Must return 401 JSON (auth required), NOT 404 HTML (Laravel routing)
+          if [ "$SECURITY_CODE" = "401" ]; then
+            # Verify it's JSON, not HTML
+            if echo "$SECURITY_BODY" | grep -q '"error"'; then
+              echo "✅ Security smoke PASSED: API returns 401 JSON (auth working)"
+            else
+              echo "❌ Security smoke FAILED: Got 401 but response is not JSON"
+              echo "This may indicate nginx routing issue. Check /api/producer/ route."
+              exit 1
+            fi
+          elif [ "$SECURITY_CODE" = "404" ]; then
+            # 404 HTML from Laravel = nginx routing broken
+            if echo "$SECURITY_BODY" | grep -qi "html\|laravel\|not found"; then
+              echo "❌ Security smoke FAILED: Got 404 HTML (likely Laravel, not Next.js)"
+              echo "nginx may be routing /api/producer/* to Laravel instead of Next.js"
+              echo "See: docs/OPS/RUNBOOKS/vps-frontend-deploy.md"
+              exit 1
+            fi
+          else
+            echo "⚠️ Security smoke WARNING: Unexpected code $SECURITY_CODE (expected 401)"
+            echo "Proceeding but please verify API auth manually"
           fi
 
           echo ""
