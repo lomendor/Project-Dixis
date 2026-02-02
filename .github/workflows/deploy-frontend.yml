@@ -161,7 +161,10 @@ jobs:
           max_attempts: ${{ env.SSH_RETRY_MAX }}
           retry_wait_seconds: ${{ env.SSH_RETRY_DELAY_SECONDS }}
           command: |
+            # P0-PROD-SMOKE-404-02: Exclude .next/cache from delete
+            # The cache dir is owned by PM2/www-data and causes permission errors
             rsync -rlvz --delete --omit-dir-times \
+              --exclude='.next/cache' \
               -e "ssh -o ConnectTimeout=30 -o StrictHostKeyChecking=no" \
               frontend/.next/standalone/ \
               ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/dixis/current/frontend/
