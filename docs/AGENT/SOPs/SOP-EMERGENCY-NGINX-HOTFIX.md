@@ -73,8 +73,57 @@ curl -s -o /dev/null -w "%{http_code}\n" https://dixis.gr/og-products.jpg
 
 ## Revert / Cleanup (DEBT)
 
-After normal CI/CD deploy delivers the asset:
+### Pre-cleanup check
+Before running cleanup, verify the PR has been deployed:
+```bash
+# Check PR status
+gh pr view 2594 --json state,mergedAt
 
+# Check if app is serving the assets (not nginx hotfix)
+# Look for different headers (e.g., x-nextjs-cache instead of our Cache-Control)
+curl -sI https://dixis.gr/og-products.jpg | grep -iE 'server:|cache-control:|x-nextjs'
+```
+
+### Automated Cleanup Script (copy-paste)
+```bash
+#!/bin/bash
+# Run this AFTER PR is merged and deployed
+set -euo pipefail
+
+HOST="dixis-prod"
+CONF="/etc/nginx/sites-enabled/dixis.gr"
+STATIC_DIR="/var/www/dixis-static"
+URLS=("https://dixis.gr/og-products.jpg" "https://dixis.gr/twitter-products.jpg")
+
+echo "== 0) Proof BEFORE cleanup (must be 200) =="
+for u in "${URLS[@]}"; do
+  echo -n "$u -> "
+  curl -s -o /dev/null -w "%{http_code}\n" "$u"
+done
+
+echo "== 1) Backup nginx config =="
+ssh "$HOST" "sudo cp $CONF ${CONF}.bak.cleanup-\$(date +%Y%m%d-%H%M%S)"
+
+echo "== 2) Remove EMERGENCY HOTFIX blocks manually =="
+echo "Opening editor - delete the blocks marked 'EMERGENCY HOTFIX'"
+ssh -t "$HOST" "sudo nano $CONF"
+
+echo "== 3) Validate + reload nginx =="
+ssh "$HOST" "sudo nginx -t && sudo systemctl reload nginx"
+
+echo "== 4) Cleanup static dir =="
+ssh "$HOST" "sudo rm -f $STATIC_DIR/* && ls -la $STATIC_DIR"
+
+echo "== 5) Proof AFTER cleanup (must stay 200) =="
+for u in "${URLS[@]}"; do
+  echo -n "$u -> "
+  curl -s -o /dev/null -w "%{http_code}\n" "$u"
+done
+
+echo "DONE - Hotfix removed, assets now served by app"
+```
+
+### Manual Steps (alternative)
 ```bash
 # 1. SSH to VPS
 ssh dixis-prod
@@ -86,7 +135,7 @@ sudo nano /etc/nginx/sites-enabled/dixis.gr
 # 3. Validate and reload
 sudo nginx -t && sudo systemctl reload nginx
 
-# 4. Optionally clean up static dir
+# 4. Clean up static dir
 sudo rm -rf /var/www/dixis-static/*
 
 # 5. Verify assets still work (now served by app)
