@@ -53,8 +53,9 @@
 ## DoD
 - [x] Inventory workflows using DB/Neon ✅
 - [x] Verify default PR checks don't touch Neon ✅
-- [ ] Rename `e2e-postgres.yml` to clarify it uses SQLite (cosmetic)
-- [ ] Add guardrail comment in workflows that DO use remote DB
+- [x] Rename `e2e-postgres.yml` → `e2e-sqlite-smoke.yml` ✅ (local, no push)
+- [x] Add header note clarifying SQLite usage ✅ (local, no push)
+- [ ] Push when Actions operational
 - [ ] Create SOP: `SOP-CI-DB-COST-GUARDRAILS.md`
 - [ ] Update docs/OPS/STATE.md
 
@@ -62,6 +63,12 @@
 - No business logic changes.
 - Allowed: .github/workflows/*, docs/*
 - **NO PUSH** while GitHub Actions is in major_outage
+
+## Local-only changes prepared (NO PUSH during outage)
+- Renamed: `.github/workflows/e2e-postgres.yml` → `.github/workflows/e2e-sqlite-smoke.yml`
+- Updated workflow name: `e2e-postgres` → `e2e-sqlite-smoke`
+- Updated job name: `E2E (PostgreSQL)` → `E2E (SQLite CI)`
+- Added header comment explaining SQLite CI schema usage
 
 ## Notes
 - Prepare locally during Actions outage.

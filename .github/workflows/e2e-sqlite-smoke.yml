@@ -1,4 +1,8 @@
-name: e2e-postgres
+name: e2e-sqlite-smoke
+
+# NOTE: Despite historical filename, this workflow runs E2E on SQLite via prisma/schema.ci.prisma
+# (ci:gen / ci:migrate / ci:seed). It does NOT use remote Neon/Postgres.
+# Renamed from e2e-postgres.yml for clarity (Pass CI-DB-GUARDRAILS-01).
 
 on:
   pull_request:
@@ -8,7 +12,7 @@ on:
 
 jobs:
   e2e:
-    name: E2E (PostgreSQL)
+    name: E2E (SQLite CI)
     runs-on: ubuntu-latest
     if: ${{ !contains(join(github.event.pull_request.labels.*.name, ','), 'ui-only') }}
 
