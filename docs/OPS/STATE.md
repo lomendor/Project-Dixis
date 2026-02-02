@@ -34,7 +34,7 @@ curl -sI https://dixis.gr/og-products.jpg → 200 OK (44591 bytes)
 curl -sI https://dixis.gr/twitter-products.jpg → 200 OK (41699 bytes)
 ```
 
-**DEBT/REVERT PLAN**:
+**DEBT/REVERT PLAN** (see [SOP-EMERGENCY-NGINX-HOTFIX](../AGENT/SOPs/SOP-EMERGENCY-NGINX-HOTFIX.md)):
 - Once PR #2594 merges and deploys normally, the nginx hotfix is redundant
 - Remove hotfix location blocks from `/etc/nginx/sites-enabled/dixis.gr`
 - Clean up `/var/www/dixis-static/` directory
