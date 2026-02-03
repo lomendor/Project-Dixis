@@ -15,7 +15,7 @@ jobs:
       - name: Check API Health Endpoint
         run: |
           echo "Checking https://dixis.gr/api/healthz"
-          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)
+          HTTP_CODE=$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)
           if [ "$HTTP_CODE" != "200" ]; then
             echo "❌ API health check failed with HTTP $HTTP_CODE"
             exit 1
@@ -25,8 +25,8 @@ jobs:
       - name: Check Products Page
         run: |
           echo "Checking https://dixis.gr/products"
-          RESPONSE=$(curl -sS https://dixis.gr/products)
-          HTTP_CODE=$(echo "$RESPONSE" | head -c 1 > /dev/null; curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/products)
+          RESPONSE=$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors https://dixis.gr/products)
+          HTTP_CODE=$(echo "$RESPONSE" | head -c 1 > /dev/null; curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/products)
 
           if [ "$HTTP_CODE" != "200" ]; then
             echo "❌ Products page failed with HTTP $HTTP_CODE"
@@ -52,7 +52,7 @@ jobs:
       - name: Check Auth Pages
         run: |
           echo "Checking https://dixis.gr/auth/login"
-          LOGIN_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/auth/login)
+          LOGIN_CODE=$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/auth/login)
           if [ "$LOGIN_CODE" != "200" ]; then
             echo "❌ Auth login page failed with HTTP $LOGIN_CODE"
             exit 1
@@ -60,7 +60,7 @@ jobs:
           echo "✅ Auth login page check passed (HTTP $LOGIN_CODE)"
 
           echo "Checking https://dixis.gr/auth/register"
-          REGISTER_CODE=$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/auth/register)
+          REGISTER_CODE=$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/auth/register)
           if [ "$REGISTER_CODE" != "200" ]; then
             echo "❌ Auth register page failed with HTTP $REGISTER_CODE"
             exit 1

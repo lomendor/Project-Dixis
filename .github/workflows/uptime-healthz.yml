@@ -14,7 +14,7 @@ jobs:
         id: curl
         run: |
           set -euo pipefail
-          code=$(curl -sk -o /dev/null -w "%{http_code}" "https://dixis.gr/api/healthz")
+          code=$(curl -sk --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" "https://dixis.gr/api/healthz")
           echo "code=$code" >> "$GITHUB_OUTPUT"
           if [ "$code" != "200" ]; then
             echo "::error::healthz returned $code"

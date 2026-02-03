@@ -11,7 +11,7 @@ jobs:
           set -e
           URL="https://dixis.gr/api/healthz"
           echo "Probing $URL"
-          RESPONSE=$(curl -fsS "$URL")
+          RESPONSE=$(curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors "$URL")
           echo "Response: $RESPONSE"
           if echo "$RESPONSE" | grep -qi '"status".*"ok"'; then
             echo "✅ OK: $URL is healthy"

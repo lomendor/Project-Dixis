@@ -16,21 +16,21 @@ jobs:
       - name: Check healthz
         run: |
           set -euo pipefail
-          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)"
+          code="$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/api/healthz)"
           echo "healthz=$code"
           test "$code" = "200"
 
       - name: Check products page
         run: |
           set -euo pipefail
-          code="$(curl -sS -o /dev/null -w "%{http_code}" https://dixis.gr/products)"
+          code="$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/products)"
           echo "products_page=$code"
           test "$code" = "200"
 
       - name: Check products API has data
         run: |
           set -euo pipefail
-          body="$(curl -fsS https://dixis.gr/api/v1/public/products)"
+          body="$(curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors https://dixis.gr/api/v1/public/products)"
           echo "$body" | head -c 220
           echo
           if command -v jq >/dev/null 2>&1; then

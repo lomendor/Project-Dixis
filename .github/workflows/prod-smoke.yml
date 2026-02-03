@@ -85,7 +85,7 @@ jobs:
           echo "=== Checking auth redirects ==="
 
           # Check /login redirect
-          LOGIN_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          LOGIN_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             https://dixis.gr/login)
 
@@ -95,7 +95,7 @@ jobs:
           fi
 
           # Check /register redirect
-          REGISTER_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          REGISTER_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             https://dixis.gr/register)
 
@@ -109,7 +109,7 @@ jobs:
       - name: Check PROD orders page
         run: |
           echo "=== Checking orders page ==="
-          ORDERS_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          ORDERS_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             https://dixis.gr/orders || true)
 
@@ -130,7 +130,7 @@ jobs:
           # POST to checkout with invalid/empty data
           # Expected: 400, 401, 422 (client errors) - NOT 500 (server error)
           # This guards against database transaction failures
-          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          HTTP_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             -X POST https://dixis.gr/api/v1/public/orders \
             -H "Content-Type: application/json" \
