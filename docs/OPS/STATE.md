@@ -1,9 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-P0-PROD-OG-ASSETS-01)
+**Last Updated**: 2026-02-03 (Pass-PROD-DEPLOY-SOP-BASELINE-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~350 lines (target ≤350). ✅
+> **Current size**: ~380 lines (target ≤350). ⚠️ Archive soon.
+
+---
+
+## 2026-02-03 — Pass-PROD-DEPLOY-SOP-BASELINE-02: Deterministic prod deploy SOP
+
+**Status**: ✅ COMMITTED — Script at `scripts/prod-deploy-clean.sh`
+
+**Context**: During P0-PROD-OG-ASSETS-01 emergency deploy, a VPS-only hack (`typescript.ignoreBuildErrors`) was needed due to stale `node_modules`, partial git state (143 missing tracked files), and ghost `@types/sharp@0.32.0`. Fixed via sharp TS shim (#2605) and this SOP.
+
+**Script**: `scripts/prod-deploy-clean.sh`
+- Preflight: verify prod healthy before touching server
+- Hard sync: `git reset --hard origin/main` (no partial checkouts)
+- Clean slate: wipe `node_modules` + `.next`
+- Deterministic install: `pnpm install --frozen-lockfile` + `pnpm rebuild`
+- Build: `prisma generate` + `pnpm build`
+- PM2 restart only after successful build
+- Postflight: verify localhost + public https
+
+**Rule**: No manual edits on VPS. Always deploy via this SOP.
 
 ---
 
