@@ -27,7 +27,8 @@ test.describe('Filters and Search @smoke', () => {
     expect(initialProductCount).toBeGreaterThan(0);
 
     // Use stable data-testid selector for search input
-    const searchInput = page.getByTestId('search-input');
+    // search-input may render twice during hydration (EN + EL locale). Use .first().
+    const searchInput = page.getByTestId('search-input').first();
     await expect(searchInput).toBeVisible({ timeout: 5000 });
 
     // Focus input and clear any existing value
