@@ -1,4 +1,7 @@
-# Frontend Deployment Guide
+# Frontend Deployment Guide (Legacy)
+
+> **Superseded by**: [`docs/OPS/DEPLOY.md`](DEPLOY.md) and `scripts/prod-deploy-clean.sh`
+> This file is kept for historical reference only.
 
 **Last Updated**: 2025-01-03
 
