@@ -23,7 +23,7 @@ jobs:
       - name: Curl ${{ matrix.url }}
         run: |
           URL="${{ matrix.url }}"
-          read -r CODE TIME <<<"$(curl -sS -o /dev/null -w "%{http_code} %{time_total}" "$URL")"
+          read -r CODE TIME <<<"$(curl -sS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code} %{time_total}" "$URL")"
           echo "GET $URL -> $CODE in ${TIME}s"
 
           # Status must be 200

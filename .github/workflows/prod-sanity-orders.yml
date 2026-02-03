@@ -20,7 +20,7 @@ jobs:
       - name: Check healthz
         run: |
           echo "=== Healthz Check ==="
-          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          HTTP_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             https://dixis.gr/api/healthz)
 
@@ -33,10 +33,10 @@ jobs:
       - name: Check orders endpoint returns JSON
         run: |
           echo "=== Orders API Check ==="
-          RESPONSE=$(curl -sS --connect-timeout 10 --max-time 20 \
+          RESPONSE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors --connect-timeout 10 --max-time 20 \
             https://dixis.gr/api/v1/public/orders)
 
-          HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' \
+          HTTP_CODE=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' \
             --connect-timeout 10 --max-time 20 \
             https://dixis.gr/api/v1/public/orders)
 
@@ -60,7 +60,7 @@ jobs:
           echo "=== Order Data Integrity Check ==="
 
           # Fetch first order from API
-          ORDER=$(curl -sS --connect-timeout 10 --max-time 20 \
+          ORDER=$(curl -sS --retry 3 --retry-delay 2 --retry-all-errors --connect-timeout 10 --max-time 20 \
             https://dixis.gr/api/v1/public/orders | jq -r '.data[0]')
 
           if [ "$ORDER" = "null" ] || [ -z "$ORDER" ]; then

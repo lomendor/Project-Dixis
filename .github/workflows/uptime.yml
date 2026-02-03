@@ -18,7 +18,7 @@ jobs:
       - name: Curl ${{ matrix.url }}
         run: |
           for i in 1 2 3; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" "${{ matrix.url }}") || code=0
+            code=$(curl -s --max-time 30 -o /dev/null -w "%{http_code}" "${{ matrix.url }}") || code=0
             echo "Attempt $i → $code"
             [[ "$code" =~ ^2|3 ]] && exit 0
             sleep 5

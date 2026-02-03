@@ -18,7 +18,7 @@ jobs:
         id: healthz
         run: |
           echo "🩺 Testing production health endpoint..."
-          if ! RESPONSE=$(curl -fsS -w "\nHTTP_CODE:%{http_code}" https://dixis.gr/api/healthz 2>&1); then
+          if ! RESPONSE=$(curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -w "\nHTTP_CODE:%{http_code}" https://dixis.gr/api/healthz 2>&1); then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "url=https://dixis.gr/api/healthz" >> $GITHUB_OUTPUT
             echo "error=$RESPONSE" >> $GITHUB_OUTPUT
@@ -42,7 +42,7 @@ jobs:
         id: login
         run: |
           echo "🔐 Testing login page..."
-          HTTP_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" https://dixis.gr/auth/login 2>&1 || echo "failed")
+          HTTP_CODE=$(curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/auth/login 2>&1 || echo "failed")
 
           if [[ "$HTTP_CODE" =~ ^(5[0-9]{2})$ ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
@@ -57,7 +57,7 @@ jobs:
         id: products
         run: |
           echo "🛒 Testing products page..."
-          HTTP_CODE=$(curl -fsS -o /dev/null -w "%{http_code}" https://dixis.gr/products 2>&1 || echo "failed")
+          HTTP_CODE=$(curl -fsS --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/products 2>&1 || echo "failed")
 
           if [[ "$HTTP_CODE" =~ ^(5[0-9]{2})$ ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
