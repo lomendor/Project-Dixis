@@ -8,7 +8,8 @@ test.describe('Notifications @smoke', () => {
   test('notification bell is visible for authenticated users', async ({ page }) => {
     // Use existing auth state from global setup
     await page.goto('/products');
-    await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
+    // search-input may render twice during hydration (EN + EL locale). Use .first() to avoid strict mode error.
+    await expect(page.getByTestId('search-input').first()).toBeVisible({ timeout: 15000 });
 
     // Bell is rendered twice (desktop + mobile header). Use .first() to target desktop bell.
     // Both have same testid but only one is visible at a time based on viewport.
@@ -48,7 +49,8 @@ test.describe('Notifications @smoke', () => {
   test('notification dropdown opens when bell is clicked', async ({ page }) => {
     // Navigate to products page
     await page.goto('/products');
-    await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
+    // search-input may render twice during hydration (EN + EL locale). Use .first() to avoid strict mode error.
+    await expect(page.getByTestId('search-input').first()).toBeVisible({ timeout: 15000 });
 
     // Bell is rendered twice (desktop + mobile header). Use .first() to target desktop bell.
     const bell = page.getByTestId('notification-bell').first();

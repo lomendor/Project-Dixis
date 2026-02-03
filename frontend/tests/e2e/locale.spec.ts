@@ -10,7 +10,8 @@ test.describe('Locale @smoke', () => {
     await page.goto('/products');
 
     // Wait for page to load
-    await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
+    // search-input may render twice during hydration (EN + EL locale). Use .first().
+    await expect(page.getByTestId('search-input').first()).toBeVisible({ timeout: 15000 });
 
     // Check that language switcher buttons exist in footer
     const footerEl = page.getByTestId('footer-lang-el');
@@ -76,7 +77,8 @@ test.describe('Locale @smoke', () => {
     await page.goto('/products', { waitUntil: 'networkidle' });
 
     // Wait for page content to be visible (indicates hydration complete)
-    await expect(page.getByTestId('search-input')).toBeVisible({ timeout: 15000 });
+    // search-input may render twice during hydration (EN + EL locale). Use .first().
+    await expect(page.getByTestId('search-input').first()).toBeVisible({ timeout: 15000 });
 
     // Cookie should still be there
     const cookies = await context.cookies();
