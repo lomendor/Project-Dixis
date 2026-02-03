@@ -1,9 +1,49 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-02 (Pass-P0-PROD-SMOKE-404-02)
+**Last Updated**: 2026-02-02 (Pass-P0-PROD-OG-ASSETS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~350 lines (target ≤350). ✅
+
+---
+
+## 2026-02-02 — Pass-P0-PROD-OG-ASSETS-01: Add missing OG images to stop prod 404
+
+**Status**: ✅ VERIFIED (via nginx hotfix) — [PR #2594](https://github.com/lomendor/Project-Dixis/pull/2594) pending CI
+
+**Objective**: Eliminate 404s for `og-products.jpg` and `twitter-products.jpg` on production homepage.
+
+**Problem**: Cached production HTML still references old URLs. Adding actual image files ensures
+no 404 regardless of which metadata version (old or new) is being served.
+
+**Fix**:
+- Added real JPEG assets in `frontend/public/`:
+  - `og-products.jpg` (1200x630, 45KB)
+  - `twitter-products.jpg` (1200x600, 42KB)
+- Generated from existing `assets/logo.png` with white background using PIL
+
+**Emergency Nginx Hotfix** (2026-02-02 21:06 UTC):
+Due to GitHub Actions major outage, assets deployed via nginx bypass:
+- Created `/var/www/dixis-static/` with OG images on VPS
+- Added location blocks in `/etc/nginx/sites-enabled/dixis.gr`
+- Both images now return 200 on production
+
+**Production Proof** (2026-02-02 21:07 UTC):
+```
+curl -sI https://dixis.gr/og-products.jpg → 200 OK (44591 bytes)
+curl -sI https://dixis.gr/twitter-products.jpg → 200 OK (41699 bytes)
+```
+
+**DEBT/REVERT PLAN** (see [SOP-EMERGENCY-NGINX-HOTFIX](../AGENT/SOPs/SOP-EMERGENCY-NGINX-HOTFIX.md)):
+- Once PR #2594 merges and deploys normally, the nginx hotfix is redundant
+- Remove hotfix location blocks from `/etc/nginx/sites-enabled/dixis.gr`
+- Clean up `/var/www/dixis-static/` directory
+- Hotfix blocks are marked with `EMERGENCY HOTFIX` comments for identification
+
+**DoD**:
+- [ ] PR merged (blocked by CI outage - auto-merge enabled)
+- [x] `curl -I` shows 200 for both assets on production ✅
+- [ ] Prod smoke green (pending verification)
 
 ---
 

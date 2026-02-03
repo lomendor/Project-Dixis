@@ -24,3 +24,9 @@
 2. Update `docs/OPS/STATE.md` (add entry at top)
 3. Create `TASKS/Pass-{NAME}.md`
 4. Create `SUMMARY/Pass-{NAME}.md`
+
+## Emergency SOPs
+
+| SOP | When to use |
+|-----|-------------|
+| [SOP-EMERGENCY-NGINX-HOTFIX](SOPs/SOP-EMERGENCY-NGINX-HOTFIX.md) | P0 production break + CI blocked + branch protection prevents bypass |

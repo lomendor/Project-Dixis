@@ -109,3 +109,13 @@ Evidence: `docs/AGENT/SUMMARY/Proof-V1-QA-EXECUTE-01-2026-01-22.md`
 ---
 
 _Last updated by DOCS-NEXT7D-HYGIENE-01 (2026-01-23)_
+
+### Cleanup: Emergency nginx hotfix (PR #2594)
+- **Trigger**: PR #2594 merged & deployed via normal CI/CD
+- **Owner**: Agent
+- **DoD**:
+  - [ ] Remove `EMERGENCY HOTFIX` blocks from `/etc/nginx/sites-enabled/dixis.gr`
+  - [ ] Clean `/var/www/dixis-static/*`
+  - [ ] Verify both URLs still return 200
+  - [ ] Close tracking GitHub issue
+- **SOP**: [SOP-EMERGENCY-NGINX-HOTFIX](AGENT/SOPs/SOP-EMERGENCY-NGINX-HOTFIX.md)
