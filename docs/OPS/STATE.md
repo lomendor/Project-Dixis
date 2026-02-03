@@ -1,9 +1,24 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-03 (Pass-PROD-STATE-ARCHIVE-01)
+**Last Updated**: 2026-02-03 (Pass-PROD-OPS-GUARDRAILS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~325 lines (target ≤350). ✅
+> **Current size**: ~340 lines (target ≤350). ✅
+>
+> **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-03 — Pass-PROD-OPS-GUARDRAILS-01: Deploy guardrails + DEPLOY doc
+
+**Status**: OPEN PR
+
+**What**:
+- Hardened `scripts/prod-deploy-clean.sh` with preflight guardrails (drift/deleted-files/ghost-deps/config-drift checks, build log capture with trap, clear STOP messages)
+- Created `docs/OPS/DEPLOY.md` documenting the canonical deploy SOP, failure modes, and rules
+- Marked `docs/OPS/DEPLOY-FRONTEND.md` as legacy (superseded)
+
+**Why**: Codifies incident learnings from P0-PROD-OG-ASSETS-01 so the safe deploy path is explicit and repeatable.
 
 ---
 
