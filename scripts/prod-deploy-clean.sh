@@ -96,10 +96,6 @@ SHA=$(git rev-parse HEAD)
 echo "DEPLOY SHA: $SHA" | tee -a "$LOGFILE"
 git log -1 --oneline | tee -a "$LOGFILE"
 
-# Write deploy metadata for healthz endpoint
-echo "{\"sha\":\"${SHA}\",\"deployedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$FE/.deploy-meta.json"
-echo "Deploy metadata written to .deploy-meta.json"
-
 echo ""
 echo "--- B) Preflight guardrails ---"
 
@@ -191,7 +187,8 @@ echo "--- G2) Validate environment ---"
 if [ -f "scripts/validate-env.ts" ]; then
   npx tsx scripts/validate-env.ts 2>&1 | tee -a "$LOGFILE"
 else
-  echo "WARN: validate-env.ts not found, skipping validation" | tee -a "$LOGFILE"
+  echo "STOP: validate-env.ts not found — cannot validate environment" | tee -a "$LOGFILE"
+  exit 1
 fi
 
 echo "Building Next.js..."
@@ -199,14 +196,37 @@ pnpm build 2>&1 | tee -a "$LOGFILE" | tail -15
 
 echo ""
 echo "--- H) Prepare standalone bundle ---"
+# Write deploy metadata AFTER successful build (not before)
+echo "{\"sha\":\"${SHA}\",\"deployedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$FE/.deploy-meta.json"
+echo "Deploy metadata written to .deploy-meta.json (post-build)"
+
 cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 cp -r public .next/standalone/ 2>/dev/null || true
 cp .deploy-meta.json .next/standalone/ 2>/dev/null || true
 echo "Standalone prepared"
 
 echo ""
+echo "--- H2) Restore .env symlink (OPS-DEPLOY-GUARD-01) ---"
+ENV_SOURCE="/var/www/dixis/shared/frontend.env"
+ENV_TARGET="$FE/.env"
+if [ ! -f "$ENV_SOURCE" ]; then
+  echo "STOP: Shared env source not found: $ENV_SOURCE" | tee -a "$LOGFILE"
+  echo "Fix: create $ENV_SOURCE with required env vars (see docs/OPS/RUNBOOKS/vps-frontend-deploy.md)" | tee -a "$LOGFILE"
+  exit 1
+fi
+ln -sfn "$ENV_SOURCE" "$ENV_TARGET"
+if [ -L "$ENV_TARGET" ]; then
+  echo "  .env symlink: OK ($ENV_TARGET -> $ENV_SOURCE)"
+else
+  echo "STOP: Failed to create .env symlink" | tee -a "$LOGFILE"
+  exit 1
+fi
+
+echo ""
 echo "--- I) Restart PM2 (post-build only) ---"
-pm2 restart "$APP"
+pm2 delete "$APP" 2>/dev/null || true
+cd "$ROOT"
+pm2 start ecosystem.config.js --only "$APP"
 sleep 5
 pm2 ls
 
