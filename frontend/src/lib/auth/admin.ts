@@ -88,10 +88,22 @@ export async function requireAdmin(): Promise<AdminContext> {
   }
 
   // 3. Verify admin exists in database whitelist
-  const adminUser = await prisma.adminUser.findUnique({
-    where: { phone },
-    select: { id: true, phone: true, role: true, isActive: true }
-  });
+  // Pass PROD-BUGFIX-ADMIN-DB-01: Wrap Prisma call to handle missing table gracefully.
+  // If AdminUser table doesn't exist (migration not yet deployed), the Prisma error
+  // should produce a clear AdminError redirect instead of a raw 500 crash.
+  let adminUser: { id: string; phone: string; role: string; isActive: boolean } | null = null;
+  try {
+    adminUser = await prisma.adminUser.findUnique({
+      where: { phone },
+      select: { id: true, phone: true, role: true, isActive: true }
+    });
+  } catch (dbError) {
+    console.error('[Admin] Database query failed (table may not exist):', dbError);
+    throw new AdminError(
+      'Admin access unavailable - database not ready. Run prisma migrate deploy.',
+      'NOT_ADMIN'
+    );
+  }
 
   if (!adminUser) {
     throw new AdminError('Admin access required - not in admin whitelist', 'NOT_ADMIN');
