@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+import { API_BASE_URL } from '@/env';
 
 export interface SalesData {
   date: string;

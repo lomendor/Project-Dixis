@@ -129,8 +129,9 @@ export class GDPRDataSubjectService {
   private apiBaseUrl: string;
 
   private constructor() {
-    // Use relative URL for browser (same-origin), env var if set
-    this.apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+    // SSOT: Import from @/env — but currently only used with mockApiCall
+    // When real API integration added, use API_BASE_URL from '@/env'
+    this.apiBaseUrl = '/api/v1';
   }
 
   static getInstance(): GDPRDataSubjectService {

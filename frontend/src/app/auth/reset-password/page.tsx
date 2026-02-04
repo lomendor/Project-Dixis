@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from '@/contexts/LocaleContext';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+import { API_BASE_URL } from '@/env';
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -48,7 +47,8 @@ function ResetPasswordForm() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE}/v1/auth/password/reset`, {
+      // SSOT: Use centralized API_BASE_URL (already includes /api/v1)
+      const response = await fetch(`${API_BASE_URL}/auth/password/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

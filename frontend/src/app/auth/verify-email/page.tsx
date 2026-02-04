@@ -4,8 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from '@/contexts/LocaleContext';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+import { API_BASE_URL } from '@/env';
 
 type VerificationState = 'loading' | 'success' | 'error' | 'expired' | 'missing';
 
@@ -41,7 +40,8 @@ function VerifyEmailForm() {
     try {
       setState('loading');
 
-      const response = await fetch(`${API_BASE}/v1/auth/email/verify`, {
+      // SSOT: Use centralized API_BASE_URL (already includes /api/v1)
+      const response = await fetch(`${API_BASE_URL}/auth/email/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ function VerifyEmailForm() {
     try {
       setResendLoading(true);
 
-      const response = await fetch(`${API_BASE}/v1/auth/email/resend`, {
+      const response = await fetch(`${API_BASE_URL}/auth/email/resend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from '@/contexts/LocaleContext';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+import { API_BASE_URL } from '@/env';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -25,7 +24,8 @@ export default function ForgotPassword() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE}/v1/auth/password/forgot`, {
+      // SSOT: Use centralized API_BASE_URL (already includes /api/v1)
+      const response = await fetch(`${API_BASE_URL}/auth/password/forgot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
