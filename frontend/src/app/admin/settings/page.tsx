@@ -15,7 +15,7 @@ export default async function AdminSettingsPage() {
     await requireAdmin();
   } catch (e) {
     if (e instanceof AdminError) {
-      redirect('/auth/login?from=/admin/settings');
+      redirect('/auth/admin-login?from=/admin/settings');
     }
     throw e;
   }

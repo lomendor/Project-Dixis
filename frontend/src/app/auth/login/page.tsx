@@ -163,6 +163,17 @@ export default function Login() {
               </Link>
             </div>
           </div>
+
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="text-center">
+              <Link
+                href="/auth/admin-login"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                Είσοδος Διαχειριστή
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

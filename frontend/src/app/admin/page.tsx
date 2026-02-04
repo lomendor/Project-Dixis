@@ -43,7 +43,7 @@ export default async function Page(){
   } catch (e) {
     if (e instanceof AdminError) {
       // Redirect unauthenticated/unauthorized users to login
-      redirect('/auth/login?from=/admin');
+      redirect('/auth/admin-login?from=/admin');
     }
     throw e; // Re-throw unexpected errors
   }
