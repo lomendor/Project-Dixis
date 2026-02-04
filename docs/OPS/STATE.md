@@ -1,11 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-04 (Pass-PROD-BUGFIX-ADMIN-DB-01)
+**Last Updated**: 2026-02-04 (Pass-PROD-UNBLOCK-DEPLOY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~400 lines (target ≤350). ⚠️ Near limit — archive soon.
+> **Current size**: ~420 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-04 — Pass-PROD-UNBLOCK-DEPLOY-01: Unblock prod deploy + fix admin sub-page auth
+
+**Status**: PR OPEN
+
+**Context**: VPS auto-deploy (rsync) broken since Feb 3 (7 consecutive failures, rsync code 23 — PM2 runtime file permissions). CI/CD guardrail blocks workflow changes. Manual SOP script works but was missing `prisma migrate deploy`.
+
+**Fixes** (5 files, ~42 LOC):
+1. **`scripts/prod-deploy-clean.sh`** — Added `npx prisma migrate deploy` between generate and build. Idempotent, ensures new tables are created on every deploy.
+2. **`admin/analytics/page.tsx`** — Replaced `requireAdmin?.()` with proper try-catch + `AdminError` redirect to `/auth/login`
+3. **`admin/settings/page.tsx`** — Same fix
+4. **`admin/users/page.tsx`** — Same fix
+
+**Why sub-pages were broken**: Used optional chaining (`?.()`) and had NO try-catch. If `requireAdmin()` threw `AdminError`, it went to generic `error.tsx` (Greek error page with retry button) instead of redirecting to login. Now matches the pattern in `admin/page.tsx`.
+
+**Deploy**: After merge, run `bash scripts/prod-deploy-clean.sh` (manual SOP). Auto-deploy via workflow remains blocked (rsync permissions — separate future pass).
 
 ---
 

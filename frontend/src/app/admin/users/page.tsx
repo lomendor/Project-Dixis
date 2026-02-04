@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db/client';
-import { requireAdmin } from '@/lib/auth/admin';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import Link from 'next/link';
 
 /**
@@ -22,7 +23,14 @@ interface AdminUser {
 }
 
 export default async function AdminUsersPage() {
-  await requireAdmin?.();
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) {
+      redirect('/auth/login?from=/admin/users');
+    }
+    throw e;
+  }
 
   const adminUsers = await prisma.adminUser.findMany({
     orderBy: { createdAt: 'desc' },
