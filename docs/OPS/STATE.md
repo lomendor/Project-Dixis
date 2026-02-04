@@ -1,11 +1,27 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-04 (Pass-PROD-E2E-PG-FLAKE-01)
+**Last Updated**: 2026-02-04 (Pass-PROD-E2E-PG-FLAKE-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~360 lines (target ≤350). ⚠️ Near limit.
+> **Current size**: ~370 lines (target ≤350). ⚠️ Near limit — archive soon.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-04 — Pass-PROD-E2E-PG-FLAKE-02: Stabilize smoke.spec.ts strict-mode flake
+
+**Status**: PR OPEN
+
+**Root cause**: `smoke.spec.ts:51` — `locator('main .grid').or(emptyState).toBeVisible()` fails with strict-mode violation. The products page has **two** elements matching `main .grid` (product grid + layout grid). Playwright strict mode rejects ambiguous locators that resolve to >1 element.
+
+**Fix** (test-only, `smoke.spec.ts`):
+- Replaced `page.locator('main .grid')` with `page.locator('[data-testid="product-card"]').first()` (unique per card, strict-mode safe)
+- Replaced `.or()` pattern with two independent `isVisible()` checks
+- Empty state now uses `page.getByTestId('no-results')` (matches app's actual testid)
+- Final assertion: `expect(hasProducts || hasEmptyState).toBe(true)`
+
+**Why stable now**: No ambiguous locators. Each check targets a unique element (data-testid).
 
 ---
 

@@ -36,19 +36,26 @@ test('@smoke products page loads', async ({ page }) => {
 // @smoke — Products page renders content (products or empty state)
 // Pass E2E-SEED-02: CI-safe test that verifies page structure without SSR mocking
 // Note: SSR fetch cannot be mocked by Playwright (server-side), so we check for either state
+//
+// CI-FLAKE-FIX-PG-02: Replaced `locator('main .grid').or(emptyState)` with two
+// deterministic checks. The page has multiple elements matching `main .grid`
+// (product grid + layout grid), causing Playwright strict-mode violations.
+// Use data-testid="product-card" (always unique per card) or the no-results testid.
 test('@smoke products page renders content', async ({ page }) => {
   await page.goto('/products', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   // Verify heading always present
   await expect(page.getByRole('heading', { name: 'Προϊόντα' })).toBeVisible({ timeout: 10000 });
 
-  // Page should show EITHER products grid OR empty state message
-  // This makes the test CI-safe regardless of SSR data availability
-  const productGrid = page.locator('main .grid');
-  const emptyState = page.getByText('Δεν υπάρχουν διαθέσιμα προϊόντα').first();
+  // Page should show EITHER product cards OR empty state message.
+  // Check each independently to avoid strict-mode violations from ambiguous locators.
+  const hasProducts = await page.locator('[data-testid="product-card"]').first()
+    .isVisible({ timeout: 15000 }).catch(() => false);
+  const hasEmptyState = await page.getByTestId('no-results')
+    .isVisible({ timeout: 2000 }).catch(() => false);
 
-  // Wait for either condition - at least one should be visible
-  await expect(productGrid.or(emptyState)).toBeVisible({ timeout: 15000 });
+  // At least one must be visible — page rendered meaningful content
+  expect(hasProducts || hasEmptyState).toBe(true);
 });
 
 // @smoke — Checkout page loads or redirects sensibly (no crash, no timeout)
