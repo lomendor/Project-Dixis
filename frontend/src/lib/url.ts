@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use `import { SITE_URL, getServerApiUrl } from '@/env'` instead.
+ * This module is a legacy duplicate. SSOT is src/env.ts.
+ */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
 
 // Internal URL for server-side API calls (avoids self-deadlock through nginx)

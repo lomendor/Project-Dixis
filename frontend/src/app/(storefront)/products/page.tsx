@@ -3,6 +3,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
+import { getServerApiUrl } from '@/env';
 
 /**
  * Pass FIX-STOCK-GUARD-01: Added stock field for OOS awareness
@@ -31,9 +32,10 @@ type ApiItem = {
 async function getData(search?: string): Promise<{ items: ApiItem[]; total: number; isDemo: boolean }> {
   // Use internal URL for SSR to avoid external round-trip timeout (Pass 26 fix)
   // CRITICAL: No localhost fallback - use relative URL if not configured
+  // SSOT: Use centralized env resolution (see src/env.ts)
   const isServer = typeof window === 'undefined';
   const base = isServer
-    ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1')
+    ? getServerApiUrl()
     : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
 
   try {
