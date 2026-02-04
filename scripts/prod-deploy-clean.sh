@@ -177,8 +177,10 @@ fi
 echo "  post-install sanity: clean"
 
 echo ""
-echo "--- G) Prisma generate + Next.js build ---"
+echo "--- G) Prisma generate + migrate + Next.js build ---"
 npx prisma generate 2>&1 | tee -a "$LOGFILE" | tail -3
+echo "Running migrations (idempotent)..."
+npx prisma migrate deploy 2>&1 | tee -a "$LOGFILE" | tail -5
 echo "Building Next.js..."
 pnpm build 2>&1 | tee -a "$LOGFILE" | tail -15
 

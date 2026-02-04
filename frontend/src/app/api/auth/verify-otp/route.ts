@@ -83,8 +83,10 @@ export async function POST(req: NextRequest) {
         });
         console.log(`[Auth] AdminUser synced for ${phoneNorm}`);
       } catch (dbError) {
-        // Log but don't fail login - admin can still use JWT type check
-        console.error('[Auth] Failed to sync AdminUser:', dbError);
+        // Pass PROD-BUGFIX-ADMIN-DB-01: Log clearly so ops can see migration is needed.
+        // Login still succeeds (JWT has type:'admin'), but requireAdmin() will fail
+        // on the DB check until the AdminUser table exists and this upsert succeeds.
+        console.error('[Auth] Failed to sync AdminUser (run prisma migrate deploy):', dbError);
       }
     }
 

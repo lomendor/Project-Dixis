@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
-import { requireAdmin } from '@/lib/auth/admin';
+import { redirect } from 'next/navigation';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import Link from 'next/link';
 
 // Environment config (read-only display)
@@ -10,7 +11,14 @@ const envConfig = {
 };
 
 export default async function AdminSettingsPage() {
-  await requireAdmin?.();
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) {
+      redirect('/auth/login?from=/admin/settings');
+    }
+    throw e;
+  }
 
   return (
     <main style={{ padding: 16, maxWidth: 960, margin: '0 auto' }}>
