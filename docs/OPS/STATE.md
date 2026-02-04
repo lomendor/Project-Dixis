@@ -1,11 +1,32 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-04 (Pass-PROD-E2E-PG-FLAKE-02)
+**Last Updated**: 2026-02-04 (Pass-PROD-BUGFIX-ADMIN-DB-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~370 lines (target ≤350). ⚠️ Near limit — archive soon.
+> **Current size**: ~400 lines (target ≤350). ⚠️ Near limit — archive soon.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-04 — Pass-PROD-BUGFIX-ADMIN-DB-01: Fix admin dashboard crash (missing DB migration)
+
+**Status**: PR OPEN
+
+**Root cause**: `AdminUser` and `AdminAuditLog` models existed in `schema.prisma` (Sprint 11 RBAC) but **had no migration**. Tables never created in production PostgreSQL.
+
+**Impact chain**:
+1. Admin login (`verify-otp`) issues JWT with `type: 'admin'` — succeeds
+2. `prisma.adminUser.upsert()` silently fails (table doesn't exist) — error caught, login still works
+3. `/admin` page calls `requireAdmin()` → JWT checks pass → `prisma.adminUser.findUnique()` **crashes** (table missing)
+4. Prisma error is NOT `AdminError`, so `admin/page.tsx` line 48 `throw e` → raw 500 error
+
+**Fix** (3 files, ~60 LOC):
+1. **New migration** `20260204000000_add_admin_rbac/migration.sql` — Creates `AdminUser` + `AdminAuditLog` tables with all indexes and FK
+2. **`admin.ts`** — Wrapped `prisma.adminUser.findUnique()` in try/catch; on DB error, throws `AdminError('NOT_ADMIN')` instead of raw crash → clean redirect to login
+3. **`verify-otp/route.ts`** — Improved error log message to surface "run prisma migrate deploy" hint
+
+**Deploy note**: After merge, run `prisma migrate deploy` on VPS before restarting. First admin login after migration will auto-upsert the AdminUser row.
 
 ---
 
