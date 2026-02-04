@@ -1,4 +1,5 @@
 // API client utility with Bearer token support
+// NOTE: URL resolution delegates to @/env (SSOT). Do NOT add new process.env reads here.
 
 export interface ApiResponse<T = unknown> {
   data?: T;
@@ -282,29 +283,12 @@ export interface TopProduct {
 // Helper functions for safe URL joining
 // CRITICAL: Browser must use relative URLs (same-origin) to avoid localhost in production
 // Server-side can use INTERNAL_API_URL for SSR server-to-server calls
-// Export for use in other files
+//
+// SSOT: Delegates to @/env for URL resolution. Do NOT duplicate logic here.
+import { API_BASE_URL as _envApiBase } from '@/env';
+
 export function getApiBaseUrl(): string {
-  // 1. If explicitly configured via NEXT_PUBLIC_API_BASE_URL, use it
-  const explicitUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (explicitUrl) {
-    return explicitUrl;
-  }
-
-  // 2. In browser: ALWAYS use relative URL (same-origin requests)
-  // This ensures production browser calls go to https://dixis.gr/api/v1
-  if (typeof window !== 'undefined') {
-    return '/api/v1';
-  }
-
-  // 3. Server-side (SSR): Use internal URL if configured, else relative
-  // INTERNAL_API_URL is for server-to-server calls only (never exposed to browser)
-  const internalUrl = process.env.INTERNAL_API_URL;
-  if (internalUrl) {
-    return internalUrl;
-  }
-
-  // 4. Fallback for SSR without internal URL: relative path
-  return '/api/v1';
+  return _envApiBase;
 }
 
 const RAW_BASE = getApiBaseUrl();

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
 import { getBaseUrl } from '@/lib/site';
+import { getServerApiUrl } from '@/env';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -24,7 +25,8 @@ async function getProductById(id: string) {
     // In CI SSR, we need absolute URL to Next.js server
     base = 'http://127.0.0.1:3001/api/v1';
   } else if (isServer) {
-    base = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+    // SSOT: Use centralized env resolution (see src/env.ts)
+    base = getServerApiUrl();
   } else {
     base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
   }

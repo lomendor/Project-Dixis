@@ -1,9 +1,10 @@
 import { MetadataRoute } from 'next';
+import { getServerApiUrl, SITE_URL } from '@/env';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
 
-// Use internal API during build (SSR), external for runtime
-const API_BASE = process.env.INTERNAL_API_URL || 'https://dixis.gr/api/v1';
+// SSOT: Use centralized env resolution for SSR API calls (see src/env.ts)
+const API_BASE = getServerApiUrl();
 
 interface ProductForSitemap {
   id: number;

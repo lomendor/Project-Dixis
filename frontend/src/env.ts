@@ -1,6 +1,18 @@
 /**
- * Environment Configuration
- * Centralized environment variables and configuration for the frontend
+ * env.ts — SINGLE SOURCE OF TRUTH for environment configuration
+ *
+ * All env var reads for API URLs MUST go through this file.
+ * Do NOT read process.env.INTERNAL_API_URL or NEXT_PUBLIC_API_BASE_URL
+ * directly in other files — import from here instead.
+ *
+ * Canonical env vars (set in .env / .env.ci / VPS):
+ *   NEXT_PUBLIC_API_BASE_URL  — Browser-side API base (e.g. https://dixis.gr/api/v1)
+ *   INTERNAL_API_URL          — Server-side only, for SSR server-to-server calls
+ *   NEXT_PUBLIC_SITE_URL      — Public site URL (e.g. https://dixis.gr)
+ *   DATABASE_URL              — Neon PostgreSQL connection string
+ *   NODE_ENV                  — production | development | test
+ *
+ * See also: frontend/scripts/validate-env.ts (pre-deploy validation)
  */
 
 // Runtime environment validation
@@ -12,9 +24,19 @@ function getEnvVar(name: string, defaultValue?: string): string {
   return value;
 }
 
-// API Configuration
+// ── API URL Resolution ──────────────────────────────────────────────────
 // CRITICAL: Browser ALWAYS uses relative /api/v1 (same-origin)
 // Only server-side SSR can use INTERNAL_API_URL for server-to-server calls
+
+/**
+ * Get the API base URL, aware of SSR vs browser context.
+ * - Browser: relative `/api/v1` (same-origin, works behind nginx)
+ * - Server (SSR): INTERNAL_API_URL > NEXT_PUBLIC_API_BASE_URL > `/api/v1`
+ *
+ * This is the CANONICAL implementation. All other URL helpers
+ * (lib/api.ts, lib/http/apiBase.ts, lib/runtime/urls.ts) should
+ * delegate to this function.
+ */
 function getApiBaseUrlFromEnv(): string {
   // 1. Explicit NEXT_PUBLIC_API_BASE_URL takes precedence
   const explicitUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -35,6 +57,20 @@ function getApiBaseUrlFromEnv(): string {
 
   // 4. Fallback: relative (works in both environments)
   return '/api/v1';
+}
+
+/**
+ * Get API base URL for server-side (SSR) fetch calls.
+ * Prefers INTERNAL_API_URL for server-to-server calls (avoids nginx round-trip).
+ * Falls back to NEXT_PUBLIC_API_BASE_URL, then '/api/v1'.
+ *
+ * Use this in Server Components and API routes instead of reading
+ * process.env.INTERNAL_API_URL directly.
+ */
+export function getServerApiUrl(): string {
+  return process.env.INTERNAL_API_URL
+    || process.env.NEXT_PUBLIC_API_BASE_URL
+    || '/api/v1';
 }
 
 export const API_BASE_URL = getApiBaseUrlFromEnv();

@@ -1,4 +1,8 @@
 /**
+ * @deprecated Use imports from '@/env' instead:
+ *   import { apiUrl, getServerApiUrl } from '@/env';
+ * This module is a legacy duplicate. SSOT is src/env.ts.
+ *
  * apiPath: SSR-safe URL builder for fetch
  *
  * SSR context (Node.js):
