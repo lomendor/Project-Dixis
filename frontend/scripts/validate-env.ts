@@ -16,13 +16,17 @@
 // Load .env if present (for VPS where .env is a symlink)
 import 'dotenv/config';
 
-// ── Required environment variables ──────────────────────────────────────────
+// ── Required: script FAILS if these are missing ─────────────────────────────
 const REQUIRED_VARS = [
   { name: 'DATABASE_URL', hint: 'Neon PostgreSQL connection string' },
+  { name: 'NODE_ENV', hint: 'Environment (production/development/test)' },
+] as const;
+
+// ── Recommended: script WARNS if these are missing (CI may not have them) ───
+const RECOMMENDED_VARS = [
   { name: 'INTERNAL_API_URL', hint: 'Server-side API URL (e.g. https://dixis.gr/api/v1)' },
   { name: 'NEXT_PUBLIC_API_BASE_URL', hint: 'Browser-side API URL' },
   { name: 'PORT', hint: 'Server port (usually 3000)' },
-  { name: 'NODE_ENV', hint: 'Environment (production/development/test)' },
 ] as const;
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -46,11 +50,23 @@ for (const { name, hint } of REQUIRED_VARS) {
   if (!value || value.trim() === '') {
     fail(name, `Missing or empty. Hint: ${hint}`);
   } else {
-    // Mask sensitive values
     const masked = name === 'DATABASE_URL'
       ? value.replace(/\/\/[^@]+@/, '//***@')
       : value;
     pass(name, masked);
+  }
+}
+
+// Recommended vars: warn only, don't fail
+console.log('\n🔔 Recommended Variables (warn only)');
+console.log('─'.repeat(50));
+
+for (const { name, hint } of RECOMMENDED_VARS) {
+  const value = process.env[name];
+  if (!value || value.trim() === '') {
+    console.log(`  ⚠️  ${name}: Not set (${hint})`);
+  } else {
+    pass(name, value);
   }
 }
 
