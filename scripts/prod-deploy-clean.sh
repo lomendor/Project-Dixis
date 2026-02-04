@@ -96,6 +96,10 @@ SHA=$(git rev-parse HEAD)
 echo "DEPLOY SHA: $SHA" | tee -a "$LOGFILE"
 git log -1 --oneline | tee -a "$LOGFILE"
 
+# Write deploy metadata for healthz endpoint
+echo "{\"sha\":\"${SHA}\",\"deployedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > "$FE/.deploy-meta.json"
+echo "Deploy metadata written to .deploy-meta.json"
+
 echo ""
 echo "--- B) Preflight guardrails ---"
 
@@ -181,6 +185,15 @@ echo "--- G) Prisma generate + migrate + Next.js build ---"
 npx prisma generate 2>&1 | tee -a "$LOGFILE" | tail -3
 echo "Running migrations (idempotent)..."
 npx prisma migrate deploy 2>&1 | tee -a "$LOGFILE" | tail -5
+
+echo ""
+echo "--- G2) Validate environment ---"
+if [ -f "scripts/validate-env.ts" ]; then
+  npx tsx scripts/validate-env.ts 2>&1 | tee -a "$LOGFILE"
+else
+  echo "WARN: validate-env.ts not found, skipping validation" | tee -a "$LOGFILE"
+fi
+
 echo "Building Next.js..."
 pnpm build 2>&1 | tee -a "$LOGFILE" | tail -15
 
@@ -188,6 +201,7 @@ echo ""
 echo "--- H) Prepare standalone bundle ---"
 cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 cp -r public .next/standalone/ 2>/dev/null || true
+cp .deploy-meta.json .next/standalone/ 2>/dev/null || true
 echo "Standalone prepared"
 
 echo ""
