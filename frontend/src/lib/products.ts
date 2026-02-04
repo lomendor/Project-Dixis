@@ -40,8 +40,9 @@ const centsFrom = (item: any): number | null => {
 
 export const getProducts = cache(async (): Promise<Product[]> => {
   // 1) Προσπάθησε REAL API (εάν υπάρχει NEXT_PUBLIC_API_BASE_URL)
+  // SSOT: Use centralized env resolution (see src/env.ts)
   try {
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const { API_BASE_URL: base } = await import('@/env');
     if (base) {
       const res = await fetch(`${base}/products`, { headers: { 'Accept': 'application/json' }, next: { revalidate: 30 } });
       if (res.ok) {
