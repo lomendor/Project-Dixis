@@ -23,10 +23,26 @@ export interface OrderEmailData {
 }
 
 export interface StatusUpdateEmailData {
-  orderId: number
+  orderId: string
   customerName: string
-  newStatus: 'processing' | 'shipped' | 'delivered'
+  newStatus: 'packing' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   total: number
+  trackUrl?: string
+}
+
+/**
+ * Maps admin UPPERCASE statuses to email-friendly lowercase values.
+ * Returns null for statuses that shouldn't trigger customer emails (e.g. PENDING, PAID).
+ */
+export function normalizeOrderStatus(status: string): StatusUpdateEmailData['newStatus'] | null {
+  const map: Record<string, StatusUpdateEmailData['newStatus']> = {
+    PACKING: 'packing',
+    PROCESSING: 'processing',
+    SHIPPED: 'shipped',
+    DELIVERED: 'delivered',
+    CANCELLED: 'cancelled',
+  }
+  return map[status.toUpperCase()] ?? null
 }
 
 export interface EmailResult {
@@ -136,9 +152,11 @@ export async function sendOrderStatusUpdate({
   const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.gr'
 
   const statusLabels: Record<string, string> = {
+    packing: 'Σε Συσκευασία',
     processing: 'Σε Επεξεργασία',
     shipped: 'Απεσταλμένη',
-    delivered: 'Παραδομένη'
+    delivered: 'Παραδομένη',
+    cancelled: 'Ακυρωμένη',
   }
 
   try {
@@ -149,7 +167,7 @@ export async function sendOrderStatusUpdate({
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-v1`
+        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-v2`
       },
       body: JSON.stringify({
         from,
@@ -183,10 +201,14 @@ function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string
   const fmt = (amount: number) => `€${amount.toFixed(2)}`
 
   const statusMessages: Record<string, string> = {
+    packing: 'Η παραγγελία σας ετοιμάζεται για αποστολή.',
     processing: 'Η παραγγελία σας ετοιμάζεται από τον παραγωγό.',
     shipped: 'Η παραγγελία σας έχει αποσταλεί και είναι καθ\' οδόν!',
-    delivered: 'Η παραγγελία σας έχει παραδοθεί. Ευχαριστούμε!'
+    delivered: 'Η παραγγελία σας έχει παραδοθεί. Ευχαριστούμε!',
+    cancelled: 'Η παραγγελία σας έχει ακυρωθεί.',
   }
+
+  const headerColor = data.newStatus === 'cancelled' ? '#dc2626' : '#3b82f6'
 
   return `
 <!DOCTYPE html>
@@ -199,7 +221,7 @@ function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
 
   <!-- Header -->
-  <div style="background-color: #3b82f6; color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center;">
+  <div style="background-color: ${headerColor}; color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center;">
     <h1 style="margin: 0; font-size: 24px; font-weight: bold;">
       Ενημέρωση Παραγγελίας
     </h1>
@@ -235,6 +257,15 @@ function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string
         Σύνολο: <strong style="color: #059669;">${fmt(data.total)}</strong>
       </p>
     </div>
+
+    ${data.trackUrl ? `
+    <!-- Tracking Link -->
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="${data.trackUrl}" style="display: inline-block; padding: 12px 28px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
+        Παρακολούθηση Παραγγελίας
+      </a>
+    </div>
+    ` : ''}
 
     <!-- Footer -->
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">

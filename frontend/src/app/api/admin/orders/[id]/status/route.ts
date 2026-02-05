@@ -62,79 +62,38 @@ export async function POST(
       ...createOrderStatusContext(from, to)
     });
 
-    // Fetch order with items for email notification
-    const fresh = await prisma.order.findUnique({
-      where: { id: updated.id },
-      include: {
-        items: {
-          select: {
-            titleSnap: true,
-            qty: true,
-            price: true
-          }
-        }
-      }
-    }).catch((): null => null);
-
-    // Send status update email to customer
+    // Send status update email to customer via Resend
     try {
-      const { sendMailSafe } = await import('@/lib/mail/mailer');
-      const orderStatusTpl = await import('@/lib/mail/templates/orderStatus');
-
-      // Get customer email from order (if stored)
-      const orderWithEmail = await prisma.order.findUnique({
-        where: { id },
-        select: { buyerPhone: true }
+      const fresh = await prisma.order.findUnique({
+        where: { id: updated.id },
+        select: { email: true, name: true, buyerName: true, publicToken: true, total: true }
       });
 
-      // For now, we don't have buyer email in schema
-      // Email will be sent when email field is added
-      const customerEmail = process.env.DEV_MAIL_TO; // Send to dev for testing
+      const customerEmail = fresh?.email;
+      if (customerEmail) {
+        const { sendOrderStatusUpdate, normalizeOrderStatus } = await import('@/lib/email');
+        const emailStatus = normalizeOrderStatus(to);
 
-      if (customerEmail && fresh) {
-        // Prepare items for email
-        const itemsForEmail = (fresh.items || []).map((it: any) => ({
-          title: it.titleSnap || '—',
-          qty: Number(it.qty || 0),
-          price: Number(it.price || 0)
-        }))
+        if (emailStatus) {
+          const customerName = fresh.name || fresh.buyerName || 'Πελάτη';
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+          const trackUrl = fresh.publicToken
+            ? `${siteUrl.replace(/\/$/, '')}/track/${fresh.publicToken}`
+            : undefined;
 
-        // Calculate totals
-        let totals: any = undefined
-        try {
-          const { calcTotals } = await import('@/lib/cart/totals')
-          // Use COURIER as default since shippingMethod not in Order schema yet
-          const method = 'COURIER'
-          const shippingMethod = method as 'PICKUP' | 'COURIER' | 'COURIER_COD'
+          const result = await sendOrderStatusUpdate({
+            data: { orderId: id, customerName, newStatus: emailStatus, total: fresh.total ?? 0, trackUrl },
+            toEmail: customerEmail,
+          });
 
-          totals = calcTotals({
-            items: itemsForEmail.map((x: any) => ({ price: x.price, qty: x.qty })),
-            shippingMethod,
-            baseShipping: undefined,
-            codFee: undefined,
-            taxRate: 0
-          })
-        } catch (_) {}
-
-        await sendMailSafe({
-          to: customerEmail,
-          subject: orderStatusTpl.subject(updated.id, to),
-          html: orderStatusTpl.html({
-            id: updated.id,
-            status: to,
-            publicToken: fresh.publicToken || '',
-            items: itemsForEmail,
-            totals
-          } as any),
-          text: orderStatusTpl.text({
-            id: updated.id,
-            status: to,
-            publicToken: fresh.publicToken || '',
-            items: itemsForEmail,
-            totals
-          } as any)
-        });
-        console.log(`[admin] Status email sent to ${customerEmail}`);
+          if (result.ok) {
+            console.log(`[admin] Status email sent to ${customerEmail} (dryRun=${result.dryRun ?? false})`);
+          } else {
+            console.warn(`[admin] Status email failed: ${result.error}`);
+          }
+        }
+      } else {
+        console.log(`[admin] No customer email on order ${id}, skipping notification`);
       }
     } catch (e) {
       console.warn('[admin status mail] skipped:', (e as Error).message);
