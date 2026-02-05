@@ -22,9 +22,28 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
   // Read credentials from secure file (never log them)
   let e2eEmail: string;
   let e2ePassword: string;
+  // Pass CARD-SMOKE-02: Resolve an in-stock product ID via API to avoid OOS/demo issues
+  let inStockProductId: string | null = null;
 
-  test.beforeAll(() => {
+  test.beforeAll(async () => {
     e2eEmail = 'e2e-card-test@dixis.gr';
+
+    // Find an in-stock product via the public API
+    try {
+      const base = process.env.BASE_URL || 'https://dixis.gr';
+      const res = await fetch(`${base}/api/v1/public/products`);
+      if (res.ok) {
+        const json = await res.json();
+        const products = json?.data ?? [];
+        const inStock = products.find((p: any) => typeof p.stock === 'number' && p.stock > 0);
+        if (inStock) {
+          inStockProductId = String(inStock.id);
+          console.log(`In-stock product found: id=${inStock.id} stock=${inStock.stock}`);
+        }
+      }
+    } catch {
+      console.log('Could not fetch products API - will try UI fallback');
+    }
 
     // Read password from secure file
     const credsPath = path.join(process.env.HOME || '~', '.dixis', 'e2e-creds');
@@ -109,24 +128,23 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
     await page.getByTestId('login-submit').click();
     await page.waitForURL('/', { timeout: 20000 });
 
-    // Navigate to products
-    await page.goto('/products');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000); // Allow products to load
-
-    // Wait for products to load
-    const productCard = page.locator('[data-testid="product-card"], .product-card').first();
-    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false);
-
-    if (!hasProducts) {
-      console.log('No products visible - checking if page loaded');
-      test.skip(true, 'No products available for testing');
-      return;
+    // Pass CARD-SMOKE-02: Navigate to an in-stock product (API-resolved or UI fallback)
+    if (inStockProductId) {
+      await page.goto(`/products/${inStockProductId}`);
+    } else {
+      await page.goto('/products');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000);
+      const productCard = page.locator('[data-testid="product-card"]:not(:has-text("Εξαντλήθηκε"))').first();
+      const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false);
+      if (!hasProducts) {
+        test.skip(true, 'No in-stock products available for testing');
+        return;
+      }
+      await productCard.click();
+      await page.waitForURL(/\/products\/[^/]+/, { timeout: 15000 });
     }
-
-    // Click on first product
-    await productCard.click();
-    await page.waitForURL(/\/products\/\d+/, { timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
 
     // Add to cart
     const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add to cart"), button:has-text("Add"), [data-testid="add-to-cart"]').first();
@@ -166,21 +184,22 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
     await page.getByTestId('login-submit').click();
     await page.waitForURL('/', { timeout: 20000 });
 
-    // Add product to cart (needed for checkout)
-    await page.goto('/products');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000);
-
-    const productCard = page.locator('[data-testid="product-card"], .product-card').first();
-    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false);
-
-    if (!hasProducts) {
-      test.skip(true, 'No products available');
-      return;
+    // Pass CARD-SMOKE-02: Navigate to an in-stock product (API-resolved or UI fallback)
+    if (inStockProductId) {
+      await page.goto(`/products/${inStockProductId}`);
+    } else {
+      await page.goto('/products');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000);
+      const productCard = page.locator('[data-testid="product-card"]:not(:has-text("Εξαντλήθηκε"))').first();
+      if (!await productCard.isVisible({ timeout: 10000 }).catch(() => false)) {
+        test.skip(true, 'No in-stock products available');
+        return;
+      }
+      await productCard.click();
+      await page.waitForURL(/\/products\/[^/]+/, { timeout: 15000 });
     }
-
-    await productCard.click();
-    await page.waitForURL(/\/products\/\d+/, { timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded');
 
     const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add"), [data-testid="add-to-cart"]').first();
     await expect(addToCartBtn).toBeVisible({ timeout: 10000 });
@@ -252,15 +271,18 @@ test.describe('Pass PAYMENTS-CARD-REAL-01: Card Payment with Real Auth', () => {
     await submitBtn.click({ force: false });
     await page.waitForURL('/', { timeout: 20000 });
 
-    // Add product to cart - wait for product cards to be visible
-    await page.goto('/products');
+    // Pass CARD-SMOKE-02: Navigate to an in-stock product (API-resolved or UI fallback)
+    if (inStockProductId) {
+      await page.goto(`/products/${inStockProductId}`);
+    } else {
+      await page.goto('/products');
+      await page.waitForLoadState('domcontentloaded');
+      const productCard = page.locator('[data-testid="product-card"]:not(:has-text("Εξαντλήθηκε"))').first();
+      await expect(productCard).toBeVisible({ timeout: 15000 });
+      await productCard.click();
+      await page.waitForURL(/\/products\/[^/]+/, { timeout: 15000 });
+    }
     await page.waitForLoadState('domcontentloaded');
-
-    const productCard = page.locator('[data-testid="product-card"], .product-card').first();
-    await expect(productCard).toBeVisible({ timeout: 15000 });
-
-    await productCard.click();
-    await page.waitForURL(/\/products\/\d+/, { timeout: 10000 });
 
     const addToCartBtn = page.locator('button:has-text("Προσθήκη"), button:has-text("Add"), [data-testid="add-to-cart"]').first();
     await expect(addToCartBtn).toBeVisible({ timeout: 10000 });

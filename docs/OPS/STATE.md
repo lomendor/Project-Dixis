@@ -1,11 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-06 (Pass-ORDER-NOTIFY-01)
+**Last Updated**: 2026-02-06 (Pass-CARD-SMOKE-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~440 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-06 — Pass-CARD-SMOKE-02: Card Payment E2E Smoke on Production
+
+**Status**: ✅ DONE (branch: `pass/card-smoke-02`)
+
+**Changes** (1 file, 102 LOC):
+1. **`frontend/tests/e2e/card-payment-real-auth.spec.ts`** — Fix product selection: API-resolved in-stock product + URL regex for slug-based routes
+
+**VPS fixes** (not in repo):
+- Created `frontend/.env` with `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`, `INTERNAL_API_URL`
+- Rebuilt frontend, fixed PM2 EADDRINUSE crash loop
+
+**Results**: 4/4 real-auth E2E tests passing against production:
+- Login ✅ | Add to cart ✅ | Card option visible (COD+Card) ✅ | Stripe Elements flow ✅
+- Stripe test card 4242: order 201 → payment init 200 → Elements loaded → card entered
 
 ---
 
