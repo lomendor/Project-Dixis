@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -12,6 +13,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'checkout_session_id',
+        'public_token',
         'is_child_order',
         'status',
         'payment_status',
@@ -52,6 +54,21 @@ class Order extends Model
         'shipping_address' => 'array',
         'billing_address' => 'array',
     ];
+
+    /**
+     * Boot method: Auto-generate public_token on create
+     * Pass TRACKING-DISPLAY-01
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            if (empty($order->public_token)) {
+                $order->public_token = Str::uuid()->toString();
+            }
+        });
+    }
 
     /**
      * Get the user that owns the order.
