@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-05 (Pass ADMIN-SETTINGS-01)
+**Updated**: 2026-02-06 (Pass ADMIN-HARDENING — 6 PRs merged)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -20,11 +20,21 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+| Pass ID | Feature | Status |
+|---------|---------|--------|
+| **ADMIN-HARDENING** | Product creation + cleanup | In Progress |
 
 ---
 
 ## NEXT (top 3 unblocked)
+
+| Priority | Pass ID | Feature |
+|----------|---------|---------|
+| 1 | **PR-CRUD-02** | Product creation (API + UI, ~250 LOC) |
+| 2 | **PR-CLEAN-01** | Delete dead code (~-105 LOC) |
+| 3 | **PR-CLEAN-02** | Shared admin components (~80 LOC) |
+
+After ADMIN-HARDENING completion:
 
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
@@ -47,16 +57,16 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PR-CRUD-01** — Producer creation UI (#2637) ✅
+- **PR-FIX-03** — Analytics auth fix: cookie auth + Prisma endpoint (#2636) ✅
+- **PR-FIX-02** — Moderation page rewrite: cookies, toast, Tailwind (#2635) ✅
+- **PR-FIX-01** — Wire OrderStatusQuickActions into order detail (#2634) ✅
+- **PR-SEC-01+02** — Rate limit + admin 24h session (#2633) ✅
+- **OPS-0** — VPS DIXIS_ENV=production, bypass closed ✅
 - **ADMIN-SETTINGS-01** — Settings page with real Stripe/Resend/DB status ✅
 - **ADMIN-CUSTOMERS-01** — Customer management page (aggregated from orders) ✅
 - **ADMIN-DASHBOARD-POLISH-01** — Dashboard Tailwind rewrite + quick actions ✅
 - **ADMIN-LAYOUT-01** — Sidebar navigation + fixed-overlay admin shell ✅
-- **ADMIN-LOGIN-UI-01** — Admin login page (phone/OTP) ✅
-- **DEPLOY-HARDENING-01** — Deploy script safety guards ✅
-- **PRODUCER-THRESHOLD-POSTALCODE-01** — Per-producer free shipping threshold + checkout address prefill ✅
-- **EMAIL-VERIFY-01** — Email verification flow (backend + frontend + tests) ✅
-- **PROC-01** — Consolidate entry points into AGENT-STATE.md ✅
-- **PERF-IPV4-PREFER-01** — Fix 9.5s backend latency (9.3s → 70ms, ~100x faster) ✅
 
 ---
 
