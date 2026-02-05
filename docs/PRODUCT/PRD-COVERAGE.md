@@ -10,12 +10,12 @@
 | Metric | Value |
 |--------|-------|
 | Total PRD Features | 111 |
-| ✅ DONE | 83 (75%) |
-| ⚠️ PARTIAL | 21 (19%) |
+| ✅ DONE | 84 (76%) |
+| ⚠️ PARTIAL | 20 (18%) |
 | ❌ MISSING | 7 (6%) |
-| **Health Score** | **96%** |
+| **Health Score** | **97%** |
 
-**Last Updated**: 2026-02-06 (TRACKING-DISPLAY-01)
+**Last Updated**: 2026-02-06 (SSOT Audit - discovered CART-SYNC-01 already working)
 
 ---
 
@@ -86,7 +86,7 @@
 | Cart View | ✅ DONE | (baseline) | |
 | Cart Quantity | ✅ DONE | (baseline) | |
 | Remove from Cart | ✅ DONE | (baseline) | |
-| Cart Persistence | ⚠️ PARTIAL | — | LocalStorage only, not synced |
+| **Cart Persistence** | ✅ DONE | CART-SYNC-01 | Server sync on login (AuthContext) |
 | Checkout Flow | ✅ DONE | EN-LANGUAGE-02 | i18n complete |
 | **Guest Checkout** | ✅ DONE | GUEST-CHECKOUT-01 | |
 | Shipping Address | ✅ DONE | (baseline) | |
@@ -196,11 +196,12 @@
 
 | Priority | Pass ID | Feature | Effort | Notes |
 |----------|---------|---------|--------|-------|
-| 1 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
-| 2 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
-| 3 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+| 1 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
+| 2 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+| 3 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Medium | Service exists |
 
 ### Recently Completed (2026-02-06)
+- ✅ CART-SYNC-01 — Cart persistence discovered working (AuthContext sync)
 - ✅ TRACKING-DISPLAY-01 — Public order tracking via UUID token
 - ✅ SSOT-AUDIT-01 — Discovered order confirmation emails already working
 - ✅ EMAIL-VERIFY-ACTIVATE-01 — Email verification enabled

@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (TRACKING-DISPLAY-01 ✅ — public order tracking)
+**Updated**: 2026-02-06 (SSOT Audit — discovered CART-SYNC-01 already working)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -14,7 +14,7 @@
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
 | **Ports** | 8001 (backend), 3001 (frontend) — LOCKED |
-| **Feature health** | 96% (83 DONE + 22 PARTIAL / 111 total) |
+| **Feature health** | 97% (84 DONE + 20 PARTIAL / 111 total) |
 
 ---
 
@@ -28,9 +28,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature | Why |
 |----------|---------|---------|-----|
-| 1 | **CART-SYNC-01** | Cart persistence to backend | Multi-device support |
-| 2 | **REORDER-01** | Reorder from order history | UX convenience |
-| 3 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Backend ready |
+| 1 | **REORDER-01** | Reorder from order history | UX convenience |
+| 2 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Backend ready |
+| 3 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Service exists |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **CART-SYNC-01** — Cart persistence discovered working (AuthContext sync on login) ✅
 - **TRACKING-DISPLAY-01** — Public order tracking via UUID token ✅
 - **SSOT-AUDIT-01** — Discovered order confirmation emails already working (Laravel) ✅
 - **EMAIL-VERIFY-ACTIVATE-01** — Email verification enabled in production ✅
