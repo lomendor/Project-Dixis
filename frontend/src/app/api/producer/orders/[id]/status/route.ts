@@ -101,7 +101,7 @@ export async function POST(
     // Send email notification
     const emailResult = await sendOrderStatusUpdate({
       data: {
-        orderId: parseInt(orderId, 10) || 0,
+        orderId: orderId,
         customerName,
         newStatus: status,
         total: order.total,
