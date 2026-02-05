@@ -13,7 +13,7 @@
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
-| **Ports** | 8001 (backend), 3001 (frontend) — LOCKED |
+| **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
 | **Feature health** | 97% (84 DONE + 20 PARTIAL / 111 total) |
 
 ---
