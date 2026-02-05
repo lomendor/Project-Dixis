@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-01-28 (Pass PRODUCER-THRESHOLD-POSTALCODE-01)
+**Updated**: 2026-02-05 (Pass ADMIN-LOGIN-UI-01)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,8 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **ADMIN-LOGIN-UI-01** — Admin login page with phone/OTP authentication (#2623) ✅
+- **DEPLOY-HARDENING-01** — Deploy script hardening + env SSOT (#2618-#2622) ✅
 - **PRODUCER-THRESHOLD-POSTALCODE-01** — Per-producer free shipping threshold + checkout address prefill ✅
 - **EMAIL-VERIFY-01** — Email verification flow (backend + frontend + tests) ✅
 - **PROC-01** — Consolidate entry points into AGENT-STATE.md ✅

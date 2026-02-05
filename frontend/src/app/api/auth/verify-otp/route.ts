@@ -34,13 +34,11 @@ export async function POST(req: NextRequest) {
     const isAdmin = adminPhones.includes(phoneNorm);
     const bypassCode = process.env.OTP_BYPASS;
 
-    // SECURITY: Never allow bypass in production
-    const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
-
     let isValid = false;
     let errorMessage: string | undefined;
 
-    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed() && !isProd) {
+    // SECURITY: Use isAuthBypassAllowed() SSOT (lib/env.ts) — same guard as request-otp
+    if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed()) {
       // Admin bypass - only in dev/staging, NEVER in production
       console.log(`[Auth] Admin login bypass for ${phoneNorm} (non-production)`);
       isValid = true;
