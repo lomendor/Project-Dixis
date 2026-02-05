@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (SSOT Audit — discovered CART-SYNC-01 already working)
+**Updated**: 2026-02-06 (REORDER-01 + TRACKING-DISPLAY-01 merged)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,9 +28,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature | Why |
 |----------|---------|---------|-----|
-| 1 | **REORDER-01** | Reorder from order history | UX convenience |
-| 2 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Backend ready |
-| 3 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Service exists |
+| 1 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Backend ready |
+| 2 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Service exists |
+| 3 | **PRODUCER-NOTIFY-01** | Producer new order notifications | Email service ready |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,8 +47,9 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **REORDER-01** — Reorder button on order details (PR #2659, deployed 2026-02-06) ✅
+- **TRACKING-DISPLAY-01** — Public order tracking via UUID token (PR #2657, deployed 2026-02-06) ✅
 - **CART-SYNC-01** — Cart persistence discovered working (AuthContext sync on login) ✅
-- **TRACKING-DISPLAY-01** — Public order tracking via UUID token ✅
 - **SSOT-AUDIT-01** — Discovered order confirmation emails already working (Laravel) ✅
 - **EMAIL-VERIFY-ACTIVATE-01** — Email verification enabled in production ✅
 - **CARD-SMOKE-02** — Card payment E2E smoke verified on production ✅
@@ -56,12 +57,6 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 - **PR-CLEAN-02** — Shared admin components: AdminLoading + AdminEmptyState (#2646) ✅
 - **PR-CLEAN-01** — Dead code removal: update-status, validator, resend spec (#2644) ✅
 - **PR-CRUD-02** — Product creation API + UI with Zod validation (#2642) ✅
-- **PR-BUILD-FIX** — Remove dead resend/route.ts blocking VPS build (#2640) ✅
-- **PR-CRUD-01** — Producer creation UI (#2637) ✅
-- **PR-FIX-03** — Analytics auth fix: cookie auth + Prisma endpoint (#2636) ✅
-- **PR-FIX-02** — Moderation page rewrite: cookies, toast, Tailwind (#2635) ✅
-- **PR-FIX-01** — Wire OrderStatusQuickActions into order detail (#2634) ✅
-- **PR-SEC-01+02** — Rate limit + admin 24h session (#2633) ✅
 
 ---
 

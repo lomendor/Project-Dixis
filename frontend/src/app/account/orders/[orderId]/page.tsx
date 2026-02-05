@@ -8,6 +8,7 @@ import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
 import { formatDate, formatStatus, safeMoney, safeText, formatShippingMethod, formatShippingAddress, hasShippingAddress } from '@/lib/orderUtils';
+import { useCart } from '@/lib/cart';
 
 function OrderDetailsPage(): React.JSX.Element {
   const params = useParams();
@@ -16,7 +17,9 @@ function OrderDetailsPage(): React.JSX.Element {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
   const { showToast } = useToast();
+  const addToCart = useCart(s => s.add);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -102,6 +105,66 @@ function OrderDetailsPage(): React.JSX.Element {
   const statusConfig = formatStatus(order.status);
   const orderItems = order.items || order.order_items || [];
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  /**
+   * Pass REORDER-01: Add items from this order to cart
+   * Skips inactive/unavailable products, lets checkout handle stock validation
+   */
+  const handleReorder = async () => {
+    if (reordering || orderItems.length === 0) return;
+
+    setReordering(true);
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    for (const item of orderItems) {
+      // Get product info - prefer nested product object, fallback to item fields
+      const productId = item.product_id || item.product?.id;
+      const productName = item.product_name || item.product?.name || 'Προϊόν';
+      const unitPrice = item.unit_price || item.price || item.product?.price || 0;
+      const producerId = item.producer?.id || item.product?.producer?.id;
+      const producerName = item.producer?.name || item.product?.producer?.name;
+
+      if (!productId) {
+        skippedCount++;
+        continue;
+      }
+
+      // Check if product is active (if we have that info)
+      if (item.product?.is_active === false) {
+        skippedCount++;
+        continue;
+      }
+
+      // Convert price to cents (consistent with cart store)
+      const priceCents = Math.round(Number(unitPrice) * 100);
+
+      // Add each unit individually (cart.add increments qty by 1)
+      for (let i = 0; i < item.quantity; i++) {
+        addToCart({
+          id: String(productId),
+          title: productName,
+          priceCents: priceCents,
+          producerId: producerId ? String(producerId) : undefined,
+          producerName: producerName || undefined,
+        });
+      }
+      addedCount++;
+    }
+
+    setReordering(false);
+
+    if (addedCount > 0) {
+      if (skippedCount > 0) {
+        showToast('success', `${addedCount} προϊόντα προστέθηκαν στο καλάθι (${skippedCount} μη διαθέσιμα)`);
+      } else {
+        showToast('success', 'Τα προϊόντα προστέθηκαν στο καλάθι');
+      }
+      router.push('/checkout');
+    } else {
+      showToast('error', 'Δεν υπάρχουν διαθέσιμα προϊόντα για επαναπαραγγελία');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -337,6 +400,38 @@ function OrderDetailsPage(): React.JSX.Element {
                     </p>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Pass REORDER-01: Reorder Button */}
+            <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-6">
+                <button
+                  onClick={handleReorder}
+                  disabled={reordering || orderItems.length === 0}
+                  data-testid="reorder-button"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {reordering ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Προσθήκη...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Επαναπαραγγελία
+                    </>
+                  )}
+                </button>
+                <p className="mt-2 text-xs text-gray-500 text-center">
+                  Προσθέτει όλα τα προϊόντα στο καλάθι
+                </p>
               </div>
             </div>
           </div>
