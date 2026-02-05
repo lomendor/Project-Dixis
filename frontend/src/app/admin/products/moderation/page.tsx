@@ -1,313 +1,236 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useToast } from '@/contexts/ToastContext';
 
-interface Product {
-  id: number;
-  name: string;
-  approval_status: string;
-  created_at: string;
-  producer: {
-    id: number;
-    name: string;
-  };
-}
+/**
+ * Pass PR-FIX-02: Moderation queue rewrite.
+ *
+ * Replaces old page that used localStorage auth, /api/v1 endpoints, alert(),
+ * and inline styles with:
+ * - Cookie-based auth (auto via AdminShell)
+ * - Next.js API routes (/api/admin/products?approval=pending)
+ * - useToast() for feedback
+ * - Tailwind styling
+ */
 
-interface ModerationPageData {
-  data: Product[];
-  total: number;
-  current_page: number;
-  per_page: number;
+interface PendingProduct {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  approvalStatus: string;
+  producer?: { id: string; name: string };
 }
 
 export default function ModerationQueuePage() {
-  const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
+  const { showSuccess, showError } = useToast();
+  const [products, setProducts] = useState<PendingProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [rejectingProductId, setRejectingProductId] = useState<number | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchPendingProducts();
-  }, []);
+  // Rejection modal state
+  const [rejectModal, setRejectModal] = useState<{ id: string; title: string } | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const fetchPendingProducts = async () => {
+  const fetchPending = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
-
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-      const response = await fetch(`${baseUrl}/admin/products/pending`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
-      });
-
-      if (response.status === 401) {
-        router.push('/auth/login');
-        return;
-      }
-
-      if (response.status === 403) {
-        setError('Δεν έχετε δικαίωμα πρόσβασης σε αυτή τη σελίδα');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data: ModerationPageData = await response.json();
-      setProducts(data.data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Σφάλμα φόρτωσης');
+      const res = await fetch('/api/admin/products?approval=pending', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const json = await res.json();
+      setProducts(json.items || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Σφάλμα φόρτωσης');
     } finally {
       setLoading(false);
     }
   };
 
-  const moderateProduct = async (productId: number, action: 'approve' | 'reject', reason?: string) => {
-    setActionLoading(productId);
+  useEffect(() => { fetchPending(); }, []);
 
+  const handleApprove = async (productId: string) => {
+    setProcessingIds(prev => new Set([...prev, productId]));
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
-
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-      const response = await fetch(`${baseUrl}/admin/products/${productId}/moderate`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action, reason }),
-      });
-
-      if (response.status === 401) {
-        router.push('/auth/login');
-        return;
-      }
-
-      if (response.status === 403) {
-        alert('Δεν έχετε δικαίωμα για αυτή την ενέργεια');
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Σφάλμα moderation');
-      }
-
-      const result = await response.json();
-      alert(result.message || `Προϊόν ${action === 'approve' ? 'εγκρίθηκε' : 'απορρίφθηκε'} επιτυχώς`);
-
-      // Remove product from pending list
-      setProducts(products.filter(p => p.id !== productId));
-      setRejectingProductId(null);
-      setRejectReason('');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Σφάλμα');
+      const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST' });
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία');
+      showSuccess('Το προϊόν εγκρίθηκε επιτυχώς');
+      await fetchPending();
+    } catch (e) {
+      showError(e instanceof Error ? e.message : 'Σφάλμα έγκρισης');
     } finally {
-      setActionLoading(null);
+      setProcessingIds(prev => { const n = new Set(prev); n.delete(productId); return n; });
     }
   };
 
-  const handleApprove = (productId: number) => {
-    if (confirm('Είστε σίγουροι ότι θέλετε να εγκρίνετε αυτό το προϊόν;')) {
-      moderateProduct(productId, 'approve');
+  const handleRejectConfirm = async () => {
+    if (!rejectModal || rejectionReason.length < 5) return;
+    setSubmitting(true);
+    setProcessingIds(prev => new Set([...prev, rejectModal.id]));
+    try {
+      const res = await fetch(`/api/admin/products/${rejectModal.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rejectionReason }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία');
+      showSuccess('Το προϊόν απορρίφθηκε');
+      setRejectModal(null);
+      setRejectionReason('');
+      await fetchPending();
+    } catch (e) {
+      showError(e instanceof Error ? e.message : 'Σφάλμα απόρριψης');
+    } finally {
+      setSubmitting(false);
+      if (rejectModal) {
+        setProcessingIds(prev => { const n = new Set(prev); n.delete(rejectModal.id); return n; });
+      }
     }
   };
-
-  const handleReject = (productId: number) => {
-    setRejectingProductId(productId);
-  };
-
-  const submitReject = () => {
-    if (!rejectingProductId) return;
-
-    if (rejectReason.length < 10) {
-      alert('Η αιτιολογία πρέπει να έχει τουλάχιστον 10 χαρακτήρες');
-      return;
-    }
-
-    moderateProduct(rejectingProductId, 'reject', rejectReason);
-  };
-
-  if (loading) {
-    return (
-      <main style={{ padding: 16 }}>
-        <h1>Ουρά Έγκρισης Προϊόντων</h1>
-        <p>Φόρτωση...</p>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main style={{ padding: 16 }}>
-        <h1>Ουρά Έγκρισης Προϊόντων</h1>
-        <p style={{ color: 'red' }}>{error}</p>
-      </main>
-    );
-  }
 
   return (
-    <main style={{ padding: 16, display: 'grid', gap: 16 }}>
-      <h1>Ουρά Έγκρισης Προϊόντων</h1>
+    <div className="space-y-6" data-testid="moderation-page">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-neutral-900">Ουρά Έγκρισης</h1>
+        <span className="text-sm text-neutral-500">
+          {products.length} σε αναμονή
+        </span>
+      </div>
 
-      {products.length === 0 ? (
-        <p>Δεν υπάρχουν προϊόντα σε αναμονή έγκρισης</p>
-      ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #ddd' }}>
-              <th style={{ padding: 8, textAlign: 'left' }}>Προϊόν</th>
-              <th style={{ padding: 8, textAlign: 'left' }}>Παραγωγός</th>
-              <th style={{ padding: 8, textAlign: 'left' }}>Ημερομηνία</th>
-              <th style={{ padding: 8, textAlign: 'center' }}>Ενέργειες</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: 8 }}>{product.name}</td>
-                <td style={{ padding: 8 }}>{product.producer?.name || '—'}</td>
-                <td style={{ padding: 8 }}>
-                  {new Date(product.created_at).toLocaleDateString('el-GR')}
-                </td>
-                <td style={{ padding: 8, textAlign: 'center' }}>
-                  {actionLoading === product.id ? (
-                    <span>⏳</span>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => handleApprove(product.id)}
-                        style={{
-                          marginRight: 8,
-                          padding: '4px 12px',
-                          backgroundColor: '#10b981',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 4,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        ✓ Έγκριση
-                      </button>
-                      <button
-                        onClick={() => handleReject(product.id)}
-                        style={{
-                          padding: '4px 12px',
-                          backgroundColor: '#ef4444',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 4,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        ✗ Απόρριψη
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+          {error}
+        </div>
       )}
 
-      {/* Reject modal */}
-      {rejectingProductId && (
+      {loading ? (
+        <div className="text-sm text-neutral-500">Φόρτωση...</div>
+      ) : products.length === 0 ? (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-8 text-center">
+          <p className="text-emerald-700 font-medium">Δεν υπάρχουν προϊόντα σε αναμονή</p>
+          <p className="text-emerald-600 text-sm mt-1">Όλα τα προϊόντα έχουν ελεγχθεί.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
+          <table className="min-w-full divide-y divide-neutral-200" data-testid="moderation-table">
+            <thead className="bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  Προϊόν
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  Παραγωγός
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  Κατηγορία
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  Τιμή
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                  Ενέργειες
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {products.map((p) => (
+                <tr key={p.id} className="hover:bg-neutral-50 transition-colors">
+                  <td className="px-4 py-3 text-sm font-medium text-neutral-900">
+                    {p.title}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-neutral-600">
+                    {p.producer?.name || '—'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-neutral-600">
+                    {p.category || '—'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-neutral-900 text-right">
+                    {new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(Number(p.price))}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {processingIds.has(p.id) ? (
+                      <span className="text-neutral-400 text-sm">Επεξεργασία...</span>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleApprove(p.id)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-md font-medium transition-colors"
+                          data-testid={`approve-btn-${p.id}`}
+                        >
+                          Έγκριση
+                        </button>
+                        <button
+                          onClick={() => setRejectModal({ id: p.id, title: p.title })}
+                          className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md font-medium transition-colors"
+                          data-testid={`reject-btn-${p.id}`}
+                        >
+                          Απόρριψη
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Rejection Modal */}
+      {rejectModal && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onClick={() => setRejectingProductId(null)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => { setRejectModal(null); setRejectionReason(''); }}
+          data-testid="rejection-modal"
         >
           <div
-            style={{
-              backgroundColor: 'white',
-              padding: 24,
-              borderRadius: 8,
-              maxWidth: 500,
-              width: '90%',
-            }}
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3>Απόρριψη Προϊόντος</h3>
-            <p style={{ marginBottom: 16 }}>
-              Παρακαλώ εισάγετε την αιτιολογία της απόρριψης (τουλάχιστον 10 χαρακτήρες):
+            <h3 className="text-lg font-bold text-neutral-900 mb-1" data-testid="rejection-modal-title">
+              Απόρριψη Προϊόντος
+            </h3>
+            <p className="text-sm text-neutral-600 mb-4">
+              {rejectModal.title}
             </p>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
+              Λόγος Απόρριψης *
+            </label>
             <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
               rows={4}
-              style={{
-                width: '100%',
-                padding: 8,
-                border: '1px solid #ddd',
-                borderRadius: 4,
-                marginBottom: 16,
-              }}
-              placeholder="π.χ. Οι φωτογραφίες δεν πληρούν τις προδιαγραφές ποιότητας..."
+              placeholder="Εξηγήστε γιατί απορρίπτεται το προϊόν..."
+              className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-vertical"
+              data-testid="rejection-reason-input"
             />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            {rejectionReason.length > 0 && rejectionReason.length < 5 && (
+              <p className="text-red-600 text-xs mt-1">Τουλάχιστον 5 χαρακτήρες</p>
+            )}
+            <div className="flex justify-end gap-3 mt-4">
               <button
-                onClick={() => {
-                  setRejectingProductId(null);
-                  setRejectReason('');
-                }}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                }}
+                onClick={() => { setRejectModal(null); setRejectionReason(''); }}
+                disabled={submitting}
+                className="px-4 py-2 border border-neutral-300 rounded-md text-sm hover:bg-neutral-50 transition-colors"
+                data-testid="rejection-modal-cancel"
               >
                 Ακύρωση
               </button>
               <button
-                onClick={submitReject}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                }}
+                onClick={handleRejectConfirm}
+                disabled={submitting || rejectionReason.length < 5}
+                className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                data-testid="rejection-modal-confirm"
               >
-                Απόρριψη Προϊόντος
+                {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
               </button>
             </div>
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
