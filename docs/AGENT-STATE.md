@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (CARD-SMOKE-02 ✅ — card payment E2E on production)
+**Updated**: 2026-02-06 (EMAIL-VERIFY-ACTIVATE-01 ✅ — email verification enabled in production)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -29,7 +29,7 @@ _(empty — pick from NEXT)_
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
 | 1 | **CART-SYNC-01** | Cart persistence to backend |
-| 2 | **EMAIL-VERIFY-01** | Email verification flow |
+| 2 | **TRACKING-DISPLAY-01** | Order tracking URL display |
 | 3 | **PRODUCER-DASH-01** | Producer dashboard improvements |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **EMAIL-VERIFY-ACTIVATE-01** — Email verification enabled in production ✅
 - **CARD-SMOKE-02** — Card payment E2E smoke verified on production ✅
 - **ORDER-NOTIFY-01** — Order status email notifications via Resend (#2651) ✅
 - **PR-CLEAN-02** — Shared admin components: AdminLoading + AdminEmptyState (#2646) ✅

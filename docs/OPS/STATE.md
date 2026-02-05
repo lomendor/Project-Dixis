@@ -1,11 +1,34 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-06 (Pass-CARD-SMOKE-02)
+**Last Updated**: 2026-02-06 (Pass-EMAIL-VERIFY-ACTIVATE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-06 — Pass-EMAIL-VERIFY-ACTIVATE-01: Enable Email Verification in Production
+
+**Status**: ✅ DONE (config activation only)
+
+**Context**: EMAIL-VERIFY-01 was already implemented (Pass 2026-01-18, commit `04aefc91`) but disabled in production. This pass activates it.
+
+**VPS changes** (not in repo):
+- Added `EMAIL_VERIFICATION_REQUIRED=true` to `/var/www/dixis/current/backend/.env`
+- Ran `php artisan config:clear && php artisan config:cache`
+
+**Code changes** (1 file, +4 LOC):
+- `frontend/tests/e2e/email-verification.spec.ts` — Fixed test to expect `verify-expired` state (backend message "Invalid or expired" contains "expired" → frontend shows expired state with resend button)
+
+**Verification**:
+- Resend endpoint: Returns expected anti-enumeration message ✅
+- Verify endpoint: Returns "Invalid or expired" for invalid tokens ✅
+- Registration API: Returns `verification_sent: true`, `email_verified_at: null` ✅
+- E2E tests: 2/2 passing against production ✅
+
+**User impact**: New user registrations now require email verification before `email_verified_at` is set. Existing unverified users unaffected (flag only applies to new registrations).
 
 ---
 
