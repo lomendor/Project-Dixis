@@ -5,10 +5,14 @@ import type { NextResponse } from 'next/server';
  * - HttpOnly: Προστασία από XSS
  * - SameSite=lax: Προστασία από CSRF
  * - Secure: HTTPS-only σε production
- * - MaxAge: 7 days
+ * - MaxAge: configurable (PR-SEC-02: admin 24h, user 7d)
  * - Path: /
  */
-export function setSessionCookie(res: NextResponse, token: string): void {
+export function setSessionCookie(
+  res: NextResponse,
+  token: string,
+  maxAgeSeconds: number = 60 * 60 * 24 * 7, // default 7 days
+): void {
   const isProd =
     process.env.DIXIS_ENV === 'production' ||
     process.env.NODE_ENV === 'production';
@@ -18,7 +22,7 @@ export function setSessionCookie(res: NextResponse, token: string): void {
     sameSite: 'lax',
     path: '/',
     secure: isProd,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: maxAgeSeconds,
   });
 }
 

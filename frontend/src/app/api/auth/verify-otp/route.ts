@@ -4,17 +4,26 @@ import { setSessionCookie } from '@/lib/auth/cookies';
 import { verifyOtp } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed } from '@/lib/env';
 import { prisma } from '@/lib/db/client';
+import { authRateLimit, withRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/verify-otp
  * Verifies OTP code and sets secure session cookie
  *
+ * PR-SEC-01: Rate limiting (5 req / 15 min per IP)
+ * PR-SEC-02: Admin sessions 24h, user sessions 7d
+ *
  * Features:
+ * - Rate limiting to prevent brute-force OTP attacks
  * - In-memory OTP validation (5 min expiry, 3 max attempts)
  * - Production guards (admin bypass only in non-production)
- * - Secure session with 7-day expiry
+ * - Admin-specific shorter session expiry
  */
 export async function POST(req: NextRequest) {
+  // PR-SEC-01: Rate limit — 5 requests per 15 minutes per IP
+  const blocked = await withRateLimit(authRateLimit)(req);
+  if (blocked) return blocked;
+
   try {
     const body = await req.json();
     const { phone, code } = body;
@@ -64,10 +73,12 @@ export async function POST(req: NextRequest) {
     })();
 
     const sessionType = isAdmin ? 'admin' : 'user';
+    // PR-SEC-02: Admin sessions expire in 24h (security), user sessions in 7d
+    const sessionExpiry = isAdmin ? '24h' : '7d';
     const sessionToken = jwt.sign(
       { phone: phoneNorm, type: sessionType, iat: Math.floor(Date.now() / 1000) },
       JWT_SECRET,
-      { expiresIn: '7d', algorithm: 'HS256', issuer: 'dixis-auth', subject: phoneNorm }
+      { expiresIn: sessionExpiry, algorithm: 'HS256', issuer: 'dixis-auth', subject: phoneNorm }
     );
 
     console.log(`[Auth] Successful ${sessionType} login for ${phoneNorm}`);
@@ -96,8 +107,9 @@ export async function POST(req: NextRequest) {
       phone: phoneNorm
     });
 
-    // Set secure session cookie
-    setSessionCookie(response, sessionToken);
+    // Set secure session cookie (PR-SEC-02: admin 24h, user 7d)
+    const cookieMaxAge = isAdmin ? 60 * 60 * 24 : 60 * 60 * 24 * 7;
+    setSessionCookie(response, sessionToken, cookieMaxAge);
 
     return response;
 
