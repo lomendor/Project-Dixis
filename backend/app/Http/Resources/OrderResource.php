@@ -58,6 +58,8 @@ class OrderResource extends JsonResource
         return [
             'id' => $this->id,
             'order_number' => 'ORD-'.str_pad($this->id, 6, '0', STR_PAD_LEFT),
+            // Pass TRACKING-DISPLAY-01: Public token for customer tracking
+            'public_token' => $this->public_token,
             // Pass MP-ORDERS-SPLIT-01: Child order indicator
             'checkout_session_id' => $this->checkout_session_id,
             'is_child_order' => (bool) $this->is_child_order,

@@ -10,6 +10,7 @@ interface OrderItem {
 }
 
 // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Enhanced order interface for multi-producer checkout
+// Pass TRACKING-DISPLAY-01: Added public_token for tracking link
 interface Order {
   id: string
   status: string
@@ -23,6 +24,7 @@ interface Order {
   items: OrderItem[]
   isMultiProducer?: boolean
   shippingLines?: ShippingLine[] // Per-producer shipping breakdown
+  publicToken?: string // Pass TRACKING-DISPLAY-01: For tracking link
 }
 
 export default function ThankYouPage({ searchParams }: { searchParams?: Record<string, string | undefined> }) {
@@ -55,6 +57,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           ? parseFloat(laravelOrder.shipping_total)
           : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
         // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Include per-producer shipping lines
+        // Pass TRACKING-DISPLAY-01: Include public_token for tracking link
         const transformedOrder: Order = {
           id: String(laravelOrder.id),
           status: laravelOrder.status,
@@ -67,6 +70,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           name: null,
           isMultiProducer: laravelOrder.is_multi_producer || false,
           shippingLines: laravelOrder.shipping_lines || [],
+          publicToken: laravelOrder.public_token || undefined,
           items: orderItems.map((item) => ({
             id: String(item.id),
             qty: item.quantity,
@@ -193,6 +197,28 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
               <div className="border-t pt-4 mt-4">
                 <p className="text-sm text-gray-600">
                   Θα λάβετε email επιβεβαίωσης στο <span className="font-medium">{order.email}</span>
+                </p>
+              </div>
+            )}
+
+            {/* Pass TRACKING-DISPLAY-01: Tracking link for customer */}
+            {order.publicToken && (
+              <div className="border-t pt-4 mt-4 bg-emerald-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                <p className="text-sm text-gray-700 mb-2">
+                  Παρακολουθήστε την παραγγελία σας:
+                </p>
+                <a
+                  href={`/track/${order.publicToken}`}
+                  className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium"
+                  data-testid="tracking-link"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                  Σελίδα παρακολούθησης
+                </a>
+                <p className="text-xs text-gray-500 mt-2">
+                  Μπορείτε να αποθηκεύσετε αυτόν τον σύνδεσμο για να ελέγχετε την κατάσταση της παραγγελίας σας.
                 </p>
               </div>
             )}

@@ -239,6 +239,11 @@ Route::prefix('v1')->group(function () {
         Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
             ->middleware(['auth.optional', 'throttle:10,1']);
 
+        // Pass TRACKING-DISPLAY-01: Public order tracking by token (no auth required)
+        Route::get('orders/track/{token}', [App\Http\Controllers\Api\V1\OrderTrackingController::class, 'show'])
+            ->name('api.v1.public.orders.track')
+            ->middleware('throttle:60,1'); // 60 tracking requests per minute
+
         // Pass 50: Zone-based shipping quote (simpler than /api/shipping/quote)
         Route::post('shipping/quote', [App\Http\Controllers\Api\V1\ShippingQuoteController::class, 'quote'])
             ->name('api.v1.public.shipping.quote')

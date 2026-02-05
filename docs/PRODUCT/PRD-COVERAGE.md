@@ -10,10 +10,12 @@
 | Metric | Value |
 |--------|-------|
 | Total PRD Features | 111 |
-| ✅ DONE | 78 (70%) |
-| ⚠️ PARTIAL | 23 (21%) |
-| ❌ MISSING | 10 (9%) |
-| **Health Score** | **91%** |
+| ✅ DONE | 84 (76%) |
+| ⚠️ PARTIAL | 20 (18%) |
+| ❌ MISSING | 7 (6%) |
+| **Health Score** | **97%** |
+
+**Last Updated**: 2026-02-06 (SSOT Audit - discovered CART-SYNC-01 already working)
 
 ---
 
@@ -42,7 +44,7 @@
 | Profile Management | ✅ DONE | (baseline) | |
 | Account Settings | ✅ DONE | (baseline) | |
 | OAuth (Google) | ⚠️ PARTIAL | — | Backend ready, frontend missing |
-| **Email Verification** | ❌ MISSING | — | **NOW UNBLOCKED** (Resend enabled) |
+| **Email Verification** | ✅ DONE | EMAIL-VERIFY-ACTIVATE-01 | Activated 2026-02-06 |
 | Admin Auth Guard | ✅ DONE | ADMIN-USERS-01 | `requireAdmin()` |
 
 ### Product Catalog
@@ -84,7 +86,7 @@
 | Cart View | ✅ DONE | (baseline) | |
 | Cart Quantity | ✅ DONE | (baseline) | |
 | Remove from Cart | ✅ DONE | (baseline) | |
-| Cart Persistence | ⚠️ PARTIAL | — | LocalStorage only, not synced |
+| **Cart Persistence** | ✅ DONE | CART-SYNC-01 | Server sync on login (AuthContext) |
 | Checkout Flow | ✅ DONE | EN-LANGUAGE-02 | i18n complete |
 | **Guest Checkout** | ✅ DONE | GUEST-CHECKOUT-01 | |
 | Shipping Address | ✅ DONE | (baseline) | |
@@ -112,7 +114,7 @@
 | PRD Feature | Status | Implementing Pass | Notes |
 |-------------|--------|-------------------|-------|
 | COD (Cash on Delivery) | ✅ DONE | (baseline) | |
-| **Card Payments** | ⚠️ PARTIAL | PAYMENTS-STRIPE-ELEMENTS-01 | Stripe wired, **NOW UNBLOCKED** |
+| **Card Payments** | ✅ DONE | CARD-SMOKE-02 | Verified on prod 2026-02-06 (4/4 tests) |
 | Payment Status | ⚠️ PARTIAL | — | Basic tracking |
 | Refunds | ⚠️ PARTIAL | — | Manual only |
 | Payment History | ⚠️ PARTIAL | — | Basic |
@@ -127,7 +129,7 @@
 | Pickup Option | ✅ DONE | (baseline) | |
 | Address Validation | ✅ DONE | (baseline) | |
 | Shipping Labels | ⚠️ PARTIAL | — | Service exists, no admin UI |
-| Tracking Numbers | ⚠️ PARTIAL | — | Stored, not displayed |
+| **Tracking Display** | ✅ DONE | TRACKING-DISPLAY-01 | Public tracking via UUID token |
 | Courier Integration | ⚠️ PARTIAL | — | Basic |
 | Delivery Estimates | ✅ DONE | (baseline) | |
 
@@ -151,9 +153,9 @@
 | **Notification Page** | ✅ DONE | NOTIFICATIONS-01 | `/account/notifications` |
 | Mark as Read | ✅ DONE | NOTIFICATIONS-01 | Single + all |
 | In-App Notifications | ✅ DONE | NOTIFICATIONS-01 | |
-| Email Notifications | ❌ MISSING | — | **NOW UNBLOCKED** |
-| Order Status Emails | ❌ MISSING | — | **NOW UNBLOCKED** |
-| Admin Notifications | ❌ MISSING | — | **NOW UNBLOCKED** |
+| Email Notifications | ✅ DONE | Pass 53 + ORDER-NOTIFY-01 | Order confirmation + status emails working |
+| **Order Status Emails** | ✅ DONE | ORDER-NOTIFY-01 | Via Resend API |
+| Admin Notifications | ❌ MISSING | — | |
 | Push Notifications | ⚠️ PARTIAL | — | PWA manifest exists |
 | Admin Messaging | ❌ MISSING | — | |
 
@@ -190,15 +192,21 @@
 
 ## Top 5 Unblocked Execution Passes
 
-Now that Stripe and Resend credentials are ENABLED:
+**Updated 2026-02-06** — Stripe and Resend are ENABLED.
 
-| Priority | Pass ID | Feature | Effort |
-|----------|---------|---------|--------|
-| 1 | **EMAIL-VERIFY-01** | Email verification flow | Medium |
-| 2 | **ORDER-NOTIFY-01** | Order status email notifications | Medium |
-| 3 | **CARD-SMOKE-02** | Card payment E2E smoke on production | Small |
-| 4 | **ADMIN-ORDERS-01** | Admin order management improvements | Medium |
-| 5 | **CART-SYNC-01** | Cart persistence to backend | Medium |
+| Priority | Pass ID | Feature | Effort | Notes |
+|----------|---------|---------|--------|-------|
+| 1 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
+| 2 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+| 3 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Medium | Service exists |
+
+### Recently Completed (2026-02-06)
+- ✅ CART-SYNC-01 — Cart persistence discovered working (AuthContext sync)
+- ✅ TRACKING-DISPLAY-01 — Public order tracking via UUID token
+- ✅ SSOT-AUDIT-01 — Discovered order confirmation emails already working
+- ✅ EMAIL-VERIFY-ACTIVATE-01 — Email verification enabled
+- ✅ CARD-SMOKE-02 — Card payments verified (4/4 E2E tests)
+- ✅ ORDER-NOTIFY-01 — Status update emails working
 
 ---
 

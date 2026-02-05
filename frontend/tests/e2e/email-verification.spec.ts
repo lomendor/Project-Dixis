@@ -20,15 +20,16 @@ test.describe('Email Verification Page', () => {
     await expect(page.getByText(/Πίσω στη Σύνδεση|Back to Login/i)).toBeVisible();
   });
 
-  test('shows error state for invalid token', async ({ page }) => {
+  test('shows expired state for invalid token', async ({ page }) => {
     // Navigate with invalid token
     await page.goto('/auth/verify-email?token=invalid-token&email=test@example.com');
 
     // Wait for verification attempt to complete
-    // Should show error state (invalid token)
-    await expect(page.getByTestId('verify-error')).toBeVisible({ timeout: 15000 });
+    // Pass EMAIL-VERIFY-ACTIVATE-01: Backend returns "Invalid or expired" which
+    // contains "expired" → frontend shows expired state (has resend button)
+    await expect(page.getByTestId('verify-expired')).toBeVisible({ timeout: 15000 });
 
-    // Should have link back to login
-    await expect(page.getByText(/Πίσω στη Σύνδεση|Back to Login/i)).toBeVisible();
+    // Should have resend button for expired tokens
+    await expect(page.getByTestId('resend-button')).toBeVisible();
   });
 });

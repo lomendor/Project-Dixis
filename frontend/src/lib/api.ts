@@ -88,6 +88,8 @@ export interface OrderItemProducer {
 export interface Order {
   id: number;
   user_id: number;
+  // Pass TRACKING-DISPLAY-01: Public token for customer tracking
+  public_token?: string;
   subtotal: string;
   tax_amount: string;
   shipping_amount: string;
@@ -117,6 +119,29 @@ export interface Order {
   type?: 'checkout_session'; // Present for multi-producer orders
   payment_order_id?: number; // Canonical order ID for payment init (first child order)
   orders?: Order[]; // Child orders for multi-producer checkout
+}
+
+// Pass TRACKING-DISPLAY-01: Public order tracking response
+export interface OrderTrackingResponse {
+  ok: boolean;
+  order: {
+    id: number;
+    status: string;
+    payment_status: string;
+    created_at: string;
+    updated_at: string;
+    items_count: number;
+    total: number;
+    shipment?: {
+      status: string;
+      carrier_code: string | null;
+      tracking_code: string | null;
+      tracking_url: string | null;
+      shipped_at: string | null;
+      delivered_at: string | null;
+      estimated_delivery: string | null;
+    };
+  };
 }
 
 export interface OrderItem {
@@ -657,6 +682,16 @@ class ApiClient {
     // API returns { data: Order }, must unwrap
     const response = await this.request<{ data: Order }>(`public/orders/${id}`);
     return response.data;
+  }
+
+  /**
+   * Pass TRACKING-DISPLAY-01: Get order by public tracking token (no auth required)
+   *
+   * @param token UUID public token
+   * @returns Order tracking info (status, shipment, etc.)
+   */
+  async trackOrderByToken(token: string): Promise<OrderTrackingResponse> {
+    return this.request<OrderTrackingResponse>(`public/orders/track/${token}`);
   }
 
   // Direct order creation via Laravel API (Pass 44 - Single Source of Truth)

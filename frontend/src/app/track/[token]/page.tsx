@@ -1,44 +1,211 @@
 import StatusBadge from '@/components/admin/StatusBadge'
+import { getServerApiUrl } from '@/env'
 
 /**
- * Pass FIX-ADMIN-DASHBOARD-418-02: Deterministic date formatter for Server Components.
- * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ * Pass TRACKING-DISPLAY-01: Public order tracking page using Laravel API
+ *
+ * Fetches order status by public token (UUID) from Laravel backend.
+ * No authentication required - safe for sharing with customers.
+ */
+
+/**
+ * Stable date formatter for Server Components (avoids hydration mismatch).
  */
 function formatDateStable(date: string | Date | null): string {
-  if (!date) return '—';
-  const d = new Date(date);
-  // Format: YYYY-MM-DD HH:MM (stable across server/client)
-  return d.toISOString().slice(0, 16).replace('T', ' ');
+  if (!date) return '—'
+  const d = new Date(date)
+  return d.toISOString().slice(0, 16).replace('T', ' ')
 }
 
-async function fetchData(token:string){
-  const base = process.env.NEXT_PUBLIC_SITE_URL || ''
-  const res = await fetch(`${base}/api/track/${token}`, { cache:'no-store' })
-  if (!res.ok) return null
-  return res.json()
+interface TrackingOrder {
+  id: number
+  status: string
+  payment_status: string
+  created_at: string
+  updated_at: string
+  items_count: number
+  total: number
+  shipment?: {
+    status: string
+    carrier_code: string | null
+    tracking_code: string | null
+    tracking_url: string | null
+    shipped_at: string | null
+    delivered_at: string | null
+    estimated_delivery: string | null
+  }
 }
 
-export default async function TrackPage({ params }:{ params:{ token:string } }){
-  const data = await fetchData(params.token)
-  if (!data) return <div style={{padding:16}}>Δεν βρέθηκε παραγγελία για το συγκεκριμένο σύνδεσμο.</div>
-  const fmt = (n:number)=> new Intl.NumberFormat('el-GR',{ style:'currency', currency:'EUR' }).format(n)
+interface TrackingResponse {
+  ok: boolean
+  order: TrackingOrder
+}
+
+async function fetchTrackingData(token: string): Promise<TrackingOrder | null> {
+  try {
+    // Pass TRACKING-DISPLAY-01: Use Laravel API (single source of truth)
+    const apiBase = getServerApiUrl()
+    const res = await fetch(`${apiBase}/public/orders/track/${token}`, {
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+    if (!res.ok) return null
+    const data: TrackingResponse = await res.json()
+    return data.order
+  } catch {
+    return null
+  }
+}
+
+export default async function TrackPage({ params }: { params: { token: string } }) {
+  const order = await fetchTrackingData(params.token)
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
+          <div className="text-5xl mb-4">🔍</div>
+          <h1 className="text-xl font-semibold text-gray-900 mb-2">Παραγγελία δεν βρέθηκε</h1>
+          <p className="text-gray-600">
+            Ο σύνδεσμος παρακολούθησης δεν είναι έγκυρος ή η παραγγελία δεν υπάρχει.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const fmt = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
+
+  // Status labels in Greek
+  const statusLabels: Record<string, string> = {
+    pending: 'Εκκρεμεί',
+    processing: 'Σε επεξεργασία',
+    shipped: 'Απεστάλη',
+    delivered: 'Παραδόθηκε',
+    completed: 'Ολοκληρώθηκε',
+    cancelled: 'Ακυρώθηκε',
+  }
+
   return (
-    <div style={{padding:'20px 16px', maxWidth:720, margin:'0 auto'}}>
-      <h1 style={{fontSize:22, marginBottom:12}}>Παρακολούθηση Παραγγελίας</h1>
-      <div style={{display:'flex', gap:12, alignItems:'center', marginBottom:12}}>
-        <span style={{opacity:0.7}}>Κωδικός:</span><b>#{data.id}</b>
-        <span style={{opacity:0.7}}>Κατάσταση:</span><StatusBadge status={data.status}/>
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Παρακολούθηση Παραγγελίας</h1>
+
+          {/* Order Info */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-gray-600">Κωδικός:</span>
+              <span className="font-mono font-semibold text-lg">#{order.id}</span>
+            </div>
+
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-gray-600">Κατάσταση:</span>
+              <StatusBadge status={order.status} />
+            </div>
+
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-gray-600">Ημερομηνία:</span>
+              <span>{formatDateStable(order.created_at)}</span>
+            </div>
+
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-gray-600">Προϊόντα:</span>
+              <span>{order.items_count} τεμάχια</span>
+            </div>
+
+            <div className="flex items-center justify-between pb-4 border-b">
+              <span className="text-gray-600">Σύνολο:</span>
+              <span className="font-semibold text-emerald-600">{fmt(order.total)}</span>
+            </div>
+          </div>
+
+          {/* Shipment Info */}
+          {order.shipment && (
+            <div className="mt-6 pt-6 border-t">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Πληροφορίες Αποστολής</h2>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Κατάσταση αποστολής:</span>
+                  <span className="capitalize">{statusLabels[order.shipment.status] || order.shipment.status}</span>
+                </div>
+
+                {order.shipment.carrier_code && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Μεταφορέας:</span>
+                    <span className="uppercase">{order.shipment.carrier_code}</span>
+                  </div>
+                )}
+
+                {order.shipment.tracking_code && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Αριθμός Αποστολής:</span>
+                    <span className="font-mono">{order.shipment.tracking_code}</span>
+                  </div>
+                )}
+
+                {order.shipment.tracking_url && (
+                  <div className="mt-4">
+                    <a
+                      href={order.shipment.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                    >
+                      Παρακολούθηση στον Μεταφορέα
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+
+                {order.shipment.shipped_at && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Ημ/νία αποστολής:</span>
+                    <span>{formatDateStable(order.shipment.shipped_at)}</span>
+                  </div>
+                )}
+
+                {order.shipment.estimated_delivery && !order.shipment.delivered_at && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Εκτιμώμενη παράδοση:</span>
+                    <span>{formatDateStable(order.shipment.estimated_delivery)}</span>
+                  </div>
+                )}
+
+                {order.shipment.delivered_at && (
+                  <div className="flex items-center justify-between text-emerald-600">
+                    <span>Παραδόθηκε:</span>
+                    <span>{formatDateStable(order.shipment.delivered_at)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t text-center">
+            <p className="text-sm text-gray-500">
+              Αυτός ο σύνδεσμος είναι μόνο για ενημέρωση κατάστασης.
+            </p>
+            <a href="/" className="text-emerald-600 hover:underline text-sm mt-2 inline-block">
+              Επιστροφή στην αρχική
+            </a>
+          </div>
+        </div>
       </div>
-      <div style={{opacity:0.8, marginTop:6}}>
-        <div>Ημ/νία: {formatDateStable(data.createdAt)}</div>
-        <div>Πελάτης: {data.buyerName || '—'}</div>
-        <div>Σύνολο: {typeof data.total === 'number' ? fmt(data.total) : '—'}</div>
-      </div>
-      <p style={{marginTop:16, fontSize:14, opacity:0.7}}>
-        Ο σύνδεσμος είναι μόνο για ενημέρωση κατάστασης.
-      </p>
     </div>
   )
 }
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
