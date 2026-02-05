@@ -10,12 +10,12 @@
 | Metric | Value |
 |--------|-------|
 | Total PRD Features | 111 |
-| ✅ DONE | 82 (74%) |
-| ⚠️ PARTIAL | 22 (20%) |
+| ✅ DONE | 83 (75%) |
+| ⚠️ PARTIAL | 21 (19%) |
 | ❌ MISSING | 7 (6%) |
-| **Health Score** | **95%** |
+| **Health Score** | **96%** |
 
-**Last Updated**: 2026-02-06 (SSOT Audit)
+**Last Updated**: 2026-02-06 (TRACKING-DISPLAY-01)
 
 ---
 
@@ -129,7 +129,7 @@
 | Pickup Option | ✅ DONE | (baseline) | |
 | Address Validation | ✅ DONE | (baseline) | |
 | Shipping Labels | ⚠️ PARTIAL | — | Service exists, no admin UI |
-| Tracking Numbers | ⚠️ PARTIAL | — | Stored, not displayed |
+| **Tracking Display** | ✅ DONE | TRACKING-DISPLAY-01 | Public tracking via UUID token |
 | Courier Integration | ⚠️ PARTIAL | — | Basic |
 | Delivery Estimates | ✅ DONE | (baseline) | |
 
@@ -196,12 +196,12 @@
 
 | Priority | Pass ID | Feature | Effort | Notes |
 |----------|---------|---------|--------|-------|
-| 1 | **TRACKING-DISPLAY-01** | Show tracking URL to customer | Small | URL exists but never displayed |
-| 2 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
-| 3 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
-| 4 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+| 1 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
+| 2 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
+| 3 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
 
 ### Recently Completed (2026-02-06)
+- ✅ TRACKING-DISPLAY-01 — Public order tracking via UUID token
 - ✅ SSOT-AUDIT-01 — Discovered order confirmation emails already working
 - ✅ EMAIL-VERIFY-ACTIVATE-01 — Email verification enabled
 - ✅ CARD-SMOKE-02 — Card payments verified (4/4 E2E tests)
