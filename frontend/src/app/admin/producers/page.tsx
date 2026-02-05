@@ -68,6 +68,10 @@ function AdminProducersContent() {
   const [rejectionReason, setRejectionReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  // PR-CRUD-01: Create producer modal state
+  const [createOpen, setCreateOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
+
   // Filters
   const q = searchParams.get('q') || ''
   const active = searchParams.get('active') || ''
@@ -154,9 +158,51 @@ function AdminProducersContent() {
     router.push(`/admin/producers?${params.toString()}`)
   }
 
+  // PR-CRUD-01: Create producer
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setCreating(true)
+    const fd = new FormData(e.currentTarget)
+    const body = {
+      name: fd.get('name') as string,
+      slug: (fd.get('name') as string).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      region: fd.get('region') as string,
+      category: fd.get('category') as string,
+      email: fd.get('email') as string || undefined,
+      phone: fd.get('phone') as string || undefined,
+    }
+    try {
+      const res = await fetch('/api/admin/producers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Αποτυχία δημιουργίας')
+      }
+      showSuccess('Ο παραγωγός δημιουργήθηκε επιτυχώς')
+      setCreateOpen(false)
+      await loadProducers()
+    } catch (err: any) {
+      showError(err.message || 'Σφάλμα δημιουργίας παραγωγού')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   return (
     <main style={{ padding: 16, maxWidth: 960, margin: '0 auto' }}>
-      <h1>Παραγωγοί</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h1 style={{ margin: 0 }}>Παραγωγοί</h1>
+        <button
+          onClick={() => setCreateOpen(true)}
+          style={{ padding: '8px 16px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: 14 }}
+          data-testid="create-producer-btn"
+        >
+          + Νέος Παραγωγός
+        </button>
+      </div>
 
       <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 160px', gap: 8, marginBottom: 16 }}>
         <input name="q" defaultValue={q} placeholder="Αναζήτηση ονόματος…" style={{ padding: 8 }} />
@@ -238,6 +284,62 @@ function AdminProducersContent() {
           ← Επιστροφή στο Admin
         </Link>
       </div>
+
+      {/* PR-CRUD-01: Create Producer Modal */}
+      {createOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setCreateOpen(false)}
+          data-testid="create-producer-modal"
+        >
+          <div
+            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 480, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }}>Νέος Παραγωγός</h3>
+            <form onSubmit={handleCreate} style={{ display: 'grid', gap: 12 }}>
+              <label style={{ fontSize: 14, fontWeight: 500 }}>
+                Όνομα *
+                <input name="name" required minLength={2} style={{ display: 'block', width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 6, marginTop: 4, boxSizing: 'border-box' }} />
+              </label>
+              <label style={{ fontSize: 14, fontWeight: 500 }}>
+                Περιοχή *
+                <input name="region" required minLength={2} style={{ display: 'block', width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 6, marginTop: 4, boxSizing: 'border-box' }} />
+              </label>
+              <label style={{ fontSize: 14, fontWeight: 500 }}>
+                Κατηγορία *
+                <input name="category" required minLength={2} style={{ display: 'block', width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 6, marginTop: 4, boxSizing: 'border-box' }} />
+              </label>
+              <label style={{ fontSize: 14, fontWeight: 500 }}>
+                Email
+                <input name="email" type="email" style={{ display: 'block', width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 6, marginTop: 4, boxSizing: 'border-box' }} />
+              </label>
+              <label style={{ fontSize: 14, fontWeight: 500 }}>
+                Τηλέφωνο
+                <input name="phone" style={{ display: 'block', width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 6, marginTop: 4, boxSizing: 'border-box' }} />
+              </label>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setCreateOpen(false)}
+                  disabled={creating}
+                  style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                >
+                  Ακύρωση
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  style={{ padding: '10px 16px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, opacity: creating ? 0.5 : 1 }}
+                  data-testid="create-producer-submit"
+                >
+                  {creating ? 'Δημιουργία...' : 'Δημιουργία'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Rejection Modal */}
       {rejectModalOpen && (
