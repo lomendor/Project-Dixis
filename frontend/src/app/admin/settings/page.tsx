@@ -1,15 +1,14 @@
 export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
-import Link from 'next/link';
+import { prisma } from '@/lib/db/client';
 
-// Environment config (read-only display)
-const envConfig = {
-  nodeEnv: process.env.NODE_ENV || 'development',
-  lowStockThreshold: process.env.LOW_STOCK_THRESHOLD || '3',
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1',
-};
-
+/**
+ * Pass ADMIN-SETTINGS-01: Settings page with real system info.
+ *
+ * Replaces placeholder sections with actual Stripe, Resend, shipping,
+ * and system information. Read-only — no mutations.
+ */
 export default async function AdminSettingsPage() {
   try {
     await requireAdmin();
@@ -20,74 +19,116 @@ export default async function AdminSettingsPage() {
     throw e;
   }
 
+  // Collect system info (read-only, no secrets exposed)
+  const stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
+  const stripePk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const resendConfigured = !!process.env.RESEND_API_KEY;
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  const dixisEnv = process.env.DIXIS_ENV || '(not set)';
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  const lowStockThreshold = process.env.LOW_STOCK_THRESHOLD || '3';
+
+  // DB check
+  let dbStatus = 'unknown';
+  let orderCount = 0;
+  let productCount = 0;
+  try {
+    [orderCount, productCount] = await Promise.all([
+      prisma.order.count(),
+      prisma.product.count(),
+    ]);
+    dbStatus = 'connected';
+  } catch {
+    dbStatus = 'error';
+  }
+
   return (
-    <main style={{ padding: 16, maxWidth: 960, margin: '0 auto' }}>
-      <div style={{ marginBottom: 16 }}>
-        <Link href="/admin" style={{ color: '#0070f3', textDecoration: 'none' }}>
-          &larr; Επιστροφή στο Dashboard
-        </Link>
-      </div>
+    <div className="space-y-8" data-testid="admin-settings-page">
+      <h1 className="text-2xl font-bold text-neutral-900">Ρυθμίσεις</h1>
 
-      <h1 style={{ marginBottom: 24 }}>Ρυθμίσεις</h1>
+      {/* Environment */}
+      <SettingsSection title="Περιβάλλον">
+        <ConfigRow label="NODE_ENV" value={nodeEnv} />
+        <ConfigRow label="DIXIS_ENV" value={dixisEnv} />
+        <ConfigRow label="API Base URL" value={apiBaseUrl} />
+        <ConfigRow label="Low Stock Threshold" value={lowStockThreshold} />
+      </SettingsSection>
 
-      {/* Environment Configuration */}
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, borderBottom: '1px solid #eee', paddingBottom: 8 }}>
-          Περιβάλλον
-        </h2>
-        <div style={{ display: 'grid', gap: 12 }}>
-          <ConfigItem label="Mode" value={envConfig.nodeEnv} />
-          <ConfigItem label="Low Stock Threshold" value={envConfig.lowStockThreshold} />
-          <ConfigItem label="API Base URL" value={envConfig.apiBaseUrl} />
+      {/* Payments */}
+      <SettingsSection title="Πληρωμές">
+        <StatusRow label="Stripe" configured={stripeConfigured} />
+        {stripePk && (
+          <ConfigRow label="Publishable Key" value={`${stripePk.slice(0, 12)}...`} />
+        )}
+        <ConfigRow label="Μέθοδοι" value={stripeConfigured ? 'Κάρτα, Cash on Delivery' : 'Cash on Delivery μόνο'} />
+      </SettingsSection>
+
+      {/* Email Notifications */}
+      <SettingsSection title="Ειδοποιήσεις (Email)">
+        <StatusRow label="Resend" configured={resendConfigured} />
+        <ConfigRow label="Λειτουργία" value={resendConfigured ? 'Αποστολή email ενεργή' : 'Email απενεργοποιημένα'} />
+      </SettingsSection>
+
+      {/* Shipping */}
+      <SettingsSection title="Μεταφορικά">
+        <ConfigRow label="Δωρεάν αποστολή" value="Εξαρτάται ανά παραγωγό" />
+        <ConfigRow label="Ζώνες" value="Ηπειρωτική, Νησιά, Παραλαβή" />
+        <ConfigRow label="Προεπιλογή" value="Courier (ηπειρωτική)" />
+      </SettingsSection>
+
+      {/* System */}
+      <SettingsSection title="Σύστημα">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-medium text-neutral-500 w-40">Database</span>
+          <StatusDot ok={dbStatus === 'connected'} />
+          <span className="text-sm text-neutral-700">{dbStatus}</span>
         </div>
-      </section>
-
-      {/* Notifications (placeholder) */}
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, borderBottom: '1px solid #eee', paddingBottom: 8 }}>
-          Ειδοποιήσεις
-        </h2>
-        <div style={{ padding: 16, backgroundColor: '#f9fafb', borderRadius: 8, color: '#6b7280' }}>
-          Οι ρυθμίσεις ειδοποιήσεων θα προστεθούν σύντομα.
-        </div>
-      </section>
-
-      {/* Shipping (placeholder) */}
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, borderBottom: '1px solid #eee', paddingBottom: 8 }}>
-          Μεταφορικά
-        </h2>
-        <div style={{ padding: 16, backgroundColor: '#f9fafb', borderRadius: 8, color: '#6b7280' }}>
-          Οι ρυθμίσεις μεταφορικών θα προστεθούν σύντομα.
-        </div>
-      </section>
-
-      {/* Payment (placeholder) */}
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12, borderBottom: '1px solid #eee', paddingBottom: 8 }}>
-          Πληρωμές
-        </h2>
-        <div style={{ padding: 16, backgroundColor: '#f9fafb', borderRadius: 8, color: '#6b7280' }}>
-          Οι ρυθμίσεις πληρωμών θα προστεθούν σύντομα.
-        </div>
-      </section>
-    </main>
+        <ConfigRow label="Παραγγελίες (DB)" value={String(orderCount)} />
+        <ConfigRow label="Προϊόντα (DB)" value={String(productCount)} />
+        <ConfigRow label="Node.js" value={process.version} />
+        <ConfigRow label="Next.js" value="15.5.0" />
+      </SettingsSection>
+    </div>
   );
 }
 
-function ConfigItem({ label, value }: { label: string; value: string }) {
+/* --- Sub-components --- */
+
+function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontWeight: 500, minWidth: 160 }}>{label}:</span>
-      <code style={{
-        backgroundColor: '#f3f4f6',
-        padding: '4px 8px',
-        borderRadius: 4,
-        fontSize: 14,
-        fontFamily: 'monospace'
-      }}>
-        {value}
-      </code>
+    <section>
+      <h2 className="text-lg font-semibold text-neutral-900 mb-3 pb-2 border-b border-neutral-200">
+        {title}
+      </h2>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function ConfigRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs font-medium text-neutral-500 w-40 shrink-0">{label}</span>
+      <code className="text-sm bg-neutral-100 px-2 py-0.5 rounded text-neutral-800">{value}</code>
     </div>
+  );
+}
+
+function StatusRow({ label, configured }: { label: string; configured: boolean }) {
+  return (
+    <div className="flex items-center gap-3 mb-1">
+      <span className="text-xs font-medium text-neutral-500 w-40 shrink-0">{label}</span>
+      <StatusDot ok={configured} />
+      <span className="text-sm text-neutral-700">{configured ? 'Ενεργό' : 'Δεν έχει ρυθμιστεί'}</span>
+    </div>
+  );
+}
+
+function StatusDot({ ok }: { ok: boolean }) {
+  return (
+    <span
+      className={`inline-block w-2 h-2 rounded-full shrink-0 ${ok ? 'bg-emerald-500' : 'bg-red-400'}`}
+      aria-label={ok ? 'Active' : 'Inactive'}
+    />
   );
 }
