@@ -14,7 +14,7 @@
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
 | **Ports** | 8001 (backend), 3001 (frontend) — LOCKED |
-| **Feature health** | 91% (78 DONE + 23 PARTIAL / 111 total) |
+| **Feature health** | 94% (81 DONE + 23 PARTIAL / 111 total) |
 
 ---
 
@@ -26,11 +26,11 @@ _(empty — pick from NEXT)_
 
 ## NEXT (top 3 unblocked)
 
-| Priority | Pass ID | Feature |
-|----------|---------|---------|
-| 1 | **CART-SYNC-01** | Cart persistence to backend |
-| 2 | **TRACKING-DISPLAY-01** | Order tracking URL display |
-| 3 | **PRODUCER-DASH-01** | Producer dashboard improvements |
+| Priority | Pass ID | Feature | Why |
+|----------|---------|---------|-----|
+| 1 | **ORDER-CONFIRM-EMAIL-01** | Order confirmation email | ⚠️ Customer gets NOTHING after checkout |
+| 2 | **TRACKING-DISPLAY-01** | Show tracking URL to customer | URL exists but never displayed |
+| 3 | **CART-SYNC-01** | Cart persistence to backend | Multi-device support |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 

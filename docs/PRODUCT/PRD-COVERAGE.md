@@ -10,10 +10,12 @@
 | Metric | Value |
 |--------|-------|
 | Total PRD Features | 111 |
-| ✅ DONE | 78 (70%) |
+| ✅ DONE | 81 (73%) |
 | ⚠️ PARTIAL | 23 (21%) |
-| ❌ MISSING | 10 (9%) |
-| **Health Score** | **91%** |
+| ❌ MISSING | 7 (6%) |
+| **Health Score** | **94%** |
+
+**Last Updated**: 2026-02-06
 
 ---
 
@@ -42,7 +44,7 @@
 | Profile Management | ✅ DONE | (baseline) | |
 | Account Settings | ✅ DONE | (baseline) | |
 | OAuth (Google) | ⚠️ PARTIAL | — | Backend ready, frontend missing |
-| **Email Verification** | ❌ MISSING | — | **NOW UNBLOCKED** (Resend enabled) |
+| **Email Verification** | ✅ DONE | EMAIL-VERIFY-ACTIVATE-01 | Activated 2026-02-06 |
 | Admin Auth Guard | ✅ DONE | ADMIN-USERS-01 | `requireAdmin()` |
 
 ### Product Catalog
@@ -112,7 +114,7 @@
 | PRD Feature | Status | Implementing Pass | Notes |
 |-------------|--------|-------------------|-------|
 | COD (Cash on Delivery) | ✅ DONE | (baseline) | |
-| **Card Payments** | ⚠️ PARTIAL | PAYMENTS-STRIPE-ELEMENTS-01 | Stripe wired, **NOW UNBLOCKED** |
+| **Card Payments** | ✅ DONE | CARD-SMOKE-02 | Verified on prod 2026-02-06 (4/4 tests) |
 | Payment Status | ⚠️ PARTIAL | — | Basic tracking |
 | Refunds | ⚠️ PARTIAL | — | Manual only |
 | Payment History | ⚠️ PARTIAL | — | Basic |
@@ -151,9 +153,9 @@
 | **Notification Page** | ✅ DONE | NOTIFICATIONS-01 | `/account/notifications` |
 | Mark as Read | ✅ DONE | NOTIFICATIONS-01 | Single + all |
 | In-App Notifications | ✅ DONE | NOTIFICATIONS-01 | |
-| Email Notifications | ❌ MISSING | — | **NOW UNBLOCKED** |
-| Order Status Emails | ❌ MISSING | — | **NOW UNBLOCKED** |
-| Admin Notifications | ❌ MISSING | — | **NOW UNBLOCKED** |
+| Email Notifications | ⚠️ PARTIAL | ORDER-NOTIFY-01 | Status emails work; confirmation NOT sent |
+| **Order Status Emails** | ✅ DONE | ORDER-NOTIFY-01 | Via Resend API |
+| Admin Notifications | ❌ MISSING | — | |
 | Push Notifications | ⚠️ PARTIAL | — | PWA manifest exists |
 | Admin Messaging | ❌ MISSING | — | |
 
@@ -190,15 +192,20 @@
 
 ## Top 5 Unblocked Execution Passes
 
-Now that Stripe and Resend credentials are ENABLED:
+**Updated 2026-02-06** — Stripe and Resend are ENABLED.
 
-| Priority | Pass ID | Feature | Effort |
-|----------|---------|---------|--------|
-| 1 | **EMAIL-VERIFY-01** | Email verification flow | Medium |
-| 2 | **ORDER-NOTIFY-01** | Order status email notifications | Medium |
-| 3 | **CARD-SMOKE-02** | Card payment E2E smoke on production | Small |
-| 4 | **ADMIN-ORDERS-01** | Admin order management improvements | Medium |
-| 5 | **CART-SYNC-01** | Cart persistence to backend | Medium |
+| Priority | Pass ID | Feature | Effort | Notes |
+|----------|---------|---------|--------|-------|
+| 1 | **ORDER-CONFIRM-EMAIL-01** | Order confirmation email | Medium | ⚠️ Customer gets NOTHING after checkout! |
+| 2 | **TRACKING-DISPLAY-01** | Show tracking URL to customer | Small | URL exists but never displayed |
+| 3 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
+| 4 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
+| 5 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+
+### Recently Completed (2026-02-06)
+- ✅ EMAIL-VERIFY-ACTIVATE-01 — Email verification enabled
+- ✅ CARD-SMOKE-02 — Card payments verified (4/4 E2E tests)
+- ✅ ORDER-NOTIFY-01 — Status update emails working
 
 ---
 
