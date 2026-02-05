@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-01-28 (Pass PRODUCER-THRESHOLD-POSTALCODE-01)
+**Updated**: 2026-02-05 (Pass ADMIN-SETTINGS-01)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,17 +47,16 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **ADMIN-SETTINGS-01** — Settings page with real Stripe/Resend/DB status ✅
+- **ADMIN-CUSTOMERS-01** — Customer management page (aggregated from orders) ✅
+- **ADMIN-DASHBOARD-POLISH-01** — Dashboard Tailwind rewrite + quick actions ✅
+- **ADMIN-LAYOUT-01** — Sidebar navigation + fixed-overlay admin shell ✅
+- **ADMIN-LOGIN-UI-01** — Admin login page (phone/OTP) ✅
+- **DEPLOY-HARDENING-01** — Deploy script safety guards ✅
 - **PRODUCER-THRESHOLD-POSTALCODE-01** — Per-producer free shipping threshold + checkout address prefill ✅
 - **EMAIL-VERIFY-01** — Email verification flow (backend + frontend + tests) ✅
 - **PROC-01** — Consolidate entry points into AGENT-STATE.md ✅
 - **PERF-IPV4-PREFER-01** — Fix 9.5s backend latency (9.3s → 70ms, ~100x faster) ✅
-- **CSP-STRIPE-01** — Fix CSP for Stripe Elements iframe ✅
-- **STRIPE-E2E-TIMEOUT-01** — Deterministic Stripe E2E test ✅
-- **PAYMENTS-STRIPE-ELEMENTS-01** — Stripe Elements in checkout ✅
-- **PAYMENTS-CARD-REAL-01** — Card payment E2E with real auth ✅
-- **ENV-FRONTEND-PAYMENTS-01** — VPS frontend Stripe env ✅
-- **CARD-PAYMENT-SMOKE-01** — Card payment E2E smoke tests ✅
-- **PROD-UNBLOCK-01** — Production auth/products verified ✅
 
 ---
 
