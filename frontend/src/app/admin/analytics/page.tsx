@@ -7,7 +7,7 @@ export default async function AnalyticsPage() {
     await requireAdmin();
   } catch (e) {
     if (e instanceof AdminError) {
-      redirect('/auth/login?from=/admin/analytics');
+      redirect('/auth/admin-login?from=/admin/analytics');
     }
     throw e;
   }

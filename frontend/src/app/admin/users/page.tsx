@@ -27,7 +27,7 @@ export default async function AdminUsersPage() {
     await requireAdmin();
   } catch (e) {
     if (e instanceof AdminError) {
-      redirect('/auth/login?from=/admin/users');
+      redirect('/auth/admin-login?from=/admin/users');
     }
     throw e;
   }
