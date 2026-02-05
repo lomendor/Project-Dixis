@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
+import AdminLoading from '@/app/admin/components/AdminLoading'
+import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 
 interface Product {
   id: string
@@ -361,7 +363,7 @@ function AdminProductsContent() {
       </form>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>
+        <AdminLoading />
       ) : (
         <table width="100%" cellPadding={8} style={{ borderCollapse: 'collapse' }}>
           <thead>
@@ -446,11 +448,7 @@ function AdminProductsContent() {
               </tr>
             ))}
             {products.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
-                  Δεν βρέθηκαν προϊόντα.
-                </td>
-              </tr>
+              <AdminEmptyState message="Δεν βρέθηκαν προϊόντα." colSpan={7} />
             )}
           </tbody>
         </table>
@@ -623,7 +621,7 @@ export default function AdminProductsPage() {
   return (
     <main style={{ padding: 16, maxWidth: 1200, margin: '0 auto' }}>
       <h1>Προϊόντα</h1>
-      <Suspense fallback={<div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>}>
+      <Suspense fallback={<AdminLoading />}>
         <AdminProductsContent />
       </Suspense>
     </main>
