@@ -1,11 +1,27 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-04 (Pass-PROD-UNBLOCK-DEPLOY-01)
+**Last Updated**: 2026-02-06 (Pass-ORDER-NOTIFY-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~420 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~440 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-06 — Pass-ORDER-NOTIFY-01: Wire order status email notifications via Resend
+
+**Status**: ✅ MERGED ([#2651](https://github.com/lomendor/Project-Dixis/pull/2651))
+
+**Changes** (5 files, -7 LOC net):
+1. **`frontend/src/lib/email.ts`** — Extend StatusUpdateEmailData (packing/cancelled statuses, trackUrl, orderId string), add `normalizeOrderStatus()`
+2. **`frontend/src/app/api/admin/orders/[id]/status/route.ts`** — Replace broken `sendMailSafe` (NOOP in prod) with `sendOrderStatusUpdate` + `order.email`
+3. **`frontend/src/app/api/producer/orders/[id]/status/route.ts`** — Fix orderId bug: `parseInt` on CUID string always returned 0
+4. **`frontend/.env.example`** + **`frontend/.env.ci`** — Document `RESEND_API_KEY`, `EMAIL_DRY_RUN`
+
+**Why**: Admin status changes (PACKING/SHIPPED/DELIVERED/CANCELLED) were not sending emails because `sendMailSafe` was NOOP in production. Now uses Resend API via `sendOrderStatusUpdate`. Cancelled orders get red header in email.
+
+**Deploy**: Follow `docs/AGENT/SOPs/SOP-VPS-DEPLOY.md`
 
 ---
 
