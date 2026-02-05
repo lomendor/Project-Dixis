@@ -4,6 +4,8 @@ import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
+import AdminLoading from '@/app/admin/components/AdminLoading'
+import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 
 interface Producer {
   id: string
@@ -47,7 +49,7 @@ function parseStyle(s: string): React.CSSProperties {
 
 export default function AdminProducersPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 32, textAlign: 'center' }}>Φόρτωση...</div>}>
+    <Suspense fallback={<AdminLoading />}>
       <AdminProducersContent />
     </Suspense>
   )
@@ -220,7 +222,7 @@ function AdminProducersContent() {
       </form>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 32, opacity: 0.6 }}>Φόρτωση...</div>
+        <AdminLoading />
       ) : (
         <table width="100%" cellPadding={8} style={{ borderCollapse: 'collapse' }}>
           <thead>
@@ -269,11 +271,7 @@ function AdminProducersContent() {
               </tr>
             ))}
             {producers.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ opacity: 0.7, textAlign: 'center', padding: 16 }}>
-                  Δεν βρέθηκαν αποτελέσματα.
-                </td>
-              </tr>
+              <AdminEmptyState message="Δεν βρέθηκαν αποτελέσματα." colSpan={5} />
             )}
           </tbody>
         </table>
