@@ -10,12 +10,12 @@
 | Metric | Value |
 |--------|-------|
 | Total PRD Features | 111 |
-| ✅ DONE | 81 (73%) |
-| ⚠️ PARTIAL | 23 (21%) |
+| ✅ DONE | 82 (74%) |
+| ⚠️ PARTIAL | 22 (20%) |
 | ❌ MISSING | 7 (6%) |
-| **Health Score** | **94%** |
+| **Health Score** | **95%** |
 
-**Last Updated**: 2026-02-06
+**Last Updated**: 2026-02-06 (SSOT Audit)
 
 ---
 
@@ -153,7 +153,7 @@
 | **Notification Page** | ✅ DONE | NOTIFICATIONS-01 | `/account/notifications` |
 | Mark as Read | ✅ DONE | NOTIFICATIONS-01 | Single + all |
 | In-App Notifications | ✅ DONE | NOTIFICATIONS-01 | |
-| Email Notifications | ⚠️ PARTIAL | ORDER-NOTIFY-01 | Status emails work; confirmation NOT sent |
+| Email Notifications | ✅ DONE | Pass 53 + ORDER-NOTIFY-01 | Order confirmation + status emails working |
 | **Order Status Emails** | ✅ DONE | ORDER-NOTIFY-01 | Via Resend API |
 | Admin Notifications | ❌ MISSING | — | |
 | Push Notifications | ⚠️ PARTIAL | — | PWA manifest exists |
@@ -196,13 +196,13 @@
 
 | Priority | Pass ID | Feature | Effort | Notes |
 |----------|---------|---------|--------|-------|
-| 1 | **ORDER-CONFIRM-EMAIL-01** | Order confirmation email | Medium | ⚠️ Customer gets NOTHING after checkout! |
-| 2 | **TRACKING-DISPLAY-01** | Show tracking URL to customer | Small | URL exists but never displayed |
-| 3 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
-| 4 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
-| 5 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
+| 1 | **TRACKING-DISPLAY-01** | Show tracking URL to customer | Small | URL exists but never displayed |
+| 2 | **CART-SYNC-01** | Cart persistence to backend | Medium | LocalStorage only |
+| 3 | **REORDER-01** | Reorder functionality | Medium | UX convenience |
+| 4 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Medium | Backend ready |
 
 ### Recently Completed (2026-02-06)
+- ✅ SSOT-AUDIT-01 — Discovered order confirmation emails already working
 - ✅ EMAIL-VERIFY-ACTIVATE-01 — Email verification enabled
 - ✅ CARD-SMOKE-02 — Card payments verified (4/4 E2E tests)
 - ✅ ORDER-NOTIFY-01 — Status update emails working

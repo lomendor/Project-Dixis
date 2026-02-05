@@ -1,11 +1,42 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-06 (Pass-EMAIL-VERIFY-ACTIVATE-01)
+**Last Updated**: 2026-02-06 (SSOT-AUDIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-06 — SSOT-AUDIT-01: Comprehensive Feature Audit
+
+**Status**: ✅ DONE (audit + documentation update)
+
+**Key Discovery**: Order confirmation emails were **already working** via Laravel!
+
+**What we found**:
+- `EMAIL_NOTIFICATIONS_ENABLED=true` was already set on VPS
+- `OrderEmailService::sendOrderPlacedNotifications()` sends to consumer + producer
+- `OrderNotification` table has records of sent emails (verified)
+- COD orders: Email sent immediately
+- CARD orders: Email sent after payment confirmation
+
+**PRD-COVERAGE updates**:
+- Email Notifications: PARTIAL → DONE (+1)
+- Feature Health: 94% → 95% (82 DONE / 111 total)
+
+**NEXT priorities updated**:
+1. TRACKING-DISPLAY-01 (was #2, now #1)
+2. CART-SYNC-01 (was #3, now #2)
+3. REORDER-01 (new #3)
+
+**Evidence**:
+```sql
+-- OrderNotification records show emails sent
+SELECT * FROM order_notifications ORDER BY created_at DESC LIMIT 5;
+-- Shows consumer + producer notifications for recent orders
+```
 
 ---
 
