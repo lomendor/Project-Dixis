@@ -2,6 +2,7 @@
 import React from 'react';
 import { orderNumber } from '../../../../lib/orderNumber';
 import { useToast } from '@/contexts/ToastContext';
+import { OrderStatusQuickActions } from './OrderStatusQuickActions';
 
 type Order = {
   id: string;
@@ -16,6 +17,7 @@ type Order = {
   email?: string | null;
   paymentStatus?: string;
   paymentRef?: string | null;
+  status?: string;
 };
 
 export default function AdminOrderDetail({
@@ -52,6 +54,10 @@ export default function AdminOrderDetail({
         <div className="mt-4 text-sm">Φόρτωση…</div>
       ) : (
         <div className="mt-4 text-sm">
+          {/* PR-FIX-01: Wire orphaned OrderStatusQuickActions */}
+          {data.status && (
+            <OrderStatusQuickActions orderId={data.id} currentStatus={data.status} />
+          )}
           <div className="mb-2">
             Order No:{' '}
             <strong data-testid="detail-order-no">
@@ -111,6 +117,12 @@ export default function AdminOrderDetail({
                 <td className="pr-4">Email</td>
                 <td>{data.email ?? '-'}</td>
               </tr>
+              {data.status && (
+                <tr>
+                  <td className="pr-4">Κατάσταση</td>
+                  <td data-testid="detail-status" className="font-medium">{data.status}</td>
+                </tr>
+              )}
               <tr>
                 <td className="pr-4">Payment</td>
                 <td>
