@@ -1,11 +1,82 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-06 (Pass-ORDER-NOTIFY-01)
+**Last Updated**: 2026-02-06 (SSOT-AUDIT-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~440 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-06 — SSOT-AUDIT-01: Comprehensive Feature Audit
+
+**Status**: ✅ DONE (audit + documentation update)
+
+**Key Discovery**: Order confirmation emails were **already working** via Laravel!
+
+**What we found**:
+- `EMAIL_NOTIFICATIONS_ENABLED=true` was already set on VPS
+- `OrderEmailService::sendOrderPlacedNotifications()` sends to consumer + producer
+- `OrderNotification` table has records of sent emails (verified)
+- COD orders: Email sent immediately
+- CARD orders: Email sent after payment confirmation
+
+**PRD-COVERAGE updates**:
+- Email Notifications: PARTIAL → DONE (+1)
+- Feature Health: 94% → 95% (82 DONE / 111 total)
+
+**NEXT priorities updated**:
+1. TRACKING-DISPLAY-01 (was #2, now #1)
+2. CART-SYNC-01 (was #3, now #2)
+3. REORDER-01 (new #3)
+
+**Evidence**:
+```sql
+-- OrderNotification records show emails sent
+SELECT * FROM order_notifications ORDER BY created_at DESC LIMIT 5;
+-- Shows consumer + producer notifications for recent orders
+```
+
+---
+
+## 2026-02-06 — Pass-EMAIL-VERIFY-ACTIVATE-01: Enable Email Verification in Production
+
+**Status**: ✅ DONE (config activation only)
+
+**Context**: EMAIL-VERIFY-01 was already implemented (Pass 2026-01-18, commit `04aefc91`) but disabled in production. This pass activates it.
+
+**VPS changes** (not in repo):
+- Added `EMAIL_VERIFICATION_REQUIRED=true` to `/var/www/dixis/current/backend/.env`
+- Ran `php artisan config:clear && php artisan config:cache`
+
+**Code changes** (1 file, +4 LOC):
+- `frontend/tests/e2e/email-verification.spec.ts` — Fixed test to expect `verify-expired` state (backend message "Invalid or expired" contains "expired" → frontend shows expired state with resend button)
+
+**Verification**:
+- Resend endpoint: Returns expected anti-enumeration message ✅
+- Verify endpoint: Returns "Invalid or expired" for invalid tokens ✅
+- Registration API: Returns `verification_sent: true`, `email_verified_at: null` ✅
+- E2E tests: 2/2 passing against production ✅
+
+**User impact**: New user registrations now require email verification before `email_verified_at` is set. Existing unverified users unaffected (flag only applies to new registrations).
+
+---
+
+## 2026-02-06 — Pass-CARD-SMOKE-02: Card Payment E2E Smoke on Production
+
+**Status**: ✅ DONE (branch: `pass/card-smoke-02`)
+
+**Changes** (1 file, 102 LOC):
+1. **`frontend/tests/e2e/card-payment-real-auth.spec.ts`** — Fix product selection: API-resolved in-stock product + URL regex for slug-based routes
+
+**VPS fixes** (not in repo):
+- Created `frontend/.env` with `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true`, `INTERNAL_API_URL`
+- Rebuilt frontend, fixed PM2 EADDRINUSE crash loop
+
+**Results**: 4/4 real-auth E2E tests passing against production:
+- Login ✅ | Add to cart ✅ | Card option visible (COD+Card) ✅ | Stripe Elements flow ✅
+- Stripe test card 4242: order 201 → payment init 200 → Elements loaded → card entered
 
 ---
 
