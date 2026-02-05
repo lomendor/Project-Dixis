@@ -1,4 +1,10 @@
-import { API_BASE_URL } from '@/env';
+/**
+ * Pass PR-FIX-03: Analytics API client.
+ *
+ * Rewritten to use:
+ * - /api/admin/analytics (Prisma-based, cookie auth)
+ * - No more localStorage token or old Laravel /api/v1 endpoints
+ */
 
 export interface SalesData {
   date: string;
@@ -93,138 +99,45 @@ export interface DashboardSummary {
   };
 }
 
+// Cached response for all analytics (single API call)
+let cachedData: any = null;
+let cacheExpiry = 0;
+const CACHE_TTL = 60_000; // 1 minute
+
+async function fetchAll(): Promise<any> {
+  if (cachedData && Date.now() < cacheExpiry) return cachedData;
+
+  const res = await fetch('/api/admin/analytics', { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Analytics API error: ${res.status}`);
+
+  cachedData = await res.json();
+  cacheExpiry = Date.now() + CACHE_TTL;
+  return cachedData;
+}
+
 export const analyticsApi = {
-  /**
-   * Get sales analytics data
-   */
-  async getSales(period: 'daily' | 'monthly' = 'daily', limit = 30): Promise<SalesAnalytics> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const params = new URLSearchParams({
-      period,
-      limit: limit.toString(),
-    });
-
-    const response = await fetch(`${API_BASE_URL}/admin/analytics/sales?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.analytics;
+  async getSales(_period: 'daily' | 'monthly' = 'daily', _limit = 30): Promise<SalesAnalytics> {
+    const data = await fetchAll();
+    return data.sales;
   },
 
-  /**
-   * Get orders analytics data
-   */
   async getOrders(): Promise<OrdersAnalytics> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/admin/analytics/orders`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.analytics;
+    const data = await fetchAll();
+    return data.orders;
   },
 
-  /**
-   * Get products analytics data
-   */
-  async getProducts(limit = 10): Promise<ProductsAnalytics> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-    });
-
-    const response = await fetch(`${API_BASE_URL}/admin/analytics/products?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.analytics;
+  async getProducts(_limit = 10): Promise<ProductsAnalytics> {
+    const data = await fetchAll();
+    return data.products;
   },
 
-  /**
-   * Get producers analytics data
-   */
   async getProducers(): Promise<ProducersAnalytics> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/admin/analytics/producers`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.analytics;
+    const data = await fetchAll();
+    return data.producers;
   },
 
-  /**
-   * Get dashboard summary with all key metrics
-   */
   async getDashboard(): Promise<DashboardSummary> {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/admin/analytics/dashboard`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await fetchAll();
     return data.summary;
   },
 };
@@ -253,17 +166,22 @@ export function formatPercentage(value: number): string {
 export function getStatusColor(status: string): string {
   switch (status) {
     case 'pending':
-      return '#FFA500'; // Orange
+    case 'PENDING':
+      return '#FFA500';
     case 'confirmed':
     case 'processing':
-      return '#007BFF'; // Blue
+    case 'PACKING':
+      return '#007BFF';
     case 'shipped':
-      return '#17A2B8'; // Cyan
+    case 'SHIPPED':
+      return '#17A2B8';
     case 'delivered':
-      return '#28A745'; // Green
+    case 'DELIVERED':
+      return '#28A745';
     case 'cancelled':
-      return '#DC3545'; // Red
+    case 'CANCELLED':
+      return '#DC3545';
     default:
-      return '#6C757D'; // Gray
+      return '#6C757D';
   }
 }
