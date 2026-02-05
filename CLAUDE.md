@@ -1,304 +1,57 @@
-# 🎯 PROJECT-DIXIS - CANONICAL WORKSPACE
+# PROJECT-DIXIS — Agent Instructions
 
-**NOTE: Active workspace — use Project-Dixis (not legacy repos).**
+> **Entry Point**: `docs/AGENT-STATE.md` — Read this first every session.
 
-> **Agent Entry Point**: `docs/AGENT-STATE.md` — Read this first every session.
+---
 
-## ⚡ Guardrails & Standards
+## Guardrails (non-negotiable)
+
 - **CI/CD**: NO changes to `.github/workflows/**`
-- **Ports**: 8001 (backend), 3001 (frontend) - LOCKED
-- **Next.js**: 15.5.0 - LOCKED
+- **Ports**: 8001 (backend), 3001 (frontend) — LOCKED
+- **Next.js**: 15.5.0 — LOCKED
 - **PR Size**: ≤300 LOC per PR
+- **WIP limit**: 1 item in progress at a time
 - **Artifacts**: playwright-report/**, test-results/** required
 
-## 🗄️ Database Policy
-- **Primary DB**: PostgreSQL (Neon) - used in production, staging, local dev
-- **CI DB**: SQLite - ONLY for fast CI tests via `schema.ci.prisma`
-- **Constraint**: Don't use PostgreSQL-specific features that break SQLite CI
+## Database Policy
+
+- **Primary DB**: PostgreSQL (Neon) — production, staging, local dev
+- **CI DB**: SQLite — fast CI tests via `schema.ci.prisma`
+- **Constraint**: No PostgreSQL-specific features that break SQLite CI
   - Example: `mode: 'insensitive'` removed from Prisma queries
 - **Schema sync**: `schema.ci.prisma` auto-generated from main schema
 
-## 🔧 Workspace Anchors  
-- **Repo (root)**: Project-Dixis (where frontend/ & backend/ exist)
-- **FE**: ./frontend  
-- **BE**: ./backend
-- **Context Scope**: Limited to frontend/ directory (use `npm run agent:limit-scan`)
+## Workspace Layout
 
-## 🤖 Parent/Subagents Working Style
-- **Parent Mode**: Maintains context, performs all code implementations/commits
-- **Subagents**: Research-only (produce docs in `doc/research/`), no code edits
-- **ULTRATHINK Protocol**: Always execute before any work (read docs, verify .claude/ignore, limit scope)
-- **PR Structure**: ≤300 LOC with AC, Evidence links, "Generated-by" footer
+- **Repo root**: Project-Dixis (frontend/ & backend/)
+- **Frontend**: `./frontend` (Next.js 15 + React 19 + TypeScript 5)
+- **Backend**: `./backend` (Laravel 11 + PostgreSQL 15)
+- **Docs**: `docs/` — AGENT-STATE, SOPs, passes, product specs
+- **Context Scope**: Limited to frontend/ (use `npm run agent:limit-scan`)
 
----
+## Agent Working Style
 
-# PROJECT-DIXIS - LOCAL PRODUCER MARKETPLACE
+- **ULTRATHINK**: Read AGENT-STATE.md + relevant docs before any work
+- **Parent agent**: Maintains context, performs implementations/commits
+- **Subagents**: Research-only (produce docs), no code edits
+- **PR format**: ≤300 LOC, AC checklist, evidence links
 
-**Full-Stack Laravel + Next.js Application** | **E2E Test Suite** | **Status**: ✅ PRODUCTION READY
+## Key SOPs
 
----
+| SOP | When |
+|-----|------|
+| `docs/AGENT/SOPs/SOP-VPS-DEPLOY.md` | Deploy to production VPS |
+| `docs/AGENT/SOPs/SOP-Feature-Pass.md` | Start a new feature pass |
+| `docs/AGENT/SOPs/SOP-PDAC-lite.md` | Lightweight planning process |
+| `docs/AGENT/SOPs/PRECHECKS.md` | Pre-flight checks before work |
 
-## 🎯 PURPOSE
+## Auth Flow (reference)
 
-**Project-Dixis** is a **complete local producer marketplace** connecting Greek producers with consumers. Features full Laravel 11 backend API, Next.js 15 frontend, and comprehensive E2E test coverage.
-
-## 🏆 RECENT MAJOR MILESTONE - E2E STABILIZATION COMPLETE
-
-### ✅ **PR #35 MERGED** - `feat/e2e-hardening` 
-**Achievement**: Complete E2E test stabilization from infrastructure chaos to 100% GREEN  
-**Result**: 23 files changed (+1,174/-323), bulletproof CI/CD pipeline  
-**Impact**: Production-ready deployment confidence
-
-## ✅ VERIFIED PRODUCTION SETUP
-
-### 🚀 Tech Stack
-- **Backend**: Laravel 11.45.2 + PostgreSQL 15
-- **Frontend**: Next.js 15.5.0 + React 19 + TypeScript 5
-- **Testing**: Playwright E2E + PHPUnit backend tests
-- **CI/CD**: GitHub Actions with comprehensive test coverage
-- **Infrastructure**: Docker-ready, PostgreSQL service containers
-
-### 🔧 Core Features
-- ✅ **Producer Marketplace**: Full CRUD for producers and products  
-- ✅ **User Authentication**: Consumer/Producer roles with AuthGuard
-- ✅ **Order System**: Complete order flow with API integration
-- ✅ **Product Catalog**: Search, filtering, categories  
-- ✅ **Cart System**: Add to cart, checkout flow
-- ✅ **Toast Notifications**: User feedback system
-- ✅ **Responsive Design**: Mobile-first approach
-
-## 📊 PRODUCTION-READY CI/CD PIPELINE
-
-### GitHub Actions Workflows (All ✅ GREEN)
-```yaml
-# Backend CI - Laravel + PHPUnit
-✅ PostgreSQL 15 service container
-✅ PHP 8.2 + all required extensions  
-✅ Composer caching + dependency install
-✅ Database migrations + seeding
-✅ PHPUnit test execution (30+ tests)
-✅ API health endpoint verification
-
-# Frontend CI - Next.js Build + TypeScript  
-✅ Node.js 18 + npm caching
-✅ TypeScript compilation (strict mode)
-✅ Next.js build process
-✅ Lint + type checking
-
-# E2E Test Suite - Playwright
-✅ Full-stack integration testing
-✅ 26 comprehensive test scenarios  
-✅ Authentication flows (Consumer/Producer)
-✅ Product catalog + search functionality
-✅ Order creation + API integration
-✅ Error handling + edge cases
+```
+Phone → OTP (6 digits) → JWT in HttpOnly cookie → requireAdmin() checks cookie + DB
 ```
 
-### Health Check Endpoints
-```php
-// Backend API Health
-GET /api/health
-{
-  "status": "ok",
-  "database": "connected",
-  "timestamp": "2025-08-28T13:16:41.001Z",
-  "version": "11.45.2"
-}
-
-// Frontend Health (via E2E)
-- Page load times: <2s
-- Interactive elements: Fully responsive
-- API integration: 100% working
-```
-
-## 🛠️ DEVELOPMENT SETUP
-
-### Prerequisites
-- PHP 8.2+ με PostgreSQL extension
-- Node.js 18+ με npm
-- PostgreSQL 15+
-- Composer 2.x
-
-### Quick Start
-```bash
-# Clone repository
-git clone https://github.com/lomendor/Project-Dixis.git
-cd Project-Dixis
-
-# Backend setup  
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve --port=8001
-
-# Frontend setup (separate terminal)
-cd ../frontend  
-npm install
-npm run build
-npm run dev  # Runs on http://localhost:3001
-
-# Run E2E tests (optional)
-cd frontend
-npx playwright test
-```
-
-### Verification Commands
-```bash
-# Backend tests
-cd backend && php artisan test
-
-# Frontend build
-cd frontend && npm run build  
-
-# E2E test suite
-cd frontend && npx playwright test --reporter=line
-
-# API health check
-curl http://localhost:8001/api/health
-```
-
-## 🧠 PRODUCTION ARCHITECTURE PATTERNS
-
-### 1. Full-Stack API Integration
-```typescript
-// Frontend API client
-const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  endpoints: {
-    products: '/api/v1/public/products',
-    orders: '/api/v1/orders',
-    auth: '/api/v1/auth'
-  }
-}
-```
-
-### 2. E2E Test Stabilization Strategy
-```typescript
-// Instead of API waits (flaky)
-await page.waitForResponse('/api/products') 
-
-// Use user-facing element waits (stable)  
-await page.waitForSelector('[data-testid="product-card"]')
-await expect(page.getByTestId('product-card')).toBeVisible()
-```
-
-### 3. TypeScript + Laravel API Integration
-```php
-// Laravel API Resource
-class ProductResource extends JsonResource {
-    public function toArray($request): array {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'price' => number_format($this->price, 2),
-            'categories' => CategoryResource::collection($this->categories)
-        ];
-    }
-}
-```
-
-### 4. Authentication Flow (Frontend ↔ Backend)
-```typescript
-// Next.js AuthGuard with role-based protection
-<AuthGuard requireAuth={true} requireRole="producer">
-  <ProducerDashboard />
-</AuthGuard>
-
-// Laravel API with Sanctum tokens
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('orders', OrderController::class);
-});
-```
-
-## 📈 SUCCESS METRICS ACHIEVED
-
-- **Backend Tests**: ✅ 30+ tests passing (100% core functionality)
-- **Frontend Build**: ✅ TypeScript strict mode, zero errors  
-- **E2E Coverage**: ✅ 26 test scenarios, complete user journeys
-- **CI Duration**: ~3-5 minutes end-to-end (optimized for speed)
-- **Performance**: <2s page loads, responsive on all devices
-- **Database**: PostgreSQL with comprehensive migrations + seeding
-
-## 🚀 DEPLOYMENT STATUS
-
-- **Infrastructure**: ✅ Production-ready
-- **Security**: ✅ Authentication + authorization implemented  
-- **Performance**: ✅ Optimized builds + database queries
-- **Testing**: ✅ Comprehensive coverage (backend + frontend + E2E)
-- **Documentation**: ✅ Complete setup + architecture guides
-
-## 📋 NEXT PHASE OBJECTIVES
-
-### 🎨 **Immediate Tasks** (Week 1-2)
-- Frontend UX polish (toast improvements, loading states)
-- Mobile responsiveness refinement  
-- Accessibility audit + improvements
-
-### 🚀 **Feature Milestones** (Week 3-4)
-- Payment integration (Viva Wallet)
-- Multi-language support (Greek + English)
-- Advanced producer dashboard
-
-### 📊 **Growth Features** (Week 5-6+)
-- Analytics dashboard  
-- Advanced inventory management
-- Producer profile enhancements
-
-## 🎖️ BATTLE-TESTED SOLUTIONS
-
-### E2E Test Flakiness Resolution
-**Problem**: Playwright `waitForResponse` timeouts causing CI failures  
-**Solution**: Element-based waits instead of API timing dependency
-```typescript
-// ❌ Flaky approach
-await page.waitForResponse('/api/products', { timeout: 60000 })
-
-// ✅ Stable approach  
-await page.waitForSelector('[data-testid="product-card"]', { timeout: 15000 })
-```
-
-### TypeScript Optional Chaining for Context APIs
-**Problem**: Cannot invoke possibly undefined functions  
-**Solution**: Optional chaining operators for context methods
-```typescript
-// ❌ Runtime error potential
-setIntendedDestination(pathname)
-
-// ✅ Safe invocation
-setIntendedDestination?.(pathname)
-```
-
-### Frontend-Backend Integration
-**Problem**: CORS, authentication, API versioning complexity  
-**Solution**: Centralized API client with environment-based configuration
-```typescript
-const apiClient = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1',
-  withAuth: (token: string) => ({ Authorization: `Bearer ${token}` })
-}
-```
-
----
-
-## 📚 COMPREHENSIVE DOCUMENTATION
-
-- **📋 Next Phase Roadmap**: `NEXT-PHASE-ROADMAP.md`
-- **⚡ Immediate Tasks**: `IMMEDIATE-TASKS.md`  
-- **🔧 API Documentation**: `backend/docs/API.md`
-- **🧪 E2E Test Guide**: `frontend/tests/e2e/README.md`
-
----
-
-**Repository**: https://github.com/lomendor/Project-Dixis  
-**Status**: ✅ **PRODUCTION READY** | **Phase**: Feature Development  
-**Architecture**: Full-Stack Marketplace με Modern CI/CD
-
-**🇬🇷 Dixis: Connecting Greek Producers με Consumers Through Technology!**
-
-## 🎯 NOW (2025-09-08) - Parent/Subagents Architecture Setup
-
-- **Current Goal**: Setting up parent/subagents architecture for controlled checkout feature implementation
-- **Active Pattern**: Research-only subagents (UI/Review experts) with strict scope limitations and ≤300 LOC PRs
-- **Next PRs**: PR-Infra-MCP (≤80 LOC), PR-Checkout-API (2A), PR-UI-small (2B) with proper context anchoring
+- No passwords (phone-based identity)
+- Rate limited: 5 requests / 15 min
+- Admin session: 24h expiry
+- DB whitelist: AdminUser table
