@@ -174,6 +174,11 @@ function AdminProductsContent() {
   const [editForm, setEditForm] = useState({ title: '', description: '', category: '', unit: '' })
   const [editSubmitting, setEditSubmitting] = useState(false)
 
+  // Create modal state
+  const [createOpen, setCreateOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [producers, setProducers] = useState<{ id: string; name: string }[]>([])
+
   const q = searchParams.get('q') || ''
   const approval = searchParams.get('approval') || ''
 
@@ -196,6 +201,49 @@ function AdminProductsContent() {
       console.error('Failed to load products')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadProducers() {
+    try {
+      const res = await fetch('/api/admin/producers?active=only')
+      if (!res.ok) return
+      const data = await res.json()
+      setProducers((data?.items || []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })))
+    } catch { /* ignore */ }
+  }
+
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setCreating(true)
+    try {
+      const fd = new FormData(e.currentTarget)
+      const body = {
+        title: fd.get('title') as string,
+        category: fd.get('category') as string,
+        price: parseFloat(fd.get('price') as string) || 0,
+        unit: fd.get('unit') as string,
+        stock: parseInt(fd.get('stock') as string) || 0,
+        description: fd.get('description') as string || undefined,
+        producerId: fd.get('producerId') as string,
+      }
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Αποτυχία' }))
+        throw new Error(err.error || 'Αποτυχία δημιουργίας')
+      }
+      showSuccess('Το προϊόν δημιουργήθηκε επιτυχώς')
+      setCreateOpen(false)
+      await loadProducts()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Αποτυχία δημιουργίας προϊόντος'
+      showError(message)
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -347,6 +395,15 @@ function AdminProductsContent() {
 
   return (
     <>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <button
+          onClick={() => { setCreateOpen(true); loadProducers() }}
+          style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}
+          data-testid="create-product-btn"
+        >
+          + Νέο Προϊόν
+        </button>
+      </div>
       <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 8, marginBottom: 16 }}>
         <input name="q" defaultValue={q} placeholder="Αναζήτηση τίτλου…" style={{ padding: 8 }} />
         <select name="approval" defaultValue={approval} style={{ padding: 8 }}>
@@ -511,6 +568,67 @@ function AdminProductsContent() {
                 {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Product Modal */}
+      {createOpen && (
+        <div
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          onClick={() => setCreateOpen(false)}
+          data-testid="create-product-modal"
+        >
+          <div
+            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 500, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }}>Νέο Προϊόν</h3>
+            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Παραγωγός *</label>
+                <select name="producerId" required style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-producer-select">
+                  <option value="">Επιλέξτε παραγωγό...</option>
+                  {producers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Τίτλος *</label>
+                <input name="title" required minLength={3} placeholder="Τίτλος προϊόντος..." style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-title-input" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Κατηγορία *</label>
+                  <input name="category" required placeholder="π.χ. Λάδι" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-category-input" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Μονάδα *</label>
+                  <input name="unit" required placeholder="π.χ. κιλό" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-unit-input" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Τιμή (€) *</label>
+                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-price-input" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Απόθεμα</label>
+                  <input name="stock" type="number" min="0" defaultValue="0" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-stock-input" />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Περιγραφή</label>
+                <textarea name="description" rows={3} placeholder="Περιγραφή προϊόντος..." style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }} data-testid="create-description-input" />
+              </div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
+                <button type="button" onClick={() => setCreateOpen(false)} disabled={creating} style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }} data-testid="create-modal-cancel">
+                  Ακύρωση
+                </button>
+                <button type="submit" disabled={creating} style={{ padding: '10px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: creating ? 0.5 : 1 }} data-testid="create-modal-confirm">
+                  {creating ? 'Δημιουργία...' : 'Δημιουργία'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
