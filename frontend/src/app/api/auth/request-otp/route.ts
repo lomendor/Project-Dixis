@@ -64,40 +64,39 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if admin with email → send OTP via email
-    // Use internal Laravel API instead of Prisma (more reliable connection)
-    try {
-      const internalApiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001';
-      const adminLookupUrl = `${internalApiUrl}/api/admin-user-lookup?phone=${encodeURIComponent(phone)}`;
+    // Using env-based admin email mapping (format: phone1:email1,phone2:email2)
+    // This avoids database connection issues while maintaining security
+    const adminEmailMapping = (process.env.ADMIN_EMAIL_MAPPING || '')
+      .split(',')
+      .map(entry => entry.trim())
+      .filter(Boolean)
+      .reduce((acc, entry) => {
+        const [mappedPhone, email] = entry.split(':').map(s => s.trim());
+        if (mappedPhone && email) acc[mappedPhone] = email;
+        return acc;
+      }, {} as Record<string, string>);
 
-      const adminRes = await fetch(adminLookupUrl, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        // Short timeout to avoid blocking
-        signal: AbortSignal.timeout(3000)
-      });
+    const adminEmail = adminEmailMapping[phone];
+    if (adminEmail) {
+      console.log(`[Auth] Admin ${phone} - sending OTP via email`);
+      try {
+        const emailResult = await sendOtpEmail({
+          toEmail: adminEmail,
+          code,
+          phone
+        });
 
-      if (adminRes.ok) {
-        const adminData = await adminRes.json();
-        if (adminData?.email && adminData?.isActive) {
-          console.log(`[Auth] Admin ${phone} - sending OTP via email`);
-          const emailResult = await sendOtpEmail({
-            toEmail: adminData.email,
-            code,
-            phone
+        if (emailResult.ok) {
+          return NextResponse.json({
+            success: true,
+            message: 'Κωδικός OTP εστάλη στο email σας',
+            method: 'email'
           });
-
-          if (emailResult.ok) {
-            return NextResponse.json({
-              success: true,
-              message: 'Κωδικός OTP εστάλη στο email σας',
-              method: 'email'
-            });
-          }
-          console.warn('[Auth] Email OTP failed, falling back to SMS placeholder');
         }
+        console.warn('[Auth] Email OTP failed, falling back to SMS placeholder');
+      } catch (emailError) {
+        console.warn('[Auth] Email send failed:', emailError instanceof Error ? emailError.message : emailError);
       }
-    } catch (lookupError) {
-      console.warn('[Auth] Admin lookup failed:', lookupError instanceof Error ? lookupError.message : lookupError);
     }
 
     // Fallback: SMS provider (not implemented)
