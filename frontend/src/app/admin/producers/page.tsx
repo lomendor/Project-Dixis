@@ -91,7 +91,9 @@ function AdminProducersContent() {
       if (active) params.set('active', active)
       if (sort) params.set('sort', sort)
 
-      const res = await fetch(`/api/admin/producers?${params.toString()}`)
+      const res = await fetch(`/api/admin/producers?${params.toString()}`, {
+        credentials: 'include'
+      })
       if (!res.ok) throw new Error('Failed to load')
       const data = await res.json()
       setProducers(data?.items || data || [])
@@ -105,7 +107,7 @@ function AdminProducersContent() {
   async function handleApprove(producerId: string) {
     setProcessingIds(prev => new Set([...prev, producerId]))
     try {
-      const res = await fetch(`/api/admin/producers/${producerId}/approve`, { method: 'POST' })
+      const res = await fetch(`/api/admin/producers/${producerId}/approve`, { method: 'POST', credentials: 'include' })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Ο παραγωγός εγκρίθηκε επιτυχώς')
       await loadProducers()
@@ -130,7 +132,8 @@ function AdminProducersContent() {
       const res = await fetch(`/api/admin/producers/${producerToReject.id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rejectionReason })
+        body: JSON.stringify({ rejectionReason }),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Ο παραγωγός απορρίφθηκε')
@@ -178,6 +181,7 @@ function AdminProducersContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        credentials: 'include'
       })
       if (!res.ok) {
         const err = await res.json()

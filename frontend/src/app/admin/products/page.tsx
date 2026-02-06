@@ -195,7 +195,9 @@ function AdminProductsContent() {
       if (q) params.set('q', q)
       if (approval) params.set('approval', approval)
 
-      const res = await fetch(`/api/admin/products?${params.toString()}`)
+      const res = await fetch(`/api/admin/products?${params.toString()}`, {
+        credentials: 'include'
+      })
       if (!res.ok) throw new Error('Failed to load')
       const data = await res.json()
       setProducts(data?.items || data || [])
@@ -208,7 +210,9 @@ function AdminProductsContent() {
 
   async function loadProducers() {
     try {
-      const res = await fetch('/api/admin/producers?active=only')
+      const res = await fetch('/api/admin/producers?active=only', {
+        credentials: 'include'
+      })
       if (!res.ok) return
       const data = await res.json()
       setProducers((data?.items || []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })))
@@ -233,6 +237,7 @@ function AdminProductsContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        credentials: 'include'
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Αποτυχία' }))
@@ -252,7 +257,7 @@ function AdminProductsContent() {
   async function handleApprove(productId: string) {
     setProcessingIds(prev => new Set([...prev, productId]))
     try {
-      const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST' })
+      const res = await fetch(`/api/admin/products/${productId}/approve`, { method: 'POST', credentials: 'include' })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Το προϊόν εγκρίθηκε επιτυχώς')
       await loadProducts()
@@ -278,7 +283,8 @@ function AdminProductsContent() {
       const res = await fetch(`/api/admin/products/${productToReject.id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rejectionReason })
+        body: JSON.stringify({ rejectionReason }),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Το προϊόν απορρίφθηκε')
@@ -312,7 +318,8 @@ function AdminProductsContent() {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: newIsActive })
+        body: JSON.stringify({ isActive: newIsActive }),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Η κατάσταση ενημερώθηκε επιτυχώς')
@@ -328,7 +335,8 @@ function AdminProductsContent() {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ price: newPrice })
+        body: JSON.stringify({ price: newPrice }),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Η τιμή ενημερώθηκε επιτυχώς')
@@ -344,7 +352,8 @@ function AdminProductsContent() {
       const res = await fetch(`/api/admin/products/${productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock: newStock })
+        body: JSON.stringify({ stock: newStock }),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Το απόθεμα ενημερώθηκε επιτυχώς')
@@ -374,7 +383,8 @@ function AdminProductsContent() {
       const res = await fetch(`/api/admin/products/${productToEdit.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
+        body: JSON.stringify(editForm),
+        credentials: 'include'
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Το προϊόν ενημερώθηκε επιτυχώς')

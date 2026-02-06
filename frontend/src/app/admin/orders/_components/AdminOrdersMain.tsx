@@ -226,12 +226,12 @@ export default function AdminOrdersMain() {
         qs.set('per_page', String(pageSize));
         qs.set('sort', sort === 'createdAt' ? 'created_at' : '-created_at');
 
-        // Build headers with Authorization from localStorage
-        const headers: Record<string, string> = { 'Accept': 'application/json' };
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const res = await fetch(`/api/v1/admin/orders?${qs.toString()}`, { cache:'no-store', headers });
+        // Use cookies for authentication (HttpOnly session cookie)
+        const res = await fetch(`/api/v1/admin/orders?${qs.toString()}`, {
+          cache: 'no-store',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
+        });
         if (res.status === 401 || res.status === 403) {
           // Unauthenticated - show clear message
           setErrNote('Απαιτείται σύνδεση διαχειριστή');
