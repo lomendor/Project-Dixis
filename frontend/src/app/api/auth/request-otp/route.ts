@@ -4,6 +4,33 @@ import { isAuthBypassAllowed, isDevEchoAllowed } from '@/lib/env';
 import { sendOtpEmail } from '@/lib/email';
 
 /**
+ * Normalize Greek phone number to +30 format
+ * Handles: 6979195028, 306979195028, +306979195028
+ */
+function normalizeGreekPhone(phone: string): string {
+  // Remove all non-digit characters except leading +
+  const cleaned = phone.replace(/[^\d+]/g, '');
+
+  // Already in +30 format
+  if (cleaned.startsWith('+30')) {
+    return cleaned;
+  }
+
+  // Starts with 30 (missing +)
+  if (cleaned.startsWith('30') && cleaned.length === 12) {
+    return '+' + cleaned;
+  }
+
+  // Starts with 6 (Greek mobile without country code)
+  if (cleaned.startsWith('6') && cleaned.length === 10) {
+    return '+30' + cleaned;
+  }
+
+  // Return as-is if doesn't match expected patterns
+  return phone;
+}
+
+/**
  * POST /api/auth/request-otp
  * Generates and stores OTP for phone verification
  *
@@ -16,14 +43,17 @@ import { sendOtpEmail } from '@/lib/email';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { phone } = body;
+    const { phone: rawPhone } = body;
 
-    if (!phone) {
+    if (!rawPhone) {
       return NextResponse.json(
         { error: 'Το τηλέφωνο είναι υποχρεωτικό' },
         { status: 400 }
       );
     }
+
+    // Normalize phone to +30 format for consistent matching
+    const phone = normalizeGreekPhone(rawPhone.trim());
 
     // Rate limiting - don't generate new OTP if one exists
     if (hasPendingOtp(phone)) {
@@ -72,7 +102,10 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .reduce((acc, entry) => {
         const [mappedPhone, email] = entry.split(':').map(s => s.trim());
-        if (mappedPhone && email) acc[mappedPhone] = email;
+        if (mappedPhone && email) {
+          // Normalize mapping phone for consistent matching
+          acc[normalizeGreekPhone(mappedPhone)] = email;
+        }
         return acc;
       }, {} as Record<string, string>);
 
