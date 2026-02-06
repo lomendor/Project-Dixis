@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (PRODUCER-NOTIFY-01 discovered working)
+**Updated**: 2026-02-06 (ADMIN-SHIPPING-UI-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -20,9 +20,7 @@
 
 ## WIP (max 1)
 
-| Pass ID | Feature | PR |
-|---------|---------|-----|
-| **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | PR #2662 (CI pending) |
+_(empty — pick from NEXT)_
 
 ---
 
@@ -49,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **ADMIN-SHIPPING-UI-01** — Shipping labels UI wired to admin (PR #2662, deployed 2026-02-06) ✅
 - **PRODUCER-NOTIFY-01** — Producer emails discovered working (47 records, enabled since Jan) ✅
 - **REORDER-01** — Reorder button on order details (PR #2659, deployed 2026-02-06) ✅
 - **TRACKING-DISPLAY-01** — Public order tracking via UUID token (PR #2657, deployed 2026-02-06) ✅
