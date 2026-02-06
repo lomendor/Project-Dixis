@@ -9,7 +9,7 @@
 
 **Added**: 2026-02-06
 **Pass**: ADMIN-EMAIL-OTP-01
-**Status**: ACTIVE
+**Status**: CAN BE REMOVED (DB fixed 2026-02-06)
 
 ### Problem
 - Neon PostgreSQL `AdminUser` table doesn't exist
@@ -35,11 +35,11 @@ ADMIN_EMAIL_MAPPING=+306979195028:kourkoutisp@gmail.com
 ```
 
 ### Removal Conditions
-- [ ] Run `npx prisma migrate deploy` on VPS
-- [ ] Verify AdminUser table exists in Neon
-- [ ] Insert admin record via Prisma
-- [ ] Remove fallback code from `admin.ts`
-- [ ] Remove `ADMIN_PHONES` env var
+- [x] Run `npx prisma migrate deploy` on VPS (DONE 2026-02-06)
+- [x] Verify AdminUser table exists in Neon (DONE - has record)
+- [x] Insert admin record via Prisma (DONE - already existed)
+- [ ] Remove fallback code from `admin.ts` (optional - harmless to keep)
+- [ ] Remove `ADMIN_PHONES` env var (optional)
 
 ### How to Properly Fix
 ```bash
