@@ -97,6 +97,62 @@ function normalizeGreekPhone(phone: string): string {
 
 ---
 
+## 3. Deploy Script Protects .env
+
+**Added**: 2026-02-06
+**Pass**: INFRA-STABILITY-01
+**Status**: PERMANENT SOLUTION
+
+### Problem
+- `rsync --delete` was deleting `.env` file on VPS
+- Each deploy broke authentication (no secrets)
+- Had to manually restore `.env` after every deploy
+
+### Solution
+Created `scripts/deploy.sh` that:
+1. Uses `--exclude='.env'` in rsync
+2. Copies `.env` from `/var/www/dixis/shared/frontend.env` after sync
+3. Restarts PM2 with `--update-env`
+
+### Usage
+```bash
+./scripts/deploy.sh
+```
+
+### Removal Conditions
+- This is the permanent solution - no removal needed
+- If moving to CI/CD, replicate this logic in GitHub Actions
+
+---
+
+## 4. Nginx Admin API Routing
+
+**Added**: 2026-02-06
+**Pass**: INFRA-STABILITY-01
+**Status**: PERMANENT SOLUTION
+
+### Problem
+- `/api/admin/*` routes were going to Laravel instead of Next.js
+- Admin pages showed empty (404 from Laravel)
+
+### Solution
+Added nginx location blocks:
+```nginx
+location ^~ /api/admin/ { proxy_pass http://127.0.0.1:3000; ... }
+location ^~ /api/categories { proxy_pass http://127.0.0.1:3000; ... }
+```
+
+### Config Location
+- VPS: `/etc/nginx/sites-enabled/dixis.gr`
+- Backup: `/var/www/dixis/shared/nginx-dixis.gr.conf.bak`
+- Docs: `docs/OPS/NGINX-CONFIG.md`
+
+### Removal Conditions
+- This is permanent configuration
+- If migrating all APIs to one server, simplify routing
+
+---
+
 ## Template for New Workarounds
 
 ```markdown
@@ -122,4 +178,4 @@ function normalizeGreekPhone(phone: string): string {
 
 ---
 
-_Last updated: 2026-02-06_
+_Last updated: 2026-02-06 (INFRA-STABILITY-01)_

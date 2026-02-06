@@ -19,7 +19,9 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+| Pass ID | Feature | Started |
+|---------|---------|---------|
+| **INFRA-STABILITY-01** | Deploy script, nginx docs, stability | 2026-02-06 |
 
 ---
 
@@ -45,6 +47,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **ADMIN-PAGES-FIX-01** — Fixed admin pages (credentials: include, nginx routing) (2026-02-06) ✅
 - **NEON-DB-FIX-01** — Fixed Neon DB password mismatch (2026-02-06) ✅
 - **ADMIN-EMAIL-OTP-01** — Admin login via email OTP (2026-02-06) ✅
 - **ADMIN-SHIPPING-UI-01** — Shipping labels UI wired to admin ✅
@@ -78,8 +81,10 @@ _(empty — pick from NEXT)_
 | Doc | Purpose |
 |-----|---------|
 | `docs/OPS/WORKAROUNDS.md` | Active workarounds (check for cleanup) |
+| `docs/OPS/NGINX-CONFIG.md` | Nginx configuration reference |
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
+| `scripts/deploy.sh` | **USE THIS TO DEPLOY** |
 
 ---
 
