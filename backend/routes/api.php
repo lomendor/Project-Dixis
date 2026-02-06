@@ -1072,3 +1072,32 @@ Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewControll
 // Ops: DB slow queries endpoint (guarded by X-Ops-Key in production)
 Route::get('/ops/db/slow-queries', [OpsDbController::class, 'slow'])
     ->name('ops.db.slow');
+
+// Internal: AdminUser lookup for OTP email delivery (Next.js → Laravel)
+// Only accessible from localhost (internal API call)
+Route::get('/admin-user-lookup', function (Illuminate\Http\Request $request) {
+    // Only allow internal requests (from localhost)
+    $clientIp = $request->ip();
+    if (!in_array($clientIp, ['127.0.0.1', '::1'])) {
+        abort(403, 'Internal only');
+    }
+
+    $phone = $request->query('phone');
+    if (!$phone) {
+        return response()->json(['error' => 'phone required'], 400);
+    }
+
+    $admin = DB::table('AdminUser')
+        ->where('phone', $phone)
+        ->select(['email', 'isActive'])
+        ->first();
+
+    if (!$admin) {
+        return response()->json(null, 404);
+    }
+
+    return response()->json([
+        'email' => $admin->email,
+        'isActive' => (bool) $admin->isActive,
+    ]);
+})->middleware('throttle:30,1');

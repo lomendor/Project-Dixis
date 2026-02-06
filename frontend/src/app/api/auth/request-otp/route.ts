@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { storeOtp, hasPendingOtp, getRemainingTime } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed, isDevEchoAllowed } from '@/lib/env';
-import { prisma } from '@/lib/db/client';
 import { sendOtpEmail } from '@/lib/email';
 
 /**
@@ -65,31 +64,40 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if admin with email → send OTP via email
+    // Use internal Laravel API instead of Prisma (more reliable connection)
     try {
-      const adminUser = await prisma.adminUser.findUnique({
-        where: { phone },
-        select: { email: true, isActive: true }
+      const internalApiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001';
+      const adminLookupUrl = `${internalApiUrl}/api/admin-user-lookup?phone=${encodeURIComponent(phone)}`;
+
+      const adminRes = await fetch(adminLookupUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        // Short timeout to avoid blocking
+        signal: AbortSignal.timeout(3000)
       });
 
-      if (adminUser?.email && adminUser.isActive) {
-        console.log(`[Auth] Admin ${phone} - sending OTP via email`);
-        const emailResult = await sendOtpEmail({
-          toEmail: adminUser.email,
-          code,
-          phone
-        });
-
-        if (emailResult.ok) {
-          return NextResponse.json({
-            success: true,
-            message: 'Κωδικός OTP εστάλη στο email σας',
-            method: 'email'
+      if (adminRes.ok) {
+        const adminData = await adminRes.json();
+        if (adminData?.email && adminData?.isActive) {
+          console.log(`[Auth] Admin ${phone} - sending OTP via email`);
+          const emailResult = await sendOtpEmail({
+            toEmail: adminData.email,
+            code,
+            phone
           });
+
+          if (emailResult.ok) {
+            return NextResponse.json({
+              success: true,
+              message: 'Κωδικός OTP εστάλη στο email σας',
+              method: 'email'
+            });
+          }
+          console.warn('[Auth] Email OTP failed, falling back to SMS placeholder');
         }
-        console.warn('[Auth] Email OTP failed, falling back to SMS placeholder');
       }
-    } catch (dbError) {
-      console.warn('[Auth] Admin lookup failed:', dbError);
+    } catch (lookupError) {
+      console.warn('[Auth] Admin lookup failed:', lookupError instanceof Error ? lookupError.message : lookupError);
     }
 
     // Fallback: SMS provider (not implemented)
