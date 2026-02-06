@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { storeOtp, hasPendingOtp, getRemainingTime } from '@/lib/auth/otp-store';
 import { isAuthBypassAllowed, isDevEchoAllowed } from '@/lib/env';
+import { prisma } from '@/lib/db/client';
+import { sendOtpEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/request-otp
@@ -62,8 +64,35 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Production: Send OTP via SMS provider
-    // TODO: Integrate with Twilio/Vonage/Greek SMS provider
+    // Check if admin with email → send OTP via email
+    try {
+      const adminUser = await prisma.adminUser.findUnique({
+        where: { phone },
+        select: { email: true, isActive: true }
+      });
+
+      if (adminUser?.email && adminUser.isActive) {
+        console.log(`[Auth] Admin ${phone} - sending OTP via email`);
+        const emailResult = await sendOtpEmail({
+          toEmail: adminUser.email,
+          code,
+          phone
+        });
+
+        if (emailResult.ok) {
+          return NextResponse.json({
+            success: true,
+            message: 'Κωδικός OTP εστάλη στο email σας',
+            method: 'email'
+          });
+        }
+        console.warn('[Auth] Email OTP failed, falling back to SMS placeholder');
+      }
+    } catch (dbError) {
+      console.warn('[Auth] Admin lookup failed:', dbError);
+    }
+
+    // Fallback: SMS provider (not implemented)
     console.log(`[Auth] OTP generated for ${phone} - SMS sending not implemented`);
 
     return NextResponse.json({

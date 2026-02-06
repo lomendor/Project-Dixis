@@ -401,3 +401,112 @@ function renderOrderConfirmationHTML(order: OrderEmailData): string {
 </html>
   `.trim()
 }
+
+/**
+ * Send OTP code via email (for admin authentication)
+ *
+ * @param toEmail - Recipient email address
+ * @param code - The 6-digit OTP code
+ * @param phone - Phone number (for display in email)
+ * @returns Result object (never throws)
+ */
+export async function sendOtpEmail({
+  toEmail,
+  code,
+  phone
+}: {
+  toEmail: string
+  code: string
+  phone: string
+}): Promise<EmailResult> {
+
+  // Dry-run mode (CI/dev) - logs but doesn't send
+  if (process.env.EMAIL_DRY_RUN === 'true') {
+    console.log(`[EMAIL DRY-RUN] Would send OTP ${code} to ${toEmail} for ${phone}`)
+    return { ok: true, dryRun: true }
+  }
+
+  // Validate API key
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.error('[EMAIL] RESEND_API_KEY not configured')
+    return { ok: false, error: 'API key missing' }
+  }
+
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+
+  try {
+    const html = renderOtpEmailHTML(code, phone)
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `otp-${phone}-${code}-v1`
+      },
+      body: JSON.stringify({
+        from,
+        to: toEmail,
+        subject: `Dixis Admin: Ο κωδικός σας είναι ${code}`,
+        html
+      })
+    })
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`[EMAIL] OTP email failed ${response.status}:`, errorBody)
+      return { ok: false, error: `HTTP ${response.status}` }
+    }
+
+    const result = await response.json()
+    console.log(`[EMAIL] OTP sent to ${toEmail} for ${phone}`)
+    return { ok: true, messageId: result.id }
+
+  } catch (error) {
+    console.error('[EMAIL] OTP send failed:', error)
+    return { ok: false, error: String(error) }
+  }
+}
+
+/**
+ * Render OTP email HTML (simple, clean design)
+ */
+function renderOtpEmailHTML(code: string, phone: string): string {
+  return `
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Κωδικός OTP</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; background-color: #f9fafb;">
+
+  <!-- Logo -->
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #059669; margin: 0; font-size: 28px;">Dixis Admin</h1>
+  </div>
+
+  <!-- OTP Box -->
+  <div style="background: #f3f4f6; border-radius: 12px; padding: 30px; text-align: center;">
+    <p style="color: #374151; margin: 0 0 20px; font-size: 16px;">
+      Ο κωδικός OTP για το <strong>${phone}</strong> είναι:
+    </p>
+    <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #059669; background: white; padding: 15px 20px; border-radius: 8px; display: inline-block;">
+      ${code}
+    </div>
+    <p style="color: #6b7280; font-size: 14px; margin: 20px 0 0;">
+      Ο κωδικός λήγει σε 5 λεπτά.
+    </p>
+  </div>
+
+  <!-- Warning -->
+  <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 30px; line-height: 1.5;">
+    Αν δεν ζητήσατε εσείς αυτόν τον κωδικό, αγνοήστε αυτό το email.
+  </p>
+
+</body>
+</html>
+  `.trim()
+}
