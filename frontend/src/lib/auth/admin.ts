@@ -99,6 +99,23 @@ export async function requireAdmin(): Promise<AdminContext> {
     });
   } catch (dbError) {
     console.error('[Admin] Database query failed (table may not exist):', dbError);
+
+    // Pass ADMIN-EMAIL-OTP-01: Fallback to env-based admin check when DB is unavailable
+    // This allows admin login when Neon DB is paused/unreachable
+    const envAdminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
+    if (envAdminPhones.includes(phone)) {
+      console.log(`[Admin] DB unavailable, using env-based admin fallback for ${phone}`);
+      const ipAddress = await getClientIp();
+      const userAgent = await getUserAgent();
+      return {
+        id: `env-admin-${phone}`,
+        phone,
+        role: 'admin' as const,
+        ipAddress,
+        userAgent
+      };
+    }
+
     throw new AdminError(
       'Admin access unavailable - database not ready. Run prisma migrate deploy.',
       'NOT_ADMIN'
@@ -106,6 +123,20 @@ export async function requireAdmin(): Promise<AdminContext> {
   }
 
   if (!adminUser) {
+    // Pass ADMIN-EMAIL-OTP-01: Also check env fallback when user not found in DB
+    const envAdminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
+    if (envAdminPhones.includes(phone)) {
+      console.log(`[Admin] User not in DB, using env-based admin fallback for ${phone}`);
+      const ipAddress = await getClientIp();
+      const userAgent = await getUserAgent();
+      return {
+        id: `env-admin-${phone}`,
+        phone,
+        role: 'admin' as const,
+        ipAddress,
+        userAgent
+      };
+    }
     throw new AdminError('Admin access required - not in admin whitelist', 'NOT_ADMIN');
   }
 
