@@ -1,71 +1,73 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/client';
+import { getSessionPhone } from '@/lib/auth/session';
 
 /**
  * GET /api/producer/status
  * Returns the current producer profile status for the authenticated user
+ *
+ * Pass PRODUCER-ONBOARDING-FIX-01: Replaced mock with Prisma
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Mock authentication - in real app this would come from session/JWT
-    const userToken = request.headers.get('authorization');
-    const userId = getCurrentUserId(userToken);
+    const phone = await getSessionPhone();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!phone) {
+      // No session - return null status (not an error for unauthenticated users)
+      return NextResponse.json({ status: null, profile: null });
     }
 
-    // Mock producer profile lookup
-    // In real app this would query the database
-    const mockProducerProfile = getMockProducerProfile(userId);
+    const producer = await prisma.producer.findFirst({
+      where: { phone },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        region: true,
+        approvalStatus: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+
+    if (!producer) {
+      // User is logged in but no producer profile exists
+      return NextResponse.json({ status: null, profile: null, profileExists: false });
+    }
+
+    // Map Prisma approvalStatus to frontend status
+    // - 'approved' + isActive:true → 'active'
+    // - 'pending' → 'pending'
+    // - 'rejected' or isActive:false → 'inactive'
+    const status = producer.approvalStatus === 'approved' && producer.isActive
+      ? 'active'
+      : producer.approvalStatus === 'pending'
+        ? 'pending'
+        : 'inactive';
 
     return NextResponse.json({
-      status: mockProducerProfile?.status || null,
-      profile: mockProducerProfile,
-      submittedAt: mockProducerProfile?.created_at,
+      status,
+      profile: {
+        id: producer.id,
+        name: producer.name,
+        phone: producer.phone,
+        email: producer.email,
+        region: producer.region,
+        status,
+        created_at: producer.createdAt.toISOString(),
+        updated_at: producer.updatedAt.toISOString(),
+      },
+      profileExists: true,
+      submittedAt: producer.createdAt.toISOString(),
     });
 
   } catch (error) {
-    console.error('Producer status error:', error);
+    console.error('[Producer Status] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
-}
-
-// Mock helper functions (replace with actual database queries)
-function getCurrentUserId(token: string | null): number | null {
-  // Mock user extraction from token
-  // In real app: verify JWT, extract user ID from session
-  if (!token) return null;
-
-  // For testing purposes, return mock user ID
-  return 1;
-}
-
-function getMockProducerProfile(userId: number) {
-  // Mock producer profiles for testing
-  const mockProfiles: Record<number, any> = {
-    1: {
-      id: 1,
-      user_id: userId,
-      name: 'Δημήτρης Παπαδόπουλος',
-      business_name: 'Παπαδόπουλος Αγρόκτημα',
-      tax_id: '123456789',
-      phone: '+30 210 1234567',
-      status: 'pending', // Can be: 'pending' | 'active' | 'inactive'
-      created_at: '2025-09-15T20:00:00.000Z',
-      updated_at: '2025-09-15T20:00:00.000Z',
-    },
-    2: {
-      id: 2,
-      user_id: userId,
-      name: 'Μαρία Γιαννοπούλου',
-      status: 'active',
-      created_at: '2025-09-14T15:30:00.000Z',
-      updated_at: '2025-09-15T10:15:00.000Z',
-    },
-  };
-
-  return mockProfiles[userId] || null;
 }

@@ -1,26 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/client';
 import { requireProducer } from '@/lib/auth/requireProducer';
-import { cookies } from 'next/headers';
 
 /**
  * GET /api/me/products
  * Returns products for the authenticated producer (scoped to producer_id)
  * Query params: ?q=searchterm&category=xyz&status=active|inactive|all
  *
- * Pass 2: Proxies to backend scoped endpoint instead of using Prisma directly
+ * Pass PRODUCER-PRODUCTS-FIX-01: Replaced Laravel proxy with Prisma
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get authenticated producer (throws if not auth'd)
-    await requireProducer();
-
-    // Get auth token from cookies
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
+    // Get authenticated producer (throws 401/403)
+    const producer = await requireProducer();
 
     // Parse query params for search/filter
     const { searchParams } = new URL(request.url);
@@ -28,69 +20,74 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')?.trim() || '';
     const status = searchParams.get('status')?.trim() || 'all';
 
-    // Build backend API URL
-    const backendUrl = new URL(
-      '/api/v1/producer/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
+    // Build Prisma where clause - always scoped to producer
+    const where: {
+      producerId: string;
+      title?: { contains: string };
+      category?: string;
+      isActive?: boolean;
+    } = { producerId: producer.id };
 
-    // Add query params
-    if (q) backendUrl.searchParams.set('search', q);
-    if (category) backendUrl.searchParams.set('category', category);
-    if (status) backendUrl.searchParams.set('status', status);
-
-    // Call backend scoped endpoint with session token
-    const response = await fetch(backendUrl.toString(), {
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`,
-        'Accept': 'application/json',
-      },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return NextResponse.json(
-        { error: errorData.message || 'Failed to fetch products' },
-        { status: response.status }
-      );
+    if (q) {
+      where.title = { contains: q };
+    }
+    if (category) {
+      where.category = category;
+    }
+    if (status === 'active') {
+      where.isActive = true;
+    } else if (status === 'inactive') {
+      where.isActive = false;
     }
 
-    const data = await response.json();
-
-    // Map backend response to frontend format
-    const products = (data.data || []).map((p: any) => ({
-      id: p.id,
-      title: p.name || p.title,
-      name: p.name,
-      category: p.category,
-      price: parseFloat(p.price),
-      unit: p.unit || 'kg',
-      stock: p.stock || 0,
-      description: p.description,
-      imageUrl: p.image_url || p.imageUrl,
-      isActive: p.is_active !== false,
-      is_active: p.is_active !== false,
-      status: p.status || 'available',
-      createdAt: p.created_at || p.createdAt,
-      updatedAt: p.updated_at || p.updatedAt,
-      currency: 'EUR',
-      created_at: p.created_at,
-      updated_at: p.updated_at,
-    }));
-
-    return NextResponse.json({
-      products,
-      total: products.length,
+    const products = await prisma.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        price: true,
+        unit: true,
+        stock: true,
+        isActive: true,
+        imageUrl: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-  } catch (error: any) {
+    // Map to frontend format (both camelCase and snake_case for compatibility)
+    const mapped = products.map((p) => ({
+      id: p.id,
+      name: p.title,
+      title: p.title,
+      price: p.price,
+      currency: 'EUR',
+      stock: p.stock,
+      unit: p.unit,
+      category: p.category,
+      is_active: p.isActive,
+      isActive: p.isActive,
+      imageUrl: p.imageUrl,
+      image_url: p.imageUrl,
+      description: p.description,
+      status: p.isActive ? 'available' : 'unavailable',
+      created_at: p.createdAt.toISOString(),
+      updated_at: p.updatedAt.toISOString(),
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+    }));
+
+    return NextResponse.json({ products: mapped, total: mapped.length });
+  } catch (error: unknown) {
     // requireProducer throws Response objects for 401/403
     if (error instanceof Response) {
       return error;
     }
 
-    console.error('Producer products error:', error);
+    console.error('[Producer Products GET] Error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ανάκτηση προϊόντων' },
       { status: 500 }
@@ -102,69 +99,70 @@ export async function GET(request: NextRequest) {
  * POST /api/me/products
  * Create a new product for the authenticated producer
  *
- * Pass 2: Proxies to backend API (producer_id auto-set server-side)
+ * Pass PRODUCER-PRODUCTS-FIX-01: Replaced Laravel proxy with Prisma
  */
 export async function POST(request: NextRequest) {
   try {
-    await requireProducer();
-
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
+    const producer = await requireProducer();
     const body = await request.json();
 
-    // Map frontend fields to backend API format
-    const backendPayload = {
-      name: body.title || body.name,
-      slug: body.slug,
-      category: body.category,
-      price: parseFloat(body.price),
-      unit: body.unit,
-      stock: parseInt(body.stock, 10),
-      description: body.description || null,
-      image_url: body.imageUrl || null,
-      is_active: body.isActive !== undefined ? Boolean(body.isActive) : true,
-      // Note: producer_id NOT included - backend auto-sets from auth user
-    };
-
-    // Call backend API
-    const backendUrl = new URL(
-      '/api/v1/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(backendPayload),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    // Validate required fields
+    const title = body.title?.trim() || body.name?.trim();
+    if (!title) {
       return NextResponse.json(
-        { error: errorData.message || 'Failed to create product' },
-        { status: response.status }
+        { error: 'Το όνομα προϊόντος είναι υποχρεωτικό' },
+        { status: 400 }
       );
     }
 
-    const data = await response.json();
+    // Generate unique slug
+    const baseSlug = title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Collapse multiple hyphens
+      .slice(0, 40);
 
-    return NextResponse.json({ success: true, product: data.data }, { status: 201 });
+    const slug = body.slug || `${baseSlug}-${Date.now().toString(36)}`;
 
-  } catch (error: any) {
+    const product = await prisma.product.create({
+      data: {
+        title,
+        slug,
+        producerId: producer.id,
+        category: body.category || 'other',
+        price: parseFloat(body.price) || 0,
+        unit: body.unit || 'kg',
+        stock: parseInt(body.stock, 10) || 0,
+        description: body.description || null,
+        imageUrl: body.imageUrl || body.image_url || null,
+        isActive: body.isActive !== false,
+        approvalStatus: 'pending', // New products require admin approval
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        product: {
+          ...product,
+          name: product.title,
+          is_active: product.isActive,
+          image_url: product.imageUrl,
+          created_at: product.createdAt.toISOString(),
+          updated_at: product.updatedAt.toISOString(),
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error: unknown) {
     if (error instanceof Response) {
       return error;
     }
 
-    console.error('Create product error:', error);
+    console.error('[Producer Products POST] Error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά τη δημιουργία προϊόντος' },
       { status: 500 }

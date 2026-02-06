@@ -1,77 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/client';
 import { requireProducer } from '@/lib/auth/requireProducer';
-import { cookies } from 'next/headers';
+
+type RouteContext = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/me/products/[id]
- * Get a single product by ID (scoped to producer)
+ * Returns a single product for the authenticated producer (owner check)
  *
- * Pass 2: Proxies to backend API to enforce ProductPolicy
+ * Pass PRODUCER-PRODUCTS-FIX-01: Replaced Laravel proxy with Prisma
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    await requireProducer();
+    const producer = await requireProducer();
+    const { id } = await context.params;
 
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
-
-    // Proxy to backend GET /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`,
-        'Accept': 'application/json',
+    const product = await prisma.product.findFirst({
+      where: { id, producerId: producer.id },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        category: true,
+        price: true,
+        unit: true,
+        stock: true,
+        isActive: true,
+        imageUrl: true,
+        description: true,
+        approvalStatus: true,
+        createdAt: true,
+        updatedAt: true,
       },
-      cache: 'no-store',
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    if (!product) {
       return NextResponse.json(
-        { error: errorData.message || 'Δεν βρέθηκε' },
-        { status: response.status }
+        { error: 'Το προϊόν δεν βρέθηκε' },
+        { status: 404 }
       );
     }
 
-    const data = await response.json();
-
-    // Map backend response to frontend format
-    const product = {
-      id: data.data?.id,
-      slug: data.data?.slug,
-      title: data.data?.name || data.data?.title,
-      category: data.data?.category,
-      price: parseFloat(data.data?.price || 0),
-      unit: data.data?.unit || 'kg',
-      stock: data.data?.stock || 0,
-      description: data.data?.description,
-      imageUrl: data.data?.image_url || data.data?.imageUrl,
-      isActive: data.data?.is_active !== false,
-      createdAt: data.data?.created_at || data.data?.createdAt,
-      updatedAt: data.data?.updated_at || data.data?.updatedAt,
+    // Map to frontend format (both camelCase and snake_case for compatibility)
+    const mapped = {
+      id: product.id,
+      name: product.title,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      currency: 'EUR',
+      stock: product.stock,
+      unit: product.unit,
+      category: product.category,
+      is_active: product.isActive,
+      isActive: product.isActive,
+      imageUrl: product.imageUrl,
+      image_url: product.imageUrl,
+      description: product.description,
+      approval_status: product.approvalStatus,
+      approvalStatus: product.approvalStatus,
+      status: product.isActive ? 'available' : 'unavailable',
+      created_at: product.createdAt.toISOString(),
+      updated_at: product.updatedAt.toISOString(),
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
     };
 
-    return NextResponse.json({ product });
-
-  } catch (error: any) {
+    return NextResponse.json({ product: mapped });
+  } catch (error: unknown) {
     if (error instanceof Response) {
       return error;
     }
 
-    console.error('Get product error:', error);
+    console.error('[Producer Product GET] Error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ανάκτηση προϊόντος' },
       { status: 500 }
@@ -81,90 +82,111 @@ export async function GET(
 
 /**
  * PUT /api/me/products/[id]
- * Update a product by ID (scoped to producer)
+ * Update a product for the authenticated producer (owner check)
  *
- * Pass 2: Proxies to backend PATCH /api/v1/products/{id} to enforce ProductPolicy
- * This ensures admin override capability and consistent authorization logic
+ * Pass PRODUCER-PRODUCTS-FIX-01: Replaced Laravel proxy with Prisma
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    await requireProducer();
-
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
+    const producer = await requireProducer();
+    const { id } = await context.params;
     const body = await request.json();
 
-    // Map frontend fields to backend API format
-    const backendPayload: any = {};
-    if (body.title !== undefined) backendPayload.name = body.title;
-    if (body.slug !== undefined) backendPayload.slug = body.slug;
-    if (body.category !== undefined) backendPayload.category = body.category;
-    if (body.price !== undefined) backendPayload.price = parseFloat(body.price);
-    if (body.unit !== undefined) backendPayload.unit = body.unit;
-    if (body.stock !== undefined) backendPayload.stock = parseInt(body.stock, 10);
-    if (body.description !== undefined) backendPayload.description = body.description;
-    if (body.imageUrl !== undefined) backendPayload.image_url = body.imageUrl;
-    if (body.isActive !== undefined) backendPayload.is_active = Boolean(body.isActive);
-
-    // Proxy to backend PATCH /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(backendPayload),
+    // First check ownership
+    const existing = await prisma.product.findFirst({
+      where: { id, producerId: producer.id },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    if (!existing) {
       return NextResponse.json(
-        { error: errorData.message || 'Σφάλμα κατά την ενημέρωση προϊόντος' },
-        { status: response.status }
+        { error: 'Το προϊόν δεν βρέθηκε' },
+        { status: 404 }
       );
     }
 
-    const data = await response.json();
+    // Build update data (only update provided fields)
+    const updateData: {
+      title?: string;
+      category?: string;
+      price?: number;
+      unit?: string;
+      stock?: number;
+      description?: string | null;
+      imageUrl?: string | null;
+      isActive?: boolean;
+    } = {};
 
-    // Map backend response to frontend format
-    const product = {
-      id: data.data?.id,
-      slug: data.data?.slug,
-      title: data.data?.name || data.data?.title,
-      category: data.data?.category,
-      price: parseFloat(data.data?.price || 0),
-      unit: data.data?.unit || 'kg',
-      stock: data.data?.stock || 0,
-      description: data.data?.description,
-      imageUrl: data.data?.image_url || data.data?.imageUrl,
-      isActive: data.data?.is_active !== false,
-      createdAt: data.data?.created_at || data.data?.createdAt,
-      updatedAt: data.data?.updated_at || data.data?.updatedAt,
-    };
+    if (body.title?.trim()) {
+      updateData.title = body.title.trim();
+    } else if (body.name?.trim()) {
+      updateData.title = body.name.trim();
+    }
 
-    return NextResponse.json({ success: true, product });
+    if (body.category) {
+      updateData.category = body.category;
+    }
 
-  } catch (error: any) {
+    if (body.price !== undefined) {
+      updateData.price = parseFloat(body.price) || existing.price;
+    }
+
+    if (body.unit) {
+      updateData.unit = body.unit;
+    }
+
+    if (body.stock !== undefined) {
+      updateData.stock = parseInt(body.stock, 10);
+      if (isNaN(updateData.stock)) {
+        updateData.stock = existing.stock;
+      }
+    }
+
+    if (body.description !== undefined) {
+      updateData.description = body.description || null;
+    }
+
+    if (body.imageUrl !== undefined || body.image_url !== undefined) {
+      updateData.imageUrl = body.imageUrl || body.image_url || null;
+    }
+
+    if (body.isActive !== undefined || body.is_active !== undefined) {
+      updateData.isActive = body.isActive ?? body.is_active ?? existing.isActive;
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return NextResponse.json({
+      success: true,
+      product: {
+        id: product.id,
+        name: product.title,
+        title: product.title,
+        price: product.price,
+        currency: 'EUR',
+        stock: product.stock,
+        unit: product.unit,
+        category: product.category,
+        is_active: product.isActive,
+        isActive: product.isActive,
+        imageUrl: product.imageUrl,
+        image_url: product.imageUrl,
+        description: product.description,
+        status: product.isActive ? 'available' : 'unavailable',
+        created_at: product.createdAt.toISOString(),
+        updated_at: product.updatedAt.toISOString(),
+        createdAt: product.createdAt.toISOString(),
+        updatedAt: product.updatedAt.toISOString(),
+      },
+    });
+  } catch (error: unknown) {
     if (error instanceof Response) {
       return error;
     }
 
-    console.error('Update product error:', error);
+    console.error('[Producer Product PUT] Error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ενημέρωση προϊόντος' },
       { status: 500 }
@@ -174,57 +196,39 @@ export async function PUT(
 
 /**
  * DELETE /api/me/products/[id]
- * Delete a product by ID (scoped to producer)
+ * Delete a product for the authenticated producer (owner check)
  *
- * Pass 2: Proxies to backend DELETE /api/v1/products/{id} to enforce ProductPolicy
- * This ensures admin override capability and consistent authorization logic
+ * Pass PRODUCER-PRODUCTS-FIX-01: Replaced Laravel proxy with Prisma
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    await requireProducer();
+    const producer = await requireProducer();
+    const { id } = await context.params;
 
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
-
-    // Proxy to backend DELETE /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${sessionToken}`,
-        'Accept': 'application/json',
-      },
+    // First check ownership
+    const existing = await prisma.product.findFirst({
+      where: { id, producerId: producer.id },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    if (!existing) {
       return NextResponse.json(
-        { error: errorData.message || 'Δεν βρέθηκε' },
-        { status: response.status }
+        { error: 'Το προϊόν δεν βρέθηκε' },
+        { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, deleted: productId });
+    await prisma.product.delete({ where: { id } });
 
-  } catch (error: any) {
+    return NextResponse.json({
+      success: true,
+      message: 'Το προϊόν διαγράφηκε επιτυχώς',
+    });
+  } catch (error: unknown) {
     if (error instanceof Response) {
       return error;
     }
 
-    console.error('Delete product error:', error);
+    console.error('[Producer Product DELETE] Error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά τη διαγραφή προϊόντος' },
       { status: 500 }

@@ -27,9 +27,11 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
-| 1 | **WISHLIST-01** | User wishlist feature |
-| 2 | **ADMIN-BULK-STATUS-01** | Bulk order status update |
-| 3 | **OAUTH-GOOGLE-01** | Google OAuth login (needs backend work) |
+| 1 | **ADMIN-AUTHGUARD-01** | Fix AuthGuard admin role detection |
+| 2 | **WISHLIST-01** | User wishlist feature |
+| 3 | **PRODUCER-NOTIFICATIONS-01** | Producer order notifications |
+
+> **Note**: See `docs/E2E-FLOW-AUDIT.md` for comprehensive flow analysis
 
 ---
 
@@ -45,6 +47,10 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **PRODUCER-PRODUCTS-FIX-01** — Producer products CRUD via Prisma + nginx fix (2026-02-06) ✅
+- **PRODUCER-ONBOARDING-FIX-01** — Replaced mock with Prisma (2026-02-06) ✅
+- **ADMIN-CONSOLIDATION-01** — Security fixes, Orders migrated to Prisma, Laravel removed (2026-02-06) ✅
+- **ADMIN-AUDIT-01** — Deep audit of admin dashboard, fixed Category table, seeded 9 categories (2026-02-06) ✅
 - **INFRA-STABILITY-01** — Deploy script, nginx docs, stability fixes (2026-02-06) ✅
 - **ADMIN-PAGES-FIX-01** — Fixed admin pages (credentials: include, nginx routing) (2026-02-06) ✅
 - **NEON-DB-FIX-01** — Fixed Neon DB password mismatch (2026-02-06) ✅
@@ -84,7 +90,9 @@ _(empty — pick from NEXT)_
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `scripts/deploy.sh` | **USE THIS TO DEPLOY** |
+| `docs/ADMIN-AUDIT.md` | Admin dashboard audit report |
+| `docs/E2E-FLOW-AUDIT.md` | **E2E flow audit (2026-02-06)** |
 
 ---
 
-_Lines: ~65 | Target: ≤100_
+_Lines: ~70 | Target: ≤100_
