@@ -10,7 +10,7 @@ import {
 } from '@/lib/shippingSchemas';
 
 interface ShippingLabelManagerProps {
-  orderId: number;
+  orderId: string;
   orderDetails?: {
     id: number;
     status: string;
