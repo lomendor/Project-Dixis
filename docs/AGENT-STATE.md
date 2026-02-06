@@ -20,7 +20,9 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+| Pass ID | Feature | PR |
+|---------|---------|-----|
+| **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | PR #2662 (CI pending) |
 
 ---
 
@@ -28,9 +30,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature | Why |
 |----------|---------|---------|-----|
-| 1 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Component exists, needs wiring |
-| 2 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend NOT ready (needs Socialite) |
-| 3 | **WISHLIST-01** | User wishlist feature | No implementation yet |
+| 1 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend NOT ready (needs Socialite) |
+| 2 | **WISHLIST-01** | User wishlist feature | No implementation yet |
+| 3 | **ADMIN-BULK-STATUS-01** | Bulk order status update | Admin productivity |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 

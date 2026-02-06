@@ -3,6 +3,7 @@ import React from 'react';
 import { orderNumber } from '../../../../lib/orderNumber';
 import { useToast } from '@/contexts/ToastContext';
 import { OrderStatusQuickActions } from './OrderStatusQuickActions';
+import { ShippingLabelManager } from '@/components/shipping';
 
 type Order = {
   id: string;
@@ -58,6 +59,17 @@ export default function AdminOrderDetail({
           {data.status && (
             <OrderStatusQuickActions orderId={data.id} currentStatus={data.status} />
           )}
+
+          {/* ADMIN-SHIPPING-UI-01: Shipping Label Manager */}
+          {data.status && ['PAID', 'PACKING'].includes(data.status.toUpperCase()) && (
+            <div className="my-6 pb-6 border-b border-gray-200">
+              <ShippingLabelManager
+                orderId={data.id}
+                className="mt-4"
+              />
+            </div>
+          )}
+
           <div className="mb-2">
             Order No:{' '}
             <strong data-testid="detail-order-no">
