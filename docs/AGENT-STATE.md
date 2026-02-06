@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (ADMIN-SHIPPING-UI-01 deployed)
+**Updated**: 2026-02-06 (ADMIN-EMAIL-OTP-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **ADMIN-EMAIL-OTP-01** — Admin login via email OTP (PRs #2665-2667, deployed 2026-02-06) ✅
 - **ADMIN-SHIPPING-UI-01** — Shipping labels UI wired to admin (PR #2662, deployed 2026-02-06) ✅
 - **PRODUCER-NOTIFY-01** — Producer emails discovered working (47 records, enabled since Jan) ✅
 - **REORDER-01** — Reorder button on order details (PR #2659, deployed 2026-02-06) ✅
