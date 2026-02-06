@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06 (REORDER-01 + TRACKING-DISPLAY-01 merged)
+**Updated**: 2026-02-06 (PRODUCER-NOTIFY-01 discovered working)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -13,7 +13,7 @@
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
-| **Ports** | 8001 (backend), 3001 (frontend) — LOCKED |
+| **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
 | **Feature health** | 97% (84 DONE + 20 PARTIAL / 111 total) |
 
 ---
@@ -28,9 +28,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature | Why |
 |----------|---------|---------|-----|
-| 1 | **OAUTH-GOOGLE-01** | Google OAuth frontend | Backend ready |
-| 2 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Service exists |
-| 3 | **PRODUCER-NOTIFY-01** | Producer new order notifications | Email service ready |
+| 1 | **ADMIN-SHIPPING-UI-01** | Admin shipping labels UI | Component exists, needs wiring |
+| 2 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend NOT ready (needs Socialite) |
+| 3 | **WISHLIST-01** | User wishlist feature | No implementation yet |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PRODUCER-NOTIFY-01** — Producer emails discovered working (47 records, enabled since Jan) ✅
 - **REORDER-01** — Reorder button on order details (PR #2659, deployed 2026-02-06) ✅
 - **TRACKING-DISPLAY-01** — Public order tracking via UUID token (PR #2657, deployed 2026-02-06) ✅
 - **CART-SYNC-01** — Cart persistence discovered working (AuthContext sync on login) ✅
