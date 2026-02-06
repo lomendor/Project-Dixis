@@ -19,9 +19,7 @@
 
 ## WIP (max 1)
 
-| Pass ID | Feature | Started |
-|---------|---------|---------|
-| **INFRA-STABILITY-01** | Deploy script, nginx docs, stability | 2026-02-06 |
+_(empty — pick from NEXT)_
 
 ---
 
@@ -47,6 +45,7 @@
 
 ## Recently Done (last 10)
 
+- **INFRA-STABILITY-01** — Deploy script, nginx docs, stability fixes (2026-02-06) ✅
 - **ADMIN-PAGES-FIX-01** — Fixed admin pages (credentials: include, nginx routing) (2026-02-06) ✅
 - **NEON-DB-FIX-01** — Fixed Neon DB password mismatch (2026-02-06) ✅
 - **ADMIN-EMAIL-OTP-01** — Admin login via email OTP (2026-02-06) ✅
