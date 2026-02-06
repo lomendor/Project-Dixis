@@ -414,8 +414,8 @@ Based on ADMIN-AUDIT.md:
    - Extend event bus to notify producers
    - Add `producer_new_order` email template
 
-4. **ADMIN-AUTHGUARD-FIX-01**: Fix AuthGuard role detection
-   - Sync client AuthContext with server session
+4. ~~**ADMIN-AUTHGUARD-FIX-01**: Fix AuthGuard role detection~~ ✅ DONE (2026-02-06)
+   - Added `/api/auth/me` endpoint to sync client with JWT session
 
 ---
 

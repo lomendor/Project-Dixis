@@ -92,6 +92,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // Pass ADMIN-AUTHGUARD-01: Check session-based auth (phone OTP)
+      // This syncs client auth state with server JWT for admin users
+      try {
+        const sessionRes = await fetch('/api/auth/me', { credentials: 'include' });
+        if (sessionRes.ok) {
+          const session = await sessionRes.json();
+          if (session.authenticated && session.role === 'admin') {
+            console.log('[Auth] Admin session detected from JWT');
+            setUser({
+              id: 0, // Session-based admin users don't have numeric IDs
+              name: session.phone,
+              email: '',
+              role: 'admin',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+            setLoading(false);
+            return; // Skip Laravel profile fetch
+          }
+        }
+      } catch (error) {
+        // Non-blocking: fall through to normal auth flow
+        console.log('[Auth] Session check skipped, using token auth');
+      }
+
       // Normal auth flow
       apiClient.refreshToken();
       const token = apiClient.getToken();

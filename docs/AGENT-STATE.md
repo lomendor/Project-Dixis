@@ -27,9 +27,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
-| 1 | **ADMIN-AUTHGUARD-01** | Fix AuthGuard admin role detection |
-| 2 | **WISHLIST-01** | User wishlist feature |
-| 3 | **PRODUCER-NOTIFICATIONS-01** | Producer order notifications |
+| 1 | **WISHLIST-01** | User wishlist feature |
+| 2 | **PRODUCER-NOTIFICATIONS-01** | Producer order notifications |
+| 3 | **SEARCH-FILTERS-01** | Product search & filters enhancement |
 
 > **Note**: See `docs/E2E-FLOW-AUDIT.md` for comprehensive flow analysis
 
@@ -47,6 +47,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **ADMIN-AUTHGUARD-01** — Sync client auth state with server JWT (2026-02-06) ✅
 - **PRODUCER-PRODUCTS-FIX-01** — Producer products CRUD via Prisma + nginx fix (2026-02-06) ✅
 - **PRODUCER-ONBOARDING-FIX-01** — Replaced mock with Prisma (2026-02-06) ✅
 - **ADMIN-CONSOLIDATION-01** — Security fixes, Orders migrated to Prisma, Laravel removed (2026-02-06) ✅
