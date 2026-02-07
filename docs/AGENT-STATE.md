@@ -12,14 +12,17 @@
 |------|-------|
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
-| **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
+| **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 dixis@144.76.224.1` |
+| **VPS Status** | ⚠️ Unreachable as of 2026-02-07 |
 | **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
 
 ---
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+| Pass ID | Status | Notes |
+|---------|--------|-------|
+| **AUTH-UNIFICATION-01** | ⏳ Pending Deploy | VPS unreachable - code ready in GitHub |
 
 ---
 
@@ -47,6 +50,8 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **PUBLIC-PRODUCER-PAGES-01** — Public producer catalog & profile pages (2026-02-07) ✅
+- **ADMIN-ORDER-PRODUCER-VIEW-01** — Admin orders list & detail show producer per item (2026-02-07) ✅
 - **PRODUCER-NOTIFICATIONS-01** — Producers receive email when orders are placed (2026-02-07) ✅
 - **PUBLIC-PRODUCTS-PRISMA-01** — Storefront now shows real products via Prisma (2026-02-07) ✅
 - **ADMIN-AUTHGUARD-01** — Sync client auth state with server JWT (2026-02-06) ✅
