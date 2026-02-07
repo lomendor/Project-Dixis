@@ -1,8 +1,9 @@
 # PLAN: AUTH-UNIFICATION-01
 
 **Date**: 2026-02-07
-**Status**: PLANNING → READY FOR IMPLEMENTATION
+**Status**: ✅ IMPLEMENTATION COMPLETE - PENDING DEPLOYMENT
 **Priority**: 🔴 CRITICAL (Producer auth broken)
+**Commit**: 5d97849f
 
 ---
 
@@ -215,23 +216,41 @@ All protected pages should use `<AuthGuard>`:
 
 ```
 Day 1:
-  ☐ 1.1 Schema update + migrate
-  ☐ 1.2 Update requireProducer
-  ☐ Deploy + verify admin still works
+  ✅ 1.1 Schema update + migrate (Consumer-Producer relation added)
+  ✅ 1.2 Update requireProducer (OR clause for phone/consumer.phone)
+  ⏳ Deploy + verify admin still works (VPS unreachable)
 
 Day 2:
-  ☐ 1.3 Producer onboard API
-  ☐ 1.4 Producer join page
-  ☐ Test full producer flow
+  ✅ 1.3 Producer onboard API (updated existing /api/producer/onboarding)
+  ✅ 1.4 Producer join/register pages (created /producers/register)
+  ⏳ Test full producer flow
 
 Day 3:
-  ☐ 2.1 Login page role awareness
-  ☐ 2.2 Remove/convert registration
-  ☐ 2.3 Intended destination
+  ✅ 2.1 Login page role awareness (from param already works)
+  ✅ 2.2 AuthContext updated with producerStatus
+  ✅ 2.3 Intended destination (via ?from= param)
 
 Day 4:
-  ☐ 3.1-3.3 Cleanup + documentation
-  ☐ Full E2E testing
+  ⏳ 3.1-3.3 Cleanup + documentation
+  ⏳ Full E2E testing
+```
+
+## Deployment Steps (When VPS Available)
+
+```bash
+# 1. SSH to VPS
+ssh -i ~/.ssh/dixis_prod_ed25519_20260115 dixis@144.76.224.1
+
+# 2. Pull latest code
+cd /home/dixis/frontend
+git pull origin docs/admin-shipping-deployed
+
+# 3. Run Prisma migration
+npx prisma db push --accept-data-loss
+
+# 4. Rebuild and restart
+npm run build
+pm2 restart frontend
 ```
 
 ---
