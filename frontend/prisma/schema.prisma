@@ -15,8 +15,11 @@ model Producer {
   region          String
   category        String
   description     String?
-  phone           String?
+  phone           String?   @unique  // Phone for auth lookup
   email           String?
+  // Pass AUTH-UNIFICATION-01: Link to Consumer for unified identity
+  consumerId      String?   @unique
+  consumer        Consumer? @relation(fields: [consumerId], references: [id])
   products        Int       @default(0)
   rating          Float?    @default(0)
   imageUrl        String?
@@ -31,6 +34,7 @@ model Producer {
   @@index([region, category])
   @@index([name])
   @@index([approvalStatus])
+  @@index([phone])
 }
 
 model Product {
@@ -259,6 +263,8 @@ model Consumer {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  // Pass AUTH-UNIFICATION-01: One consumer can be one producer
+  producer  Producer?
 
   @@index([phone])
   @@index([email])

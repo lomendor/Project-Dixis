@@ -7,6 +7,7 @@ import { getSessionPhone } from '@/lib/auth/session';
  * Returns the current producer profile status for the authenticated user
  *
  * Pass PRODUCER-ONBOARDING-FIX-01: Replaced mock with Prisma
+ * Pass AUTH-UNIFICATION-01: Support lookup via Consumer relation
  */
 export async function GET() {
   try {
@@ -17,15 +18,24 @@ export async function GET() {
       return NextResponse.json({ status: null, profile: null });
     }
 
+    // Pass AUTH-UNIFICATION-01: Try multiple lookup strategies
     const producer = await prisma.producer.findFirst({
-      where: { phone },
+      where: {
+        OR: [
+          { phone },
+          { consumer: { phone } }
+        ]
+      },
       select: {
         id: true,
         name: true,
         phone: true,
         email: true,
         region: true,
+        category: true,
+        description: true,
         approvalStatus: true,
+        rejectionReason: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -55,7 +65,11 @@ export async function GET() {
         phone: producer.phone,
         email: producer.email,
         region: producer.region,
+        category: producer.category,
+        description: producer.description,
         status,
+        approvalStatus: producer.approvalStatus,
+        rejectionReason: producer.rejectionReason,
         created_at: producer.createdAt.toISOString(),
         updated_at: producer.updatedAt.toISOString(),
       },

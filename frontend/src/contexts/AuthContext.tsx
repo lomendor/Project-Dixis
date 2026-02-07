@@ -5,6 +5,17 @@ import { User, apiClient } from '@/lib/api';
 import { useToast } from './ToastContext';
 import { useCart, CartItem as LocalCartItem } from '@/lib/cart';
 
+/**
+ * Pass AUTH-UNIFICATION-01: Producer status from session
+ */
+interface ProducerStatus {
+  id: string;
+  name: string;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  isActive: boolean;
+  canAccess: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -30,6 +41,10 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isProducer: boolean;
   isAdmin: boolean;
+  /**
+   * Pass AUTH-UNIFICATION-01: Producer status from session
+   */
+  producerStatus: ProducerStatus | null;
   setIntendedDestination?: (destination: string) => void;
   getIntendedDestination?: () => string | null;
   clearIntendedDestination?: () => void;
@@ -68,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
+  // Pass AUTH-UNIFICATION-01: Track producer status
+  const [producerStatus, setProducerStatus] = useState<ProducerStatus | null>(null);
   const { showToast } = useToast();
   const { getItemsForSync, replaceWithServerCart } = useCart();
 
@@ -97,21 +114,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Pass ADMIN-AUTHGUARD-01: Check session-based auth (phone OTP)
-      // This syncs client auth state with server JWT for admin users
+      // Pass AUTH-UNIFICATION-01: Also check for consumer sessions and producer status
       try {
         const sessionRes = await fetch('/api/auth/me', { credentials: 'include' });
         if (sessionRes.ok) {
           const session = await sessionRes.json();
-          if (session.authenticated && session.role === 'admin') {
-            console.log('[Auth] Admin session detected from JWT');
+          if (session.authenticated) {
+            console.log(`[Auth] Session detected from JWT: ${session.role}`);
             setUser({
-              id: 0, // Session-based admin users don't have numeric IDs
+              id: 0, // Session-based users don't have numeric IDs
               name: session.phone,
               email: '',
-              role: 'admin',
+              role: session.role === 'admin' ? 'admin' : 'consumer',
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             });
+            // Pass AUTH-UNIFICATION-01: Set producer status if available
+            if (session.producer) {
+              setProducerStatus(session.producer);
+            }
             setLoading(false);
             return; // Skip Laravel profile fetch
           }
@@ -285,6 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /**
    * Pass FIX-AUTH-TIMEOUT: Refresh auth state from server session
    * Called after OTP verification to sync client state with JWT cookie
+   * Pass AUTH-UNIFICATION-01: Also captures producer status
    */
   const refreshAuth = async () => {
     try {
@@ -301,6 +323,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           });
+          // Pass AUTH-UNIFICATION-01: Set producer status if available
+          if (session.producer) {
+            setProducerStatus(session.producer);
+          } else {
+            setProducerStatus(null);
+          }
           showToast('success', 'Επιτυχής σύνδεση!');
         }
       }
@@ -323,8 +351,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     refreshAuth,
     isAuthenticated,
-    isProducer: user?.role === 'producer',
+    isProducer: user?.role === 'producer' || producerStatus?.canAccess === true,
     isAdmin: user?.role === 'admin',
+    producerStatus,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

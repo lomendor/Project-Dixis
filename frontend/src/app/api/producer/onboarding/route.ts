@@ -7,6 +7,9 @@ interface OnboardingRequest {
   taxId?: string;
   phone?: string;
   email?: string;
+  region?: string;
+  category?: string;
+  description?: string;
 }
 
 /**
@@ -14,6 +17,7 @@ interface OnboardingRequest {
  * Creates or updates a producer profile with status=pending
  *
  * Pass PRODUCER-ONBOARDING-FIX-01: Replaced mock with Prisma
+ * Pass AUTH-UNIFICATION-01: Links producer to consumer via consumerId
  */
 export async function POST(request: NextRequest) {
   try {
@@ -51,9 +55,30 @@ export async function POST(request: NextRequest) {
 
     const slug = `${baseSlug}-${Date.now().toString(36)}`;
 
-    // Check if producer profile exists for this phone
-    const existing = await prisma.producer.findFirst({
+    // Pass AUTH-UNIFICATION-01: Get or create consumer for this phone
+    let consumer = await prisma.consumer.findUnique({
       where: { phone: sessionPhone },
+    });
+
+    if (!consumer) {
+      consumer = await prisma.consumer.create({
+        data: {
+          phone: sessionPhone,
+          name: displayName,
+          email: body.email?.trim() || null,
+        },
+      });
+    }
+
+    // Check if producer profile already exists
+    // Try multiple lookup strategies: direct phone, via consumer
+    const existing = await prisma.producer.findFirst({
+      where: {
+        OR: [
+          { phone: sessionPhone },
+          { consumerId: consumer.id }
+        ]
+      },
     });
 
     let producer;
@@ -65,21 +90,29 @@ export async function POST(request: NextRequest) {
         data: {
           name: displayName,
           email: body.email?.trim() || undefined,
+          region: body.region?.trim() || undefined,
+          category: body.category?.trim() || undefined,
+          description: body.description?.trim() || undefined,
+          // Ensure consumer link exists
+          consumerId: consumer.id,
           // Don't update status on re-submit - admin controls that
         },
       });
     } else {
-      // Create new producer profile
+      // Create new producer profile linked to consumer
       producer = await prisma.producer.create({
         data: {
           name: displayName,
           slug,
           phone: sessionPhone,
           email: body.email?.trim() || null,
-          region: 'Ελλάδα', // Default region
-          category: 'other', // Default category
+          region: body.region?.trim() || 'Ελλάδα',
+          category: body.category?.trim() || 'other',
+          description: body.description?.trim() || null,
           approvalStatus: 'pending',
           isActive: false,
+          // Pass AUTH-UNIFICATION-01: Link to consumer
+          consumerId: consumer.id,
         },
       });
     }
@@ -92,7 +125,11 @@ export async function POST(request: NextRequest) {
         name: producer.name,
         phone: producer.phone,
         email: producer.email,
+        region: producer.region,
+        category: producer.category,
+        description: producer.description,
         status: producer.approvalStatus === 'approved' && producer.isActive ? 'active' : 'pending',
+        approvalStatus: producer.approvalStatus,
         created_at: producer.createdAt.toISOString(),
         updated_at: producer.updatedAt.toISOString(),
       },
