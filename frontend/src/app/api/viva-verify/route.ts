@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getVivaWalletClient } from '@/lib/viva-wallet/client'
 import { isVivaWalletConfigured } from '@/lib/viva-wallet/config'
 import { prisma } from '@/server/db/prisma'
+import { emitEvent } from '@/lib/events/bus'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -43,6 +44,24 @@ export async function GET(req: Request) {
         where: { id: orderId },
         data: { status: 'paid' }
       })
+
+      // PRODUCER-NOTIFICATIONS-01: Emit order.created event for notifications
+      // This triggers SMS to customer + email to producers
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { items: true }
+      })
+
+      if (fullOrder) {
+        await emitEvent('order.created', {
+          orderId: fullOrder.id,
+          shipping: {
+            phone: fullOrder.phone || fullOrder.buyerPhone,
+            name: fullOrder.name || fullOrder.buyerName
+          },
+          items: fullOrder.items
+        })
+      }
     }
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-06
+**Updated**: 2026-02-07
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,8 +28,8 @@ _(empty — pick from NEXT)_
 | Priority | Pass ID | Feature |
 |----------|---------|---------|
 | 1 | **WISHLIST-01** | User wishlist feature |
-| 2 | **PRODUCER-NOTIFICATIONS-01** | Producer order notifications |
-| 3 | **SEARCH-FILTERS-01** | Product search & filters enhancement |
+| 2 | **SEARCH-FILTERS-01** | Product search & filters enhancement |
+| 3 | **STOCK-ALERTS-01** | Low stock alerts for producers |
 
 > **Note**: See `docs/E2E-FLOW-AUDIT.md` for comprehensive flow analysis
 
@@ -47,6 +47,8 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **PRODUCER-NOTIFICATIONS-01** — Producers receive email when orders are placed (2026-02-07) ✅
+- **PUBLIC-PRODUCTS-PRISMA-01** — Storefront now shows real products via Prisma (2026-02-07) ✅
 - **ADMIN-AUTHGUARD-01** — Sync client auth state with server JWT (2026-02-06) ✅
 - **PRODUCER-PRODUCTS-FIX-01** — Producer products CRUD via Prisma + nginx fix (2026-02-06) ✅
 - **PRODUCER-ONBOARDING-FIX-01** — Replaced mock with Prisma (2026-02-06) ✅

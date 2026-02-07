@@ -510,3 +510,205 @@ function renderOtpEmailHTML(code: string, phone: string): string {
 </html>
   `.trim()
 }
+
+/**
+ * PRODUCER-NOTIFICATIONS-01: Producer order notification data
+ */
+export interface ProducerOrderNotificationData {
+  orderId: string
+  producerId: string
+  producerName: string
+  items: Array<{
+    titleSnap: string
+    qty: number
+    priceSnap: number
+  }>
+  customerName: string
+  shippingAddress: string
+  totalForProducer: number
+}
+
+/**
+ * Send new order notification email to a producer
+ * Pass: PRODUCER-NOTIFICATIONS-01
+ *
+ * @param data - Order data specific to this producer
+ * @param toEmail - Producer's email address
+ * @returns Result object (never throws)
+ */
+export async function sendProducerNewOrderNotification({
+  data,
+  toEmail
+}: {
+  data: ProducerOrderNotificationData
+  toEmail: string
+}): Promise<EmailResult> {
+
+  // Dry-run mode (CI/dev) - logs but doesn't send
+  if (process.env.EMAIL_DRY_RUN === 'true') {
+    console.log(`[EMAIL DRY-RUN] Would send producer notification to ${toEmail} for order ${data.orderId}`)
+    return { ok: true, dryRun: true }
+  }
+
+  // Validate API key
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.error('[EMAIL] RESEND_API_KEY not configured')
+    return { ok: false, error: 'API key missing' }
+  }
+
+  // Email config
+  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+  const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.gr'
+
+  try {
+    const html = renderProducerOrderHTML(data)
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        // Idempotency: prevent duplicate sends for same producer + order
+        'Idempotency-Key': `producer-${data.producerId}-order-${data.orderId}-v1`
+      },
+      body: JSON.stringify({
+        from,
+        to: toEmail,
+        reply_to: replyTo,
+        subject: `Νέα παραγγελία #${data.orderId} στο Dixis`
+      , html
+      })
+    })
+
+    if (!response.ok) {
+      const errorBody = await response.text()
+      console.error(`[EMAIL] Producer notification failed ${response.status}:`, errorBody)
+      return { ok: false, error: `HTTP ${response.status}` }
+    }
+
+    const result = await response.json()
+    console.log(`[EMAIL] Sent producer notification for order ${data.orderId} to ${toEmail}`, result)
+    return { ok: true, messageId: result.id }
+
+  } catch (error) {
+    console.error('[EMAIL] Producer notification send failed:', error)
+    return { ok: false, error: String(error) }
+  }
+}
+
+/**
+ * Render producer order notification email HTML (Greek)
+ * Pass: PRODUCER-NOTIFICATIONS-01
+ */
+function renderProducerOrderHTML(data: ProducerOrderNotificationData): string {
+  const fmt = (amount: number) => `€${amount.toFixed(2)}`
+
+  return `
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Νέα Παραγγελία</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+
+  <!-- Header -->
+  <div style="background-color: #059669; color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px; font-weight: bold;">
+      Νέα Παραγγελία!
+    </h1>
+  </div>
+
+  <!-- Main Content -->
+  <div style="background-color: white; padding: 30px 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+
+    <p style="margin: 0 0 10px 0; font-size: 16px; color: #374151;">
+      Γεια σας <strong>${data.producerName}</strong>,
+    </p>
+
+    <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151;">
+      Λάβατε νέα παραγγελία από το Dixis!
+    </p>
+
+    <!-- Order Number -->
+    <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+      <p style="margin: 0 0 5px 0; font-size: 14px; color: #6b7280;">
+        Αριθμός Παραγγελίας
+      </p>
+      <p style="margin: 0; font-size: 24px; color: #059669; font-weight: bold;">
+        #${data.orderId}
+      </p>
+    </div>
+
+    <!-- Your Items -->
+    <h2 style="border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin: 0 0 20px 0; font-size: 18px; color: #111827;">
+      Τα Προϊόντα Σας
+    </h2>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <tbody>
+        ${data.items.map(item => `
+          <tr style="border-bottom: 1px solid #f3f4f6;">
+            <td style="padding: 12px 0; color: #374151; font-size: 14px;">
+              ${item.titleSnap} <span style="color: #6b7280;">x ${item.qty}</span>
+            </td>
+            <td style="text-align: right; padding: 12px 0; color: #111827; font-size: 14px; font-weight: 500;">
+              ${fmt(item.priceSnap * item.qty)}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <!-- Total -->
+    <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <table style="width: 100%;">
+        <tr>
+          <td style="color: #374151; font-size: 16px; font-weight: bold;">Σύνολο για εσάς:</td>
+          <td style="text-align: right; color: #059669; font-size: 20px; font-weight: bold;">
+            ${fmt(data.totalForProducer)}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Shipping Info -->
+    <h2 style="border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin: 20px 0 15px 0; font-size: 18px; color: #111827;">
+      Στοιχεία Αποστολής
+    </h2>
+
+    <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <p style="margin: 0 0 5px 0; font-size: 14px; font-weight: bold; color: #374151;">
+        ${data.customerName}
+      </p>
+      <p style="margin: 0; font-size: 14px; color: #6b7280; white-space: pre-line;">
+        ${data.shippingAddress}
+      </p>
+    </div>
+
+    <!-- CTA Button -->
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="https://dixis.gr/producer/orders" style="display: inline-block; padding: 14px 32px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        Δείτε τις Παραγγελίες σας
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
+        Παρακαλούμε ετοιμάστε την παραγγελία το συντομότερο δυνατό.
+      </p>
+      <p style="margin: 0; color: #6b7280; font-size: 13px;">
+        Ευχαριστούμε,<br>
+        <strong style="color: #374151;">Η ομάδα του Dixis</strong>
+      </p>
+    </div>
+
+  </div>
+
+</body>
+</html>
+  `.trim()
+}
