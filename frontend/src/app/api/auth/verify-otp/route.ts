@@ -99,6 +99,20 @@ export async function POST(req: NextRequest) {
         // on the DB check until the AdminUser table exists and this upsert succeeds.
         console.error('[Auth] Failed to sync AdminUser (run prisma migrate deploy):', dbError);
       }
+    } else {
+      // Pass FIX-AUTH-TIMEOUT: Sync consumer to database for consistent user records
+      // Creates Consumer record on first login, updates isActive on subsequent logins
+      try {
+        await prisma.consumer.upsert({
+          where: { phone: phoneNorm },
+          update: { isActive: true },
+          create: { phone: phoneNorm, isActive: true }
+        });
+        console.log(`[Auth] Consumer synced for ${phoneNorm}`);
+      } catch (dbError) {
+        // Non-blocking: Login still succeeds (JWT-based), but user record won't exist
+        console.error('[Auth] Failed to sync Consumer:', dbError);
+      }
     }
 
     const response = NextResponse.json({

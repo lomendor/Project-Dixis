@@ -23,6 +23,10 @@ interface AuthContextType {
     role: 'consumer' | 'producer' | 'admin';
   }) => Promise<void>;
   logout: () => Promise<void>;
+  /**
+   * Pass FIX-AUTH-TIMEOUT: Refresh auth state from server (after OTP login)
+   */
+  refreshAuth: () => Promise<void>;
   isAuthenticated: boolean;
   isProducer: boolean;
   isAdmin: boolean;
@@ -274,8 +278,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout error:', error);
       showToast('info', 'You have been logged out');
     }
-    
+
     setUser(null);
+  };
+
+  /**
+   * Pass FIX-AUTH-TIMEOUT: Refresh auth state from server session
+   * Called after OTP verification to sync client state with JWT cookie
+   */
+  const refreshAuth = async () => {
+    try {
+      const sessionRes = await fetch('/api/auth/me', { credentials: 'include' });
+      if (sessionRes.ok) {
+        const session = await sessionRes.json();
+        if (session.authenticated) {
+          console.log(`[Auth] Session refresh: ${session.role} user authenticated`);
+          setUser({
+            id: 0, // Session-based users don't have numeric IDs
+            name: session.phone,
+            email: '',
+            role: session.role === 'admin' ? 'admin' : 'consumer',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          showToast('success', 'Επιτυχής σύνδεση!');
+        }
+      }
+    } catch (error) {
+      console.error('[Auth] Failed to refresh auth:', error);
+    }
   };
 
   // Pass FIX-HOMEPAGE-HYDRATION-01: isAuthenticated is now simple - just based on user presence.
@@ -290,6 +321,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
+    refreshAuth,
     isAuthenticated,
     isProducer: user?.role === 'producer',
     isAdmin: user?.role === 'admin',

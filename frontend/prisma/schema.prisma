@@ -246,3 +246,20 @@ model Category {
 
   @@index([isActive, sortOrder])
 }
+
+// ============================================
+// CONSUMER AUTH (OTP-based, same as Admin)
+// ============================================
+
+model Consumer {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  email     String?  @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+}
