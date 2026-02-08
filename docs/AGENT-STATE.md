@@ -50,6 +50,7 @@
 
 ## Recently Done (last 10)
 
+- **PRODUCER-COUNT-FIX-01** — Fix producer catalog showing "0 προϊόντα" (2026-02-08) ✅
 - **PUBLIC-PRODUCER-PAGES-01** — Public producer catalog & profile pages (2026-02-07) ✅
 - **ADMIN-ORDER-PRODUCER-VIEW-01** — Admin orders list & detail show producer per item (2026-02-07) ✅
 - **PRODUCER-NOTIFICATIONS-01** — Producers receive email when orders are placed (2026-02-07) ✅
