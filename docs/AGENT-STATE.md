@@ -12,8 +12,8 @@
 |------|-------|
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
-| **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 dixis@144.76.224.1` |
-| **VPS Status** | ⚠️ Unreachable as of 2026-02-07 |
+| **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
+| **VPS Status** | ✅ Reachable (fixed 2026-02-08) |
 | **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
 
 ---
