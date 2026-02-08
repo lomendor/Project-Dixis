@@ -1,6 +1,4 @@
-import { headers } from 'next/headers';
-import { getSessionPhone, getSessionType } from './session';
-import { prisma } from '@/lib/db/client';
+import { cookies, headers } from 'next/headers';
 
 // ============================================
 // Types
@@ -8,7 +6,8 @@ import { prisma } from '@/lib/db/client';
 
 export type AdminSession = {
   id: string;
-  phone: string;
+  email: string;
+  name: string;
   role: 'admin' | 'super_admin';
 };
 
@@ -57,92 +56,74 @@ async function getUserAgent(): Promise<string | null> {
   return headersList.get('user-agent');
 }
 
+/**
+ * Get Laravel session from httpOnly cookie
+ * Pass AUTH-UNIFY-02: Laravel-based admin auth
+ */
+async function getLaravelSession(): Promise<{ user: { id: number; name: string; email: string; role: string } } | null> {
+  try {
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get('laravel_user');
+    const tokenCookie = cookieStore.get('laravel_token');
+
+    if (!userCookie?.value || !tokenCookie?.value) {
+      return null;
+    }
+
+    const user = JSON.parse(userCookie.value);
+    return { user };
+  } catch (error) {
+    console.error('[Admin] Failed to parse Laravel session:', error);
+    return null;
+  }
+}
+
 // ============================================
 // Main function
 // ============================================
 
 /**
- * Require authenticated admin session with database-backed role verification.
+ * Require authenticated admin session with Laravel role verification.
+ *
+ * Pass AUTH-UNIFY-02: Unified auth - admins use same login as consumers/producers
  *
  * Checks:
- * 1. User is authenticated (has valid session)
- * 2. Session type is 'admin'
- * 3. Phone exists in AdminUser table
- * 4. Admin account is active
+ * 1. User is authenticated (has valid Laravel session cookie)
+ * 2. User role is 'admin'
  *
  * @throws AdminError with code 'NOT_AUTHENTICATED' if not logged in
  * @throws AdminError with code 'NOT_ADMIN' if not an admin
- * @throws AdminError with code 'ADMIN_INACTIVE' if admin account is deactivated
  */
 export async function requireAdmin(): Promise<AdminContext> {
-  // 1. Check authentication
-  const phone = await getSessionPhone();
-  if (!phone) {
+  // 1. Check Laravel session (httpOnly cookie)
+  const session = await getLaravelSession();
+
+  if (!session || !session.user) {
+    // Fallback: Check OTP-based session (for backwards compatibility during transition)
+    const { getSessionPhone, getSessionType } = await import('./session');
+    const phone = await getSessionPhone();
+    const sessionType = await getSessionType();
+
+    if (phone && sessionType === 'admin') {
+      console.log('[Admin] Using legacy OTP session for:', phone);
+      const ipAddress = await getClientIp();
+      const userAgent = await getUserAgent();
+      return {
+        id: `otp-admin-${phone}`,
+        email: '',
+        name: phone,
+        role: 'admin' as const,
+        ipAddress,
+        userAgent
+      };
+    }
+
     throw new AdminError('Admin access required - not authenticated', 'NOT_AUTHENTICATED');
   }
 
-  // 2. Check session type
-  const sessionType = await getSessionType();
-  if (sessionType !== 'admin') {
-    throw new AdminError('Admin access required - not an admin session', 'NOT_ADMIN');
-  }
-
-  // 3. Verify admin exists in database whitelist
-  // Pass PROD-BUGFIX-ADMIN-DB-01: Wrap Prisma call to handle missing table gracefully.
-  // If AdminUser table doesn't exist (migration not yet deployed), the Prisma error
-  // should produce a clear AdminError redirect instead of a raw 500 crash.
-  let adminUser: { id: string; phone: string; role: string; isActive: boolean } | null = null;
-  try {
-    adminUser = await prisma.adminUser.findUnique({
-      where: { phone },
-      select: { id: true, phone: true, role: true, isActive: true }
-    });
-  } catch (dbError) {
-    console.error('[Admin] Database query failed (table may not exist):', dbError);
-
-    // Pass ADMIN-EMAIL-OTP-01: Fallback to env-based admin check when DB is unavailable
-    // This allows admin login when Neon DB is paused/unreachable
-    const envAdminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
-    if (envAdminPhones.includes(phone)) {
-      console.log(`[Admin] DB unavailable, using env-based admin fallback for ${phone}`);
-      const ipAddress = await getClientIp();
-      const userAgent = await getUserAgent();
-      return {
-        id: `env-admin-${phone}`,
-        phone,
-        role: 'admin' as const,
-        ipAddress,
-        userAgent
-      };
-    }
-
-    throw new AdminError(
-      'Admin access unavailable - database not ready. Run prisma migrate deploy.',
-      'NOT_ADMIN'
-    );
-  }
-
-  if (!adminUser) {
-    // Pass ADMIN-EMAIL-OTP-01: Also check env fallback when user not found in DB
-    const envAdminPhones = (process.env.ADMIN_PHONES || '').split(',').map(p => p.trim()).filter(Boolean);
-    if (envAdminPhones.includes(phone)) {
-      console.log(`[Admin] User not in DB, using env-based admin fallback for ${phone}`);
-      const ipAddress = await getClientIp();
-      const userAgent = await getUserAgent();
-      return {
-        id: `env-admin-${phone}`,
-        phone,
-        role: 'admin' as const,
-        ipAddress,
-        userAgent
-      };
-    }
-    throw new AdminError('Admin access required - not in admin whitelist', 'NOT_ADMIN');
-  }
-
-  // 4. Check if admin account is active
-  if (!adminUser.isActive) {
-    throw new AdminError('Admin access denied - account deactivated', 'ADMIN_INACTIVE');
+  // 2. Check if user has admin role
+  if (session.user.role !== 'admin') {
+    throw new AdminError('Admin access required - insufficient permissions', 'NOT_ADMIN');
   }
 
   // Get context for audit logging
@@ -150,9 +131,10 @@ export async function requireAdmin(): Promise<AdminContext> {
   const userAgent = await getUserAgent();
 
   return {
-    id: adminUser.id,
-    phone: adminUser.phone,
-    role: adminUser.role as 'admin' | 'super_admin',
+    id: String(session.user.id),
+    email: session.user.email,
+    name: session.user.name,
+    role: 'admin' as const,
     ipAddress,
     userAgent
   };

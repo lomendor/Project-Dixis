@@ -45,7 +45,7 @@ export async function logAdminAction(input: AuditLogInput) {
 
   return prisma.adminAuditLog.create({
     data: {
-      adminPhone: admin.phone,
+      adminPhone: admin.email || admin.name, // Use email or name for audit (phone deprecated)
       adminUserId: admin.id,
       action,
       entityType,

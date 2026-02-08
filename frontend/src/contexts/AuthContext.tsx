@@ -171,6 +171,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
 
+      // Pass AUTH-UNIFY-02: Store session in httpOnly cookie for server-side admin access
+      try {
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: response.token, user: response.user }),
+        });
+        console.log('🔑 AuthContext: Session stored in cookie');
+      } catch (sessionError) {
+        // Non-blocking: cookie storage failure shouldn't break login
+        console.error('🔑 AuthContext: Failed to store session cookie (non-blocking):', sessionError);
+      }
+
       // Pass CART-SYNC-01: Sync localStorage cart with server after login
       try {
         const localItems = getItemsForSync();
@@ -300,7 +313,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       showToast('info', 'You have been logged out');
     }
 
+    // Pass AUTH-UNIFY-02: Clear Laravel session cookie
+    try {
+      await fetch('/api/auth/session', { method: 'DELETE' });
+    } catch (sessionError) {
+      console.error('Failed to clear session cookie:', sessionError);
+    }
+
+    // Clear OTP session cookie too
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (otpError) {
+      // Non-blocking
+    }
+
     setUser(null);
+    setProducerStatus(null);
   };
 
   /**

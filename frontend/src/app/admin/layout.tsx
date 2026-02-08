@@ -19,7 +19,7 @@ export default async function AdminLayout({
     await requireAdmin();
   } catch (e) {
     if (e instanceof AdminError) {
-      redirect('/auth/admin-login?from=/admin');
+      redirect('/auth/login?redirect=/admin');
     }
     throw e;
   }

@@ -23,16 +23,29 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations();
-  const { login, loading, isAuthenticated } = useAuth();
+  const { login, loading, isAuthenticated, user } = useAuth();
 
-  const from = searchParams.get('from') || '/';
+  // Support both 'from' and 'redirect' params
+  const redirectTo = searchParams.get('redirect') || searchParams.get('from') || null;
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated - use role-based routing
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push(from);
+    if (isAuthenticated && user) {
+      // If explicit redirect specified, use it (e.g., /admin)
+      if (redirectTo) {
+        router.push(redirectTo);
+        return;
+      }
+      // Otherwise, role-based default routing
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else if (user.role === 'producer') {
+        router.push('/producer/dashboard');
+      } else {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, router, from]);
+  }, [isAuthenticated, user, router, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,8 +59,7 @@ function LoginContent() {
 
     try {
       await login(email, password);
-      // Success - AuthContext handles toast and redirect happens via useEffect
-      router.push(from);
+      // Success - useEffect will handle role-based redirect when user state updates
     } catch (err) {
       console.error('❌ Login failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Η σύνδεση απέτυχε';
@@ -172,17 +184,6 @@ function LoginContent() {
             </div>
           </div>
 
-          {/* Admin login link */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="text-center">
-              <Link
-                href="/auth/admin-login"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
-                Είσοδος Διαχειριστή
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </div>
