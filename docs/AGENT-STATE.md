@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-08
+**Updated**: 2026-02-09
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -22,7 +22,7 @@
 
 | Pass ID | Status | Notes |
 |---------|--------|-------|
-| **AUTH-EMAIL-PASSWORD-01** | ✅ Deployed | Classic email/password login for MVP |
+| — | — | No active WIP |
 
 ---
 
@@ -50,6 +50,7 @@
 
 ## Recently Done (last 10)
 
+- **AUTH-UNIFY-02** — Unified login for all users (admin/producer/consumer) (2026-02-09) ✅
 - **AUTH-EMAIL-PASSWORD-01** — Classic email/password login for consumers/producers (2026-02-08) ✅
 - **PRODUCER-COUNT-FIX-01** — Fix producer catalog showing "0 προϊόντα" (2026-02-08) ✅
 - **PUBLIC-PRODUCER-PAGES-01** — Public producer catalog & profile pages (2026-02-07) ✅
