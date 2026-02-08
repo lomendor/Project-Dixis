@@ -18,13 +18,18 @@ interface Product {
   price_cents: number;
   producer_id?: number;
   producer_name?: string;
+  producer?: { slug?: string };  // PUBLIC-PRODUCER-PAGES-01: Add producer slug for linking
   image_url?: string;
 }
 
 async function getProducts(): Promise<Product[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-    const res = await fetch(`${apiUrl}/public/products?limit=8`, {
+    // Use same URL resolution pattern as products/page.tsx
+    // NEXT_PUBLIC_API_BASE_URL is undefined on server, so we need fallbacks
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ||
+                    process.env.INTERNAL_API_URL ||
+                    'http://localhost:3001';
+    const res = await fetch(`${baseUrl}/api/public/products?limit=8`, {
       next: { revalidate: 3600 }, // Revalidate every hour
     });
 
@@ -79,6 +84,7 @@ export default async function FeaturedProducts() {
                 title={product.name}
                 producer={product.producer_name || null}
                 producerId={product.producer_id}
+                producerSlug={product.producer?.slug}
                 priceCents={product.price_cents}
                 image={product.image_url || null}
               />
