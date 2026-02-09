@@ -243,11 +243,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await apiClient.logout();
-      showToast('info', 'You have been logged out successfully');
+      showToast('info', 'Αποσυνδεθήκατε επιτυχώς');
     } catch (error) {
       // Ignore logout errors and proceed with clearing local state
       console.error('Logout error:', error);
-      showToast('info', 'You have been logged out');
+      showToast('info', 'Αποσυνδεθήκατε');
     }
     
     setUser(null);
