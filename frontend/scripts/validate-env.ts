@@ -72,62 +72,64 @@ for (const { name, hint } of RECOMMENDED_VARS) {
 
 const isQuick = process.argv.includes('--quick');
 
-if (!isQuick && failures === 0) {
-  // ── Step 2: Test DB connectivity ────────────────────────────────────────
-  console.log('\n🗄️  Database Connectivity');
-  console.log('─'.repeat(50));
+// Wrap connectivity checks in async IIFE (top-level await unsupported in CJS/tsx)
+(async () => {
+  if (!isQuick && failures === 0) {
+    // ── Step 2: Test DB connectivity ──────────────────────────────────────
+    console.log('\n🗄️  Database Connectivity');
+    console.log('─'.repeat(50));
 
-  try {
-    // Dynamic import to avoid crash if prisma not generated yet
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient({ log: [] });
-    const result = await prisma.$queryRaw`SELECT 1 as test`;
-    await prisma.$disconnect();
-    if (Array.isArray(result) && result.length > 0) {
-      pass('DATABASE_URL', 'SELECT 1 succeeded');
-    } else {
-      fail('DATABASE_URL', 'Query returned unexpected result');
-    }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    fail('DATABASE_URL', `Cannot connect: ${msg.slice(0, 120)}`);
-  }
-
-  // ── Step 3: Test API reachability ─────────────────────────────────────
-  console.log('\n🌐 API Reachability');
-  console.log('─'.repeat(50));
-
-  const apiUrl = process.env.INTERNAL_API_URL;
-  if (apiUrl) {
     try {
-      // Try fetching products endpoint (or just healthz)
-      const healthUrl = apiUrl.replace(/\/api\/v1\/?$/, '/api/v1/public/products?per_page=1');
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10_000);
-      const res = await fetch(healthUrl, {
-        signal: controller.signal,
-        headers: { Accept: 'application/json' },
-      });
-      clearTimeout(timeout);
-      if (res.ok) {
-        pass('INTERNAL_API_URL', `HTTP ${res.status} from ${apiUrl}`);
+      // Dynamic import to avoid crash if prisma not generated yet
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient({ log: [] });
+      const result = await prisma.$queryRaw`SELECT 1 as test`;
+      await prisma.$disconnect();
+      if (Array.isArray(result) && result.length > 0) {
+        pass('DATABASE_URL', 'SELECT 1 succeeded');
       } else {
-        fail('INTERNAL_API_URL', `HTTP ${res.status} from ${healthUrl}`);
+        fail('DATABASE_URL', 'Query returned unexpected result');
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      fail('INTERNAL_API_URL', `Unreachable: ${msg.slice(0, 120)}`);
+      fail('DATABASE_URL', `Cannot connect: ${msg.slice(0, 120)}`);
+    }
+
+    // ── Step 3: Test API reachability ───────────────────────────────────
+    console.log('\n🌐 API Reachability');
+    console.log('─'.repeat(50));
+
+    const apiUrl = process.env.INTERNAL_API_URL;
+    if (apiUrl) {
+      try {
+        const healthUrl = apiUrl.replace(/\/api\/v1\/?$/, '/api/v1/public/products?per_page=1');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10_000);
+        const res = await fetch(healthUrl, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
+          pass('INTERNAL_API_URL', `HTTP ${res.status} from ${apiUrl}`);
+        } else {
+          fail('INTERNAL_API_URL', `HTTP ${res.status} from ${healthUrl}`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        fail('INTERNAL_API_URL', `Unreachable: ${msg.slice(0, 120)}`);
+      }
     }
   }
-}
 
-// ── Summary ─────────────────────────────────────────────────────────────────
-console.log('\n' + '═'.repeat(50));
-if (failures > 0) {
-  console.error(`\n💥 VALIDATION FAILED: ${failures} check(s) failed.`);
-  console.error('   Fix the issues above before deploying.\n');
-  process.exit(1);
-} else {
-  console.log(`\n✅ ALL CHECKS PASSED${isQuick ? ' (quick mode — no connectivity)' : ''}\n`);
-  process.exit(0);
-}
+  // ── Summary ───────────────────────────────────────────────────────────────
+  console.log('\n' + '═'.repeat(50));
+  if (failures > 0) {
+    console.error(`\n💥 VALIDATION FAILED: ${failures} check(s) failed.`);
+    console.error('   Fix the issues above before deploying.\n');
+    process.exit(1);
+  } else {
+    console.log(`\n✅ ALL CHECKS PASSED${isQuick ? ' (quick mode — no connectivity)' : ''}\n`);
+    process.exit(0);
+  }
+})();
