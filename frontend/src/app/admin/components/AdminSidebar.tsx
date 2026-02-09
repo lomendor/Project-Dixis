@@ -11,14 +11,14 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
+  { href: '/admin', label: 'Πίνακας Ελέγχου', icon: '📊' },
   { href: '/admin/orders', label: 'Παραγγελίες', icon: '📦' },
   { href: '/admin/products', label: 'Προϊόντα', icon: '🏷️' },
-  { href: '/admin/products/moderation', label: 'Moderation', icon: '🛡️' },
+  { href: '/admin/products/moderation', label: 'Έγκριση', icon: '🛡️' },
   { href: '/admin/producers', label: 'Παραγωγοί', icon: '🧑‍🌾' },
   { href: '/admin/producers/images', label: 'Εικόνες', icon: '🖼️' },
   { href: '/admin/categories', label: 'Κατηγορίες', icon: '📂' },
-  { href: '/admin/analytics', label: 'Analytics', icon: '📈' },
+  { href: '/admin/analytics', label: 'Αναλυτικά', icon: '📈' },
   { href: '/admin/customers', label: 'Πελάτες', icon: '🛒' },
   { href: '/admin/users', label: 'Διαχειριστές', icon: '👥' },
   { href: '/admin/settings', label: 'Ρυθμίσεις', icon: '⚙️' },

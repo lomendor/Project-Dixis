@@ -120,7 +120,7 @@ function RoleBadge({ role }: { role: string }) {
         color: isSuperAdmin ? '#92400e' : '#1e40af',
       }}
     >
-      {isSuperAdmin ? 'Super Admin' : 'Admin'}
+      {isSuperAdmin ? 'Υπερδιαχειριστής' : 'Διαχειριστής'}
     </span>
   );
 }

@@ -199,7 +199,7 @@ function AdminCategoriesContent() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Icon
+                  Εικόνα
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Όνομα
@@ -315,7 +315,7 @@ function AdminCategoriesContent() {
                 {/* Icon Field */}
                 <div>
                   <label htmlFor="edit-icon" className="block text-sm font-medium text-gray-700 mb-1">
-                    Icon (Emoji)
+                    Εικόνα (Emoji)
                   </label>
                   <input
                     id="edit-icon"

@@ -11,24 +11,24 @@ export default function AnalyticsContent() {
         <nav className="flex mb-8" data-testid="breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li>
-              <Link href="/" className="hover:text-green-600">Home</Link>
+              <Link href="/" className="hover:text-green-600">Αρχική</Link>
             </li>
             <li>/</li>
             <li>
-              <Link href="/admin" className="hover:text-green-600">Admin</Link>
+              <Link href="/admin" className="hover:text-green-600">Διαχείριση</Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900">Analytics</li>
+            <li className="text-gray-900">Αναλυτικά</li>
           </ol>
         </nav>
 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Analytics Dashboard
+            Πίνακας Αναλυτικών
           </h1>
           <p className="text-gray-600">
-            Monitor user behavior and marketplace performance metrics
+            Παρακολουθήστε τη συμπεριφορά χρηστών και τις μετρήσεις απόδοσης της αγοράς
           </p>
         </div>
 
@@ -45,18 +45,19 @@ export default function AnalyticsContent() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-800">
-                Analytics Information
+                Πληροφορίες Αναλυτικών
               </h3>
               <div className="mt-2 text-sm text-blue-700">
                 <p>
-                  This dashboard displays real-time analytics data from user interactions across the Dixis marketplace.
-                  Events are tracked client-side and include page views, product interactions, cart activities, and order completions.
+                  Αυτός ο πίνακας εμφανίζει δεδομένα αναλυτικών σε πραγματικό χρόνο από τις αλληλεπιδράσεις χρηστών
+                  στην αγορά Dixis. Τα γεγονότα καταγράφονται στην πλευρά του πελάτη και περιλαμβάνουν προβολές σελίδων,
+                  αλληλεπιδράσεις προϊόντων, δραστηριότητες καλαθιού και ολοκληρώσεις παραγγελιών.
                 </p>
                 <ul className="mt-2 list-disc list-inside space-y-1">
-                  <li>Data is updated in real-time as users interact with the platform</li>
-                  <li>Events are batched for optimal performance</li>
-                  <li>All data respects user privacy and GDPR compliance</li>
-                  <li>Session tracking helps understand user journeys</li>
+                  <li>Τα δεδομένα ενημερώνονται σε πραγματικό χρόνο</li>
+                  <li>Τα γεγονότα ομαδοποιούνται για βέλτιστη απόδοση</li>
+                  <li>Όλα τα δεδομένα σέβονται το απόρρητο χρηστών και τη συμμόρφωση GDPR</li>
+                  <li>Η παρακολούθηση συνεδριών βοηθά στην κατανόηση της πορείας των χρηστών</li>
                 </ul>
               </div>
             </div>

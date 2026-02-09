@@ -86,8 +86,8 @@ export default async function Page() {
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard label="Παραγγελίες (7ημ)" value={String(orders7Count)} />
         <KpiCard label="Έσοδα (7ημ)" value={fmtMoney(revenue7)} />
-        <KpiCard label="Pending" value={String(pendingCount)} accent={pendingCount > 0} />
-        <KpiCard label={`Low stock (\u2264 ${thr()})`} value={String(lowStockCount)} accent={lowStockCount > 0} />
+        <KpiCard label="Εκκρεμείς" value={String(pendingCount)} accent={pendingCount > 0} />
+        <KpiCard label={`Χαμηλό απόθεμα (\u2264 ${thr()})`} value={String(lowStockCount)} accent={lowStockCount > 0} />
       </section>
 
       {/* Quick Actions */}
@@ -100,7 +100,7 @@ export default async function Page() {
           <QuickAction href="/admin/products" icon="🏷️" label="Προϊόντα" />
           <QuickAction href="/admin/producers" icon="🧑‍🌾" label="Παραγωγοί" />
           <QuickAction href="/admin/categories" icon="📂" label="Κατηγορίες" />
-          <QuickAction href="/admin/analytics" icon="📈" label="Analytics" />
+          <QuickAction href="/admin/analytics" icon="📈" label="Αναλυτικά" />
         </div>
       </section>
 
@@ -120,7 +120,7 @@ export default async function Page() {
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Ημ/νία</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Πελάτης</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Σύνολο</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Κατάσταση</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -224,11 +224,18 @@ function StatusBadge({ status }: { status: string }) {
     DELIVERED: 'bg-emerald-100 text-emerald-800',
     CANCELLED: 'bg-red-100 text-red-800',
   };
+  const labels: Record<string, string> = {
+    PENDING: 'Εκκρεμής',
+    CONFIRMED: 'Επιβεβαιωμένη',
+    SHIPPED: 'Απεσταλμένη',
+    DELIVERED: 'Παραδοθείσα',
+    CANCELLED: 'Ακυρωθείσα',
+  };
   const cls = colors[status] || 'bg-neutral-100 text-neutral-700';
 
   return (
     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${cls}`}>
-      {status}
+      {labels[status] || status}
     </span>
   );
 }
