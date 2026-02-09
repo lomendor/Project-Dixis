@@ -46,7 +46,7 @@ export default function AdminOrderDetail({
 
   return (
     <main style={{ maxWidth: 960, margin: '40px auto', padding: 16 }}>
-      <h2 style={{ margin: 0 }}>Admin · Order Detail</h2>
+      <h2 style={{ margin: 0 }}>Διαχείριση · Παραγγελία</h2>
       <p style={{ color: '#6b7280', marginTop: 6 }}>
         Πλήρης σύνοψη παραγγελίας.
       </p>
@@ -71,13 +71,13 @@ export default function AdminOrderDetail({
           )}
 
           <div className="mb-2">
-            Order No:{' '}
+            Αρ. Παραγγελίας:{' '}
             <strong data-testid="detail-order-no">
               {orderNumber(data.id, data.createdAt)}
             </strong>
           </div>
           <div className="mb-2">
-            Order ID:{' '}
+            ID Παραγγελίας:{' '}
             <strong data-testid="detail-order-id">{data.id}</strong>
           </div>
           <div className="mb-2">
@@ -86,7 +86,7 @@ export default function AdminOrderDetail({
               className="text-blue-600 underline text-xs"
               data-testid="customer-view-link"
             >
-              Customer view →
+              Προβολή πελάτη →
             </a>
           </div>
           <table className="text-sm">
@@ -108,7 +108,7 @@ export default function AdminOrderDetail({
                 <td>{data.weightGrams ?? '-'}</td>
               </tr>
               <tr>
-                <td className="pr-4">Subtotal</td>
+                <td className="pr-4">Υποσύνολο</td>
                 <td>{String(data.subtotal ?? '-')}</td>
               </tr>
               <tr>
@@ -136,7 +136,7 @@ export default function AdminOrderDetail({
                 </tr>
               )}
               <tr>
-                <td className="pr-4">Payment</td>
+                <td className="pr-4">Πληρωμή</td>
                 <td>
                   {data.paymentStatus ?? 'PAID'}{' '}
                   {data.paymentRef ? `(${data.paymentRef})` : ''}
@@ -160,7 +160,7 @@ export default function AdminOrderDetail({
                 }
               }}
               className="border px-3 py-1 rounded"
-            >Resend receipt</button>
+            >Επαναποστολή απόδειξης</button>
           </div>
           <div className="mt-4">
             <a href="/admin/orders" className="underline">
