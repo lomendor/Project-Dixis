@@ -86,14 +86,14 @@ export default function ProducerAnalyticsDashboard() {
     labels: data.sales.data.map(item => item.date),
     datasets: [
       {
-        label: 'Sales (€)',
+        label: 'Πωλήσεις (€)',
         data: data.sales.data.map(item => item.total_sales),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         tension: 0.1,
       },
       {
-        label: 'Orders',
+        label: 'Παραγγελίες',
         data: data.sales.data.map(item => item.order_count),
         borderColor: 'rgb(59, 130, 246)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -114,7 +114,7 @@ export default function ProducerAnalyticsDashboard() {
       },
       title: {
         display: true,
-        text: `Your Product Sales (${period === 'daily' ? 'Daily' : 'Monthly'})`,
+        text: `Πωλήσεις Προϊόντων (${period === 'daily' ? 'Ημερήσιες' : 'Μηνιαίες'})`,
       },
     },
     scales: {
@@ -124,7 +124,7 @@ export default function ProducerAnalyticsDashboard() {
         position: 'left' as const,
         title: {
           display: true,
-          text: 'Sales (€)',
+          text: 'Πωλήσεις (€)',
         },
       },
       y1: {
@@ -133,7 +133,7 @@ export default function ProducerAnalyticsDashboard() {
         position: 'right' as const,
         title: {
           display: true,
-          text: 'Orders',
+          text: 'Παραγγελίες',
         },
         grid: {
           drawOnChartArea: false,
@@ -162,7 +162,7 @@ export default function ProducerAnalyticsDashboard() {
       },
       title: {
         display: true,
-        text: 'Orders with Your Products by Status',
+        text: 'Παραγγελίες ανά Κατάσταση',
       },
     },
   };
@@ -171,7 +171,7 @@ export default function ProducerAnalyticsDashboard() {
     labels: data.products.top_products.map(product => product.name),
     datasets: [
       {
-        label: 'Revenue (€)',
+        label: 'Έσοδα (€)',
         data: data.products.top_products.map(product => product.total_revenue),
         backgroundColor: 'rgba(168, 85, 247, 0.8)',
         borderColor: 'rgb(168, 85, 247)',
@@ -188,7 +188,7 @@ export default function ProducerAnalyticsDashboard() {
       },
       title: {
         display: true,
-        text: 'Your Top Products by Revenue',
+        text: 'Κορυφαία Προϊόντα ανά Έσοδα',
       },
     },
     scales: {
@@ -196,7 +196,7 @@ export default function ProducerAnalyticsDashboard() {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Revenue (€)',
+          text: 'Έσοδα (€)',
         },
       },
     },
@@ -232,14 +232,14 @@ export default function ProducerAnalyticsDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <h3 className="text-red-800 font-medium">Error Loading Analytics</h3>
+              <h3 className="text-red-800 font-medium">Σφάλμα Φόρτωσης Αναλυτικών</h3>
               <p className="text-red-700 text-sm mt-1">{error}</p>
               <button
                 onClick={loadProducerAnalytics}
                 className="mt-3 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
                 data-testid="retry-button"
               >
-                Retry
+                Επανάληψη
               </button>
             </div>
           </div>
@@ -254,8 +254,8 @@ export default function ProducerAnalyticsDashboard() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">📊 Your Product Analytics</h1>
-            <p className="text-gray-600">Monitor your sales performance and product analytics</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">📊 Αναλυτικά Προϊόντων</h1>
+            <p className="text-gray-600">Παρακολουθήστε πωλήσεις και αναλυτικά προϊόντων</p>
           </div>
           <div className="flex space-x-2" data-testid="period-toggle">
             <button
@@ -267,7 +267,7 @@ export default function ProducerAnalyticsDashboard() {
               }`}
               data-testid="daily-button"
             >
-              Daily
+              Ημερήσια
             </button>
             <button
               onClick={() => setPeriod('monthly')}
@@ -278,7 +278,7 @@ export default function ProducerAnalyticsDashboard() {
               }`}
               data-testid="monthly-button"
             >
-              Monthly
+              Μηνιαία
             </button>
           </div>
         </div>
@@ -290,19 +290,19 @@ export default function ProducerAnalyticsDashboard() {
               <div className="text-2xl font-bold text-green-600">
                 {formatCurrency(data.sales.summary.total_revenue)}
               </div>
-              <div className="text-sm text-gray-600">Total Revenue ({period})</div>
+              <div className="text-sm text-gray-600">Συνολικά Έσοδα ({period === 'daily' ? 'ημερήσια' : 'μηνιαία'})</div>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" data-testid="kpi-total-orders">
               <div className="text-2xl font-bold text-blue-600">
                 {data.sales.summary.total_orders}
               </div>
-              <div className="text-sm text-gray-600">Orders with Your Products</div>
+              <div className="text-sm text-gray-600">Παραγγελίες Προϊόντων</div>
             </div>
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4" data-testid="kpi-growth">
               <div className="text-2xl font-bold text-purple-600">
                 {formatPercentage(data.sales.summary.period_growth)}
               </div>
-              <div className="text-sm text-gray-600">Sales Growth</div>
+              <div className="text-sm text-gray-600">Ανάπτυξη Πωλήσεων</div>
             </div>
           </div>
         )}
@@ -341,25 +341,25 @@ export default function ProducerAnalyticsDashboard() {
       {/* Product Performance Table */}
       {data.products && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Product Performance</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Απόδοση Προϊόντων</h2>
           <div className="overflow-x-auto" data-testid="producer-products-table">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
+                    Προϊόν
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
+                    Τιμή
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity Sold
+                    Πωλ. Ποσότητα
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Revenue
+                    Έσοδα
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Orders
+                    Παραγγελίες
                   </th>
                 </tr>
               </thead>
@@ -392,25 +392,25 @@ export default function ProducerAnalyticsDashboard() {
       {/* Product Summary Stats */}
       {data.products && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Portfolio Overview</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Επισκόπηση Χαρτοφυλακίου Προϊόντων</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="producer-product-stats">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">{data.products.summary.total_products}</div>
-              <div className="text-sm text-gray-600">Total Products</div>
+              <div className="text-sm text-gray-600">Συνολικά Προϊόντα</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{data.products.summary.active_products}</div>
-              <div className="text-sm text-gray-600">Active Products</div>
+              <div className="text-sm text-gray-600">Ενεργά Προϊόντα</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{data.products.summary.out_of_stock}</div>
-              <div className="text-sm text-gray-600">Out of Stock</div>
+              <div className="text-sm text-gray-600">Εξαντλημένα</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {data.products.summary.best_seller_name || 'N/A'}
+                {data.products.summary.best_seller_name || 'Δ/Υ'}
               </div>
-              <div className="text-sm text-gray-600">Best Seller</div>
+              <div className="text-sm text-gray-600">Δημοφιλέστερο</div>
             </div>
           </div>
         </div>
