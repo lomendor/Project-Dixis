@@ -66,12 +66,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       productPages = products
         .filter((p) => p.is_active)
-        .map((product) => ({
-          url: `${BASE_URL}/products/${product.id}`,
-          lastModified: new Date(product.updated_at),
-          changeFrequency: 'weekly' as const,
-          priority: 0.8,
-        }));
+        .map((product) => {
+          const date = new Date(product.updated_at);
+          const lastModified = isNaN(date.getTime()) ? new Date() : date;
+          return {
+            url: `${BASE_URL}/products/${product.id}`,
+            lastModified,
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+          };
+        });
     }
   } catch (error) {
     console.error('[Sitemap] Error fetching products from API:', error);
