@@ -31,7 +31,7 @@ export const producerAnalyticsApi = {
   async getSales(period: 'daily' | 'monthly' = 'daily', limit = 30): Promise<ProducerSalesAnalytics> {
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
 
     const params = new URLSearchParams({
@@ -49,7 +49,7 @@ export const producerAnalyticsApi = {
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error('Producer access required. Please ensure you are associated with a producer.');
+        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -64,7 +64,7 @@ export const producerAnalyticsApi = {
   async getOrders(): Promise<ProducerOrdersAnalytics> {
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
 
     const response = await fetch(`${API_BASE_URL}/producer/analytics/orders`, {
@@ -77,7 +77,7 @@ export const producerAnalyticsApi = {
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error('Producer access required. Please ensure you are associated with a producer.');
+        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -92,7 +92,7 @@ export const producerAnalyticsApi = {
   async getProducts(limit = 10): Promise<ProducerProductsAnalytics> {
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
 
     const params = new URLSearchParams({
@@ -109,7 +109,7 @@ export const producerAnalyticsApi = {
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error('Producer access required. Please ensure you are associated with a producer.');
+        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -133,17 +133,17 @@ export function checkProducerAccess(): boolean {
  * Helper to handle producer-specific errors
  */
 export function handleProducerError(error: Error): string {
-  if (error.message.includes('Producer access required')) {
-    return 'You need to be associated with a producer to view analytics. Please contact support if you believe this is an error.';
+  if (error.message.includes('πρόσβαση παραγωγού')) {
+    return 'Πρέπει να είστε συνδεδεμένος παραγωγός για προβολή αναλυτικών. Επικοινωνήστε με την υποστήριξη αν πιστεύετε ότι πρόκειται για σφάλμα.';
   }
-  if (error.message.includes('No authentication token')) {
-    return 'Please log in to view your producer analytics.';
+  if (error.message.includes('token πιστοποίησης')) {
+    return 'Συνδεθείτε για προβολή αναλυτικών παραγωγού.';
   }
   if (error.message.includes('HTTP error! status: 401')) {
-    return 'Your session has expired. Please log in again.';
+    return 'Η συνεδρία σας έληξε. Συνδεθείτε ξανά.';
   }
   if (error.message.includes('HTTP error! status: 403')) {
-    return 'You do not have permission to view producer analytics.';
+    return 'Δεν έχετε δικαίωμα προβολής αναλυτικών παραγωγού.';
   }
-  return 'Failed to load analytics data. Please try again.';
+  return 'Αποτυχία φόρτωσης αναλυτικών. Δοκιμάστε ξανά.';
 }

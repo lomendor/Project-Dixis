@@ -27,7 +27,7 @@ export default function ProducerAnalytics() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">Φόρτωση...</p>
         </div>
       </div>
     );
@@ -44,24 +44,24 @@ export default function ProducerAnalytics() {
         <nav className="flex mb-8" data-testid="breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li>
-              <Link href="/" className="hover:text-green-600">Home</Link>
+              <Link href="/" className="hover:text-green-600">Αρχική</Link>
             </li>
             <li>/</li>
             <li>
-              <Link href="/producer/dashboard" className="hover:text-green-600">Producer Dashboard</Link>
+              <Link href="/producer/dashboard" className="hover:text-green-600">Πίνακας Παραγωγού</Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900">Analytics</li>
+            <li className="text-gray-900">Αναλυτικά</li>
           </ol>
         </nav>
 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Producer Analytics
+            Αναλυτικά Παραγωγού
           </h1>
           <p className="text-gray-600">
-            Monitor your products&apos; performance and sales analytics
+            Παρακολουθήστε την απόδοση των προϊόντων και τα αναλυτικά πωλήσεων
           </p>
         </div>
 
@@ -78,18 +78,18 @@ export default function ProducerAnalytics() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-800">
-                Producer Analytics Information
+                Πληροφορίες Αναλυτικών Παραγωγού
               </h3>
               <div className="mt-2 text-sm text-blue-700">
                 <p>
-                  This dashboard displays analytics data specific to your products and orders.
-                  Track your sales performance, order trends, and product popularity over time.
+                  Αυτός ο πίνακας εμφανίζει αναλυτικά δεδομένα για τα προϊόντα και τις παραγγελίες σας.
+                  Παρακολουθήστε πωλήσεις, τάσεις παραγγελιών και δημοτικότητα προϊόντων.
                 </p>
                 <ul className="mt-2 list-disc list-inside space-y-1">
-                  <li>Data shows only orders containing your products</li>
-                  <li>Sales analytics reflect revenue from your product sales</li>
-                  <li>Order analytics include all orders with your products</li>
-                  <li>Product rankings are based on your portfolio performance</li>
+                  <li>Τα δεδομένα αφορούν μόνο παραγγελίες που περιέχουν τα προϊόντα σας</li>
+                  <li>Τα αναλυτικά πωλήσεων αντικατοπτρίζουν τα έσοδα από τα προϊόντα σας</li>
+                  <li>Τα αναλυτικά παραγγελιών περιλαμβάνουν όλες τις παραγγελίες με τα προϊόντα σας</li>
+                  <li>Η κατάταξη προϊόντων βασίζεται στην απόδοση του χαρτοφυλακίου σας</li>
                 </ul>
               </div>
             </div>

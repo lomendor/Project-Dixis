@@ -1,11 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-06 (SSOT-AUDIT-01)
+**Last Updated**: 2026-02-09 (ADMIN-CLEANUP-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-09 — ADMIN-CLEANUP-01: Admin Code Cleanup + i18n Completion
+
+**Status**: ✅ DONE (4 PRs: #2694, #2695, #2696, #2698)
+
+**What was done**:
+- Complete admin i18n: All 11 admin files verified 100% Greek
+- Deploy infra: `ecosystem.config.js` committed, PM2 path fixed
+- Code cleanup: duplicate SkeletonRow removed, deprecated API endpoint fixed
+- UX: `window.confirm()` added for product approval in moderation
+- AnalyticsDashboard: 25+ English strings translated to Greek
+
+**Production**: SHA `4f4eb217`, deployed 21:23 UTC, healthz 200
+
+**Pass summary**: `docs/AGENT/PASSES/SUMMARY-Pass-ADMIN-CLEANUP-01.md`
 
 ---
 
