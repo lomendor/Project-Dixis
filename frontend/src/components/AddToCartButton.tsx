@@ -1,6 +1,7 @@
 'use client'
 import { useCart } from '@/lib/cart'
 import { useState } from 'react'
+import { useToast } from '@/contexts/ToastContext'
 
 /**
  * AddToCartButton - Multi-producer carts now supported
@@ -21,6 +22,7 @@ export default function AddToCartButton(props: {
 }) {
   const add = useCart(s => s.add)
   const [isAdded, setIsAdded] = useState(false)
+  const { showSuccess } = useToast()
 
   // Pass FIX-STOCK-GUARD-01: Check if product is out of stock
   const isOutOfStock = typeof props.stock === 'number' && props.stock <= 0
@@ -40,6 +42,7 @@ export default function AddToCartButton(props: {
 
     add(item)
     setIsAdded(true)
+    showSuccess(`${props.title} προστέθηκε στο καλάθι`, 2000)
     setTimeout(() => setIsAdded(false), 900)
   }
 
