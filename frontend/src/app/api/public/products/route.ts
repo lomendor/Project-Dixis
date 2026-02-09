@@ -1,38 +1,51 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Type for Prisma select result
-type ProductSelectResult = {
-  id: string;
-  title: string;
-  category: string;
-  price: number;
-  unit: string;
-  stock: number;
-  isActive: boolean;
-}
-
 export const dynamic = 'force-dynamic'
+
+/**
+ * Public Products Listing API
+ * Used by (storefront)/products/page.tsx via INTERNAL_API_URL.
+ * Returns Laravel-compatible format for the product catalog.
+ */
 export async function GET(req: Request) {
-  try{
+  try {
     const { searchParams } = new URL(req.url)
-    const q = searchParams.get('q')?.trim() || ''
-    const where:any = { isActive:true }
-    if (q) where.title = { contains:q, mode:'insensitive' }
+    const q = searchParams.get('q')?.trim() || searchParams.get('search')?.trim() || ''
+    const where: Record<string, unknown> = { isActive: true }
+    if (q) where.title = { contains: q }
     const items = await prisma.product.findMany({
-      where, orderBy:{ createdAt:'desc' },
-      select:{ id:true,title:true,category:true,price:true,unit:true,stock:true,isActive:true }
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        producer: { select: { id: true, name: true, slug: true } },
+      },
     })
-    // Transform to match Laravel API format expected by HomeClient
-    const transformed = items.map((p: ProductSelectResult) => ({
-      ...p,
+    // Transform to Laravel API format expected by products page
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = items.map((p: any) => ({
+      id: p.id,
       name: p.title,
-      images: [] as string[],  // Stub empty array - HomeClient will use placeholder
-      producer: { name: 'Demo Producer' },  // Stub producer
-      categories: [] as string[]  // Stub categories
+      slug: p.slug,
+      description: p.description,
+      price: p.price,
+      unit: p.unit || 'kg',
+      stock: p.stock ?? 0,
+      is_active: p.isActive,
+      category: p.category,
+      image_url: p.imageUrl,
+      producer_id: p.producerId,
+      producer: p.producer
+        ? { id: p.producer.id, name: p.producer.name, slug: p.producer.slug }
+        : null,
     }))
-    return NextResponse.json({ ok:true, count: items.length, data: transformed }, { headers:{ 'cache-control':'no-store' }})
-  }catch(e:any){
-    return NextResponse.json({ ok:false, error: e?.message||'error' }, { status:500 })
+    return NextResponse.json(
+      { ok: true, count: data.length, data },
+      { headers: { 'cache-control': 'no-store' } }
+    )
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'unknown error'
+    console.error('[API] public/products error:', message)
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }
