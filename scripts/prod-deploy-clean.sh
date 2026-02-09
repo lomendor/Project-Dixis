@@ -225,8 +225,8 @@ fi
 echo ""
 echo "--- I) Restart PM2 (post-build only) ---"
 pm2 delete "$APP" 2>/dev/null || true
-cd "$ROOT"
-pm2 start ecosystem.config.js --only "$APP"
+cd "$FE"
+pm2 start "$FE/ecosystem.config.js" --only "$APP"
 sleep 5
 pm2 ls
 
