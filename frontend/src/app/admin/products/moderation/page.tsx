@@ -156,7 +156,7 @@ export default function ModerationQueuePage() {
                     ) : (
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          onClick={() => handleApprove(p.id)}
+                          onClick={() => { if (window.confirm(`Έγκριση του "${p.title}";`)) handleApprove(p.id); }}
                           className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-md font-medium transition-colors"
                           data-testid={`approve-btn-${p.id}`}
                         >
