@@ -95,11 +95,14 @@ const isQuick = process.argv.includes('--quick');
       fail('DATABASE_URL', `Cannot connect: ${msg.slice(0, 120)}`);
     }
 
-    // ── Step 3: Test API reachability ───────────────────────────────────
+    // ── Step 3: Test API reachability (warn-only during deploy) ────────
     console.log('\n🌐 API Reachability');
     console.log('─'.repeat(50));
 
     const apiUrl = process.env.INTERNAL_API_URL;
+    // During deploy, localhost Next.js may be down (no .next dir).
+    // Warn instead of fail for self-referencing URLs.
+    const isSelfUrl = apiUrl && /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(apiUrl);
     if (apiUrl) {
       try {
         const healthUrl = apiUrl.replace(/\/api\/v1\/?$/, '/api/v1/public/products?per_page=1');
@@ -112,12 +115,18 @@ const isQuick = process.argv.includes('--quick');
         clearTimeout(timeout);
         if (res.ok) {
           pass('INTERNAL_API_URL', `HTTP ${res.status} from ${apiUrl}`);
+        } else if (isSelfUrl) {
+          console.log(`  ⚠️  INTERNAL_API_URL: HTTP ${res.status} (localhost — expected during deploy)`);
         } else {
           fail('INTERNAL_API_URL', `HTTP ${res.status} from ${healthUrl}`);
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        fail('INTERNAL_API_URL', `Unreachable: ${msg.slice(0, 120)}`);
+        if (isSelfUrl) {
+          console.log(`  ⚠️  INTERNAL_API_URL: ${msg.slice(0, 80)} (localhost — expected during deploy)`);
+        } else {
+          fail('INTERNAL_API_URL', `Unreachable: ${msg.slice(0, 120)}`);
+        }
       }
     }
   }
