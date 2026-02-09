@@ -231,7 +231,7 @@ export default function AdminOrdersMain() {
         const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch(`/api/v1/admin/orders?${qs.toString()}`, { cache:'no-store', headers });
+        const res = await fetch(`/api/admin/orders?${qs.toString()}`, { cache:'no-store', headers });
         if (res.status === 401 || res.status === 403) {
           // Unauthenticated - show clear message
           setErrNote('Απαιτείται σύνδεση διαχειριστή');
@@ -243,15 +243,23 @@ export default function AdminOrdersMain() {
         }
         if (!res.ok) throw new Error(`API ${res.status}`);
         const json = await res.json();
-        // Transform Laravel response to frontend format
-        const orders = json.orders || json.data || [];
-        const items: Row[] = orders.map((o: Record<string, unknown>) => ({
-          id: `A-${o.id}`,
-          customer: (o.user as Record<string, unknown>)?.name || (o.user as Record<string, unknown>)?.email || 'N/A',
-          total: `€${Number(o.total_amount || 0).toFixed(2)}`,
-          status: o.status as Status,
-        }));
-        const totalCount = json.meta?.total ?? json.total ?? items.length;
+        // Next.js proxy returns { items, count } with pre-transformed rows
+        // Laravel direct returns { orders, meta: { total } } with raw data
+        let items: Row[];
+        if (Array.isArray(json.items)) {
+          // Next.js proxy format — items are already transformed
+          items = json.items as Row[];
+        } else {
+          // Laravel direct format — needs transformation
+          const orders = json.orders || json.data || [];
+          items = orders.map((o: Record<string, unknown>) => ({
+            id: `A-${o.id}`,
+            customer: (o.user as Record<string, unknown>)?.name || (o.user as Record<string, unknown>)?.email || 'N/A',
+            total: `€${Number(o.total_amount || 0).toFixed(2)}`,
+            status: o.status as Status,
+          }));
+        }
+        const totalCount = json.count ?? json.meta?.total ?? json.total ?? items.length;
         setRows(items); setCount(totalCount);
         setUsingApi(true);
         const delay3=Math.max(0,150-(Date.now()-startTime)); await new Promise(r=>setTimeout(r,delay3));
@@ -277,12 +285,6 @@ export default function AdminOrdersMain() {
   const onPageSize = (n: number) => { writeParam('pageSize', String(n)); setPageSize(n); setPage(1); };
   const go = (delta: number) => {
     const maxPage = Math.max(1, Math.ceil(count / pageSize));
-
-  const SkeletonRow: React.FC = () => (
-    <div role="row" aria-busy style={{display:'grid', gridTemplateColumns:grid, gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
-      {visible.map(c=> <div key={String(c.key)} style={{height:12, borderRadius:6, background:'linear-gradient(90deg,#eee,#f5f5f5,#eee)', backgroundSize:'200% 100%', animation:'s 1.2s linear infinite'}} />)}
-    </div>
-  );
     const next = Math.min(maxPage, Math.max(1, page + delta));
     writeParam('page', String(next)); setPage(next);
   };
