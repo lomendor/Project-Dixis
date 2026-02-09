@@ -60,9 +60,9 @@ export default function ProducerDashboard() {
               stock: (p.stock ?? 0) as number | null,
               is_active: p.is_active !== false,
               description: (p.description || null) as string | null,
-              categories: [],
-              images: [],
-              producer: p.producer || { id: 0, name: '', business_name: '' },
+              categories: [] as Product['categories'],
+              images: [] as Product['images'],
+              producer: (p.producer || { id: 0, name: '', business_name: '' }) as Product['producer'],
             })) as Product[];
           }
         } catch {
