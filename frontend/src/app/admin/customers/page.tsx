@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
-import Link from 'next/link';
 
 /**
  * Pass ADMIN-CUSTOMERS-01: Customer management page.
