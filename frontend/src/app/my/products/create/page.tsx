@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import UploadImage from '@/components/UploadImage.client';
+import { apiClient } from '@/lib/api';
 
 type Category = {
   id: string;
@@ -59,26 +60,18 @@ function CreateProductContent() {
     setBusy(true);
 
     try {
-      const response = await fetch('/api/me/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug,
-          title,
-          category,
-          price: parseFloat(price),
-          unit,
-          stock: parseInt(stock),
-          description: description || undefined,
-          imageUrl,
-          isActive,
-        }),
+      // AUTH-UNIFY-02: Call Laravel directly via apiClient (snake_case fields)
+      await apiClient.createProducerProduct({
+        name: title,
+        slug,
+        category,
+        price: parseFloat(price),
+        unit,
+        stock: parseInt(stock),
+        description: description || undefined,
+        image_url: imageUrl,
+        is_active: isActive,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Αποτυχία δημιουργίας προϊόντος');
-      }
 
       router.push('/my/products');
     } catch (err: any) {
