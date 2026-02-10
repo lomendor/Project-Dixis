@@ -77,7 +77,7 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
       producerName: p.producer?.name || null,
       priceCents: Math.round(parseFloat(p.price) * 100),
       imageUrl: p.image_url,
-      categorySlug: p.category?.slug || null,
+      categorySlug: p.category || null,
       stock: typeof p.stock === 'number' ? p.stock : null,
     }));
 
