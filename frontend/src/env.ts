@@ -7,7 +7,8 @@
  *
  * Canonical env vars (set in .env / .env.ci / VPS):
  *   NEXT_PUBLIC_API_BASE_URL  — Browser-side API base (e.g. https://dixis.gr/api/v1)
- *   INTERNAL_API_URL          — Server-side only, for SSR server-to-server calls
+ *   INTERNAL_API_URL          — Server-side only, for SSR server-to-server calls (Next.js)
+ *   LARAVEL_INTERNAL_URL      — Server-side only, for SSR calls to Laravel backend
  *   NEXT_PUBLIC_SITE_URL      — Public site URL (e.g. https://dixis.gr)
  *   DATABASE_URL              — Neon PostgreSQL connection string
  *   NODE_ENV                  — production | development | test
@@ -71,6 +72,19 @@ export function getServerApiUrl(): string {
   return process.env.INTERNAL_API_URL
     || process.env.NEXT_PUBLIC_API_BASE_URL
     || '/api/v1';
+}
+
+/**
+ * Get Laravel API base URL for server-side calls.
+ * Used by Next.js API routes that proxy to Laravel (e.g. public products/producers).
+ * Falls back to NEXT_PUBLIC_API_BASE_URL (goes through nginx → Laravel).
+ *
+ * Set LARAVEL_INTERNAL_URL on production VPS for direct server-to-server calls.
+ */
+export function getLaravelInternalUrl(): string {
+  return process.env.LARAVEL_INTERNAL_URL
+    || process.env.NEXT_PUBLIC_API_BASE_URL
+    || 'http://127.0.0.1:8001/api/v1';
 }
 
 export const API_BASE_URL = getApiBaseUrlFromEnv();
