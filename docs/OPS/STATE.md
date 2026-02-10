@@ -1,11 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-10 (PRODUCERS-LISTING-01)
+**Last Updated**: 2026-02-10 (PRODUCER-PROFILE-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-10 — PRODUCER-PROFILE-01: Producer Profile Page + Product Count Fix
+
+**Status**: ✅ DONE (PR #2704)
+
+**What was done**:
+- New `/producers/[slug]` profile page showing producer info + products grid
+- New API route `/api/public/producers/[slug]` with products include
+- Fixed product count: uses `_count.Product` instead of denormalized Int (was showing 0)
+- Reuses existing ProductCard component — zero new UI components needed
+- SEO: generateMetadata with OpenGraph + canonical URL
+
+**Production**: SHA `771ac704`, deployed 06:55 UTC, healthz 200
+- `/producers/malis-garden` → 200, shows 6 products
+- `/producers/lemnos-honey-co` → 200, shows 4 products
+
+**Pass summary**: `docs/AGENT/PASSES/SUMMARY-Pass-PRODUCER-PROFILE-01.md`
 
 ---
 
