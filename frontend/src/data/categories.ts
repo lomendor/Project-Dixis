@@ -82,6 +82,27 @@ export const CATEGORIES: Category[] = [
     labelEn: 'Sauces, Preserves & Pickles',
     icon: 'Soup',
   },
+  {
+    id: 11,
+    slug: 'beverages',
+    labelEl: 'Ποτά & Αποστάγματα',
+    labelEn: 'Beverages & Spirits',
+    icon: 'Wine',
+  },
+  {
+    id: 12,
+    slug: 'dairy',
+    labelEl: 'Γαλακτοκομικά',
+    labelEn: 'Dairy Products',
+    icon: 'Milk',
+  },
+  {
+    id: 13,
+    slug: 'fruits-vegetables',
+    labelEl: 'Φρούτα & Λαχανικά',
+    labelEn: 'Fruits & Vegetables',
+    icon: 'Apple',
+  },
 ];
 
 // Helper to get category by slug

@@ -13,6 +13,9 @@ import {
   Leaf,
   Cherry,
   Soup,
+  Wine,
+  Milk,
+  Apple,
   LayoutGrid,
 } from 'lucide-react';
 
@@ -28,6 +31,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Leaf,
   Cherry,
   Soup,
+  Wine,
+  Milk,
+  Apple,
 };
 
 interface CategoryStripProps {
