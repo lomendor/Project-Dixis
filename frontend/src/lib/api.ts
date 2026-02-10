@@ -985,6 +985,31 @@ class ApiClient {
     const qs = searchParams.toString();
     return this.request<AdminOrdersResponse>(`admin/orders${qs ? `?${qs}` : ''}`);
   }
+
+  // AUTH-UNIFY-01: Producer profile/status (replaces mock /api/producer/status)
+  async getProducerMe(): Promise<{
+    producer: {
+      id: number;
+      name: string;
+      slug: string;
+      status: string;
+      is_active: boolean;
+      business_name?: string;
+      description?: string;
+      location?: string;
+      phone?: string;
+      email?: string;
+    };
+  }> {
+    return this.request('producer/me');
+  }
+
+  // AUTH-UNIFY-01: Delete a producer product
+  async deleteProducerProduct(productId: number): Promise<void> {
+    await this.request(`producer/products/${productId}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
