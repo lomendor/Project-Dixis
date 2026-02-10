@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { ProducerCard } from '@/components/ProducerCard';
+import { FilterStrip } from '@/components/FilterStrip';
 import { getServerApiUrl } from '@/env';
 
 export const metadata = { title: 'Παραγωγοί | Dixis' };
@@ -48,17 +49,33 @@ async function getData(search?: string): Promise<{ items: ApiProducer[]; total: 
 }
 
 interface PageProps {
-  searchParams: Promise<{ search?: string }>;
+  searchParams: Promise<{ search?: string; region?: string; cat?: string }>;
 }
 
 export default async function ProducersPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const searchQuery = params.search || null;
-  const { items, total } = await getData(searchQuery || undefined);
+  const regionFilter = params.region || null;
+  const categoryFilter = params.cat || null;
+  const { items: allItems } = await getData(searchQuery || undefined);
+
+  // Extract unique filter options from ALL fetched items (pre-filter)
+  const allRegions = [...new Set(allItems.map((p) => p.region))].sort();
+  const allCategories = [...new Set(allItems.map((p) => p.category))].sort();
+
+  // Apply client-side filters
+  const filtered = allItems
+    .filter((p) => !regionFilter || p.region === regionFilter)
+    .filter((p) => !categoryFilter || p.category === categoryFilter);
+  const total = filtered.length;
 
   const getEmptyMessage = () => {
-    if (searchQuery) {
-      return `Δεν βρέθηκαν παραγωγοί για "${searchQuery}".`;
+    const parts: string[] = [];
+    if (searchQuery) parts.push(`αναζήτηση "${searchQuery}"`);
+    if (regionFilter) parts.push(`περιοχή "${regionFilter}"`);
+    if (categoryFilter) parts.push(`κατηγορία "${categoryFilter}"`);
+    if (parts.length > 0) {
+      return `Δεν βρέθηκαν παραγωγοί για ${parts.join(' και ')}.`;
     }
     return 'Δεν υπάρχουν παραγωγοί αυτή τη στιγμή.';
   };
@@ -90,9 +107,17 @@ export default async function ProducersPage({ searchParams }: PageProps) {
           </Link>
         </div>
 
-        {items.length > 0 ? (
+        {/* Filter strips */}
+        <Suspense fallback={null}>
+          <div className="flex flex-col gap-2 mb-6">
+            <FilterStrip label="Περιοχή" options={allRegions} selected={regionFilter} paramName="region" basePath="/producers" />
+            <FilterStrip label="Κατηγορία" options={allCategories} selected={categoryFilter} paramName="cat" basePath="/producers" />
+          </div>
+        </Suspense>
+
+        {filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {items.map((p) => (
+            {filtered.map((p) => (
               <ProducerCard
                 key={p.id}
                 id={p.id}
