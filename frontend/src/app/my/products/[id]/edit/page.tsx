@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import UploadImage from '@/components/UploadImage.client';
+import { apiClient } from '@/lib/api';
 
 type Category = {
   id: string;
@@ -67,24 +68,20 @@ function EditProductContent() {
   async function loadProduct() {
     try {
       setLoading(true);
-      const response = await fetch(`/api/me/products/${productId}`);
+      // AUTH-UNIFY-02: Call Laravel directly via apiClient
+      const response = await apiClient.getProducerProduct(productId);
+      const product = response.data;
 
-      if (!response.ok) {
-        throw new Error('Αποτυχία φόρτωσης προϊόντος');
-      }
-
-      const data = await response.json();
-      const product = data.product;
-
-      setTitle(product.title || '');
+      // Laravel returns snake_case fields
+      setTitle(product.name || '');
       setSlug(product.slug || '');
       setCategory(product.category || '');
       setUnit(product.unit || '');
       setDescription(product.description || '');
       setPrice(product.price?.toString() || '');
       setStock(product.stock?.toString() || '');
-      setImageUrl(product.imageUrl || null);
-      setIsActive(product.isActive ?? true);
+      setImageUrl(product.image_url || null);
+      setIsActive(product.is_active ?? true);
     } catch (err: any) {
       setError(err.message || 'Σφάλμα φόρτωσης προϊόντος');
     } finally {
@@ -98,26 +95,18 @@ function EditProductContent() {
     setBusy(true);
 
     try {
-      const response = await fetch(`/api/me/products/${productId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug,
-          title,
-          category,
-          price: parseFloat(price),
-          unit,
-          stock: parseInt(stock),
-          description: description || undefined,
-          imageUrl,
-          isActive,
-        }),
+      // AUTH-UNIFY-02: Call Laravel directly via apiClient (snake_case fields)
+      await apiClient.updateProducerProduct(productId, {
+        name: title,
+        slug,
+        category,
+        price: parseFloat(price),
+        unit,
+        stock: parseInt(stock),
+        description: description || undefined,
+        image_url: imageUrl,
+        is_active: isActive,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Αποτυχία ενημέρωσης προϊόντος');
-      }
 
       router.push('/my/products');
     } catch (err: any) {

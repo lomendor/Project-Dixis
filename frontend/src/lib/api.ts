@@ -10,11 +10,14 @@ export interface ApiResponse<T = unknown> {
 export interface Product {
   id: number;
   name: string;
+  slug?: string;
   price: string;
   unit: string;
   stock: number | null;
   is_active: boolean;
   description: string | null;
+  category?: string;
+  image_url?: string | null;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
@@ -1008,6 +1011,49 @@ class ApiClient {
   async deleteProducerProduct(productId: number): Promise<void> {
     await this.request(`producer/products/${productId}`, {
       method: 'DELETE',
+    });
+  }
+
+  // AUTH-UNIFY-02: Get a single producer product by ID
+  async getProducerProduct(productId: number | string): Promise<{
+    data: Product;
+  }> {
+    return this.request<{ data: Product }>(`producer/products/${productId}`);
+  }
+
+  // AUTH-UNIFY-02: Create a new producer product
+  async createProducerProduct(data: {
+    name: string;
+    slug?: string;
+    category?: string;
+    price: number;
+    unit?: string;
+    stock: number;
+    description?: string;
+    image_url?: string | null;
+    is_active?: boolean;
+  }): Promise<{ data: Product }> {
+    return this.request<{ data: Product }>('producer/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // AUTH-UNIFY-02: Update an existing producer product
+  async updateProducerProduct(productId: number | string, data: {
+    name?: string;
+    slug?: string;
+    category?: string;
+    price?: number;
+    unit?: string;
+    stock?: number;
+    description?: string;
+    image_url?: string | null;
+    is_active?: boolean;
+  }): Promise<{ data: Product }> {
+    return this.request<{ data: Product }>(`producer/products/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     });
   }
 }
