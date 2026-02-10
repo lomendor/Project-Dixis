@@ -1,11 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-10 (PRODUCER-FILTERS-01)
+**Last Updated**: 2026-02-10 (FEATURED-PRODUCTS-FIX-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~480 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~500 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-10 — FEATURED-PRODUCTS-FIX-01: Fix Homepage Featured Products
+
+**Status**: ✅ DONE (PR #2708)
+
+**What was done**:
+- Fixed homepage "Προτεινόμενα Προϊόντα" showing skeletons instead of products
+- Bug 1: Wrong API URL — `NEXT_PUBLIC_API_BASE_URL` missing `/api` prefix, fixed to `getServerApiUrl()`
+- Bug 2: Wrong field mapping — `price_cents`→`price * 100`, `producer_name`→`producer.name`
+
+**Production**: SHA `7fd440a4`, deployed, healthz 200
+- Homepage shows 10 product cards with correct names, prices, producers
 
 ---
 
