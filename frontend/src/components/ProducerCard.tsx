@@ -6,13 +6,13 @@ type Props = {
   slug: string
   name: string
   region: string
-  category: string
+  category?: string
   description?: string | null
   imageUrl?: string | null
   productsCount: number
 }
 
-export function ProducerCard({ id, slug, name, region, category, description, imageUrl, productsCount }: Props) {
+export function ProducerCard({ id, slug, name, region, description, imageUrl, productsCount }: Props) {
   const hasImage = imageUrl && imageUrl.length > 0
   const href = `/producers/${slug || id}`
 
@@ -40,10 +40,7 @@ export function ProducerCard({ id, slug, name, region, category, description, im
       </div>
 
       <div className="px-4 pt-4 pb-2 flex-grow flex flex-col">
-        <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-          {category}
-        </span>
-        <h2 className="text-base font-bold text-gray-900 line-clamp-1 mt-1 leading-tight">
+        <h2 className="text-base font-bold text-gray-900 line-clamp-1 leading-tight">
           {name}
         </h2>
         <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
