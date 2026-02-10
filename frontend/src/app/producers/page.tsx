@@ -111,7 +111,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
         <Suspense fallback={null}>
           <div className="flex flex-col gap-2 mb-6">
             <FilterStrip label="Περιοχή" options={allRegions} selected={regionFilter} paramName="region" basePath="/producers" />
-            <FilterStrip label="Κατηγορία" options={allCategories} selected={categoryFilter} paramName="cat" basePath="/producers" />
+            <FilterStrip label="Δραστηριότητα" options={allCategories} selected={categoryFilter} paramName="cat" basePath="/producers" />
           </div>
         </Suspense>
 
