@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
+import { getServerApiUrl } from '@/env';
 
 /**
  * Featured Products Section - Mobile-first product showcase
@@ -12,19 +13,22 @@ import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
  * - Fallback UI for loading/error states
  */
 
-interface Product {
-  id: number;
+interface ApiProduct {
+  id: string | number;
   name: string;
-  price_cents: number;
-  producer_id?: number;
-  producer_name?: string;
-  image_url?: string;
+  slug: string;
+  price: number;
+  unit: string;
+  stock: number;
+  image_url?: string | null;
+  producer_id?: string | number;
+  producer?: { id: string; name: string; slug: string } | null;
 }
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(): Promise<ApiProduct[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-    const res = await fetch(`${apiUrl}/public/products?limit=8`, {
+    const base = getServerApiUrl();
+    const res = await fetch(`${base}/public/products?limit=8`, {
       next: { revalidate: 3600 }, // Revalidate every hour
     });
 
@@ -77,10 +81,11 @@ export default async function FeaturedProducts() {
                 key={product.id}
                 id={product.id}
                 title={product.name}
-                producer={product.producer_name || null}
+                producer={product.producer?.name || null}
                 producerId={product.producer_id}
-                priceCents={product.price_cents}
+                priceCents={Math.round(product.price * 100)}
                 image={product.image_url || null}
+                stock={product.stock}
               />
             ))}
           </div>
