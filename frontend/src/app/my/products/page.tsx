@@ -342,7 +342,7 @@ function ProducerProductsContent() {
                 >
                   <option value="">Όλες οι κατηγορίες</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
+                    <option key={cat.id} value={cat.slug}>
                       {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
                     </option>
                   ))}

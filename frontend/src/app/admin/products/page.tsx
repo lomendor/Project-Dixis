@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
 import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
+import { CATEGORIES } from '@/data/categories'
 
 interface Product {
   id: string
@@ -597,7 +598,12 @@ function AdminProductsContent() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Κατηγορία *</label>
-                  <input name="category" required placeholder="π.χ. Λάδι" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-category-input" />
+                  <select name="category" required style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-category-input">
+                    <option value="">Επιλέξτε κατηγορία...</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.slug}>{cat.labelEl}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Μονάδα *</label>
@@ -685,14 +691,17 @@ function AdminProductsContent() {
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
                   Κατηγορία *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={editForm.category}
                   onChange={e => setEditForm(prev => ({ ...prev, category: e.target.value }))}
-                  placeholder="Κατηγορία προϊόντος..."
                   style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
                   data-testid="edit-category-input"
-                />
+                >
+                  <option value="">Επιλέξτε κατηγορία...</option>
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.slug}>{cat.labelEl}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
