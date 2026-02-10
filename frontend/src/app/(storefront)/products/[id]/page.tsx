@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import Add from './ui/Add';
 import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
+import { getCategoryBySlug } from '@/data/categories';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -179,7 +180,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           </h1>
 
           {p.category && (
-            <p className="text-gray-600 mb-2">{p.category}</p>
+            <p className="text-gray-600 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
           )}
 
           {/* Producer */}
