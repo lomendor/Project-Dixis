@@ -1,11 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-10 (PRODUCER-PROFILE-01)
+**Last Updated**: 2026-02-10 (PRODUCER-FILTERS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~480 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-10 — PRODUCER-FILTERS-01: Region & Category Filters on Producers Page
+
+**Status**: ✅ DONE (PR #2706)
+
+**What was done**:
+- New `FilterStrip.tsx` — generic reusable filter pill component
+- Integrated region + category pill filters on `/producers` page
+- Client-side filtering via URL params (`?region=` + `?cat=`)
+- Dynamic options extracted from fetched data (zero maintenance)
+- Context-aware empty state messages for filter combos
+
+**Production**: SHA `2a226735`, deployed, healthz 200
+- `/producers` shows 2 filter strips (Περιοχή + Κατηγορία)
+- Filter options: Attica, Lemnos, Beekeeping, Organic Farming
+
+**Pass summary**: `docs/AGENT/PASSES/SUMMARY-Pass-PRODUCER-FILTERS-01.md`
 
 ---
 
