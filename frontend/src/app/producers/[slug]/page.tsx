@@ -1,0 +1,181 @@
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import type { Metadata } from 'next';
+import { ProductCard } from '@/components/ProductCard';
+import { getServerApiUrl } from '@/env';
+import { getBaseUrl } from '@/lib/site';
+
+export const dynamic = 'force-dynamic';
+
+type ApiProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  unit: string;
+  stock: number;
+  image_url: string | null;
+  category: string;
+};
+
+type ApiProducer = {
+  id: string;
+  slug: string;
+  name: string;
+  region: string;
+  category: string;
+  description: string | null;
+  image_url: string | null;
+  products: ApiProduct[];
+};
+
+async function getProducer(slug: string): Promise<ApiProducer | null> {
+  const base = getServerApiUrl();
+  try {
+    const res = await fetch(`${base}/public/producers/${slug}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const p = await getProducer(slug);
+  if (!p) return { title: 'Παραγωγός μη διαθέσιμος | Dixis' };
+
+  const baseUrl = await getBaseUrl();
+  const url = `${baseUrl}/producers/${p.slug}`;
+  const imageUrl = p.image_url || `${baseUrl}/og-default.png`;
+
+  return {
+    title: `${p.name} — Παραγωγός | Dixis`,
+    description: p.description || `${p.name} — Τοπικός παραγωγός από ${p.region}`,
+    alternates: { canonical: url },
+    openGraph: {
+      title: p.name,
+      description: p.description || `${p.name} — Τοπικός παραγωγός από ${p.region}`,
+      url,
+      siteName: 'Dixis',
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: p.name }],
+      locale: 'el_GR',
+      type: 'profile',
+    },
+  };
+}
+
+export default async function ProducerProfilePage(
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  const producer = await getProducer(slug);
+  if (!producer) return notFound();
+
+  const hasImage = producer.image_url && producer.image_url.length > 0;
+  const productCount = producer.products.length;
+
+  return (
+    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Breadcrumbs */}
+        <nav className="mb-6 text-sm" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2">
+            <li><Link href="/" className="text-primary hover:underline">Αρχική</Link></li>
+            <li className="text-gray-400">/</li>
+            <li><Link href="/producers" className="text-primary hover:underline">Παραγωγοί</Link></li>
+            <li className="text-gray-400">/</li>
+            <li className="text-gray-600">{producer.name}</li>
+          </ol>
+        </nav>
+
+        {/* Producer Hero */}
+        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-8">
+          <div className="grid md:grid-cols-3 gap-0">
+            {/* Image */}
+            <div className="aspect-[4/3] md:aspect-auto bg-neutral-100 overflow-hidden">
+              {hasImage ? (
+                <img
+                  src={producer.image_url!}
+                  alt={producer.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full min-h-[240px] flex items-center justify-center text-gray-400">
+                  <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="md:col-span-2 p-6 sm:p-8 flex flex-col justify-center">
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+                {producer.category}
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                {producer.name}
+              </h1>
+              <p className="text-sm text-gray-500 flex items-center gap-1 mb-4">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {producer.region}
+              </p>
+              {producer.description && (
+                <p className="text-gray-700 leading-relaxed mb-4">{producer.description}</p>
+              )}
+              <p className="text-sm text-gray-500">
+                {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Products Section */}
+        {productCount > 0 ? (
+          <>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Τα προϊόντα του παραγωγού
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {producer.products.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  id={p.id}
+                  title={p.name}
+                  producer={producer.name}
+                  producerId={producer.id}
+                  priceCents={Math.round(p.price * 100)}
+                  image={p.image_url}
+                  stock={p.stock}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+            <p className="text-gray-500 text-lg">
+              Δεν υπάρχουν ακόμα προϊόντα από αυτόν τον παραγωγό.
+            </p>
+          </div>
+        )}
+
+        {/* Back link */}
+        <div className="mt-8">
+          <Link href="/producers" className="inline-flex items-center text-primary hover:underline">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Πίσω στους Παραγωγούς
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}

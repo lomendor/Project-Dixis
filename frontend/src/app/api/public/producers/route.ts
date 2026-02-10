@@ -32,7 +32,7 @@ export async function GET(req: Request) {
         category: true,
         description: true,
         imageUrl: true,
-        products: true,
+        _count: { select: { Product: { where: { isActive: true } } } },
       },
     })
 
@@ -44,7 +44,7 @@ export async function GET(req: Request) {
       category: p.category,
       description: p.description,
       image_url: p.imageUrl,
-      products_count: p.products,
+      products_count: p._count.Product,
     }))
 
     return NextResponse.json(
