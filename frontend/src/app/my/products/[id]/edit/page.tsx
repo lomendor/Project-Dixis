@@ -224,7 +224,7 @@ function EditProductContent() {
                     {categoriesLoading ? 'Φόρτωση...' : 'Επιλέξτε κατηγορία'}
                   </option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
+                    <option key={cat.id} value={cat.slug}>
                       {cat.icon ? `${cat.icon} ${cat.name}` : cat.name}
                     </option>
                   ))}
