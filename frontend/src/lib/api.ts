@@ -1008,20 +1008,23 @@ class ApiClient {
   }
 
   // AUTH-UNIFY-01: Delete a producer product
+  // Uses /api/v1/products/{id} (auth:sanctum, ProductController@destroy)
   async deleteProducerProduct(productId: number): Promise<void> {
-    await this.request(`producer/products/${productId}`, {
+    await this.request(`products/${productId}`, {
       method: 'DELETE',
     });
   }
 
   // AUTH-UNIFY-02: Get a single producer product by ID
+  // Uses /api/v1/products/{id} (public, ProductController@show)
   async getProducerProduct(productId: number | string): Promise<{
     data: Product;
   }> {
-    return this.request<{ data: Product }>(`producer/products/${productId}`);
+    return this.request<{ data: Product }>(`products/${productId}`);
   }
 
   // AUTH-UNIFY-02: Create a new producer product
+  // Uses POST /api/v1/products (auth:sanctum, ProductController@store)
   async createProducerProduct(data: {
     name: string;
     slug?: string;
@@ -1033,13 +1036,14 @@ class ApiClient {
     image_url?: string | null;
     is_active?: boolean;
   }): Promise<{ data: Product }> {
-    return this.request<{ data: Product }>('producer/products', {
+    return this.request<{ data: Product }>('products', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   // AUTH-UNIFY-02: Update an existing producer product
+  // Uses PATCH /api/v1/products/{id} (auth:sanctum, ProductController@update)
   async updateProducerProduct(productId: number | string, data: {
     name?: string;
     slug?: string;
@@ -1051,8 +1055,8 @@ class ApiClient {
     image_url?: string | null;
     is_active?: boolean;
   }): Promise<{ data: Product }> {
-    return this.request<{ data: Product }>(`producer/products/${productId}`, {
-      method: 'PUT',
+    return this.request<{ data: Product }>(`products/${productId}`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
