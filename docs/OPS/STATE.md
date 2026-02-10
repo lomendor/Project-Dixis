@@ -1,11 +1,43 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-09 (ADMIN-CLEANUP-01)
+**Last Updated**: 2026-02-10 (PRODUCERS-LISTING-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~460 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-10 — PRODUCERS-LISTING-01: Restore Public Producers Listing
+
+**Status**: ✅ DONE (PR #2701)
+
+**What was done**:
+- Restored `/producers` page from static landing to functional SSR listing
+- New API route `api/public/producers` using Prisma (same pattern as products)
+- New `ProducerCard` component with image fallback, region, category, products count
+- Server-side search via URL params, ISR revalidate=60
+- Landing page preserved at `/producers/join`
+
+**Production**: SHA `c42baf17`, deployed 01:50 UTC, healthz 200, 2 producers visible
+
+**Pass summary**: `docs/AGENT/PASSES/SUMMARY-Pass-PRODUCERS-LISTING-01.md`
+
+---
+
+## 2026-02-10 — PRODUCER-I18N-01: Producer Analytics i18n
+
+**Status**: ✅ DONE (PR #2699)
+
+**What was done**:
+- Translated producer analytics dashboard to Greek (page, component, API lib)
+- ~50 English strings converted to Greek across 3 files
+- Error messages + includes() patterns matched to Greek throws
+
+**Production**: SHA `e83091fe`, deployed 23:45 UTC, healthz 200
+
+**Pass summary**: `docs/AGENT/PASSES/SUMMARY-Pass-PRODUCER-I18N-01.md`
 
 ---
 
