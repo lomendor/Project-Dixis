@@ -65,13 +65,20 @@ class ProducerController extends Controller
     }
 
     /**
-     * Display the specified producer.
+     * Display the specified producer by ID or slug.
+     *
+     * STOREFRONT-LARAVEL-01: Accept both numeric ID and string slug
+     * so the Next.js storefront can look up producers by slug.
      */
-    public function show(int $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $producer = Producer::with(['user:id,name,email'])
             ->where('is_active', true)
-            ->findOrFail($id);
+            ->where(function ($q) use ($id) {
+                $q->where('id', is_numeric($id) ? (int) $id : 0)
+                    ->orWhere('slug', $id);
+            })
+            ->firstOrFail();
 
         // Load active products with their categories and images
         $producer->load(['products' => function ($query) {

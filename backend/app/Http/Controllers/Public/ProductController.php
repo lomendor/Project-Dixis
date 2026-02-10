@@ -137,23 +137,23 @@ class ProductController extends Controller
     }
 
     /**
-     * Display the specified product with categories and images.
+     * Display the specified product by ID or slug.
+     *
+     * STOREFRONT-LARAVEL-01: Accept both numeric ID and string slug
+     * so the Next.js storefront can look up products by slug.
      */
     public function show($id): JsonResponse
     {
-        // Validate ID is numeric to prevent TypeError
-        if (!is_numeric($id) || $id <= 0) {
-            return response()->json([
-                'message' => 'Product not found',
-                'error' => 'Invalid product ID format'
-            ], 404);
-        }
-
-        $product = Product::with(['categories', 'images' => function ($query) {
+        $query = Product::with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
         }, 'producer'])
-            ->where('is_active', true)
-            ->findOrFail((int) $id);
+            ->where('is_active', true);
+
+        if (is_numeric($id)) {
+            $product = $query->findOrFail((int) $id);
+        } else {
+            $product = $query->where('slug', $id)->firstOrFail();
+        }
 
         $data = $product->toArray();
 
