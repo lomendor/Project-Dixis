@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getLaravelInternalUrl } from '@/env';
+import { toStorefrontSlug } from '@/lib/category-map';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function GET(
       unit: p.unit || 'kg',
       stock: typeof p.stock === 'number' ? p.stock : 0,
       is_active: p.is_active,
-      category: categories[0]?.slug || p.category || null,
+      category: toStorefrontSlug(categories[0]?.slug || p.category),
       image_url: primaryImage?.url || p.image_url || null,
       producer_id: p.producer_id || p.producer?.id || null,
       producer: p.producer
