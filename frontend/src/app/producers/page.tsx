@@ -119,7 +119,6 @@ export default async function ProducersPage({ searchParams }: PageProps) {
                 slug={p.slug}
                 name={p.name}
                 region={p.region}
-                category={p.category}
                 description={p.description}
                 imageUrl={p.image_url}
                 productsCount={p.products_count}
