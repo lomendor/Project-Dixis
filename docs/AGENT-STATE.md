@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-10 (PRODUCER-PROFILE-01 deployed)
+**Updated**: 2026-02-10 (PRODUCER-FILTERS-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PRODUCER-FILTERS-01** — Region & category filters on producers page (PR #2706, deployed 2026-02-10) ✅
 - **PRODUCER-PROFILE-01** — Producer profile page + fix product count (PR #2704, deployed 2026-02-10) ✅
 - **PRODUCERS-LISTING-01** — Restore public producers listing page with SSR + Prisma (PR #2701, deployed 2026-02-10) ✅
 - **PRODUCER-I18N-01** — Producer analytics dashboard translated to Greek (PR #2699, deployed 2026-02-10) ✅
