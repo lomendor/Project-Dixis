@@ -5,17 +5,21 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting production seed (idempotent)...');
 
-  // Seed categories (idempotent)
+  // Seed categories — must match src/data/categories.ts (13 official)
   const CATEGORIES = [
-    { slug: 'vegetables', name: 'Λαχανικά', icon: '🥬', sortOrder: 1 },
-    { slug: 'fruits', name: 'Φρούτα', icon: '🍎', sortOrder: 2 },
-    { slug: 'dairy', name: 'Γαλακτοκομικά', icon: '🧀', sortOrder: 3 },
-    { slug: 'meat', name: 'Κρέατα', icon: '🥩', sortOrder: 4 },
-    { slug: 'fish', name: 'Ψάρια', icon: '🐟', sortOrder: 5 },
-    { slug: 'bakery', name: 'Αρτοσκευάσματα', icon: '🥖', sortOrder: 6 },
-    { slug: 'honey-sweets', name: 'Μέλι & Γλυκά', icon: '🍯', sortOrder: 7 },
-    { slug: 'olive-oil', name: 'Ελαιόλαδο', icon: '🫒', sortOrder: 8 },
-    { slug: 'other', name: 'Άλλο', icon: '📦', sortOrder: 99 }
+    { slug: 'olive-oil-olives', name: 'Ελαιόλαδο & Ελιές', icon: '🫒', sortOrder: 1 },
+    { slug: 'honey-bee', name: 'Μέλι & Κυψέλη', icon: '🍯', sortOrder: 2 },
+    { slug: 'legumes', name: 'Όσπρια', icon: '🫘', sortOrder: 3 },
+    { slug: 'grains-rice', name: 'Δημητριακά & Ρύζια', icon: '🌾', sortOrder: 4 },
+    { slug: 'pasta', name: 'Ζυμαρικά', icon: '🍝', sortOrder: 5 },
+    { slug: 'flours-bakery', name: 'Αλεύρια & Αρτοποιία', icon: '🥐', sortOrder: 6 },
+    { slug: 'nuts-dried', name: 'Ξηροί Καρποί & Αποξηραμένα', icon: '🥜', sortOrder: 7 },
+    { slug: 'herbs-spices', name: 'Βότανα & Μπαχαρικά', icon: '🌿', sortOrder: 8 },
+    { slug: 'sweets-spreads', name: 'Γλυκά, Μαρμελάδες & Αλείμματα', icon: '🍒', sortOrder: 9 },
+    { slug: 'sauces-preserves', name: 'Σάλτσες, Conserves & Τουρσιά', icon: '🥫', sortOrder: 10 },
+    { slug: 'beverages', name: 'Ποτά & Αποστάγματα', icon: '🍷', sortOrder: 11 },
+    { slug: 'dairy', name: 'Γαλακτοκομικά', icon: '🧀', sortOrder: 12 },
+    { slug: 'fruits-vegetables', name: 'Φρούτα & Λαχανικά', icon: '🍎', sortOrder: 13 },
   ];
 
   for (const cat of CATEGORIES) {
@@ -77,7 +81,7 @@ async function main() {
     where: { slug: 'thymarisio-meli-450g' },
     update: {
       title: 'Θυμαρίσιο Μέλι 450g',
-      category: 'Honey & Sweets',
+      category: 'honey-bee',
       price: 7.9,
       unit: 'jar',
       stock: 50,
@@ -88,7 +92,7 @@ async function main() {
     create: {
       slug: 'thymarisio-meli-450g',
       title: 'Θυμαρίσιο Μέλι 450g',
-      category: 'Honey & Sweets',
+      category: 'honey-bee',
       price: 7.9,
       unit: 'jar',
       stock: 50,
@@ -102,7 +106,7 @@ async function main() {
     where: { slug: 'exairetiko-partheno-elaiolado-1l' },
     update: {
       title: 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
-      category: 'Olive Oil',
+      category: 'olive-oil-olives',
       price: 10.9,
       unit: 'bottle',
       stock: 30,
@@ -113,7 +117,7 @@ async function main() {
     create: {
       slug: 'exairetiko-partheno-elaiolado-1l',
       title: 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
-      category: 'Olive Oil',
+      category: 'olive-oil-olives',
       price: 10.9,
       unit: 'bottle',
       stock: 30,
@@ -127,7 +131,7 @@ async function main() {
     where: { slug: 'glyko-koutaliou-syko-380g' },
     update: {
       title: 'Γλυκό Κουταλιού Σύκο 380g',
-      category: 'Honey & Sweets',
+      category: 'sweets-spreads',
       price: 4.5,
       unit: 'jar',
       stock: 40,
@@ -138,7 +142,7 @@ async function main() {
     create: {
       slug: 'glyko-koutaliou-syko-380g',
       title: 'Γλυκό Κουταλιού Σύκο 380g',
-      category: 'Honey & Sweets',
+      category: 'sweets-spreads',
       price: 4.5,
       unit: 'jar',
       stock: 40,
@@ -153,7 +157,7 @@ async function main() {
     where: { slug: 'feta-pop-mytilinis' },
     update: {
       title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
-      category: 'Dairy',
+      category: 'dairy',
       price: 6.5,
       unit: 'pack',
       stock: 25,
@@ -164,7 +168,7 @@ async function main() {
     create: {
       slug: 'feta-pop-mytilinis',
       title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
-      category: 'Dairy',
+      category: 'dairy',
       price: 6.5,
       unit: 'pack',
       stock: 25,
@@ -179,7 +183,7 @@ async function main() {
     where: { slug: 'tsipouro-paradosiako' },
     update: {
       title: 'Τσίπουρο Παραδοσιακό 700ml',
-      category: 'Beverages',
+      category: 'beverages',
       price: 12.9,
       unit: 'bottle',
       stock: 15,
@@ -190,7 +194,7 @@ async function main() {
     create: {
       slug: 'tsipouro-paradosiako',
       title: 'Τσίπουρο Παραδοσιακό 700ml',
-      category: 'Beverages',
+      category: 'beverages',
       price: 12.9,
       unit: 'bottle',
       stock: 15,
@@ -205,7 +209,7 @@ async function main() {
     where: { slug: 'portokalia-viologika' },
     update: {
       title: 'Πορτοκάλια Βιολογικά 5kg',
-      category: 'Fruits & Vegetables',
+      category: 'fruits-vegetables',
       price: 8.9,
       unit: 'box',
       stock: 20,
@@ -216,7 +220,7 @@ async function main() {
     create: {
       slug: 'portokalia-viologika',
       title: 'Πορτοκάλια Βιολογικά 5kg',
-      category: 'Fruits & Vegetables',
+      category: 'fruits-vegetables',
       price: 8.9,
       unit: 'box',
       stock: 20,
@@ -231,7 +235,7 @@ async function main() {
     where: { slug: 'rigani-vounou' },
     update: {
       title: 'Ρίγανη Βουνού 100g',
-      category: 'Herbs & Spices',
+      category: 'herbs-spices',
       price: 3.5,
       unit: 'pack',
       stock: 60,
@@ -242,7 +246,7 @@ async function main() {
     create: {
       slug: 'rigani-vounou',
       title: 'Ρίγανη Βουνού 100g',
-      category: 'Herbs & Spices',
+      category: 'herbs-spices',
       price: 3.5,
       unit: 'pack',
       stock: 60,
@@ -257,7 +261,7 @@ async function main() {
     where: { slug: 'patates-naxou' },
     update: {
       title: 'Πατάτες Νάξου 3kg',
-      category: 'Fruits & Vegetables',
+      category: 'fruits-vegetables',
       price: 4.9,
       unit: 'bag',
       stock: 35,
@@ -268,7 +272,7 @@ async function main() {
     create: {
       slug: 'patates-naxou',
       title: 'Πατάτες Νάξου 3kg',
-      category: 'Fruits & Vegetables',
+      category: 'fruits-vegetables',
       price: 4.9,
       unit: 'bag',
       stock: 35,
@@ -283,7 +287,7 @@ async function main() {
     where: { slug: 'krasi-limnou-erythro' },
     update: {
       title: 'Κρασί Λήμνου Ερυθρό 750ml',
-      category: 'Beverages',
+      category: 'beverages',
       price: 9.9,
       unit: 'bottle',
       stock: 18,
@@ -294,7 +298,7 @@ async function main() {
     create: {
       slug: 'krasi-limnou-erythro',
       title: 'Κρασί Λήμνου Ερυθρό 750ml',
-      category: 'Beverages',
+      category: 'beverages',
       price: 9.9,
       unit: 'bottle',
       stock: 18,
@@ -309,7 +313,7 @@ async function main() {
     where: { slug: 'trachanas-spitikos' },
     update: {
       title: 'Τραχανάς Σπιτικός 500g',
-      category: 'Pasta & Grains',
+      category: 'pasta',
       price: 5.5,
       unit: 'pack',
       stock: 40,
@@ -320,7 +324,7 @@ async function main() {
     create: {
       slug: 'trachanas-spitikos',
       title: 'Τραχανάς Σπιτικός 500g',
-      category: 'Pasta & Grains',
+      category: 'pasta',
       price: 5.5,
       unit: 'pack',
       stock: 40,
