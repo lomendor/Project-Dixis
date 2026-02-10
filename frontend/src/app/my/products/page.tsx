@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/contexts/ToastContext';
 import AuthGuard from '@/components/AuthGuard';
+import { apiClient } from '@/lib/api';
 
 interface ProducerProduct {
   id: number;
@@ -15,6 +16,8 @@ interface ProducerProduct {
   stock: number;
   is_active: boolean;
   status: 'available' | 'unavailable' | 'seasonal';
+  image_url?: string;
+  category?: string;
   created_at: string;
   updated_at: string;
 }
@@ -87,25 +90,26 @@ function ProducerProductsContent() {
   const checkProducerStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/producer/status');
-      if (response.ok) {
-        const data = await response.json();
-        const status: ProducerStatus = {
-          isApproved: data.status === 'active',
-          status: data.status,
-          profileExists: !!data.profile,
-        };
-        setProducerStatus(status);
+      // AUTH-UNIFY-01: Call Laravel directly via apiClient (replaces broken /api/producer/status proxy)
+      const data = await apiClient.getProducerMe();
+      const status: ProducerStatus = {
+        isApproved: data.producer?.status === 'active' && data.producer?.is_active !== false,
+        status: (data.producer?.status as ProducerStatus['status']) || null,
+        profileExists: !!data.producer,
+      };
+      setProducerStatus(status);
 
-        // If approved, load products
-        if (status.isApproved) {
-          await loadProducts();
-        }
+      // If approved, load products
+      if (status.isApproved) {
+        await loadProducts();
+      }
+    } catch (err: any) {
+      // 404 = no producer profile exists yet
+      if (err.message?.includes('404')) {
+        setProducerStatus({ isApproved: false, status: null, profileExists: false });
       } else {
         setError('Αποτυχία ελέγχου κατάστασης παραγωγού');
       }
-    } catch {
-      setError('Σφάλμα δικτύου');
     } finally {
       setLoading(false);
     }
@@ -113,18 +117,30 @@ function ProducerProductsContent() {
 
   const loadProducts = async (q = '', category = '') => {
     try {
-      const params = new URLSearchParams();
-      if (q) params.set('q', q);
-      if (category) params.set('category', category);
-      const url = `/api/me/products${params.toString() ? `?${params}` : ''}`;
-
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data.products || []);
-      } else {
-        setError('Αποτυχία φόρτωσης προϊόντων');
-      }
+      // AUTH-UNIFY-01: Call Laravel directly via apiClient (replaces broken /api/me/products proxy)
+      const data = await apiClient.getProducerProducts({
+        search: q || undefined,
+      });
+      // Laravel returns { data: Product[] } — map to ProducerProduct[]
+      const mapped: ProducerProduct[] = (data.data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        title: p.title || p.name,
+        price: typeof p.price === 'string' ? parseFloat(p.price) : p.price,
+        currency: p.currency || 'EUR',
+        stock: p.stock ?? 0,
+        is_active: p.is_active ?? true,
+        status: p.status || 'available',
+        image_url: p.image_url,
+        category: p.category,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
+      }));
+      // Client-side category filter (Laravel doesn't support it as query param)
+      const filtered = category
+        ? mapped.filter((p) => p.category?.toLowerCase() === category.toLowerCase())
+        : mapped;
+      setProducts(filtered);
     } catch {
       setError('Σφάλμα φόρτωσης προϊόντων');
     }
@@ -151,13 +167,8 @@ function ProducerProductsContent() {
 
     setDeleting(true);
     try {
-      const response = await fetch(`/api/me/products/${productToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Αποτυχία διαγραφής προϊόντος');
-      }
+      // AUTH-UNIFY-01: Call Laravel directly via apiClient
+      await apiClient.deleteProducerProduct(productToDelete.id);
 
       showSuccess('Το προϊόν διαγράφηκε επιτυχώς');
 
