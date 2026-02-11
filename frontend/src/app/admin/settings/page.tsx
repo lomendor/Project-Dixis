@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import { prisma } from '@/lib/db/client';
+import { fetchProductCounts } from '@/lib/laravel/counts';
 
 /**
  * Pass ADMIN-SETTINGS-01: Settings page with real system info.
@@ -28,15 +29,17 @@ export default async function AdminSettingsPage() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
   const lowStockThreshold = process.env.LOW_STOCK_THRESHOLD || '3';
 
-  // DB check
+  // DB check (orders stay in Prisma; products from Laravel SSOT)
   let dbStatus = 'unknown';
   let orderCount = 0;
   let productCount = 0;
   try {
-    [orderCount, productCount] = await Promise.all([
+    const [oc, pc] = await Promise.all([
       prisma.order.count(),
-      prisma.product.count(),
+      fetchProductCounts(),
     ]);
+    orderCount = oc;
+    productCount = pc.total;
     dbStatus = 'connected';
   } catch {
     dbStatus = 'error';

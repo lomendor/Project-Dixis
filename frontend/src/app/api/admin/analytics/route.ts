@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/client'
 import { requireAdmin, AdminError } from '@/lib/auth/admin'
+import { fetchProductCounts, fetchProducerCount } from '@/lib/laravel/counts'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,9 +22,11 @@ export async function GET() {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
     // Run all queries in parallel
+    // Order/OrderItem queries stay in Prisma (orders are Prisma-only)
+    // Product/Producer counts come from Laravel (SSOT)
     const [
       totalOrders,
-      totalProducts,
+      productCounts,
       totalProducers,
       pendingOrders,
       ordersByStatus,
@@ -31,11 +34,10 @@ export async function GET() {
       ordersMonth,
       allOrders30d,
       topItems,
-      activeProducts,
     ] = await Promise.all([
       prisma.order.count(),
-      prisma.product.count(),
-      prisma.producer.count(),
+      fetchProductCounts(),
+      fetchProducerCount(),
       prisma.order.count({ where: { status: 'PENDING' } }),
       prisma.order.groupBy({ by: ['status'], _count: true }),
       prisma.order.findMany({ where: { createdAt: { gte: today } }, select: { total: true } }),
@@ -51,8 +53,9 @@ export async function GET() {
         orderBy: { _sum: { qty: 'desc' } },
         take: 10,
       }),
-      prisma.product.count({ where: { isActive: true } }),
     ])
+    const totalProducts = productCounts.total
+    const activeProducts = productCounts.active
 
     // Calculate sales
     const todaySales = ordersToday.reduce((s, o) => s + Number(o.total ?? 0), 0)
