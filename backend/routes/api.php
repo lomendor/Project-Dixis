@@ -369,6 +369,16 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 simulations per minute
     });
 
+    // PRODUCER-ONBOARD-01: Admin Producer Management
+    Route::middleware('auth:sanctum')->prefix('admin/producers')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'index'])
+            ->middleware('throttle:60,1');
+        Route::patch('{producer}/approve', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'approve'])
+            ->middleware('throttle:30,1');
+        Route::patch('{producer}/reject', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'reject'])
+            ->middleware('throttle:30,1');
+    });
+
 });
 
 // Pass 51: Card payment checkout (authenticated)
