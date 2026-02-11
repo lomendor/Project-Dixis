@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (P3-DOCS-CLEANUP complete)
+**Updated**: 2026-02-11 (PROD-STABILITY-02 complete)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,9 +28,9 @@ _(empty — pick from NEXT)_
 
 | Priority | Pass ID | Feature | Why |
 |----------|---------|---------|-----|
-| 1 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend NOT ready (needs Socialite) |
-| 2 | **WISHLIST-01** | User wishlist feature | No implementation yet |
-| 3 | **AUDIT-BACKLOG-P2** | Error response standardization | 82 routes inconsistent |
+| 1 | **REORDER-01** | "Order Again" button | Core marketplace loop, repeat customers |
+| 2 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend needs Socialite — verify first |
+| 3 | **UX-POLISH-01** | Empty states + loading skeletons | Professional feel |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,6 +47,8 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PROD-STABILITY-02** — Infra hardening: nginx .bak cleanup, Prisma singleton caching in production, Neon connection pooling params (PR #2755, deployed 2026-02-11) ✅
+- **PROD-FIX-SPRINT-01** — 3 production fixes from E2E audit: cart toast feedback (PR #2749), legal pages content (PR #2751), producer dashboard redirect+auth (PR #2753). All deployed & verified (2026-02-11) ✅
 - **P3-DOCS-CLEANUP** — 13 env vars documented in .env.example, OPS/STATE.md synced, audit backlog cleared (2026-02-11) ✅
 - **ADMIN-BULK-STATUS-01** — Bulk order status update with checkboxes + toolbar (PR #2744, deployed 2026-02-11) ✅
 - **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS fix (#2741), mock cleanup (#2743) ✅
