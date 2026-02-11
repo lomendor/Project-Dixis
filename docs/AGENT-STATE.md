@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-10 (FEATURED-PRODUCTS-FIX-01 deployed)
+**Updated**: 2026-02-11 (Codebase cleanup sprint: Prisma singleton, SQLite compat)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,9 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740) ✅
+- **DUAL-DB-MIGRATION** — Phases 5.5a-d: Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
+- **AUTH-UNIFY** — Fix producer dashboard auth (PRs #2721-#2722, deployed 2026-02-10) ✅
 - **FEATURED-PRODUCTS-FIX-01** — Fix homepage featured products not rendering (PR #2708, deployed 2026-02-10) ✅
 - **PRODUCER-FILTERS-01** — Region & category filters on producers page (PR #2706, deployed 2026-02-10) ✅
 - **PRODUCER-PROFILE-01** — Producer profile page + fix product count (PR #2704, deployed 2026-02-10) ✅
