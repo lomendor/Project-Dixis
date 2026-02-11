@@ -176,13 +176,18 @@ class ProducerController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        // Ensure user has a producer profile
+        // PRODUCER-ONBOARD-01: Return 200 with has_profile flag instead of 403
+        // This lets the frontend distinguish "no profile yet" from "unauthorized"
         if (! $user->producer) {
-            return response()->json(['message' => 'Producer profile not found'], 403);
+            return response()->json([
+                'producer' => null,
+                'has_profile' => false,
+            ]);
         }
 
         return response()->json([
             'producer' => new \App\Http\Resources\ProducerResource($user->producer),
+            'has_profile' => true,
         ]);
     }
 

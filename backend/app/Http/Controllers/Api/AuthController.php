@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyEmailMail;
+use App\Models\Producer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,13 +39,30 @@ class AuthController extends Controller
         // Auto-verify only if verification is disabled (backwards compatibility)
         $requireVerification = config('notifications.email_verification_required', false);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'email_verified_at' => $requireVerification ? null : now(),
-        ]);
+        $user = DB::transaction(function () use ($request, $requireVerification) {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'email_verified_at' => $requireVerification ? null : now(),
+            ]);
+
+            // PRODUCER-ONBOARD-01: Auto-create Producer profile for producer registrations
+            if ($request->role === 'producer') {
+                Producer::create([
+                    'user_id' => $user->id,
+                    'name' => $request->name,
+                    'slug' => Str::slug($request->name) . '-' . $user->id,
+                    'email' => $request->email,
+                    'status' => 'pending',
+                    'is_active' => false,
+                    'verified' => false,
+                ]);
+            }
+
+            return $user;
+        });
 
         // Send verification email if required
         $verificationSent = false;
