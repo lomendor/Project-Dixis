@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPrisma } from '../../../lib/prismaSafe';
+import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../lib/orderStore';
 import { rateLimit } from '../../../lib/rateLimit';
 import { parseOrderNo } from '../../../lib/orderNumber';
@@ -34,10 +34,8 @@ export async function POST(req: Request) {
 
   const { dateStart, dateEnd, suffix } = parsed;
 
-  const prisma = getPrisma();
-  if (prisma) {
-    try {
-      const candidates = await prisma.checkoutOrder.findMany({
+  try {
+    const candidates = await prisma.checkoutOrder.findMany({
         where: {
           createdAt: {
             gte: dateStart,
@@ -67,9 +65,8 @@ export async function POST(req: Request) {
         total: matched.total,
         paymentStatus: matched.paymentStatus,
       });
-    } catch {
-      // Fallback to memory
-    }
+  } catch {
+    // Fallback to memory
   }
 
   // In-memory fallback

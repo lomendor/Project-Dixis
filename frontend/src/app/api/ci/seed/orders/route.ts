@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,6 @@ function allow(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   if (!allow(req)) return new Response('Forbidden', { status: 403 });
-
-  const { PrismaClient } = await import('@prisma/client');
-  const prisma = new PrismaClient();
 
   const url = new URL(req.url);
   const dataset = url.searchParams.get('dataset') || 'facets-basic';
