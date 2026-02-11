@@ -49,7 +49,7 @@ async function getProductById(id: string) {
       stock: raw.stock,
       isActive: raw.is_active !== false,
       category: raw.category,
-      imageUrl: raw.image_url,
+      imageUrl: raw.image_url || raw.images?.[0]?.url || null,
       producer: raw.producer ? { name: raw.producer.name } : null,
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
