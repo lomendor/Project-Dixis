@@ -54,6 +54,20 @@ export default function AdminOrdersMain() {
   const [toDate, setToDate] = React.useState<string>('');
 
   const [rows, setRows]   = React.useState<Row[]>([]);
+
+  // ADMIN-BULK-STATUS-01: Selection state for bulk actions
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = React.useState(false);
+  const [bulkResult, setBulkResult] = React.useState<string|null>(null);
+  const toggleSelect = (id: string) => setSelected(s => {
+    const next = new Set(s);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const toggleAll = () => setSelected(s =>
+    s.size === rows.length ? new Set() : new Set(rows.map(r => r.id))
+  );
+
   const [facetTotals, setFacetTotals] = React.useState<Record<string, number> | null>(null);
   const [facetTotalAll, setFacetTotalAll] = React.useState<number | null>(null);
   const [isFacetLoading, setIsFacetLoading] = React.useState(false);
@@ -131,6 +145,7 @@ export default function AdminOrdersMain() {
 
   const [count, setCount] = React.useState<number>(0);
   const [usingApi, setUsingApi] = React.useState(false);
+  const [fetchTrigger, setFetchTrigger] = React.useState(0); // bump to re-fetch
 
   const fetchFacets = async () => {
     try {
@@ -273,7 +288,7 @@ export default function AdminOrdersMain() {
       }
     };
     run();
-  }, [active, page, pageSize, sort, mode, q, fromDate, toDate]);
+  }, [active, page, pageSize, sort, mode, q, fromDate, toDate, fetchTrigger]);
 
   const onChangeStatus = (v: string | null) => {
     writeParam('status', v); setActive(v as Status | null); setPage(1);
@@ -295,6 +310,35 @@ export default function AdminOrdersMain() {
     writeParam('toDate', toDate || null);
     setPage(1);
   };
+
+  // ADMIN-BULK-STATUS-01: Bulk status update
+  const bulkUpdate = async (newStatus: string) => {
+    const label: Record<string, string> = { PACKING:'Συσκευασία', SHIPPED:'Απεστάλη', DELIVERED:'Παραδόθηκε', CANCELLED:'Ακύρωση' };
+    if (!confirm(`Αλλαγή ${selected.size} παραγγελιών σε "${label[newStatus] || newStatus}";`)) return;
+    setBulkLoading(true);
+    setBulkResult(null);
+    try {
+      const res = await fetch('/api/admin/orders/bulk/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderIds: [...selected], status: newStatus })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Σφάλμα');
+      const msg = `${json.updated} ενημερώθηκαν` + (json.failed?.length ? `, ${json.failed.length} απέτυχαν` : '');
+      setBulkResult(msg);
+      setSelected(new Set());
+      // Re-trigger data fetch
+      setFetchTrigger(n => n + 1);
+    } catch (e: any) {
+      setBulkResult(`Σφάλμα: ${e.message}`);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  // Clear selection on filter/page change
+  React.useEffect(() => { setSelected(new Set()); }, [active, page, pageSize, sort, q, fromDate, toDate]);
 
   const maxPage = Math.max(1, Math.ceil(count / pageSize));
 
@@ -381,6 +425,33 @@ export default function AdminOrdersMain() {
       </div>
 
       {errNote && <div style={{fontSize:12,color:'#a33',margin:'6px 0'}}>{errNote}</div>}
+
+      {/* ADMIN-BULK-STATUS-01: Bulk action toolbar */}
+      {selected.size > 0 && (
+        <div data-testid="bulk-toolbar" style={{display:'flex', gap:8, alignItems:'center', flexWrap:'wrap', padding:'8px 12px', margin:'8px 0', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:8}}>
+          <strong style={{fontSize:12}}>{selected.size} επιλεγμένες</strong>
+          <button type="button" disabled={bulkLoading} onClick={()=>bulkUpdate('PACKING')} data-testid="bulk-packing"
+            style={{padding:'4px 10px', borderRadius:6, border:'1px solid #16a34a', background:'#dcfce7', cursor:'pointer', fontSize:12, fontWeight:600}}>
+            {bulkLoading ? '...' : 'Συσκευασία'}
+          </button>
+          <button type="button" disabled={bulkLoading} onClick={()=>bulkUpdate('SHIPPED')} data-testid="bulk-shipped"
+            style={{padding:'4px 10px', borderRadius:6, border:'1px solid #2563eb', background:'#dbeafe', cursor:'pointer', fontSize:12, fontWeight:600}}>
+            {bulkLoading ? '...' : 'Απεστάλη'}
+          </button>
+          <button type="button" disabled={bulkLoading} onClick={()=>bulkUpdate('DELIVERED')} data-testid="bulk-delivered"
+            style={{padding:'4px 10px', borderRadius:6, border:'1px solid #7c3aed', background:'#ede9fe', cursor:'pointer', fontSize:12, fontWeight:600}}>
+            {bulkLoading ? '...' : 'Παραδόθηκε'}
+          </button>
+          <button type="button" disabled={bulkLoading} onClick={()=>bulkUpdate('CANCELLED')} data-testid="bulk-cancelled"
+            style={{padding:'4px 10px', borderRadius:6, border:'1px solid #dc2626', background:'#fee2e2', cursor:'pointer', fontSize:12, fontWeight:600}}>
+            {bulkLoading ? '...' : 'Ακύρωση'}
+          </button>
+          <button type="button" onClick={()=>setSelected(new Set())} style={{padding:'4px 10px', borderRadius:6, border:'1px solid #d1d5db', background:'#fff', cursor:'pointer', fontSize:12}}>
+            Αποεπιλογή
+          </button>
+        </div>
+      )}
+      {bulkResult && <div data-testid="bulk-result" style={{fontSize:12, color:'#1e40af', margin:'4px 0', padding:'4px 8px', background:'#eff6ff', borderRadius:6}}>{bulkResult}</div>}
 
 
       {/* Quick totals (τρέχουσα σελίδα) */}
@@ -518,11 +589,13 @@ export default function AdminOrdersMain() {
           ) : null;
         })()}
 
-        <div role="row" style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
+        <div role="row" style={{display:'grid', gridTemplateColumns:'32px 1.2fr 2fr 1fr 1.2fr', gap:12, fontWeight:600, fontSize:12, color:'#555'}}>
+          <div><input type="checkbox" data-testid="select-all" checked={rows.length > 0 && selected.size === rows.length} onChange={toggleAll} aria-label="Επιλογή όλων" /></div>
           <div>Order</div><div>Πελάτης</div><div>Σύνολο</div><div>Κατάσταση</div>
         </div>
         {rows.map(o=>(
-          <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+          <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'32px 1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
+            <div><input type="checkbox" data-testid={`select-${o.id}`} checked={selected.has(o.id)} onChange={()=>toggleSelect(o.id)} aria-label={`Επιλογή ${o.id}`} /></div>
             <div>{o.id}</div><div>{o.customer}</div><div>{o.total}</div><div><StatusChip status={o.status} /></div>
           </div>
         ))}
