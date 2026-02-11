@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (PROD-STABILITY-02 complete)
+**Updated**: 2026-02-11 (PROD-IMAGE-FIX-01 complete)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **PROD-IMAGE-FIX-01** — Product image fallback to images[] array + cart i18n (PR #2757, deployed 2026-02-11) ✅
 - **PROD-STABILITY-02** — Infra hardening: nginx .bak cleanup, Prisma singleton caching in production, Neon connection pooling params (PR #2755, deployed 2026-02-11) ✅
 - **PROD-FIX-SPRINT-01** — 3 production fixes from E2E audit: cart toast feedback (PR #2749), legal pages content (PR #2751), producer dashboard redirect+auth (PR #2753). All deployed & verified (2026-02-11) ✅
 - **P3-DOCS-CLEANUP** — 13 env vars documented in .env.example, OPS/STATE.md synced, audit backlog cleared (2026-02-11) ✅
