@@ -1,7 +1,7 @@
 # Audit Backlog — Codebase Health Issues
 
 **Created**: 2026-02-11 (from full codebase health audit)
-**Last Updated**: 2026-02-11 (P1 fixes in PR #2743)
+**Last Updated**: 2026-02-11 (P3 items resolved)
 
 > Items discovered during a 5-agent parallel audit. Critical items (PRs #2738-#2741) already fixed.
 > This file tracks remaining issues for future sprints.
@@ -21,6 +21,8 @@
 | Viva-verify does DB mutation on GET request | #2741 | MERGED |
 | Producer onboarding mock (always userId=1) | #2743 | MERGED |
 | Producer status mock (hardcoded fake data) | #2743 | MERGED |
+| 13 env vars undocumented in .env.example | P3-DOCS | MERGED |
+| OPS/STATE.md missing pass entries | P3-DOCS | MERGED |
 
 ---
 
@@ -51,20 +53,13 @@
    - Fix: Create shared `apiError(message, status)` helper, migrate routes incrementally.
    - Effort: High (82 routes, spread across multiple PRs)
 
-### P3: Documentation / DX
+### P3: Documentation / DX — ✅ ALL RESOLVED
 
-5. **13 env vars undocumented in .env.example**
-   - Problem: Variables like `LARAVEL_INTERNAL_URL`, `CI_SEED_TOKEN`, `DIXIS_AGG_PROVIDER`, `SMTP_DEV_MAILBOX`, etc. are used in code but not listed in `.env.example`.
-   - Impact: New developers / fresh deployments miss configuration.
-   - Fix: Add all env vars to `.env.example` with comments.
-   - Effort: Low
+5. ~~**13 env vars undocumented in .env.example**~~ — RESOLVED
+   - Fixed: Added all missing env vars to `.env.example` with section headers and comments.
 
-6. **OPS/STATE.md outdated**
-   - File: `docs/OPS/STATE.md`
-   - Problem: Missing entries for AUTH-UNIFY, DUAL-DB-MIGRATION, CLEANUP-SPRINT passes.
-   - Impact: Historical record incomplete.
-   - Fix: Add missing entries.
-   - Effort: Low
+6. ~~**OPS/STATE.md outdated**~~ — RESOLVED
+   - Fixed: Added AUTH-UNIFY, DUAL-DB-MIGRATION, CLEANUP-SPRINT-01, ADMIN-BULK-STATUS-01 entries.
 
 ---
 

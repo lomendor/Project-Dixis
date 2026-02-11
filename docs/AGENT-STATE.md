@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (ADMIN-BULK-STATUS-01 deployed)
+**Updated**: 2026-02-11 (P3-DOCS-CLEANUP complete)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,6 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
+- **P3-DOCS-CLEANUP** — 13 env vars documented in .env.example, OPS/STATE.md synced, audit backlog cleared (2026-02-11) ✅
 - **ADMIN-BULK-STATUS-01** — Bulk order status update with checkboxes + toolbar (PR #2744, deployed 2026-02-11) ✅
 - **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS fix (#2741), mock cleanup (#2743) ✅
 - **DUAL-DB-MIGRATION** — Phases 5.5a-d: Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
