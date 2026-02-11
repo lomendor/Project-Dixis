@@ -34,6 +34,7 @@ class Producer extends Model
         'status',
         'user_id',
         'is_active',
+        'rejection_reason',
     ];
 
     protected $casts = [
