@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { fetchProductCounts } from '@/lib/laravel/counts';
 import Link from 'next/link';
 
 /**
@@ -54,10 +55,10 @@ export default async function Page() {
   const from7 = new Date(now.getTime() - T7);
   const from30 = new Date(now.getTime() - T30);
 
-  const [orders7, pendingCount, lowStockCount, latest, topItems] = await Promise.all([
+  const [orders7, pendingCount, productCounts, latest, topItems] = await Promise.all([
     prisma.order.findMany({ where: { createdAt: { gte: from7 } }, select: { id: true, total: true } }),
     prisma.order.count({ where: { status: 'PENDING' } }),
-    prisma.product.count({ where: { stock: { lte: thr() } } }),
+    fetchProductCounts(thr()),
     prisma.order.findMany({
       orderBy: { createdAt: 'desc' },
       take: 10,
@@ -71,6 +72,7 @@ export default async function Page() {
       take: 10,
     }).catch((): TopProduct[] => []),
   ]);
+  const lowStockCount = productCounts.lowStock;
 
   const revenue7 = orders7.reduce((s: number, o: OrderSummary) => s + Number(o.total ?? 0), 0);
   const orders7Count = orders7.length;
