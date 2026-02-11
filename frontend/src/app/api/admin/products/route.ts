@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/client'
 import { requireAdmin, AdminError } from '@/lib/auth/admin'
+import { getLaravelInternalUrl } from '@/env'
+import { toStorefrontSlug } from '@/lib/category-map'
 import { z } from 'zod'
+import { cookies } from 'next/headers'
+
+/**
+ * Phase 5.1: Admin product routes now proxy to Laravel (SSOT).
+ * Admin authentication still uses Prisma AdminUser table.
+ * Product CRUD goes to Laravel so products appear on the storefront.
+ */
 
 const CreateProductSchema = z.object({
   title: z.string().min(3, 'Τίτλος τουλάχιστον 3 χαρακτήρες'),
@@ -14,47 +22,78 @@ const CreateProductSchema = z.object({
   imageUrl: z.string().url().optional().or(z.literal('')),
 })
 
+/**
+ * Helper: get session token for Laravel proxy calls
+ */
+async function getSessionToken(): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get('dixis_session')?.value ?? null
+}
+
+/**
+ * GET /api/admin/products
+ * Lists ALL products from Laravel (admin view with search/filter)
+ */
 export async function GET(req: Request) {
   try {
-    // Require admin authentication
     await requireAdmin()
 
     const { searchParams } = new URL(req.url)
     const q = searchParams.get('q') || ''
     const approval = searchParams.get('approval') || ''
 
-    const items = await prisma.product.findMany({
-      where: {
-        AND: [
-          q ? { title: { contains: q } } : {},
-          approval ? { approvalStatus: approval } : {}
-        ]
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        price: true,
-        unit: true,
-        stock: true,
-        isActive: true,
-        approvalStatus: true,
-        rejectionReason: true,
-        producer: {
-          select: { id: true, name: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 100
+    const laravelBase = getLaravelInternalUrl()
+    const url = new URL(`${laravelBase}/public/products`)
+    if (q) url.searchParams.set('search', q)
+    url.searchParams.set('per_page', '100')
+
+    const res = await fetch(url.toString(), {
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store',
     })
+
+    if (!res.ok) {
+      console.error('[Admin] Laravel products fetch failed:', res.status)
+      return NextResponse.json({ error: 'Σφάλμα ανάκτησης προϊόντων' }, { status: res.status })
+    }
+
+    const json = await res.json()
+    const products = json?.data ?? []
+
+    // Map Laravel format to admin panel format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items = products
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((p: any) => {
+        if (!approval) return true
+        const status = p.approval_status || 'approved'
+        return status === approval
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((p: any) => {
+        const categories = p.categories || []
+        return {
+          id: String(p.id),
+          title: p.name || p.title,
+          description: p.description,
+          category: toStorefrontSlug(categories[0]?.slug || p.category),
+          price: parseFloat(p.price),
+          unit: p.unit || 'kg',
+          stock: typeof p.stock === 'number' ? p.stock : 0,
+          isActive: p.is_active !== false,
+          approvalStatus: p.approval_status || 'approved',
+          rejectionReason: p.rejection_reason || null,
+          producer: p.producer
+            ? { id: String(p.producer.id), name: p.producer.name }
+            : null,
+        }
+      })
 
     return NextResponse.json({ items })
 
   } catch (error: unknown) {
     console.error('Admin products list error:', error)
 
-    // Handle AdminError (authentication/authorization)
     if (error instanceof AdminError) {
       if (error.code === 'NOT_AUTHENTICATED') {
         return NextResponse.json({ error: 'Απαιτείται σύνδεση' }, { status: 401 })
@@ -66,6 +105,10 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * POST /api/admin/products
+ * Creates a product in Laravel (so it appears on the storefront)
+ */
 export async function POST(req: Request) {
   try {
     await requireAdmin()
@@ -82,44 +125,60 @@ export async function POST(req: Request) {
 
     const { title, category, price, unit, stock, description, producerId, imageUrl } = parsed.data
 
-    // Verify producer exists
-    const producer = await prisma.producer.findUnique({ where: { id: producerId } })
-    if (!producer) {
-      return NextResponse.json({ error: 'Ο παραγωγός δεν βρέθηκε' }, { status: 400 })
+    const sessionToken = await getSessionToken()
+
+    // Proxy to Laravel POST /v1/products
+    const laravelBase = getLaravelInternalUrl()
+    const url = new URL(`${laravelBase}/products`)
+
+    const laravelPayload = {
+      name: title,
+      category,
+      price,
+      unit,
+      stock: stock ?? 0,
+      description: description || null,
+      image_url: imageUrl || null,
+      producer_id: parseInt(producerId, 10),
+      is_active: true,
     }
 
-    // Generate slug from title
-    const baseSlug = title
-      .toLowerCase()
-      .replace(/[αά]/g, 'a').replace(/[εέ]/g, 'e').replace(/[ηή]/g, 'i')
-      .replace(/[ιί]/g, 'i').replace(/[οό]/g, 'o').replace(/[υύ]/g, 'y')
-      .replace(/[ωώ]/g, 'o').replace(/[σς]/g, 's')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    const slug = `${baseSlug}-${Date.now().toString(36)}`
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`
+    }
 
-    const item = await prisma.product.create({
-      data: {
-        title,
-        slug,
-        category,
-        price,
-        unit,
-        stock: stock ?? 0,
-        description: description || null,
-        producerId,
-        imageUrl: imageUrl || null,
-        isActive: true,
-        approvalStatus: 'approved', // Admin-created products auto-approved
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        category: true,
-        price: true,
-        producer: { select: { id: true, name: true } },
-      },
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(laravelPayload),
     })
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      console.error('[Admin] Laravel product create failed:', res.status, errorData)
+      return NextResponse.json(
+        { error: errorData.message || 'Σφάλμα δημιουργίας προϊόντος' },
+        { status: res.status }
+      )
+    }
+
+    const data = await res.json()
+    const product = data.data || data
+
+    const item = {
+      id: String(product.id),
+      title: product.name || product.title,
+      slug: product.slug,
+      category: product.category,
+      price: parseFloat(product.price),
+      producer: product.producer
+        ? { id: String(product.producer.id), name: product.producer.name }
+        : null,
+    }
 
     return NextResponse.json({ item }, { status: 201 })
 

@@ -1,19 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/client'
 import { requireAdmin, AdminError } from '@/lib/auth/admin'
 import { logAdminAction } from '@/lib/audit/logger'
+import { getLaravelInternalUrl } from '@/env'
+import { cookies } from 'next/headers'
+
+/**
+ * Phase 5.1: Admin product update now proxies to Laravel (SSOT).
+ * Admin auth + audit logging still uses Prisma.
+ * Product mutations go to Laravel so changes appear on the storefront.
+ */
+
+async function getSessionToken(): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get('dixis_session')?.value ?? null
+}
 
 /**
  * PATCH /api/admin/products/[id]
- * Update product properties (admin only)
- * Supports: isActive, price, stock
+ * Update product properties via Laravel (admin only)
+ * Supports: isActive, price, stock, title, description, category, unit
  */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require admin authentication
     const admin = await requireAdmin()
     const { id: productId } = await params
 
@@ -24,38 +35,14 @@ export async function PATCH(
     const body = await request.json().catch(() => ({}))
     const { isActive, price, stock, title, description, category, unit } = body
 
-    // Fetch current product for audit trail
-    const currentProduct = await prisma.product.findUnique({
-      where: { id: productId },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        unit: true,
-        isActive: true,
-        price: true,
-        stock: true
-      }
-    })
-
-    if (!currentProduct) {
-      return NextResponse.json({ error: 'Το προϊόν δεν βρέθηκε' }, { status: 404 })
-    }
-
-    // Build update data
-    const updateData: Record<string, unknown> = {}
-    const oldValue: Record<string, number | boolean | string> = {}
-    const newValue: Record<string, number | boolean | string> = {}
-    let hasChanges = false
+    // Build Laravel update payload (snake_case for Laravel)
+    const laravelPayload: Record<string, unknown> = {}
+    const oldValue: Record<string, string | number | boolean> = {}
+    const newValue: Record<string, string | number | boolean> = {}
 
     if (isActive !== undefined && typeof isActive === 'boolean') {
-      updateData.isActive = isActive
-      if (currentProduct.isActive !== isActive) {
-        oldValue.isActive = currentProduct.isActive
-        newValue.isActive = isActive
-        hasChanges = true
-      }
+      laravelPayload.is_active = isActive
+      newValue.isActive = isActive
     }
 
     if (price !== undefined) {
@@ -66,12 +53,8 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      updateData.price = newPrice
-      if (currentProduct.price !== newPrice) {
-        oldValue.price = currentProduct.price
-        newValue.price = newPrice
-        hasChanges = true
-      }
+      laravelPayload.price = newPrice
+      newValue.price = newPrice
     }
 
     if (stock !== undefined) {
@@ -82,12 +65,8 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      updateData.stock = newStock
-      if (currentProduct.stock !== newStock) {
-        oldValue.stock = currentProduct.stock
-        newValue.stock = newStock
-        hasChanges = true
-      }
+      laravelPayload.stock = newStock
+      newValue.stock = newStock
     }
 
     if (title !== undefined && typeof title === 'string') {
@@ -98,22 +77,14 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      updateData.title = trimmedTitle
-      if (currentProduct.title !== trimmedTitle) {
-        oldValue.title = currentProduct.title
-        newValue.title = trimmedTitle
-        hasChanges = true
-      }
+      laravelPayload.name = trimmedTitle
+      newValue.title = trimmedTitle
     }
 
     if (description !== undefined) {
       const trimmedDesc = typeof description === 'string' ? description.trim() : null
-      updateData.description = trimmedDesc
-      if (currentProduct.description !== trimmedDesc) {
-        oldValue.description = currentProduct.description || ''
-        newValue.description = trimmedDesc || ''
-        hasChanges = true
-      }
+      laravelPayload.description = trimmedDesc
+      newValue.description = trimmedDesc || ''
     }
 
     if (category !== undefined && typeof category === 'string') {
@@ -124,12 +95,8 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      updateData.category = trimmedCategory
-      if (currentProduct.category !== trimmedCategory) {
-        oldValue.category = currentProduct.category
-        newValue.category = trimmedCategory
-        hasChanges = true
-      }
+      laravelPayload.category = trimmedCategory
+      newValue.category = trimmedCategory
     }
 
     if (unit !== undefined && typeof unit === 'string') {
@@ -140,67 +107,89 @@ export async function PATCH(
           { status: 400 }
         )
       }
-      updateData.unit = trimmedUnit
-      if (currentProduct.unit !== trimmedUnit) {
-        oldValue.unit = currentProduct.unit
-        newValue.unit = trimmedUnit
-        hasChanges = true
+      laravelPayload.unit = trimmedUnit
+      newValue.unit = trimmedUnit
+    }
+
+    if (Object.keys(laravelPayload).length === 0) {
+      return NextResponse.json({ success: true, product: { id: productId } })
+    }
+
+    // Proxy to Laravel PATCH /v1/products/{id}
+    const sessionToken = await getSessionToken()
+    const laravelBase = getLaravelInternalUrl()
+    const url = new URL(`${laravelBase}/products/${productId}`)
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`
+    }
+
+    const res = await fetch(url.toString(), {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(laravelPayload),
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      console.error('[Admin] Laravel product update failed:', res.status, errorData)
+
+      if (res.status === 404) {
+        return NextResponse.json({ error: 'Το προϊόν δεν βρέθηκε' }, { status: 404 })
+      }
+
+      return NextResponse.json(
+        { error: errorData.message || 'Σφάλμα ενημέρωσης' },
+        { status: res.status }
+      )
+    }
+
+    const data = await res.json()
+    const product = data.data || data
+
+    const updatedProduct = {
+      id: String(product.id),
+      title: product.name || product.title,
+      description: product.description,
+      category: product.category,
+      unit: product.unit,
+      price: parseFloat(product.price),
+      stock: typeof product.stock === 'number' ? product.stock : 0,
+      isActive: product.is_active !== false,
+      approvalStatus: product.approval_status || 'approved',
+    }
+
+    // Audit log (still uses Prisma — admin audit trail)
+    if (Object.keys(newValue).length > 0) {
+      try {
+        await logAdminAction({
+          admin,
+          action: 'PRODUCT_UPDATE',
+          entityType: 'product',
+          entityId: productId,
+          oldValue,
+          newValue,
+        })
+      } catch (auditErr) {
+        // Don't fail the request if audit logging fails
+        console.error('[Admin] Audit log failed:', auditErr)
       }
     }
 
-    // If no changes, return current product
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json({ success: true, product: currentProduct })
-    }
-
-    // Update product
-    const updatedProduct = await prisma.product.update({
-      where: { id: productId },
-      data: updateData,
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        category: true,
-        unit: true,
-        price: true,
-        stock: true,
-        isActive: true,
-        approvalStatus: true
-      }
-    })
-
-    // Log admin action for audit trail (only if there were actual changes)
-    if (hasChanges) {
-      await logAdminAction({
-        admin,
-        action: 'PRODUCT_UPDATE',
-        entityType: 'product',
-        entityId: productId,
-        oldValue,
-        newValue
-      })
-    }
-
-    return NextResponse.json({
-      success: true,
-      product: updatedProduct
-    })
+    return NextResponse.json({ success: true, product: updatedProduct })
 
   } catch (error: unknown) {
     console.error('Admin product update error:', error)
 
-    // Handle AdminError (authentication/authorization)
     if (error instanceof AdminError) {
       if (error.code === 'NOT_AUTHENTICATED') {
         return NextResponse.json({ error: 'Απαιτείται σύνδεση' }, { status: 401 })
       }
       return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
-    }
-
-    // Handle Prisma errors
-    if ((error as any)?.code === 'P2025') {
-      return NextResponse.json({ error: 'Το προϊόν δεν βρέθηκε' }, { status: 404 })
     }
 
     return NextResponse.json({ error: 'Σφάλμα διακομιστή' }, { status: 500 })
