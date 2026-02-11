@@ -1,11 +1,44 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-11 (P3-DOCS-CLEANUP)
+**Last Updated**: 2026-02-11 (PROD-STABILITY-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-11 — PROD-STABILITY-02: Infrastructure Hardening
+
+**Status**: ✅ DONE (PR #2755 merged & deployed)
+
+**What was done**:
+- Removed stale `dixis.gr.bak` from nginx `sites-enabled/` (was a duplicate server block)
+- Fixed PrismaClient singleton: now cached in ALL environments (was only dev)
+- Added production log config: errors-only to reduce noise
+- Added Neon connection pooling params to DATABASE_URL: `pgbouncer=true&connection_limit=5&pool_timeout=20&connect_timeout=15`
+
+**Result**: Zero Prisma "Connection Closed" errors after deploy (was 11+ per restart before).
+
+---
+
+## 2026-02-11 — PROD-FIX-SPRINT-01: Production E2E Audit Fixes
+
+**Status**: ✅ DONE (PRs #2749, #2751, #2753 — all merged & deployed)
+
+**What was done**:
+- **Cart UX (PR #2749)**: Added toast notification to product detail page `Add.tsx` (was only showing subtle `<p>` text), passed `imageUrl` from product pages to cart store
+- **Legal Pages (PR #2751)**: Replaced 1-sentence placeholder Terms & Privacy pages with comprehensive Greek legal content (11 sections each, GDPR-aware)
+- **Producer Dashboard (PR #2753)**: Created `/producer` index page with redirect to `/producer/dashboard` (was 404), replaced manual auth in analytics with `AuthGuard requireRole="producer"`
+
+**Deploy note**: Orphaned next-server process was serving stale cached 404 for `/producer`. Fixed by killing orphan, cleaning PM2, fresh start. PM2 saved.
+
+**Production verification**:
+- `/legal/terms` → 200 ✅
+- `/legal/privacy` → 200 ✅
+- `/producer` → 307 → `/producer/dashboard` ✅
+- All 15 critical routes verified via `curl` through nginx
 
 ---
 
