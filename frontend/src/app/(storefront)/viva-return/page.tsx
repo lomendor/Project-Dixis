@@ -20,7 +20,11 @@ function VivaReturnContent() {
       }
 
       try {
-        const res = await fetch(`/api/viva-verify?orderCode=${orderCode}&t=${transactionId || ''}`)
+        const res = await fetch('/api/viva-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderCode, transactionId: transactionId || '' }),
+        })
         const data = await res.json()
 
         if (res.ok && data.success) {
