@@ -92,10 +92,11 @@ function ProducerProductsContent() {
       setLoading(true);
       // AUTH-UNIFY-01: Call Laravel directly via apiClient (replaces broken /api/producer/status proxy)
       const data = await apiClient.getProducerMe();
+      // PRODUCER-ONBOARD-01: Use has_profile flag from backend
       const status: ProducerStatus = {
         isApproved: data.producer?.status === 'active' && data.producer?.is_active !== false,
         status: (data.producer?.status as ProducerStatus['status']) || null,
-        profileExists: !!data.producer,
+        profileExists: data.has_profile ?? !!data.producer,
       };
       setProducerStatus(status);
 
@@ -104,12 +105,9 @@ function ProducerProductsContent() {
         await loadProducts();
       }
     } catch (err: any) {
-      // 404 = no producer profile exists yet
-      if (err.message?.includes('404')) {
-        setProducerStatus({ isApproved: false, status: null, profileExists: false });
-      } else {
-        setError('Αποτυχία ελέγχου κατάστασης παραγωγού');
-      }
+      // PRODUCER-ONBOARD-01: Backend now returns 200 even without profile
+      // Only catch network/unexpected errors
+      setError('Αποτυχία ελέγχου κατάστασης παραγωγού');
     } finally {
       setLoading(false);
     }

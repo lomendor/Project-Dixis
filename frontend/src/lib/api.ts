@@ -989,7 +989,7 @@ class ApiClient {
     return this.request<AdminOrdersResponse>(`admin/orders${qs ? `?${qs}` : ''}`);
   }
 
-  // AUTH-UNIFY-01: Producer profile/status (replaces mock /api/producer/status)
+  // PRODUCER-ONBOARD-01: Producer profile/status with has_profile flag
   async getProducerMe(): Promise<{
     producer: {
       id: number;
@@ -1002,9 +1002,26 @@ class ApiClient {
       location?: string;
       phone?: string;
       email?: string;
-    };
+      rejection_reason?: string | null;
+    } | null;
+    has_profile: boolean;
   }> {
     return this.request('producer/me');
+  }
+
+  // PRODUCER-ONBOARD-01: Update producer profile (onboarding form)
+  async updateProducerProfile(data: {
+    business_name?: string;
+    phone?: string;
+    city?: string;
+    region?: string;
+    description?: string;
+    tax_id?: string;
+  }): Promise<{ producer: Record<string, unknown>; message: string }> {
+    return this.request('producer/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 
   // AUTH-UNIFY-01: Delete a producer product
