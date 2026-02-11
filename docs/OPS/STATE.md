@@ -1,11 +1,25 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-11 (PROD-STABILITY-02)
+**Last Updated**: 2026-02-11 (PROD-IMAGE-FIX-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-11 — PROD-IMAGE-FIX-01: Product Image Fallback + Cart i18n
+
+**Status**: ✅ DONE (PR #2757, deployed)
+
+**What was done**:
+- Products with `id≥10` had `image_url: null` but images in `images[]` array — added fallback `p.image_url || p.images?.[0]?.url || null` on listing + detail pages
+- Cart page had mixed Greek/English text ("Συνέχεια στο checkout") — replaced with full Greek ("Ολοκλήρωση παραγγελίας")
+- Cart disclaimer also translated ("κατά την ολοκλήρωση")
+
+**Files changed**: 3 files, 4 LOC
+**Production**: Deployed, healthz 200, images rendering, cart fully Greek
 
 ---
 
