@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (Codebase cleanup sprint: Prisma singleton, SQLite compat)
+**Updated**: 2026-02-11 (ADMIN-BULK-STATUS-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -30,7 +30,7 @@ _(empty — pick from NEXT)_
 |----------|---------|---------|-----|
 | 1 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend NOT ready (needs Socialite) |
 | 2 | **WISHLIST-01** | User wishlist feature | No implementation yet |
-| 3 | **ADMIN-BULK-STATUS-01** | Bulk order status update | Admin productivity |
+| 3 | **AUDIT-BACKLOG-P2** | Error response standardization | 82 routes inconsistent |
 
 See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
@@ -47,7 +47,8 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
-- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS+viva fix (#2741), deployed 2026-02-11 ✅
+- **ADMIN-BULK-STATUS-01** — Bulk order status update with checkboxes + toolbar (PR #2744, deployed 2026-02-11) ✅
+- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS fix (#2741), mock cleanup (#2743) ✅
 - **DUAL-DB-MIGRATION** — Phases 5.5a-d: Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
 - **AUTH-UNIFY** — Fix producer dashboard auth (PRs #2721-#2722, deployed 2026-02-10) ✅
 - **FEATURED-PRODUCTS-FIX-01** — Fix homepage featured products not rendering (PR #2708, deployed 2026-02-10) ✅
@@ -56,20 +57,6 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 - **PRODUCERS-LISTING-01** — Restore public producers listing page with SSR + Prisma (PR #2701, deployed 2026-02-10) ✅
 - **PRODUCER-I18N-01** — Producer analytics dashboard translated to Greek (PR #2699, deployed 2026-02-10) ✅
 - **ADMIN-CLEANUP-01** — Admin code cleanup + complete i18n (PRs #2694-#2698, deployed 2026-02-09) ✅
-- **QA-FULL-E2E-01** — Full QA pass + bug fixes + deploy hardening (PRs #2686-#2689, deployed 2026-02-09) ✅
-- **ADMIN-EMAIL-OTP-01** — Admin login via email OTP (PRs #2665-2667, deployed 2026-02-06) ✅
-- **ADMIN-SHIPPING-UI-01** — Shipping labels UI wired to admin (PR #2662, deployed 2026-02-06) ✅
-- **PRODUCER-NOTIFY-01** — Producer emails discovered working (47 records, enabled since Jan) ✅
-- **REORDER-01** — Reorder button on order details (PR #2659, deployed 2026-02-06) ✅
-- **TRACKING-DISPLAY-01** — Public order tracking via UUID token (PR #2657, deployed 2026-02-06) ✅
-- **CART-SYNC-01** — Cart persistence discovered working (AuthContext sync on login) ✅
-- **SSOT-AUDIT-01** — Discovered order confirmation emails already working (Laravel) ✅
-- **EMAIL-VERIFY-ACTIVATE-01** — Email verification enabled in production ✅
-- **CARD-SMOKE-02** — Card payment E2E smoke verified on production ✅
-- **ORDER-NOTIFY-01** — Order status email notifications via Resend (#2651) ✅
-- **PR-CLEAN-02** — Shared admin components: AdminLoading + AdminEmptyState (#2646) ✅
-- **PR-CLEAN-01** — Dead code removal: update-status, validator, resend spec (#2644) ✅
-- **PR-CRUD-02** — Product creation API + UI with Zod validation (#2642) ✅
 
 ---
 
