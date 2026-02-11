@@ -1,6 +1,49 @@
 import { prisma } from '@/server/db/prisma'
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
+import { getLaravelInternalUrl } from '@/env'
+
+/**
+ * Phase 5.5c: Product data fetched from Laravel (SSOT).
+ * Order creation stays in Prisma (orders are Prisma-only).
+ */
+
+interface LaravelProduct {
+  id: string | number
+  name: string
+  price: number | string
+  producer_id: number | string
+}
+
+async function fetchProductsFromLaravel(ids: string[]): Promise<Map<string, LaravelProduct>> {
+  const laravelBase = getLaravelInternalUrl()
+  const productMap = new Map<string, LaravelProduct>()
+
+  await Promise.all(ids.map(async (id) => {
+    try {
+      const url = new URL(`${laravelBase}/public/products/${id}`)
+      const res = await fetch(url.toString(), {
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        const p = json?.data ?? json
+        productMap.set(String(p.id), {
+          id: String(p.id),
+          name: p.name || p.title || '',
+          price: Number(p.price ?? 0),
+          producer_id: String(p.producer_id ?? p.producerId ?? ''),
+        })
+      }
+    } catch {
+      // Skip failed product fetches
+    }
+  }))
+
+  return productMap
+}
 
 export async function POST(req: Request) {
   try {
@@ -10,31 +53,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid items' }, { status: 400 })
     }
 
-    // Fetch products from DB
+    // Fetch products from Laravel (SSOT)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const productIds = items.map((i: any) => String(i.id))
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      include: { producer: true }
-    })
+    const productMap = await fetchProductsFromLaravel(productIds)
 
     // Calculate totals (cart uses priceCents, DB uses price Float)
     let subtotalFloat = 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const orderItems = items.map((cartItem: any) => {
-      const product = products.find(p => p.id === String(cartItem.id))
+      const product = productMap.get(String(cartItem.id))
       if (!product) {
         throw new Error(`Product ${cartItem.id} not found`)
       }
 
-      const priceFloat = product.price
+      const priceFloat = Number(product.price)
       const lineTotal = priceFloat * cartItem.qty
       subtotalFloat += lineTotal
 
       return {
-        productId: product.id,
-        producerId: product.producerId,
+        productId: String(product.id),
+        producerId: String(product.producer_id),
         qty: cartItem.qty,
         price: priceFloat,
-        titleSnap: product.title,
+        titleSnap: product.name,
         priceSnap: priceFloat,
         status: 'pending'
       }
@@ -59,7 +101,7 @@ export async function POST(req: Request) {
     const totalDecimal = subtotal.add(shipping).add(vat)
     const total = totalDecimal.toNumber()
 
-    // Create draft order with full breakdown
+    // Create draft order with full breakdown (orders stay in Prisma)
     const order = await prisma.order.create({
       data: {
         status: 'pending',

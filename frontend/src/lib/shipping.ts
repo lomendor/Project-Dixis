@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { getLaravelInternalUrl } from '@/env';
 
 export type Zone = 'mainland' | 'islands';
 export type Item = { slug: string; qty: number };
@@ -20,19 +20,37 @@ export function calcShippingFromSummary(subtotal: number, qty: number, zone: Zon
   return { total: Number(total.toFixed(2)), subtotal: Number(subtotal.toFixed(2)), zone, threshold: FREE_TH };
 }
 
+/**
+ * Phase 5.5c: Fetch product prices from Laravel (SSOT) instead of Prisma.
+ * Fetches individual products by ID from /public/products/{id}.
+ */
 export async function calcShippingForItems(items: Item[], zone: Zone) {
   const slugs = items.map(i => i.slug);
-  const prods = await prisma.product.findMany({
-    where: { id: { in: slugs } },
-    select: { id: true, price: true }
-  });
-  const map = new Map<string, number>();
-  for (const p of prods) map.set(p.id, Number(p.price ?? 0));
+  const laravelBase = getLaravelInternalUrl();
+  const priceMap = new Map<string, number>();
+
+  try {
+    await Promise.all(slugs.map(async (id) => {
+      const url = new URL(`${laravelBase}/public/products/${id}`);
+      const res = await fetch(url.toString(), {
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const product = json?.data ?? json;
+        priceMap.set(id, Number(product.price ?? 0));
+      }
+    }));
+  } catch {
+    // If Laravel fails, prices default to 0 (graceful degradation)
+  }
 
   let subtotal = 0; let qty = 0;
   for (const it of items) {
     const q = Math.max(0, Number(it.qty) || 0);
-    subtotal += (map.get(it.slug) ?? 0) * q;
+    subtotal += (priceMap.get(it.slug) ?? 0) * q;
     qty += q;
   }
   return calcShippingFromSummary(subtotal, qty, zone);

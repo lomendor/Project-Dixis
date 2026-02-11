@@ -7,15 +7,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    // Phase 5.5c: Remove Product relation include.
+    // OrderItem already has titleSnap/priceSnap snapshots.
     const order = await prisma.order.findUnique({
       where: { id },
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      }
+      include: { items: true }
     })
 
     if (!order) {
@@ -41,7 +37,6 @@ export async function GET(
         price: item.price,
         titleSnap: item.titleSnap,
         priceSnap: item.priceSnap,
-        product: item.product
       }))
     })
   } catch (error) {
