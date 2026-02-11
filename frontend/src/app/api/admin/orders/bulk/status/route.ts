@@ -96,11 +96,11 @@ export async function POST(req: Request) {
             }
           }
         } catch (emailErr) {
-          console.warn(`[admin bulk] email skipped for ${orderId}:`, (emailErr as Error).message);
+          console.warn('[admin bulk] email skipped for %s:', String(orderId).replace(/[\n\r]/g, ''), (emailErr as Error).message);
         }
 
         results.push({ id: orderId, ok: true });
-        console.log(`[order bulk] ${orderId} status ${from}→${to}`);
+        console.log('[order bulk] %s status %s→%s', String(orderId).replace(/[\n\r]/g, ''), from, to);
       } catch (err) {
         results.push({ id: orderId, ok: false, error: (err as Error).message });
       }
