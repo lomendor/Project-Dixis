@@ -30,8 +30,8 @@ export function buildWhereClause(q: FacetQuery): any {
     // Προτάσεις από AG97-prep: id ή buyerName ή buyerPhone
     where.OR = [
       { id: needle },
-      { buyerName: { contains: needle, mode: 'insensitive' } },
-      { buyerPhone: { contains: needle, mode: 'insensitive' } },
+      { buyerName: { contains: needle } },
+      { buyerPhone: { contains: needle } },
     ];
   }
   return where;
