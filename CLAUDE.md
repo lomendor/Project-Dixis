@@ -7,7 +7,7 @@
 ## Guardrails (non-negotiable)
 
 - **CI/CD**: NO changes to `.github/workflows/**`
-- **Ports**: 8001 (backend), 3001 (frontend) — LOCKED
+- **Ports**: 8001 (Laravel backend), 3000 (Next.js frontend via PM2) — LOCKED
 - **Next.js**: 15.5.0 — LOCKED
 - **PR Size**: ≤300 LOC per PR
 - **WIP limit**: 1 item in progress at a time
@@ -20,6 +20,8 @@
 - **Constraint**: No PostgreSQL-specific features that break SQLite CI
   - Example: `mode: 'insensitive'` removed from Prisma queries
 - **Schema sync**: `schema.ci.prisma` auto-generated from main schema
+- **PrismaClient**: Single singleton at `@/lib/db/client` — NEVER create `new PrismaClient()` elsewhere
+- **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (see `src/lib/api.ts`)
 
 ## Workspace Layout
 
