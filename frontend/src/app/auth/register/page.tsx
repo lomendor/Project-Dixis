@@ -25,11 +25,11 @@ export default function Register() {
       const intendedDestination = getIntendedDestination?.();
       clearIntendedDestination?.();
       
-      // Role-based redirect logic
-      const destination = intendedDestination && intendedDestination !== '/' 
-        ? intendedDestination 
-        : user.role === 'producer' 
-          ? '/producer/dashboard' 
+      // PRODUCER-ONBOARD-01: New producers go to onboarding, not dashboard
+      const destination = intendedDestination && intendedDestination !== '/'
+        ? intendedDestination
+        : user.role === 'producer'
+          ? '/producer/onboarding'
           : '/';
       
       router.push(destination);
