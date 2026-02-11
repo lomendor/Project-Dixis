@@ -22,6 +22,13 @@ class CategorySeeder extends Seeder
             'Olive Oil & Olives',
             'Wine & Beverages',
             'Honey & Preserves',
+            // Phase 3: Categories needed by Greek storefront products
+            'Legumes',
+            'Pasta & Trahanas',
+            'Flours & Bakery',
+            'Nuts & Dried Fruits',
+            'Sweets & Preserves',
+            'Sauces & Pickles',
         ];
 
         foreach ($categories as $categoryName) {

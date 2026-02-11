@@ -6,192 +6,245 @@ use App\Models\Category;
 use App\Models\Producer;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
+/**
+ * Phase 3 (STOREFRONT-LARAVEL-01): Seed Greek-named products and producers.
+ *
+ * Mirrors the Prisma seed data so the storefront has a rich Greek catalog.
+ * Safe to re-run: uses firstOrCreate throughout.
+ */
 class GreekProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Get the first producer (created in ProducerSeeder)
-        $producer = Producer::first();
+        // --- Producers (with backing User accounts) ---
 
-        if (! $producer) {
-            $this->command->warn('No producers found. Skipping Greek product seeding.');
-
-            return;
-        }
-
-        // Get categories for assignment (use canonical slugs from CategorySeeder)
-        $vegetables = Category::where('slug', 'vegetables')->first();
-        $fruits = Category::where('slug', 'fruits')->first();
-        $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
-        $herbs = Category::where('slug', 'herbs-spices')->first();
-        $dairy = Category::where('slug', 'dairy-products')->first();
-        $honey = Category::where('slug', 'honey-preserves')->first();
-
-        // Create Greek products for testing Greek normalization
-        $greekProductsData = [
+        $malisUser = User::firstOrCreate(
+            ['email' => 'malis@dixis.gr'],
+            ['name' => 'Malis Garden', 'password' => bcrypt('demo-seed-2026')]
+        );
+        $malis = Producer::firstOrCreate(
+            ['slug' => 'malis-garden'],
             [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Πορτοκάλια Κρήτης',
-                    'slug' => 'portokalia-kritis',
-                    'description' => 'Φρέσκα πορτοκάλια από την Κρήτη, γλυκά και ζουμερά',
-                    'price' => 2.80,
-                    'weight_per_unit' => 1.000,
-                    'unit' => 'kg',
-                    'stock' => 120,
-                    'category' => 'Fruits',
-                    'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1547036967-23d11aacaee0',
-                    'status' => 'available',
-                    'is_active' => true,
-                ],
-                'categories' => [$fruits],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1547036967-23d11aacaee0', 'is_primary' => true, 'sort_order' => 0],
-                ],
-            ],
+                'user_id' => $malisUser->id,
+                'name' => 'Malis Garden',
+                'business_name' => 'Malis Garden',
+                'description' => 'Παραδοσιακό βιολογικό αγρόκτημα με ελαιόλαδο και κονσέρβες',
+                'location' => 'Attica',
+                'phone' => '+30 210 0000001',
+                'email' => 'malis@dixis.gr',
+                'status' => 'active',
+                'is_active' => true,
+            ]
+        );
+
+        $lemnosUser = User::firstOrCreate(
+            ['email' => 'lemnos@dixis.gr'],
+            ['name' => 'Lemnos Honey Co', 'password' => bcrypt('demo-seed-2026')]
+        );
+        $lemnos = Producer::firstOrCreate(
+            ['slug' => 'lemnos-honey-co'],
             [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Ελαιόλαδο Καλαμάτας',
-                    'slug' => 'elaiola-kalamatas',
-                    'description' => 'Παρθένο ελαιόλαδο από Καλαμάτα, εξαιρετικής ποιότητας',
-                    'price' => 15.50,
-                    'weight_per_unit' => 0.750,
+                'user_id' => $lemnosUser->id,
+                'name' => 'Lemnos Honey Co',
+                'business_name' => 'Lemnos Honey Co',
+                'description' => 'Οικογενειακή μελισσοκομία με premium θυμαρίσιο μέλι',
+                'location' => 'Lemnos',
+                'phone' => '+30 210 0000002',
+                'email' => 'lemnos@dixis.gr',
+                'status' => 'active',
+                'is_active' => true,
+            ]
+        );
+
+        // --- Categories (look up by slug; CategorySeeder must run first) ---
+
+        $cat = fn (string $slug) => Category::where('slug', $slug)->first();
+
+        // --- Products ---
+        // Mirrors Prisma seed: 10 Greek products across 2 producers.
+
+        $products = [
+            // ─── Malis Garden (6 products) ───
+            [
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
+                    'slug' => 'exairetiko-partheno-elaiolado-1l',
+                    'description' => 'Extra virgin olive oil from organic olives',
+                    'price' => 10.90,
                     'unit' => 'bottle',
                     'stock' => 45,
-                    'category' => 'Oil',
                     'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5',
-                    'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$oliveOil],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5', 'is_primary' => true, 'sort_order' => 0],
-                ],
+                'category' => 'olive-oil-olives',
+                'image' => 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5',
             ],
             [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Μήλα Ζαγοράς',
-                    'slug' => 'mila-zagoras',
-                    'description' => 'Κόκκινα μήλα από την Ζαγορά Πηλίου, τραγανά και νόστιμα',
-                    'price' => 3.20,
-                    'weight_per_unit' => 1.000,
-                    'unit' => 'kg',
-                    'stock' => 80,
-                    'category' => 'Fruits',
-                    'is_organic' => false,
-                    'image_url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
-                    'status' => 'available',
-                    'is_active' => true,
-                ],
-                'categories' => [$fruits],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', 'is_primary' => true, 'sort_order' => 0],
-                ],
-            ],
-            [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Ντομάτες Σαντορίνης',
-                    'slug' => 'domatez-santorinis',
-                    'description' => 'Μικρές ντομάτες από Σαντορίνη, γλυκές και αρωματικές',
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Γλυκό Κουταλιού Σύκο 380g',
+                    'slug' => 'glyko-koutaliou-syko-380g',
+                    'description' => 'Traditional fig spoon sweet',
                     'price' => 4.50,
-                    'weight_per_unit' => 0.500,
-                    'unit' => 'kg',
-                    'stock' => 60,
-                    'category' => 'Vegetables',
-                    'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa',
-                    'status' => 'available',
-                    'is_active' => true,
-                ],
-                'categories' => [$vegetables],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa', 'is_primary' => true, 'sort_order' => 0],
-                ],
-            ],
-            [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Μέλι Θυμαρίσιο',
-                    'slug' => 'meli-thymarisio',
-                    'description' => 'Θυμαρίσιο μέλι από τα βουνά της Κρήτης, πυκνό και αρωματικό',
-                    'price' => 8.90,
-                    'weight_per_unit' => 0.450,
                     'unit' => 'jar',
-                    'stock' => 35,
-                    'category' => 'Honey',
-                    'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
-                    'status' => 'available',
+                    'stock' => 30,
+                    'is_organic' => false,
                     'is_active' => true,
                 ],
-                'categories' => [$honey ?? $herbs],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62', 'is_primary' => true, 'sort_order' => 0],
-                ],
+                'category' => 'sweets-preserves',
+                'image' => 'https://images.unsplash.com/photo-1597714026720-8f74c62310ba',
             ],
             [
-                'product_data' => [
-                    'producer_id' => $producer->id,
-                    'name' => 'Φέτα ΠΟΠ',
-                    'slug' => 'feta-pop',
-                    'description' => 'Αυθεντική φέτα ΠΟΠ από πρόβειο και κατσικίσιο γάλα',
-                    'price' => 6.80,
-                    'weight_per_unit' => 0.400,
-                    'unit' => 'piece',
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Φέτα ΠΟΠ Μυτιλήνης 400g',
+                    'slug' => 'feta-pop-mytilinis',
+                    'description' => 'Authentic PDO feta cheese from Mytilini',
+                    'price' => 6.50,
+                    'unit' => 'pack',
                     'stock' => 25,
-                    'category' => 'Dairy',
                     'is_organic' => false,
-                    'image_url' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7',
-                    'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$dairy ?? $vegetables],
-                'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7', 'is_primary' => true, 'sort_order' => 0],
+                'category' => 'dairy-products',
+                'image' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7',
+            ],
+            [
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Πορτοκάλια Βιολογικά 5kg',
+                    'slug' => 'portokalia-viologika',
+                    'description' => 'Organic oranges from Argolida',
+                    'price' => 8.90,
+                    'unit' => 'box',
+                    'stock' => 60,
+                    'is_organic' => true,
+                    'is_active' => true,
                 ],
+                'category' => 'fruits',
+                'image' => 'https://images.unsplash.com/photo-1547036967-23d11aacaee0',
+            ],
+            [
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Πατάτες Νάξου 3kg',
+                    'slug' => 'patates-naxou',
+                    'description' => 'Famous potatoes from Naxos island',
+                    'price' => 4.90,
+                    'unit' => 'bag',
+                    'stock' => 100,
+                    'is_organic' => false,
+                    'is_active' => true,
+                ],
+                'category' => 'vegetables',
+                'image' => 'https://images.unsplash.com/photo-1518977676601-b53f82ber39a',
+            ],
+            [
+                'producer' => $malis,
+                'data' => [
+                    'name' => 'Τραχανάς Σπιτικός 500g',
+                    'slug' => 'trachanas-spitikos',
+                    'description' => 'Traditional homemade trahanas',
+                    'price' => 5.50,
+                    'unit' => 'pack',
+                    'stock' => 40,
+                    'is_organic' => false,
+                    'is_active' => true,
+                ],
+                'category' => 'pasta-trahanas',
+                'image' => 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9',
+            ],
+
+            // ─── Lemnos Honey Co (4 products) ───
+            [
+                'producer' => $lemnos,
+                'data' => [
+                    'name' => 'Θυμαρίσιο Μέλι 450g',
+                    'slug' => 'thymarisio-meli-450g',
+                    'description' => 'Premium thyme honey from Lemnos island',
+                    'price' => 7.90,
+                    'unit' => 'jar',
+                    'stock' => 50,
+                    'is_organic' => true,
+                    'is_active' => true,
+                ],
+                'category' => 'honey-preserves',
+                'image' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
+            ],
+            [
+                'producer' => $lemnos,
+                'data' => [
+                    'name' => 'Τσίπουρο Παραδοσιακό 700ml',
+                    'slug' => 'tsipouro-paradosiako',
+                    'description' => 'Traditional Greek tsipouro spirit',
+                    'price' => 12.90,
+                    'unit' => 'bottle',
+                    'stock' => 20,
+                    'is_organic' => false,
+                    'is_active' => true,
+                ],
+                'category' => 'wine-beverages',
+                'image' => 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b',
+            ],
+            [
+                'producer' => $lemnos,
+                'data' => [
+                    'name' => 'Ρίγανη Βουνού 100g',
+                    'slug' => 'rigani-vounou',
+                    'description' => 'Wild mountain oregano from Epirus',
+                    'price' => 3.50,
+                    'unit' => 'pack',
+                    'stock' => 80,
+                    'is_organic' => true,
+                    'is_active' => true,
+                ],
+                'category' => 'herbs-spices',
+                'image' => 'https://images.unsplash.com/photo-1515586000433-45406d8e6662',
+            ],
+            [
+                'producer' => $lemnos,
+                'data' => [
+                    'name' => 'Κρασί Λήμνου Ερυθρό 750ml',
+                    'slug' => 'krasi-limnou-erythro',
+                    'description' => 'Red wine from Lemnos vineyards',
+                    'price' => 9.90,
+                    'unit' => 'bottle',
+                    'stock' => 30,
+                    'is_organic' => false,
+                    'is_active' => true,
+                ],
+                'category' => 'wine-beverages',
+                'image' => 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d',
             ],
         ];
 
-        foreach ($greekProductsData as $item) {
-            $productData = $item['product_data'];
-            $categories = array_filter($item['categories']); // Remove null categories
-            $images = $item['images'];
+        foreach ($products as $item) {
+            $productData = array_merge($item['data'], [
+                'producer_id' => $item['producer']->id,
+            ]);
 
-            // Create product if it doesn't exist
             $product = Product::firstOrCreate(
                 ['slug' => $productData['slug']],
                 $productData
             );
 
-            // Attach categories
-            if (! empty($categories)) {
-                $product->categories()->sync(collect($categories)->pluck('id')->toArray());
+            // Attach category
+            $category = $cat($item['category']);
+            if ($category) {
+                $product->categories()->syncWithoutDetaching([$category->id]);
             }
 
-            // Create images
-            foreach ($images as $imageData) {
-                ProductImage::firstOrCreate([
-                    'product_id' => $product->id,
-                    'url' => $imageData['url'],
-                ], [
-                    'product_id' => $product->id,
-                    'url' => $imageData['url'],
-                    'is_primary' => $imageData['is_primary'],
-                    'sort_order' => $imageData['sort_order'],
-                ]);
-            }
+            // Create primary image
+            ProductImage::firstOrCreate(
+                ['product_id' => $product->id, 'url' => $item['image']],
+                ['product_id' => $product->id, 'url' => $item['image'], 'is_primary' => true, 'sort_order' => 0]
+            );
         }
 
-        $this->command->info('Greek products seeded successfully!');
+        $this->command->info('Greek products seeded: ' . count($products) . ' products, 2 producers.');
     }
 }
