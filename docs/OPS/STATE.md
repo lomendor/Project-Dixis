@@ -1,11 +1,81 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-10 (FEATURED-PRODUCTS-FIX-01)
+**Last Updated**: 2026-02-11 (P3-DOCS-CLEANUP)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~500 lines (target ≤350). ⚠️ Over limit — archive next pass.
+> **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-11 — P3-DOCS-CLEANUP: Documentation & .env.example Sync
+
+**Status**: ✅ DONE
+
+**What was done**:
+- Added 13+ undocumented env vars to `.env.example` with comments (LARAVEL_INTERNAL_URL, CI_SEED_TOKEN, DIXIS_AGG_PROVIDER, SMTP_DEV_MAILBOX, OPS_TOKEN, OPS_KEY, STRIPE_SECRET_KEY, VIVA_WALLET_VERIFICATION_KEY, etc.)
+- Fixed ADMIN_PHONES formatting bug (was concatenated to comment line)
+- Updated `docs/OPS/STATE.md` with missing pass entries (AUTH-UNIFY, DUAL-DB-MIGRATION, CLEANUP-SPRINT-01, ADMIN-BULK-STATUS-01)
+- Updated `docs/AGENT/AUDIT-BACKLOG.md` to mark P3 items resolved
+
+**Impact**: New developers / fresh deployments now have complete configuration reference.
+
+---
+
+## 2026-02-11 — ADMIN-BULK-STATUS-01: Bulk Order Status Update
+
+**Status**: ✅ DONE (PR #2744, deployed)
+
+**What was done**:
+- New API endpoint `POST /api/admin/orders/bulk/status` with transition validation, audit logging, and email
+- Checkbox selection + bulk action toolbar in admin orders list
+- Max 50 orders per batch, same state machine as individual route
+- CodeQL compliance: log injection prevention with format specifiers
+
+**Production**: Deployed, healthz 200
+
+---
+
+## 2026-02-11 — CLEANUP-SPRINT-01: Codebase Health Fixes
+
+**Status**: ✅ DONE (PRs #2738-#2743)
+
+**What was done**:
+- PrismaClient unified to single singleton (#2738)
+- `prismaSafe.ts` anti-pattern removed (#2738)
+- `mode: 'insensitive'` removed from 6 Prisma queries for SQLite CI compat (#2739)
+- CLAUDE.md ports fixed, AGENT-STATE.md updated (#2740)
+- Contact form XSS fix, viva-verify GET mutation fixed (#2741)
+- Producer onboarding/status mock cleanup (#2743)
+
+**Impact**: 9 codebase health issues resolved from 5-agent audit.
+
+---
+
+## 2026-02-11 — DUAL-DB-MIGRATION (Phases 5.5a-d): Laravel SSOT for Products
+
+**Status**: ✅ DONE (PRs #2734-#2737, deployed)
+
+**What was done**:
+- Phase 5.5a: Created `apiClient` in `src/lib/api.ts` for Laravel proxy calls
+- Phase 5.5b: Migrated products page to use Laravel API via apiClient
+- Phase 5.5c: Migrated product detail page + SEO metadata
+- Phase 5.5d: Migrated admin product moderation to Laravel API
+
+**Impact**: Products now served from Laravel/PostgreSQL (single source of truth). Frontend proxies via `apiClient`.
+
+---
+
+## 2026-02-10 — AUTH-UNIFY: Fix Producer Dashboard Auth
+
+**Status**: ✅ DONE (PRs #2721-#2722, deployed)
+
+**What was done**:
+- Fixed producer dashboard authentication (Laravel Sanctum Bearer token)
+- Unified auth flow between admin (JWT cookie) and producer (Bearer token)
+
+**Production**: Deployed, both admin and producer dashboards functional.
 
 ---
 
