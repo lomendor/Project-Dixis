@@ -1,13 +1,15 @@
 'use client';
 import { useCart } from '@/lib/cart';
 import { useState } from 'react';
+import { useToast } from '@/contexts/ToastContext';
 
 /**
  * Pass FIX-STOCK-GUARD-01: Added stock field for OOS awareness
+ * Pass CART-UX-FEEDBACK-01: Added toast notification + imageUrl
  */
 interface AddProps {
   // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producerId for multi-producer cart detection
-  product: { id: string; title: string; price: number; producerId?: string | number | null; producerName?: string | null; stock?: number | null };
+  product: { id: string; title: string; price: number; imageUrl?: string | null; producerId?: string | number | null; producerName?: string | null; stock?: number | null };
   translations: {
     addToCart: string;
     cartAdded: string;
@@ -18,6 +20,7 @@ interface AddProps {
 export default function Add({ product, translations }: AddProps) {
   const add = useCart(s => s.add);
   const [added, setAdded] = useState(false);
+  const { showSuccess } = useToast();
 
   // Pass FIX-STOCK-GUARD-01: Check if product is out of stock
   const isOutOfStock = typeof product.stock === 'number' && product.stock <= 0;
@@ -33,15 +36,18 @@ export default function Add({ product, translations }: AddProps) {
     const priceCents = Math.round(Number(product.price || 0) * 100);
 
     // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producerId for multi-producer cart detection
+    // Pass CART-UX-FEEDBACK-01: Include imageUrl for cart thumbnails
     add({
       id: String(product.id),
       title: product.title,
       priceCents: priceCents,
+      imageUrl: product.imageUrl || undefined,
       producerId: product.producerId ? String(product.producerId) : undefined,
       producerName: product.producerName || undefined,
     });
 
     setAdded(true);
+    showSuccess(`${product.title} προστέθηκε στο καλάθι`, 2000);
     setTimeout(() => setAdded(false), 2000);
   };
 

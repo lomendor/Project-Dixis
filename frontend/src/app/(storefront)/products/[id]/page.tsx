@@ -228,10 +228,10 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </div>
           )}
 
-          {/* Add to Cart */}
+          {/* Add to Cart — Pass CART-UX-FEEDBACK-01: include imageUrl */}
           <div className="mt-auto">
             <Add
-              product={p}
+              product={{ ...p, imageUrl: p.imageUrl || null }}
               translations={{
                 addToCart: t('product.addToCart'),
                 cartAdded: t('cart.added')

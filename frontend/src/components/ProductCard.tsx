@@ -59,7 +59,8 @@ export function ProductCard({ id, title, producer, producerId, priceCents, image
         <span data-testid="product-card-price" className="text-lg font-bold text-neutral-900">{price}</span>
         <div data-testid="product-card-add">
           {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
-          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} stock={stock} />
+          {/* Pass CART-UX-FEEDBACK-01: Include imageUrl for cart thumbnails */}
+          <AddToCartButton id={String(id)} title={title} priceCents={priceCents} imageUrl={image || undefined} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} stock={stock} />
         </div>
       </div>
     </div>
