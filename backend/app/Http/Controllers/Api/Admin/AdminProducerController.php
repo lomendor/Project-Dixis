@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ProducerApproved;
+use App\Mail\ProducerRejected;
 use App\Models\Producer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class AdminProducerController extends Controller
 {
@@ -65,6 +68,11 @@ class AdminProducerController extends Controller
             'rejection_reason' => null,
         ]);
 
+        // PRODUCER-ONBOARD-01: Send approval notification email
+        if ($producer->email && config('notifications.email_enabled', false)) {
+            Mail::to($producer->email)->send(new ProducerApproved($producer));
+        }
+
         return response()->json([
             'message' => 'Producer approved successfully',
             'producer' => $producer->fresh(),
@@ -89,6 +97,11 @@ class AdminProducerController extends Controller
             'is_active' => false,
             'rejection_reason' => $request->input('rejection_reason'),
         ]);
+
+        // PRODUCER-ONBOARD-01: Send rejection notification email
+        if ($producer->email && config('notifications.email_enabled', false)) {
+            Mail::to($producer->email)->send(new ProducerRejected($producer->fresh()));
+        }
 
         return response()->json([
             'message' => 'Producer rejected',
