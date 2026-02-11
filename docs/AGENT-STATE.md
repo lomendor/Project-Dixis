@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (PROD-IMAGE-FIX-01 complete)
+**Updated**: 2026-02-11 (FULL-AUDIT complete, priorities reset)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -12,9 +12,28 @@
 |------|-------|
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
-| **SSH** | `ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235` |
+| **SSH** | `ssh dixis-prod` (alias, key: `dixis_prod_ed25519_20260115`) |
 | **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
-| **Feature health** | 97% (84 DONE + 20 PARTIAL / 111 total) |
+| **Goal** | Real marketplace — real producers, real products, real customers |
+
+---
+
+## Full Functional Audit (2026-02-11)
+
+### What WORKS end-to-end
+- **Customer**: register → login → browse → cart → checkout → Stripe pay → email confirm → order history ✅
+- **Producer** (if account exists): login → add product → edit product → see orders → email on sale ✅
+- **Admin**: phone OTP login → dashboard stats → manage orders → bulk status update ✅
+- **Shipping**: cost calc by postal code + weight, per-producer free threshold ✅
+- **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
+
+### What is BROKEN or MISSING
+- **Producer Registration**: ❌ NO self-service. Page says "Σύντομα διαθέσιμο — στείλτε email". Producers must be created manually in DB.
+- **Producer Onboarding Flow**: ❌ No form, no approval workflow, no profile auto-creation
+- **Admin Approve Producers**: ❌ No UI to review/approve producer applications
+- **Viva Wallet**: ❌ Frontend UI exists, backend throws "not yet implemented"
+- **Seed Data**: ⚠️ English producer names, 2 products missing images, placeholder descriptions
+- **20 stale PRs**: ⚠️ PRs from Dec 2025 still open, need cleanup
 
 ---
 
@@ -24,15 +43,17 @@ _(empty — pick from NEXT)_
 
 ---
 
-## NEXT (top 3 unblocked)
+## NEXT (correct priority — marketplace-first)
 
-| Priority | Pass ID | Feature | Why |
-|----------|---------|---------|-----|
-| 1 | **REORDER-01** | "Order Again" button | Core marketplace loop, repeat customers |
-| 2 | **OAUTH-GOOGLE-01** | Google OAuth login | Backend needs Socialite — verify first |
-| 3 | **UX-POLISH-01** | Empty states + loading skeletons | Professional feel |
+| # | Pass ID | What | Why | Scope |
+|---|---------|------|-----|-------|
+| 1 | **PRODUCER-ONBOARD-01** | Producer self-service registration + approval | Without producers, no marketplace | Frontend + Backend (Laravel) |
+| 2 | **SEED-DATA-FIX** | Greek names, real images, Greek descriptions | Site looks like demo with English placeholder data | Backend (Laravel seeder) |
+| 3 | **COD-COMPLETE** | Cash on Delivery fully working | Most Greek customers prefer COD | Backend |
+| 4 | **ADMIN-PRODUCERS** | Admin UI to approve/reject/manage producers | Needed once producers can register | Frontend |
+| 5 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
 
-See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
+**Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
 
 ---
 
@@ -42,43 +63,49 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 |--------|--------|
 | **Stripe (Card Payments)** | ✅ ENABLED |
 | **Resend (Email)** | ✅ ENABLED |
+| **Viva Wallet** | ❌ NOT IMPLEMENTED (backend stub only) |
 
 ---
 
 ## Recently Done (last 10)
 
-- **PROD-IMAGE-FIX-01** — Product image fallback to images[] array + cart i18n (PR #2757, deployed 2026-02-11) ✅
-- **PROD-STABILITY-02** — Infra hardening: nginx .bak cleanup, Prisma singleton caching in production, Neon connection pooling params (PR #2755, deployed 2026-02-11) ✅
-- **PROD-FIX-SPRINT-01** — 3 production fixes from E2E audit: cart toast feedback (PR #2749), legal pages content (PR #2751), producer dashboard redirect+auth (PR #2753). All deployed & verified (2026-02-11) ✅
-- **P3-DOCS-CLEANUP** — 13 env vars documented in .env.example, OPS/STATE.md synced, audit backlog cleared (2026-02-11) ✅
-- **ADMIN-BULK-STATUS-01** — Bulk order status update with checkboxes + toolbar (PR #2744, deployed 2026-02-11) ✅
-- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS fix (#2741), mock cleanup (#2743) ✅
-- **DUAL-DB-MIGRATION** — Phases 5.5a-d: Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
+- **FULL-AUDIT** — Deep functional audit of all user journeys, reset priorities to marketplace-first (2026-02-11)
+- **PROD-IMAGE-FIX-01** — Product image fallback + cart i18n (PR #2757, deployed 2026-02-11) ✅
+- **PROD-STABILITY-02** — nginx cleanup, Prisma singleton, Neon pooling (PR #2755, deployed 2026-02-11) ✅
+- **PROD-FIX-SPRINT-01** — Cart toast, legal pages, producer redirect (PRs #2749/#2751/#2753, deployed 2026-02-11) ✅
+- **ADMIN-BULK-STATUS-01** — Bulk order status update (PR #2744, deployed 2026-02-11) ✅
+- **CLEANUP-SPRINT-01** — PrismaClient singleton, SQLite compat, XSS fix (#2738-#2743) ✅
+- **DUAL-DB-MIGRATION** — Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
 - **AUTH-UNIFY** — Fix producer dashboard auth (PRs #2721-#2722, deployed 2026-02-10) ✅
-- **FEATURED-PRODUCTS-FIX-01** — Fix homepage featured products not rendering (PR #2708, deployed 2026-02-10) ✅
-- **PRODUCER-FILTERS-01** — Region & category filters on producers page (PR #2706, deployed 2026-02-10) ✅
-- **PRODUCER-PROFILE-01** — Producer profile page + fix product count (PR #2704, deployed 2026-02-10) ✅
-- **PRODUCERS-LISTING-01** — Restore public producers listing page with SSR + Prisma (PR #2701, deployed 2026-02-10) ✅
-- **PRODUCER-I18N-01** — Producer analytics dashboard translated to Greek (PR #2699, deployed 2026-02-10) ✅
-- **ADMIN-CLEANUP-01** — Admin code cleanup + complete i18n (PRs #2694-#2698, deployed 2026-02-09) ✅
 
 ---
 
-## Guardrails (non-negotiable)
+## Guardrails
 
 - **WIP limit = 1** — One item in progress at any time
-- **DoD required** — Measurable Definition of Done before starting
-- **PR size ≤300 LOC** — Smaller = faster review
-- **No workflow changes** — `.github/workflows/**` locked without explicit directive
+- **PR size ≤300 LOC** — May need multiple PRs for large features
+- **No workflow changes** — `.github/workflows/**` locked
+- **Docs inside PR** — No separate docs-only PRs (update AGENT-STATE in same PR)
+- **Deploy via GitHub** — PR → CI → merge → SSH deploy
 
 ---
 
 ## After Completing a Pass
 
-1. Update this file (WIP → Recently Done)
+1. Update this file (WIP → Recently Done, update audit status if relevant)
 2. Add entry to `docs/OPS/STATE.md` (top)
-3. Create pass file in `docs/AGENT/PASSES/SUMMARY-Pass-{PASS-ID}.md`
-4. Verify prod: `curl -sI https://dixis.gr/api/healthz`
+3. Verify prod: `curl -sI https://dixis.gr/api/healthz`
+
+---
+
+## Key Technical Notes
+
+- **Auth**: Email + password (customers/producers), Phone OTP (admin only)
+- **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
+- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
+- **Payment**: Stripe Checkout Sessions + webhooks. Viva NOT working.
+- **Producer routes**: `/producer/*` (dashboard, orders), `/my/products/*` (product CRUD)
+- **Deploy**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`
 
 ---
 
@@ -87,21 +114,9 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 | Doc | Purpose |
 |-----|---------|
 | `docs/OPS/STATE.md` | Detailed pass records |
-| `docs/OPS/STATE-ARCHIVE/` | Older pass history |
-| `docs/AGENT/PASSES/` | All pass documentation (TASK-*, SUMMARY-*) |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
-| `docs/PRODUCT/PRD-COVERAGE.md` | PRD→Pass mapping |
-| `docs/AGENT/AUDIT-BACKLOG.md` | Remaining codebase health issues (from 2026-02-11 audit) |
 
 ---
 
-## E2E Full (Manual Run)
-
-1. GitHub Actions → "E2E Full (nightly & manual)"
-2. Click "Run workflow"
-3. Artifacts: `e2e-full-report-{run_number}`
-
----
-
-_Lines: ~95 | Target: ≤150_
+_Lines: ~100 | Target: ≤150_
