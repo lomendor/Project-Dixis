@@ -3,9 +3,14 @@ import { getVivaWalletClient } from '@/lib/viva-wallet/client'
 import { isVivaWalletConfigured } from '@/lib/viva-wallet/config'
 import { prisma } from '@/server/db/prisma'
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const orderCode = searchParams.get('orderCode')
+/**
+ * POST /api/viva-verify
+ * Verifies Viva Wallet payment and updates order status.
+ * Changed from GET→POST because it performs a DB mutation (order.update).
+ */
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => ({}))
+  const orderCode = body?.orderCode || null
 
   if (!orderCode) {
     return NextResponse.json(

@@ -42,10 +42,11 @@ export async function POST(req: NextRequest) {
   if (parsed.data.hp && parsed.data.hp.trim() !== "") return NextResponse.json({ ok:true });
 
   const to = process.env.ADMIN_EMAIL ?? "info@dixis.gr";
-  const html = `<p><b>Όνομα:</b> ${parsed.data.name}</p>
-<p><b>Email:</b> ${parsed.data.email}</p>
-<p><b>Μήνυμα:</b><br/>${parsed.data.message.replace(/\n/g,"<br/>")}</p>`;
-  const res = await sendMail(to, `Contact form — ${parsed.data.name}`, html, parsed.data.email);
+  const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const html = `<p><b>Όνομα:</b> ${esc(parsed.data.name)}</p>
+<p><b>Email:</b> ${esc(parsed.data.email)}</p>
+<p><b>Μήνυμα:</b><br/>${esc(parsed.data.message).replace(/\n/g,"<br/>")}</p>`;
+  const res = await sendMail(to, `Contact form — ${esc(parsed.data.name)}`, html, parsed.data.email);
 
   // Autoreply (thank you email)
   try {
