@@ -14,8 +14,8 @@ export const sqliteRepo: OrdersRepo = {
     if (p.status) where.status = p.status;
     if (p.q) {
       where.OR = [
-        { id: { contains: p.q, mode: 'insensitive' } },
-        { buyerName: { contains: p.q, mode: 'insensitive' } },
+        { id: { contains: p.q } },
+        { buyerName: { contains: p.q } },
       ];
     }
     if (range.gte || range.lte) where.createdAt = { ...(range.gte && { gte: range.gte }), ...(range.lte && { lte: range.lte }) };
