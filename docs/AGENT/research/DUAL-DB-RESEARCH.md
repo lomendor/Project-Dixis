@@ -325,3 +325,34 @@ Align Laravel categories with the 13 Greek categories from Prisma:
 | 2026-02-11 | Laravel = SSOT for products/producers/orders | Auth, CRUD, orders all on Laravel; Prisma is seed-data-only |
 | 2026-02-11 | Phase 1: nginx fix + storefront field mapping | Lowest risk, zero backend changes |
 | 2026-02-11 | Keep Prisma for admin/audit/notifications | These features work and have no Laravel equivalent |
+| 2026-02-11 | Phase 2: Category slug mapping (PR #2727) | Laravel English slugs → Prisma Greek slugs for CategoryStrip filtering |
+| 2026-02-11 | Phase 3: Greek seed data (PR #2728) | 10 Greek products + 2 producers + 6 new categories seeded into Laravel |
+| 2026-02-11 | Phase 4: Cleanup (PR #2729) | Deprecated old Prisma product routes, removed dead seed script, fixed PrismaClient leak |
+
+---
+
+## Phase 4 Audit: Remaining Prisma Usage
+
+Prisma **cannot be fully removed** — it's still required for:
+
+| Area | Models Used | Why |
+|------|------------|-----|
+| Admin Product CRUD | Product, Producer | Admin panel reads/writes products in Prisma for approval workflow |
+| Order Processing | Product, Order, OrderItem | Checkout looks up products in Prisma to calculate totals |
+| Shipping Calculation | Product | Weight-based shipping needs Prisma product data |
+| Auth & Audit | AdminUser, AdminAuditLog, Producer | Phone-based admin auth, audit trail |
+| Rate Limiting | RateLimit | OTP rate limiting |
+| Notifications | Notification, Event | SMS/email queue |
+| Categories | Category | `/api/categories` still reads from Prisma (13 Greek categories) |
+| E2E Tests | Product, Producer | 20+ E2E tests query `/api/products` (Prisma/SQLite in CI) |
+
+**What was cleaned up:**
+- `/api/products/route.ts` — Fixed PrismaClient leak (was `new PrismaClient()`), added @deprecated
+- `/api/products/[id]/route.ts` — Added @deprecated comment
+- `scripts/seed/products.ts` — Removed (dead code, replaced by `prisma/seed.ts`)
+- `package.json` — Removed dead `seed:products` script
+
+**Future cleanup (not in Phase 4):**
+- Move admin product CRUD to Laravel (eliminates Prisma Product model dependency)
+- Move order product lookups to Laravel API (eliminates shipping/checkout Prisma dependency)
+- Then Product/Producer models can be removed from Prisma schema

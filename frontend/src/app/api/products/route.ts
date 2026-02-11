@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 
-const prisma = new PrismaClient()
-
-function moneyEUR(n: number) {
-  try { return new Intl.NumberFormat('el-GR',{ style:'currency', currency:'EUR' }).format(n) }
-  catch { return `${n} €` }
-}
+/**
+ * @deprecated LEGACY ROUTE — kept for E2E tests only.
+ * The storefront uses /api/public/products (Laravel proxy) since Phase 1.
+ * This route reads from Prisma (seeded SQLite in CI) and is NOT called in production.
+ * See docs/AGENT/research/DUAL-DB-RESEARCH.md for context.
+ */
 
 export const revalidate = 30
 
