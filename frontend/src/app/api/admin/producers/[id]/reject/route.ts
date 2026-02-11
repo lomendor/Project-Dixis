@@ -1,98 +1,81 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db/client'
-import { requireAdmin, AdminError } from '@/lib/auth/admin'
-import { logAdminAction, createRejectionContext } from '@/lib/audit/logger'
-import { z } from 'zod'
-
-const RejectSchema = z.object({
-  rejectionReason: z.string().min(5, 'Ο λόγος απόρριψης πρέπει να έχει τουλάχιστον 5 χαρακτήρες')
-})
+import { requireAdmin } from '@/lib/auth/admin'
+import { getLaravelInternalUrl } from '@/env'
+import { cookies } from 'next/headers'
 
 /**
- * POST /api/admin/producers/[id]/reject
- * Rejects a producer (sets approvalStatus to 'rejected')
+ * PRODUCER-ONBOARD-01: Reject producer — proxy to Laravel SSOT
+ * Replaces previous Prisma-based reject with Laravel admin endpoint
  */
+
+async function getAuthToken(req: NextRequest): Promise<string | null> {
+  const cookieStore = await cookies()
+  return cookieStore.get('auth_token')?.value
+    || cookieStore.get('dixis_session')?.value
+    || req.headers.get('authorization')?.replace('Bearer ', '')
+    || null
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Get admin context for audit logging
-    const admin = await requireAdmin()
-    const { id: producerId } = await params
+    await requireAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  }
 
-    if (!producerId) {
-      return NextResponse.json({ error: 'Invalid producer ID' }, { status: 400 })
+  const { id: producerId } = await params
+
+  if (!producerId) {
+    return NextResponse.json({ error: 'Invalid producer ID' }, { status: 400 })
+  }
+
+  const body = await request.json().catch(() => ({}))
+  const rejectionReason = body.rejectionReason || body.rejection_reason
+
+  if (!rejectionReason || typeof rejectionReason !== 'string' || rejectionReason.length < 5) {
+    return NextResponse.json(
+      { error: 'Ο λόγος απόρριψης πρέπει να έχει τουλάχιστον 5 χαρακτήρες' },
+      { status: 400 }
+    )
+  }
+
+  try {
+    const token = await getAuthToken(request)
+    const laravelBase = getLaravelInternalUrl()
+    const url = `${laravelBase}/admin/producers/${producerId}/reject`
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
     }
+    if (token) headers['Authorization'] = `Bearer ${token}`
 
-    const body = await request.json().catch(() => ({}))
-    const parsed = RejectSchema.safeParse(body)
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ rejection_reason: rejectionReason }),
+      cache: 'no-store',
+    })
 
-    if (!parsed.success) {
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
       return NextResponse.json(
-        { error: parsed.error.errors[0]?.message || 'Λάθος δεδομένα' },
-        { status: 400 }
+        { error: errorData.message || 'Σφάλμα απόρριψης παραγωγού' },
+        { status: res.status }
       )
     }
 
-    // Fetch existing producer for audit log (oldValue)
-    const existingProducer = await prisma.producer.findUnique({
-      where: { id: producerId },
-      select: { id: true, name: true, approvalStatus: true, isActive: true }
-    })
-
-    if (!existingProducer) {
-      return NextResponse.json({ error: 'Ο παραγωγός δεν βρέθηκε' }, { status: 404 })
-    }
-
-    // Update producer
-    const producer = await prisma.producer.update({
-      where: { id: producerId },
-      data: {
-        approvalStatus: 'rejected',
-        isActive: false,
-        rejectionReason: parsed.data.rejectionReason
-      },
-      select: {
-        id: true,
-        name: true,
-        approvalStatus: true,
-        isActive: true,
-        rejectionReason: true
-      }
-    })
-
-    // Audit log with rejection reason
-    await logAdminAction({
-      admin,
-      action: 'PRODUCER_REJECT',
-      entityType: 'producer',
-      entityId: producerId,
-      ...createRejectionContext(existingProducer, parsed.data.rejectionReason)
-    })
-
+    const data = await res.json()
     return NextResponse.json({
       success: true,
-      message: 'Ο παραγωγός απορρίφθηκε',
-      producer
+      message: data.message || 'Ο παραγωγός απορρίφθηκε',
+      producer: data.producer,
     })
-
-  } catch (error: unknown) {
-    console.error('Producer rejection error:', error)
-
-    // Handle AdminError
-    if (error instanceof AdminError) {
-      if (error.code === 'NOT_AUTHENTICATED') {
-        return NextResponse.json({ error: 'Απαιτείται σύνδεση' }, { status: 401 })
-      }
-      return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
-    }
-
-    // Handle Prisma errors
-    if ((error as any)?.code === 'P2025') {
-      return NextResponse.json({ error: 'Ο παραγωγός δεν βρέθηκε' }, { status: 404 })
-    }
-
+  } catch (error) {
+    console.error('[Admin] Producer reject proxy error:', error)
     return NextResponse.json({ error: 'Σφάλμα διακομιστή' }, { status: 500 })
   }
 }
