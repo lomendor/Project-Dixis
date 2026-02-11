@@ -47,7 +47,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 
 ## Recently Done (last 10)
 
-- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740) ✅
+- **CLEANUP-SPRINT-01** — Codebase health: PrismaClient singleton (#2738), SQLite compat (#2739), docs sync (#2740), XSS+viva fix (#2741), deployed 2026-02-11 ✅
 - **DUAL-DB-MIGRATION** — Phases 5.5a-d: Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
 - **AUTH-UNIFY** — Fix producer dashboard auth (PRs #2721-#2722, deployed 2026-02-10) ✅
 - **FEATURED-PRODUCTS-FIX-01** — Fix homepage featured products not rendering (PR #2708, deployed 2026-02-10) ✅
