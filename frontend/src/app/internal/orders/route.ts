@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPrisma } from '../../../lib/prismaSafe';
+import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../lib/orderStore';
 import { rateLimit } from '../../../lib/rateLimit';
 import { orderNumber } from '../../../lib/orderNumber';
@@ -17,11 +17,6 @@ function originFromReq(req: Request): string {
 
 // GET /api/orders - List orders (from Prisma/Neon)
 export async function GET() {
-  const prisma = getPrisma();
-  if (!prisma) {
-    return NextResponse.json({ orders: [] });
-  }
-
   try {
     const orders = await prisma.order.findMany({
       include: { items: true },
@@ -104,82 +99,50 @@ export async function POST(req: Request) {
     return new NextResponse('missing fields', { status: 400 });
   }
 
-  const prisma = getPrisma();
-  if (prisma) {
+  try {
+    const created = await prisma.checkoutOrder.create({
+      data: {
+        postalCode: data.postalCode,
+        method: data.method,
+        weightGrams: data.weightGrams,
+        subtotal: data.subtotal,
+        shippingCost: data.shippingCost,
+        codFee: data.codFee,
+        total: data.total,
+        email: data.email,
+        paymentRef: data.paymentRef,
+        paymentStatus: 'PAID',
+      },
+    });
     try {
-      const created = await prisma.checkoutOrder.create({
-        data: {
-          postalCode: data.postalCode,
-          method: data.method,
-          weightGrams: data.weightGrams,
-          subtotal: data.subtotal,
-          shippingCost: data.shippingCost,
-          codFee: data.codFee,
-          total: data.total,
-          email: data.email,
-          paymentRef: data.paymentRef,
-          paymentStatus: 'PAID',
-        },
-      });
-      try {
-        if (process.env.SMTP_DEV_MAILBOX === '1') {
-          const origin = originFromReq(req);
-          const to = String(
-            summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
-          );
-          const ordNo = orderNumber(created.id, created.createdAt as any);
-          const subject = `Dixis Order ${ordNo} — Total: €${(
-            data.total ?? 0
-          ).toFixed(2)}`;
-          const link = `${origin}/admin/orders/${created.id}`;
-          const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
-          const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
-            2
-          )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
-          await fetch(`${origin}/api/ci/devmail/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to, subject, body }),
-          }).catch(() => {});
-        }
-      } catch {}
-      const ordNo = orderNumber(created.id, created.createdAt as any);
-      return NextResponse.json(
-        { ok: true, id: created.id, orderNumber: ordNo },
-        { status: 201 }
-      );
-    } catch (e) {
-      // Fallback to memory if DB fails
-      const created = memOrders.create(data);
-      try {
-        if (process.env.SMTP_DEV_MAILBOX === '1') {
-          const origin = originFromReq(req);
-          const to = String(
-            summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
-          );
-          const ordNo = orderNumber(created.id, created.createdAt as any);
-          const subject = `Dixis Order ${ordNo} — Total: €${(
-            data.total ?? 0
-          ).toFixed(2)}`;
-          const link = `${origin}/admin/orders/${created.id}`;
-          const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
-          const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
-            2
-          )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
-          await fetch(`${origin}/api/ci/devmail/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to, subject, body }),
-          }).catch(() => {});
-        }
-      } catch {}
-      const ordNo = orderNumber(created.id, created.createdAt as any);
-      return NextResponse.json(
-        { ok: true, id: created.id, orderNumber: ordNo, mem: true },
-        { status: 201 }
-      );
-    }
-  } else {
+      if (process.env.SMTP_DEV_MAILBOX === '1') {
+        const origin = originFromReq(req);
+        const to = String(
+          summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
+        );
+        const ordNo = orderNumber(created.id, created.createdAt as any);
+        const subject = `Dixis Order ${ordNo} — Total: €${(
+          data.total ?? 0
+        ).toFixed(2)}`;
+        const link = `${origin}/admin/orders/${created.id}`;
+        const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
+        const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
+          2
+        )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
+        await fetch(`${origin}/api/ci/devmail/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to, subject, body }),
+        }).catch(() => {});
+      }
+    } catch {}
+    const ordNo = orderNumber(created.id, created.createdAt as any);
+    return NextResponse.json(
+      { ok: true, id: created.id, orderNumber: ordNo },
+      { status: 201 }
+    );
+  } catch (e) {
+    // Fallback to memory if DB fails
     const created = memOrders.create(data);
     try {
       if (process.env.SMTP_DEV_MAILBOX === '1') {
@@ -187,12 +150,15 @@ export async function POST(req: Request) {
         const to = String(
           summary?.email || process.env.DEVMAIL_DEFAULT_TO || 'test@dixis.dev'
         );
-        const subject = `Dixis Order — ${data.postalCode} — Total: €${(
+        const ordNo = orderNumber(created.id, created.createdAt as any);
+        const subject = `Dixis Order ${ordNo} — Total: €${(
           data.total ?? 0
         ).toFixed(2)}`;
-        const body = `Ευχαριστούμε για την παραγγελία σας. Σύνολο: €${(
-          data.total ?? 0
-        ).toFixed(2)}. Τ.Κ.: ${data.postalCode}.`;
+        const link = `${origin}/admin/orders/${created.id}`;
+        const cust = `${origin}/orders/lookup?ordNo=${ordNo}`;
+        const body = `Order ${ordNo}\nΣύνολο: €${(data.total ?? 0).toFixed(
+          2
+        )}\nΤ.Κ.: ${data.postalCode}\n\nAdmin: ${link}\nCustomer: ${cust}`;
         await fetch(`${origin}/api/ci/devmail/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

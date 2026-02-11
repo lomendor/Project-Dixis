@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPrisma } from '../../../../lib/prismaSafe';
+import { prisma } from '@/lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,14 +8,6 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const prisma = getPrisma();
-  if (!prisma) {
-    return NextResponse.json(
-      { error: 'Database unavailable' },
-      { status: 503 }
-    );
-  }
-
   const orderId = params.id;
 
   // Validate ID is non-empty string (CUID format: alphanumeric, 20+ chars)

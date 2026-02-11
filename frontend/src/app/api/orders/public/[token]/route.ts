@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db/client'
 
 /** Επιτρέπουμε ΜΟΝΟ ασφαλή πεδία στο δημόσιο API */
 function toPublic(order:any){

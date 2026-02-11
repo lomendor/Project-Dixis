@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db/client'
 
 export async function GET(_req: Request, ctx: { params: { token: string } }) {
   const token = String(ctx.params?.token||'').trim()

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPrisma } from '../../../../../lib/prismaSafe';
+import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../../../lib/orderStore';
 import { adminEnabled } from '../../../../../lib/adminGuard';
 
@@ -17,17 +17,14 @@ export async function GET(
     return new NextResponse('missing id', { status: 400 });
   }
 
-  const prisma = getPrisma();
-  if (prisma) {
-    try {
-      const o = await prisma.checkoutOrder.findUnique({ where: { id } });
-      if (!o) {
-        return new NextResponse('not found', { status: 404 });
-      }
-      return NextResponse.json(o);
-    } catch {
-      // fallthrough to memory
+  try {
+    const o = await prisma.checkoutOrder.findUnique({ where: { id } });
+    if (!o) {
+      return new NextResponse('not found', { status: 404 });
     }
+    return NextResponse.json(o);
+  } catch {
+    // fallthrough to memory
   }
   const m = memOrders.get(id);
   if (!m) {

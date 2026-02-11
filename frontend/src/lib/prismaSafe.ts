@@ -1,15 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+// DEPRECATED — Use @/lib/db/client instead.
+// This module previously created a separate PrismaClient instance.
+// All consumers have been migrated to import { prisma } from '@/lib/db/client'.
+// Kept only for backward compatibility; will be removed in a future cleanup.
 
-let prisma: PrismaClient | null = null;
+import { prisma } from '@/lib/db/client'
 
-export function getPrisma(): PrismaClient | null {
-  try {
-    if (!prisma) {
-      prisma = new PrismaClient();
-    }
-    return prisma;
-  } catch {
-    // Prisma may not be available in all environments
-    return null;
-  }
+/** @deprecated Use `import { prisma } from '@/lib/db/client'` instead. */
+export function getPrisma() {
+  return prisma
 }

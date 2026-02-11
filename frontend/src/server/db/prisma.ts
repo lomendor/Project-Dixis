@@ -1,15 +1,3 @@
-// AG104 — shared Prisma client (singleton)
-import { PrismaClient } from '@prisma/client'
-
-// Χρησιμοποιούμε globalThis για να αποφεύγουμε πολλαπλές συνδέσεις σε dev/hot-reload
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
-  })
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+// DEPRECATED — Use @/lib/db/client instead.
+// Re-exports the singleton PrismaClient for backward compatibility.
+export { prisma } from '@/lib/db/client'

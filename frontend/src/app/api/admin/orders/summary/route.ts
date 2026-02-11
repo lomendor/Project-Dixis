@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPrisma } from '../../../../../lib/prismaSafe';
+import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../../../lib/orderStore';
 import { adminEnabled } from '../../../../../lib/adminGuard';
 import { parseOrderNo } from '../../../../../lib/orderNumber';
@@ -29,56 +29,53 @@ export async function GET(req: Request) {
     return safeId.slice(-4).toUpperCase() === parsed.suffix;
   };
 
-  const prisma = getPrisma();
-  if (prisma) {
-    try {
-      // Build Prisma where clause
-      const where: any = {};
+  try {
+    // Build Prisma where clause
+    const where: any = {};
 
-      if (q) {
-        where.OR = [
-          { id: { contains: q, mode: 'insensitive' } },
-          { email: { contains: q, mode: 'insensitive' } },
-        ];
-      }
-      if (pc) {
-        where.postalCode = { contains: pc };
-      }
-      if (method) {
-        where.method = method;
-      }
-      if (status) {
-        where.paymentStatus = status;
-      }
-      if (from) {
-        where.createdAt = { ...where.createdAt, gte: new Date(from) };
-      }
-      if (to) {
-        where.createdAt = { ...where.createdAt, lte: new Date(to) };
-      }
-      if (parsed) {
-        where.createdAt = { ...where.createdAt, gte: parsed.dateStart, lt: parsed.dateEnd };
-      }
-
-      // Fetch orders with id and total for aggregation
-      let list = await prisma.checkoutOrder.findMany({
-        where,
-        select: { id: true, total: true },
-        take: 1000, // cap for safety
-      });
-
-      // Apply suffix filter if ordNo provided
-      if (parsed) {
-        list = list.filter((o: any) => matchSuffix(o.id));
-      }
-
-      const totalCount = list.length;
-      const totalAmount = list.reduce((acc: number, o: any) => acc + Number(o.total ?? 0), 0);
-
-      return NextResponse.json({ totalCount, totalAmount });
-    } catch {
-      // Fallthrough to memory
+    if (q) {
+      where.OR = [
+        { id: { contains: q } },
+        { email: { contains: q } },
+      ];
     }
+    if (pc) {
+      where.postalCode = { contains: pc };
+    }
+    if (method) {
+      where.method = method;
+    }
+    if (status) {
+      where.paymentStatus = status;
+    }
+    if (from) {
+      where.createdAt = { ...where.createdAt, gte: new Date(from) };
+    }
+    if (to) {
+      where.createdAt = { ...where.createdAt, lte: new Date(to) };
+    }
+    if (parsed) {
+      where.createdAt = { ...where.createdAt, gte: parsed.dateStart, lt: parsed.dateEnd };
+    }
+
+    // Fetch orders with id and total for aggregation
+    let list = await prisma.checkoutOrder.findMany({
+      where,
+      select: { id: true, total: true },
+      take: 1000, // cap for safety
+    });
+
+    // Apply suffix filter if ordNo provided
+    if (parsed) {
+      list = list.filter((o: any) => matchSuffix(o.id));
+    }
+
+    const totalCount = list.length;
+    const totalAmount = list.reduce((acc: number, o: any) => acc + Number(o.total ?? 0), 0);
+
+    return NextResponse.json({ totalCount, totalAmount });
+  } catch {
+    // Fallthrough to memory
   }
 
   // Apply filters to in-memory fallback
