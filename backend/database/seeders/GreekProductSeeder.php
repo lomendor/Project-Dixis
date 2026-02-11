@@ -23,16 +23,16 @@ class GreekProductSeeder extends Seeder
 
         $malisUser = User::firstOrCreate(
             ['email' => 'malis@dixis.gr'],
-            ['name' => 'Malis Garden', 'password' => bcrypt('demo-seed-2026')]
+            ['name' => 'Κήπος Μάλη', 'password' => bcrypt('demo-seed-2026')]
         );
         $malis = Producer::firstOrCreate(
             ['slug' => 'malis-garden'],
             [
                 'user_id' => $malisUser->id,
-                'name' => 'Malis Garden',
-                'business_name' => 'Malis Garden',
-                'description' => 'Παραδοσιακό βιολογικό αγρόκτημα με ελαιόλαδο και κονσέρβες',
-                'location' => 'Attica',
+                'name' => 'Κήπος Μάλη',
+                'business_name' => 'Κήπος Μάλη',
+                'description' => 'Παραδοσιακό βιολογικό αγρόκτημα με ελαιόλαδο και κονσέρβες στην Αττική.',
+                'location' => 'Αττική',
                 'phone' => '+30 210 0000001',
                 'email' => 'malis@dixis.gr',
                 'status' => 'active',
@@ -42,17 +42,17 @@ class GreekProductSeeder extends Seeder
 
         $lemnosUser = User::firstOrCreate(
             ['email' => 'lemnos@dixis.gr'],
-            ['name' => 'Lemnos Honey Co', 'password' => bcrypt('demo-seed-2026')]
+            ['name' => 'Μελισσοκομία Λήμνου', 'password' => bcrypt('demo-seed-2026')]
         );
         $lemnos = Producer::firstOrCreate(
             ['slug' => 'lemnos-honey-co'],
             [
                 'user_id' => $lemnosUser->id,
-                'name' => 'Lemnos Honey Co',
-                'business_name' => 'Lemnos Honey Co',
-                'description' => 'Οικογενειακή μελισσοκομία με premium θυμαρίσιο μέλι',
-                'location' => 'Lemnos',
-                'phone' => '+30 210 0000002',
+                'name' => 'Μελισσοκομία Λήμνου',
+                'business_name' => 'Μελισσοκομία Λήμνου',
+                'description' => 'Οικογενειακή μελισσοκομία τρίτης γενιάς με premium θυμαρίσιο μέλι από τη Λήμνο.',
+                'location' => 'Λήμνος',
+                'phone' => '+30 254 0000002',
                 'email' => 'lemnos@dixis.gr',
                 'status' => 'active',
                 'is_active' => true,
@@ -73,7 +73,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Εξαιρετικό Παρθένο Ελαιόλαδο 1L',
                     'slug' => 'exairetiko-partheno-elaiolado-1l',
-                    'description' => 'Extra virgin olive oil from organic olives',
+                    'description' => 'Εξαιρετικό παρθένο ελαιόλαδο από βιολογικές ελιές της Αττικής. Χαμηλή οξύτητα, πλούσιο άρωμα.',
                     'price' => 10.90,
                     'unit' => 'bottle',
                     'stock' => 45,
@@ -88,7 +88,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Γλυκό Κουταλιού Σύκο 380g',
                     'slug' => 'glyko-koutaliou-syko-380g',
-                    'description' => 'Traditional fig spoon sweet',
+                    'description' => 'Παραδοσιακό γλυκό κουταλιού σύκο, φτιαγμένο με τον παλιό τρόπο από φρέσκα σύκα.',
                     'price' => 4.50,
                     'unit' => 'jar',
                     'stock' => 30,
@@ -103,7 +103,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Φέτα ΠΟΠ Μυτιλήνης 400g',
                     'slug' => 'feta-pop-mytilinis',
-                    'description' => 'Authentic PDO feta cheese from Mytilini',
+                    'description' => 'Αυθεντική φέτα ΠΟΠ Μυτιλήνης από γάλα ελευθέρας βοσκής. Κρεμώδης και αρωματική.',
                     'price' => 6.50,
                     'unit' => 'pack',
                     'stock' => 25,
@@ -118,7 +118,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Πορτοκάλια Βιολογικά 5kg',
                     'slug' => 'portokalia-viologika',
-                    'description' => 'Organic oranges from Argolida',
+                    'description' => 'Βιολογικά πορτοκάλια Αργολίδας, γεμάτα χυμό. Ιδανικά για φρέσκο χυμό και κατανάλωση.',
                     'price' => 8.90,
                     'unit' => 'box',
                     'stock' => 60,
@@ -133,7 +133,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Πατάτες Νάξου 3kg',
                     'slug' => 'patates-naxou',
-                    'description' => 'Famous potatoes from Naxos island',
+                    'description' => 'Οι φημισμένες πατάτες Νάξου ΠΓΕ. Τραγανές, αρωματικές, ιδανικές για τηγάνισμα και φούρνο.',
                     'price' => 4.90,
                     'unit' => 'bag',
                     'stock' => 100,
@@ -148,7 +148,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Τραχανάς Σπιτικός 500g',
                     'slug' => 'trachanas-spitikos',
-                    'description' => 'Traditional homemade trahanas',
+                    'description' => 'Σπιτικός τραχανάς φτιαγμένος με παραδοσιακή συνταγή από ξινόγαλο και σιτάρι.',
                     'price' => 5.50,
                     'unit' => 'pack',
                     'stock' => 40,
@@ -165,7 +165,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Θυμαρίσιο Μέλι 450g',
                     'slug' => 'thymarisio-meli-450g',
-                    'description' => 'Premium thyme honey from Lemnos island',
+                    'description' => 'Premium θυμαρίσιο μέλι από τη Λήμνο. Πυκνό, αρωματικό, με χαρακτηριστική χρυσή απόχρωση.',
                     'price' => 7.90,
                     'unit' => 'jar',
                     'stock' => 50,
@@ -180,7 +180,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Τσίπουρο Παραδοσιακό 700ml',
                     'slug' => 'tsipouro-paradosiako',
-                    'description' => 'Traditional Greek tsipouro spirit',
+                    'description' => 'Παραδοσιακό τσίπουρο χωρίς γλυκάνισο, απόσταξη σε χάλκινο καζάνι. Ήπια γεύση, καθαρό άρωμα.',
                     'price' => 12.90,
                     'unit' => 'bottle',
                     'stock' => 20,
@@ -195,7 +195,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Ρίγανη Βουνού 100g',
                     'slug' => 'rigani-vounou',
-                    'description' => 'Wild mountain oregano from Epirus',
+                    'description' => 'Άγρια ρίγανη βουνού από την Ήπειρο. Αρωματική, ξηραμένη στον ήλιο με τον παραδοσιακό τρόπο.',
                     'price' => 3.50,
                     'unit' => 'pack',
                     'stock' => 80,
@@ -210,7 +210,7 @@ class GreekProductSeeder extends Seeder
                 'data' => [
                     'name' => 'Κρασί Λήμνου Ερυθρό 750ml',
                     'slug' => 'krasi-limnou-erythro',
-                    'description' => 'Red wine from Lemnos vineyards',
+                    'description' => 'Ερυθρό κρασί από τους αμπελώνες της Λήμνου. Ξηρό, με νότες μαύρων φρούτων και μπαχαρικών.',
                     'price' => 9.90,
                     'unit' => 'bottle',
                     'stock' => 30,

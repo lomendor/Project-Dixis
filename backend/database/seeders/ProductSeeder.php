@@ -35,19 +35,19 @@ class ProductSeeder extends Seeder
         $honey = Category::where('slug', 'honey-preserves')->first();
 
         // Get producers by slug for explicit assignment, with fallbacks
-        $greenFarm = $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
-        $cretanHoney = $producers->firstWhere('slug', 'cretan-honey') ?? $producers->skip(1)->first() ?? $greenFarm;
-        $olympusDairy = $producers->firstWhere('slug', 'mount-olympus-dairy') ?? $producers->skip(2)->first() ?? $greenFarm;
+        $ktima = $producers->firstWhere('slug', 'ktima-papadopoulou') ?? $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
+        $melissa = $producers->firstWhere('slug', 'melissokomia-kritis') ?? $producers->firstWhere('slug', 'cretan-honey') ?? $producers->skip(1)->first() ?? $ktima;
+        $galakto = $producers->firstWhere('slug', 'galaktokomika-olympou') ?? $producers->firstWhere('slug', 'mount-olympus-dairy') ?? $producers->skip(2)->first() ?? $ktima;
 
         // Create products distributed across producers
         $productsData = [
-            // GREEN FARM CO. products (vegetables, herbs)
+            // ΚΤΗΜΑ ΠΑΠΑΔΟΠΟΥΛΟΥ — λαχανικά, βότανα, φρούτα
             [
                 'product_data' => [
-                    'producer_id' => $greenFarm->id,
-                    'name' => 'Organic Tomatoes',
-                    'slug' => 'organic-tomatoes',
-                    'description' => 'Fresh organic tomatoes grown without pesticides',
+                    'producer_id' => $ktima->id,
+                    'name' => 'Ντομάτες Βιολογικές',
+                    'slug' => 'ntomates-viologikes',
+                    'description' => 'Φρέσκες βιολογικές ντομάτες από το κτήμα μας στη Μεσσηνία. Καλλιεργούνται χωρίς φυτοφάρμακα με παραδοσιακές μεθόδους.',
                     'price' => 3.50,
                     'weight_per_unit' => 1.000,
                     'unit' => 'kg',
@@ -66,13 +66,13 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $greenFarm->id,
-                    'name' => 'Fresh Lettuce',
-                    'slug' => 'fresh-lettuce',
-                    'description' => 'Crispy fresh lettuce perfect for salads',
+                    'producer_id' => $ktima->id,
+                    'name' => 'Μαρούλι Φρέσκο',
+                    'slug' => 'marouli-fresko',
+                    'description' => 'Τραγανό φρέσκο μαρούλι, ιδανικό για σαλάτες. Μαζεύεται κάθε πρωί από τον κήπο μας.',
                     'price' => 2.25,
                     'weight_per_unit' => 0.300,
-                    'unit' => 'piece',
+                    'unit' => 'τεμάχιο',
                     'stock' => 50,
                     'category' => 'Vegetables',
                     'is_organic' => false,
@@ -87,14 +87,14 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $greenFarm->id,
-                    'name' => 'Greek Oregano',
-                    'slug' => 'greek-oregano',
-                    'description' => 'Aromatic Greek oregano, dried and packaged',
-                    'price' => 5.50,
-                    'weight_per_unit' => 0.050,
-                    'unit' => 'packet',
-                    'stock' => 30,
+                    'producer_id' => $ktima->id,
+                    'name' => 'Ρίγανη Βουνού 100g',
+                    'slug' => 'rigani-vounou-100g',
+                    'description' => 'Αρωματική ελληνική ρίγανη βουνού, αποξηραμένη με τον παραδοσιακό τρόπο. Ιδανική για σαλάτες και ψητά.',
+                    'price' => 3.50,
+                    'weight_per_unit' => 0.100,
+                    'unit' => 'συσκευασία',
+                    'stock' => 80,
                     'category' => 'Herbs',
                     'is_organic' => true,
                     'image_url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9',
@@ -106,16 +106,16 @@ class ProductSeeder extends Seeder
                     ['url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
-            // CRETAN HONEY products (oil, honey)
+            // ΜΕΛΙΣΣΟΚΟΜΙΑ ΚΡΗΤΗΣ — ελαιόλαδο, μέλι
             [
                 'product_data' => [
-                    'producer_id' => $cretanHoney->id,
-                    'name' => 'Extra Virgin Olive Oil',
-                    'slug' => 'extra-virgin-olive-oil',
-                    'description' => 'Premium Greek olive oil from Crete',
+                    'producer_id' => $melissa->id,
+                    'name' => 'Εξαιρετικό Παρθένο Ελαιόλαδο 500ml',
+                    'slug' => 'exairetiko-partheno-elaiolado-500ml',
+                    'description' => 'Premium ελαιόλαδο εξαιρετικό παρθένο από βιολογικούς ελαιώνες της Κρήτης. Χαμηλή οξύτητα, πλούσια γεύση.',
                     'price' => 12.00,
                     'weight_per_unit' => 0.500,
-                    'unit' => 'bottle',
+                    'unit' => 'φιάλη',
                     'stock' => 25,
                     'category' => 'Oil',
                     'is_organic' => true,
@@ -131,13 +131,13 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $cretanHoney->id,
-                    'name' => 'Cretan Thyme Honey',
-                    'slug' => 'cretan-thyme-honey',
-                    'description' => 'Pure thyme honey from the mountains of Crete',
+                    'producer_id' => $melissa->id,
+                    'name' => 'Θυμαρίσιο Μέλι Κρήτης 450g',
+                    'slug' => 'thymarisio-meli-kritis-450g',
+                    'description' => 'Αγνό θυμαρίσιο μέλι από τα βουνά της Κρήτης. Συλλέγεται χειροποίητα από τα μελίσσια μας σε υψόμετρο 800μ.',
                     'price' => 15.00,
-                    'weight_per_unit' => 0.500,
-                    'unit' => 'jar',
+                    'weight_per_unit' => 0.450,
+                    'unit' => 'βάζο',
                     'stock' => 40,
                     'category' => 'Honey',
                     'is_organic' => true,
@@ -150,13 +150,13 @@ class ProductSeeder extends Seeder
                     ['url' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
-            // MOUNT OLYMPUS DAIRY products (fruits, dairy)
+            // ΓΑΛΑΚΤΟΚΟΜΙΚΑ ΟΛΥΜΠΟΥ — φρούτα, γαλακτοκομικά
             [
                 'product_data' => [
-                    'producer_id' => $olympusDairy->id,
-                    'name' => 'Fresh Apples',
-                    'slug' => 'fresh-apples',
-                    'description' => 'Crispy red apples from local orchards',
+                    'producer_id' => $galakto->id,
+                    'name' => 'Μήλα Ζαγοράς Πηλίου',
+                    'slug' => 'mila-zagoras-piliou',
+                    'description' => 'Τραγανά μήλα ΠΟΠ Ζαγοράς Πηλίου. Φυσική γλυκύτητα και τραγανή υφή, ιδανικά για κατανάλωση και μαγειρική.',
                     'price' => 4.00,
                     'weight_per_unit' => 1.000,
                     'unit' => 'kg',
@@ -174,13 +174,13 @@ class ProductSeeder extends Seeder
             ],
             [
                 'product_data' => [
-                    'producer_id' => $olympusDairy->id,
-                    'name' => 'Greek Feta Cheese',
-                    'slug' => 'greek-feta-cheese',
-                    'description' => 'Traditional PDO feta cheese from Thessaly',
+                    'producer_id' => $galakto->id,
+                    'name' => 'Φέτα ΠΟΠ Θεσσαλίας 400g',
+                    'slug' => 'feta-pop-thessalias-400g',
+                    'description' => 'Αυθεντική φέτα ΠΟΠ από γάλα ελευθέρας βοσκής στους πρόποδες του Ολύμπου. Κρεμώδης υφή, πλούσια γεύση.',
                     'price' => 8.50,
                     'weight_per_unit' => 0.400,
-                    'unit' => 'piece',
+                    'unit' => 'συσκευασία',
                     'stock' => 60,
                     'category' => 'Dairy',
                     'is_organic' => false,
