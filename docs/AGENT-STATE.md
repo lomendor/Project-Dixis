@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-11 (FULL-AUDIT complete, priorities reset)
+**Updated**: 2026-02-12 (PRODUCER-ONBOARD-01 complete, deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,9 +28,9 @@
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
 
 ### What is BROKEN or MISSING
-- **Producer Registration**: ❌ NO self-service. Page says "Σύντομα διαθέσιμο — στείλτε email". Producers must be created manually in DB.
-- **Producer Onboarding Flow**: ❌ No form, no approval workflow, no profile auto-creation
-- **Admin Approve Producers**: ❌ No UI to review/approve producer applications
+- **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
+- **Producer Onboarding Flow**: ✅ FIXED — Form collects business_name, phone, city, region, description, tax_id
+- **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy wired to admin panel
 - **Viva Wallet**: ❌ Frontend UI exists, backend throws "not yet implemented"
 - **Seed Data**: ⚠️ English producer names, 2 products missing images, placeholder descriptions
 - **20 stale PRs**: ⚠️ PRs from Dec 2025 still open, need cleanup
@@ -41,17 +41,18 @@
 
 _(empty — pick from NEXT)_
 
+> **PRODUCER-ONBOARD-01 DONE** — 5 PRs merged (#2760–#2765), deployed 2026-02-12
+
 ---
 
 ## NEXT (correct priority — marketplace-first)
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **PRODUCER-ONBOARD-01** | Producer self-service registration + approval | Without producers, no marketplace | Frontend + Backend (Laravel) |
-| 2 | **SEED-DATA-FIX** | Greek names, real images, Greek descriptions | Site looks like demo with English placeholder data | Backend (Laravel seeder) |
-| 3 | **COD-COMPLETE** | Cash on Delivery fully working | Most Greek customers prefer COD | Backend |
-| 4 | **ADMIN-PRODUCERS** | Admin UI to approve/reject/manage producers | Needed once producers can register | Frontend |
-| 5 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
+| 1 | **SEED-DATA-FIX** | Greek names, real images, Greek descriptions | Site looks like demo with English placeholder data | Backend (Laravel seeder) |
+| 2 | **COD-COMPLETE** | Cash on Delivery fully working | Most Greek customers prefer COD | Backend |
+| 3 | **ADMIN-PRODUCERS** | Admin UI polish for producer management | Better UX for approve/reject flow | Frontend |
+| 4 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
 
 **Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
 
@@ -69,6 +70,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **PRODUCER-ONBOARD-01** — Producer self-service registration + onboarding form + admin approve/reject + email notifications (PRs #2760–#2765, deployed 2026-02-12) ✅
 - **FULL-AUDIT** — Deep functional audit of all user journeys, reset priorities to marketplace-first (2026-02-11)
 - **PROD-IMAGE-FIX-01** — Product image fallback + cart i18n (PR #2757, deployed 2026-02-11) ✅
 - **PROD-STABILITY-02** — nginx cleanup, Prisma singleton, Neon pooling (PR #2755, deployed 2026-02-11) ✅
