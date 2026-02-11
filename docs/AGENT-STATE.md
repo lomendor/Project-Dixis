@@ -101,6 +101,7 @@ See `docs/PRODUCT/PRD-COVERAGE.md` for full mapping.
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
 | `docs/PRODUCT/PRD-COVERAGE.md` | PRD→Pass mapping |
+| `docs/AGENT/AUDIT-BACKLOG.md` | Remaining codebase health issues (from 2026-02-11 audit) |
 
 ---
 
