@@ -54,6 +54,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Υποστήριξη</h4>
             <nav className="flex flex-col gap-1">
+              <Link href="/faq" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+                Συχνές Ερωτήσεις
+              </Link>
               <Link href="/contact" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Επικοινωνία / Σχόλια
               </Link>
@@ -91,7 +94,7 @@ export default function Footer() {
                 </button>
               ))}
             </div>
-            <span className="text-xs text-neutral-400">Made with Cyprus Green</span>
+            <span className="text-xs text-neutral-400">Με ελληνικό πάθος</span>
           </div>
         </div>
       </div>

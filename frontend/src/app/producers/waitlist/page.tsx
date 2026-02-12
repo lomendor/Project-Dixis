@@ -35,7 +35,7 @@ export default function WaitlistPage(){
           <input name="phone" placeholder="Τηλέφωνο *" className="h-10 px-3 border rounded-md" required />
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          <input type="email" name="email" placeholder="Email" className="h-10 px-3 border rounded-md" />
+          <input type="email" name="email" placeholder="Διεύθυνση email" className="h-10 px-3 border rounded-md" />
           <input name="region" placeholder="Περιοχή (π.χ. Λήμνος)" className="h-10 px-3 border rounded-md" />
         </div>
         <input name="products" placeholder="Τι προϊόντα έχεις (π.χ. μέλι, λάδι…)" className="h-10 px-3 border rounded-md" />

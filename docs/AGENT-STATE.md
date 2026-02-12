@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (L6-I18N-UNIFY deployed)
+**Updated**: 2026-02-12 (UX-QUICK-WINS-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -66,6 +66,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **UX-QUICK-WINS-01** — Hellenize all English UI strings (HomeClient filters/cards, contact, waitlist, order-lookup, footer). Rewrite 404/500 error pages with proper layout + CTAs. New `/faq` page (Greek accordion). (deployed 2026-02-12) ✅
 - **L6-I18N-UNIFY** — Remove next-intl, unify on LocaleContext. Delete deprecated CheckoutClient.tsx (561 LOC). Architecture audit 100% resolved. (deployed 2026-02-12) ✅
 - **H1-ORDER-MODEL Phase 2** — Proxy admin order detail/summary to Laravel API. Remaining: status+bulk routes still use Prisma Order (email/audit coupling) (deployed 2026-02-12) ✅
 - **H1-ORDER-MODEL Phase 1** — Delete CheckoutOrder model (never populated in prod), 8 dead routes/pages, orderStore.ts. Stub admin detail/summary. Remaining: Prisma Order (Phase 2) (deployed 2026-02-12) ✅
