@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (AUTH-FIX-CRITICAL deployed)
+**Updated**: 2026-02-12 (DEAD-CODE-CLEANUP deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -41,8 +41,8 @@
 
 _(empty — pick from NEXT)_
 
-> **AUTH-FIX-CRITICAL DONE** — PR #2783 merged, deployed 2026-02-12
-> Security audit + fix: 4 admin endpoints secured, 2 production blocks added
+> **DEAD-CODE-CLEANUP DONE** — PR #2786 merged, deployed 2026-02-12
+> Deleted 42 files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs
 
 ---
 
@@ -50,12 +50,12 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **DEAD-CODE-CLEANUP** | Delete 17 dead components, 10 dead libs, 11 orphan routes | Tech debt | ~200 LOC deletions |
-| 2 | **ORDER-CONSOLIDATE** | Remove 4/5 duplicate tracking APIs + legacy checkout flow | Architecture | ~300 LOC deletions |
-| 3 | **CSP-FIX** | Remove localhost from CSP, fix hardcoded URLs | Security | ~20 LOC |
+| 1 | **ORDER-CONSOLIDATE** | Remove duplicate tracking APIs + duplicate tracking page | Architecture | ~200 LOC deletions |
+| 2 | **CSP-FIX** | Remove localhost from CSP, fix hardcoded URLs | Security | ~20 LOC |
+| 3 | **PRISMA-IMPORT-UNIFY** | Consolidate 3 import paths to single `@/lib/db/client` | Tech debt | ~30 LOC |
 | 4 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
 
-**Note**: Priorities updated from architecture audit (`docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`). Focus on cleanup before new features.
+**Note**: DEAD-CODE-CLEANUP done (PR #2786). Priorities from `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`.
 
 ---
 
@@ -72,6 +72,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **DEAD-CODE-CLEANUP** — Delete 42 dead files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs (PR #2786, deployed 2026-02-12) ✅
 - **AUTH-FIX-CRITICAL** — Add requireAdmin() to 4 unprotected admin endpoints + production blocks on /api/ops/status and /dev-check (PR #2783, deployed 2026-02-12) ✅
 - **ARCH-AUDIT** — Full architecture audit: 82 API routes, 14 Prisma models, ~200 frontend files. Found CRITICAL auth holes, dead code, duplicate systems. Report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md` (2026-02-12) ✅
 - **ADMIN-PRODUCTS-TAILWIND** — Convert admin products page from inline styles to Tailwind (PR #2780, deployed 2026-02-12) ✅
