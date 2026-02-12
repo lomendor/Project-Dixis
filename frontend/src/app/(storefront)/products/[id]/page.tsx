@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
 import { getBaseUrl } from '@/lib/site';

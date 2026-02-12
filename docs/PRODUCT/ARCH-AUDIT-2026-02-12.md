@@ -62,7 +62,7 @@
 | L3 | Dead API routes (no frontend callers) | 11 routes | FIXED PR #2786 (5 deleted, 2 kept for E2E) |
 | L4 | 3 Prisma import paths for same singleton | `@/lib/db/client` (canonical), `@/lib/prisma` (9 files), `@/server/db/prisma` (4 files) | FIXED PR #2789 (all 10 files → `@/lib/db/client`, 2 shims deleted) |
 | L5 | 2 rate-limiting implementations | `rate-limit.ts` (class-based) vs `rateLimit.ts` (token-bucket) | WONTFIX (different purposes: HTTP auth vs internal ops rate limiting) |
-| L6 | 2 i18n systems coexist | next-intl `getTranslations()` vs custom `LocaleContext` `useTranslations()` | OPEN |
+| L6 | 2 i18n systems coexist | next-intl `getTranslations()` vs custom `LocaleContext` `useTranslations()` | **FIXED** (L6-I18N-UNIFY: removed next-intl, unified on LocaleContext + server-safe `@/lib/i18n/t.ts`) |
 | L7 | 50+ console.log in production code | Including `console.log('Starting login process...', { email })` in auth/login | **FIXED** (CONSOLE-CLEANUP: PII removed, 30+ debug logs deleted, 10 files) |
 | L8 | 8+ files still using inline styles | After Tailwind conversions: track/page, checkout/flow, checkout/payment, products-demo, dev/brand, admin/shipping-test, my/error, global-error | **FIXED** (AUDIT-CLEANUP-02: 5/8 already deleted, remaining 3 converted to Tailwind) |
 | L9 | Redirect stub pages | `/login`→`/auth/login`, `/register`→`/auth/register`, `/product/[id]`→`/products/[id]` | FIXED PR #2786 (deleted) |
