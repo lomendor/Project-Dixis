@@ -1,6 +1,6 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (CONSOLE-CLEANUP)
+**Last Updated**: 2026-02-12 (AUDIT-CLEANUP-02)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
@@ -9,18 +9,34 @@
 
 ---
 
-## 2026-02-12 — CONSOLE-CLEANUP: Remove PII + Debug Noise from Logs
+## 2026-02-12 — AUDIT-CLEANUP-02
 
-**Status**: ✅ DONE (deployed)
+**Status**: ✅ DONE (PR #2793, deployed)
 
 **What was done**:
-- **PII removed from logs** (4 files): Phone numbers stripped from auth OTP request/verify routes, email addresses stripped from email.ts success logs
-- **Debug noise removed** (6 files): 30+ console.log statements removed from AuthContext, login, register, AuthGuard, StripePaymentForm, shippingRetry, checkoutValidation
-- **Kept**: All console.error/console.warn for legitimate error handling, DEBUG_AUTH-gated logs in api.ts
-- ARCH-AUDIT L7 marked FIXED
+- Deleted 3 orphaned order pages: `/orders/page.tsx`, `/orders/[id]/page.tsx`, `/orders/id-lookup/page.tsx` (canonical = `/account/orders`)
+- Deleted dangerous producer DELETE route (`api/admin/producers/[id]/route.ts`) — Prisma-only, no Laravel sync
+- Converted 3 remaining inline-style files to Tailwind: `my/error.tsx`, `global-error.tsx`, `admin/shipping-test/page.tsx`
+- Triaged 7 audit items: M2/L8/L10 FIXED, M1 DEFER, M3/M4/L5 WONTFIX
+- Remaining OPEN: H1 (triple order model), L6 (dual i18n)
+
+**Files changed**: 9 (4 deleted, 3 converted to Tailwind, 2 docs updated)
+**Production**: Deployed, healthz 200
+
+---
+
+## 2026-02-12 — CONSOLE-CLEANUP
+
+**Status**: ✅ DONE (PR #2792, deployed)
+
+**What was done**:
+- Removed PII from production logs: email addresses, phone numbers, OTP codes in 4 files
+- Stripped 30+ debug `console.log` from 6 files (payment, shipping retry, checkout validation)
+- Kept all `console.error`/`console.warn` for legitimate error handling
+- Updated ARCH-AUDIT: L7 marked FIXED
 
 **Files changed**: 10 (17 insertions, 68 deletions)
-**Production**: Deployed, healthz 200, build clean
+**Production**: Deployed, healthz 200
 
 ---
 

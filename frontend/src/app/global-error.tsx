@@ -11,7 +11,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
 
   return (
     <html>
-      <body style={{padding: 16}}>
+      <body className="p-4">
         <h1>Κάτι πήγε στραβά</h1>
         <p>Παρακαλούμε δοκιμάστε ξανά.</p>
       </body>

@@ -8,10 +8,10 @@ export default function AdminShippingTestPage() {
   const isProd = process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production';
   const prodGuard = isProd && process.env.BASIC_AUTH !== '1';
   return (
-    <main style={{maxWidth:880, margin:'40px auto', padding:16}}>
-      <div style={{marginBottom:16}}>
-        <h2 style={{margin:0}}>Admin · Shipping Test</h2>
-        <p style={{color:'#6b7280', margin:'6px 0 0'}}>Δοκίμασε Τ.Κ., βάρος και μέθοδο — φαίνεται breakdown & "Γιατί;".</p>
+    <main className="max-w-[880px] mx-auto mt-10 p-4">
+      <div className="mb-4">
+        <h2 className="m-0">Admin · Shipping Test</h2>
+        <p className="text-gray-500 mt-1.5">Δοκίμασε Τ.Κ., βάρος και μέθοδο — φαίνεται breakdown & "Γιατί;".</p>
       </div>
 
       {prodGuard ? (

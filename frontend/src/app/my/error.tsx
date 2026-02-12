@@ -8,24 +8,16 @@ export default function MyAccountError({
   reset: () => void;
 }) {
   return (
-    <main style={{ padding: 24, textAlign: 'center' }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, color: '#dc2626', marginBottom: 8 }}>
+    <main className="p-6 text-center">
+      <h1 className="text-2xl font-bold text-red-600 mb-2">
         Σφάλμα στον Λογαριασμό
       </h1>
-      <p style={{ color: '#666', marginBottom: 16 }}>
+      <p className="text-gray-500 mb-4">
         Παρουσιάστηκε πρόβλημα κατά τη φόρτωση της σελίδας.
       </p>
       <button
         onClick={reset}
-        style={{
-          padding: '8px 16px',
-          background: '#10b981',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 8,
-          cursor: 'pointer',
-          fontWeight: 600,
-        }}
+        className="px-4 py-2 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
       >
         Δοκιμάστε ξανά
       </button>
