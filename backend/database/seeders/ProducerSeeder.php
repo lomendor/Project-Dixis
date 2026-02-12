@@ -15,27 +15,27 @@ class ProducerSeeder extends Seeder
      */
     public function run(): void
     {
-        // Producer 1: Green Farm Co. (linked to producer@example.com)
+        // Παραγωγός 1: Κτήμα Παπαδόπουλου (linked to producer@example.com)
         $producerUser = User::where('email', 'producer@example.com')->first();
 
         if ($producerUser) {
             $this->createProducerIfNotExists($producerUser->id, [
-                'name' => 'Green Farm Co.',
-                'slug' => 'green-farm-co',
-                'business_name' => 'Green Farm Company Ltd',
-                'description' => 'Organic vegetables and fruits from local farms',
-                'location' => 'Athens, Greece',
-                'phone' => '+30 210 1234567',
-                'email' => 'info@greenfarm.gr',
-                'website' => 'https://greenfarm.gr',
+                'name' => 'Κτήμα Παπαδόπουλου',
+                'slug' => 'ktima-papadopoulou',
+                'business_name' => 'Κτήμα Παπαδόπουλου Ο.Ε.',
+                'description' => 'Βιολογικά λαχανικά και φρούτα από οικογενειακό αγρόκτημα στη Μεσσηνία. Καλλιεργούμε με σεβασμό στη γη από το 1985.',
+                'location' => 'Καλαμάτα, Μεσσηνία',
+                'phone' => '+30 272 1012345',
+                'email' => 'info@ktimapapadopoulou.gr',
+                'website' => 'https://ktimapapadopoulou.gr',
             ]);
         }
 
-        // Producer 2: Cretan Honey (create user if needed)
+        // Παραγωγός 2: Μελισσοκομία Κρήτης
         $honeyUser = User::firstOrCreate(
             ['email' => 'producer2@example.com'],
             [
-                'name' => 'Cretan Honey Producer',
+                'name' => 'Νίκος Στεφανάκης',
                 'email' => 'producer2@example.com',
                 'role' => 'producer',
                 'password' => bcrypt('password'),
@@ -44,21 +44,21 @@ class ProducerSeeder extends Seeder
         );
 
         $this->createProducerIfNotExists($honeyUser->id, [
-            'name' => 'Cretan Honey',
-            'slug' => 'cretan-honey',
-            'business_name' => 'Cretan Honey Producers Co-op',
-            'description' => 'Traditional honey and bee products from Crete',
-            'location' => 'Heraklion, Crete',
+            'name' => 'Μελισσοκομία Κρήτης',
+            'slug' => 'melissokomia-kritis',
+            'business_name' => 'Μελισσοκομία Κρήτης — Στεφανάκης',
+            'description' => 'Παραδοσιακή μελισσοκομία τρίτης γενιάς στα βουνά της Κρήτης. Θυμαρίσιο μέλι, ελαιόλαδο και προϊόντα κυψέλης.',
+            'location' => 'Ηράκλειο, Κρήτη',
             'phone' => '+30 281 0987654',
-            'email' => 'info@cretanhoney.gr',
-            'website' => 'https://cretanhoney.gr',
+            'email' => 'info@melissakritis.gr',
+            'website' => 'https://melissakritis.gr',
         ]);
 
-        // Producer 3: Mount Olympus Dairy (create user if needed)
+        // Παραγωγός 3: Γαλακτοκομικά Ολύμπου
         $dairyUser = User::firstOrCreate(
             ['email' => 'producer3@example.com'],
             [
-                'name' => 'Olympus Dairy Producer',
+                'name' => 'Γιώργος Τσιμπούκης',
                 'email' => 'producer3@example.com',
                 'role' => 'producer',
                 'password' => bcrypt('password'),
@@ -67,14 +67,14 @@ class ProducerSeeder extends Seeder
         );
 
         $this->createProducerIfNotExists($dairyUser->id, [
-            'name' => 'Mount Olympus Dairy',
-            'slug' => 'mount-olympus-dairy',
-            'business_name' => 'Mount Olympus Dairy Products SA',
-            'description' => 'Traditional Greek dairy products and cheeses',
-            'location' => 'Larissa, Thessaly',
+            'name' => 'Γαλακτοκομικά Ολύμπου',
+            'slug' => 'galaktokomika-olympou',
+            'business_name' => 'Γαλακτοκομικά Ολύμπου Α.Ε.',
+            'description' => 'Παραδοσιακά γαλακτοκομικά προϊόντα από τους πρόποδες του Ολύμπου. Φέτα ΠΟΠ, γιαούρτι και τυριά με γάλα ελευθέρας βοσκής.',
+            'location' => 'Λάρισα, Θεσσαλία',
             'phone' => '+30 241 0567890',
-            'email' => 'info@olympusdairy.gr',
-            'website' => 'https://olympusdairy.gr',
+            'email' => 'info@galaktokomika-olympou.gr',
+            'website' => 'https://galaktokomika-olympou.gr',
         ]);
     }
 

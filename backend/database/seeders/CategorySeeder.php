@@ -13,30 +13,31 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
+        // Greek-first category names (slug stays English for URLs)
         $categories = [
-            'Fruits',
-            'Vegetables',
-            'Herbs & Spices',
-            'Grains & Cereals',
-            'Dairy Products',
-            'Olive Oil & Olives',
-            'Wine & Beverages',
-            'Honey & Preserves',
+            'fruits' => 'Φρούτα',
+            'vegetables' => 'Λαχανικά',
+            'herbs-spices' => 'Βότανα & Μπαχαρικά',
+            'grains-cereals' => 'Δημητριακά & Όσπρια',
+            'dairy-products' => 'Γαλακτοκομικά',
+            'olive-oil-olives' => 'Ελαιόλαδο & Ελιές',
+            'wine-beverages' => 'Κρασιά & Ποτά',
+            'honey-preserves' => 'Μέλι & Κονσέρβες',
             // Phase 3: Categories needed by Greek storefront products
-            'Legumes',
-            'Pasta & Trahanas',
-            'Flours & Bakery',
-            'Nuts & Dried Fruits',
-            'Sweets & Preserves',
-            'Sauces & Pickles',
+            'legumes' => 'Όσπρια',
+            'pasta-trahanas' => 'Ζυμαρικά & Τραχανάς',
+            'flours-bakery' => 'Αλεύρια & Αρτοποιία',
+            'nuts-dried-fruits' => 'Ξηροί Καρποί',
+            'sweets-preserves' => 'Γλυκά & Μαρμελάδες',
+            'sauces-pickles' => 'Σάλτσες & Τουρσιά',
         ];
 
-        foreach ($categories as $categoryName) {
+        foreach ($categories as $slug => $greekName) {
             Category::firstOrCreate([
-                'slug' => Str::slug($categoryName),
+                'slug' => $slug,
             ], [
-                'name' => $categoryName,
-                'slug' => Str::slug($categoryName),
+                'name' => $greekName,
+                'slug' => $slug,
             ]);
         }
     }
