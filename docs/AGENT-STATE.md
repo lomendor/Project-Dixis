@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (COD-COMPLETE deployed)
+**Updated**: 2026-02-12 (ADMIN-PRODUCERS deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -30,7 +30,7 @@
 ### What is BROKEN or MISSING
 - **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
 - **Producer Onboarding Flow**: ✅ FIXED — Form collects business_name, phone, city, region, description, tax_id
-- **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy wired to admin panel
+- **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy + polished admin UI (ADMIN-PRODUCERS)
 - **Viva Wallet**: ❌ Frontend UI exists, backend throws "not yet implemented"
 - **Seed Data**: ✅ FIXED (SEED-DATA-FIX) — All producers, products, categories now in Greek with rich descriptions
 - **20 stale PRs**: ⚠️ PRs from Dec 2025 still open, need cleanup
@@ -41,7 +41,7 @@
 
 _(empty — pick from NEXT)_
 
-> **COD-COMPLETE DONE** — 2 PRs merged (#2771–#2772), deployed 2026-02-12
+> **ADMIN-PRODUCERS DONE** — PR #2774 merged, deployed 2026-02-12
 
 ---
 
@@ -49,8 +49,7 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **ADMIN-PRODUCERS** | Admin UI polish for producer management | Better UX for approve/reject flow | Frontend |
-| 2 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
+| 1 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
 
 **Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
 
@@ -69,6 +68,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **ADMIN-PRODUCERS** — Admin producers page: fix status mapping, add filters/detail row, Tailwind conversion (PR #2774, deployed 2026-02-12) ✅
 - **COD-COMPLETE** — Cash on Delivery: shipping quote COD fee display + admin mark-as-paid endpoint (PRs #2771–#2772, deployed 2026-02-12) ✅
 - **SEED-DATA-FIX** — Greek names, descriptions for all producers/products/categories + data migration (PRs #2768–#2769, deployed 2026-02-12) ✅
 - **PRODUCER-ONBOARD-01** — Producer self-service registration + onboarding form + admin approve/reject + email notifications (PRs #2760–#2765, deployed 2026-02-12) ✅
