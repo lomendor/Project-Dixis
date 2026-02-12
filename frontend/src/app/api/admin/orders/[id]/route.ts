@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/client';
-import { memOrders } from '../../../../../lib/orderStore';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
 
 export const dynamic = 'force-dynamic';
+
+// TODO [H1-Phase2]: Proxy to Laravel API for admin order detail.
+// CheckoutOrder + memOrders removed (H1-ORDER-MODEL Phase 1) — data was
+// never populated in production. Wire to Laravel GET /admin/orders/:id
+// when the endpoint is available.
 
 export async function GET(
   _req: Request,
@@ -20,18 +23,6 @@ export async function GET(
     return new NextResponse('missing id', { status: 400 });
   }
 
-  try {
-    const o = await prisma.checkoutOrder.findUnique({ where: { id } });
-    if (!o) {
-      return new NextResponse('not found', { status: 404 });
-    }
-    return NextResponse.json(o);
-  } catch {
-    // fallthrough to memory
-  }
-  const m = memOrders.get(id);
-  if (!m) {
-    return new NextResponse('not found', { status: 404 });
-  }
-  return NextResponse.json(m);
+  // No backend data source available yet — return 404
+  return new NextResponse('not found', { status: 404 });
 }

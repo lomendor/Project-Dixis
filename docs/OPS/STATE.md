@@ -1,11 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (AUDIT-CLEANUP-02)
+**Last Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 1)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — H1-ORDER-MODEL Phase 1: Delete CheckoutOrder + Dead Order Routes
+
+**Status**: ✅ DONE (PR #2794, deployed)
+
+**What was done**:
+- Deleted `CheckoutOrder` model + `PaymentStatus` enum from both Prisma schemas (never populated in production)
+- Deleted 5 dead API routes: `/internal/orders` (GET+POST), `/internal/orders/[id]`, `/api/orders/lookup`, `/api/orders/[id]`
+- Deleted 2 orphaned pages: `/(storefront)/orders/receipt/[orderId]`, `/order/confirmation/[orderId]`
+- Deleted `orderStore.ts` (in-memory fallback for empty CheckoutOrder data)
+- Stubbed `/api/order-lookup` (was querying empty CheckoutOrder, now returns 404 with TODO for Laravel proxy)
+- Stubbed `/api/admin/orders/[id]` + `/api/admin/orders/summary` (removed dead CheckoutOrder queries)
+- Phase 2 TODO: Proxy admin order routes to Laravel API, delete Prisma `Order` model
+
+**Files changed**: 14 (8 deleted, 3 stubbed, 2 schemas updated, 1 lib deleted)
+**Production**: Deployed, healthz 200
 
 ---
 

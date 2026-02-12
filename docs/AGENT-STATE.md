@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (AUDIT-CLEANUP-02 deployed)
+**Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 1 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,9 +47,9 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **H1-ORDER-MODEL** | Resolve triple order model confusion (Prisma Order vs CheckoutOrder vs Laravel) | Architecture | DB + API |
+| 1 | **H1-ORDER-MODEL-P2** | Proxy admin order detail/summary/facets to Laravel API (delete Prisma Order model) | Architecture | API |
 
-**Note**: Audit nearly complete. Remaining OPEN: H1, L6. All others FIXED/WONTFIX/DEFER.
+**Note**: H1 Phase 1 done (CheckoutOrder deleted). Phase 2: proxy remaining admin routes to Laravel. Only L6 (dual i18n) remains fully OPEN.
 
 ---
 
@@ -66,6 +66,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **H1-ORDER-MODEL Phase 1** — Delete CheckoutOrder model (never populated in prod), 8 dead routes/pages, orderStore.ts. Stub admin detail/summary. Remaining: Prisma Order (Phase 2) (deployed 2026-02-12) ✅
 - **AUDIT-CLEANUP-02** — Delete 3 orphaned order pages + producer DELETE route, convert 3 inline-style files to Tailwind, mark 5 audit items WONTFIX/DEFER (deployed 2026-02-12) ✅
 - **CONSOLE-CLEANUP** — Remove PII from logs (phone/email in 4 files), remove 30+ debug console.log from 6 files (PR #2792, deployed 2026-02-12) ✅
 - **CSP-FIX + PRISMA-IMPORT-UNIFY** — Delete dead `csp.ts` (localhost in CSP), unify all Prisma imports to `@/lib/db/client`, delete 2 deprecated shim files (PR #2789, deployed 2026-02-12) ✅

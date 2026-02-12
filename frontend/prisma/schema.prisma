@@ -156,29 +156,9 @@ model RateLimit {
   @@index([name, key, bucket])
 }
 
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-}
-
-model CheckoutOrder {
-  id            String        @id @default(cuid())
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  // Checkout snapshot (denormalized για απλότητα)
-  postalCode    String
-  method        String
-  weightGrams   Int
-  subtotal      Decimal       @db.Decimal(10, 2)
-  shippingCost  Decimal       @db.Decimal(10, 2)
-  codFee        Decimal?      @db.Decimal(10, 2)
-  total         Decimal       @db.Decimal(10, 2)
-  // Optional contact
-  email         String?
-  paymentStatus PaymentStatus @default(PAID)
-  paymentRef    String?
-}
+// CheckoutOrder + PaymentStatus enum DELETED (H1-ORDER-MODEL Phase 1) — model
+// was never populated in production. All order data lives in Laravel (SSOT).
+// See docs/PRODUCT/ARCH-AUDIT-2026-02-12.md H1 for plan.
 
 model Waitlist {
   id        String   @id @default(cuid())
