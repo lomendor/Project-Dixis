@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (UX-QUICK-WINS-01 deployed)
+**Updated**: 2026-02-13 (LAUNCH-POLISH-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -57,7 +57,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 | System | Status |
 |--------|--------|
-| **Stripe (Card Payments)** | ✅ ENABLED |
+| **Stripe (Card Payments)** | ✅ ENABLED (frontend flag + key deployed 2026-02-13) |
 | **COD (Cash on Delivery)** | ✅ ENABLED (+€4.00 fee) |
 | **Resend (Email)** | ✅ ENABLED |
 | **Viva Wallet** | ❌ NOT IMPLEMENTED (backend stub only) |
@@ -66,6 +66,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **LAUNCH-POLISH-01** — Hellenize ALL metadata (title, description, OG, Twitter, JSON-LD, manifest). Rebrand "Project Dixis" → "Dixis". Remove fake "500+" social proof. Enable card payments on prod (Stripe flag + publishable key). (PRs #2802, #2804, deployed 2026-02-13) ✅
 - **UX-QUICK-WINS-01** — Hellenize all English UI strings (HomeClient filters/cards, contact, waitlist, order-lookup, footer). Rewrite 404/500 error pages with proper layout + CTAs. New `/faq` page (Greek accordion). (deployed 2026-02-12) ✅
 - **L6-I18N-UNIFY** — Remove next-intl, unify on LocaleContext. Delete deprecated CheckoutClient.tsx (561 LOC). Architecture audit 100% resolved. (deployed 2026-02-12) ✅
 - **H1-ORDER-MODEL Phase 2** — Proxy admin order detail/summary to Laravel API. Remaining: status+bulk routes still use Prisma Order (email/audit coupling) (deployed 2026-02-12) ✅
