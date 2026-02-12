@@ -17,6 +17,7 @@ type Order = {
   total: number;
   email?: string | null;
   paymentStatus?: string;
+  paymentMethod?: string | null;
   paymentRef?: string | null;
   status?: string;
 };
@@ -57,7 +58,12 @@ export default function AdminOrderDetail({
         <div className="mt-4 text-sm">
           {/* PR-FIX-01: Wire orphaned OrderStatusQuickActions */}
           {data.status && (
-            <OrderStatusQuickActions orderId={data.id} currentStatus={data.status} />
+            <OrderStatusQuickActions
+              orderId={data.id}
+              currentStatus={data.status}
+              paymentMethod={data.paymentMethod ?? (data.codFee != null && Number(data.codFee) > 0 ? 'COD' : null)}
+              paymentStatus={data.paymentStatus}
+            />
           )}
 
           {/* ADMIN-SHIPPING-UI-01: Shipping Label Manager */}
