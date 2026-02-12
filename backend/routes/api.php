@@ -357,6 +357,9 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1'); // 60 requests per minute (Pass 61)
         Route::patch('{order}/status', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'updateStatus'])
             ->middleware('throttle:60,1'); // 60 status updates per minute
+        // Pass COD-COMPLETE: Admin confirm COD payment received
+        Route::patch('{order}/payment/confirm', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'confirmPayment'])
+            ->middleware('throttle:30,1'); // 30 payment confirms per minute
     });
 
     // Admin Shipping (read-only rate tables interface)

@@ -155,6 +155,49 @@ class AdminOrderController extends Controller
     }
 
     /**
+     * Confirm COD payment received (admin-only).
+     * Pass COD-COMPLETE: Mark a COD order's payment_status as completed.
+     *
+     * Only applies to orders with payment_method=COD and payment_status != completed.
+     */
+    public function confirmPayment(Request $request, Order $order)
+    {
+        // Admin check
+        if (!$request->user() || $request->user()->role !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Guard: Only COD orders can be confirmed this way
+        if ($order->payment_method !== 'COD') {
+            return response()->json([
+                'error' => 'Only COD orders can be confirmed via this endpoint',
+            ], 422);
+        }
+
+        // Guard: Already confirmed
+        if ($order->payment_status === 'completed') {
+            return response()->json([
+                'error' => 'Payment already confirmed',
+            ], 422);
+        }
+
+        $order->update([
+            'payment_status' => 'completed',
+            'payment_reference' => 'COD-CONFIRMED-' . now()->format('Ymd-His'),
+        ]);
+
+        \Log::info('COD payment confirmed by admin', [
+            'order_id' => $order->id,
+            'admin_id' => $request->user()->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Payment confirmed successfully',
+            'order' => $order->fresh()->load(['orderItems.product', 'user']),
+        ]);
+    }
+
+    /**
      * Validate status transitions.
      * Allows logical order state flow.
      */
