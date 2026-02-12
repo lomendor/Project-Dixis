@@ -1,11 +1,26 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (CSP-FIX + PRISMA-IMPORT-UNIFY)
+**Last Updated**: 2026-02-12 (CONSOLE-CLEANUP)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — CONSOLE-CLEANUP: Remove PII + Debug Noise from Logs
+
+**Status**: ✅ DONE (deployed)
+
+**What was done**:
+- **PII removed from logs** (4 files): Phone numbers stripped from auth OTP request/verify routes, email addresses stripped from email.ts success logs
+- **Debug noise removed** (6 files): 30+ console.log statements removed from AuthContext, login, register, AuthGuard, StripePaymentForm, shippingRetry, checkoutValidation
+- **Kept**: All console.error/console.warn for legitimate error handling, DEBUG_AUTH-gated logs in api.ts
+- ARCH-AUDIT L7 marked FIXED
+
+**Files changed**: 10 (17 insertions, 68 deletions)
+**Production**: Deployed, healthz 200, build clean
 
 ---
 

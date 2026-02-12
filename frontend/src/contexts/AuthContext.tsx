@@ -115,30 +115,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('🔑 AuthContext: Calling API login...');
       const response = await apiClient.login(email, password);
-      console.log('🔑 AuthContext: API login response:', response);
-      console.log('🔑 AuthContext: Setting user state...', response.user);
       setUser(response.user);
 
       // Pass CART-SYNC-01: Sync localStorage cart with server after login
       try {
         const localItems = getItemsForSync();
         if (localItems.length > 0) {
-          console.log('🛒 CartSync: Syncing', localItems.length, 'local items to server...');
           const serverCart = await apiClient.syncCart(localItems);
-          // Replace localStorage with authoritative server cart
           const localFormat = serverToLocalCart(serverCart.items);
           replaceWithServerCart(localFormat);
-          console.log('🛒 CartSync: Sync complete, server cart has', serverCart.total_items, 'items');
         } else {
-          // No local items, fetch server cart to populate localStorage
-          console.log('🛒 CartSync: No local items, fetching server cart...');
           const serverCart = await apiClient.getCart();
           if (serverCart.items.length > 0) {
             const localFormat = serverToLocalCart(serverCart.items);
             replaceWithServerCart(localFormat);
-            console.log('🛒 CartSync: Loaded', serverCart.total_items, 'items from server');
           }
         }
       } catch (syncError) {
@@ -147,7 +138,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       showToast('success', `Καλώς ήρθατε πίσω, ${response.user.name}!`);
-      console.log('🔑 AuthContext: Login completed successfully');
     } catch (error: any) {
       console.error('🔑 AuthContext: Login error:', error);
 

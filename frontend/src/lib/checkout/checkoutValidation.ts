@@ -174,8 +174,6 @@ export const validateCheckoutPayload = (payload: any): {
   const errors: CheckoutValidationError[] = [];
   const timestamp = new Date().toISOString();
   
-  console.log(`🔍 [${timestamp}] Validating checkout payload:`, JSON.stringify(payload, null, 2));
-  
   try {
     // Validate with Zod schema
     const validation = checkoutValidationSchema.safeParse(payload);
@@ -214,8 +212,6 @@ ${errors.map(e => `  • ${e.field}: ${e.message}`).join('\n')}
 ═══════════════════════════
     `.trim();
     
-    console.log('🔒 Validation proof generated:', proof);
-    
     return {
       isValid: errors.length === 0,
       errors,
@@ -231,8 +227,8 @@ ${errors.map(e => `  • ${e.field}: ${e.message}`).join('\n')}
 ══════════════════
     `.trim();
     
-    console.error('❌ Validation failed with error:', errorProof);
-    
+    console.error('[Checkout] Validation failed:', error instanceof Error ? error.message : 'Unknown error');
+
     return {
       isValid: false,
       errors: [{

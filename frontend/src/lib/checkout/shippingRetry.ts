@@ -66,9 +66,6 @@ const isRetryableError = (error: any): boolean => {
 
 // Parse HTTP error from API response
 const parseHttpError = (error: any): CheckoutHttpError => {
-  const timestamp = new Date().toISOString();
-  console.log(`🚨 [${timestamp}] Parsing HTTP error:`, error);
-  
   if (error.name === 'TypeError' || error.message?.includes('fetch')) {
     return {
       type: 'NETWORK',
@@ -174,8 +171,7 @@ export class ShippingRetryManager {
     request: ShippingQuoteRequest
   ): Promise<ShippingQuote | null> {
     const startTime = Date.now();
-    console.log(`🚢 [${new Date().toISOString()}] Starting shipping quote request:`, request);
-    
+
     this.updateState({
       isLoading: true,
       currentAttempt: 0,
@@ -185,16 +181,12 @@ export class ShippingRetryManager {
     
     for (let attempt = 1; attempt <= this.retryConfig.maxAttempts; attempt++) {
       try {
-        console.log(`🔄 [${new Date().toISOString()}] Shipping quote attempt ${attempt}/${this.retryConfig.maxAttempts}`);
-        
         this.updateState({
           currentAttempt: attempt,
           lastAttemptTime: Date.now()
         });
         
         const result = await apiCall(request);
-        
-        console.log(`✅ [${new Date().toISOString()}] Shipping quote successful on attempt ${attempt}:`, result);
         
         this.updateState({
           isLoading: false,
@@ -205,8 +197,6 @@ export class ShippingRetryManager {
         
       } catch (error) {
         const httpError = parseHttpError(error);
-        console.log(`❌ [${new Date().toISOString()}] Shipping quote failed on attempt ${attempt}:`, httpError);
-        
         this.updateState({
           error: httpError,
           lastAttemptTime: Date.now()
@@ -214,7 +204,6 @@ export class ShippingRetryManager {
         
         // If not retryable or last attempt, fail
         if (!httpError.retryable || attempt === this.retryConfig.maxAttempts) {
-          console.log(`🛑 [${new Date().toISOString()}] Shipping quote exhausted retries`);
           this.updateState({
             isLoading: false
           });
@@ -223,8 +212,7 @@ export class ShippingRetryManager {
         
         // Calculate delay for next attempt
         const delay = calculateDelay(attempt, this.retryConfig);
-        console.log(`⏳ [${new Date().toISOString()}] Retrying in ${delay}ms...`);
-        
+
         // Update retry countdown
         const countdownStart = Date.now();
         const countdownInterval = setInterval(() => {
@@ -259,8 +247,6 @@ export class ShippingRetryManager {
   
   // Fallback shipping calculation when API fails
   getFallbackShippingQuote(request: ShippingQuoteRequest): ShippingQuote {
-    console.log(`🔄 [${new Date().toISOString()}] Using fallback shipping quote for:`, request);
-    
     // Simple zone-based fallback pricing
     const postalPrefix = request.zip.substring(0, 2);
     let carrier = 'Ελληνικά Ταχυδρομεία';
@@ -302,8 +288,6 @@ export class ShippingRetryManager {
         volume: request.volume
       }
     };
-    
-    console.log(`📦 [${new Date().toISOString()}] Fallback shipping quote generated:`, fallbackQuote);
     
     return fallbackQuote;
   }

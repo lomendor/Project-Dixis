@@ -69,7 +69,7 @@ export async function sendOrderConfirmation({
 
   // Dry-run mode (CI/dev) - logs but doesn't send
   if (process.env.EMAIL_DRY_RUN === 'true') {
-    console.log(`[EMAIL DRY-RUN] Would send order confirmation to ${toEmail} for order ${order.id}`)
+    console.log(`[EMAIL DRY-RUN] Would send order confirmation for order ${order.id}`)
     return { ok: true, dryRun: true }
   }
 
@@ -110,7 +110,7 @@ export async function sendOrderConfirmation({
     }
 
     const result = await response.json()
-    console.log(`[EMAIL] Sent confirmation for order ${order.id} to ${toEmail}`, result)
+    console.log(`[EMAIL] Sent confirmation for order ${order.id}`, { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
@@ -136,7 +136,7 @@ export async function sendOrderStatusUpdate({
 
   // Dry-run mode (CI/dev) - logs but doesn't send
   if (process.env.EMAIL_DRY_RUN === 'true') {
-    console.log(`[EMAIL DRY-RUN] Would send status update to ${toEmail} for order ${data.orderId} -> ${data.newStatus}`)
+    console.log(`[EMAIL DRY-RUN] Would send status update for order ${data.orderId} -> ${data.newStatus}`)
     return { ok: true, dryRun: true }
   }
 
@@ -185,7 +185,7 @@ export async function sendOrderStatusUpdate({
     }
 
     const result = await response.json()
-    console.log(`[EMAIL] Sent status update for order ${data.orderId} to ${toEmail}`, result)
+    console.log(`[EMAIL] Sent status update for order ${data.orderId} -> ${data.newStatus}`, { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
@@ -422,7 +422,7 @@ export async function sendOtpEmail({
 
   // Dry-run mode (CI/dev) - logs but doesn't send
   if (process.env.EMAIL_DRY_RUN === 'true') {
-    console.log(`[EMAIL DRY-RUN] Would send OTP ${code} to ${toEmail} for ${phone}`)
+    console.log('[EMAIL DRY-RUN] Would send OTP email')
     return { ok: true, dryRun: true }
   }
 
@@ -460,7 +460,7 @@ export async function sendOtpEmail({
     }
 
     const result = await response.json()
-    console.log(`[EMAIL] OTP sent to ${toEmail} for ${phone}`)
+    console.log('[EMAIL] OTP email sent', { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
