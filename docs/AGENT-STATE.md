@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (UX-POLISH-01 deployed)
+**Updated**: 2026-02-12 (ADMIN-PRODUCTS-TAILWIND deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -33,7 +33,7 @@
 - **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy + polished admin UI (ADMIN-PRODUCERS)
 - **Viva Wallet**: ❌ Frontend UI exists, backend throws "not yet implemented"
 - **Seed Data**: ✅ FIXED (SEED-DATA-FIX) — All producers, products, categories now in Greek with rich descriptions
-- **20 stale PRs**: ⚠️ PRs from Dec 2025 still open, need cleanup
+- **20 stale PRs**: ✅ FIXED (STALE-PR-CLEANUP) — All 5 remaining PRs closed with explanations
 
 ---
 
@@ -41,7 +41,8 @@
 
 _(empty — pick from NEXT)_
 
-> **UX-POLISH-01 DONE** — PR #2776 merged, deployed 2026-02-12
+> **ADMIN-PRODUCTS-TAILWIND DONE** — PR #2780 merged, deployed 2026-02-12
+> **STALE-PR-CLEANUP DONE** — 5 PRs closed, 0 open PRs remaining
 
 ---
 
@@ -49,10 +50,11 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **ADMIN-PRODUCTS-TAILWIND** | Convert admin products page inline styles to Tailwind | Consistency | Frontend only |
-| 2 | **STALE-PR-CLEANUP** | Close/merge 20 stale PRs from Dec 2025 | Hygiene | GitHub |
+| 1 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
+| 2 | **REORDER-01** | Reorder functionality for past orders | UX convenience | Full stack |
+| 3 | **OAUTH-GOOGLE-01** | Google OAuth login for customers | Growth | Full stack |
 
-**Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
+**Note**: REORDER-01 and OAUTH-GOOGLE-01 are nice-to-have. PROD-CDN-FIX addresses E2E failures from asset MIME issues.
 
 ---
 
@@ -69,6 +71,8 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **ADMIN-PRODUCTS-TAILWIND** — Convert admin products page from inline styles to Tailwind (PR #2780, deployed 2026-02-12) ✅
+- **STALE-PR-CLEANUP** — Close 5 stale PRs (#2547, #2598, #2625, #2654, #2656) — 0 open PRs (2026-02-12) ✅
 - **UX-POLISH-01** — Hellenize checkout/order-lookup, polish shared components (AdminEmptyState, AdminLoading, Skeleton), remove skeleton.css (PR #2776, deployed 2026-02-12) ✅
 - **ADMIN-PRODUCERS** — Admin producers page: fix status mapping, add filters/detail row, Tailwind conversion (PR #2774, deployed 2026-02-12) ✅
 - **COD-COMPLETE** — Cash on Delivery: shipping quote COD fee display + admin mark-as-paid endpoint (PRs #2771–#2772, deployed 2026-02-12) ✅
