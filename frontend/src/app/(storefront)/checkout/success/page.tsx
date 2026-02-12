@@ -26,14 +26,14 @@ function SuccessContent() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold mb-4">Success!</h1>
+        <h1 className="text-2xl font-bold mb-4">Επιτυχία!</h1>
 
         <p className="text-gray-600 mb-2">
-          Your order has been placed successfully.
+          Η παραγγελία σας καταχωρήθηκε επιτυχώς.
         </p>
 
         <p className="text-sm text-gray-500 mb-6" data-testid="order-id">
-          Order ID: <span className="font-mono font-semibold">{orderId}</span>
+          Κωδικός παραγγελίας: <span className="font-mono font-semibold">{orderId}</span>
         </p>
 
         <div className="space-y-3">
@@ -41,14 +41,14 @@ function SuccessContent() {
             href="/products"
             className="inline-block w-full bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700"
           >
-            Continue Shopping
+            Συνέχεια αγορών
           </Link>
 
           <Link
             href="/"
             className="inline-block w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
           >
-            Back to Home
+            Πίσω στην αρχική
           </Link>
         </div>
       </div>
@@ -58,7 +58,7 @@ function SuccessContent() {
 
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">Φόρτωση…</div>}>
       <SuccessContent />
     </Suspense>
   )

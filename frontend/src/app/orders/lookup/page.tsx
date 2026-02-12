@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 type OrderResult = {
@@ -141,9 +142,9 @@ function OrderLookupContent() {
   const disableAll = busy;
 
   return (
-    <main style={{ maxWidth: 720, margin: '40px auto', padding: 16 }}>
-      <h2 style={{ margin: 0 }}>Εύρεση Παραγγελίας</h2>
-      <p style={{ color: '#6b7280', marginTop: 6 }}>
+    <main className="max-w-2xl mx-auto py-10 px-4">
+      <h2 className="text-2xl font-bold text-gray-900">Εύρεση Παραγγελίας</h2>
+      <p className="text-gray-500 mt-1.5">
         Βάλτε τον αριθμό παραγγελίας (π.χ. <code>DX-20251017-AB12</code>) και το
         email σας.
       </p>
@@ -157,8 +158,8 @@ function OrderLookupContent() {
                 setOrderNo(e.target.value);
                 if (errNo) setErrNo('');
               }}
-              placeholder="Order No (DX-YYYYMMDD-####)"
-              className="border px-3 py-2 rounded w-full"
+              placeholder="Αρ. παραγγελίας (DX-YYYYMMDD-####)"
+              className="border border-gray-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               aria-invalid={!!errNo}
               disabled={disableAll}
               data-testid="lookup-order-no"
@@ -188,7 +189,7 @@ function OrderLookupContent() {
               placeholder="Email"
               ref={emailRef}
               type="email"
-              className="border px-3 py-2 rounded w-full"
+              className="border border-gray-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               aria-invalid={!!errEmail}
               disabled={disableAll}
               data-testid="lookup-email"
@@ -207,7 +208,7 @@ function OrderLookupContent() {
                   onClick={onClear}
                   className="underline hover:text-neutral-800"
                 >
-                  Clear
+                  Καθαρισμός
                 </button>
               </div>
             )}
@@ -217,7 +218,7 @@ function OrderLookupContent() {
             <button
               type="submit"
               disabled={disableAll}
-              className="border px-3 py-2 rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="lookup-submit"
             >
               {busy ? 'Αναζήτηση…' : 'Αναζήτηση'}
@@ -226,10 +227,10 @@ function OrderLookupContent() {
               type="button"
               onClick={onClear}
               disabled={disableAll}
-              className="border px-3 py-2 rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
+              className="border border-gray-300 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="clear-remembered-email"
             >
-              Clear remembered email
+              Καθαρισμός email
             </button>
             {busy && (
               <span data-testid="lookup-busy" className="text-xs text-neutral-600">
@@ -252,14 +253,14 @@ function OrderLookupContent() {
       )}
 
       {result && (
-        <div className="mt-5 text-sm border rounded p-3" data-testid="lookup-result">
+        <div className="mt-5 text-sm border border-gray-200 rounded-lg p-4 bg-gray-50" data-testid="lookup-result">
           {/* AG40: Copy order link button */}
-          <div className="mb-2 flex items-center gap-3">
+          <div className="mb-3 flex items-center gap-3">
             <button
               type="button"
               data-testid="copy-order-link-lookup"
               onClick={onCopyCurrent}
-              className="border px-3 py-2 rounded text-sm"
+              className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-100 transition-colors"
             >
               Αντιγραφή συνδέσμου
             </button>
@@ -270,7 +271,7 @@ function OrderLookupContent() {
             )}
           </div>
           <div>
-            <strong>Order No:</strong>{' '}
+            <strong>Αρ. Παραγγελίας:</strong>{' '}
             <span data-testid="result-order-no">{result.orderNo}</span>
           </div>
           <div>
@@ -287,16 +288,16 @@ function OrderLookupContent() {
             <strong>Σύνολο:</strong> €{Number(result.total).toFixed(2)}
           </div>
           <div>
-            <strong>Status:</strong> {result.paymentStatus ?? 'PAID'}
+            <strong>Κατάσταση:</strong> {result.paymentStatus ?? 'PAID'}
           </div>
         </div>
       )}
 
       {/* AG38: Back to shop link */}
       <div className="mt-6">
-        <a href="/" data-testid="back-to-shop-link" className="underline">
-          Πίσω στο κατάστημα
-        </a>
+        <Link href="/" data-testid="back-to-shop-link" className="text-emerald-600 hover:text-emerald-800 text-sm">
+          ← Πίσω στο κατάστημα
+        </Link>
       </div>
     </main>
   );
@@ -304,7 +305,7 @@ function OrderLookupContent() {
 
 export default function OrderLookupPage() {
   return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto p-6">Loading...</div>}>
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-gray-500">Φόρτωση…</div>}>
       <OrderLookupContent />
     </Suspense>
   );
