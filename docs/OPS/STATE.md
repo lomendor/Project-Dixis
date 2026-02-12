@@ -1,11 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 2)
+**Last Updated**: 2026-02-12 (L6-I18N-UNIFY)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — L6-I18N-UNIFY: Remove next-intl, Unify on LocaleContext
+
+**Status**: ✅ DONE (deployed)
+
+**What was done**:
+- Removed `next-intl` package (27 transitive deps removed) and `withNextIntl()` plugin from `next.config.ts`
+- Migrated 2 server components (`products/[id]`, `order/[id]`) from `next-intl/server` to `@/lib/i18n/t.ts`
+- Enhanced `@/lib/i18n/t.ts` with parameter interpolation support (matches LocaleContext's `t('key', { param })` API)
+- Deleted deprecated `CheckoutClient.tsx` (561 LOC, marked @deprecated since 2025-12-29, zero importers)
+- Deleted `i18n/request.ts` (next-intl server config, no longer needed)
+- Architecture audit L6 marked FIXED — **all audit items now resolved**
+
+**Files changed**: 7 (2 deleted, 3 modified, 1 enhanced, 1 config cleaned)
+**Production**: Deployed, healthz 200
 
 ---
 

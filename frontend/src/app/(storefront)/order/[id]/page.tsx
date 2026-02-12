@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from '@/lib/i18n/t';
 import Link from 'next/link';
 
 export default async function OrderConfirmation({ params }: { params: Promise<{ id: string }> }) {

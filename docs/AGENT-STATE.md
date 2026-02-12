@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 2 deployed)
+**Updated**: 2026-02-12 (L6-I18N-UNIFY deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,9 +47,9 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **L6-I18N-UNIFY** | Unify dual i18n systems (next-intl vs custom LocaleContext) | Cleanup | Frontend |
+_(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-AUDIT doc.)_
 
-**Note**: H1 Phase 1+2 done (CheckoutOrder deleted, admin detail/summary proxied to Laravel). Remaining H1 work: status update + bulk routes still use Prisma Order (blocked by email/audit coupling). Only L6 (dual i18n) remains fully OPEN.
+**Note**: Full architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified. Remaining: H1 status/bulk routes (Prisma→Laravel, blocked by email/audit coupling), M1 deprecated product routes (DEFER, needed for E2E).
 
 ---
 
@@ -66,6 +66,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **L6-I18N-UNIFY** — Remove next-intl, unify on LocaleContext. Delete deprecated CheckoutClient.tsx (561 LOC). Architecture audit 100% resolved. (deployed 2026-02-12) ✅
 - **H1-ORDER-MODEL Phase 2** — Proxy admin order detail/summary to Laravel API. Remaining: status+bulk routes still use Prisma Order (email/audit coupling) (deployed 2026-02-12) ✅
 - **H1-ORDER-MODEL Phase 1** — Delete CheckoutOrder model (never populated in prod), 8 dead routes/pages, orderStore.ts. Stub admin detail/summary. Remaining: Prisma Order (Phase 2) (deployed 2026-02-12) ✅
 - **AUDIT-CLEANUP-02** — Delete 3 orphaned order pages + producer DELETE route, convert 3 inline-style files to Tailwind, mark 5 audit items WONTFIX/DEFER (deployed 2026-02-12) ✅
