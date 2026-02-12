@@ -1,11 +1,46 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (ADMIN-PRODUCTS-TAILWIND)
+**Last Updated**: 2026-02-12 (AUTH-FIX-CRITICAL)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — AUTH-FIX-CRITICAL: Secure Unprotected Admin Endpoints
+
+**Status**: ✅ DONE (PR #2783, deployed)
+
+**Context**: Architecture audit (3 parallel agents, 82 API routes) revealed CRITICAL security holes — admin endpoints serving data without authentication.
+
+**What was done**:
+- CRITICAL: Added `requireAdmin()` to `/api/admin/orders/export` (was serving CSV to anyone)
+- CRITICAL: Added `requireAdmin()` to `/api/admin/orders/facets` (was exposing order stats)
+- HIGH: Replaced weak `adminEnabled()` with `requireAdmin()` on `/api/admin/orders/summary`
+- HIGH: Replaced weak `adminEnabled()` with `requireAdmin()` on `/api/admin/orders/[id]`
+- MEDIUM: Added production block to `/api/ops/status` (was exposing server internals)
+- MEDIUM: Added production block to `/dev-check` (was exposing env config)
+- Created comprehensive architecture audit report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`
+
+**Deployment issue**: Orphan next-server process (PID 2156165) held port 3000 after PM2 restarts, serving stale (un-patched) code. Fixed by killing orphan + restart.
+
+**Files changed**: 7 files, 173 insertions, 6 deletions
+**Production**: Deployed, verified — export returns 401, ops/status returns 404, healthz 200
+
+---
+
+## 2026-02-12 — ARCH-AUDIT: Full Architecture Audit
+
+**Status**: ✅ DONE (report written, issues catalogued)
+
+**What was done**:
+- Deployed 3 parallel scan agents: api-scanner (82 routes), db-scanner (14 models), frontend-scanner (~200 files)
+- Found: 2 CRITICAL (unprotected endpoints), 3 HIGH (weak auth, triple order model), 6 MEDIUM, 4 LOW
+- Positive: Product SSOT correctly enforced, PrismaClient singleton clean, CI schema in sync
+- Report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`
+- Remaining backlog: DEAD-CODE-CLEANUP, ORDER-CONSOLIDATE, CSP-FIX
 
 ---
 
