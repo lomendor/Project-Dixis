@@ -45,18 +45,28 @@ export async function GET(req: NextRequest) {
     const json = await res.json()
     const producers = json?.data ?? []
 
-    // Map Laravel format to admin panel format
+    // Map Laravel status to frontend approval status
+    // Laravel: pending/active/inactive → Frontend: pending/approved/rejected
+    const mapStatus = (s: string): string => {
+      if (s === 'active') return 'approved'
+      if (s === 'inactive') return 'rejected'
+      return 'pending'
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items = producers.map((p: any) => ({
       id: String(p.id),
-      name: p.name,
+      name: p.name || p.business_name || '',
       businessName: p.business_name || '',
       region: p.region || p.location || '',
-      status: p.status || 'pending',
+      approvalStatus: mapStatus(p.status || 'pending'),
       isActive: p.is_active !== false,
       rejectionReason: p.rejection_reason || null,
       email: p.email || p.user?.email || '',
       phone: p.phone || '',
+      description: p.description || '',
+      city: p.city || '',
+      taxId: p.tax_id || '',
       createdAt: p.created_at,
     }))
 
