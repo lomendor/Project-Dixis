@@ -1,11 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (COD-COMPLETE)
+**Last Updated**: 2026-02-12 (ADMIN-PRODUCERS)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — ADMIN-PRODUCERS: Admin Producers Page Polish
+
+**Status**: ✅ DONE (PR #2774, deployed)
+
+**What was done**:
+- Fixed `approvalStatus` field mismatch — proxy sent `status` but frontend read `approvalStatus`
+- Added status mapping: Laravel active→approved, inactive→rejected, pending→pending
+- Added status filter dropdown (Σε αναμονή / Εγκεκριμένοι / Απορρίφθηκαν)
+- Added expandable detail row (email, phone, city, tax ID, description, rejection reason)
+- Converted all inline styles to Tailwind CSS
+- Removed stale Prisma PATCH handler (approve/reject through Laravel SSOT)
+- Removed broken create modal (producers self-register via PRODUCER-ONBOARD-01)
+
+**Files changed**: 3 files, 201 insertions, 295 deletions
+**Production**: Deployed, healthz 200
 
 ---
 
