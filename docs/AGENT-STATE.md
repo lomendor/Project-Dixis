@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (ADMIN-PRODUCTS-TAILWIND deployed)
+**Updated**: 2026-02-12 (AUTH-FIX-CRITICAL deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -41,8 +41,8 @@
 
 _(empty — pick from NEXT)_
 
-> **ADMIN-PRODUCTS-TAILWIND DONE** — PR #2780 merged, deployed 2026-02-12
-> **STALE-PR-CLEANUP DONE** — 5 PRs closed, 0 open PRs remaining
+> **AUTH-FIX-CRITICAL DONE** — PR #2783 merged, deployed 2026-02-12
+> Security audit + fix: 4 admin endpoints secured, 2 production blocks added
 
 ---
 
@@ -50,11 +50,12 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
-| 2 | **REORDER-01** | Reorder functionality for past orders | UX convenience | Full stack |
-| 3 | **OAUTH-GOOGLE-01** | Google OAuth login for customers | Growth | Full stack |
+| 1 | **DEAD-CODE-CLEANUP** | Delete 17 dead components, 10 dead libs, 11 orphan routes | Tech debt | ~200 LOC deletions |
+| 2 | **ORDER-CONSOLIDATE** | Remove 4/5 duplicate tracking APIs + legacy checkout flow | Architecture | ~300 LOC deletions |
+| 3 | **CSP-FIX** | Remove localhost from CSP, fix hardcoded URLs | Security | ~20 LOC |
+| 4 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
 
-**Note**: REORDER-01 and OAUTH-GOOGLE-01 are nice-to-have. PROD-CDN-FIX addresses E2E failures from asset MIME issues.
+**Note**: Priorities updated from architecture audit (`docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`). Focus on cleanup before new features.
 
 ---
 
@@ -71,6 +72,8 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **AUTH-FIX-CRITICAL** — Add requireAdmin() to 4 unprotected admin endpoints + production blocks on /api/ops/status and /dev-check (PR #2783, deployed 2026-02-12) ✅
+- **ARCH-AUDIT** — Full architecture audit: 82 API routes, 14 Prisma models, ~200 frontend files. Found CRITICAL auth holes, dead code, duplicate systems. Report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md` (2026-02-12) ✅
 - **ADMIN-PRODUCTS-TAILWIND** — Convert admin products page from inline styles to Tailwind (PR #2780, deployed 2026-02-12) ✅
 - **STALE-PR-CLEANUP** — Close 5 stale PRs (#2547, #2598, #2625, #2654, #2656) — 0 open PRs (2026-02-12) ✅
 - **UX-POLISH-01** — Hellenize checkout/order-lookup, polish shared components (AdminEmptyState, AdminLoading, Skeleton), remove skeleton.css (PR #2776, deployed 2026-02-12) ✅
@@ -125,6 +128,7 @@ _(empty — pick from NEXT)_
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
+| `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md` | Architecture audit backlog |
 
 ---
 
