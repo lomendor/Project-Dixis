@@ -1,11 +1,26 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (ORDER-CONSOLIDATE)
+**Last Updated**: 2026-02-12 (CSP-FIX + PRISMA-IMPORT-UNIFY)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — CSP-FIX + PRISMA-IMPORT-UNIFY
+
+**Status**: ✅ DONE (PR #2789, deployed)
+
+**What was done**:
+- Deleted dead `src/lib/csp.ts` (contained hardcoded `localhost:3200` — was never imported, real CSP lives in `next.config.ts`)
+- Unified all 10 Prisma import paths to canonical `@/lib/db/client`
+- Deleted 2 deprecated re-export shims: `src/lib/prisma.ts` + `src/server/db/prisma.ts`
+- Updated ARCH-AUDIT: H5, L4, L11 marked FIXED
+
+**Files changed**: 13 (3 deleted, 10 imports updated)
+**Production**: Deployed, healthz 200, build clean
 
 ---
 

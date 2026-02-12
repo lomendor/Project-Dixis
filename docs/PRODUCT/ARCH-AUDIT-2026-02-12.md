@@ -36,7 +36,7 @@
 | H2 | 5 duplicate order tracking APIs | `/api/track/[token]`, `/api/orders/track/[token]`, `/api/orders/track`, `/api/orders/public/[token]`, `/api/public/track/[token]` — three different response shapes | FIXED PRs #2786 + #2788 (all 5 deleted, canonical = Laravel `/public/orders/track/{token}`) |
 | H3 | 2 duplicate tracking pages | `/track/[token]` (uses Laravel API, correct) vs `/orders/track/[token]` (uses Prisma directly, stale) | FIXED PR #2788 (stale page deleted, email + confirmation links fixed to canonical `/track/`) |
 | H4 | Legacy checkout flow still live | `/checkout/flow`, `/checkout/payment`, `/checkout/payment/success`, `/checkout/payment/failure`, `/checkout/confirmation` — inline styles, localStorage state. Real checkout is `/(storefront)/checkout` | FIXED PR #2786 |
-| H5 | CSP hardcodes localhost | `src/lib/csp.ts:7` — `http://localhost:3200` in production CSP connect-src | OPEN |
+| H5 | CSP hardcodes localhost | `src/lib/csp.ts:7` — `http://localhost:3200` in production CSP connect-src | FIXED PR #2789 (dead file deleted, real CSP in next.config.ts was already clean) |
 | H6 | `/api/order-intents` — ZERO auth | Creates draft orders in Prisma without any authentication | FIXED PR #2786 (deleted) |
 
 ---
@@ -60,14 +60,14 @@
 | L1 | Dead components (never imported) | 17+ files | FIXED PR #2786 (16 deleted) |
 | L2 | Dead lib files (never imported) | 10+ files | FIXED PR #2786 (6 deleted, 5 alive) |
 | L3 | Dead API routes (no frontend callers) | 11 routes | FIXED PR #2786 (5 deleted, 2 kept for E2E) |
-| L4 | 3 Prisma import paths for same singleton | `@/lib/db/client` (canonical), `@/lib/prisma` (9 files), `@/server/db/prisma` (4 files) | OPEN |
+| L4 | 3 Prisma import paths for same singleton | `@/lib/db/client` (canonical), `@/lib/prisma` (9 files), `@/server/db/prisma` (4 files) | FIXED PR #2789 (all 10 files → `@/lib/db/client`, 2 shims deleted) |
 | L5 | 2 rate-limiting implementations | `rate-limit.ts` (class-based) vs `rateLimit.ts` (token-bucket) | OPEN |
 | L6 | 2 i18n systems coexist | next-intl `getTranslations()` vs custom `LocaleContext` `useTranslations()` | OPEN |
 | L7 | 50+ console.log in production code | Including `console.log('Starting login process...', { email })` in auth/login | OPEN |
 | L8 | 8+ files still using inline styles | After Tailwind conversions: track/page, checkout/flow, checkout/payment, products-demo, dev/brand, admin/shipping-test, my/error, global-error | OPEN |
 | L9 | Redirect stub pages | `/login`→`/auth/login`, `/register`→`/auth/register`, `/product/[id]`→`/products/[id]` | FIXED PR #2786 (deleted) |
 | L10 | Duplicate consumer order pages | `/orders` and `/account/orders` serve same audience with different implementations | OPEN |
-| L11 | `@/lib/prismaSafe` deprecated shim | 0 callers, can be deleted | OPEN |
+| L11 | `@/lib/prismaSafe` deprecated shim | 0 callers, can be deleted | FIXED PR #2786 (deleted) |
 
 ---
 

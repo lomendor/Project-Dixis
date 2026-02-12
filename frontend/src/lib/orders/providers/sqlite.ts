@@ -1,5 +1,5 @@
 import type { OrdersRepo, ListParams } from './types';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db/client';
 import { toDto, parseSort, clamp, parseDateRange } from './_map';
 
 export const sqliteRepo: OrdersRepo = {
