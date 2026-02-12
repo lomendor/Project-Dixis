@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (DEAD-CODE-CLEANUP deployed)
+**Updated**: 2026-02-12 (ORDER-CONSOLIDATE deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -41,21 +41,17 @@
 
 _(empty — pick from NEXT)_
 
-> **DEAD-CODE-CLEANUP DONE** — PR #2786 merged, deployed 2026-02-12
-> Deleted 42 files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs
-
 ---
 
 ## NEXT (correct priority — marketplace-first)
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **ORDER-CONSOLIDATE** | Remove duplicate tracking APIs + duplicate tracking page | Architecture | ~200 LOC deletions |
-| 2 | **CSP-FIX** | Remove localhost from CSP, fix hardcoded URLs | Security | ~20 LOC |
-| 3 | **PRISMA-IMPORT-UNIFY** | Consolidate 3 import paths to single `@/lib/db/client` | Tech debt | ~30 LOC |
-| 4 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
+| 1 | **CSP-FIX** | Remove localhost from CSP, fix hardcoded URLs | Security | ~20 LOC |
+| 2 | **PRISMA-IMPORT-UNIFY** | Consolidate 3 import paths to single `@/lib/db/client` | Tech debt | ~30 LOC |
+| 3 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
 
-**Note**: DEAD-CODE-CLEANUP done (PR #2786). Priorities from `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`.
+**Note**: ORDER-CONSOLIDATE done. Priorities from `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`.
 
 ---
 
@@ -72,6 +68,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **ORDER-CONSOLIDATE** — Delete 5 duplicate tracking APIs/pages (169 LOC), fix email tracking link + confirmation page to use canonical `/track/` path (PR #2788, deployed 2026-02-12) ✅
 - **DEAD-CODE-CLEANUP** — Delete 42 dead files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs (PR #2786, deployed 2026-02-12) ✅
 - **AUTH-FIX-CRITICAL** — Add requireAdmin() to 4 unprotected admin endpoints + production blocks on /api/ops/status and /dev-check (PR #2783, deployed 2026-02-12) ✅
 - **ARCH-AUDIT** — Full architecture audit: 82 API routes, 14 Prisma models, ~200 frontend files. Found CRITICAL auth holes, dead code, duplicate systems. Report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md` (2026-02-12) ✅

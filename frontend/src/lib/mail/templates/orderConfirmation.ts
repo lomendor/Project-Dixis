@@ -17,7 +17,7 @@ export function html(params: {
     )
     .join('');
   const base = (process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr').replace(/\/$/, '');
-  const track = `${base}/orders/track/${params.publicToken}`;
+  const track = `${base}/track/${params.publicToken}`;
 
   return `<div style="font-family:system-ui,Arial,sans-serif">
     <h2>Ευχαριστούμε για την παραγγελία σας!</h2>

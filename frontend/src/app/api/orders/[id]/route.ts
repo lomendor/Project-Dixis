@@ -14,6 +14,7 @@ export async function GET(
         id: true,
         status: true,
         total: true,
+        publicToken: true,
         // AG130 checkout fields
         email: true,
         name: true,
@@ -55,6 +56,7 @@ export async function GET(
       id: order.id,
       status: order.status,
       total: Number(order.total || 0),
+      publicToken: order.publicToken || null,
       // AG130 checkout fields (used by thank-you page)
       subtotal: order.subtotal ? Number(order.subtotal) : undefined,
       shipping: order.shipping ? Number(order.shipping) : undefined,
