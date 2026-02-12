@@ -33,8 +33,8 @@
 | # | Finding | Details | Status |
 |---|---------|---------|--------|
 | H1 | Triple order model confusion | `prisma.Order` (intents, status, tracking) ≠ `prisma.CheckoutOrder` (admin summary, lookup) ≠ Laravel orders (admin list, payment). Admin sees different data per endpoint. | OPEN |
-| H2 | 5 duplicate order tracking APIs | `/api/track/[token]`, `/api/orders/track/[token]`, `/api/orders/track`, `/api/orders/public/[token]`, `/api/public/track/[token]` — three different response shapes | OPEN |
-| H3 | 2 duplicate tracking pages | `/track/[token]` (uses Laravel API, correct) vs `/orders/track/[token]` (uses Prisma directly, stale) | OPEN |
+| H2 | 5 duplicate order tracking APIs | `/api/track/[token]`, `/api/orders/track/[token]`, `/api/orders/track`, `/api/orders/public/[token]`, `/api/public/track/[token]` — three different response shapes | FIXED PRs #2786 + #2788 (all 5 deleted, canonical = Laravel `/public/orders/track/{token}`) |
+| H3 | 2 duplicate tracking pages | `/track/[token]` (uses Laravel API, correct) vs `/orders/track/[token]` (uses Prisma directly, stale) | FIXED PR #2788 (stale page deleted, email + confirmation links fixed to canonical `/track/`) |
 | H4 | Legacy checkout flow still live | `/checkout/flow`, `/checkout/payment`, `/checkout/payment/success`, `/checkout/payment/failure`, `/checkout/confirmation` — inline styles, localStorage state. Real checkout is `/(storefront)/checkout` | FIXED PR #2786 |
 | H5 | CSP hardcodes localhost | `src/lib/csp.ts:7` — `http://localhost:3200` in production CSP connect-src | OPEN |
 | H6 | `/api/order-intents` — ZERO auth | Creates draft orders in Prisma without any authentication | FIXED PR #2786 (deleted) |

@@ -1,11 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (DEAD-CODE-CLEANUP)
+**Last Updated**: 2026-02-12 (ORDER-CONSOLIDATE)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — ORDER-CONSOLIDATE: Remove Duplicate Tracking
+
+**Status**: ✅ DONE (PR #2788, deployed)
+
+**What was done**:
+- Deleted 5 duplicate/stale files: `/api/orders/track/route.ts` (PII-leaking), `/api/orders/track/[token]/route.ts`, `/orders/track/[token]/page.tsx` (stale Prisma-based), `/orders/track/page.tsx` (redirect helper), `/api/dev/track/token/route.ts` (dev helper)
+- Fixed `orderConfirmation.ts` email template: tracking link from `/orders/track/` → `/track/` (canonical)
+- Fixed `order/confirmation/[orderId]/page.tsx`: tracking link now uses `publicToken` → `/track/{token}` instead of broken `/orders/track/{id}`
+- Added `publicToken` to `/api/orders/[id]` select + response
+- Canonical tracking flow: `/track/{token}` → Laravel API — single source of truth
+- Updated ARCH-AUDIT: H2 + H3 marked FIXED
+
+**Files changed**: 8 (5 deleted, 3 modified), net -169 LOC
+**Production**: Deployed, healthz 200, deleted routes 404
 
 ---
 

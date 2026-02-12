@@ -11,6 +11,7 @@ const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EU
 
 interface Order {
   id: string;
+  publicToken?: string | null;
   status: string;
   createdAt: string;
   total: number;
@@ -265,7 +266,7 @@ export default function OrderConfirmationPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href={`/orders/track/${order.id}`}
+              href={order.publicToken ? `/track/${order.publicToken}` : '/track'}
               className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
               data-testid="track-order-btn"
             >
