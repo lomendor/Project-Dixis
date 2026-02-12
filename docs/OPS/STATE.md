@@ -1,11 +1,27 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (AUTH-FIX-CRITICAL)
+**Last Updated**: 2026-02-12 (DEAD-CODE-CLEANUP)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — DEAD-CODE-CLEANUP: Delete 42 Dead Files
+
+**Status**: ✅ DONE (PR #2786, deployed)
+
+**What was done**:
+- Verified each file with parallel scan agents (zero importers confirmed)
+- Deleted 16 dead components, 6 dead libs, 5 orphan API routes, 8 legacy/dev pages, 3 redirect stubs
+- Total: 42 files, 3,058 LOC removed
+- Build passes, all deleted routes return 404 in production
+- Updated ARCH-AUDIT doc to mark L1/L2/L3/H4/H6/M5/L9 as FIXED
+
+**Files deleted**: 42 (pure deletions, zero code changes)
+**Production**: Deployed, healthz 200, deleted routes verified 404
 
 ---
 
