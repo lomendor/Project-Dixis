@@ -1,11 +1,43 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (UX-POLISH-01)
+**Last Updated**: 2026-02-12 (ADMIN-PRODUCTS-TAILWIND)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — ADMIN-PRODUCTS-TAILWIND: Convert Admin Products to Tailwind
+
+**Status**: ✅ DONE (PR #2780, deployed)
+
+**What was done**:
+- Converted all inline `style={{...}}` to Tailwind utility classes in admin products page
+- StatusBadge: `parseStyle()` helper → config object pattern (bg-amber-100, etc.)
+- InlineToggle: inline styles → conditional Tailwind classes
+- All 3 modals (rejection, create, edit): Tailwind overlay/content pattern
+- Table: bordered rounded-lg pattern, consistent header/row styling
+- Form inputs/labels/buttons: consistent Tailwind matching rest of admin panel
+
+**Files changed**: 1 file, 166 insertions, 185 deletions
+**Production**: Deployed, healthz 200
+
+---
+
+## 2026-02-12 — STALE-PR-CLEANUP: Close Stale PRs
+
+**Status**: ✅ DONE
+
+**What was done**:
+- Closed 5 stale PRs from Dec 2025 – Feb 2026:
+  - #2598 (CI rename — violates workflow guardrail)
+  - #2547 (seed user blocking — not marketplace-critical)
+  - #2625 (OTP bypass SSOT — staging-only)
+  - #2654 (card smoke E2E — may conflict with recent refactors)
+  - #2656 (email verify activation — not marketplace-critical)
+- Result: 0 open PRs remaining
 
 ---
 
