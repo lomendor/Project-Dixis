@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (SEED-DATA-FIX complete, deployed)
+**Updated**: 2026-02-12 (COD-COMPLETE deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -24,7 +24,7 @@
 - **Customer**: register → login → browse → cart → checkout → Stripe pay → email confirm → order history ✅
 - **Producer** (if account exists): login → add product → edit product → see orders → email on sale ✅
 - **Admin**: phone OTP login → dashboard stats → manage orders → bulk status update ✅
-- **Shipping**: cost calc by postal code + weight, per-producer free threshold ✅
+- **Shipping**: cost calc by postal code + weight, per-producer free threshold, **COD** (+€4 fee) ✅
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
 
 ### What is BROKEN or MISSING
@@ -41,8 +41,7 @@
 
 _(empty — pick from NEXT)_
 
-> **SEED-DATA-FIX DONE** — 2 PRs merged (#2768–#2769), deployed 2026-02-12
-> **PRODUCER-ONBOARD-01 DONE** — 5 PRs merged (#2760–#2765), deployed 2026-02-12
+> **COD-COMPLETE DONE** — 2 PRs merged (#2771–#2772), deployed 2026-02-12
 
 ---
 
@@ -50,9 +49,8 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **COD-COMPLETE** | Cash on Delivery fully working | Most Greek customers prefer COD | Backend |
-| 2 | **ADMIN-PRODUCERS** | Admin UI polish for producer management | Better UX for approve/reject flow | Frontend |
-| 3 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
+| 1 | **ADMIN-PRODUCERS** | Admin UI polish for producer management | Better UX for approve/reject flow | Frontend |
+| 2 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
 
 **Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
 
@@ -63,6 +61,7 @@ _(empty — pick from NEXT)_
 | System | Status |
 |--------|--------|
 | **Stripe (Card Payments)** | ✅ ENABLED |
+| **COD (Cash on Delivery)** | ✅ ENABLED (+€4.00 fee) |
 | **Resend (Email)** | ✅ ENABLED |
 | **Viva Wallet** | ❌ NOT IMPLEMENTED (backend stub only) |
 
@@ -70,6 +69,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **COD-COMPLETE** — Cash on Delivery: shipping quote COD fee display + admin mark-as-paid endpoint (PRs #2771–#2772, deployed 2026-02-12) ✅
 - **SEED-DATA-FIX** — Greek names, descriptions for all producers/products/categories + data migration (PRs #2768–#2769, deployed 2026-02-12) ✅
 - **PRODUCER-ONBOARD-01** — Producer self-service registration + onboarding form + admin approve/reject + email notifications (PRs #2760–#2765, deployed 2026-02-12) ✅
 - **FULL-AUDIT** — Deep functional audit of all user journeys, reset priorities to marketplace-first (2026-02-11)
@@ -106,7 +106,7 @@ _(empty — pick from NEXT)_
 - **Auth**: Email + password (customers/producers), Phone OTP (admin only)
 - **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
 - **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
-- **Payment**: Stripe Checkout Sessions + webhooks. Viva NOT working.
+- **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva NOT working.
 - **Producer routes**: `/producer/*` (dashboard, orders), `/my/products/*` (product CRUD)
 - **Deploy**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`
 

@@ -1,11 +1,30 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-11 (PROD-IMAGE-FIX-01)
+**Last Updated**: 2026-02-12 (COD-COMPLETE)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — COD-COMPLETE: Cash on Delivery
+
+**Status**: ✅ DONE (PRs #2771–#2772, deployed)
+
+**What was done**:
+- PR1: Wired COD fee (€4.00) through shipping quote API + checkout UI — fee displayed as line item, PaymentMethodSelector shows fee note
+- PR2: Admin mark-as-paid endpoint for COD orders — button in OrderStatusQuickActions, proxies to Laravel confirmPayment()
+- Production: `SHIPPING_ENABLE_COD=true` set in backend `.env`, config cached
+
+**Architecture decisions**:
+- COD fee applied ONCE at controller level (not per-producer) to avoid double-charging
+- Admin payment confirm proxies to Laravel (not Prisma) since real orders live in Laravel's orders table
+- `codFee > 0` used as COD detection fallback for Prisma-based admin detail page
+
+**Files changed**: 10 files, ~213 LOC across 2 PRs
+**Production**: Deployed, healthz 200, COD enabled
 
 ---
 
