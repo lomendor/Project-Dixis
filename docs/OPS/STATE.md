@@ -1,11 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (ADMIN-PRODUCERS)
+**Last Updated**: 2026-02-12 (UX-POLISH-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — UX-POLISH-01: Hellenize + Polish Shared Components
+
+**Status**: ✅ DONE (PR #2776, deployed)
+
+**What was done**:
+- Checkout success page: English → Greek (Επιτυχία!, Συνέχεια αγορών, etc.)
+- Order lookup page: English → Greek + inline styles → Tailwind + button styling (emerald-600)
+- AdminEmptyState: inline styles → Tailwind + inbox icon
+- AdminLoading: inline styles → Tailwind + animated spinner SVG
+- Skeleton component: CSS keyframe shimmer → Tailwind animate-pulse
+- Track/admin order loading skeletons: inline styles → Tailwind
+- Removed skeleton.css (no longer needed)
+
+**Files changed**: 9 files, 49 insertions, 54 deletions
+**Production**: Deployed, healthz 200
 
 ---
 

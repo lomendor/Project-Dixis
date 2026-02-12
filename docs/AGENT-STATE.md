@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (ADMIN-PRODUCERS deployed)
+**Updated**: 2026-02-12 (UX-POLISH-01 deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -41,7 +41,7 @@
 
 _(empty — pick from NEXT)_
 
-> **ADMIN-PRODUCERS DONE** — PR #2774 merged, deployed 2026-02-12
+> **UX-POLISH-01 DONE** — PR #2776 merged, deployed 2026-02-12
 
 ---
 
@@ -49,7 +49,8 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **UX-POLISH-01** | Empty states, loading skeletons, error handling | Professional feel | Frontend only |
+| 1 | **ADMIN-PRODUCTS-TAILWIND** | Convert admin products page inline styles to Tailwind | Consistency | Frontend only |
+| 2 | **STALE-PR-CLEANUP** | Close/merge 20 stale PRs from Dec 2025 | Hygiene | GitHub |
 
 **Note**: REORDER-01, OAUTH-GOOGLE-01 deprioritized — nice-to-have, not core flow.
 
@@ -68,6 +69,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **UX-POLISH-01** — Hellenize checkout/order-lookup, polish shared components (AdminEmptyState, AdminLoading, Skeleton), remove skeleton.css (PR #2776, deployed 2026-02-12) ✅
 - **ADMIN-PRODUCERS** — Admin producers page: fix status mapping, add filters/detail row, Tailwind conversion (PR #2774, deployed 2026-02-12) ✅
 - **COD-COMPLETE** — Cash on Delivery: shipping quote COD fee display + admin mark-as-paid endpoint (PRs #2771–#2772, deployed 2026-02-12) ✅
 - **SEED-DATA-FIX** — Greek names, descriptions for all producers/products/categories + data migration (PRs #2768–#2769, deployed 2026-02-12) ✅
