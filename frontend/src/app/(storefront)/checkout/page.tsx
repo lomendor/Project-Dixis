@@ -36,6 +36,8 @@ interface ProducerShipping {
 interface CartShippingQuote {
   producers: ProducerShipping[];
   total_shipping: number;
+  cod_fee: number;
+  payment_method: string;
   quoted_at: string;
   currency: string;
   zone_name: string | null;
@@ -118,8 +120,8 @@ function CheckoutContent() {
   const subtotalCents = cartTotalCents(cartItems)
   const subtotal = subtotalCents / 100
 
-  // Pass ORDER-SHIPPING-SPLIT-01: Fetch per-producer cart shipping quote
-  const fetchCartShippingQuote = useCallback(async (postal: string) => {
+  // Pass ORDER-SHIPPING-SPLIT-01 + COD-COMPLETE: Fetch per-producer cart shipping quote
+  const fetchCartShippingQuote = useCallback(async (postal: string, pmMethod?: PaymentMethod) => {
     // Validate Greek postal code format
     if (!postal || !/^\d{5}$/.test(postal)) {
       setCartShippingQuote(null)
@@ -146,10 +148,13 @@ function CheckoutContent() {
         quantity: item.qty
       }))
 
+      // Pass COD-COMPLETE: Include payment_method for COD fee calculation
+      const selectedMethod = pmMethod ?? paymentMethod
       const quote = await apiClient.getCartShippingQuote({
         postal_code: postal,
         method: 'HOME',
         items,
+        payment_method: selectedMethod === 'card' ? 'CARD' : 'COD',
       })
 
       setCartShippingQuote(quote)
@@ -191,7 +196,7 @@ function CheckoutContent() {
     } finally {
       setShippingLoading(false)
     }
-  }, [cartItems, subtotal, t])
+  }, [cartItems, subtotal, t, paymentMethod])
 
   // Pass CHECKOUT-SHIPPING-DISPLAY-01: Legacy fetch (now wraps cart quote)
   const fetchShippingQuote = useCallback(async (postal: string) => {
@@ -205,6 +210,13 @@ function CheckoutContent() {
       fetchCartShippingQuote(postalCode)
     }
   }, [postalCode, savedAddress]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pass COD-COMPLETE: Re-fetch shipping quote when payment method changes (COD fee differs)
+  useEffect(() => {
+    if (postalCode && postalCode.length === 5) {
+      fetchCartShippingQuote(postalCode, paymentMethod)
+    }
+  }, [paymentMethod]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle successful Stripe payment
   // Pass PAY-CARD-CONFIRM-GUARD-01: Only call backend confirm with valid Stripe result
@@ -534,12 +546,20 @@ function CheckoutContent() {
               </p>
             )}
 
-            {/* Total with shipping */}
+            {/* Pass COD-COMPLETE: COD fee row (only when COD selected and fee > 0) */}
+            {cartShippingQuote && cartShippingQuote.cod_fee > 0 && (
+              <div className="flex justify-between text-sm" data-testid="cod-fee-line">
+                <span>Αντικαταβολή:</span>
+                <span>{fmt.format(cartShippingQuote.cod_fee)}</span>
+              </div>
+            )}
+
+            {/* Total with shipping + COD fee */}
             <div className="flex justify-between font-bold text-lg pt-2 border-t" data-testid="total-line">
               <span>{t('checkoutPage.total')}:</span>
               <span data-testid="checkout-total">
                 {shippingQuote
-                  ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur))
+                  ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur) + (cartShippingQuote?.cod_fee ?? 0))
                   : fmt.format(subtotal)}
               </span>
             </div>
@@ -689,6 +709,7 @@ function CheckoutContent() {
                 value={paymentMethod}
                 onChange={setPaymentMethod}
                 disabled={loading}
+                codFee={cartShippingQuote?.cod_fee}
               />
             </div>
 
