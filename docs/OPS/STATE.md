@@ -1,11 +1,29 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (L6-I18N-UNIFY)
+**Last Updated**: 2026-02-12 (UX-QUICK-WINS-01)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — UX-QUICK-WINS-01: Hellenize UI + Error Pages + FAQ
+
+**Status**: ✅ DONE (deployed)
+
+**What was done**:
+- Hellenized ALL English strings in HomeClient.tsx (30+ strings: filters, sort, organic, cards, buttons, tooltips)
+- Fixed "Email" placeholder in contact, waitlist, order-lookup pages → "Διεύθυνση email"
+- Fixed "Made with Cyprus Green" in footer → "Με ελληνικό πάθος"
+- Rewrote `not-found.tsx` — large 404, descriptive text, two CTA buttons (home + products)
+- Rewrote `error.tsx` — warning icon, retry button via `reset()`, home CTA
+- Created `/faq` page — 4 sections (Orders, Products, Account, Producers), 11 Q&As, accordion UI
+- Added FAQ link in footer under Υποστήριξη section
+
+**Files changed**: 8 (1 new, 7 modified)
+**Production**: Deployed, healthz 200
 
 ---
 

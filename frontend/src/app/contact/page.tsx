@@ -18,7 +18,7 @@ export default function ContactPage() {
       {state==="error" && <div className="p-3 rounded bg-red-100">Κάτι πήγε στραβά. Δοκίμασε ξανά.</div>}
       <form onSubmit={onSubmit} className="grid gap-3 mt-3">
         <input name="name" placeholder="Ονοματεπώνυμο" required minLength={2} className="border rounded p-2" />
-        <input name="email" type="email" placeholder="Email" required className="border rounded p-2" />
+        <input name="email" type="email" placeholder="Διεύθυνση email" required className="border rounded p-2" />
         <textarea name="message" placeholder="Μήνυμα" required minLength={10} className="border rounded p-2 h-40" />
         <input name="hp" className="hidden" tabIndex={-1} autoComplete="off" />
         <button disabled={state==="sending"} className="rounded bg-black text-white px-4 py-2">
