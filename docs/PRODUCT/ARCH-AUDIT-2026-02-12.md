@@ -45,10 +45,10 @@
 
 | # | Finding | Details | Status |
 |---|---------|---------|--------|
-| M1 | Deprecated product routes still accessible | `/api/products` and `/api/products/[id]` — marked @deprecated but serve Prisma fallback when Laravel is slow/down | OPEN |
-| M2 | Producer DELETE via Prisma doesn't sync Laravel | `api/admin/producers/[id]/route.ts` DELETE removes from Prisma only — ghost data in Laravel | OPEN |
-| M3 | Category CRUD in both systems | Prisma `api/categories/[id]` can update categories independently of Laravel Category model | OPEN |
-| M4 | Inconsistent Laravel URL resolution | Some routes use `getLaravelInternalUrl()`, others use `process.env.NEXT_PUBLIC_API_BASE_URL` | OPEN |
+| M1 | Deprecated product routes still accessible | `/api/products` and `/api/products/[id]` — marked @deprecated but serve Prisma fallback when Laravel is slow/down | DEFER (needed for E2E tests) |
+| M2 | Producer DELETE via Prisma doesn't sync Laravel | `api/admin/producers/[id]/route.ts` DELETE removes from Prisma only — ghost data in Laravel | **FIXED** (AUDIT-CLEANUP-02: route deleted, approve/reject remain) |
+| M3 | Category CRUD in both systems | Prisma `api/categories/[id]` can update categories independently of Laravel Category model | WONTFIX (admin-only PATCH, not duplication — categories managed in Prisma) |
+| M4 | Inconsistent Laravel URL resolution | Some routes use `getLaravelInternalUrl()`, others use `process.env.NEXT_PUBLIC_API_BASE_URL` | WONTFIX (already unified at `@/env.ts` — server vs client distinction is by design) |
 | M5 | Dev/test pages accessible in production | `/dev/notifications`, `/dev/brand`, `/dev/quote-demo`, `/test-error`, `/products-demo` — no auth | FIXED PR #2786 (deleted) |
 
 ---
@@ -61,12 +61,12 @@
 | L2 | Dead lib files (never imported) | 10+ files | FIXED PR #2786 (6 deleted, 5 alive) |
 | L3 | Dead API routes (no frontend callers) | 11 routes | FIXED PR #2786 (5 deleted, 2 kept for E2E) |
 | L4 | 3 Prisma import paths for same singleton | `@/lib/db/client` (canonical), `@/lib/prisma` (9 files), `@/server/db/prisma` (4 files) | FIXED PR #2789 (all 10 files → `@/lib/db/client`, 2 shims deleted) |
-| L5 | 2 rate-limiting implementations | `rate-limit.ts` (class-based) vs `rateLimit.ts` (token-bucket) | OPEN |
+| L5 | 2 rate-limiting implementations | `rate-limit.ts` (class-based) vs `rateLimit.ts` (token-bucket) | WONTFIX (different purposes: HTTP auth vs internal ops rate limiting) |
 | L6 | 2 i18n systems coexist | next-intl `getTranslations()` vs custom `LocaleContext` `useTranslations()` | OPEN |
 | L7 | 50+ console.log in production code | Including `console.log('Starting login process...', { email })` in auth/login | **FIXED** (CONSOLE-CLEANUP: PII removed, 30+ debug logs deleted, 10 files) |
-| L8 | 8+ files still using inline styles | After Tailwind conversions: track/page, checkout/flow, checkout/payment, products-demo, dev/brand, admin/shipping-test, my/error, global-error | OPEN |
+| L8 | 8+ files still using inline styles | After Tailwind conversions: track/page, checkout/flow, checkout/payment, products-demo, dev/brand, admin/shipping-test, my/error, global-error | **FIXED** (AUDIT-CLEANUP-02: 5/8 already deleted, remaining 3 converted to Tailwind) |
 | L9 | Redirect stub pages | `/login`→`/auth/login`, `/register`→`/auth/register`, `/product/[id]`→`/products/[id]` | FIXED PR #2786 (deleted) |
-| L10 | Duplicate consumer order pages | `/orders` and `/account/orders` serve same audience with different implementations | OPEN |
+| L10 | Duplicate consumer order pages | `/orders` and `/account/orders` serve same audience with different implementations | **FIXED** (AUDIT-CLEANUP-02: `/orders` page + detail + id-lookup deleted, `/account/orders` canonical) |
 | L11 | `@/lib/prismaSafe` deprecated shim | 0 callers, can be deleted | FIXED PR #2786 (deleted) |
 
 ---
