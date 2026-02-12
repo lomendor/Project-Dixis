@@ -222,15 +222,15 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
     return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Fresh Local Products',
-      description: 'Premium organic products from local Greek producers',
+      name: 'Φρέσκα τοπικά προϊόντα',
+      description: 'Βιολογικά προϊόντα από τοπικούς Έλληνες παραγωγούς',
       url: siteUrl,
       numberOfItems: list.length,
       itemListElement: list.slice(0, 10).map((product, index) => ({
         '@type': 'Product',
         position: index + 1,
         name: product?.name || 'Product',
-        description: product?.description || `Fresh product from local producer`,
+        description: product?.description || 'Φρέσκο προϊόν από τοπικό παραγωγό',
         image: product?.images?.[0]?.url || product?.images?.[0]?.image_path || undefined,
         offers: {
           '@type': 'Offer',
@@ -239,7 +239,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           availability: (product?.stock ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           seller: {
             '@type': 'Organization',
-            name: product?.producer?.name || 'Local Producer',
+            name: product?.producer?.name || 'Τοπικός Παραγωγός',
           },
         },
         brand: {
