@@ -9,12 +9,14 @@ interface PaymentMethodSelectorProps {
   value: PaymentMethod
   onChange: (method: PaymentMethod) => void
   disabled?: boolean
+  codFee?: number
 }
 
 export default function PaymentMethodSelector({
   value,
   onChange,
   disabled = false,
+  codFee,
 }: PaymentMethodSelectorProps) {
   // Card payments gated by build-time env flag AND user authentication
   // Guest users can only use COD; logged-in users can use card
@@ -59,6 +61,11 @@ export default function PaymentMethodSelector({
         <div className="flex-1">
           <span className="font-medium">Αντικαταβολή</span>
           <p className="text-sm text-gray-500">Πληρωμή κατά την παράδοση</p>
+          {codFee != null && codFee > 0 && (
+            <p className="text-xs text-amber-600 mt-0.5" data-testid="cod-fee-note">
+              +{new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(codFee)} χρέωση αντικαταβολής
+            </p>
+          )}
         </div>
       </label>
 

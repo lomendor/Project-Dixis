@@ -897,11 +897,12 @@ class ApiClient {
     });
   }
 
-  // Pass ORDER-SHIPPING-SPLIT-01: Get per-producer shipping breakdown for cart
+  // Pass ORDER-SHIPPING-SPLIT-01 + COD-COMPLETE: Get per-producer shipping breakdown for cart
   async getCartShippingQuote(data: {
     postal_code: string;
     method: 'HOME' | 'COURIER' | 'PICKUP';
     items: { product_id: number; quantity: number }[];
+    payment_method?: 'COD' | 'CARD';
   }): Promise<{
     producers: {
       producer_id: number;
@@ -915,6 +916,8 @@ class ApiClient {
       weight_grams: number;
     }[];
     total_shipping: number;
+    cod_fee: number;
+    payment_method: string;
     quoted_at: string;
     currency: string;
     zone_name: string | null;

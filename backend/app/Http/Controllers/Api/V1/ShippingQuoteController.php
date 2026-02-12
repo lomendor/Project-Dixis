@@ -179,10 +179,12 @@ class ShippingQuoteController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
+            'payment_method' => 'sometimes|string|in:COD,CARD',
         ]);
 
         $postalCode = $validated['postal_code'];
         $method = $validated['method'];
+        $paymentMethod = $validated['payment_method'] ?? 'COD';
         $isPickup = $method === 'PICKUP';
         $quotedAt = now();
 
@@ -241,6 +243,12 @@ class ShippingQuoteController extends Controller
             $producerGroups[$producerId]['weight_grams'] += (int) ($weightPerUnit * $quantity);
         }
 
+        // Pass COD-COMPLETE: Calculate COD fee (applied once, not per-producer)
+        $codEnabled = config('shipping.enable_cod', false);
+        $codFeeEur = ($paymentMethod === 'COD' && $codEnabled)
+            ? (float) config('shipping.cod_fee_eur', 4.00)
+            : 0.00;
+
         // Calculate shipping per producer
         $producersResult = [];
         $totalShipping = 0;
@@ -294,7 +302,8 @@ class ShippingQuoteController extends Controller
 
             // Calculate shipping using ShippingService
             try {
-                $shippingResult = $this->shippingService->calculateShippingCost($weightKg, $zoneCode);
+                // Pass COD-COMPLETE: Don't pass COD to per-producer calc — COD fee is applied once at top level
+                $shippingResult = $this->shippingService->calculateShippingCost($weightKg, $zoneCode, 'HOME', 'CARD');
                 $shippingCost = round($shippingResult['cost_eur'], 2);
             } catch (\Exception $e) {
                 // Zone calculation failed - mark as unavailable
@@ -344,6 +353,8 @@ class ShippingQuoteController extends Controller
         return response()->json([
             'producers' => $producersResult,
             'total_shipping' => round($totalShipping, 2),
+            'cod_fee' => round($codFeeEur, 2),
+            'payment_method' => $paymentMethod,
             'quoted_at' => $quotedAt->toIso8601String(),
             'currency' => 'EUR',
             'zone_name' => $zoneName,
