@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../../../lib/orderStore';
-import { adminEnabled } from '../../../../../lib/adminGuard';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,8 +9,11 @@ export async function GET(
   _req: Request,
   ctx: { params: { id: string } }
 ): Promise<NextResponse> {
-  if (!adminEnabled()) {
-    return new NextResponse('Not Found', { status: 404 });
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const id = ctx?.params?.id;
   if (!id) {

@@ -5,8 +5,15 @@ import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
 import { prisma } from '@/server/db/prisma';
 import { get as getCache, set as setCache, makeKey, DEFAULT_TTL_MS } from '@/server/cache/facets.cache';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 
 export async function GET(req: NextRequest) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const url = new URL(req.url);
   const forceDemo = url.searchParams.get('demo') === '1';
 

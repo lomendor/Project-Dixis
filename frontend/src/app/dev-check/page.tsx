@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Dev Check - Project Dixis',
@@ -7,6 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default async function DevCheckPage() {
+  // Block in production — exposes env configuration
+  if (process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production') {
+    notFound();
+  }
   let healthStatus = 'unknown';
   let healthTimestamp = 'N/A';
 

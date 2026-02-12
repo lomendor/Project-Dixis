@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { memOrders } from '../../../../../lib/orderStore';
-import { adminEnabled } from '../../../../../lib/adminGuard';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import { parseOrderNo } from '../../../../../lib/orderNumber';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-  if (!adminEnabled()) {
-    return new NextResponse('admin disabled', { status: 404 });
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Parse filters from query string (same as list endpoint, but no pagination)

@@ -10,6 +10,10 @@ function commit() {
 }
 
 export async function GET() {
+  // Block in production — exposes server internals
+  if (process.env.DIXIS_ENV === 'production' || process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
   let dbOk = false, dbLatency = -1;
   const t0 = Date.now();
   try { await prisma.$queryRaw`SELECT 1`; dbOk = true; } catch {}
