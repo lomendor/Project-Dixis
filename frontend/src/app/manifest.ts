@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Project Dixis - Local Producer Marketplace',
+    name: 'Dixis — Φρέσκα τοπικά προϊόντα',
     short_name: 'Dixis',
-    description: 'Connect with local producers and discover fresh, quality products in your area',
+    description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
@@ -66,9 +66,9 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: 'Browse Products',
-        short_name: 'Products',
-        description: 'Browse fresh products from local producers',
+        name: 'Προϊόντα',
+        short_name: 'Προϊόντα',
+        description: 'Περιηγηθείτε σε φρέσκα προϊόντα από τοπικούς παραγωγούς',
         url: '/',
         icons: [
           {
@@ -79,9 +79,9 @@ export default function manifest(): MetadataRoute.Manifest {
         ],
       },
       {
-        name: 'Login',
-        short_name: 'Login',
-        description: 'Access your account',
+        name: 'Σύνδεση',
+        short_name: 'Σύνδεση',
+        description: 'Συνδεθείτε στο λογαριασμό σας',
         url: '/auth/login',
         icons: [
           {
@@ -98,14 +98,14 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '1280x720',
         type: 'image/png',
         form_factor: 'wide',
-        label: 'Homepage showing fresh products from local producers',
+        label: 'Αρχική σελίδα με φρέσκα προϊόντα από τοπικούς παραγωγούς',
       },
       {
         src: '/screenshots/mobile-products.png',
         sizes: '375x812',
         type: 'image/png',
         form_factor: 'narrow',
-        label: 'Mobile view of product listings',
+        label: 'Κινητή προβολή λίστας προϊόντων',
       },
     ],
   };

@@ -14,29 +14,21 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
 
 export const metadata: Metadata = {
   title: LANDING_MODE
-    ? "Dixis - Σύντομα διαθέσιμο | Τοπικά προϊόντα από Έλληνες παραγωγούς"
-    : "Fresh Local Products from Greek Producers | Dixis",
+    ? "Dixis — Σύντομα διαθέσιμο | Τοπικά προϊόντα από Έλληνες παραγωγούς"
+    : "Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς | Dixis",
   description: LANDING_MODE
     ? "Η νέα πλατφόρμα που συνδέει Έλληνες παραγωγούς με καταναλωτές. Φρέσκα, βιολογικά και τοπικά προϊόντα απευθείας στην πόρτα σας."
-    : "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers. Support sustainable agriculture and taste the difference of farm-fresh quality.",
-  keywords: LANDING_MODE
-    ? [
-        "τοπικά προϊόντα Ελλάδα",
-        "Έλληνες παραγωγοί",
-        "φρέσκα λαχανικά",
-        "βιολογικά προϊόντα",
-        "παραδοσιακά ελληνικά προϊόντα"
-      ]
-    : [
-        "fresh vegetables Greece",
-        "organic fruits",
-        "local Greek producers",
-        "farm fresh products",
-        "sustainable agriculture",
-        "artisanal food",
-        "direct from farm",
-        "premium organic produce"
-      ],
+    : "Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς. Βιολογικά λαχανικά, φρέσκα φρούτα και χειροποίητα προϊόντα — από το χωράφι στο τραπέζι σας.",
+  keywords: [
+    "τοπικά προϊόντα Ελλάδα",
+    "Έλληνες παραγωγοί",
+    "φρέσκα λαχανικά",
+    "βιολογικά προϊόντα",
+    "παραδοσιακά ελληνικά προϊόντα",
+    "ελληνικό μέλι",
+    "ελαιόλαδο",
+    "τυριά",
+  ],
   ...(shouldNoIndex() && {
     robots: {
       index: false,
@@ -44,32 +36,22 @@ export const metadata: Metadata = {
     },
   }),
   openGraph: {
-    title: LANDING_MODE
-      ? "Dixis - Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς"
-      : "Fresh Local Products from Greek Producers",
-    description: LANDING_MODE
-      ? "Η νέα πλατφόρμα που συνδέει Έλληνες παραγωγούς με καταναλωτές."
-      : "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers.",
+    title: "Dixis — Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς",
+    description: "Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς.",
     url: siteUrl,
     images: [
       {
-        // Use logo.png as OG image until dedicated og-products.jpg is created
-        url: `${siteUrl}/logo.png`,
+        url: `${siteUrl}/logo.svg`,
         width: 400,
         height: 400,
-        alt: 'Dixis - Fresh local products from Greek producers',
+        alt: 'Dixis — Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς',
       },
     ],
   },
   twitter: {
-    title: LANDING_MODE
-      ? "Dixis - Φρέσκα τοπικά προϊόντα"
-      : "Fresh Local Products from Greek Producers",
-    description: LANDING_MODE
-      ? "Η νέα πλατφόρμα που συνδέει παραγωγούς με καταναλωτές."
-      : "Discover premium organic vegetables, fresh fruits, and artisanal products directly from local Greek producers.",
-    // Use logo.png as Twitter card image until dedicated twitter-products.jpg is created
-    images: [`${siteUrl}/logo.png`],
+    title: "Dixis — Φρέσκα τοπικά προϊόντα",
+    description: "Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς.",
+    images: [`${siteUrl}/logo.svg`],
   },
 };
 
