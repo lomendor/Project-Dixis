@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
+import { requireAdmin, AdminError } from '@/lib/auth/admin';
 
 function csvEscape(v: any) {
   return `"${String(v ?? '').replace(/"/g, '""')}"`;
 }
 
 export async function GET(req: NextRequest) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const url = new URL(req.url);
   const forceDemo = url.searchParams.get('demo') === '1';
   const status = url.searchParams.get('status') || undefined;
