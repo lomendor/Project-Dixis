@@ -43,28 +43,16 @@ export default function ProducerDashboard() {
       setStats(statsData);
       let products = productsData.data || [];
 
-      // BUG-P01 fix: If top-products is empty but stats show active products,
-      // fallback to Prisma-backed public API for consistent data display
+      // FIX-DASHBOARD-LEAK: If top-products is empty but stats show active products,
+      // fallback to producer's own products (scoped by auth), never the public API
       if (products.length === 0 && statsData.active_products > 0) {
         try {
-          const res = await fetch('/api/public/products?per_page=5');
-          if (res.ok) {
-            const json = await res.json();
-            const items = json.data || [];
-            // Map Prisma format → Product interface for dashboard table
-            products = items.slice(0, 5).map((p: Record<string, unknown>) => ({
-              id: p.id as number,
-              name: (p.name || '') as string,
-              price: String(p.price ?? '0'),
-              unit: (p.unit || 'kg') as string,
-              stock: (p.stock ?? 0) as number | null,
-              is_active: p.is_active !== false,
-              description: (p.description || null) as string | null,
-              categories: [] as Product['categories'],
-              images: [] as Product['images'],
-              producer: (p.producer || { id: 0, name: '', business_name: '' }) as Product['producer'],
-            })) as Product[];
-          }
+          const ownProducts = await apiClient.getProducerProducts({ per_page: 5 });
+          products = (ownProducts.data || []).map((p: Product) => ({
+            ...p,
+            categories: p.categories || [],
+            images: p.images || [],
+          }));
         } catch {
           // Fallback silently — dashboard will show empty state
         }
