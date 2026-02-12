@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getVivaWalletClient } from '@/lib/viva-wallet/client'
 import { isVivaWalletConfigured } from '@/lib/viva-wallet/config'
-import { prisma } from '@/server/db/prisma'
+import { prisma } from '@/lib/db/client'
 
 /**
  * POST /api/viva-verify

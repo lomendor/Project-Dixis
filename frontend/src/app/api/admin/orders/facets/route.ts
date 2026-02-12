@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { getOrdersRepo } from '@/lib/orders/providers';
 import type { ListParams } from '@/lib/orders/providers';
 import { createPgFacetProvider, type FacetQuery } from '../../../../admin/orders/_server/facets.provider';
-import { prisma } from '@/server/db/prisma';
+import { prisma } from '@/lib/db/client';
 import { get as getCache, set as setCache, makeKey, DEFAULT_TTL_MS } from '@/server/cache/facets.cache';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
 
