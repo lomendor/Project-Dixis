@@ -32,7 +32,7 @@
 
 | # | Finding | Details | Status |
 |---|---------|---------|--------|
-| H1 | Triple order model confusion | `prisma.Order` (intents, status, tracking) ≠ `prisma.CheckoutOrder` (admin summary, lookup) ≠ Laravel orders (admin list, payment). Admin sees different data per endpoint. | **Phase 1 FIXED** (H1-ORDER-MODEL: CheckoutOrder deleted, 8 dead routes/pages deleted, admin detail/summary stubbed. Phase 2: proxy admin to Laravel, delete Prisma Order) |
+| H1 | Triple order model confusion | `prisma.Order` (intents, status, tracking) ≠ `prisma.CheckoutOrder` (admin summary, lookup) ≠ Laravel orders (admin list, payment). Admin sees different data per endpoint. | **Phase 1+2 FIXED** (CheckoutOrder deleted, 8 dead routes/pages deleted, admin detail+summary proxied to Laravel. Remaining: status updates + bulk still use Prisma Order — need email/audit refactoring to proxy) |
 | H2 | 5 duplicate order tracking APIs | `/api/track/[token]`, `/api/orders/track/[token]`, `/api/orders/track`, `/api/orders/public/[token]`, `/api/public/track/[token]` — three different response shapes | FIXED PRs #2786 + #2788 (all 5 deleted, canonical = Laravel `/public/orders/track/{token}`) |
 | H3 | 2 duplicate tracking pages | `/track/[token]` (uses Laravel API, correct) vs `/orders/track/[token]` (uses Prisma directly, stale) | FIXED PR #2788 (stale page deleted, email + confirmation links fixed to canonical `/track/`) |
 | H4 | Legacy checkout flow still live | `/checkout/flow`, `/checkout/payment`, `/checkout/payment/success`, `/checkout/payment/failure`, `/checkout/confirmation` — inline styles, localStorage state. Real checkout is `/(storefront)/checkout` | FIXED PR #2786 |

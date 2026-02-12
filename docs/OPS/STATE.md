@@ -1,11 +1,27 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 1)
+**Last Updated**: 2026-02-12 (H1-ORDER-MODEL Phase 2)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-12 — H1-ORDER-MODEL Phase 2: Proxy Admin Order Routes to Laravel
+
+**Status**: ✅ DONE (deployed)
+
+**What was done**:
+- Rewrote `/api/admin/orders/summary` to proxy to Laravel `GET /admin/orders?per_page=1` and extract `meta.total`
+- Rewrote `/api/admin/orders/[id]` to proxy to Laravel `GET /admin/orders?q={id}&per_page=1` with exact ID match
+- Both routes now use Laravel as SSOT instead of returning stubs/zeros
+- Remaining: status update + bulk status routes still use Prisma Order (blocked by email notification + audit log coupling)
+- Updated ARCH-AUDIT doc: H1 marked "Phase 1+2 FIXED"
+
+**Files changed**: 5 (2 routes rewritten, 3 docs updated)
+**Production**: Deployed, healthz 200
 
 ---
 
