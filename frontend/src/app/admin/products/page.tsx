@@ -26,30 +26,18 @@ interface Product {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    pending: 'background-color: #fef3c7; color: #92400e;',
-    approved: 'background-color: #d1fae5; color: #065f46;',
-    rejected: 'background-color: #fee2e2; color: #991b1b;'
+  const config: Record<string, { bg: string; text: string; label: string }> = {
+    pending:  { bg: 'bg-amber-100', text: 'text-amber-800', label: 'Σε αναμονή' },
+    approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Εγκεκριμένο' },
+    rejected: { bg: 'bg-red-100',   text: 'text-red-800',   label: 'Απορρίφθηκε' },
   }
-  const labels: Record<string, string> = {
-    pending: 'Σε αναμονή',
-    approved: 'Εγκεκριμένο',
-    rejected: 'Απορρίφθηκε'
-  }
-  const parseStyle = (s: string): React.CSSProperties => {
-    const obj: Record<string, string> = {}
-    s.split(';').forEach(p => {
-      const [k, v] = p.split(':').map(x => x.trim())
-      if (k && v) obj[k.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v
-    })
-    return obj
-  }
+  const c = config[status] || config.pending
   return (
     <span
-      style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 500, ...parseStyle(styles[status] || '') }}
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${c.bg} ${c.text}`}
       data-testid={`product-status-${status}`}
     >
-      {labels[status] || status}
+      {c.label}
     </span>
   )
 }
@@ -66,21 +54,15 @@ function InlineToggle({ productId, isActive, onToggle, disabled }: { productId: 
     }
   }
 
+  const isDisabled = disabled || toggling
+
   return (
     <button
       onClick={handleToggle}
-      disabled={disabled || toggling}
-      style={{
-        padding: '4px 12px',
-        borderRadius: 12,
-        fontSize: 12,
-        fontWeight: 500,
-        border: 'none',
-        cursor: disabled || toggling ? 'not-allowed' : 'pointer',
-        opacity: disabled || toggling ? 0.5 : 1,
-        backgroundColor: isActive ? '#10b981' : '#6b7280',
-        color: 'white'
-      }}
+      disabled={isDisabled}
+      className={`px-3 py-0.5 rounded-full text-xs font-medium text-white transition-colors ${
+        isActive ? 'bg-emerald-500' : 'bg-gray-500'
+      } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       data-testid={`toggle-active-${productId}`}
     >
       {toggling ? '...' : isActive ? 'Ενεργό' : 'Ανενεργό'}
@@ -113,7 +95,7 @@ function InlineEditField({ value, onSave, type, disabled }: { value: number; onS
 
   if (editing) {
     return (
-      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+      <div className="flex gap-1 items-center">
         <input
           type="number"
           step={type === 'price' ? '0.01' : '1'}
@@ -121,13 +103,13 @@ function InlineEditField({ value, onSave, type, disabled }: { value: number; onS
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           disabled={saving}
-          style={{ width: 80, padding: 4, border: '1px solid #ddd', borderRadius: 4 }}
+          className="w-20 p-1 border border-gray-300 rounded text-sm"
           data-testid={`edit-${type}-input`}
         />
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{ padding: '2px 8px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+          className="px-2 py-0.5 bg-emerald-500 text-white rounded text-xs cursor-pointer"
           data-testid={`edit-${type}-save`}
         >
           ✓
@@ -135,7 +117,7 @@ function InlineEditField({ value, onSave, type, disabled }: { value: number; onS
         <button
           onClick={handleCancel}
           disabled={saving}
-          style={{ padding: '2px 8px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}
+          className="px-2 py-0.5 bg-gray-500 text-white rounded text-xs cursor-pointer"
           data-testid={`edit-${type}-cancel`}
         >
           ✗
@@ -147,7 +129,7 @@ function InlineEditField({ value, onSave, type, disabled }: { value: number; onS
   return (
     <span
       onClick={() => !disabled && setEditing(true)}
-      style={{ cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1 }}
+      className={`${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
       title={disabled ? '' : 'Κλικ για επεξεργασία'}
       data-testid={`edit-${type}-display`}
     >
@@ -393,29 +375,26 @@ function AdminProductsContent() {
     }
   }
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n)
-
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+      <div className="flex justify-end mb-3">
         <button
           onClick={() => { setCreateOpen(true); loadProducers() }}
-          style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}
+          className="px-5 py-2.5 bg-emerald-500 text-white rounded-lg cursor-pointer font-medium hover:bg-emerald-600 transition-colors"
           data-testid="create-product-btn"
         >
           + Νέο Προϊόν
         </button>
       </div>
-      <form onSubmit={handleFilterSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 160px', gap: 8, marginBottom: 16 }}>
-        <input name="q" defaultValue={q} placeholder="Αναζήτηση τίτλου…" style={{ padding: 8 }} />
-        <select name="approval" defaultValue={approval} style={{ padding: 8 }}>
+      <form onSubmit={handleFilterSubmit} className="grid grid-cols-[1fr_160px] gap-2 mb-4">
+        <input name="q" defaultValue={q} placeholder="Αναζήτηση τίτλου..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+        <select name="approval" defaultValue={approval} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white">
           <option value="">Όλα</option>
           <option value="pending">Σε αναμονή</option>
           <option value="approved">Εγκεκριμένα</option>
           <option value="rejected">Απορριφθέντα</option>
         </select>
-        <button type="submit" style={{ gridColumn: '1 / -1', padding: 8, cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}>
+        <button type="submit" className="col-span-full py-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm font-medium">
           Εφαρμογή
         </button>
       </form>
@@ -423,97 +402,99 @@ function AdminProductsContent() {
       {loading ? (
         <AdminLoading />
       ) : (
-        <table width="100%" cellPadding={8} style={{ borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid #ddd', backgroundColor: '#f5f5f5' }}>
-              <th>Τίτλος</th>
-              <th>Παραγωγός</th>
-              <th>Τιμή</th>
-              <th>Απόθεμα</th>
-              <th>Ενεργό</th>
-              <th>Έγκριση</th>
-              <th>Ενέργειες</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.id} style={{ borderBottom: '1px solid #f0f0f0' }} data-testid={`product-row-${p.id}`}>
-                <td><Link href={`/products/${p.id}`}>{p.title}</Link></td>
-                <td>{p.producer?.name || 'Άγνωστος'}</td>
-                <td>
-                  <InlineEditField
-                    value={Number(p.price || 0)}
-                    onSave={(newPrice) => handleUpdatePrice(p.id, newPrice)}
-                    type="price"
-                    disabled={processingIds.has(p.id)}
-                  />
-                  {' / '}{p.unit}
-                </td>
-                <td>
-                  <InlineEditField
-                    value={Number(p.stock || 0)}
-                    onSave={(newStock) => handleUpdateStock(p.id, newStock)}
-                    type="stock"
-                    disabled={processingIds.has(p.id)}
-                  />
-                </td>
-                <td>
-                  <InlineToggle
-                    productId={p.id}
-                    isActive={p.isActive}
-                    onToggle={handleToggleActive}
-                    disabled={processingIds.has(p.id)}
-                  />
-                </td>
-                <td><StatusBadge status={p.approvalStatus} /></td>
-                <td>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {p.approvalStatus === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleApprove(p.id)}
-                          disabled={processingIds.has(p.id)}
-                          style={{ padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
-                          data-testid={`approve-btn-${p.id}`}
-                        >
-                          {processingIds.has(p.id) ? '...' : 'Έγκριση'}
-                        </button>
-                        <button
-                          onClick={() => handleRejectClick({ id: p.id, title: p.title })}
-                          disabled={processingIds.has(p.id)}
-                          style={{ padding: '6px 12px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
-                          data-testid={`reject-btn-${p.id}`}
-                        >
-                          Απόρριψη
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleEditClick(p)}
-                      disabled={processingIds.has(p.id)}
-                      style={{ padding: '6px 12px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer', opacity: processingIds.has(p.id) ? 0.5 : 1 }}
-                      data-testid={`edit-btn-${p.id}`}
-                    >
-                      Επεξεργασία
-                    </button>
-                    {p.approvalStatus === 'rejected' && p.rejectionReason && (
-                      <span style={{ fontSize: 12, color: '#666', alignSelf: 'center' }} title={p.rejectionReason}>
-                        Λόγος: {p.rejectionReason.slice(0, 20)}...
-                      </span>
-                    )}
-                  </div>
-                </td>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b-2 border-gray-200 text-left">
+                <th className="px-4 py-3 font-medium text-gray-600">Τίτλος</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Παραγωγός</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Τιμή</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Απόθεμα</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Ενεργό</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Έγκριση</th>
+                <th className="px-4 py-3 font-medium text-gray-600">Ενέργειες</th>
               </tr>
-            ))}
-            {products.length === 0 && (
-              <AdminEmptyState message="Δεν βρέθηκαν προϊόντα." colSpan={7} />
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {products.map(p => (
+                <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors" data-testid={`product-row-${p.id}`}>
+                  <td className="px-4 py-3"><Link href={`/products/${p.id}`} className="text-blue-600 hover:text-blue-800">{p.title}</Link></td>
+                  <td className="px-4 py-3 text-gray-600">{p.producer?.name || 'Άγνωστος'}</td>
+                  <td className="px-4 py-3">
+                    <InlineEditField
+                      value={Number(p.price || 0)}
+                      onSave={(newPrice) => handleUpdatePrice(p.id, newPrice)}
+                      type="price"
+                      disabled={processingIds.has(p.id)}
+                    />
+                    {' / '}{p.unit}
+                  </td>
+                  <td className="px-4 py-3">
+                    <InlineEditField
+                      value={Number(p.stock || 0)}
+                      onSave={(newStock) => handleUpdateStock(p.id, newStock)}
+                      type="stock"
+                      disabled={processingIds.has(p.id)}
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <InlineToggle
+                      productId={p.id}
+                      isActive={p.isActive}
+                      onToggle={handleToggleActive}
+                      disabled={processingIds.has(p.id)}
+                    />
+                  </td>
+                  <td className="px-4 py-3"><StatusBadge status={p.approvalStatus} /></td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2 flex-wrap">
+                      {p.approvalStatus === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(p.id)}
+                            disabled={processingIds.has(p.id)}
+                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                            data-testid={`approve-btn-${p.id}`}
+                          >
+                            {processingIds.has(p.id) ? '...' : 'Έγκριση'}
+                          </button>
+                          <button
+                            onClick={() => handleRejectClick({ id: p.id, title: p.title })}
+                            disabled={processingIds.has(p.id)}
+                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                            data-testid={`reject-btn-${p.id}`}
+                          >
+                            Απόρριψη
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => handleEditClick(p)}
+                        disabled={processingIds.has(p.id)}
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                        data-testid={`edit-btn-${p.id}`}
+                      >
+                        Επεξεργασία
+                      </button>
+                      {p.approvalStatus === 'rejected' && p.rejectionReason && (
+                        <span className="text-xs text-gray-500 self-center" title={p.rejectionReason}>
+                          Λόγος: {p.rejectionReason.slice(0, 20)}...
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {products.length === 0 && (
+                <AdminEmptyState message="Δεν βρέθηκαν προϊόντα." colSpan={7} />
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      <div style={{ marginTop: 16 }}>
-        <Link href="/admin" style={{ color: '#0070f3', textDecoration: 'none' }}>
+      <div className="mt-4">
+        <Link href="/admin" className="text-blue-600 hover:text-blue-800 text-sm">
           ← Επιστροφή στο Admin
         </Link>
       </div>
@@ -521,21 +502,21 @@ function AdminProductsContent() {
       {/* Rejection Modal */}
       {rejectModalOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={() => setRejectModalOpen(false)}
           data-testid="rejection-modal"
         >
           <div
-            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 400, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl"
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }} data-testid="rejection-modal-title">
+            <h3 className="text-lg font-bold text-gray-900 mb-4" data-testid="rejection-modal-title">
               Απόρριψη Προϊόντος
             </h3>
-            <p style={{ color: '#666', marginBottom: 16 }}>
+            <p className="text-gray-600 mb-4">
               Προϊόν: <strong>{productToReject?.title}</strong>
             </p>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Λόγος Απόρριψης *
             </label>
             <textarea
@@ -543,17 +524,17 @@ function AdminProductsContent() {
               onChange={e => setRejectionReason(e.target.value)}
               rows={4}
               placeholder="Εξηγήστε γιατί απορρίπτεται το προϊόν..."
-              style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y"
               data-testid="rejection-reason-input"
             />
             {rejectionReason.length > 0 && rejectionReason.length < 5 && (
-              <p style={{ color: '#dc2626', fontSize: 14, marginTop: 4 }}>Τουλάχιστον 5 χαρακτήρες</p>
+              <p className="text-red-600 text-sm mt-1">Τουλάχιστον 5 χαρακτήρες</p>
             )}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+            <div className="flex gap-3 justify-end mt-5">
               <button
                 onClick={() => { setRejectModalOpen(false); setRejectionReason('') }}
                 disabled={submitting}
-                style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
                 data-testid="rejection-modal-cancel"
               >
                 Ακύρωση
@@ -561,7 +542,7 @@ function AdminProductsContent() {
               <button
                 onClick={handleRejectConfirm}
                 disabled={submitting || rejectionReason.length < 5}
-                style={{ padding: '10px 16px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: (submitting || rejectionReason.length < 5) ? 0.5 : 1 }}
+                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
                 data-testid="rejection-modal-confirm"
               >
                 {submitting ? 'Απόρριψη...' : 'Απόρριψη'}
@@ -574,31 +555,31 @@ function AdminProductsContent() {
       {/* Create Product Modal */}
       {createOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={() => setCreateOpen(false)}
           data-testid="create-product-modal"
         >
           <div
-            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 500, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto' }}
+            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }}>Νέο Προϊόν</h3>
-            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Νέο Προϊόν</h3>
+            <form onSubmit={handleCreate} className="flex flex-col gap-3">
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Παραγωγός *</label>
-                <select name="producerId" required style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-producer-select">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Παραγωγός *</label>
+                <select name="producerId" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-producer-select">
                   <option value="">Επιλέξτε παραγωγό...</option>
                   {producers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Τίτλος *</label>
-                <input name="title" required minLength={3} placeholder="Τίτλος προϊόντος..." style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-title-input" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Τίτλος *</label>
+                <input name="title" required minLength={3} placeholder="Τίτλος προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-title-input" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Κατηγορία *</label>
-                  <select name="category" required style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-category-input">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Κατηγορία *</label>
+                  <select name="category" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-category-input">
                     <option value="">Επιλέξτε κατηγορία...</option>
                     {CATEGORIES.map((cat) => (
                       <option key={cat.id} value={cat.slug}>{cat.labelEl}</option>
@@ -606,29 +587,29 @@ function AdminProductsContent() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Μονάδα *</label>
-                  <input name="unit" required placeholder="π.χ. κιλό" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-unit-input" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Μονάδα *</label>
+                  <input name="unit" required placeholder="π.χ. κιλό" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-unit-input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Τιμή (€) *</label>
-                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-price-input" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Τιμή (€) *</label>
+                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-price-input" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Απόθεμα</label>
-                  <input name="stock" type="number" min="0" defaultValue="0" style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }} data-testid="create-stock-input" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Απόθεμα</label>
+                  <input name="stock" type="number" min="0" defaultValue="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-stock-input" />
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Περιγραφή</label>
-                <textarea name="description" rows={3} placeholder="Περιγραφή προϊόντος..." style={{ width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }} data-testid="create-description-input" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Περιγραφή</label>
+                <textarea name="description" rows={3} placeholder="Περιγραφή προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" data-testid="create-description-input" />
               </div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
-                <button type="button" onClick={() => setCreateOpen(false)} disabled={creating} style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }} data-testid="create-modal-cancel">
+              <div className="flex gap-3 justify-end mt-2">
+                <button type="button" onClick={() => setCreateOpen(false)} disabled={creating} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors" data-testid="create-modal-cancel">
                   Ακύρωση
                 </button>
-                <button type="submit" disabled={creating} style={{ padding: '10px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: creating ? 0.5 : 1 }} data-testid="create-modal-confirm">
+                <button type="submit" disabled={creating} className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50" data-testid="create-modal-confirm">
                   {creating ? 'Δημιουργία...' : 'Δημιουργία'}
                 </button>
               </div>
@@ -640,24 +621,24 @@ function AdminProductsContent() {
       {/* Edit Product Modal */}
       {editModalOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={() => setEditModalOpen(false)}
           data-testid="edit-modal"
         >
           <div
-            style={{ backgroundColor: 'white', borderRadius: 8, padding: 24, maxWidth: 500, width: '100%', margin: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto' }}
+            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 16px', fontSize: 20, fontWeight: 'bold' }} data-testid="edit-modal-title">
+            <h3 className="text-lg font-bold text-gray-900 mb-4" data-testid="edit-modal-title">
               Επεξεργασία Προϊόντος
             </h3>
-            <p style={{ color: '#666', marginBottom: 16, fontSize: 14 }}>
+            <p className="text-gray-600 mb-4 text-sm">
               ID: {productToEdit?.id}
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="flex flex-col gap-4">
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Τίτλος *
                 </label>
                 <input
@@ -665,16 +646,16 @@ function AdminProductsContent() {
                   value={editForm.title}
                   onChange={e => setEditForm(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Τίτλος προϊόντος..."
-                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   data-testid="edit-title-input"
                 />
                 {editForm.title.length > 0 && editForm.title.length < 3 && (
-                  <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>Τουλάχιστον 3 χαρακτήρες</p>
+                  <p className="text-red-600 text-xs mt-1">Τουλάχιστον 3 χαρακτήρες</p>
                 )}
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Περιγραφή
                 </label>
                 <textarea
@@ -682,19 +663,19 @@ function AdminProductsContent() {
                   onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
                   rows={4}
                   placeholder="Περιγραφή προϊόντος..."
-                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, resize: 'vertical', boxSizing: 'border-box' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y"
                   data-testid="edit-description-input"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Κατηγορία *
                 </label>
                 <select
                   value={editForm.category}
                   onChange={e => setEditForm(prev => ({ ...prev, category: e.target.value }))}
-                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   data-testid="edit-category-input"
                 >
                   <option value="">Επιλέξτε κατηγορία...</option>
@@ -705,7 +686,7 @@ function AdminProductsContent() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 8 }}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Μονάδα Μέτρησης *
                 </label>
                 <input
@@ -713,17 +694,17 @@ function AdminProductsContent() {
                   value={editForm.unit}
                   onChange={e => setEditForm(prev => ({ ...prev, unit: e.target.value }))}
                   placeholder="π.χ. κιλό, τεμάχιο..."
-                  style={{ width: '100%', padding: 12, border: '1px solid #ddd', borderRadius: 8, boxSizing: 'border-box' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   data-testid="edit-unit-input"
                 />
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 20 }}>
+            <div className="flex gap-3 justify-end mt-5">
               <button
                 onClick={() => { setEditModalOpen(false); setProductToEdit(null) }}
                 disabled={editSubmitting}
-                style={{ padding: '10px 16px', border: '1px solid #ddd', borderRadius: 8, backgroundColor: 'white', cursor: 'pointer' }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
                 data-testid="edit-modal-cancel"
               >
                 Ακύρωση
@@ -731,7 +712,7 @@ function AdminProductsContent() {
               <button
                 onClick={handleEditConfirm}
                 disabled={editSubmitting || editForm.title.trim().length < 3 || !editForm.category.trim() || !editForm.unit.trim()}
-                style={{ padding: '10px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', opacity: (editSubmitting || editForm.title.trim().length < 3 || !editForm.category.trim() || !editForm.unit.trim()) ? 0.5 : 1 }}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
                 data-testid="edit-modal-confirm"
               >
                 {editSubmitting ? 'Αποθήκευση...' : 'Αποθήκευση'}
@@ -746,8 +727,8 @@ function AdminProductsContent() {
 
 export default function AdminProductsPage() {
   return (
-    <main style={{ padding: 16, maxWidth: 1200, margin: '0 auto' }}>
-      <h1>Προϊόντα</h1>
+    <main className="max-w-5xl mx-auto px-4 py-6">
+      <h1 className="text-2xl font-bold text-gray-900">Προϊόντα</h1>
       <Suspense fallback={<AdminLoading />}>
         <AdminProductsContent />
       </Suspense>
