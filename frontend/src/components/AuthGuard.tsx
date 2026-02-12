@@ -26,7 +26,6 @@ export default function AuthGuard({
 
     // If auth is required but user is not authenticated
     if (requireAuth && !isAuthenticated) {
-      console.log('🛡️ AuthGuard: User not authenticated, redirecting to login');
       setIntendedDestination?.(pathname);
       router.push(redirectTo);
       return;
@@ -34,15 +33,12 @@ export default function AuthGuard({
 
     // If specific role is required but user doesn't have it
     if (requireRole && user && user.role !== requireRole) {
-      console.log(`🛡️ AuthGuard: User role ${user.role} doesn't match required role ${requireRole}`);
-      
       // Redirect based on user's actual role
       const destination = user.role === 'producer' ? '/producer/dashboard' : '/';
       router.push(destination);
       return;
     }
 
-    console.log('🛡️ AuthGuard: Access granted');
   }, [loading, isAuthenticated, user, requireAuth, requireRole, pathname, router, setIntendedDestination, redirectTo]);
 
   // Show loading state while checking auth

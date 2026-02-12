@@ -70,9 +70,7 @@ export default function Register() {
 
     try {
       setError(null);
-      console.log('📝 Starting registration process...', { email: formData.email, role: formData.role });
       await register(formData);
-      console.log('✅ Registration successful!');
       // Success message is now handled in AuthContext with Greek text
     } catch (err) {
       console.error('❌ Registration failed:', err);

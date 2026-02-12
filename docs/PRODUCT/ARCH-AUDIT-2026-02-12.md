@@ -63,7 +63,7 @@
 | L4 | 3 Prisma import paths for same singleton | `@/lib/db/client` (canonical), `@/lib/prisma` (9 files), `@/server/db/prisma` (4 files) | FIXED PR #2789 (all 10 files → `@/lib/db/client`, 2 shims deleted) |
 | L5 | 2 rate-limiting implementations | `rate-limit.ts` (class-based) vs `rateLimit.ts` (token-bucket) | OPEN |
 | L6 | 2 i18n systems coexist | next-intl `getTranslations()` vs custom `LocaleContext` `useTranslations()` | OPEN |
-| L7 | 50+ console.log in production code | Including `console.log('Starting login process...', { email })` in auth/login | OPEN |
+| L7 | 50+ console.log in production code | Including `console.log('Starting login process...', { email })` in auth/login | **FIXED** (CONSOLE-CLEANUP: PII removed, 30+ debug logs deleted, 10 files) |
 | L8 | 8+ files still using inline styles | After Tailwind conversions: track/page, checkout/flow, checkout/payment, products-demo, dev/brand, admin/shipping-test, my/error, global-error | OPEN |
 | L9 | Redirect stub pages | `/login`→`/auth/login`, `/register`→`/auth/register`, `/product/[id]`→`/products/[id]` | FIXED PR #2786 (deleted) |
 | L10 | Duplicate consumer order pages | `/orders` and `/account/orders` serve same audience with different implementations | OPEN |

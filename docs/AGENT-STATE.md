@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-12 (CSP-FIX + PRISMA-IMPORT-UNIFY deployed)
+**Updated**: 2026-02-12 (CONSOLE-CLEANUP deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -47,9 +47,9 @@ _(empty — pick from NEXT)_
 
 | # | Pass ID | What | Why | Scope |
 |---|---------|------|-----|-------|
-| 1 | **PROD-CDN-FIX** | Fix 400/MIME errors on production static assets | Reliability | Server/nginx |
+| 1 | **REMAINING-AUDIT** | Continue ARCH-AUDIT backlog (H1, M1-M4, L5-L8, L10) | Quality | Mixed |
 
-**Note**: CSP-FIX + PRISMA-IMPORT-UNIFY done. Remaining from `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md`: H1, M1-M4, L5-L8, L10.
+**Note**: PROD-CDN-FIX verified OK (all assets 200, correct MIME/cache). CONSOLE-CLEANUP done.
 
 ---
 
@@ -66,6 +66,7 @@ _(empty — pick from NEXT)_
 
 ## Recently Done (last 10)
 
+- **CONSOLE-CLEANUP** — Remove PII from logs (phone/email in 4 files), remove 30+ debug console.log from 6 files (auth, payment, shipping, checkout), strip emoji noise (deployed 2026-02-12) ✅
 - **CSP-FIX + PRISMA-IMPORT-UNIFY** — Delete dead `csp.ts` (localhost in CSP), unify all Prisma imports to `@/lib/db/client`, delete 2 deprecated shim files (PR #2789, deployed 2026-02-12) ✅
 - **ORDER-CONSOLIDATE** — Delete 5 duplicate tracking APIs/pages (169 LOC), fix email tracking link + confirmation page to use canonical `/track/` path (PR #2788, deployed 2026-02-12) ✅
 - **DEAD-CODE-CLEANUP** — Delete 42 dead files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs (PR #2786, deployed 2026-02-12) ✅

@@ -34,9 +34,7 @@ export default function Login() {
       setLoading(true);
       setError(null);
 
-      console.log('Starting login process...', { email });
       await login(email, password);
-      console.log('Login successful, redirecting to home...');
 
       // Small delay to ensure toast renders before redirect
       await new Promise(resolve => setTimeout(resolve, 100));

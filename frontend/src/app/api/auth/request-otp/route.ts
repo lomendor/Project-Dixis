@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     if (isAdmin && bypassCode && isAuthBypassAllowed()) {
       // Admin bypass - only in dev/staging
-      console.log(`[Auth] Admin OTP request for ${phone} - bypass enabled (non-production)`);
+      // Admin bypass enabled (non-production) — no PII in logs
       return NextResponse.json({
         success: true,
         message: 'Κωδικός OTP εστάλη επιτυχώς',
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Dev echo - only in non-production with OTP_DEV_ECHO=1
     if (isDevEchoAllowed()) {
-      console.log(`[Auth] DEV MODE - OTP for ${phone}: ${code}`);
+      // Dev echo mode — code returned in response body, no log needed
       return NextResponse.json({
         success: true,
         message: 'Κωδικός OTP εστάλη επιτυχώς',
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const adminEmail = adminEmailMapping[phone];
     if (adminEmail) {
-      console.log(`[Auth] Admin ${phone} - sending OTP via email`);
+      // Sending OTP via email — no PII in logs
       try {
         const emailResult = await sendOtpEmail({
           toEmail: adminEmail,
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fallback: SMS provider (not implemented)
-    console.log(`[Auth] OTP generated for ${phone} - SMS sending not implemented`);
+    // OTP generated — SMS sending not yet implemented
 
     return NextResponse.json({
       success: true,

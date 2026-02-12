@@ -41,9 +41,6 @@ export default function StripePaymentForm({
     setIsProcessing(true);
 
     try {
-      // Pass PAY-CARD-CONFIRM-GUARD-01: Log before Stripe call for debugging
-      console.log('[StripePaymentForm] Calling stripe.confirmPayment...');
-
       const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -52,16 +49,7 @@ export default function StripePaymentForm({
         redirect: 'if_required',
       });
 
-      // Pass PAY-CARD-CONFIRM-GUARD-01: Destructure after call with logging
       const { error, paymentIntent } = result;
-      console.log('[StripePaymentForm] confirmPayment result:', {
-        hasError: !!error,
-        errorType: error?.type,
-        errorCode: error?.code,
-        hasPaymentIntent: !!paymentIntent,
-        paymentIntentStatus: paymentIntent?.status,
-        paymentIntentId: paymentIntent?.id ? `${paymentIntent.id.substring(0, 10)}...` : null,
-      });
 
       // Case 1: Stripe returned an error
       if (error) {
@@ -89,7 +77,6 @@ export default function StripePaymentForm({
 
       // Case 4: PaymentIntent succeeded - call backend to confirm
       if (paymentIntent.status === 'succeeded') {
-        console.log('[StripePaymentForm] Payment succeeded, calling onPaymentSuccess');
         onPaymentSuccess(paymentIntent.id);
         return;
       }

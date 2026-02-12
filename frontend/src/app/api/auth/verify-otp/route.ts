@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     if (isAdmin && bypassCode && code === bypassCode && isAuthBypassAllowed() && !isProd) {
       // Admin bypass - only in dev/staging, NEVER in production
-      console.log(`[Auth] Admin login bypass for ${phoneNorm} (non-production)`);
+      // Admin bypass accepted (non-production) — no PII in logs
       isValid = true;
     } else {
       // Normal OTP verification
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: sessionExpiry, algorithm: 'HS256', issuer: 'dixis-auth', subject: phoneNorm }
     );
 
-    console.log(`[Auth] Successful ${sessionType} login for ${phoneNorm}`);
+    // Successful login — session type tracked via JWT, no PII in logs
 
     // Pass FIX-ADMIN-WHITELIST-SYNC-01: Sync admin to database whitelist
     // This ensures requireAdmin() database check passes for admins in ADMIN_PHONES
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
           update: { isActive: true },
           create: { phone: phoneNorm, role: 'admin', isActive: true }
         });
-        console.log(`[Auth] AdminUser synced for ${phoneNorm}`);
+        // AdminUser synced to DB whitelist — no PII in logs
       } catch (dbError) {
         // Pass PROD-BUGFIX-ADMIN-DB-01: Log clearly so ops can see migration is needed.
         // Login still succeeds (JWT has type:'admin'), but requireAdmin() will fail
