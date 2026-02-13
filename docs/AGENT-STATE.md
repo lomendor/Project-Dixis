@@ -66,6 +66,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **SECURITY-AUDIT-FIX-01** — Deep functional audit found CRITICAL: GET /api/v1/public/orders exposed ALL orders without auth. Fixed: removed public order list/detail routes, added UUID-based order lookup (by-token), thank-you page uses token not ID, commission-preview requires auth. Also fixed: homepage product images, producers location field mapping, PM2 env vars for standalone. (PRs #2826-#2828, deployed 2026-02-13) ✅
 - **LAUNCH-POLISH-01** — Hellenize ALL metadata (title, description, OG, Twitter, JSON-LD, manifest). Rebrand "Project Dixis" → "Dixis". Remove fake "500+" social proof. Enable card payments on prod (Stripe flag + publishable key). (PRs #2802, #2804, deployed 2026-02-13) ✅
 - **UX-QUICK-WINS-01** — Hellenize all English UI strings (HomeClient filters/cards, contact, waitlist, order-lookup, footer). Rewrite 404/500 error pages with proper layout + CTAs. New `/faq` page (Greek accordion). (deployed 2026-02-12) ✅
 - **L6-I18N-UNIFY** — Remove next-intl, unify on LocaleContext. Delete deprecated CheckoutClient.tsx (561 LOC). Architecture audit 100% resolved. (deployed 2026-02-12) ✅
