@@ -68,18 +68,18 @@ export const metadata: Metadata = {
     description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς. Από το χωράφι στο τραπέζι σας.',
     images: [
       {
-        url: `${siteUrl}/logo.svg`,
-        width: 400,
-        height: 400,
-        alt: 'Dixis - Φρέσκα τοπικά προϊόντα',
+        url: `${siteUrl}/hero-lcp.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Dixis - Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς',
       },
     ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Dixis | Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς',
     description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς.',
-    images: [`${siteUrl}/logo.svg`],
+    images: [`${siteUrl}/hero-lcp.png`],
   },
   alternates: {
     canonical: siteUrl,

@@ -148,7 +148,7 @@ function OrdersPage(): React.JSX.Element {
 
 export default function OrdersPageWithAuth(): React.JSX.Element {
   return (
-    <AuthGuard requireAuth={true} requireRole="consumer">
+    <AuthGuard requireAuth={true}>
       <OrdersPage />
     </AuthGuard>
   );
