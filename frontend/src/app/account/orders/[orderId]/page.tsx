@@ -443,7 +443,7 @@ function OrderDetailsPage(): React.JSX.Element {
 
 export default function OrderDetailsPageWithAuth(): React.JSX.Element {
   return (
-    <AuthGuard requireAuth={true} requireRole="consumer">
+    <AuthGuard requireAuth={true}>
       <OrderDetailsPage />
     </AuthGuard>
   );
