@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
+import ProducerMap from '@/components/ProducerMapWrapper';
 import { getServerApiUrl } from '@/env';
 import { getBaseUrl } from '@/lib/site';
 
@@ -33,9 +34,13 @@ type ApiProducer = {
   name: string;
   region?: string;
   location?: string;
+  city?: string;
   category?: string;
   description: string | null;
   image_url: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  website?: string | null;
   products: ApiProduct[];
 };
 
@@ -149,12 +154,27 @@ export default async function ProducerProfilePage(
                   {producer.region}
                 </p>
               )}
-              <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-neutral-100 px-3 py-1 rounded-full w-fit">
-                <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
-              </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-neutral-100 px-3 py-1 rounded-full">
+                  <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
+                </span>
+                {producer.website && (
+                  <a
+                    href={producer.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    Website
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -169,6 +189,25 @@ export default async function ProducerProfilePage(
               Η Ιστορία μας
             </h2>
             <p className="text-gray-700 leading-relaxed">{producer.description}</p>
+          </div>
+        )}
+
+        {/* Map section — only if coordinates exist */}
+        {producer.latitude && producer.longitude && (
+          <div className="mb-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Η Τοποθεσία μας
+            </h2>
+            <ProducerMap
+              latitude={producer.latitude}
+              longitude={producer.longitude}
+              name={producer.name}
+              region={producer.region}
+            />
           </div>
         )}
 
