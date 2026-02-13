@@ -7,23 +7,33 @@ import { getBaseUrl } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 
+type ApiImage = {
+  id: number;
+  url: string;
+  is_primary: boolean;
+  sort_order: number;
+};
+
 type ApiProduct = {
-  id: string;
-  slug: string;
+  id: string | number;
+  slug?: string;
   name: string;
-  price: number;
+  price: string | number;
   unit: string;
   stock: number;
-  image_url: string | null;
-  category: string;
+  image_url?: string | null;
+  images?: ApiImage[];
+  category?: string;
+  categories?: { id: number; name: string; slug: string }[];
 };
 
 type ApiProducer = {
-  id: string;
+  id: string | number;
   slug: string;
   name: string;
-  region: string;
-  category: string;
+  region?: string;
+  location?: string;
+  category?: string;
   description: string | null;
   image_url: string | null;
   products: ApiProduct[];
@@ -35,7 +45,15 @@ async function getProducer(slug: string): Promise<ApiProducer | null> {
     const res = await fetch(`${base}/public/producers/${slug}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
-    return json?.data ?? null;
+    // Pass FIX-MOBILE-CARDS-01: API returns data directly (no .data wrapper)
+    // Also map 'location' to 'region' for frontend compatibility
+    const raw = json?.data ?? json;
+    if (!raw || !raw.id) return null;
+    return {
+      ...raw,
+      region: raw.region || raw.location || '',
+      category: raw.category || '',
+    };
   } catch {
     return null;
   }
@@ -144,18 +162,24 @@ export default async function ProducerProfilePage(
               Τα προϊόντα του παραγωγού
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {producer.products.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  id={p.id}
-                  title={p.name}
-                  producer={producer.name}
-                  producerId={producer.id}
-                  priceCents={Math.round(p.price * 100)}
-                  image={p.image_url}
-                  stock={p.stock}
-                />
-              ))}
+              {producer.products.map((p) => {
+                // Pass FIX-MOBILE-CARDS-01: Resolve image from images[] array or image_url
+                const imageUrl = p.image_url || p.images?.[0]?.url || null;
+                const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
+                return (
+                  <ProductCard
+                    key={p.id}
+                    id={p.id}
+                    title={p.name}
+                    producer={producer.name}
+                    producerId={producer.id}
+                    producerSlug={producer.slug}
+                    priceCents={Math.round(price * 100)}
+                    image={imageUrl}
+                    stock={p.stock}
+                  />
+                );
+              })}
             </div>
           </>
         ) : (

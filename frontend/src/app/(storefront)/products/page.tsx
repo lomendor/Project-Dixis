@@ -13,6 +13,7 @@ type ApiItem = {
   title: string;
   producerId?: string | number;
   producerName?: string;
+  producerSlug?: string;
   priceCents: number;
   priceFormatted?: string;
   imageUrl?: string;
@@ -75,6 +76,7 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
       title: p.name,
       producerId: p.producer?.id || null,
       producerName: p.producer?.name || null,
+      producerSlug: p.producer?.slug || null,
       priceCents: Math.round(parseFloat(p.price) * 100),
       imageUrl: p.image_url || p.images?.[0]?.url || null,
       categorySlug: p.category || null,
@@ -190,6 +192,7 @@ export default async function Page({ searchParams }: PageProps) {
                 title={p.title}
                 producer={p.producerName || null}
                 producerId={p.producerId}
+                producerSlug={p.producerSlug}
                 priceCents={p.priceCents}
                 image={p.imageUrl}
                 stock={p.stock}
