@@ -79,10 +79,12 @@ export const useCart = create<State>()(
       },
       getItemsForSync: () => {
         const items = get().items
-        return Object.values(items).map(item => ({
-          product_id: parseInt(item.id, 10),
-          quantity: item.qty,
-        }))
+        return Object.values(items)
+          .filter(item => item.id && !isNaN(parseInt(item.id, 10)) && item.qty > 0)
+          .map(item => ({
+            product_id: parseInt(item.id, 10),
+            quantity: item.qty,
+          }))
       },
     }),
     { name: 'dixis:cart:v1' }

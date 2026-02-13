@@ -193,7 +193,7 @@ test.describe('SEO Basics Implementation', () => {
       const content = await page.textContent('body');
       const manifest = JSON.parse(content!);
       
-      expect(manifest.name).toBe('Project Dixis - Local Producer Marketplace');
+      expect(manifest.name).toBe('Dixis — Φρέσκα τοπικά προϊόντα');
       expect(manifest.short_name).toBe('Dixis');
       expect(manifest.display).toBe('standalone');
       expect(manifest.theme_color).toBe('#16a34a');
