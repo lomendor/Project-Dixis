@@ -21,7 +21,11 @@ class UpdateProducerRequest extends FormRequest
      */
     public function rules(): array
     {
-        $producerId = $this->route('producer') ? $this->route('producer')->id ?? $this->route('producer') : null;
+        // Fix: For flat routes like PATCH /v1/producer/profile (no {producer} param),
+        // resolve producer ID from the authenticated user instead of route binding.
+        $producerId = $this->route('producer')
+            ? ($this->route('producer')->id ?? $this->route('producer'))
+            : ($this->user()?->producer?->id);
 
         return [
             'name' => 'sometimes|required|string|max:255',
