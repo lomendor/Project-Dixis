@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Πολιτική Απορρήτου | Dixis',
+  title: 'Πολιτική Απορρήτου',
   description: 'Πολιτική απορρήτου και προστασία προσωπικών δεδομένων του dixis.gr.',
 };
 

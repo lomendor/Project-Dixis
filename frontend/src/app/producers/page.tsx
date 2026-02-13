@@ -4,7 +4,7 @@ import { ProducerCard } from '@/components/ProducerCard';
 import { FilterStrip } from '@/components/FilterStrip';
 import { getServerApiUrl } from '@/env';
 
-export const metadata = { title: 'Παραγωγοί | Dixis' };
+export const metadata = { title: 'Παραγωγοί' };
 
 type ApiProducer = {
   id: string | number;

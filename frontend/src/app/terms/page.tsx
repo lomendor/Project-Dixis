@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Όροι Χρήσης | Dixis',
+  title: 'Όροι Χρήσης',
   description: 'Όροι και προϋποθέσεις χρήσης της πλατφόρμας dixis.gr.',
 };
 

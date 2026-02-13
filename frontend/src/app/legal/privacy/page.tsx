@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Πολιτική Απορρήτου | Dixis',
+  title: 'Πολιτική Απορρήτου',
   description: 'Πολιτική απορρήτου και προστασίας δεδομένων (GDPR) της πλατφόρμας Dixis.',
 };
 
