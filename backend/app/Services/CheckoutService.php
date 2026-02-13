@@ -118,6 +118,10 @@ class CheckoutService
         $sessionShippingTotal = 0;
         $sessionTotal = 0;
 
+        // Pass COD-FEE-FIX-01: Calculate COD fee once for the whole checkout
+        $codFee = $this->calculateCodFee($paymentMethod);
+        $codFeeApplied = false; // Track so we only add it to the first child order
+
         // Create CheckoutSession first
         $checkoutSession = CheckoutSession::create([
             'user_id' => $userId,
@@ -150,7 +154,12 @@ class CheckoutService
             $shippingCost = $shippingDetails['cost'];
             $freeShippingApplied = $shippingCost === 0.0;
 
-            $orderTotal = $producerSubtotal + $shippingCost;
+            // Pass COD-FEE-FIX-01: Apply COD fee to first child order only
+            $orderCodFee = (!$codFeeApplied && $codFee > 0) ? $codFee : 0;
+            if ($orderCodFee > 0) {
+                $codFeeApplied = true;
+            }
+            $orderTotal = $producerSubtotal + $shippingCost + $orderCodFee;
 
             // Create child order
             $order = Order::create([
@@ -165,6 +174,7 @@ class CheckoutService
                 'currency' => $currency,
                 'subtotal' => $producerSubtotal,
                 'shipping_cost' => $shippingCost,
+                'cod_fee' => $orderCodFee,
                 'total' => $orderTotal,
                 'total_amount' => $orderTotal, // Legacy alias
                 'notes' => $options['notes'] ?? null,
@@ -277,7 +287,9 @@ class CheckoutService
             ];
         }
 
-        $totalWithShipping = $orderTotal + $totalShippingCost;
+        // Pass COD-FEE-FIX-01: Calculate COD fee server-side
+        $codFee = $this->calculateCodFee($paymentMethod);
+        $totalWithShipping = $orderTotal + $totalShippingCost + $codFee;
 
         // Create standalone order (no checkout_session_id)
         $order = Order::create([
@@ -292,6 +304,7 @@ class CheckoutService
             'currency' => $currency,
             'subtotal' => $orderTotal,
             'shipping_cost' => $totalShippingCost,
+            'cod_fee' => $codFee,
             'total' => $totalWithShipping,
             'total_amount' => $totalWithShipping, // Legacy alias
             'notes' => $options['notes'] ?? null,
@@ -434,5 +447,25 @@ class CheckoutService
             'weight_grams' => $weightGrams,
             'threshold_eur' => $threshold,
         ];
+    }
+
+    /**
+     * Calculate COD fee based on payment method and config.
+     * Pass COD-FEE-FIX-01: Server-side COD fee calculation.
+     *
+     * @param string $paymentMethod
+     * @return float COD fee in EUR (0.0 if not applicable)
+     */
+    private function calculateCodFee(string $paymentMethod): float
+    {
+        if (strtoupper($paymentMethod) !== 'COD') {
+            return 0.0;
+        }
+
+        if (!config('shipping.enable_cod', false)) {
+            return 0.0;
+        }
+
+        return (float) config('shipping.cod_fee_eur', 4.00);
     }
 }

@@ -79,6 +79,8 @@ class OrderResource extends JsonResource
             'tax_amount' => number_format($taxAmount, 2),
             'shipping_amount' => number_format($impliedShipping, 2),
             'shipping_cost' => number_format($impliedShipping, 2),
+            // Pass COD-FEE-FIX-01: Include COD fee in response
+            'cod_fee' => number_format((float) ($this->cod_fee ?? 0), 2),
             'total' => number_format((float) $total, 2),
             'total_amount' => number_format((float) $total, 2), // Alias for frontend compatibility
             'currency' => $this->currency ?? 'EUR',

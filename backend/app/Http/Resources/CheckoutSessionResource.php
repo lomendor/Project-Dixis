@@ -29,6 +29,10 @@ class CheckoutSessionResource extends JsonResource
             // Financial totals (sum of all child orders)
             'subtotal' => number_format((float) $this->subtotal, 2),
             'shipping_total' => number_format((float) $this->shipping_total, 2),
+            // Pass COD-FEE-FIX-01: Aggregate COD fee from child orders
+            'cod_fee' => $this->when($this->relationLoaded('orders'), function () {
+                return number_format($this->orders->sum('cod_fee'), 2);
+            }, '0.00'),
             'total' => number_format((float) $this->total, 2),
             'currency' => $this->currency ?? 'EUR',
 
