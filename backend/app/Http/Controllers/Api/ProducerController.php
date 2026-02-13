@@ -297,19 +297,56 @@ class ProducerController extends Controller
             $topProducts = $topProducts->concat($productsWithoutSales);
         }
 
+        // Pass FIX-DASHBOARD-THUMBNAILS-01: Fetch images and categories for top products
+        $productIds = $topProducts->pluck('id')->toArray();
+
+        $productImages = \DB::table('product_images')
+            ->whereIn('product_id', $productIds)
+            ->orderBy('is_primary', 'desc')
+            ->orderBy('sort_order', 'asc')
+            ->get()
+            ->groupBy('product_id');
+
+        $productCategories = \DB::table('category_product')
+            ->join('categories', 'category_product.category_id', '=', 'categories.id')
+            ->whereIn('category_product.product_id', $productIds)
+            ->select('category_product.product_id', 'categories.id as category_id', 'categories.name', 'categories.slug')
+            ->get()
+            ->groupBy('product_id');
+
         return response()->json([
-            'top_products' => $topProducts->map(function ($product) {
+            'top_products' => $topProducts->map(function ($product) use ($productImages, $productCategories) {
+                $images = $productImages->get($product->id, collect())->map(function ($img) {
+                    return [
+                        'id' => $img->id,
+                        'image_path' => $img->url,
+                        'alt_text' => null,
+                        'is_primary' => (bool) $img->is_primary,
+                    ];
+                })->values()->toArray();
+
+                $categories = $productCategories->get($product->id, collect())->map(function ($cat) {
+                    return [
+                        'id' => $cat->category_id,
+                        'name' => $cat->name,
+                        'slug' => $cat->slug,
+                    ];
+                })->values()->toArray();
+
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'unit' => $product->unit,
                     'current_price' => number_format((float) $product->current_price, 2),
+                    'price' => number_format((float) $product->current_price, 2),
                     'stock' => $product->stock,
                     'is_active' => (bool) $product->is_active,
                     'total_quantity_sold' => (int) $product->total_quantity_sold,
                     'total_revenue' => number_format((float) $product->total_revenue, 2),
                     'total_orders' => (int) $product->total_orders,
                     'average_unit_price' => number_format((float) $product->average_unit_price, 2),
+                    'images' => $images,
+                    'categories' => $categories,
                 ];
             })->values(),
             'limit' => $limit,
