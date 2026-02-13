@@ -660,7 +660,7 @@ class ApiClient {
     return this.request<{ orders: Order[] }>('orders');
   }
 
-  async getOrder(id: number): Promise<Order> {
+  async getOrder(id: number | string): Promise<Order> {
     return this.request<Order>(`orders/${id}`);
   }
 

@@ -34,9 +34,9 @@ function OrderDetailsPage(): React.JSX.Element {
         setLoading(true);
         setError(null);
 
-        // Fetch from Laravel API where orders are created
+        // Pass FIX-ORDERS-PRIVACY-01: Use authenticated endpoint for order details
         apiClient.refreshToken(); // Ensure latest token is loaded
-        const orderData = await apiClient.getPublicOrder(orderId);
+        const orderData = await apiClient.getOrder(orderId);
         setOrder(orderData);
       } catch (error) {
         console.error('Failed to fetch order:', error);
