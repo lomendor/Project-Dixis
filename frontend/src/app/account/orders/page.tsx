@@ -16,10 +16,11 @@ function OrdersPage(): React.JSX.Element {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        // Fetch from Laravel API where orders are created
+        // Pass FIX-ORDERS-PRIVACY-01: Use authenticated endpoint to show only user's own orders
+        // Previously used getPublicOrders() which returned ALL orders (security bug)
         apiClient.refreshToken(); // Ensure latest token is loaded
-        const response = await apiClient.getPublicOrders();
-        setOrders(response.data || []);
+        const response = await apiClient.getOrders();
+        setOrders(response.orders || []);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
         showToast('error', 'Failed to load your orders. Please try again.');
