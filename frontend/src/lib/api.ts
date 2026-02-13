@@ -96,6 +96,7 @@ export interface Order {
   subtotal: string;
   tax_amount: string;
   shipping_amount: string;
+  cod_fee?: string; // Pass COD-FEE-FIX-01: COD surcharge
   total_amount: string;
   payment_status: string;
   payment_method: string;

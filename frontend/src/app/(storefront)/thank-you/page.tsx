@@ -17,6 +17,7 @@ interface Order {
   total: number
   subtotal?: number
   shipping?: number
+  codFee?: number // Pass COD-FEE-FIX-01: COD surcharge
   vat?: number
   zone?: string
   email: string | null
@@ -64,6 +65,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           total: parseFloat(laravelOrder.total_amount) || 0,
           subtotal: parseFloat(laravelOrder.subtotal) || 0,
           shipping: shippingAmount,
+          codFee: parseFloat(laravelOrder.cod_fee) || 0,
           vat: parseFloat(laravelOrder.tax_amount) || 0,
           zone: 'mainland', // Default, could be derived from shipping_address if needed
           email: null, // Not exposed in public order response for privacy
@@ -174,6 +176,13 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                       Αποστολή ({order.zone === 'islands' ? 'Νησιά' : 'Ηπειρωτική Ελλάδα'}):
                     </span>
                     <span>{fmt.format(order.shipping || 0)}</span>
+                  </div>
+                )}
+{/* Pass COD-FEE-FIX-01: COD surcharge line */}
+                {order.codFee != null && order.codFee > 0 && (
+                  <div className="flex justify-between">
+                    <span>Αντικαταβολή:</span>
+                    <span>{fmt.format(order.codFee)}</span>
                   </div>
                 )}
 {/* VAT only shown when implemented (currently not calculated by backend) */}

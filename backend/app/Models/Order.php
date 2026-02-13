@@ -28,6 +28,7 @@ class Order extends Model
         'currency',
         'subtotal',
         'shipping_cost',
+        'cod_fee',
         'total',
         // Legacy fields - keep for backward compatibility
         'tax_amount',
@@ -44,6 +45,7 @@ class Order extends Model
     protected $casts = [
         'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
+        'cod_fee' => 'decimal:2',
         'total' => 'decimal:2',
         'refunded_at' => 'datetime',
         'is_child_order' => 'boolean',
