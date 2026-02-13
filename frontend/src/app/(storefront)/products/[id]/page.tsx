@@ -53,6 +53,7 @@ async function getProductById(id: string) {
       producer: raw.producer ? { name: raw.producer.name } : null,
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
+      producerSlug: raw.producer?.slug || null,
       producerName: raw.producer?.name || null
     };
   } catch {
@@ -183,10 +184,17 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             <p className="text-gray-600 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
           )}
 
-          {/* Producer */}
+          {/* Producer - Pass FIX-MOBILE-CARDS-01: Link to producer page */}
           {p.producer?.name && (
             <p className="text-sm text-emerald-700 mb-4" data-testid="product-producer">
-              Από τον παραγωγό: <span className="font-medium">{p.producer.name}</span>
+              Από τον παραγωγό:{' '}
+              {(p.producerSlug || p.producerId) ? (
+                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="font-medium hover:underline">
+                  {p.producer.name}
+                </Link>
+              ) : (
+                <span className="font-medium">{p.producer.name}</span>
+              )}
             </p>
           )}
 

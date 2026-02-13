@@ -11,6 +11,7 @@ type Props = {
   title: string
   producer: string | null
   producerId?: string | number | null
+  producerSlug?: string | null
   priceCents: number
   image?: string | null
   stock?: number | null
@@ -18,10 +19,13 @@ type Props = {
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, priceCents, image, stock }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock }: Props) {
   const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
+
+  // Pass FIX-MOBILE-CARDS-01: Build producer link — prefer slug for clean URLs
+  const producerUrl = (producerSlug || producerId) ? `/producers/${producerSlug || producerId}` : null
 
   return (
     <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
@@ -44,20 +48,39 @@ export function ProductCard({ id, title, producer, producerId, priceCents, image
           )}
         </div>
 
-        <div className="px-4 pt-4 pb-2">
-          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider">
+        {/* Pass FIX-MOBILE-CARDS-01: Reduced padding on mobile for better space usage */}
+        <div className="px-2.5 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
+          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider truncate block">
             {producer || 'Παραγωγός'}
           </span>
-          <h3 data-testid="product-card-title" className="text-base font-bold text-gray-900 line-clamp-2 mt-1 leading-tight">
+          <h3 data-testid="product-card-title" className="text-sm sm:text-base font-bold text-gray-900 line-clamp-2 mt-1 leading-tight">
             {title}
           </h3>
         </div>
       </Link>
 
+      {/* Pass FIX-MOBILE-CARDS-01: Producer link */}
+      {producerUrl && (
+        <div className="px-2.5 sm:px-4 pb-1">
+          <Link
+            href={producerUrl}
+            data-testid="product-card-producer-link"
+            className="inline-flex items-center gap-1 text-xs text-primary/70 hover:text-primary transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Δες τον παραγωγό</span>
+          </Link>
+        </div>
+      )}
+
       {/* Non-clickable section - price + add to cart button */}
-      <div className="px-4 pb-4 mt-auto flex items-center justify-between pt-2 border-t border-neutral-100">
-        <span data-testid="product-card-price" className="text-lg font-bold text-neutral-900">{price}</span>
-        <div data-testid="product-card-add">
+      {/* Pass FIX-MOBILE-CARDS-01: Stack vertically on mobile, row on sm+ */}
+      <div className="px-2.5 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+        <span data-testid="product-card-price" className="text-base sm:text-lg font-bold text-neutral-900">{price}</span>
+        <div data-testid="product-card-add" className="w-full sm:w-auto">
           {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
           {/* Pass CART-UX-FEEDBACK-01: Include imageUrl for cart thumbnails */}
           <AddToCartButton id={String(id)} title={title} priceCents={priceCents} imageUrl={image || undefined} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} stock={stock} />
@@ -70,14 +93,14 @@ export function ProductCard({ id, title, producer, producerId, priceCents, image
 export function ProductCardSkeleton() {
   return (
     <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden animate-pulse">
-      <div className="h-48 bg-neutral-200 w-full" />
-      <div className="p-4 flex-grow flex flex-col">
+      <div className="aspect-square sm:h-48 sm:aspect-auto bg-neutral-200 w-full" />
+      <div className="p-2.5 sm:p-4 flex-grow flex flex-col">
         <div className="h-3 bg-neutral-200 w-1/3 mb-3 rounded" />
-        <div className="h-6 bg-neutral-200 w-full mb-2 rounded" />
-        <div className="h-6 bg-neutral-200 w-2/3 rounded" />
-        <div className="mt-auto pt-4 flex justify-between items-center border-t border-neutral-100">
-          <div className="h-6 bg-neutral-200 w-1/4 rounded" />
-          <div className="h-9 bg-neutral-200 w-24 rounded-lg" />
+        <div className="h-5 sm:h-6 bg-neutral-200 w-full mb-2 rounded" />
+        <div className="h-5 sm:h-6 bg-neutral-200 w-2/3 rounded" />
+        <div className="mt-auto pt-3 sm:pt-4 flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center border-t border-neutral-100">
+          <div className="h-5 sm:h-6 bg-neutral-200 w-1/4 rounded" />
+          <div className="h-9 bg-neutral-200 w-full sm:w-24 rounded-lg" />
         </div>
       </div>
     </div>
