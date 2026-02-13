@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const imageUrl = p.imageUrl || `${baseUrl}/og-default.png`;
 
   return {
-    title: `${p.title} - Dixis`,
+    title: p.title,
     description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
     alternates: {
       canonical: url

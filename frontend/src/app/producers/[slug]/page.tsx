@@ -46,14 +46,14 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProducer(slug);
-  if (!p) return { title: 'Παραγωγός μη διαθέσιμος | Dixis' };
+  if (!p) return { title: 'Παραγωγός μη διαθέσιμος' };
 
   const baseUrl = await getBaseUrl();
   const url = `${baseUrl}/producers/${p.slug}`;
   const imageUrl = p.image_url || `${baseUrl}/og-default.png`;
 
   return {
-    title: `${p.name} — Παραγωγός | Dixis`,
+    title: `${p.name} — Παραγωγός`,
     description: p.description || `${p.name} — Τοπικός παραγωγός από ${p.region}`,
     alternates: { canonical: url },
     openGraph: {

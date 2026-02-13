@@ -1,4 +1,4 @@
-export const metadata = { title: 'Για Παραγωγούς | Dixis' };
+export const metadata = { title: 'Για Παραγωγούς' };
 
 export default function ProducersLanding(){
   return (
