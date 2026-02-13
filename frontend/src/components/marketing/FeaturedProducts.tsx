@@ -83,6 +83,7 @@ export default async function FeaturedProducts() {
                 title={product.name}
                 producer={product.producer?.name || null}
                 producerId={product.producer_id}
+                producerSlug={product.producer?.slug || null}
                 priceCents={Math.round(product.price * 100)}
                 image={product.image_url || null}
                 stock={product.stock}
