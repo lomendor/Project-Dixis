@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-import { formatDate, formatStatus, safeMoney, safeText, formatShippingMethod, formatShippingAddress, hasShippingAddress } from '@/lib/orderUtils';
+import { formatDate, formatStatus, safeMoney, safeText, formatShippingMethod, formatShippingAddress, hasShippingAddress, formatPaymentMethod } from '@/lib/orderUtils';
 import { useCart } from '@/lib/cart';
 
 function OrderDetailsPage(): React.JSX.Element {
@@ -375,7 +375,7 @@ function OrderDetailsPage(): React.JSX.Element {
                 <div>
                   <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Πληρωμής</h3>
                   <p className="text-sm text-gray-600" data-testid="payment-method">
-                    {safeText(order.payment_method)}
+                    {formatPaymentMethod(order.payment_method)}
                   </p>
                 </div>
                 <div>

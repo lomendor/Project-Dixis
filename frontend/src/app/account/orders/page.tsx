@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
-import { formatDateShort, formatStatus, safeMoney, safeText, formatShippingMethod } from '@/lib/orderUtils';
+import { formatDateShort, formatStatus, safeMoney, safeText, formatShippingMethod, formatPaymentMethod } from '@/lib/orderUtils';
 
 function OrdersPage(): React.JSX.Element {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -113,7 +113,7 @@ function OrdersPage(): React.JSX.Element {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Τρόπος Πληρωμής</p>
-                        <p className="text-lg font-semibold text-gray-900">{safeText(order.payment_method)}</p>
+                        <p className="text-lg font-semibold text-gray-900">{formatPaymentMethod(order.payment_method)}</p>
                       </div>
                     </div>
 

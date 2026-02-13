@@ -79,6 +79,33 @@ export function formatDateShort(dateString: string | undefined): string {
 }
 
 /**
+ * Payment method code to Greek label mapping
+ */
+const PAYMENT_METHOD_LABELS: Record<string, { text: string; icon: string }> = {
+  COD: { text: 'Αντικαταβολή', icon: '💵' },
+  CARD: { text: 'Κάρτα', icon: '💳' },
+  BANK_TRANSFER: { text: 'Τραπεζική Μεταφορά', icon: '🏦' },
+  STRIPE: { text: 'Κάρτα', icon: '💳' },
+};
+
+/**
+ * Format payment method with safe handling
+ * Maps API codes (COD, CARD, BANK_TRANSFER) to Greek labels
+ */
+export function formatPaymentMethod(method: unknown): string {
+  if (typeof method === 'string' && method.trim()) {
+    const key = method.trim().toUpperCase();
+    const mapping = PAYMENT_METHOD_LABELS[key];
+    if (mapping) {
+      return `${mapping.icon} ${mapping.text}`;
+    }
+    // Fallback: return the original value with capitalization
+    return method;
+  }
+  return '—';
+}
+
+/**
  * Shipping method code to Greek label mapping
  */
 const SHIPPING_METHOD_LABELS: Record<string, string> = {
