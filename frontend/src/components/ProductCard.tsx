@@ -15,11 +15,12 @@ type Props = {
   priceCents: number
   image?: string | null
   stock?: number | null
+  hideProducerLink?: boolean
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock, hideProducerLink }: Props) {
   const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
@@ -29,7 +30,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
 
   return (
     <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
-      {/* Clickable section - navigates to product page */}
+      {/* Image — navigates to product page */}
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
         <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden">
           {hasImage ? (
@@ -47,34 +48,29 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
             </div>
           )}
         </div>
-
-        {/* Pass FIX-MOBILE-CARDS-01: Reduced padding on mobile for better space usage */}
-        <div className="px-2.5 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
-          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider truncate block">
-            {producer || 'Παραγωγός'}
-          </span>
-          <h3 data-testid="product-card-title" className="text-sm sm:text-base font-bold text-gray-900 line-clamp-2 mt-1 leading-tight">
-            {title}
-          </h3>
-        </div>
       </Link>
 
-      {/* Pass FIX-MOBILE-CARDS-01: Producer link */}
-      {producerUrl && (
-        <div className="px-2.5 sm:px-4 pb-1">
+      {/* Producer name + product title */}
+      <div className="px-2.5 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
+        {producerUrl && !hideProducerLink ? (
           <Link
             href={producerUrl}
             data-testid="product-card-producer-link"
-            className="inline-flex items-center gap-1 text-xs text-primary/70 hover:text-primary transition-colors"
-            onClick={(e) => e.stopPropagation()}
+            className="text-xs font-semibold text-primary uppercase tracking-wider truncate block hover:underline transition-colors"
           >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span>Δες τον παραγωγό</span>
+            {producer || 'Παραγωγός'}
           </Link>
-        </div>
-      )}
+        ) : (
+          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider truncate block">
+            {producer || 'Παραγωγός'}
+          </span>
+        )}
+        <Link href={productUrl} className="block mt-1">
+          <h3 data-testid="product-card-title" className="text-sm sm:text-base font-bold text-gray-900 line-clamp-2 leading-tight hover:text-primary/80 transition-colors">
+            {title}
+          </h3>
+        </Link>
+      </div>
 
       {/* Non-clickable section - price + add to cart button */}
       {/* Pass FIX-MOBILE-CARDS-01: Stack vertically on mobile, row on sm+ */}

@@ -111,7 +111,7 @@ export default async function ProducerProfilePage(
         </nav>
 
         {/* Producer Hero */}
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-8">
+        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-6">
           <div className="grid md:grid-cols-3 gap-0">
             {/* Image */}
             <div className="aspect-[4/3] md:aspect-auto bg-neutral-100 overflow-hidden">
@@ -132,38 +132,59 @@ export default async function ProducerProfilePage(
 
             {/* Info */}
             <div className="md:col-span-2 p-6 sm:p-8 flex flex-col justify-center">
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
-                {producer.category}
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              {producer.category && (
+                <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
+                  {producer.category}
+                </span>
+              )}
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
                 {producer.name}
               </h1>
-              <p className="text-sm text-gray-500 flex items-center gap-1 mb-4">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                {producer.region}
-              </p>
-              {producer.description && (
-                <p className="text-gray-700 leading-relaxed mb-4">{producer.description}</p>
+              {producer.region && (
+                <p className="text-sm text-gray-500 flex items-center gap-1.5 mb-4">
+                  <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {producer.region}
+                </p>
               )}
-              <p className="text-sm text-gray-500">
+              <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-neutral-100 px-3 py-1 rounded-full w-fit">
+                <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
                 {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
-              </p>
+              </span>
             </div>
           </div>
         </div>
 
+        {/* Story / Description section */}
+        {producer.description && (
+          <div className="bg-primary/5 rounded-xl border border-primary/10 p-6 sm:p-8 mb-8">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+              Η Ιστορία μας
+            </h2>
+            <p className="text-gray-700 leading-relaxed">{producer.description}</p>
+          </div>
+        )}
+
         {/* Products Section */}
         {productCount > 0 ? (
           <>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Τα προϊόντα του παραγωγού
-            </h2>
+            <div className="flex items-center gap-3 mb-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                Τα Προϊόντα μας
+              </h2>
+              <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                {productCount}
+              </span>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {producer.products.map((p) => {
-                // Pass FIX-MOBILE-CARDS-01: Resolve image from images[] array or image_url
                 const imageUrl = p.image_url || p.images?.[0]?.url || null;
                 const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
                 return (
@@ -177,6 +198,7 @@ export default async function ProducerProfilePage(
                     priceCents={Math.round(price * 100)}
                     image={imageUrl}
                     stock={p.stock}
+                    hideProducerLink
                   />
                 );
               })}
