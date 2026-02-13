@@ -232,12 +232,21 @@ Route::prefix('v1')->group(function () {
         Route::get('producers', [App\Http\Controllers\Public\ProducerController::class, 'index']);
         Route::get('producers/{id}', [App\Http\Controllers\Public\ProducerController::class, 'show']);
 
-        // Public Orders API (demo access - no PII exposed)
-        Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'index'])->name('api.v1.public.orders.index');
-        Route::get('orders/{order}', [App\Http\Controllers\Api\V1\OrderController::class, 'show'])->name('api.v1.public.orders.show');
+        // SECURITY FIX: Removed public GET orders endpoints (data leak — exposed ALL orders)
+        // Orders are only accessible via:
+        //   - Authenticated user: GET /api/v1/orders (scoped to user)
+        //   - Public tracking: GET /api/v1/public/orders/track/{token}
+        //   - Public by-token: GET /api/v1/public/orders/by-token/{token} (full details, UUID-gated)
+
+        // Public order creation (guest checkout supported)
         // Pass 52 fix: auth.optional captures user_id when logged in, allows guest checkout
         Route::post('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'store'])->name('api.v1.public.orders.store')
             ->middleware(['auth.optional', 'throttle:10,1']);
+
+        // Public order lookup by token (for thank-you page, email links)
+        Route::get('orders/by-token/{token}', [App\Http\Controllers\Api\V1\OrderController::class, 'showByToken'])
+            ->name('api.v1.public.orders.show-by-token')
+            ->middleware('throttle:30,1');
 
         // Pass TRACKING-DISPLAY-01: Public order tracking by token (no auth required)
         Route::get('orders/track/{token}', [App\Http\Controllers\Api\V1\OrderTrackingController::class, 'show'])
@@ -1079,8 +1088,10 @@ Route::get('/ops/commission/preview', function (Illuminate\Http\Request $request
 });
 
 // Dixis: Commission preview (read-only; feature-flagged)
+// SECURITY FIX: Added auth middleware — commission data should not be public
 use App\Http\Controllers\Api\OrderCommissionPreviewController;
-Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewController::class, 'show']);
+Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewController::class, 'show'])
+    ->middleware('auth:sanctum');
 
 // Ops: DB slow queries endpoint (guarded by X-Ops-Key in production)
 Route::get('/ops/db/slow-queries', [OpsDbController::class, 'slow'])
