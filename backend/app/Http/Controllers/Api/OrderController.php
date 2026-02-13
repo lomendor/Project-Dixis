@@ -42,6 +42,7 @@ class OrderController extends Controller
                     'payment_status' => $order->payment_status,
                     'status' => $order->status,
                     'shipping_method' => $order->shipping_method,
+                    'payment_method' => $order->payment_method ?? 'cod',
                     'notes' => $order->notes,
                     'created_at' => $order->created_at,
                     'updated_at' => $order->updated_at,
@@ -425,6 +426,9 @@ class OrderController extends Controller
             'payment_status' => $order->payment_status,
             'status' => $order->status,
             'shipping_method' => $order->shipping_method,
+            'payment_method' => $order->payment_method ?? 'cod',
+            // Pass FIX-ORDER-DETAILS-01: Include shipping address for consumer order details
+            'shipping_address' => $order->shipping_address ? json_decode($order->shipping_address, true) : null,
             'notes' => $order->notes,
             'created_at' => $order->created_at,
             'updated_at' => $order->updated_at,
