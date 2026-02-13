@@ -12,6 +12,7 @@ export interface Product {
   name: string;
   slug?: string;
   price: string;
+  current_price?: string; // Pass FIX-DASHBOARD-THUMBNAILS-01: top-products API returns current_price
   unit: string;
   stock: number | null;
   is_active: boolean;
@@ -751,7 +752,9 @@ class ApiClient {
 
   async getProducerTopProducts(limit?: number): Promise<{ data: Product[] }> {
     const endpoint = `producer/dashboard/top-products${limit ? `?limit=${limit}` : ''}`;
-    return this.request<{ data: Product[] }>(endpoint);
+    // Pass FIX-DASHBOARD-THUMBNAILS-01: API returns { top_products: [...] }, map to { data: [...] }
+    const response = await this.request<{ top_products: Product[] }>(endpoint);
+    return { data: response.top_products || [] };
   }
 
   async getTopProducts(limit?: number): Promise<{ top_products: TopProduct[] }> {
