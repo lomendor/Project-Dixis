@@ -98,8 +98,8 @@ All 4 Greek zones tested and return correct costs:
 | E2E order test (Card) | ✅ Tested | — | Consumer card order #7 created. Stripe Checkout Session opened with correct amount (€10.80). Stripe Link integration working. |
 | COD fee in backend total | ✅ Fixed | — | PR #2807: Backend now calculates COD fee server-side (4€) and includes it in order total. Order #8 verified: total=22.70€ (subtotal 15.80 + shipping 2.90 + COD 4.00). |
 | Producer cannot place orders | ⚠️ By Design | Low | OrderPolicy blocks producers (role=producer). Only guests, consumers, admins can checkout. |
-| Login page i18n | ⚠️ English | Medium | `/auth/login` shows English UI ("Sign in to your account", "Email address", "Password"). Should be Greek. |
-| Navbar i18n (logged in) | ⚠️ English | Medium | Navbar shows "Products", "Our Producers" in English when logged in. User dropdown: "My Orders", "Logout" in English. |
+| ~~Login page i18n~~ | ✅ Fixed | — | PR #2809: Removed browser language auto-detect. Default is now Greek for all visitors. |
+| ~~Navbar i18n (logged in)~~ | ✅ Fixed | — | PR #2809: Same root cause — browser `en` overriding default `el` locale. |
 | E2E registration | ✅ Tested | — | Consumer "Test User Dixis" (e2etest2026@dixis.gr) registered on production. Greek form, redirect to homepage. |
 | E2E waitlist | ✅ Tested | — | Producer waitlist form submitted successfully. "Ελήφθη! Θα σε καλέσουμε σύντομα." confirmed. |
 | Waitlist infra fix | ✅ Fixed | — | Added `/api/ops/` nginx route + `ADMIN_EMAIL` env var on production. Was returning 404/500. |
@@ -113,7 +113,7 @@ All 4 Greek zones tested and return correct costs:
 - `/about` page with company story
 - Categories API endpoint in Laravel
 - Switch Stripe to live keys for real payments
-- **Fix login page i18n** — `/auth/login` shows English; navbar + user dropdown English when logged in
+- ~~Fix login page i18n~~ → ✅ FIXED (PR #2809, deployed + verified on production)
 - Multi-language support (currently Greek-only, correct for launch)
 - Producer product image upload improvements
 
@@ -163,4 +163,4 @@ _Audit completed 2026-02-13 by agent. All automated checks passed._
 _E2E order tests completed 2026-02-13. COD + Card orders verified on production._
 _COD fee bug fixed 2026-02-13. PR #2807 + #2808 deployed. Order #8 verified correct totals._
 _E2E registration + waitlist tests completed 2026-02-13. Waitlist infra fix deployed (nginx route + ADMIN_EMAIL)._
-_i18n bug discovered 2026-02-13: Login page + navbar + user dropdown show English instead of Greek._
+_i18n bug fixed 2026-02-13: PR #2809 — removed browser language auto-detect, default to Greek. Verified on production._
