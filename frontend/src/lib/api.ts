@@ -165,7 +165,7 @@ export interface OrderItem {
 export interface ProducerOrderRaw {
   id: number;
   user_id: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   payment_status: string;
   payment_method: string;
   subtotal: string;
@@ -187,7 +187,7 @@ export interface ProducerOrderRaw {
 export interface ProducerOrder {
   id: number;
   user_id: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   payment_status: string;
   payment_method: string;
   subtotal: string;
@@ -210,9 +210,12 @@ export interface ProducerOrdersResponse {
   meta: {
     total: number;
     pending: number;
+    confirmed: number;
     processing: number;
     shipped: number;
     delivered: number;
+    cancelled: number;
+    [key: string]: number; // Allow dynamic status access
   };
 }
 
@@ -813,7 +816,7 @@ class ApiClient {
   }
 
   // Producer order management methods
-  async getProducerOrders(status?: 'pending' | 'processing' | 'shipped' | 'delivered'): Promise<ProducerOrdersResponse> {
+  async getProducerOrders(status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'): Promise<ProducerOrdersResponse> {
     const endpoint = `producer/orders${status ? `?status=${status}` : ''}`;
     const raw = await this.request<{ success: boolean; orders: ProducerOrderRaw[]; meta: ProducerOrdersResponse['meta'] }>(endpoint);
 
