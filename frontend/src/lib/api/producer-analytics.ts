@@ -29,7 +29,7 @@ export const producerAnalyticsApi = {
    * Get sales analytics for the authenticated producer
    */
   async getSales(period: 'daily' | 'monthly' = 'daily', limit = 30): Promise<ProducerSalesAnalytics> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
@@ -62,7 +62,7 @@ export const producerAnalyticsApi = {
    * Get orders analytics for the authenticated producer
    */
   async getOrders(): Promise<ProducerOrdersAnalytics> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
@@ -90,7 +90,7 @@ export const producerAnalyticsApi = {
    * Get products analytics for the authenticated producer
    */
   async getProducts(limit = 10): Promise<ProducerProductsAnalytics> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       throw new Error('Δεν βρέθηκε token πιστοποίησης');
     }
@@ -125,7 +125,7 @@ export const producerAnalyticsApi = {
 export function checkProducerAccess(): boolean {
   // This would typically check user role/producer association
   // For now, we'll rely on API responses to determine access
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('auth_token');
   return !!token;
 }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
+import { apiClient } from '@/lib/api';
 
 interface SettingsFormData {
   name: string;
@@ -59,33 +60,38 @@ function ProducerSettingsContent() {
     free_shipping_threshold_eur: '', // Empty means use system default
   });
 
-  // Load current producer data
+  // Load current producer data via apiClient (includes Bearer token)
   useEffect(() => {
-    fetch('/api/v1/producer/me')
-      .then((r) => r.json())
+    apiClient.refreshToken();
+    apiClient.getProducerMe()
       .then((data) => {
         const producer = data.producer;
+        if (!producer) {
+          setError('Δεν βρέθηκε προφίλ παραγωγού');
+          setLoading(false);
+          return;
+        }
         setFormData({
           name: producer.name || '',
-          business_name: producer.business_name || '',
+          business_name: (producer as any).business_name || '',
           slug: producer.slug || '',
           description: producer.description || '',
           email: producer.email || '',
           phone: producer.phone || '',
-          website: producer.website || '',
-          address: producer.address || '',
-          city: producer.city || '',
-          postal_code: producer.postal_code || '',
-          region: producer.region || '',
+          website: (producer as any).website || '',
+          address: (producer as any).address || '',
+          city: (producer as any).city || '',
+          postal_code: (producer as any).postal_code || '',
+          region: (producer as any).region || '',
           location: producer.location || '',
-          tax_id: producer.tax_id || '',
-          tax_office: producer.tax_office || '',
-          social_media: producer.social_media && producer.social_media.length > 0
-            ? producer.social_media
+          tax_id: (producer as any).tax_id || '',
+          tax_office: (producer as any).tax_office || '',
+          social_media: (producer as any).social_media && (producer as any).social_media.length > 0
+            ? (producer as any).social_media
             : [''],
           // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Load per-producer threshold
-          free_shipping_threshold_eur: producer.free_shipping_threshold_eur != null
-            ? String(producer.free_shipping_threshold_eur)
+          free_shipping_threshold_eur: (producer as any).free_shipping_threshold_eur != null
+            ? String((producer as any).free_shipping_threshold_eur)
             : '',
         });
         setLoading(false);
@@ -113,16 +119,8 @@ function ProducerSettingsContent() {
           : null,
       };
 
-      const response = await fetch('/api/v1/producer/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cleanedData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Αποτυχία ενημέρωσης');
-      }
+      apiClient.refreshToken();
+      await apiClient.updateProducerProfile(cleanedData as any);
 
       setSuccess('Οι αλλαγές αποθηκεύτηκαν επιτυχώς');
 
