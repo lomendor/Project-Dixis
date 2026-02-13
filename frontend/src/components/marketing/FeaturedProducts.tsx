@@ -21,6 +21,7 @@ interface ApiProduct {
   unit: string;
   stock: number;
   image_url?: string | null;
+  images?: { id: number; url: string; is_primary: boolean }[];
   producer_id?: string | number;
   producer?: { id: string; name: string; slug: string } | null;
 }
@@ -76,19 +77,22 @@ export default async function FeaturedProducts() {
         {/* Products grid - mobile-first */}
         {hasProducts ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                title={product.name}
-                producer={product.producer?.name || null}
-                producerId={product.producer_id}
-                producerSlug={product.producer?.slug || null}
-                priceCents={Math.round(product.price * 100)}
-                image={product.image_url || null}
-                stock={product.stock}
-              />
-            ))}
+            {products.map((product) => {
+              const imageUrl = product.image_url || product.images?.[0]?.url || null;
+              return (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.name}
+                  producer={product.producer?.name || null}
+                  producerId={product.producer_id}
+                  producerSlug={product.producer?.slug || null}
+                  priceCents={Math.round(product.price * 100)}
+                  image={imageUrl}
+                  stock={product.stock}
+                />
+              );
+            })}
           </div>
         ) : (
           /* Loading skeletons */

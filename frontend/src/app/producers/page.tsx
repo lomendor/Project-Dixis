@@ -17,6 +17,12 @@ type ApiProducer = {
   products_count: number;
 };
 
+/** Raw shape from Laravel API — uses 'location' not 'region' */
+type RawApiProducer = Omit<ApiProducer, 'region'> & {
+  location?: string;
+  region?: string;
+};
+
 /**
  * Fetch approved producers from Next.js API route (Prisma → Neon DB).
  * Pattern follows (storefront)/products/page.tsx.
@@ -40,7 +46,12 @@ async function getData(search?: string): Promise<{ items: ApiProducer[]; total: 
     }
 
     const json = await res.json();
-    const items: ApiProducer[] = json?.data ?? [];
+    const raw: RawApiProducer[] = json?.data ?? [];
+    // Map 'location' (Laravel) to 'region' (frontend)
+    const items: ApiProducer[] = raw.map((p) => ({
+      ...p,
+      region: p.region || p.location || '',
+    }));
     return { items, total: items.length };
   } catch (err) {
     console.error('[Producers] Fetch error:', err);
