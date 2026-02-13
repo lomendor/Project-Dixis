@@ -18,6 +18,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--brand-primary);
+  --color-primary-light: var(--brand-primary-light);
+  --color-primary-pale: var(--brand-primary-pale);
+  --color-primary-foreground: var(--brand-primary-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
