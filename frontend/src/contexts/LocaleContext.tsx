@@ -33,16 +33,12 @@ const LOCALE_COOKIE = 'dixis_locale';
 function getStoredLocale(): Locale {
   if (typeof window === 'undefined') return defaultLocale;
 
-  // Check cookie first
+  // Only use explicitly set cookie (user's deliberate choice)
+  // Do NOT auto-detect browser language — this is a Greek marketplace
+  // and should default to Greek for all visitors.
   const cookieMatch = document.cookie.match(new RegExp(`${LOCALE_COOKIE}=([^;]+)`));
   if (cookieMatch && locales.includes(cookieMatch[1] as Locale)) {
     return cookieMatch[1] as Locale;
-  }
-
-  // Fallback to browser language
-  const browserLang = navigator.language.split('-')[0];
-  if (locales.includes(browserLang as Locale)) {
-    return browserLang as Locale;
   }
 
   return defaultLocale;
