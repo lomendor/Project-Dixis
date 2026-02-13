@@ -32,7 +32,7 @@ function VivaReturnContent() {
           setMessage('Η πληρωμή ολοκληρώθηκε!')
           // Redirect to thank-you after brief delay
           setTimeout(() => {
-            router.push(`/thank-you?id=${data.orderId}`)
+            router.push(`/thank-you?token=${data.orderToken || data.orderId}`)
           }, 1500)
         } else {
           setStatus('error')

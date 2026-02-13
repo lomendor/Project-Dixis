@@ -10,6 +10,7 @@
 
 export interface OrderEmailData {
   id: string
+  public_token?: string // SECURITY FIX: UUID token for thank-you/tracking links
   total: number
   subtotal: number
   shipping: number
@@ -370,9 +371,9 @@ function renderOrderConfirmationHTML(order: OrderEmailData): string {
         Μπορείτε να δείτε τα στοιχεία της παραγγελίας σας στο:
       </p>
       <p style="margin: 0;">
-        <a href="https://dixis.gr/thank-you?id=${order.id}"
+        <a href="https://dixis.gr/thank-you?token=${order.public_token || order.id}"
            style="color: #059669; text-decoration: none; font-weight: bold; font-size: 14px;">
-          https://dixis.gr/thank-you?id=${order.id}
+          https://dixis.gr/thank-you?token=${order.public_token || order.id}
         </a>
       </p>
     </div>

@@ -77,6 +77,31 @@ class OrderController extends Controller
     }
 
     /**
+     * SECURITY FIX: Public order lookup by UUID token (replaces sequential ID access).
+     * Used by thank-you page and email confirmation links.
+     * Token is a UUID v4, not guessable — safe for public access.
+     */
+    public function showByToken(string $token): OrderResource|Response
+    {
+        // Validate UUID v4 format
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $token)) {
+            abort(400, 'Invalid token format');
+        }
+
+        $order = Order::with(['orderItems.producer', 'shippingLines'])
+            ->where('public_token', $token)
+            ->first();
+
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        $order->loadCount('orderItems');
+
+        return new OrderResource($order);
+    }
+
+    /**
      * Create a new order with atomic transactions and stock validation.
      * Pass 53: Sends email notifications after transaction commits.
      * Pass MP-ORDERS-SPLIT-01: Multi-producer carts create CheckoutSession + N child orders.

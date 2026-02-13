@@ -664,31 +664,16 @@ class ApiClient {
     return this.request<Order>(`orders/${id}`);
   }
 
-  // Public orders endpoints (consumer-facing)
-  async getPublicOrders(params?: {
-    page?: number;
-    per_page?: number;
-    status?: string;
-  }): Promise<{ data: Order[] }> {
-    const searchParams = new URLSearchParams();
+  // SECURITY FIX: Removed getPublicOrders() — was exposing ALL orders without auth.
+  // Orders list is now only available via authenticated getOrders() endpoint.
 
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = searchParams.toString();
-    const endpoint = `public/orders${queryString ? `?${queryString}` : ''}`;
-
-    return this.request<{ data: Order[] }>(endpoint);
-  }
-
-  async getPublicOrder(id: number | string): Promise<Order> {
-    // API returns { data: Order }, must unwrap
-    const response = await this.request<{ data: Order }>(`public/orders/${id}`);
+  /**
+   * SECURITY FIX: Get order by UUID public token (not guessable sequential ID).
+   * Used by thank-you page and email confirmation links.
+   * Replaces the old getPublicOrder(id) which used sequential IDs.
+   */
+  async getOrderByToken(token: string): Promise<Order> {
+    const response = await this.request<{ data: Order }>(`public/orders/by-token/${token}`);
     return response.data;
   }
 

@@ -29,7 +29,8 @@ interface Order {
 }
 
 export default function ThankYouPage({ searchParams }: { searchParams?: Record<string, string | undefined> }) {
-  const orderId = searchParams?.id || ''
+  // SECURITY FIX: Use token (UUID) instead of sequential ID for order lookup
+  const orderToken = searchParams?.token || searchParams?.id || ''
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,7 +38,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
   const fmt = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
   useEffect(() => {
-    if (!orderId) {
+    if (!orderToken) {
       setError('Δεν βρέθηκε κωδικός παραγγελίας')
       setLoading(false)
       return
@@ -45,9 +46,8 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
     async function fetchOrder() {
       try {
-        // Pass 54: Fetch from Laravel API (single source of truth)
-        // This ensures we get the same order data as /account/orders
-        const laravelOrder = await apiClient.getPublicOrder(orderId)
+        // SECURITY FIX: Fetch by UUID token instead of sequential ID
+        const laravelOrder = await apiClient.getOrderByToken(orderToken)
 
         // Transform Laravel order format to thank-you page format
         const orderItems = laravelOrder.items || laravelOrder.order_items || []
@@ -90,7 +90,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
     }
 
     fetchOrder()
-  }, [orderId])
+  }, [orderToken])
 
   if (loading) {
     return (

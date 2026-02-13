@@ -62,7 +62,7 @@ function CheckoutContent() {
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
   const [pendingOrderId, setPendingOrderId] = useState<number | null>(null)
   // Pass PAYMENT-INIT-ORDER-ID-01: Store checkout session ID for thank-you redirect
-  const [pendingThankYouId, setPendingThankYouId] = useState<number | null>(null)
+  const [pendingThankYouId, setPendingThankYouId] = useState<string | number | null>(null)
   const [orderTotal, setOrderTotal] = useState<number>(0)
   // Pass CHECKOUT-SHIPPING-DISPLAY-01: Shipping quote state (legacy single-producer)
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
@@ -248,7 +248,7 @@ function CheckoutContent() {
       showToast('success', 'Η πληρωμή ολοκληρώθηκε επιτυχώς')
       // Clear cart and redirect to success page
       clear()
-      router.push(`/thank-you?id=${pendingThankYouId ?? pendingOrderId}`)
+      router.push(`/thank-you?token=${pendingThankYouId ?? pendingOrderId}`)
     } catch (err) {
       console.error('[Checkout] Payment confirmation failed:', err)
       // Pass PAY-CARD-CONFIRM-GUARD-01: Show specific error from backend if available
@@ -349,7 +349,8 @@ function CheckoutContent() {
       // For multi-producer checkout, API returns CheckoutSession with payment_order_id
       // For single-producer, use order.id directly
       const paymentOrderId = order.payment_order_id ?? order.id;
-      const thankYouId = order.id; // Use checkout session ID for thank-you page
+      // SECURITY FIX: Use public_token (UUID) for thank-you redirect instead of sequential ID
+      const thankYouToken = order.public_token || order.id;
 
       // Store customer details for order confirmation/email
       sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer));
@@ -365,13 +366,13 @@ function CheckoutContent() {
               firstName: body.customer.name.split(' ')[0],
               lastName: body.customer.name.split(' ').slice(1).join(' ') || undefined,
             },
-            return_url: `${window.location.origin}/thank-you?id=${thankYouId}`,
+            return_url: `${window.location.origin}/thank-you?token=${thankYouToken}`,
           })
 
           // Store order info and show Stripe Elements form
           // Use paymentOrderId for payment operations, thankYouId for navigation
           setPendingOrderId(paymentOrderId)
-          setPendingThankYouId(thankYouId)
+          setPendingThankYouId(thankYouToken)
           setOrderTotal(paymentInit.payment.amount / 100) // amount is in cents
           setStripeClientSecret(paymentInit.payment.client_secret)
           setLoading(false)
@@ -388,7 +389,7 @@ function CheckoutContent() {
 
       // COD: Clear cart and redirect to thank-you page
       clear()
-      router.push(`/thank-you?id=${thankYouId}`)
+      router.push(`/thank-you?token=${thankYouToken}`)
     } catch (err: any) {
       console.error('Order creation failed:', err)
       // Pass ORDER-SHIPPING-SPLIT-01: Handle SHIPPING_CHANGED response (HARD_BLOCK)
