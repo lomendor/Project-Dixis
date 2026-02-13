@@ -236,7 +236,7 @@ function ProducerSettingsContent() {
 
                 <div>
                   <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-                    URL Identifier (Slug)
+                    Αναγνωριστικό URL (Slug)
                   </label>
                   <input
                     id="slug"
@@ -462,7 +462,7 @@ function ProducerSettingsContent() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Social Media
+                    Κοινωνικά Δίκτυα
                   </label>
                   <div className="space-y-2">
                     {formData.social_media.map((link, i) => (
@@ -490,7 +490,7 @@ function ProducerSettingsContent() {
                       onClick={addSocialLink}
                       className="text-sm text-green-600 hover:text-green-800 font-medium"
                     >
-                      + Προσθήκη Link
+                      + Προσθήκη Συνδέσμου
                     </button>
                   </div>
                 </div>
