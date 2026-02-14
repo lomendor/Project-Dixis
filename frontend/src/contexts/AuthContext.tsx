@@ -92,18 +92,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Normal auth flow
+      // Normal auth flow — try profile fetch regardless of localStorage token.
+      // Strategic Fix 2A: session cookie may authenticate even without stored token.
       apiClient.refreshToken();
-      const token = apiClient.getToken();
 
-      if (token) {
-        try {
-          const userData = await apiClient.getProfile();
-          setUser(userData);
-        } catch {
-          // Clear invalid token
-          apiClient.setToken(null);
-        }
+      try {
+        const userData = await apiClient.getProfile();
+        setUser(userData);
+      } catch {
+        // Not authenticated via cookie or token — clear any stale token
+        apiClient.setToken(null);
       }
 
       setLoading(false);
