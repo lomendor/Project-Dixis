@@ -40,7 +40,6 @@ function OrderDetailsPage(): React.JSX.Element {
         const orderData = await apiClient.getOrder(orderId);
         setOrder(orderData);
       } catch (error) {
-        console.error('Failed to fetch order:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to load order details';
         setError(errorMessage);
 

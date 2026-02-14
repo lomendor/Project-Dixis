@@ -61,7 +61,6 @@ export default function LockerSearch({
       const parseResult = LockerSearchResponseSchema.safeParse(rawData);
 
       if (!parseResult.success) {
-        console.error('Invalid locker search response:', parseResult.error);
         throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
       }
 

@@ -183,7 +183,7 @@ function AdminProductsContent() {
       const data = await res.json()
       setProducts(data?.items || data || [])
     } catch {
-      console.error('Failed to load products')
+      // Products load failed — handled by empty state UI
     } finally {
       setLoading(false)
     }

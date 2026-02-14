@@ -47,7 +47,6 @@ export function Analytics() {
     const websiteId = process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID;
 
     if (!src || !websiteId) {
-      console.warn('[Analytics] Umami requires NEXT_PUBLIC_ANALYTICS_SRC and NEXT_PUBLIC_ANALYTICS_WEBSITE_ID');
       return null;
     }
 
@@ -61,8 +60,7 @@ export function Analytics() {
     );
   }
 
-  // Unknown provider
-  console.warn(`[Analytics] Unknown provider: ${provider}. Supported: plausible, umami`);
+  // Unknown provider — no-op
   return null;
 }
 

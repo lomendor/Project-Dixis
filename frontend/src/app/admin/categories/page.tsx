@@ -59,7 +59,6 @@ function AdminCategoriesContent() {
       setCategories(allData.categories || []);
     } catch (error) {
       showError('Αποτυχία φόρτωσης κατηγοριών');
-      console.error('Load categories error:', error);
     } finally {
       setLoading(false);
     }
@@ -83,7 +82,6 @@ function AdminCategoriesContent() {
       await loadCategories(); // Refresh list
     } catch (error) {
       showError('Αποτυχία αλλαγής κατάστασης κατηγορίας');
-      console.error('Toggle active error:', error);
     } finally {
       setProcessingIds(prev => {
         const next = new Set(prev);
@@ -142,7 +140,6 @@ function AdminCategoriesContent() {
       } else {
         showError('Σφάλμα κατά την ενημέρωση');
       }
-      console.error('Save edit error:', error);
     } finally {
       setSubmitting(false);
     }

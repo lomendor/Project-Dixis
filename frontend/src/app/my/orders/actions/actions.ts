@@ -70,8 +70,7 @@ export async function setOrderItemStatus(
 
     revalidatePath('/my/orders');
     return { ok: true };
-  } catch (error) {
-    console.error('Status update error:', error);
+  } catch {
     return { ok: false, error: 'Σφάλμα κατά την ενημέρωση της κατάστασης.' };
   }
 }

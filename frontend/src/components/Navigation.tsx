@@ -16,8 +16,8 @@ export default function Navigation() {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      // Logout errors handled by AuthContext
     }
   };
 

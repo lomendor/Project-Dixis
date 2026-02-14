@@ -96,8 +96,8 @@ class AnalyticsService {
       if (stored) {
         this.events = JSON.parse(stored);
       }
-    } catch (error) {
-      console.warn('Failed to load stored analytics events:', error);
+    } catch {
+      // Silently fail — stored events are non-critical
     }
   }
 
@@ -108,8 +108,8 @@ class AnalyticsService {
       // Keep only last 100 events to prevent storage bloat
       const eventsToStore = this.events.slice(-100);
       localStorage.setItem('dixis_analytics_events', JSON.stringify(eventsToStore));
-    } catch (error) {
-      console.warn('Failed to persist analytics events:', error);
+    } catch {
+      // Silently fail — persistence is non-critical
     }
   }
 
@@ -171,8 +171,8 @@ class AnalyticsService {
           body: JSON.stringify(event),
         });
       }
-    } catch (error) {
-      console.warn('Failed to forward analytics event:', error);
+    } catch {
+      // Silently fail — analytics forwarding is best-effort
     }
   }
 

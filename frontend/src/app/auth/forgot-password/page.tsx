@@ -41,7 +41,6 @@ export default function ForgotPassword() {
 
       setSuccess(true);
     } catch (err) {
-      console.error('Forgot password failed:', err);
       setError(err instanceof Error ? err.message : 'Request failed');
     } finally {
       setLoading(false);

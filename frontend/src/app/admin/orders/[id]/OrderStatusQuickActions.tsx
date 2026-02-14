@@ -39,8 +39,7 @@ export function OrderStatusQuickActions({ orderId, currentStatus, paymentMethod,
       setPaidConfirmed(true)
       showSuccess('Η πληρωμή επιβεβαιώθηκε')
       window.location.reload()
-    } catch (e) {
-      console.error('Payment confirm error:', e)
+    } catch {
       showError('Σφάλμα κατά την επιβεβαίωση πληρωμής')
     } finally {
       setLoading(false)
@@ -64,8 +63,7 @@ export function OrderStatusQuickActions({ orderId, currentStatus, paymentMethod,
 
       // Reload page to show updated data
       window.location.reload()
-    } catch (e) {
-      console.error('Status change error:', e)
+    } catch {
       showError('Σφάλμα κατά την αλλαγή κατάστασης')
     } finally {
       setLoading(false)

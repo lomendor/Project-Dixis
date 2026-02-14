@@ -146,11 +146,9 @@ export default function ProducerOrderDetailsPage() {
         setEmailStatus(result.dryRun ? 'skipped' : 'sent');
       } else {
         setEmailStatus('failed');
-        console.error('Email notification failed:', result.error);
       }
-    } catch (err) {
+    } catch {
       setEmailStatus('failed');
-      console.error('Email notification error:', err);
     }
   };
 

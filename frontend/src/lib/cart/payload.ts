@@ -12,7 +12,7 @@
 type CartItem={ productId:string; qty:number };
 
 export function readCartItems():CartItem[]{
-  console.warn('[DEPRECATED] readCartItems from payload.ts - use /internal/cart instead');
+  // DEPRECATED: use /internal/cart instead
   try{
     const s = JSON.parse(localStorage.getItem('dixis_cart_v1')||'{"items":[]}');
     const items = Array.isArray(s.items) ? s.items : [];
@@ -22,6 +22,6 @@ export function readCartItems():CartItem[]{
 }
 
 export function clearCart(){
-  console.warn('[DEPRECATED] clearCart from payload.ts - use DELETE /internal/cart instead');
+  // DEPRECATED: use DELETE /internal/cart instead
   try{ localStorage.setItem('dixis_cart_v1', JSON.stringify({ items:[] })); }catch{}
 }

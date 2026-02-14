@@ -61,7 +61,6 @@ export default function ShippingQuote({
       const parseResult = ShippingQuoteApiResponseSchema.safeParse(rawData);
 
       if (!parseResult.success) {
-        console.error('Invalid API response format:', parseResult.error);
         throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
       }
 

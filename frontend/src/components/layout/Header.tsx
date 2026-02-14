@@ -39,8 +39,8 @@ export default function Header() {
       setUserMenuOpen(false);
       setMobileMenuOpen(false);
       await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      // Logout errors handled by AuthContext
     }
   };
 

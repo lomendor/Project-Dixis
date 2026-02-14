@@ -22,9 +22,8 @@ export default function NotificationBell() {
       try {
         const response = await notificationApi.getUnreadCount();
         setUnreadCount(response.unread_count);
-      } catch (error) {
-        // Silently fail - don't disrupt UX for notification count
-        console.debug('Failed to fetch notification count:', error);
+      } catch {
+        // Silently fail — don't disrupt UX for notification count
       }
     };
 

@@ -76,7 +76,7 @@
 - Remove `console.log` and `console.warn` from production paths
 - Keep ONLY in development-gated blocks: `if (process.env.NODE_ENV === 'development')`
 **LOC estimate**: ~200 (deletions mostly)
-**Status**: [ ] Not started
+**Status**: [x] PR #2863 — removed ~90 client-side console statements across 43 files (199 LOC)
 
 ### 3C. Sentry Business Events
 **Why**: We have Sentry but only for crashes. We need business metrics.
@@ -122,4 +122,6 @@
 | 2026-02-14 | 1A: Checkout Hardening | PR #2851 | ApiError class, idempotency, shipping validation |
 | 2026-02-14 | 1B: Checkout Refactor | PR #2854 | page.tsx 777→200 LOC, extracted hook+components |
 | 2026-02-14 | 3A: API Timeouts | PR #2855 | 15s AbortController on all API requests |
+| 2026-02-14 | CI: PWA Icons | PR #2858 | apple-touch-icon + PWA icons fix 404s |
+| 2026-02-14 | CI: E2E Stabilization | PR #2860 | auth-nav mock APIs + smoke filter → ALL CI GREEN |
 | | | | |

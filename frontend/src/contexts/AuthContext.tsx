@@ -87,8 +87,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           setLoading(false);
           return; // Skip real /auth/me API call
-        } catch (error) {
-          console.error('MSW auth bridge error:', error);
+        } catch {
+          // MSW bridge failed — fall through to normal auth
         }
       }
 
@@ -100,8 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const userData = await apiClient.getProfile();
           setUser(userData);
-        } catch (error) {
-          console.error('Failed to fetch user profile:', error);
+        } catch {
           // Clear invalid token
           apiClient.setToken(null);
         }
@@ -132,15 +131,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             replaceWithServerCart(localFormat);
           }
         }
-      } catch (syncError) {
-        // Non-blocking: log error but don't fail login
-        console.error('🛒 CartSync: Failed to sync cart (non-blocking):', syncError);
+      } catch {
+        // Non-blocking: cart sync failure doesn't affect login
       }
 
       showToast('success', `Καλώς ήρθατε πίσω, ${response.user.name}!`);
     } catch (error: any) {
-      console.error('🔑 AuthContext: Login error:', error);
-
       // Greek error messages based on error type
       let message = 'Η σύνδεση απέτυχε. Παρακαλώ δοκιμάστε ξανά.';
 
@@ -234,9 +230,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiClient.logout();
       showToast('info', 'Αποσυνδεθήκατε επιτυχώς');
-    } catch (error) {
-      // Ignore logout errors and proceed with clearing local state
-      console.error('Logout error:', error);
+    } catch {
+      // Ignore logout errors — still clear local state
       showToast('info', 'Αποσυνδεθήκατε');
     }
     

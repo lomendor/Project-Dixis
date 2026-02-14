@@ -202,8 +202,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
     try {
       await apiClient.addToCart(productId, 1);
       showSuccess('Added to cart!');
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
+    } catch {
       showError('Failed to add to cart');
     } finally {
       setAddingToCart(prev => {

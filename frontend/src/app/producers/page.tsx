@@ -41,7 +41,6 @@ async function getData(search?: string): Promise<{ items: ApiProducer[]; total: 
     });
 
     if (!res.ok) {
-      console.error('[Producers] API fetch failed:', res.status);
       return { items: [], total: 0 };
     }
 
@@ -53,8 +52,7 @@ async function getData(search?: string): Promise<{ items: ApiProducer[]; total: 
       region: p.region || p.location || '',
     }));
     return { items, total: items.length };
-  } catch (err) {
-    console.error('[Producers] Fetch error:', err);
+  } catch {
     return { items: [], total: 0 };
   }
 }

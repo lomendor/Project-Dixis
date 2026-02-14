@@ -31,9 +31,8 @@ export default function NotificationDropdown({
         const response = await notificationApi.getLatestNotifications(5);
         setNotifications(response.notifications);
         setError(null);
-      } catch (err) {
+      } catch {
         setError(t('notifications.error'));
-        console.debug('Failed to fetch notifications:', err);
       } finally {
         setLoading(false);
       }
@@ -50,8 +49,8 @@ export default function NotificationDropdown({
           n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
         )
       );
-    } catch (err) {
-      console.debug('Failed to mark notification as read:', err);
+    } catch {
+      // Silent fail — mark-as-read is non-critical
     }
   };
 
@@ -62,8 +61,8 @@ export default function NotificationDropdown({
         prev.map((n) => ({ ...n, read_at: new Date().toISOString() }))
       );
       onNotificationsRead();
-    } catch (err) {
-      console.debug('Failed to mark all notifications as read:', err);
+    } catch {
+      // Silent fail — mark-all-as-read is non-critical
     }
   };
 

@@ -6,7 +6,7 @@ export default function OrderActions({ id, status:initial }:{ id:string, status?
   async function setS(next:string){
     if (status==='DELIVERED' || status==='CANCELLED') return; // locked terminal states
     const res = await fetch(`/api/admin/orders/${id}/status`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ status: next }) })
-    if (res.ok){ setStatus(next) } else { console.warn('status change failed') }
+    if (res.ok){ setStatus(next) }
   }
   const Btn = ({id,children,disabled,onClick}:{id:string,children:any,disabled?:boolean,onClick:()=>void}) =>
     <button data-testid={id} onClick={onClick} disabled={disabled}

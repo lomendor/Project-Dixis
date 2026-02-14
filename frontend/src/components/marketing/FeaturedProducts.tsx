@@ -34,14 +34,12 @@ async function getProducts(): Promise<ApiProduct[]> {
     });
 
     if (!res.ok) {
-      console.error('Failed to fetch products:', res.status);
       return [];
     }
 
     const data = await res.json();
     return data.data || [];
-  } catch (error) {
-    console.error('Error fetching products:', error);
+  } catch {
     return [];
   }
 }

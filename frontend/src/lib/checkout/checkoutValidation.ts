@@ -227,8 +227,6 @@ ${errors.map(e => `  • ${e.field}: ${e.message}`).join('\n')}
 ══════════════════
     `.trim();
     
-    console.error('[Checkout] Validation failed:', error instanceof Error ? error.message : 'Unknown error');
-
     return {
       isValid: false,
       errors: [{

@@ -73,7 +73,6 @@ export default function Register() {
       await register(formData);
       // Success message is now handled in AuthContext with Greek text
     } catch (err) {
-      console.error('❌ Registration failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Η εγγραφή απέτυχε';
       setError(errorMessage);
       // Error toast is already shown by AuthContext
