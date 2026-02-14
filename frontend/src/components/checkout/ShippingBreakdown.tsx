@@ -6,7 +6,7 @@ import { Input } from '../ui/input';
 import { Select } from '../ui/select';
 import { Skeleton } from '../ui/skeleton';
 import { Tooltip } from '../ui/tooltip';
-import { useToast } from '../ui/toast';
+import { useToast } from '@/contexts/ToastContext';
 import { formatEUR } from '../../lib/money';
 import { debounce } from '../../lib/debounce';
 
@@ -35,7 +35,7 @@ export default function ShippingBreakdown({
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<QuoteResponse | null>(null);
 
-  const { toast, Toaster } = useToast();
+  const { showToast } = useToast();
 
   const payload = React.useMemo<QuotePayload>(() => ({
     postalCode,
@@ -54,7 +54,7 @@ export default function ShippingBreakdown({
       const errorMsg = e?.message ?? 'Quote error';
       setError(errorMsg);
       setData(null);
-      toast(`Σφάλμα: ${errorMsg}`);  // AG8: use toast instead of inline error
+      showToast('error', `Σφάλμα: ${errorMsg}`);  // AG8: use global toast
       onQuote?.(null);  // AG7b: notify parent of error
     } finally {
       setLoading(false);
@@ -75,7 +75,6 @@ export default function ShippingBreakdown({
 
   return (
     <Card data-testid="shipping-breakdown">
-      <Toaster />
       <CardTitle className="mb-2">Μεταφορικά</CardTitle>
 
       {/* AG9: a11y labels with htmlFor/id + consistent spacing */}

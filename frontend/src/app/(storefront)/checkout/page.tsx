@@ -1,5 +1,6 @@
 'use client'
 import { Suspense, useState, useEffect, useCallback, useRef } from 'react'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
@@ -440,8 +441,8 @@ function CheckoutContent() {
   if (!isMounted) {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">{t('checkoutPage.loading')}</p>
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
+          <LoadingSpinner text={t('checkoutPage.loading')} />
         </div>
       </main>
     )
@@ -451,7 +452,7 @@ function CheckoutContent() {
   if (Object.keys(cartItems).length === 0 && !stripeClientSecret) {
     return (
       <main className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
           <p className="text-gray-600 mb-4">{t('checkoutPage.emptyCart')}</p>
           <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
             {t('checkoutPage.viewProducts')}
@@ -754,8 +755,8 @@ export default function CheckoutPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">{t('checkoutPage.loading')}</p>
+        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
+          <LoadingSpinner text={t('checkoutPage.loading')} />
         </div>
       </main>
     }>
