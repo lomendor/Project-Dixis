@@ -1,6 +1,26 @@
 // API client utility with Bearer token support
 // NOTE: URL resolution delegates to @/env (SSOT). Do NOT add new process.env reads here.
 
+/**
+ * Structured API error — carries status, code, and extra fields from backend.
+ * Checkout and other consumers check err.code / err.status for specific handling.
+ */
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  [key: string]: unknown;
+
+  constructor(message: string, status: number, extra?: Record<string, unknown>) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    if (extra) {
+      this.code = extra.code as string | undefined;
+      Object.assign(this, extra);
+    }
+  }
+}
+
 export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
@@ -472,7 +492,11 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      throw new ApiError(
+        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+        response.status,
+        errorData, // Passes code, quoted_total, locked_total, etc. to caller
+      );
     }
 
     return response.json();
@@ -703,10 +727,13 @@ class ApiClient {
     notes?: string;
     quoted_shipping?: number; // Pass ORDER-SHIPPING-SPLIT-01: Quoted shipping for mismatch
     quoted_at?: string; // Pass ORDER-SHIPPING-SPLIT-01: Quote timestamp
-  }): Promise<Order> {
+  }, idempotencyKey?: string): Promise<Order> {
     const response = await this.request<{ data: Order }>('public/orders', {
       method: 'POST',
       body: JSON.stringify(data),
+      headers: idempotencyKey
+        ? { 'X-Idempotency-Key': idempotencyKey }
+        : undefined,
     });
     return response.data;
   }

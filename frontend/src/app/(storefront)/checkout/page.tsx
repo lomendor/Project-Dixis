@@ -79,6 +79,8 @@ function CheckoutContent() {
   } | null>(null)
   // Debounce ref for postal code input
   const postalDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Idempotency key — generated once per checkout attempt, prevents double orders
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID())
   // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Saved address for pre-fill
   const [savedAddress, setSavedAddress] = useState<{
     name?: string;
@@ -286,6 +288,12 @@ function CheckoutContent() {
     // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Multi-producer checkout now enabled.
     // Backend CheckoutService handles order splitting with per-producer shipping.
 
+    // Validate shipping quote exists before allowing order creation
+    if (!shippingQuote && !cartShippingQuote && !shippingLoading) {
+      setError('Εισάγετε ταχυδρομικό κώδικα για υπολογισμό μεταφορικών.')
+      return
+    }
+
     setError('')
     setLoading(true)
 
@@ -344,7 +352,9 @@ function CheckoutContent() {
         quoted_at: cartShippingQuote?.quoted_at ?? undefined,
       };
 
-      const order = await apiClient.createOrder(orderData);
+      const order = await apiClient.createOrder(orderData, idempotencyKeyRef.current);
+      // Rotate key after successful order — next submit attempt gets a fresh key
+      idempotencyKeyRef.current = crypto.randomUUID();
 
       // Pass PAYMENT-INIT-ORDER-ID-01: Get correct order ID for payment init
       // For multi-producer checkout, API returns CheckoutSession with payment_order_id
@@ -723,7 +733,7 @@ function CheckoutContent() {
 
             <button
               type="submit"
-              disabled={loading || cardProcessing || !!cartShippingError}
+              disabled={loading || cardProcessing || !!cartShippingError || shippingLoading || (!shippingQuote && !cartShippingQuote)}
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
               data-testid="checkout-submit"
             >
