@@ -167,6 +167,10 @@ traces/
 *.png
 *.zip
 
+# Allow committed image assets in frontend/public
+!frontend/public/**/*.png
+!frontend/public/*.png
+
 # Keep test files accessible
 !/backend/frontend/tests/**
 backend/.env.testing.bak
