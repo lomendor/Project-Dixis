@@ -37,12 +37,12 @@
 **Why**: XSS can steal tokens from localStorage. HttpOnly cookies are JS-inaccessible.
 **Files**: `src/lib/api.ts` (token storage), backend Laravel CORS + Sanctum config
 **Changes**:
-- Frontend: Remove localStorage token, use `credentials: 'include'` on fetch
-- Backend: Configure Sanctum SPA authentication with cookie-based sessions
-- Update CORS to allow credentials from dixis.gr
-**LOC estimate**: ~80 frontend + backend changes
-**Status**: [ ] Not started
-**Note**: Requires backend coordination — Laravel Sanctum SPA mode
+- Backend: EnsureFrontendRequestsAreStateful middleware, Auth::login() in login/register, session invalidation on logout
+- Frontend: fetchCsrfCookie() before auth, XSRF header on all requests, simplified initAuth
+- Dual-mode: Both Bearer tokens and session cookies work simultaneously
+**LOC estimate**: ~74 (18 backend + 56 frontend)
+**Status**: [x] PR #2867 (backend) + PR #2868 (frontend) — dual-mode auth migration
+**Note**: PR 3 (remove localStorage entirely) deferred until production validation
 
 ### 2B. Middleware Auth for Protected Routes
 **Why**: Currently only `/ops/*` has middleware. Producer/admin pages rely on client-side AuthGuard.
@@ -126,4 +126,6 @@
 | 2026-02-14 | CI: E2E Stabilization | PR #2860 | auth-nav mock APIs + smoke filter → ALL CI GREEN |
 | 2026-02-14 | 3B: Console Cleanup | PR #2863 | removed ~90 client-side console.* across 43 files |
 | 2026-02-14 | 3C: Sentry Business Events | PR #2865 | 6 business events in checkout (breadcrumbs + captureMessage) |
+| 2026-02-14 | 2A: Auth Token Migration (BE) | PR #2867 | Sanctum SPA mode, Auth::login, session invalidation (18 LOC) |
+| 2026-02-14 | 2A: Auth Token Migration (FE) | PR #2868 | CSRF cookie fetch, XSRF header, simplified initAuth (56 LOC) |
 | | | | |
