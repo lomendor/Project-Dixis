@@ -13,6 +13,11 @@ import type { NextRequest } from 'next/server'
  * This middleware checks for auth cookies (set by Sanctum SPA auth)
  * and redirects to login if missing. Does NOT verify token validity
  * (that's the backend's job) — just checks presence for fast redirect.
+ *
+ * NOTE: Sentry autoInstrumentMiddleware is disabled in next.config.ts
+ * because its Rollup-based wrapping loader silently swallows middleware
+ * logic in standalone builds. We keep Sentry error reporting via the
+ * try/catch + Sentry.captureException pattern instead.
  */
 
 const PROTECTED_PREFIXES = ['/producer', '/admin', '/account']
