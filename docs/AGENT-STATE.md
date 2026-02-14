@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-13 (LAUNCH-POLISH-01 deployed)
+**Updated**: 2026-02-15 (V1-REALITY-SYNC — docs audit, middleware auth)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -39,7 +39,7 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+**V1-REALITY-SYNC** — Update outdated PRD docs (all P0 blockers resolved), add middleware auth (2B), verify email system e2e
 
 ---
 

@@ -51,8 +51,8 @@
 - Add matcher for `/producer/:path*`, `/admin/:path*`, `/account/:path*`
 - Check auth cookie (after 2A) and redirect to login if missing
 **LOC estimate**: ~30
-**Status**: [ ] Not started
-**Depends on**: 2A (needs cookie-based auth first)
+**Status**: [ ] NEXT — last remaining security item (2A complete)
+**Depends on**: 2A ✅ (cookie-based auth deployed PRs #2867-#2868)
 
 ---
 

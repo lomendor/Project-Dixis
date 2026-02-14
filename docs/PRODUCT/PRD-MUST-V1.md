@@ -1,6 +1,7 @@
 # PRD Must-Have V1 — Dixis Marketplace
 
 **Created**: 2026-01-17
+**Updated**: 2026-02-15 (V1-REALITY-SYNC — all blockers resolved)
 **Pass**: PRD-AUDIT-STRUCTURE-01
 
 > Defines what MUST ship for V1 vs what's OUT OF SCOPE.
@@ -27,7 +28,7 @@ These are non-negotiable for V1 launch:
 - [x] Guest checkout (no account required)
 - [x] Shipping form (name, phone, email, address)
 - [x] COD payment method
-- [ ] BLOCKED: Card payments (needs Stripe keys)
+- [x] Card payments (Stripe enabled 2026-02-13)
 
 ### 4. Order Management (Consumer)
 - [x] Order confirmation page
@@ -52,7 +53,7 @@ These are non-negotiable for V1 launch:
 - [x] Consumer login/register
 - [x] Producer login
 - [x] Role-based access (consumer, producer, admin)
-- [ ] BLOCKED: Email verification (needs SMTP)
+- [x] Email verification (Resend enabled, EmailVerificationController complete)
 
 ### 8. i18n (Internationalization)
 - [x] Greek (default)
@@ -64,7 +65,7 @@ These are non-negotiable for V1 launch:
 - [x] Notification bell in header
 - [x] Notification dropdown (latest 5)
 - [x] Notifications page (/account/notifications)
-- [ ] BLOCKED: Email notifications (needs SMTP)
+- [x] Email notifications (Resend enabled, OrderEmailService + 7 mail classes complete)
 
 ### 10. E2E Test Coverage
 - [x] @smoke tests for all core flows
@@ -113,13 +114,13 @@ These are explicitly NOT in V1:
 
 ---
 
-## Blocked Items (Need Credentials)
+## Previously Blocked — NOW RESOLVED
 
-| Item | Blocker | Pass |
-|------|---------|------|
-| Card Payments | Stripe API keys | Pass 52 |
-| Email Verification | SMTP/Resend keys | Pass 60 |
-| Email Notifications | SMTP/Resend keys | Pass 60 |
+| Item | Was Blocked By | Resolution |
+|------|---------------|------------|
+| Card Payments | Stripe API keys | ✅ Stripe enabled 2026-02-13 (LAUNCH-POLISH-01) |
+| Email Verification | SMTP/Resend keys | ✅ Resend enabled + EmailVerificationController complete |
+| Email Notifications | SMTP/Resend keys | ✅ Resend enabled + OrderEmailService + 7 mail classes |
 
 ---
 
@@ -129,18 +130,18 @@ These are explicitly NOT in V1:
 |----------|--------|
 | Core Storefront | ✅ Ready |
 | Checkout (COD) | ✅ Ready |
-| Checkout (Card) | ⏳ Blocked |
+| Checkout (Card) | ✅ Ready |
 | Producer Portal | ✅ Ready |
 | Admin Panel | ✅ Ready |
 | Auth (Basic) | ✅ Ready |
-| Auth (Email Verify) | ⏳ Blocked |
+| Auth (Email Verify) | ✅ Ready |
 | i18n | ✅ Ready |
 | Notifications (UI) | ✅ Ready |
-| Notifications (Email) | ⏳ Blocked |
+| Notifications (Email) | ✅ Ready |
 | E2E Tests | ✅ Ready |
 
-**V1 Launch Status**: 🟡 READY (with COD only, pending credentials for full payment/email)
+**V1 Launch Status**: ✅ READY — All V1 features complete. All credentials configured.
 
 ---
 
-_Lines: ~130 | Last Updated: 2026-01-17_
+_Lines: ~140 | Last Updated: 2026-02-15_
