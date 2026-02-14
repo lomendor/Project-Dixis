@@ -35,8 +35,8 @@ test.describe('AUTH-01: Navigation Auth Stability', () => {
   // Tests use storageState from CI globalSetup which sets auth_token in localStorage
 
   test('@smoke /account/orders accessible without redirect to login', async ({ page }) => {
-    // Mock the orders API to return empty (prevents backend dependency)
-    await page.route('**/api/v1/public/orders**', async (route) => {
+    // Mock backend API calls (CI has no Laravel backend)
+    await page.route('**/api/v1/**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -44,9 +44,8 @@ test.describe('AUTH-01: Navigation Auth Stability', () => {
       });
     });
 
-    // Navigate to account orders
-    await page.goto('/account/orders');
-    await page.waitForLoadState('networkidle');
+    // Navigate to account orders — use domcontentloaded to avoid hanging on API loads
+    await page.goto('/account/orders', { waitUntil: 'domcontentloaded' });
 
     // Should NOT redirect to login (core AUTH-01 regression check)
     const currentUrl = page.url();
@@ -65,8 +64,8 @@ test.describe('AUTH-01: Navigation Auth Stability', () => {
     // Navigation sequence: products -> home -> cart -> products
     const routes = ['/products', '/', '/cart', '/products'];
 
-    // Mock orders API for /account/orders navigation
-    await page.route('**/api/v1/public/orders**', async (route) => {
+    // Mock all backend API calls (CI has no Laravel backend — prevents timeout)
+    await page.route('**/api/v1/**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -75,16 +74,18 @@ test.describe('AUTH-01: Navigation Auth Stability', () => {
     });
 
     for (const route of routes) {
-      await page.goto(route);
-      await page.waitForLoadState('networkidle');
+      // Use domcontentloaded — don't wait for network (API calls may hang without backend)
+      await page.goto(route, { waitUntil: 'domcontentloaded' });
+
+      // Wait for main content to render instead of networkidle
+      await page.locator('main, body').first().waitFor({ state: 'visible', timeout: 10000 });
 
       // Each navigation should maintain auth state (no flash to guest)
       await verifyNotGuestHeader(page);
     }
 
     // Final check: account/orders should work
-    await page.goto('/account/orders');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/account/orders', { waitUntil: 'domcontentloaded' });
 
     // Should not redirect to login
     expect(page.url()).toContain('/account/orders');
