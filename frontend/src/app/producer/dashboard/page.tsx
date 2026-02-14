@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
@@ -206,12 +207,14 @@ export default function ProducerDashboard() {
                   <div className="md:hidden space-y-3">
                     {topProducts.slice(0, 5).map((product) => (
                       <div key={product.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                        <div className="flex-shrink-0 h-12 w-12">
+                        <div className="flex-shrink-0 h-12 w-12 relative">
                           {product.images.length > 0 ? (
-                            <img
-                              className="h-12 w-12 rounded-lg object-cover"
+                            <Image
+                              className="rounded-lg object-cover"
                               src={product.images[0].image_path}
                               alt={product.images[0].alt_text || product.name}
+                              width={48}
+                              height={48}
                             />
                           ) : (
                             <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
@@ -261,12 +264,14 @@ export default function ProducerDashboard() {
                           <tr key={product.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
+                                <div className="flex-shrink-0 h-10 w-10 relative">
                                   {product.images.length > 0 ? (
-                                    <img
-                                      className="h-10 w-10 rounded-lg object-cover"
+                                    <Image
+                                      className="rounded-lg object-cover"
                                       src={product.images[0].image_path}
                                       alt={product.images[0].alt_text || product.name}
+                                      width={40}
+                                      height={40}
                                     />
                                   ) : (
                                     <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">

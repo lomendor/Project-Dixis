@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents } from '@/lib/cart'
@@ -47,7 +48,7 @@ export default function CartPage() {
                   <div className="flex gap-4 items-center flex-1 min-w-0">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 overflow-hidden rounded shrink-0">
                       {it.imageUrl ? (
-                        <img src={it.imageUrl} alt={it.title} className="w-full h-full object-cover"/>
+                        <Image src={it.imageUrl} alt={it.title} width={80} height={80} className="w-full h-full object-cover"/>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           📦
