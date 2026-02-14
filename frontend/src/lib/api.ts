@@ -474,6 +474,9 @@ class ApiClient {
     return this.token;
   }
 
+  /** Default timeout for API requests (ms). Override per-call via options.signal. */
+  private static readonly REQUEST_TIMEOUT_MS = 15_000;
+
   private async request<T = unknown>(
     endpoint: string,
     options: RequestInit = {}
@@ -481,25 +484,45 @@ class ApiClient {
     // Handle absolute URLs directly - use new safe URL joining
     const url = endpoint.startsWith('http') ? endpoint : apiUrl(endpoint);
 
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include', // Required for Sanctum session cookies (AUTH-CRED-01)
-      headers: {
-        ...this.getHeaders(),
-        ...options.headers,
-      },
-    });
+    // Add timeout via AbortController (skip if caller already provides signal)
+    const controller = options.signal ? null : new AbortController();
+    const timeoutId = controller
+      ? setTimeout(() => controller.abort(), ApiClient.REQUEST_TIMEOUT_MS)
+      : null;
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new ApiError(
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`,
-        response.status,
-        errorData, // Passes code, quoted_total, locked_total, etc. to caller
-      );
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: options.signal ?? controller?.signal,
+        credentials: 'include', // Required for Sanctum session cookies (AUTH-CRED-01)
+        headers: {
+          ...this.getHeaders(),
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new ApiError(
+          errorData.message || `HTTP ${response.status}: ${response.statusText}`,
+          response.status,
+          errorData, // Passes code, quoted_total, locked_total, etc. to caller
+        );
+      }
+
+      return response.json();
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw new ApiError(
+          'Η αίτηση έληξε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.',
+          0,
+          { code: 'REQUEST_TIMEOUT' },
+        );
+      }
+      throw err;
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
-
-    return response.json();
   }
 
   // Public API methods
