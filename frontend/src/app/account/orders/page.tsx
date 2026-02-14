@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiClient, Order } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
 import { formatDateShort, formatStatus, safeMoney, safeText, formatShippingMethod, formatPaymentMethod } from '@/lib/orderUtils';
 
@@ -38,7 +39,7 @@ function OrdersPage(): React.JSX.Element {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto py-8 px-4">
           <div className="flex items-center justify-center min-h-96">
-            <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <LoadingSpinner size="lg" />
           </div>
         </div>
       </div>

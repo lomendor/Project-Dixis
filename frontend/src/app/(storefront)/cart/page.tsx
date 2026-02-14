@@ -45,7 +45,7 @@ export default function CartPage() {
               {list.map((it) => (
                 <div key={it.id} className="p-4 flex gap-4 items-start justify-between overflow-visible">
                   <div className="flex gap-4 items-center flex-1 min-w-0">
-                    <div className="w-20 h-20 bg-gray-100 overflow-hidden rounded shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 overflow-hidden rounded shrink-0">
                       {it.imageUrl ? (
                         <img src={it.imageUrl} alt={it.title} className="w-full h-full object-cover"/>
                       ) : (
