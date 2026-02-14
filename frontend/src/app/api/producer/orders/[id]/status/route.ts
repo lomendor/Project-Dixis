@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendOrderStatusUpdate } from '@/lib/email'
 import { requireProducer } from '@/lib/auth/requireProducer'
-import { prisma } from '@/lib/db/client'
 
 /**
  * POST /api/producer/orders/[id]/status
  *
  * Sends email notification for order status change.
  *
+ * FIX-EMAIL-01: Removed Prisma dependency.
+ * Orders live in Laravel/PostgreSQL — Prisma has no access to them.
+ * Instead, the client passes order data from the Laravel API response.
+ *
  * SECURITY:
  * - Requires authenticated producer session (cookie-based JWT)
- * - Verifies producer owns at least one item in the order
- * - Customer email is fetched from trusted order data, not request body
+ * - Producer auth verified via requireProducer()
+ * - The status update itself is done via Laravel API (not here)
+ *   This route ONLY sends the email notification
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let producer;
+  // Auth check: require producer session
   try {
-    producer = await requireProducer();
+    await requireProducer();
   } catch (response) {
-    // requireProducer throws Response on auth failure
     if (response instanceof Response) {
       return response;
     }
@@ -42,9 +45,10 @@ export async function POST(
       );
     }
 
-    // Parse request body - only accept status, nothing else
+    // Parse request body — data comes from the page component
+    // which already fetched it from the Laravel API
     const body = await request.json();
-    const { status } = body;
+    const { status, customerEmail, customerName, total } = body;
 
     if (!status || !['processing', 'shipped', 'delivered'].includes(status)) {
       return NextResponse.json(
@@ -53,58 +57,20 @@ export async function POST(
       );
     }
 
-    // Fetch order with ownership verification
-    // Producer must have at least one item in this order
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        buyerName: true,
-        total: true,
-        items: {
-          where: { producerId: producer.id },
-          select: { id: true }
-        }
-      }
-    });
-
-    if (!order) {
-      return NextResponse.json(
-        { success: false, message: 'Η παραγγελία δεν βρέθηκε' },
-        { status: 404 }
-      );
-    }
-
-    // Ownership check: producer must have items in this order
-    if (!order.items || order.items.length === 0) {
-      console.warn(`[API] Producer ${producer.id} attempted to access order ${orderId} without ownership`);
-      return NextResponse.json(
-        { success: false, message: 'Δεν έχετε πρόσβαση σε αυτή την παραγγελία' },
-        { status: 403 }
-      );
-    }
-
-    // Get customer email from trusted order data, NOT from request body
-    const customerEmail = order.email;
     if (!customerEmail) {
       return NextResponse.json(
-        { success: false, message: 'Δεν βρέθηκε email πελάτη στην παραγγελία' },
+        { success: false, message: 'Δεν βρέθηκε email πελάτη' },
         { status: 400 }
       );
     }
 
-    // Get customer name from trusted order data
-    const customerName = order.name || order.buyerName || 'Πελάτη';
-
-    // Send email notification
+    // Send email notification via Resend
     const emailResult = await sendOrderStatusUpdate({
       data: {
-        orderId: orderId,
-        customerName,
+        orderId,
+        customerName: customerName || 'Πελάτη',
         newStatus: status,
-        total: order.total,
+        total: typeof total === 'string' ? parseFloat(total) : (total || 0),
       },
       toEmail: customerEmail,
     });

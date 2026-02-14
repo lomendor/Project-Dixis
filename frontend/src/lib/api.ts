@@ -64,6 +64,7 @@ export interface CartResponse {
 
 export interface ShippingAddress {
   name?: string;
+  email?: string;
   phone?: string;
   line1?: string;
   line2?: string;
@@ -175,6 +176,7 @@ export interface ProducerOrderRaw {
   currency: string;
   created_at: string;
   updated_at: string;
+  shipping_address?: ShippingAddress;
   user?: {
     id: number;
     name: string;
@@ -197,6 +199,7 @@ export interface ProducerOrder {
   currency: string;
   created_at: string;
   updated_at: string;
+  shipping_address?: ShippingAddress;
   user?: {
     id: number;
     name: string;
