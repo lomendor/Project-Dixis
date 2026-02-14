@@ -1,19 +1,22 @@
-# Frontend Deployment Guide (Legacy)
+# Frontend Deployment Guide (DEPRECATED)
 
-> **Superseded by**: [`docs/OPS/DEPLOY.md`](DEPLOY.md) and `scripts/prod-deploy-clean.sh`
-> This file is kept for historical reference only.
+> **⚠️ DEPRECATED** — Do NOT follow this guide. Use instead:
+> - **Automated**: `bash scripts/prod-deploy-clean.sh`
+> - **Manual**: [`docs/AGENT/SOPs/SOP-VPS-DEPLOY.md`](../AGENT/SOPs/SOP-VPS-DEPLOY.md)
+> - **SSH config**: [`docs/AGENT/SYSTEM/ssh-access.md`](../AGENT/SYSTEM/ssh-access.md)
+>
+> **Key change (2026-02-14)**: Root login DISABLED. User is now `deploy`. Use `ssh dixis-prod`.
 
-**Last Updated**: 2025-01-03
+**Last Updated**: 2026-02-14 (deprecated)
 
-## Quick Reference
+## Quick Reference (OUTDATED — see SOP-VPS-DEPLOY.md)
 
 ```bash
-# SSH to VPS
-ssh -i ~/.ssh/dixis_prod_ed25519 root@147.93.126.235
+# SSH to VPS (CURRENT — use alias)
+ssh dixis-prod
 
-# Run safe deploy
-cd /var/www/dixis/current/frontend
-./scripts/safe-frontend-deploy.sh
+# Old command (BROKEN — root login disabled):
+# ssh -i ~/.ssh/dixis_prod_ed25519 root@147.93.126.235
 ```
 
 ## Safe Deploy Script

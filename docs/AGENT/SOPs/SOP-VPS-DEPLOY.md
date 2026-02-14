@@ -1,83 +1,88 @@
 # SOP: VPS Deploy (dixis.gr)
 
+**Last Updated**: 2026-02-14
+
 ## When to use
 After merging PRs to `main` that need to go live on production.
 
 ## Prerequisites
+- SSH alias: `dixis-prod` (configured in `~/.ssh/config`)
+- SSH user: **`deploy`** (root login is disabled)
 - SSH key: `~/.ssh/dixis_prod_ed25519_20260115`
 - VPS IP: `147.93.126.235`
 - Production URL: `https://dixis.gr`
 
 ---
 
-## Procedure (copy/paste)
+## Preferred Method: Automated Script
+
+```bash
+bash scripts/prod-deploy-clean.sh
+```
+
+This handles everything: preflight, hard sync, clean install, build, PM2 restart, verification.
+
+> **Note**: The script requires `https://dixis.gr` to be reachable from your network for preflight checks. If not reachable (e.g., DNS/CloudFlare issue), use Manual Method below.
+
+---
+
+## Manual Method (when script fails or network blocks public URL)
 
 ### 1. SSH into VPS
 ```bash
-ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235
+ssh dixis-prod
 ```
 
-### 2. Backup frontend .env (CRITICAL)
+### 2. Fetch and hard reset to latest main
 ```bash
 cd /var/www/dixis/current
-cp frontend/.env /tmp/frontend-env-backup 2>/dev/null || echo "No .env to backup"
+git fetch origin main
+git reset --hard origin/main
 ```
 
-> **Why?** The `.env` file contains DATABASE_URL and other critical config.
-> It's correctly gitignored, but can be lost during deploy operations.
-> Without it, the site falls back to demo mode ("DB offline").
+> **Why `reset --hard`?** Ensures exact match with GitHub. `git pull` can fail on conflicts or leave drift.
 
-### 3. Pull latest code
+### 3. Check .env symlink is intact
 ```bash
-git pull origin main
+ls -la frontend/.env
+# Should show: frontend/.env -> /var/www/dixis/shared/frontend.env
 ```
 
-### 4. Restore frontend files (CRITICAL)
+If missing, restore:
 ```bash
-git checkout -- frontend/
+ln -sfn /var/www/dixis/shared/frontend.env frontend/.env
 ```
 
-> **Why?** The `frontend/` directory is a symlink to `/var/www/dixis/current/frontend`.
-> Many frontend files (tsconfig.json, next.config.ts, lib/*, components/*) get deleted
-> from disk by an unknown mechanism (possibly an old deploy script).
-> Without this step, `npm run build` will fail with missing module errors.
-> This step is safe and idempotent — it restores git-tracked files to disk.
-
-### 5. Restore .env if missing
-```bash
-if [ ! -f frontend/.env ]; then
-  cp /tmp/frontend-env-backup frontend/.env 2>/dev/null || \
-  cp /var/www/dixis/frontend-backup-*/standalone/.env frontend/.env
-  echo "⚠️  .env was missing - restored from backup"
-fi
-```
-
-### 6. Build frontend
+### 4. Clean install and build frontend
 ```bash
 cd frontend
-npm run build
+rm -rf .next node_modules
+pnpm install --frozen-lockfile
+npx prisma generate
+NODE_OPTIONS='--max-old-space-size=2048' pnpm build
 ```
 
-### 7. Restart process
+### 5. Prepare standalone bundle
+```bash
+cp -r .next/static .next/standalone/.next/
+cp -r public .next/standalone/
+```
+
+### 6. Restore .env in standalone
+```bash
+ln -sfn /var/www/dixis/shared/frontend.env .next/standalone/.env
+```
+
+### 7. Restart PM2
 ```bash
 pm2 restart dixis-frontend --update-env
 ```
 
 ### 8. Verify
 ```bash
-curl -s https://dixis.gr/api/healthz | grep -o '"env":"[^"]*"'
+curl -sS http://127.0.0.1:3000/api/healthz
 ```
-**Expected:** `"env":"ok"`
-
-If you see `"env":"missing"` or `missingEnv`, the .env was not restored properly.
-
----
-
-## Quick one-liner (experienced use)
-```bash
-ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235 \
-  "cd /var/www/dixis/current && cp frontend/.env /tmp/frontend-env-backup 2>/dev/null; git pull origin main && git checkout -- frontend/ && [ ! -f frontend/.env ] && cp /tmp/frontend-env-backup frontend/.env; cd frontend && npm run build && pm2 restart dixis-frontend --update-env && curl -s https://dixis.gr/api/healthz | grep -o '\"env\":\"[^\"]*\"'"
-```
+**Expected:** `{"status":"ok","env":"ok",...}`
 
 ---
 
@@ -85,21 +90,36 @@ ssh -i ~/.ssh/dixis_prod_ed25519_20260115 root@147.93.126.235 \
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| Site shows "DB offline" / demo mode | Frontend `.env` deleted | Check `/api/healthz` for `missingEnv`, restore from `/tmp/frontend-env-backup` or `/var/www/dixis/frontend-backup-*/standalone/.env` |
-| `Module not found` during build | Frontend files deleted | Run `git checkout -- frontend/` |
-| `npm run build` OOM | Low VPS memory | `NODE_OPTIONS=--max-old-space-size=1536 npm run build` |
-| Health check not 200 | pm2 not restarted | `pm2 restart dixis-frontend && pm2 logs dixis-frontend --lines 20` |
-| Git pull conflicts | Local changes on VPS | `git stash && git pull origin main && git checkout -- frontend/` |
+| SSH "Permission denied" | Using root (disabled) | Use `ssh dixis-prod` (user=deploy) |
+| Site shows "DB offline" | `.env` symlink broken | `ln -sfn /var/www/dixis/shared/frontend.env frontend/.env` |
+| `Module not found` during build | Stale node_modules | `rm -rf node_modules .next && pnpm install --frozen-lockfile` |
+| OOM during build | Low VPS memory | `NODE_OPTIONS='--max-old-space-size=2048' pnpm build` |
+| PM2 crash loop | Port 3000 in use | `fuser -k 3000/tcp && pm2 restart dixis-frontend` |
+| Public URL unreachable | CloudFlare/DNS issue | Use `curl http://127.0.0.1:3000/api/healthz` from inside VPS |
+| Script preflight fails | Can't reach dixis.gr | Use manual method above |
 
 ---
 
-## Known issue: frontend file deletion
-**Status**: Unresolved root cause (workaround in place)
+## Architecture Reference
 
-The VPS has a mechanism (likely an old deploy script or cron) that deletes files from the
-`frontend/` directory. The `git checkout -- frontend/` step is the reliable workaround.
-If root cause is found, update this SOP accordingly.
+```
+CloudFlare (CDN/Proxy)
+       |
+nginx (proxy_pass)
+  |-- /api/producer/* --> Next.js (port 3000)
+  |-- /api/healthz    --> Next.js
+  |-- /api/*          --> Laravel PHP-FPM
+  |-- /*              --> Next.js (port 3000)
+```
+
+| Path | Value |
+|------|-------|
+| Frontend code | `/var/www/dixis/current/frontend/` |
+| Shared .env | `/var/www/dixis/shared/frontend.env` |
+| PM2 app name | `dixis-frontend` |
+| PM2 logs | `pm2 logs dixis-frontend` |
+| nginx config | `/etc/nginx/sites-enabled/dixis.gr` |
 
 ---
 
-_Created: 2026-02-06 | Last verified: 2026-02-06_
+_Created: 2026-02-06 | Last updated: 2026-02-14 (deploy user, pnpm, prod-deploy-clean.sh)_

@@ -22,20 +22,23 @@
 ### Fix
 **Canonical SSH command** (enforced in all docs):
 ```bash
-ssh -i ~/.ssh/dixis_prod_ed25519 -o IdentitiesOnly=yes root@147.93.126.235
+ssh dixis-prod
 ```
 
-Or via SSH config (~/.ssh/config):
+> **UPDATE 2026-02-14**: Root login is now DISABLED. User is `deploy`.
+> See `docs/AGENT/SYSTEM/ssh-access.md` for canonical SSH config.
+
+SSH config (~/.ssh/config):
 ```
-Host dixis-vps
+Host dixis-prod
   HostName 147.93.126.235
-  User root
-  IdentityFile ~/.ssh/dixis_prod_ed25519
+  User deploy
+  IdentityFile ~/.ssh/dixis_prod_ed25519_20260115
   IdentitiesOnly yes
 ```
 
 ### Enforcement (what we do every time)
-1. **Before ANY SSH command**: Use the canonical form above (never bare `ssh root@...`)
+1. **Before ANY SSH command**: Use `ssh dixis-prod` (never bare `ssh root@...` — root is disabled)
 2. **Document in all VPS-related docs**: Include full SSH command with `-o IdentitiesOnly=yes`
 3. **Verify in PR**: Any PR touching VPS access must include canonical SSH command
 4. **STATE.md entry**: "SSH/fail2ban: Canonical SSH config enforced" (closed 2025-12-19)
