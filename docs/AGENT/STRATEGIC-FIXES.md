@@ -76,7 +76,7 @@
 - Remove `console.log` and `console.warn` from production paths
 - Keep ONLY in development-gated blocks: `if (process.env.NODE_ENV === 'development')`
 **LOC estimate**: ~200 (deletions mostly)
-**Status**: [ ] Not started
+**Status**: [x] PR #2863 — removed ~90 client-side console statements across 43 files (199 LOC)
 
 ### 3C. Sentry Business Events
 **Why**: We have Sentry but only for crashes. We need business metrics.
