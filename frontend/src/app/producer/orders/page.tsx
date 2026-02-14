@@ -18,9 +18,20 @@ const statusColors: Record<OrderStatus, string> = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
+interface ShippingAddress {
+  name?: string;
+  phone?: string;
+  email?: string;
+  line1?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+}
+
 interface OrderCounts {
   total: number;
   pending: number;
+  confirmed: number;
   processing: number;
   shipped: number;
   delivered: number;
@@ -32,6 +43,7 @@ export default function ProducerOrdersPage() {
   const [counts, setCounts] = useState<OrderCounts>({
     total: 0,
     pending: 0,
+    confirmed: 0,
     processing: 0,
     shipped: 0,
     delivered: 0,
@@ -161,6 +173,26 @@ export default function ProducerOrdersPage() {
             ))}
           </div>
         </div>
+
+        {/* Shipping Address */}
+        {(order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address && (
+          <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
+            <p className="font-medium text-amber-900 mb-1">{t('producerOrders.shippingDetails')}</p>
+            {(() => {
+              const addr = (order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address!;
+              return (
+                <>
+                  {addr.name && <p className="text-amber-800">{addr.name}</p>}
+                  {addr.line1 && <p className="text-amber-800">{addr.line1}</p>}
+                  {(addr.city || addr.postal_code) && (
+                    <p className="text-amber-800">{addr.city} {addr.postal_code}</p>
+                  )}
+                  {addr.phone && <p className="text-amber-800">{addr.phone}</p>}
+                </>
+              );
+            })()}
+          </div>
+        )}
         </div>
       </Link>
     );
@@ -181,6 +213,11 @@ export default function ProducerOrdersPage() {
           {/* Status Filter Tabs */}
           <nav className="flex flex-wrap gap-2 mb-6">
             <FilterTab status="all" label={t('producerOrders.all')} count={counts.total} />
+            <FilterTab
+              status="confirmed"
+              label={t('producerOrders.confirmed')}
+              count={counts.confirmed}
+            />
             <FilterTab
               status="pending"
               label={t('producerOrders.pending')}
