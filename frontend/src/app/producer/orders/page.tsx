@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
 import { useTranslations } from '@/contexts/LocaleContext';
 
@@ -243,7 +244,7 @@ export default function ProducerOrdersPage() {
           {/* Loading State */}
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <LoadingSpinner />
             </div>
           ) : error ? (
             /* Error State */

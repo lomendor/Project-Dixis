@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
 
 type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -190,7 +191,7 @@ export default function ProducerOrderDetailsPage() {
 
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <LoadingSpinner />
             </div>
           ) : error ? (
             <div className="text-center py-12">
