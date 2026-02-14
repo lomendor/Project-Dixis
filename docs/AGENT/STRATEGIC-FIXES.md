@@ -45,14 +45,15 @@
 **Note**: PR 3 (remove localStorage entirely) deferred until production validation
 
 ### 2B. Middleware Auth for Protected Routes
-**Why**: Currently only `/ops/*` has middleware. Producer/admin pages rely on client-side AuthGuard.
-**Files**: `src/middleware.ts`
+**Why**: Previously only `/ops/*` had middleware. Producer/admin pages relied on client-side AuthGuard.
+**Files**: `middleware.ts` (root — merged with canonical redirect + API protection)
 **Changes**:
-- Add matcher for `/producer/:path*`, `/admin/:path*`, `/account/:path*`
-- Check auth cookie (after 2A) and redirect to login if missing
+- Check `dixis_session`/`mock_session` cookie for `/producer`, `/admin`, `/account`, `/ops`
+- Redirect to `/auth/login?redirect=...` if no session cookie
+- Login page reads `?redirect` param and redirects back after auth
 **LOC estimate**: ~30
-**Status**: [ ] NEXT — last remaining security item (2A complete)
-**Depends on**: 2A ✅ (cookie-based auth deployed PRs #2867-#2868)
+**Status**: [x] PRs #2873, #2874, #2876 — deployed 2026-02-15
+**Note**: Root cause of initial deploy failure: Next.js ignores `src/middleware.ts` when `middleware.ts` exists at project root
 
 ---
 
@@ -128,4 +129,6 @@
 | 2026-02-14 | 3C: Sentry Business Events | PR #2865 | 6 business events in checkout (breadcrumbs + captureMessage) |
 | 2026-02-14 | 2A: Auth Token Migration (BE) | PR #2867 | Sanctum SPA mode, Auth::login, session invalidation (18 LOC) |
 | 2026-02-14 | 2A: Auth Token Migration (FE) | PR #2868 | CSRF cookie fetch, XSRF header, simplified initAuth (56 LOC) |
+| 2026-02-15 | V1 Docs Reality Sync | PR #2872 | PRD-MUST-V1, PRD-AUDIT updated: all blockers resolved |
+| 2026-02-15 | 2B: Middleware Auth | PRs #2873-#2876 | Cookie-based auth for /producer, /admin, /account, /ops |
 | | | | |
