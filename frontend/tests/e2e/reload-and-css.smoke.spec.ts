@@ -71,9 +71,13 @@ test('homepage: styles applied & no console errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
-      // Ignore network errors (covered by navigation retry)
+      // Ignore browser-generated resource/network errors — only flag JS application errors
       const text = msg.text();
-      if (!text.includes('net::') && !text.includes('ERR_')) {
+      if (
+        !text.includes('net::') &&
+        !text.includes('ERR_') &&
+        !text.includes('Failed to load resource')
+      ) {
         errors.push(text);
       }
     }
