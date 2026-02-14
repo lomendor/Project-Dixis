@@ -16,18 +16,18 @@
 - Add visible error toast when both shipping APIs fail (lines 169-196)
 - Disable "Place Order" button when `shippingQuote === null && !shippingLoading`
 **LOC estimate**: ~40
-**Status**: [ ] Not started
+**Status**: [x] PR #2851 — also added ApiError class (fixed dead error handling code)
 
 ### 1B. Checkout Refactor: Split 766-line monolith
 **Why**: Single largest risk file. Every change risks breaking checkout.
 **Files**: `src/app/(storefront)/checkout/page.tsx` → split into:
-- `CheckoutForm.tsx` (customer details form)
-- `ShippingSection.tsx` (postal code + shipping quote logic)
-- `PaymentSection.tsx` (COD/Card selection + Stripe)
-- `OrderSummary.tsx` (totals, items, shipping breakdown)
-- `checkout/page.tsx` (orchestrator, ~100 LOC)
-**LOC estimate**: ~0 net (refactor, not new code)
-**Status**: [ ] Not started
+- `types.ts` (shared type definitions, 32 LOC)
+- `useCheckout.ts` (state + business logic hook, 282 LOC)
+- `OrderSummary.tsx` (cart items + totals display, 95 LOC)
+- `CustomerDetailsForm.tsx` (address form fields + postal code, 166 LOC)
+- `checkout/page.tsx` (orchestrator, 200 LOC)
+**Result**: page.tsx 777 → 200 lines (74% reduction)
+**Status**: [x] PR #2852
 
 ---
 
@@ -119,4 +119,6 @@
 | Date | Fix | PR | Notes |
 |------|-----|-----|-------|
 | 2026-02-14 | Audit completed | — | Identified 4 critical, 3 structural issues |
+| 2026-02-14 | 1A: Checkout Hardening | PR #2851 | ApiError class, idempotency, shipping validation |
+| 2026-02-14 | 1B: Checkout Refactor | PR #2852 | page.tsx 777→200 LOC, extracted hook+components |
 | | | | |
