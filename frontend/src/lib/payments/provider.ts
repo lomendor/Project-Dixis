@@ -21,7 +21,7 @@ export async function createPaymentIntent({
   const hasStripe = !!process.env.STRIPE_SECRET_KEY;
   
   if (method === 'stripe' && hasStripe) {
-    console.log('[pay] stripe requested but not implemented in this pass — fallback to COD');
+    // Stripe not implemented in this pass — fallback to COD
   }
   
   const timestamp = new Date().getTime();

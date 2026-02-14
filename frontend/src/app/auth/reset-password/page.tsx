@@ -75,7 +75,6 @@ function ResetPasswordForm() {
         router.push('/auth/login');
       }, 3000);
     } catch (err) {
-      console.error('Reset password failed:', err);
       setError(err instanceof Error ? err.message : 'Reset failed');
     } finally {
       setLoading(false);

@@ -38,17 +38,16 @@ class EventBatcher {
       } else if (!this.batchTimeout) {
         this.batchTimeout = setTimeout(() => this.flush(), this.BATCH_TIMEOUT_MS);
       }
-    } catch (error) {
-      console.warn('Invalid analytics event:', error);
+    } catch {
+      // Invalid event — silently drop
     }
   }
 
   flush() {
     if (this.events.length === 0) return;
 
-    // In production, send to analytics endpoint
-    console.log('[Analytics] Batched events:', this.events);
-    
+    // TODO: Send to analytics endpoint when configured
+
     // Clear batch
     this.events = [];
     if (this.batchTimeout) {

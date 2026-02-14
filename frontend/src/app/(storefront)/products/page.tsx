@@ -58,7 +58,6 @@ async function getData(
     });
 
     if (!res.ok) {
-      console.error('[Products] API fetch failed:', res.status, res.statusText);
       const demoItems = mapDemoToApiItems(DEMO_PRODUCTS);
       const filtered = search ? filterDemoBySearch(demoItems, search) : demoItems;
       return { items: filtered, total: filtered.length, isDemo: true, apiTotal: 0 };
@@ -69,7 +68,6 @@ async function getData(
     const apiTotal = json?.total ?? products.length;
 
     if (products.length === 0 && !search && !category) {
-      console.log('[Products] API returned empty, using demo fallback');
       return {
         items: mapDemoToApiItems(DEMO_PRODUCTS),
         total: DEMO_PRODUCTS.length,
@@ -93,8 +91,7 @@ async function getData(
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
-  } catch (err) {
-    console.error('[Products] Fetch error (falling back to demo):', err);
+  } catch {
     const demoItems = mapDemoToApiItems(DEMO_PRODUCTS);
     const filtered = search ? filterDemoBySearch(demoItems, search) : demoItems;
     return { items: filtered, total: filtered.length, isDemo: true, apiTotal: 0 };

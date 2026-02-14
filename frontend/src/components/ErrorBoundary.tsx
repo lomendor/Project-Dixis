@@ -38,13 +38,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console for debugging
-    console.error('🚨 Error Boundary Caught Error:', {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      errorId: this.state.errorId,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Error Boundary:', error.message, errorInfo.componentStack);
+    }
 
     // Update state with error info
     this.setState({
@@ -75,8 +72,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           url: typeof window !== 'undefined' ? window.location.href : undefined,
         },
       } as any);
-    } catch (analyticsError) {
-      console.warn('Failed to track error with analytics:', analyticsError);
+    } catch {
+      // Analytics tracking failed — non-critical
     }
   }
 
@@ -100,8 +97,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           }),
         });
       }
-    } catch (reportingError) {
-      console.warn('Failed to report error to external service:', reportingError);
+    } catch {
+      // Error reporting failed — non-critical
     }
   }
 

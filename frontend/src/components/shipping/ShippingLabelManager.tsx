@@ -60,7 +60,6 @@ export default function ShippingLabelManager({
       const parseResult = ShippingLabelApiResponseSchema.safeParse(rawData);
 
       if (!parseResult.success) {
-        console.error('Invalid API response format:', parseResult.error);
         throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
       }
 

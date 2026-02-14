@@ -22,8 +22,7 @@ function OrdersPage(): React.JSX.Element {
         apiClient.refreshToken(); // Ensure latest token is loaded
         const response = await apiClient.getOrders();
         setOrders(response.orders || []);
-      } catch (error) {
-        console.error('Failed to fetch orders:', error);
+      } catch {
         showToast('error', 'Failed to load your orders. Please try again.');
         setOrders([]); // Explicitly set empty on error
       } finally {

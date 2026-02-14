@@ -92,7 +92,6 @@ export default function DeliveryMethodSelector({
         throw new Error(data.message || 'Αποτυχία υπολογισμού μεταφορικών');
       }
     } catch (err) {
-      console.error('Shipping quote error:', err);
       throw err;
     }
   }, [items, postalCode, paymentMethod]);

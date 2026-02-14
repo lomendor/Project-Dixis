@@ -83,8 +83,7 @@ export default function AnalyticsDashboard() {
         producers: producersData,
         summary: summaryData,
       });
-    } catch (err) {
-      console.error('Failed to load analytics data:', err);
+    } catch {
       setError('Αποτυχία φόρτωσης αναλυτικών. Παρακαλώ δοκιμάστε ξανά.');
     } finally {
       setLoading(false);

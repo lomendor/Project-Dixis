@@ -81,8 +81,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           })),
         }
         setOrder(transformedOrder)
-      } catch (err) {
-        console.error('Fetch order error:', err)
+      } catch {
         setError('Αποτυχία φόρτωσης παραγγελίας')
       } finally {
         setLoading(false)

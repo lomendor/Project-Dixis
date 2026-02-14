@@ -68,8 +68,8 @@ export function useCheckout() {
             }
           }
         })
-        .catch((err) => {
-          console.warn('[Checkout] Failed to fetch saved address:', err)
+        .catch(() => {
+          // Silent fail — saved address is optional enhancement
         })
     }
   }, [isAuthenticated])
@@ -115,7 +115,6 @@ export function useCheckout() {
         source: 'cart_quote',
       })
     } catch (err: any) {
-      console.error('[Checkout] Cart shipping quote failed:', err)
       if (err?.code === 'ZONE_UNAVAILABLE') {
         setCartShippingError(t('checkoutPage.shippingUnavailable'))
         setCartShippingQuote(null)
@@ -168,20 +167,13 @@ export function useCheckout() {
 
   async function handleStripePaymentSuccess(paymentIntentId: string) {
     if (!pendingOrderId) {
-      console.error('[Checkout] handleStripePaymentSuccess called without pendingOrderId')
       setError('Σφάλμα: Δεν βρέθηκε η παραγγελία. Παρακαλώ δοκιμάστε ξανά.')
       return
     }
     if (!paymentIntentId || typeof paymentIntentId !== 'string' || !paymentIntentId.startsWith('pi_')) {
-      console.error('[Checkout] Invalid paymentIntentId:', paymentIntentId)
       setError('Σφάλμα: Μη έγκυρο αναγνωριστικό πληρωμής. Παρακαλώ δοκιμάστε ξανά.')
       return
     }
-
-    console.log('[Checkout] Confirming payment with backend:', {
-      orderId: pendingOrderId,
-      paymentIntentId: `${paymentIntentId.substring(0, 10)}...`,
-    })
 
     try {
       await paymentApi.confirmPayment(pendingOrderId, paymentIntentId)
@@ -189,7 +181,6 @@ export function useCheckout() {
       clear()
       router.push(`/thank-you?token=${pendingThankYouId ?? pendingOrderId}`)
     } catch (err) {
-      console.error('[Checkout] Payment confirmation failed:', err)
       const errorMessage = err instanceof Error ? err.message : t('checkoutPage.cardPaymentError')
       setError(errorMessage)
     }
@@ -296,8 +287,7 @@ export function useCheckout() {
           setStripeClientSecret(paymentInit.payment.client_secret)
           setLoading(false)
           return
-        } catch (paymentErr) {
-          console.error('Card payment init failed:', paymentErr)
+        } catch {
           setError(t('checkoutPage.cardPaymentError'))
           setCardProcessing(false)
           setLoading(false)
@@ -309,7 +299,6 @@ export function useCheckout() {
       clear()
       router.push(`/thank-you?token=${thankYouToken}`)
     } catch (err: any) {
-      console.error('Order creation failed:', err)
       if (err?.code === 'SHIPPING_CHANGED' && err?.quoted_total != null && err?.locked_total != null) {
         setShippingMismatch({
           oldAmount: err.quoted_total,

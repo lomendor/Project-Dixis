@@ -75,7 +75,7 @@ export async function retryWithBackoff<T>(
           (status >= 500 && status < 600 && method.toUpperCase() === 'GET');
 
         if (shouldRetry && attempt < maxRetries) {
-          console.warn(`Retrying request (attempt ${attempt + 1}/${maxRetries}): HTTP ${status}`);
+          // Retry after transient HTTP error
           const delay = baseMs * Math.pow(2, attempt);
           const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
           await new Promise(resolve => setTimeout(resolve, finalDelay));
@@ -102,7 +102,7 @@ export async function retryWithBackoff<T>(
 
       if (!shouldRetry) throw error;
 
-      console.warn(`Retrying request (attempt ${attempt + 1}/${maxRetries}): ${error.name || 'Error'}`);
+      // Retry after network error
       const delay = baseMs * Math.pow(2, attempt);
       const finalDelay = jitter ? delay + Math.random() * delay * 0.5 : delay;
       await new Promise(resolve => setTimeout(resolve, finalDelay));
@@ -418,7 +418,6 @@ export class CheckoutApiClient {
 
   // Centralized error handling
   private handleApiError(operation: string, error: unknown): ValidatedApiResponse<never> {
-    console.error(`🚨 API Error in ${operation}:`, error);
     const statusMatch = error instanceof Error ? error.message.match(/HTTP (\d+):/) : null;
     const status = statusMatch ? parseInt(statusMatch[1]) : 500;
     const retryable = status !== 429 && (status >= 500 || status === 0);

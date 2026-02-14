@@ -299,7 +299,6 @@ export class PaymentManager {
     try {
       return await provider.initPayment(orderId, amountCents, currency);
     } catch (error) {
-      console.error(`Payment initialization failed with ${provider.name}:`, error);
       throw new Error(`Αποτυχία προετοιμασίας πληρωμής: ${error instanceof Error ? error.message : 'Άγνωστο σφάλμα'}`);
     }
   }
@@ -313,7 +312,6 @@ export class PaymentManager {
     try {
       return await provider.confirmPayment(orderId, token);
     } catch (error) {
-      console.error(`Payment confirmation failed with ${provider.name}:`, error);
       return {
         success: false,
         error: `Αποτυχία επεξεργασίας πληρωμής: ${error instanceof Error ? error.message : 'Άγνωστο σφάλμα'}`,

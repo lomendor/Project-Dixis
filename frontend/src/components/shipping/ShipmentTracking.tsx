@@ -69,7 +69,6 @@ export default function ShipmentTracking({
       const parseResult = OrderShipmentApiResponseSchema.safeParse(rawData);
 
       if (!parseResult.success) {
-        console.error('Invalid API response format:', parseResult.error);
         throw new Error('Μη έγκυρη απάντηση από τον διακομιστή');
       }
 

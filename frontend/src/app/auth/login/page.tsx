@@ -42,7 +42,6 @@ export default function Login() {
       // Redirect to home page after successful login
       router.push('/');
     } catch (err) {
-      console.error('Login failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
 
       // Set inline error display for form

@@ -75,7 +75,6 @@ export default function ProducerAnalyticsDashboard() {
         products: productsData,
       });
     } catch (err) {
-      console.error('Failed to load producer analytics:', err);
       setError(handleProducerError(err as Error));
     } finally {
       setLoading(false);

@@ -44,9 +44,8 @@ export default function NotificationsPage() {
           setTotalPages(response.pagination.last_page);
         }
         setError(null);
-      } catch (err) {
+      } catch {
         setError(t('notifications.error'));
-        console.debug('Failed to fetch notifications:', err);
       } finally {
         setLoading(false);
       }
@@ -63,8 +62,8 @@ export default function NotificationsPage() {
           n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
         )
       );
-    } catch (err) {
-      console.debug('Failed to mark notification as read:', err);
+    } catch {
+      // Silent fail — mark-as-read is non-critical
     }
   };
 
@@ -74,8 +73,8 @@ export default function NotificationsPage() {
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, read_at: new Date().toISOString() }))
       );
-    } catch (err) {
-      console.debug('Failed to mark all notifications as read:', err);
+    } catch {
+      // Silent fail — mark-all-as-read is non-critical
     }
   };
 

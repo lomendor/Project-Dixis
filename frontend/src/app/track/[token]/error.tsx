@@ -2,7 +2,7 @@
 import { useEffect } from 'react'
 
 export default function Error({ error, reset }:{ error:Error & { digest?:string }, reset: ()=>void }){
-  useEffect(()=>{ console.error('[track:error]', error?.message) }, [error])
+  useEffect(()=>{ /* error already shown in UI */ }, [error])
   return (
     <main style={{maxWidth:680, margin:'40px auto', fontFamily:'system-ui, Arial'}}>
       <h1>Κάτι πήγε στραβά</h1>
