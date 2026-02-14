@@ -404,9 +404,32 @@ class ApiClient {
     // Use centralized getApiBaseUrl() - no localhost fallback
     const rawBase = getApiBaseUrl();
     this.baseURL = trimBoth(rawBase);
-    
+
     // Load token from localStorage if available
     this.loadTokenFromStorage();
+  }
+
+  /**
+   * Fetch CSRF cookie from Sanctum before auth requests.
+   * Required for SPA cookie-based authentication (Strategic Fix 2A).
+   */
+  async fetchCsrfCookie(): Promise<void> {
+    // Strip /api/v1 to get the base Laravel URL for the csrf-cookie endpoint
+    const laravelBase = this.baseURL.replace(/\/api\/v1\/?$/, '');
+    const csrfUrl = laravelBase.includes('://')
+      ? `${laravelBase}/sanctum/csrf-cookie`
+      : `/sanctum/csrf-cookie`;
+    await fetch(csrfUrl, { credentials: 'include' });
+  }
+
+  /**
+   * Read XSRF-TOKEN from cookie (set by Sanctum csrf-cookie endpoint).
+   * Sent as X-XSRF-TOKEN header for session-based auth.
+   */
+  private getXsrfToken(): string | null {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   private loadTokenFromStorage(): void {
@@ -425,8 +448,15 @@ class ApiClient {
       'Accept': 'application/json',
     };
 
+    // Bearer token for backward compatibility (migration period)
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    // XSRF token from Sanctum cookie (Strategic Fix 2A — SPA auth)
+    const xsrf = this.getXsrfToken();
+    if (xsrf) {
+      headers['X-XSRF-TOKEN'] = xsrf;
     }
 
     return headers;
@@ -569,6 +599,9 @@ class ApiClient {
 
   // Auth methods
   async login(email: string, password: string): Promise<AuthResponse> {
+    // Fetch CSRF cookie before auth request (Strategic Fix 2A — Sanctum SPA)
+    await this.fetchCsrfCookie();
+
     const response = await this.request<AuthResponse>('auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -602,6 +635,9 @@ class ApiClient {
     password_confirmation: string;
     role: 'consumer' | 'producer' | 'admin';
   }): Promise<AuthResponse> {
+    // Fetch CSRF cookie before auth request (Strategic Fix 2A — Sanctum SPA)
+    await this.fetchCsrfCookie();
+
     const response = await this.request<AuthResponse>('auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
