@@ -1,26 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
 
-export default function Login() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations();
+
+  // Strategic Fix 2B: Read redirect param set by middleware
+  const redirectTo = searchParams.get('redirect') || '/';
 
   // Redirect authenticated users away from login page
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push(redirectTo);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +43,8 @@ export default function Login() {
       // Small delay to ensure toast renders before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Redirect to home page after successful login
-      router.push('/');
+      // Strategic Fix 2B: Redirect to intended destination (from middleware) or home
+      router.push(redirectTo);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
 
@@ -174,5 +178,17 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Strategic Fix 2B: Suspense wrapper required for useSearchParams() in Next.js 15.
+ * The middleware sets ?redirect=/original/path when redirecting to login.
+ */
+export default function Login() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
