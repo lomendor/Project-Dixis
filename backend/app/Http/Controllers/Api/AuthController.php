@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -82,8 +83,9 @@ class AuthController extends Controller
             $verificationSent = true;
         }
 
-        // Create auth token
+        // Create auth token (API) + session cookie (SPA)
         $authToken = $user->createToken('auth-token')->plainTextToken;
+        Auth::login($user);
 
         $message = $verificationSent
             ? 'User registered successfully. Please check your email to verify your account.'
@@ -136,8 +138,9 @@ class AuthController extends Controller
         // Revoke existing tokens (optional - for single device login)
         // $user->tokens()->delete();
 
-        // Create new token
+        // Create new token (API) + session cookie (SPA)
         $token = $user->createToken('auth-token')->plainTextToken;
+        Auth::login($user);
 
         return response()->json([
             'message' => 'Login successful',
@@ -160,8 +163,13 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        // Revoke current token
+        // Revoke current API token
         $request->user()->currentAccessToken()->delete();
+
+        // Invalidate session cookie (SPA auth)
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logged out successfully',
