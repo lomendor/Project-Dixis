@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -43,12 +44,7 @@ export default function AuthGuard({
 
   // Show loading state while checking auth
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-        <p className="mt-4 text-gray-600">Loading...</p>
-      </div>
-    );
+    return <LoadingSpinner size="lg" fullScreen />;
   }
 
   // If auth is required but user is not authenticated, don't render children

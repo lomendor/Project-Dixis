@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
 import { formatCurrency } from '@/env';
@@ -128,7 +129,7 @@ export default function ProducerDashboard() {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <LoadingSpinner />
           </div>
         ) : error ? (
           <div className="text-center py-12">
@@ -200,7 +201,44 @@ export default function ProducerDashboard() {
                     </button>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto -mx-6">
+                  <>
+                  {/* Mobile card layout */}
+                  <div className="md:hidden space-y-3">
+                    {topProducts.slice(0, 5).map((product) => (
+                      <div key={product.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                        <div className="flex-shrink-0 h-12 w-12">
+                          {product.images.length > 0 ? (
+                            <img
+                              className="h-12 w-12 rounded-lg object-cover"
+                              src={product.images[0].image_path}
+                              alt={product.images[0].alt_text || product.name}
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                              <span className="text-xs text-gray-400">{t('producerDashboard.noImage')}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-gray-500">
+                              {product.stock !== null ? `${product.stock} ${product.unit}(s)` : t('producerDashboard.inStock')}
+                            </span>
+                            <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                              {t('producerDashboard.active')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop table layout */}
+                  <div className="hidden md:block overflow-x-auto -mx-6">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
@@ -272,6 +310,7 @@ export default function ProducerDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </div>
             </div>

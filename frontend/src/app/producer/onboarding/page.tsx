@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface ProducerProfile {
   id: number;
@@ -87,7 +88,7 @@ export default function ProducerOnboardingPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600" />
+        <LoadingSpinner />
       </div>
     );
   }
