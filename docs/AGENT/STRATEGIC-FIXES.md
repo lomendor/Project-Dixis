@@ -62,11 +62,11 @@
 **Why**: No API call has a timeout. If backend hangs, user sees spinner forever.
 **Files**: `src/lib/api.ts` (request method)
 **Changes**:
-- Add `AbortController` with 10s timeout to `request()` method
-- Show "Request timed out" toast on timeout
-- Add retry (1x) for idempotent GET requests
+- Add `AbortController` with 15s timeout to `request()` method
+- Catch AbortError → throw ApiError with code=REQUEST_TIMEOUT and Greek message
+- Respects caller-provided signal (skip timeout if caller manages abort)
 **LOC estimate**: ~25
-**Status**: [ ] Not started
+**Status**: [x] PR #2855
 
 ### 3B. Console Cleanup
 **Why**: 244 console statements leak debug info to users.
@@ -120,5 +120,6 @@
 |------|-----|-----|-------|
 | 2026-02-14 | Audit completed | — | Identified 4 critical, 3 structural issues |
 | 2026-02-14 | 1A: Checkout Hardening | PR #2851 | ApiError class, idempotency, shipping validation |
-| 2026-02-14 | 1B: Checkout Refactor | PR #2852 | page.tsx 777→200 LOC, extracted hook+components |
+| 2026-02-14 | 1B: Checkout Refactor | PR #2854 | page.tsx 777→200 LOC, extracted hook+components |
+| 2026-02-14 | 3A: API Timeouts | PR #2855 | 15s AbortController on all API requests |
 | | | | |
