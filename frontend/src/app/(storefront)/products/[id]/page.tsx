@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
@@ -154,10 +155,13 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
         {/* Product Image */}
         <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
           {p.imageUrl ? (
-            <img
+            <Image
               src={p.imageUrl}
               alt={p.title}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
               data-testid="product-image"
             />
           ) : (

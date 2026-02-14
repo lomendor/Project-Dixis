@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
@@ -121,10 +122,13 @@ export default async function ProducerProfilePage(
             {/* Image */}
             <div className="aspect-[4/3] md:aspect-auto bg-neutral-100 overflow-hidden">
               {hasImage ? (
-                <img
+                <Image
                   src={producer.image_url!}
                   alt={producer.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full min-h-[240px] flex items-center justify-center text-gray-400">

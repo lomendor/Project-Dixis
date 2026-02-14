@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import AddToCartButton from '@/components/AddToCartButton'
 
@@ -34,11 +35,12 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
         <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden">
           {hasImage ? (
-            <img
+            <Image
               src={image}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">

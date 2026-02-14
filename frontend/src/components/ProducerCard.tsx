@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
 
 type Props = {
@@ -24,11 +25,12 @@ export function ProducerCard({ id, slug, name, region, description, imageUrl, pr
     >
       <div className="relative aspect-[4/3] w-full bg-neutral-100 overflow-hidden">
         {hasImage ? (
-          <img
+          <Image
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-primary/15 text-primary/40">
