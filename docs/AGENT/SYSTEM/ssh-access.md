@@ -1,6 +1,6 @@
 # SSH Access - Canonical Configuration
 
-**Last Updated**: 2026-01-17 (Pass OPS-SSH-HYGIENE-01)
+**Last Updated**: 2026-02-14 (Security hardening: root login disabled)
 
 ## Quick Reference
 
@@ -8,9 +8,9 @@
 |------|-------|
 | **Canonical Alias** | `dixis-prod` |
 | **Host** | 147.93.126.235 |
-| **User** | root |
+| **User** | `deploy` |
 | **Key File** | `~/.ssh/dixis_prod_ed25519_20260115` |
-| **Key Fingerprint** | SHA256:MekIeM... |
+| **Root Login** | **DISABLED** (PermitRootLogin no) |
 
 ## Health Check Command
 
@@ -23,7 +23,7 @@ ssh dixis-prod 'echo SSH_OK && whoami && hostname && uptime'
 Expected output:
 ```
 SSH_OK
-root
+deploy
 srv709397
  HH:MM:SS up X days, ...
 ```
@@ -33,7 +33,7 @@ srv709397
 ```
 Host dixis-prod
   HostName 147.93.126.235
-  User root
+  User deploy
   Port 22
   IdentityFile ~/.ssh/dixis_prod_ed25519_20260115
   IdentitiesOnly yes
@@ -46,9 +46,10 @@ Host dixis-prod
 ## Rules
 
 1. **Always use alias**: `ssh dixis-prod` - never `ssh -i ... user@ip`
-2. **One canonical key**: Only `dixis_prod_ed25519_20260115` is authorized on server
-3. **IdentitiesOnly yes**: Prevents SSH agent from offering other keys
-4. **No password auth**: Key-only authentication enforced
+2. **User is `deploy`**: Root SSH is disabled. All operations use the `deploy` user.
+3. **One canonical key**: Only `dixis_prod_ed25519_20260115` is authorized on server
+4. **IdentitiesOnly yes**: Prevents SSH agent from offering other keys
+5. **No password auth**: Key-only authentication enforced
 
 ## Troubleshooting
 
