@@ -10,6 +10,14 @@ import { useTranslations } from '@/contexts/LocaleContext'
 import { useToast } from '@/contexts/ToastContext'
 import type { PaymentMethod } from '@/components/checkout/PaymentMethodSelector'
 import type { ShippingQuote, CartShippingQuote } from './types'
+import {
+  trackCheckoutStarted,
+  trackCheckoutCompleted,
+  trackCheckoutFailed,
+  trackShippingQuoteFailed,
+  trackShippingQuoteNull,
+  trackCardPaymentFailed,
+} from '@/lib/sentry-events'
 
 export function useCheckout() {
   const router = useRouter()
@@ -116,6 +124,7 @@ export function useCheckout() {
       })
     } catch (err: any) {
       if (err?.code === 'ZONE_UNAVAILABLE') {
+        trackShippingQuoteFailed({ postalCode: postal, errorCode: 'ZONE_UNAVAILABLE', fallbackUsed: false })
         setCartShippingError(t('checkoutPage.shippingUnavailable'))
         setCartShippingQuote(null)
         setShippingQuote(null)
@@ -128,6 +137,7 @@ export function useCheckout() {
             method: 'HOME',
             subtotal: subtotal,
           })
+          trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: true })
           setShippingQuote({
             price_eur: legacyQuote.price_eur,
             zone_name: legacyQuote.zone_name,
@@ -135,6 +145,7 @@ export function useCheckout() {
             source: legacyQuote.source,
           })
         } catch {
+          trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: false })
           setShippingQuote(null)
         }
       }
@@ -177,10 +188,18 @@ export function useCheckout() {
 
     try {
       await paymentApi.confirmPayment(pendingOrderId, paymentIntentId)
+      trackCheckoutCompleted({
+        itemCount: Object.keys(cartItems).length,
+        subtotalCents,
+        paymentMethod: 'card',
+        isGuest,
+        orderId: pendingOrderId,
+      })
       showToast('success', 'Η πληρωμή ολοκληρώθηκε επιτυχώς')
       clear()
       router.push(`/thank-you?token=${pendingThankYouId ?? pendingOrderId}`)
     } catch (err) {
+      trackCardPaymentFailed({ orderId: pendingOrderId, stage: 'confirm', errorMessage: err instanceof Error ? err.message : undefined })
       const errorMessage = err instanceof Error ? err.message : t('checkoutPage.cardPaymentError')
       setError(errorMessage)
     }
@@ -208,9 +227,20 @@ export function useCheckout() {
     }
 
     if (!shippingQuote && !cartShippingQuote && !shippingLoading) {
+      trackShippingQuoteNull({ postalCode, itemCount: Object.keys(cartItems).length })
       setError('Εισάγετε ταχυδρομικό κώδικα για υπολογισμό μεταφορικών.')
       return
     }
+
+    const checkoutMeta = {
+      itemCount: Object.keys(cartItems).length,
+      subtotalCents,
+      paymentMethod: paymentMethod as 'cod' | 'card',
+      isGuest,
+      postalCode,
+      shippingSource: cartShippingQuote ? 'cart_quote' : shippingQuote?.source,
+    }
+    trackCheckoutStarted(checkoutMeta)
 
     setError('')
     setLoading(true)
@@ -288,6 +318,7 @@ export function useCheckout() {
           setLoading(false)
           return
         } catch {
+          trackCardPaymentFailed({ orderId: paymentOrderId, stage: 'init' })
           setError(t('checkoutPage.cardPaymentError'))
           setCardProcessing(false)
           setLoading(false)
@@ -296,6 +327,7 @@ export function useCheckout() {
       }
 
       // COD: Clear cart and redirect
+      trackCheckoutCompleted({ ...checkoutMeta, orderId: order.id })
       clear()
       router.push(`/thank-you?token=${thankYouToken}`)
     } catch (err: any) {
@@ -307,6 +339,12 @@ export function useCheckout() {
         setLoading(false)
         return
       }
+      trackCheckoutFailed({
+        ...checkoutMeta,
+        errorCode: err?.code,
+        errorStatus: err?.status,
+        errorMessage: err?.message,
+      })
       if (err?.status === 409) {
         setError(t('checkoutPage.stockError') || 'Κάποια προϊόντα δεν είναι διαθέσιμα. Ελέγξτε το καλάθι σας.')
       } else if (err?.status === 400) {
