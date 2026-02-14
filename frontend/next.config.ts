@@ -118,4 +118,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, { silent: true });
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  // Disable Sentry's auto-wrapping of middleware. Its Rollup-based loader
+  // silently swallows middleware logic in standalone builds, causing our
+  // auth redirects to never execute. We handle errors manually instead.
+  autoInstrumentMiddleware: false,
+});
