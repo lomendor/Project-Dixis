@@ -16,6 +16,7 @@ class ProducerOrderController extends Controller
      */
     private array $validTransitions = [
         'pending' => ['processing'],
+        'confirmed' => ['processing'],
         'processing' => ['shipped'],
         'shipped' => ['delivered'],
         'delivered' => [], // terminal state
@@ -30,7 +31,7 @@ class ProducerOrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         $request->validate([
-            'status' => 'nullable|string|in:pending,processing,shipped,delivered',
+            'status' => 'nullable|string|in:pending,confirmed,processing,shipped,delivered',
         ]);
 
         // Get producer ID from authenticated user
@@ -72,6 +73,7 @@ class ProducerOrderController extends Controller
             'meta' => [
                 'total' => Order::forProducer($producerId)->count(),
                 'pending' => $statusCounts['pending'] ?? 0,
+                'confirmed' => $statusCounts['confirmed'] ?? 0,
                 'processing' => $statusCounts['processing'] ?? 0,
                 'shipped' => $statusCounts['shipped'] ?? 0,
                 'delivered' => $statusCounts['delivered'] ?? 0,
