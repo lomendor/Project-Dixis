@@ -18,59 +18,67 @@ type ApiItem = {
   priceFormatted?: string;
   imageUrl?: string;
   categorySlug?: string;
+  categorySlugs?: string[];
   stock?: number | null;
 };
 
 /**
- * Pass SEARCH-FTS-01: Fetch products with optional search parameter.
- * Uses FTS ranking on PostgreSQL backend, ILIKE fallback on others.
+ * FIX-PRODUCTS-PAGINATION: Fetch ALL products with server-side filtering.
  *
- * Pass PERF-PRODUCTS-CACHE-01: Added time-based revalidation.
- * - revalidate: 60 = cache for 60 seconds, then revalidate in background
- * - Each unique search query gets its own cache entry (Next.js caches by full URL)
- * - Balance: fresh enough for inventory changes, fast enough for good UX
+ * Key fixes:
+ * - per_page=100 to avoid hiding products (was default 15, hid 2 of 17)
+ * - category filter sent server-side via ?category=slug (was client-side only)
+ * - Extract dynamic categories from API response (no more stale hardcoded slugs)
+ *
+ * Pass PERF-PRODUCTS-CACHE-01: 60s revalidation still applies.
  */
-async function getData(search?: string): Promise<{ items: ApiItem[]; total: number; isDemo: boolean }> {
-  // Use internal URL for SSR to avoid external round-trip timeout (Pass 26 fix)
-  // CRITICAL: No localhost fallback - use relative URL if not configured
-  // SSOT: Use centralized env resolution (see src/env.ts)
+async function getData(
+  search?: string,
+  category?: string
+): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
   const isServer = typeof window === 'undefined';
   const base = isServer
     ? getServerApiUrl()
     : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
 
   try {
-    // Build URL with search param if provided
-    const url = new URL(`${base}/public/products`, 'http://localhost');
+    // Build URL with all params — let the backend handle filtering
+    const params = new URLSearchParams();
+    params.set('per_page', '100');
     if (search?.trim()) {
-      url.searchParams.set('search', search.trim());
+      params.set('search', search.trim());
     }
-    const endpoint = url.pathname + url.search;
+    if (category) {
+      params.set('category', category);
+    }
 
-    const res = await fetch(`${base}/public/products${search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : ''}`, {
-      // Pass PERF-PRODUCTS-CACHE-01: Cache response for 60s, revalidate in background
+    const res = await fetch(`${base}/public/products?${params.toString()}`, {
       next: { revalidate: 60 },
       headers: { 'Content-Type': 'application/json' },
     });
 
     if (!res.ok) {
       console.error('[Products] API fetch failed:', res.status, res.statusText);
-      // Fall back to demo products (filtered client-side if search provided)
       const demoItems = mapDemoToApiItems(DEMO_PRODUCTS);
       const filtered = search ? filterDemoBySearch(demoItems, search) : demoItems;
-      return { items: filtered, total: filtered.length, isDemo: true };
+      return { items: filtered, total: filtered.length, isDemo: true, apiTotal: 0 };
     }
 
     const json = await res.json();
     const products = json?.data ?? [];
+    const apiTotal = json?.total ?? products.length;
 
-    if (products.length === 0 && !search) {
+    if (products.length === 0 && !search && !category) {
       console.log('[Products] API returned empty, using demo fallback');
-      return { items: mapDemoToApiItems(DEMO_PRODUCTS), total: DEMO_PRODUCTS.length, isDemo: true };
+      return {
+        items: mapDemoToApiItems(DEMO_PRODUCTS),
+        total: DEMO_PRODUCTS.length,
+        isDemo: true,
+        apiTotal: 0,
+      };
     }
 
     // Map backend format to frontend format
-    // Pass FIX-STOCK-GUARD-01: Include stock for OOS check
     const items = products.map((p: any) => ({
       id: p.id,
       title: p.name,
@@ -79,16 +87,62 @@ async function getData(search?: string): Promise<{ items: ApiItem[]; total: numb
       producerSlug: p.producer?.slug || null,
       priceCents: Math.round(parseFloat(p.price) * 100),
       imageUrl: p.image_url || p.images?.[0]?.url || null,
-      categorySlug: p.category || null,
+      categorySlug: p.categories?.[0]?.slug || p.category || null,
+      categorySlugs: p.categories?.map((c: any) => c.slug) || [],
       stock: typeof p.stock === 'number' ? p.stock : null,
     }));
 
-    return { items, total: items.length, isDemo: false };
+    return { items, total: items.length, isDemo: false, apiTotal };
   } catch (err) {
     console.error('[Products] Fetch error (falling back to demo):', err);
     const demoItems = mapDemoToApiItems(DEMO_PRODUCTS);
     const filtered = search ? filterDemoBySearch(demoItems, search) : demoItems;
-    return { items: filtered, total: filtered.length, isDemo: true };
+    return { items: filtered, total: filtered.length, isDemo: true, apiTotal: 0 };
+  }
+}
+
+/**
+ * Fetch all products (unfiltered) to extract dynamic categories.
+ * Only called when NOT filtering by category, to build the strip.
+ * Cached at the same 60s interval.
+ */
+async function getActiveCategories(): Promise<{ slug: string; name: string; count: number }[]> {
+  const isServer = typeof window === 'undefined';
+  const base = isServer
+    ? getServerApiUrl()
+    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
+
+  try {
+    const res = await fetch(`${base}/public/products?per_page=100`, {
+      next: { revalidate: 60 },
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) return [];
+
+    const json = await res.json();
+    const products = json?.data ?? [];
+
+    // Extract unique categories from products and count them
+    const catMap = new Map<string, { slug: string; name: string; count: number }>();
+    for (const p of products) {
+      const cats = p.categories ?? [];
+      for (const c of cats) {
+        if (c.slug && c.name) {
+          const existing = catMap.get(c.slug);
+          if (existing) {
+            existing.count++;
+          } else {
+            catMap.set(c.slug, { slug: c.slug, name: c.name, count: 1 });
+          }
+        }
+      }
+    }
+
+    // Sort by count descending (most popular categories first)
+    return Array.from(catMap.values()).sort((a, b) => b.count - a.count);
+  } catch {
+    return [];
   }
 }
 
@@ -116,12 +170,6 @@ function filterDemoBySearch(items: ApiItem[], search: string): ApiItem[] {
   );
 }
 
-// Filter items by category
-function filterByCategory(items: ApiItem[], categorySlug: string | null): ApiItem[] {
-  if (!categorySlug) return items;
-  return items.filter((item) => item.categorySlug === categorySlug);
-}
-
 interface PageProps {
   searchParams: Promise<{ cat?: string; search?: string }>;
 }
@@ -131,9 +179,15 @@ export default async function Page({ searchParams }: PageProps) {
   const categoryFilter = params.cat || null;
   const searchQuery = params.search || null;
 
-  const { items: allItems = [], isDemo } = await getData(searchQuery || undefined);
-  const items = filterByCategory(allItems, categoryFilter);
+  // Fetch products (server-side filtering for category + search)
+  const { items, isDemo, apiTotal } = await getData(
+    searchQuery || undefined,
+    categoryFilter || undefined
+  );
   const total = items.length;
+
+  // Fetch active categories from real data (for the strip)
+  const activeCategories = await getActiveCategories();
 
   // Determine appropriate message for empty state
   const getEmptyMessage = () => {
@@ -165,7 +219,7 @@ export default async function Page({ searchParams }: PageProps) {
             <p className="mt-1 text-sm text-gray-600">
               {searchQuery
                 ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
-                : `Απευθείας από παραγωγούς — ${total} ${categoryFilter ? 'στην κατηγορία' : 'συνολικά'}.`}
+                : `Απευθείας από παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} συνολικά`}.`}
             </p>
           </div>
 
@@ -178,7 +232,10 @@ export default async function Page({ searchParams }: PageProps) {
         {/* Category Strip */}
         <div className="mb-6">
           <Suspense fallback={<div className="h-10 bg-gray-100 rounded animate-pulse" />}>
-            <CategoryStrip selectedCategory={categoryFilter} />
+            <CategoryStrip
+              selectedCategory={categoryFilter}
+              dynamicCategories={activeCategories}
+            />
           </Suspense>
         </div>
 

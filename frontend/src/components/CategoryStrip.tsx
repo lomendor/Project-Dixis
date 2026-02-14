@@ -16,10 +16,30 @@ import {
   Wine,
   Milk,
   Apple,
+  Carrot,
   LayoutGrid,
 } from 'lucide-react';
 
-// Map icon names to components
+// Map slug keywords to Lucide icons
+const iconBySlug: Record<string, React.ComponentType<{ className?: string }>> = {
+  'olive-oil': Droplets,
+  'honey': Hexagon,
+  'legumes': Bean,
+  'grains': Wheat,
+  'pasta': Utensils,
+  'flours': Croissant,
+  'nuts': Nut,
+  'herbs': Leaf,
+  'sweets': Cherry,
+  'sauces': Soup,
+  'wine': Wine,
+  'beverages': Wine,
+  'dairy': Milk,
+  'fruits': Apple,
+  'vegetables': Carrot,
+};
+
+// Map icon names to components (fallback for static CATEGORIES)
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Droplets,
   Hexagon,
@@ -34,13 +54,33 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wine,
   Milk,
   Apple,
+  Carrot,
 };
+
+/**
+ * Pick the best icon for a category based on its slug.
+ * Checks if any key in iconBySlug is contained in the slug string.
+ */
+function getIconForSlug(slug: string): React.ComponentType<{ className?: string }> | null {
+  for (const [key, icon] of Object.entries(iconBySlug)) {
+    if (slug.includes(key)) return icon;
+  }
+  return null;
+}
+
+interface DynamicCategory {
+  slug: string;
+  name: string;
+  count: number;
+}
 
 interface CategoryStripProps {
   selectedCategory?: string | null;
+  /** Dynamic categories extracted from real product data */
+  dynamicCategories?: DynamicCategory[];
 }
 
-export function CategoryStrip({ selectedCategory }: CategoryStripProps) {
+export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryStripProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentCat = selectedCategory ?? searchParams.get('cat');
@@ -54,6 +94,10 @@ export function CategoryStrip({ selectedCategory }: CategoryStripProps) {
     }
     router.push(`/products?${params.toString()}`);
   };
+
+  // Use dynamic categories if available (from real API data),
+  // otherwise fall back to static CATEGORIES
+  const useDynamic = dynamicCategories && dynamicCategories.length > 0;
 
   return (
     <div className="w-full overflow-x-auto scrollbar-hide">
@@ -75,30 +119,55 @@ export function CategoryStrip({ selectedCategory }: CategoryStripProps) {
           <span>Όλα</span>
         </button>
 
-        {/* Category buttons */}
-        {CATEGORIES.map((category) => {
-          const IconComponent = iconMap[category.icon];
-          const isSelected = currentCat === category.slug;
+        {useDynamic
+          ? /* Dynamic categories from API data */
+            dynamicCategories.map((cat) => {
+              const IconComponent = getIconForSlug(cat.slug);
+              const isSelected = currentCat === cat.slug;
 
-          return (
-            <button
-              key={category.id}
-              onClick={() => handleCategoryClick(category.slug)}
-              className={`
-                flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-                whitespace-nowrap transition-all duration-200
-                ${
-                  isSelected
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
-                }
-              `}
-            >
-              {IconComponent && <IconComponent className="w-4 h-4" />}
-              <span>{category.labelEl}</span>
-            </button>
-          );
-        })}
+              return (
+                <button
+                  key={cat.slug}
+                  onClick={() => handleCategoryClick(cat.slug)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                    whitespace-nowrap transition-all duration-200
+                    ${
+                      isSelected
+                        ? 'bg-green-600 text-white shadow-md'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+                    }
+                  `}
+                >
+                  {IconComponent && <IconComponent className="w-4 h-4" />}
+                  <span>{cat.name}</span>
+                </button>
+              );
+            })
+          : /* Static fallback categories */
+            CATEGORIES.map((category) => {
+              const IconComponent = iconMap[category.icon];
+              const isSelected = currentCat === category.slug;
+
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.slug)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                    whitespace-nowrap transition-all duration-200
+                    ${
+                      isSelected
+                        ? 'bg-green-600 text-white shadow-md'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+                    }
+                  `}
+                >
+                  {IconComponent && <IconComponent className="w-4 h-4" />}
+                  <span>{category.labelEl}</span>
+                </button>
+              );
+            })}
       </div>
     </div>
   );
