@@ -87,7 +87,7 @@
 - Track: cart_multi_producer_blocked
 - Track: order_creation_failed (with error code)
 **LOC estimate**: ~60
-**Status**: [ ] Not started
+**Status**: [x] PR #2865 — sentry-events.ts (95 LOC) + useCheckout instrumentation (38 LOC)
 
 ---
 
@@ -124,4 +124,6 @@
 | 2026-02-14 | 3A: API Timeouts | PR #2855 | 15s AbortController on all API requests |
 | 2026-02-14 | CI: PWA Icons | PR #2858 | apple-touch-icon + PWA icons fix 404s |
 | 2026-02-14 | CI: E2E Stabilization | PR #2860 | auth-nav mock APIs + smoke filter → ALL CI GREEN |
+| 2026-02-14 | 3B: Console Cleanup | PR #2863 | removed ~90 client-side console.* across 43 files |
+| 2026-02-14 | 3C: Sentry Business Events | PR #2865 | 6 business events in checkout (breadcrumbs + captureMessage) |
 | | | | |
