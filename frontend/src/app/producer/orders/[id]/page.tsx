@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
@@ -49,7 +49,6 @@ type EmailStatus = 'idle' | 'sending' | 'sent' | 'failed' | 'skipped';
 
 export default function ProducerOrderDetailsPage() {
   const params = useParams();
-  const router = useRouter();
   const orderId = Number(params.id);
 
   const [order, setOrder] = useState<ProducerOrder | null>(null);
@@ -83,6 +82,17 @@ export default function ProducerOrderDetailsPage() {
     }
   };
 
+  /**
+   * FIX-EMAIL-01: Get customer email from multiple sources.
+   * The order.email field can be null — also check user.email
+   * and shipping_address.email (where Stripe stores it).
+   */
+  const getCustomerEmail = (o: ProducerOrder): string | null => {
+    return o.user?.email
+      || o.shipping_address?.email
+      || null;
+  };
+
   const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!order || updating) return;
 
@@ -94,16 +104,20 @@ export default function ProducerOrderDetailsPage() {
       );
       setOrder(response.order);
 
-      // Send email notification with status tracking
-      if (order.user?.email) {
+      // FIX-EMAIL-01: Send email notification with data from Laravel API response
+      const customerEmail = getCustomerEmail(order);
+      if (customerEmail) {
         const emailData = {
           status: newStatus as 'processing' | 'shipped' | 'delivered',
-          customerName: order.user?.name || 'Πελάτη',
-          customerEmail: order.user.email,
+          customerName: order.user?.name || order.shipping_address?.name || 'Πελάτη',
+          customerEmail,
           total: order.total,
         };
         setLastEmailData(emailData);
         await sendEmailNotification(emailData);
+      } else {
+        // No email available — skip silently
+        setEmailStatus('skipped');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
@@ -339,7 +353,7 @@ export default function ProducerOrderDetailsPage() {
                 </div>
               )}
 
-              {/* Customer Info */}
+              {/* Customer Info + Shipping Address */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
                   Πληροφορίες Πελάτη
@@ -351,13 +365,47 @@ export default function ProducerOrderDetailsPage() {
                       {order.user?.name || 'Επισκέπτης'}
                     </p>
                   </div>
-                  {order.user?.email && (
+                  {(order.user?.email || order.shipping_address?.email) && (
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
-                      <p className="text-gray-900">{order.user.email}</p>
+                      <p className="text-gray-900">
+                        {order.user?.email || order.shipping_address?.email}
+                      </p>
                     </div>
                   )}
                 </div>
+
+                {/* Shipping Address Section */}
+                {order.shipping_address && (
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <h3 className="font-medium text-amber-900 mb-2">
+                      Στοιχεία Αποστολής
+                    </h3>
+                    <div className="text-sm text-amber-800 space-y-1">
+                      {order.shipping_address.name && (
+                        <p>{order.shipping_address.name}</p>
+                      )}
+                      {order.shipping_address.line1 && (
+                        <p>{order.shipping_address.line1}</p>
+                      )}
+                      {order.shipping_address.line2 && (
+                        <p>{order.shipping_address.line2}</p>
+                      )}
+                      {(order.shipping_address.city || order.shipping_address.postal_code) && (
+                        <p>
+                          {order.shipping_address.city}{' '}
+                          {order.shipping_address.postal_code}
+                        </p>
+                      )}
+                      {order.shipping_address.phone && (
+                        <p className="mt-1">
+                          <span className="text-amber-700">Τηλ:</span>{' '}
+                          {order.shipping_address.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Order Items */}
