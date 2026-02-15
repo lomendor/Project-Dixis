@@ -48,7 +48,7 @@ function CheckoutContent() {
   // SSR/hydration loading
   if (!isMounted) {
     return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
           <LoadingSpinner text={t('checkoutPage.loading')} />
         </div>
@@ -59,10 +59,10 @@ function CheckoutContent() {
   // Empty cart
   if (Object.keys(cartItems).length === 0 && !stripeClientSecret) {
     return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
-          <p className="text-gray-600 mb-4">{t('checkoutPage.emptyCart')}</p>
-          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:opacity-90 touch-manipulation">
+          <p className="text-neutral-600 mb-4">{t('checkoutPage.emptyCart')}</p>
+          <a href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation">
             {t('checkoutPage.viewProducts')}
           </a>
         </div>
@@ -73,13 +73,13 @@ function CheckoutContent() {
   // Stripe payment view
   if (stripeClientSecret && pendingOrderId) {
     return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-xl sm:text-2xl font-bold mb-6">{t('checkout.title')}</h1>
 
           <div className="bg-white border rounded-xl p-6 mb-6">
             <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment') || 'Card Payment'}</h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-neutral-600 mb-4">
               {t('checkoutPage.securePayment') || 'Complete your payment securely with Stripe.'}
             </p>
 
@@ -101,7 +101,7 @@ function CheckoutContent() {
             <button
               type="button"
               onClick={handleCancelPayment}
-              className="mt-4 w-full h-10 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="mt-4 w-full h-10 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50"
             >
               {t('checkoutPage.cancelPayment') || 'Cancel and go back'}
             </button>
@@ -113,7 +113,7 @@ function CheckoutContent() {
 
   // Main checkout view
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="checkout-page">
+    <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-xl sm:text-2xl font-bold mb-6" data-testid="checkout-title">{t('checkout.title')}</h1>
 
@@ -159,7 +159,7 @@ function CheckoutContent() {
           <button
             type="submit"
             disabled={loading || cardProcessing || !!cartShippingError || shippingLoading || (!shippingQuote && !cartShippingQuote)}
-            className="w-full h-12 mt-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
+            className="w-full h-12 mt-4 bg-primary hover:bg-primary-light disabled:bg-neutral-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
             data-testid="checkout-submit"
           >
             {cardProcessing
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
   const t = useTranslations()
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
           <LoadingSpinner text={t('checkoutPage.loading')} />
         </div>

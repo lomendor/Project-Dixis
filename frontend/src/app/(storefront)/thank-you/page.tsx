@@ -93,9 +93,9 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
-          <p className="text-gray-600">Φόρτωση...</p>
+          <p className="text-neutral-600">Φόρτωση...</p>
         </div>
       </main>
     )
@@ -103,10 +103,10 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
   if (error || !order) {
     return (
-      <main className="min-h-screen bg-gray-50 py-8 px-4">
+      <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-10 text-center">
           <p className="text-red-600 mb-4">{error || 'Δεν βρέθηκε η παραγγελία'}</p>
-          <a href="/products" className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
+          <a href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light">
             Συνέχεια στα προϊόντα
           </a>
         </div>
@@ -115,19 +115,19 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4" data-testid="thank-you-page">
+    <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="thank-you-page">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white border rounded-xl p-8 text-center">
           <div className="mb-6">
             <div className="text-5xl mb-4">✓</div>
-            <h1 className="text-3xl font-bold text-emerald-600 mb-2">Ευχαριστούμε!</h1>
-            <p className="text-gray-600">Η παραγγελία σας καταχωρήθηκε επιτυχώς.</p>
+            <h1 className="text-3xl font-bold text-primary mb-2">Ευχαριστούμε!</h1>
+            <p className="text-neutral-600">Η παραγγελία σας καταχωρήθηκε επιτυχώς.</p>
           </div>
 
-          <div className="bg-gray-50 border rounded-lg p-6 mb-6 text-left">
+          <div className="bg-neutral-50 border rounded-lg p-6 mb-6 text-left">
             <div className="text-center mb-4">
-              <p className="text-sm text-gray-500 mb-1">Αριθμός παραγγελίας:</p>
-              <p className="text-xl font-bold font-mono text-emerald-600" data-testid="order-id">{order.id}</p>
+              <p className="text-sm text-neutral-500 mb-1">Αριθμός παραγγελίας:</p>
+              <p className="text-xl font-bold font-mono text-primary" data-testid="order-id">{order.id}</p>
             </div>
 
             <div className="border-t pt-4">
@@ -153,9 +153,9 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                 {/* Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Show per-producer shipping for multi-producer orders */}
                 {order.isMultiProducer && order.shippingLines && order.shippingLines.length > 1 ? (
                   <>
-                    <div className="text-gray-600 font-medium pt-1">Μεταφορικά ανά παραγωγό:</div>
+                    <div className="text-neutral-600 font-medium pt-1">Μεταφορικά ανά παραγωγό:</div>
                     {order.shippingLines.map((line, idx) => (
-                      <div key={idx} className="flex justify-between pl-3 text-gray-600">
+                      <div key={idx} className="flex justify-between pl-3 text-neutral-600">
                         <span>{line.producer_name}:</span>
                         <span>
                           {line.free_shipping_applied
@@ -164,7 +164,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                         </span>
                       </div>
                     ))}
-                    <div className="flex justify-between font-medium border-t border-gray-200 pt-1">
+                    <div className="flex justify-between font-medium border-t border-neutral-200 pt-1">
                       <span>Σύνολο μεταφορικών:</span>
                       <span>{fmt.format(order.shipping || 0)}</span>
                     </div>
@@ -203,7 +203,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
             {order.email && (
               <div className="border-t pt-4 mt-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-neutral-600">
                   Θα λάβετε email επιβεβαίωσης στο <span className="font-medium">{order.email}</span>
                 </p>
               </div>
@@ -211,13 +211,13 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
 
             {/* Pass TRACKING-DISPLAY-01: Tracking link for customer */}
             {order.publicToken && (
-              <div className="border-t pt-4 mt-4 bg-emerald-50 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
-                <p className="text-sm text-gray-700 mb-2">
+              <div className="border-t pt-4 mt-4 bg-primary-pale -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
+                <p className="text-sm text-neutral-700 mb-2">
                   Παρακολουθήστε την παραγγελία σας:
                 </p>
                 <a
                   href={`/track/${order.publicToken}`}
-                  className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium"
+                  className="inline-flex items-center gap-2 text-primary hover:text-primary-light font-medium"
                   data-testid="tracking-link"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +225,7 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                   </svg>
                   Σελίδα παρακολούθησης
                 </a>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-neutral-500 mt-2">
                   Μπορείτε να αποθηκεύσετε αυτόν τον σύνδεσμο για να ελέγχετε την κατάσταση της παραγγελίας σας.
                 </p>
               </div>
@@ -235,13 +235,13 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           <div className="flex gap-3 justify-center">
             <a
               href="/products"
-              className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 font-medium"
+              className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-light font-medium"
             >
               Συνέχεια στα προϊόντα
             </a>
             <a
               href="/"
-              className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
+              className="inline-block border border-neutral-300 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-50"
             >
               Αρχική σελίδα
             </a>

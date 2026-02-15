@@ -201,7 +201,7 @@ export default async function Page({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Demo mode banner */}
         {isDemo && (
@@ -212,8 +212,8 @@ export default async function Page({ searchParams }: PageProps) {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Προϊόντα</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Προϊόντα</h1>
+            <p className="mt-1 text-sm text-neutral-600">
               {searchQuery
                 ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
                 : `Απευθείας από παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} συνολικά`}.`}
@@ -221,14 +221,14 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
 
           {/* Search Input */}
-          <Suspense fallback={<div className="h-10 w-full max-w-md bg-gray-100 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100 rounded-lg animate-pulse" />}>
             <ProductSearchInput />
           </Suspense>
         </div>
 
         {/* Category Strip */}
         <div className="mb-6">
-          <Suspense fallback={<div className="h-10 bg-gray-100 rounded animate-pulse" />}>
+          <Suspense fallback={<div className="h-10 bg-neutral-100 rounded animate-pulse" />}>
             <CategoryStrip
               selectedCategory={categoryFilter}
               dynamicCategories={activeCategories}
@@ -255,10 +255,10 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : (
           <div
-            className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"
+            className="text-center py-20 bg-white rounded-xl border border-dashed border-neutral-300"
             data-testid="no-results"
           >
-            <p className="text-gray-500 text-lg">{getEmptyMessage()}</p>
+            <p className="text-neutral-500 text-lg">{getEmptyMessage()}</p>
           </div>
         )}
       </div>
