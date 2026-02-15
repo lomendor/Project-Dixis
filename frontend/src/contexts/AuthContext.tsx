@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const { showToast } = useToast();
-  const { getItemsForSync, replaceWithServerCart } = useCart();
+  const { getItemsForSync, mergeServerCart, getVersion } = useCart();
 
   useEffect(() => {
     // Pass FIX-HOMEPAGE-HYDRATION-01: Mark as hydrated immediately.
@@ -115,18 +115,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiClient.login(email, password);
       setUser(response.user);
 
-      // Pass CART-SYNC-01: Sync localStorage cart with server after login
+      // Pass CART-SYNC-01 + FIX-CART-SYNC-RACE-01: Sync cart with race protection.
+      // Snapshot version BEFORE async sync — if user adds items during sync,
+      // mergeServerCart will merge instead of overwriting.
       try {
+        const versionBeforeSync = getVersion();
         const localItems = getItemsForSync();
         if (localItems.length > 0) {
           const serverCart = await apiClient.syncCart(localItems);
           const localFormat = serverToLocalCart(serverCart.items);
-          replaceWithServerCart(localFormat);
+          mergeServerCart(localFormat, versionBeforeSync);
         } else {
           const serverCart = await apiClient.getCart();
           if (serverCart.items.length > 0) {
             const localFormat = serverToLocalCart(serverCart.items);
-            replaceWithServerCart(localFormat);
+            mergeServerCart(localFormat, versionBeforeSync);
           }
         }
       } catch {
