@@ -45,8 +45,8 @@ export default function CustomerDetailsForm({
       )}
 
       {savedAddress && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg" data-testid="saved-address-notice">
-          <p className="text-sm text-green-800">
+        <div className="mb-4 p-3 bg-primary-pale border border-primary/20 rounded-lg" data-testid="saved-address-notice">
+          <p className="text-sm text-primary-dark">
             Χρησιμοποιείται η αποθηκευμένη διεύθυνση αποστολής σας.
           </p>
         </div>

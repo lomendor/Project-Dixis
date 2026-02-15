@@ -50,7 +50,7 @@ function ToastItem({ toast }: ToastProps) {
   const getToastStyles = (type: ToastType['type']) => {
     switch (type) {
       case 'success':
-        return 'bg-green-600 text-white border border-green-700 shadow-green-200/50';
+        return 'bg-primary text-white border border-primary-dark shadow-primary/20/50';
       case 'error':
         return 'bg-red-600 text-white border border-red-700 shadow-red-200/50';
       case 'warning':
@@ -58,7 +58,7 @@ function ToastItem({ toast }: ToastProps) {
       case 'info':
         return 'bg-blue-600 text-white border border-blue-700 shadow-blue-200/50';
       default:
-        return 'bg-gray-600 text-white border border-gray-700 shadow-gray-200/50';
+        return 'bg-neutral-600 text-white border border-neutral-700 shadow-neutral-200/50';
     }
   };
 

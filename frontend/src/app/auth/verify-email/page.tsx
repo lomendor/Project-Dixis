@@ -94,13 +94,13 @@ function VerifyEmailForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <Link href="/" className="text-2xl font-bold text-green-600">
+          <Link href="/" className="text-2xl font-bold text-primary">
             Dixis
           </Link>
-          <h1 className="mt-6 text-3xl font-bold text-gray-900" data-testid="page-title">
+          <h1 className="mt-6 text-3xl font-bold text-neutral-900" data-testid="page-title">
             {t('auth.verifyEmail.title')}
           </h1>
         </div>
@@ -112,7 +112,7 @@ function VerifyEmailForm() {
           {state === 'loading' && (
             <div className="text-center" data-testid="verify-loading">
               <svg
-                className="animate-spin h-12 w-12 text-green-600 mx-auto"
+                className="animate-spin h-12 w-12 text-primary mx-auto"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -131,16 +131,16 @@ function VerifyEmailForm() {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <p className="mt-4 text-gray-600">{t('auth.verifyEmail.verifying')}</p>
+              <p className="mt-4 text-neutral-600">{t('auth.verifyEmail.verifying')}</p>
             </div>
           )}
 
           {/* Success State */}
           {state === 'success' && (
             <div className="text-center" data-testid="verify-success">
-              <div className="rounded-full bg-green-100 p-3 mx-auto w-fit">
+              <div className="rounded-full bg-primary-pale p-3 mx-auto w-fit">
                 <svg
-                  className="h-8 w-8 text-green-600"
+                  className="h-8 w-8 text-primary"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -153,14 +153,14 @@ function VerifyEmailForm() {
                   />
                 </svg>
               </div>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 {t('auth.verifyEmail.successTitle')}
               </h2>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <p className="mt-2 text-sm text-neutral-600">{message}</p>
               <Link
                 href="/auth/login"
                 data-testid="login-link"
-                className="mt-6 inline-block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="mt-6 inline-block w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 {t('auth.verifyEmail.goToLogin')}
               </Link>
@@ -185,14 +185,14 @@ function VerifyEmailForm() {
                   />
                 </svg>
               </div>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 {t('auth.verifyEmail.expiredTitle')}
               </h2>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <p className="mt-2 text-sm text-neutral-600">{message}</p>
 
               {resendSuccess ? (
-                <div className="mt-4 rounded-md bg-green-50 p-4">
-                  <p className="text-sm text-green-700">
+                <div className="mt-4 rounded-md bg-primary-pale p-4">
+                  <p className="text-sm text-primary-dark">
                     {t('auth.verifyEmail.resendSuccess')}
                   </p>
                 </div>
@@ -201,7 +201,7 @@ function VerifyEmailForm() {
                   onClick={handleResend}
                   disabled={resendLoading}
                   data-testid="resend-button"
-                  className="mt-4 inline-flex items-center justify-center gap-2 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400"
+                  className="mt-4 inline-flex items-center justify-center gap-2 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-neutral-400"
                 >
                   {resendLoading && (
                     <svg
@@ -249,13 +249,13 @@ function VerifyEmailForm() {
                   />
                 </svg>
               </div>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 {t('auth.verifyEmail.errorTitle')}
               </h2>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <p className="mt-2 text-sm text-neutral-600">{message}</p>
               <Link
                 href="/auth/login"
-                className="mt-6 inline-block text-sm font-medium text-green-600 hover:text-green-500"
+                className="mt-6 inline-block text-sm font-medium text-primary hover:text-primary-light"
               >
                 {t('auth.verifyEmail.backToLogin')}
               </Link>
@@ -265,9 +265,9 @@ function VerifyEmailForm() {
           {/* Missing Params State */}
           {state === 'missing' && (
             <div className="text-center" data-testid="verify-missing">
-              <div className="rounded-full bg-gray-100 p-3 mx-auto w-fit">
+              <div className="rounded-full bg-neutral-100 p-3 mx-auto w-fit">
                 <svg
-                  className="h-8 w-8 text-gray-600"
+                  className="h-8 w-8 text-neutral-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -280,13 +280,13 @@ function VerifyEmailForm() {
                   />
                 </svg>
               </div>
-              <h2 className="mt-4 text-lg font-medium text-gray-900">
+              <h2 className="mt-4 text-lg font-medium text-neutral-900">
                 {t('auth.verifyEmail.missingTitle')}
               </h2>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <p className="mt-2 text-sm text-neutral-600">{message}</p>
               <Link
                 href="/auth/login"
-                className="mt-6 inline-block text-sm font-medium text-green-600 hover:text-green-500"
+                className="mt-6 inline-block text-sm font-medium text-primary hover:text-primary-light"
               >
                 {t('auth.verifyEmail.backToLogin')}
               </Link>
@@ -307,8 +307,8 @@ export default function VerifyEmail() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-gray-600">Loading...</div>
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+          <div className="text-neutral-600">Loading...</div>
         </div>
       }
     >

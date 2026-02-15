@@ -15,7 +15,7 @@ export function CartBadge() {
   return (
     <Link
       href="/cart"
-      className="relative inline-flex items-center gap-2 rounded-lg px-3 py-2 border border-gray-200 bg-white hover:shadow-md transition-shadow"
+      className="relative inline-flex items-center gap-2 rounded-lg px-3 py-2 border border-neutral-200 bg-white hover:shadow-md transition-shadow"
       aria-label="Μετάβαση στο καλάθι"
       data-testid="nav-cart cart-icon-active"
     >
@@ -36,7 +36,7 @@ export function CartBadge() {
       <span className="text-sm font-medium">Καλάθι</span>
       {displayCount > 0 && (
         <span
-          className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs font-bold text-white"
+          className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-white"
           aria-live="polite"
           aria-atomic="true"
           data-testid="cart-item-count"
