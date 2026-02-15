@@ -44,8 +44,8 @@ export default function PaymentMethodSelector({
         htmlFor="payment-cod"
         className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
           value === 'cod'
-            ? 'border-emerald-600 bg-emerald-50'
-            : 'border-gray-200 hover:border-gray-300'
+            ? 'border-primary bg-primary-pale'
+            : 'border-neutral-200 hover:border-neutral-300'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
@@ -55,12 +55,12 @@ export default function PaymentMethodSelector({
           value="cod"
           checked={value === 'cod'}
           onChange={() => onChange('cod')}
-          className="w-5 h-5 text-emerald-600 focus:ring-emerald-500"
+          className="w-5 h-5 text-primary focus:ring-primary"
           data-testid="payment-cod"
         />
         <div className="flex-1">
           <span className="font-medium">Αντικαταβολή</span>
-          <p className="text-sm text-gray-500">Πληρωμή κατά την παράδοση</p>
+          <p className="text-sm text-neutral-500">Πληρωμή κατά την παράδοση</p>
           {codFee != null && codFee > 0 && (
             <p className="text-xs text-amber-600 mt-0.5" data-testid="cod-fee-note">
               +{new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(codFee)} χρέωση αντικαταβολής
@@ -75,8 +75,8 @@ export default function PaymentMethodSelector({
           htmlFor="payment-card"
           className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
             value === 'card'
-              ? 'border-emerald-600 bg-emerald-50'
-              : 'border-gray-200 hover:border-gray-300'
+              ? 'border-primary bg-primary-pale'
+              : 'border-neutral-200 hover:border-neutral-300'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <input
@@ -86,16 +86,16 @@ export default function PaymentMethodSelector({
             value="card"
             checked={value === 'card'}
             onChange={() => onChange('card')}
-            className="w-5 h-5 text-emerald-600 focus:ring-emerald-500"
+            className="w-5 h-5 text-primary focus:ring-primary"
             data-testid="payment-card"
           />
           <div className="flex-1">
             <span className="font-medium">Κάρτα</span>
-            <p className="text-sm text-gray-500">Ασφαλής πληρωμή με κάρτα</p>
+            <p className="text-sm text-neutral-500">Ασφαλής πληρωμή με κάρτα</p>
           </div>
           <div className="flex gap-1">
-            <span className="text-xs bg-gray-100 px-2 py-1 rounded">Visa</span>
-            <span className="text-xs bg-gray-100 px-2 py-1 rounded">MC</span>
+            <span className="text-xs bg-neutral-100 px-2 py-1 rounded">Visa</span>
+            <span className="text-xs bg-neutral-100 px-2 py-1 rounded">MC</span>
           </div>
         </label>
       )}
@@ -106,7 +106,7 @@ export default function PaymentMethodSelector({
         <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="guest-card-notice">
           <p className="text-sm text-amber-800">
             Για πληρωμή με κάρτα απαιτείται σύνδεση.{' '}
-            <a href="/login?redirect=/checkout" className="font-medium text-emerald-600 hover:underline">Συνδεθείτε</a>
+            <a href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">Συνδεθείτε</a>
           </p>
         </div>
       )}

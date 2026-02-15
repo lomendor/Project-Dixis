@@ -85,7 +85,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-green-600">
+            <Link href="/" className="text-xl font-bold text-primary">
               Project Dixis
             </Link>
           </div>
@@ -95,7 +95,7 @@ export default function Navigation() {
             <div className="ml-10 flex items-baseline space-x-4">
               <Link
                 href="/"
-                className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                 data-testid="nav-products"
               >
                 Products
@@ -103,7 +103,7 @@ export default function Navigation() {
 
               <Link
                 href="/contact"
-                className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                 data-testid="nav-contact"
               >
                 Επικοινωνία
@@ -114,7 +114,7 @@ export default function Navigation() {
               {isAuthenticated && isProducer && (
                 <Link
                   href="/producer/dashboard"
-                  className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-dashboard"
                 >
                   Dashboard
@@ -127,13 +127,13 @@ export default function Navigation() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <div data-testid="user-menu" className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-neutral-700">
                   Hello, {user?.name}
                 </span>
                 <button
                   data-testid="logout-btn"
                   onClick={handleLogout}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                  className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Logout
                 </button>
@@ -142,14 +142,14 @@ export default function Navigation() {
               <div className="flex items-center space-x-2">
                 <Link
                   href="/auth/login"
-                  className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-login"
                 >
                   Login
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                  className="bg-primary hover:bg-primary-light text-white px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-register"
                 >
                   Sign Up
@@ -164,7 +164,7 @@ export default function Navigation() {
               ref={mobileMenuButtonRef}
               data-testid="mobile-menu-button"
               onClick={toggleMobileMenu}
-              className="bg-gray-50 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 transition-colors"
+              className="bg-neutral-50 p-2 rounded-md text-neutral-400 hover:text-neutral-500 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors"
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
               aria-label={mobileMenuOpen ? 'Close main menu' : 'Open main menu'}
@@ -197,7 +197,7 @@ export default function Navigation() {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <Link
                 href="/"
-                className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                 data-testid="mobile-nav-products"
               >
                 Products
@@ -205,7 +205,7 @@ export default function Navigation() {
 
               <Link
                 href="/contact"
-                className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                 data-testid="mobile-nav-contact"
               >
                 Επικοινωνία
@@ -219,7 +219,7 @@ export default function Navigation() {
               {isAuthenticated && isProducer && (
                 <Link
                   href="/producer/dashboard"
-                  className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                  className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-dashboard"
                   >
                   Dashboard
@@ -228,28 +228,28 @@ export default function Navigation() {
             </div>
             
             {/* Mobile Auth Section */}
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-t border-neutral-200">
               {isAuthenticated ? (
                 <div className="flex items-center px-5">
                   <div className="flex-shrink-0">
-                    <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-green-600">
+                    <div className="h-8 w-8 bg-primary-pale rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-primary">
                         {user?.name?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">
+                    <div className="text-base font-medium text-neutral-800">
                       {user?.name}
                     </div>
-                    <div className="text-sm font-medium text-gray-500">
+                    <div className="text-sm font-medium text-neutral-500">
                       {user?.role === 'producer' ? 'Producer' : 'Consumer'}
                     </div>
                   </div>
                   <button
                     data-testid="mobile-logout-btn"
                     onClick={handleLogout}
-                    className="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                    className="ml-auto bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Logout
                   </button>
@@ -258,14 +258,14 @@ export default function Navigation() {
                 <div className="px-2 space-y-1">
                   <Link
                     href="/auth/login"
-                    className="text-gray-700 hover:text-green-600 block px-3 py-2 rounded-md text-base font-medium"
+                    className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-login"
                       >
                     Login
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-green-600 hover:bg-green-700 text-white block px-3 py-2 rounded-md text-base font-medium"
+                    className="bg-primary hover:bg-primary-light text-white block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-register"
                       >
                     Sign Up
