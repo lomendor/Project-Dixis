@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (S1-02 Reviews & Ratings deployed to production)
+**Updated**: 2026-02-15 (Producer Launch Prep — pivot from features to real users)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -39,25 +39,25 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+**Producer Launch Prep** — See `docs/PRIORITY-PLAN.md`
 
 ---
 
-## NEXT — See `docs/BACKLOG.md`
+## NEXT — Producer Launch Prep (3-day sprint)
 
-The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized by business impact:
+**Strategy pivot:** Stop building features nobody uses. Prepare for REAL producers in 3 days.
 
-| Stage | Theme | Key Items |
-|-------|-------|-----------|
-| **1** | Trust & Core Commerce | Cultivation type, Reviews, Q&A, Wishlist, Certifications |
-| **2** | UI/UX Polish | Homepage redesign, Product cards, Mobile audit, Loading states |
-| **3** | Growth & Engagement | Cost transparency, Seasonal calendar, Cart abandonment, SEO |
-| **4** | Differentiators | Virtual tours, **Adopt-a-Tree**, Pre-orders, Limited editions |
-| **5** | B2B & Revenue | Business registration, Subscription plans, Bulk orders |
-| **6** | Community & Vision | Forum, Courses, Carbon footprint, Referral program |
+| Phase | What | Timeline |
+|-------|------|----------|
+| **A** | Technical foundations (analytics, smoke test, seed cleanup) | Day 1 |
+| **B** | UI polish sprint (homepage, dashboard, cards, producer page) | Day 1-2 |
+| **C** | Producer onboarding readiness (registration flow, product upload UX) | Day 2-3 |
+| **D** | Post-launch monitoring (analytics, feedback, bug fixes) | Day 3+ |
 
-**Current focus: Stage 1. S1-01 ✅ done. S1-02 ✅ done. Next: S1-03 (Product Q&A).**
+**Full plan:** `docs/PRIORITY-PLAN.md`
+**Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings.
 **Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 
 ---
