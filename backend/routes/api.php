@@ -209,6 +209,12 @@ Route::prefix('v1')->group(function () {
         Route::delete('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'destroy'])->name('api.v1.products.destroy');
     });
 
+    // S1-02: Authenticated reviews (create)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('products/{productId}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'store'])
+            ->middleware('throttle:10,1');
+    });
+
     // Authenticated user orders
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index'])->name('api.v1.orders.index');
@@ -227,6 +233,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('public')->group(function () {
         Route::get('products', [App\Http\Controllers\Public\ProductController::class, 'index']);
         Route::get('products/{id}', [App\Http\Controllers\Public\ProductController::class, 'show']);
+
+        // S1-02: Public Reviews API
+        Route::get('products/{productId}/reviews', [App\Http\Controllers\Api\V1\ReviewController::class, 'index']);
+        Route::get('products/{productId}/reviews/summary', [App\Http\Controllers\Api\V1\ReviewController::class, 'summary']);
 
         // Public Producers API
         Route::get('producers', [App\Http\Controllers\Public\ProducerController::class, 'index']);
