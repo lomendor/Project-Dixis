@@ -143,7 +143,7 @@ export default function RootLayout({
                 url: siteUrl,
                 logo: {
                   '@type': 'ImageObject',
-                  url: `${siteUrl}/logo.svg`,
+                  url: `${siteUrl}/logo.png`,
                   width: 400,
                   height: 400,
                 },
@@ -161,7 +161,7 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'Dixis',
               url: siteUrl,
-              logo: `${siteUrl}/logo.svg`,
+              logo: `${siteUrl}/logo.png`,
               description: 'Ηλεκτρονική αγορά τοπικών Ελλήνων παραγωγών — φρέσκα προϊόντα από το χωράφι στο τραπέζι σας',
               address: {
                 '@type': 'PostalAddress',
