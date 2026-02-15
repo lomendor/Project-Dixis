@@ -141,4 +141,5 @@
 | 2026-02-15 | OG/SEO Logo Fix | PR #2892 | logo.svg→logo.png in OG/JSON-LD, delete dead SVGs |
 | 2026-02-15 | Product Detail Polish | PR #2893 | Brand colors, chevron breadcrumb, inline price+stock |
 | 2026-02-15 | Brand Color Unify | PR #2896 | gray→neutral, emerald/blue→primary across 9 storefront files |
+| 2026-02-15 | Brand Color Unify R2 | PR #2899 | Homepage, Add-to-Cart, loading skeletons → brand tokens |
 | | | | |
