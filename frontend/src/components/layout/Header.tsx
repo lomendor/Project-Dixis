@@ -31,7 +31,6 @@ export default function Header() {
   const navLinks = [
     { href: '/products', label: t('nav.products') },
     { href: '/producers', label: t('producers.title') },
-    { href: '/contact', label: t('nav.contact') },
   ];
 
   const handleLogout = async () => {
