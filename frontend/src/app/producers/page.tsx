@@ -86,12 +86,12 @@ export default async function ProducersPage({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Παραγωγοί</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Παραγωγοί</h1>
+            <p className="mt-1 text-sm text-neutral-600">
               {searchQuery
                 ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
                 : `Γνώρισε τους τοπικούς παραγωγούς μας — ${total} συνολικά.`}
@@ -99,15 +99,15 @@ export default async function ProducersPage({ searchParams }: PageProps) {
           </div>
 
           {/* Search Form */}
-          <Suspense fallback={<div className="h-10 w-full max-w-md bg-gray-100 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100 rounded-lg animate-pulse" />}>
             <ProducerSearchForm defaultValue={searchQuery || ''} />
           </Suspense>
         </div>
 
         {/* CTA banner */}
-        <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center justify-between">
+        <div className="mb-6 p-3 bg-primary-pale border border-primary/20 rounded-lg text-primary text-sm flex items-center justify-between">
           <span>Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
-          <Link href="/producers/join" className="font-medium underline hover:text-green-900">
+          <Link href="/producers/join" className="font-medium underline hover:text-primary-light">
             Μάθε περισσότερα →
           </Link>
         </div>
@@ -136,10 +136,10 @@ export default async function ProducersPage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div
-            className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300"
+            className="text-center py-20 bg-white rounded-xl border border-dashed border-neutral-300"
             data-testid="no-results"
           >
-            <p className="text-gray-500 text-lg">{getEmptyMessage()}</p>
+            <p className="text-neutral-500 text-lg">{getEmptyMessage()}</p>
           </div>
         )}
       </div>
@@ -159,9 +159,9 @@ function ProducerSearchForm({ defaultValue }: { defaultValue: string }) {
           type="search"
           defaultValue={defaultValue}
           placeholder="Αναζήτηση παραγωγού..."
-          className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          className="w-full h-10 pl-10 pr-4 rounded-lg border border-neutral-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
