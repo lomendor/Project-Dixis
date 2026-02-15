@@ -12,7 +12,7 @@ export default function MyAccountError({
       <h1 className="text-2xl font-bold text-red-600 mb-2">
         Σφάλμα στον Λογαριασμό
       </h1>
-      <p className="text-gray-500 mb-4">
+      <p className="text-neutral-500 mb-4">
         Παρουσιάστηκε πρόβλημα κατά τη φόρτωση της σελίδας.
       </p>
       <button

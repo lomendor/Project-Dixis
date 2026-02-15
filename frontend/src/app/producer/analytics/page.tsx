@@ -13,29 +13,29 @@ import AuthGuard from '@/components/AuthGuard';
 export default function ProducerAnalytics() {
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb */}
           <nav className="flex mb-8" data-testid="breadcrumb">
-            <ol className="flex items-center space-x-2 text-sm text-gray-500">
+            <ol className="flex items-center space-x-2 text-sm text-neutral-500">
               <li>
-                <Link href="/" className="hover:text-green-600">Αρχική</Link>
+                <Link href="/" className="hover:text-primary">Αρχική</Link>
               </li>
               <li>/</li>
               <li>
-                <Link href="/producer/dashboard" className="hover:text-green-600">Πίνακας Παραγωγού</Link>
+                <Link href="/producer/dashboard" className="hover:text-primary">Πίνακας Παραγωγού</Link>
               </li>
               <li>/</li>
-              <li className="text-gray-900">Αναλυτικά</li>
+              <li className="text-neutral-900">Αναλυτικά</li>
             </ol>
           </nav>
 
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
               Αναλυτικά Παραγωγού
             </h1>
-            <p className="text-gray-600">
+            <p className="text-neutral-600">
               Παρακολουθήστε την απόδοση των προϊόντων και τα αναλυτικά πωλήσεων
             </p>
           </div>

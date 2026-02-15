@@ -87,7 +87,7 @@ export default function ProducerOnboardingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -96,10 +96,10 @@ export default function ProducerOnboardingPage() {
   // Rejected state
   if (profile?.status === 'inactive' && profile.rejection_reason) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4" data-testid="page-title">
+            <h1 className="text-2xl font-bold text-neutral-900 mb-4" data-testid="page-title">
               Ενημέρωση Αίτησης
             </h1>
             <div className="border rounded-lg p-6 bg-red-50 border-red-200 text-red-800">
@@ -119,10 +119,10 @@ export default function ProducerOnboardingPage() {
   // Pending state — already submitted
   if (profile?.status === 'pending' && (success || profile.business_name)) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4" data-testid="page-title">
+            <h1 className="text-2xl font-bold text-neutral-900 mb-4" data-testid="page-title">
               Γίνετε Παραγωγός
             </h1>
             <div className="border rounded-lg p-6 bg-yellow-50 border-yellow-200 text-yellow-800" data-testid="pending-banner">
@@ -135,7 +135,7 @@ export default function ProducerOnboardingPage() {
             </div>
             <button
               onClick={() => router.push('/producer/dashboard')}
-              className="mt-6 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="mt-6 w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-light transition-colors font-medium"
             >
               Μετάβαση στο Dashboard
             </button>
@@ -148,10 +148,10 @@ export default function ProducerOnboardingPage() {
   // Success just submitted
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4" data-testid="page-title">
+            <h1 className="text-2xl font-bold text-neutral-900 mb-4" data-testid="page-title">
               Γίνετε Παραγωγός
             </h1>
             <div className="border rounded-lg p-6 bg-green-50 border-green-200 text-green-800" data-testid="success-banner">
@@ -163,7 +163,7 @@ export default function ProducerOnboardingPage() {
             </div>
             <button
               onClick={() => router.push('/producer/dashboard')}
-              className="mt-6 w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="mt-6 w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-light transition-colors font-medium"
             >
               Μετάβαση στο Dashboard
             </button>
@@ -175,13 +175,13 @@ export default function ProducerOnboardingPage() {
 
   // Form state — show onboarding form
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-sm p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2" data-testid="page-title">
+          <h1 className="text-2xl font-bold text-neutral-900 mb-2" data-testid="page-title">
             Γίνετε Παραγωγός
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-neutral-600 mb-6">
             Συμπληρώστε τα στοιχεία σας για να ξεκινήσετε να πουλάτε στο Dixis.
           </p>
 
@@ -193,7 +193,7 @@ export default function ProducerOnboardingPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5" data-testid="onboarding-form">
             <div>
-              <label htmlFor="business_name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="business_name" className="block text-sm font-medium text-neutral-700">
                 Επωνυμία Επιχείρησης <span className="text-red-500">*</span>
               </label>
               <input
@@ -203,13 +203,13 @@ export default function ProducerOnboardingPage() {
                 required
                 value={form.business_name}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="π.χ. Αγρόκτημα Παπαδόπουλου"
               />
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="phone" className="block text-sm font-medium text-neutral-700">
                 Τηλέφωνο <span className="text-red-500">*</span>
               </label>
               <input
@@ -219,14 +219,14 @@ export default function ProducerOnboardingPage() {
                 required
                 value={form.phone}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="69XXXXXXXX"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="city" className="block text-sm font-medium text-neutral-700">
                   Πόλη <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -236,12 +236,12 @@ export default function ProducerOnboardingPage() {
                   required
                   value={form.city}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="π.χ. Ηράκλειο"
                 />
               </div>
               <div>
-                <label htmlFor="region" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="region" className="block text-sm font-medium text-neutral-700">
                   Περιφέρεια
                 </label>
                 <select
@@ -249,7 +249,7 @@ export default function ProducerOnboardingPage() {
                   name="region"
                   value={form.region}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 >
                   <option value="">Επιλέξτε...</option>
                   <option value="Αττική">Αττική</option>
@@ -270,7 +270,7 @@ export default function ProducerOnboardingPage() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="description" className="block text-sm font-medium text-neutral-700">
                 Περιγραφή Επιχείρησης
               </label>
               <textarea
@@ -279,14 +279,14 @@ export default function ProducerOnboardingPage() {
                 rows={3}
                 value={form.description}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="Πείτε μας λίγα λόγια για την επιχείρησή σας..."
               />
             </div>
 
             <div>
-              <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
-                ΑΦΜ <span className="text-gray-400 text-xs">(προαιρετικό)</span>
+              <label htmlFor="tax_id" className="block text-sm font-medium text-neutral-700">
+                ΑΦΜ <span className="text-neutral-400 text-xs">(προαιρετικό)</span>
               </label>
               <input
                 id="tax_id"
@@ -294,7 +294,7 @@ export default function ProducerOnboardingPage() {
                 type="text"
                 value={form.tax_id}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="9 ψηφία"
               />
             </div>
@@ -303,7 +303,7 @@ export default function ProducerOnboardingPage() {
               type="submit"
               disabled={submitting}
               data-testid="onboarding-submit"
-              className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-light transition-colors font-medium disabled:bg-neutral-400 disabled:cursor-not-allowed"
             >
               {submitting ? 'Υποβολή...' : 'Υποβολή Αίτησης'}
             </button>

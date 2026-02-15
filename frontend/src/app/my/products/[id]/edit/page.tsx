@@ -124,14 +124,14 @@ function EditProductContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-3xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
             <div className="animate-pulse space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-10 bg-gray-200 rounded"></div>
-              <div className="h-10 bg-gray-200 rounded"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-6 bg-neutral-200 rounded w-1/3"></div>
+              <div className="h-10 bg-neutral-200 rounded"></div>
+              <div className="h-10 bg-neutral-200 rounded"></div>
+              <div className="h-32 bg-neutral-200 rounded"></div>
             </div>
           </div>
         </div>
@@ -140,14 +140,14 @@ function EditProductContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900" data-testid="page-title">
+          <div className="px-6 py-4 border-b border-neutral-200">
+            <h1 className="text-2xl font-bold text-neutral-900" data-testid="page-title">
               Επεξεργασία Προϊόντος
             </h1>
-            <p className="mt-1 text-gray-600">
+            <p className="mt-1 text-neutral-600">
               Ενημερώστε τα στοιχεία του προϊόντος σας
             </p>
           </div>
@@ -160,7 +160,7 @@ function EditProductContent() {
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
                 Τίτλος Προϊόντος *
               </label>
               <input
@@ -169,14 +169,14 @@ function EditProductContent() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="π.χ. Βιολογικές Ντομάτες Κρήτης"
                 data-testid="title-input"
               />
             </div>
 
             <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="slug" className="block text-sm font-medium text-neutral-700 mb-1">
                 Όνομα (slug) *
               </label>
               <input
@@ -192,18 +192,18 @@ function EditProductContent() {
                   setSlug(normalized);
                 }}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="π.χ. biologikes-tomates"
                 data-testid="slug-input"
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-neutral-500">
                 Χρησιμοποιείται στο URL (μόνο λατινικά, παύλες)
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="category" className="block text-sm font-medium text-neutral-700 mb-1">
                   Κατηγορία *
                 </label>
                 <select
@@ -212,7 +212,7 @@ function EditProductContent() {
                   onChange={(e) => setCategory(e.target.value)}
                   required
                   disabled={categoriesLoading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-neutral-100"
                   data-testid="category-select"
                 >
                   <option value="">
@@ -227,7 +227,7 @@ function EditProductContent() {
               </div>
 
               <div>
-                <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="unit" className="block text-sm font-medium text-neutral-700 mb-1">
                   Μονάδα Μέτρησης *
                 </label>
                 <select
@@ -235,7 +235,7 @@ function EditProductContent() {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   data-testid="unit-select"
                 >
                   <option value="">Επιλέξτε μονάδα</option>
@@ -249,7 +249,7 @@ function EditProductContent() {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">
                 Περιγραφή
               </label>
               <textarea
@@ -257,7 +257,7 @@ function EditProductContent() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Περιγραφή προϊόντος..."
                 data-testid="description-textarea"
               />
@@ -265,14 +265,14 @@ function EditProductContent() {
 
             {/* S1-01: Cultivation Type */}
             <div>
-              <label htmlFor="cultivation_type" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="cultivation_type" className="block text-sm font-medium text-neutral-700 mb-1">
                 Τρόπος Καλλιέργειας
               </label>
               <select
                 id="cultivation_type"
                 value={cultivationType}
                 onChange={(e) => setCultivationType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 data-testid="cultivation-type-select"
               >
                 <option value="">Επιλέξτε τρόπο καλλιέργειας</option>
@@ -283,14 +283,14 @@ function EditProductContent() {
                 <option value="traditional_natural">Παραδοσιακή / Φυσική</option>
                 <option value="other">Άλλο</option>
               </select>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-neutral-500">
                 Πώς παράχθηκε το προϊόν;
               </p>
             </div>
 
             {cultivationType && (
               <div>
-                <label htmlFor="cultivation_description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="cultivation_description" className="block text-sm font-medium text-neutral-700 mb-1">
                   Περιγραφή Καλλιέργειας
                 </label>
                 <textarea
@@ -298,7 +298,7 @@ function EditProductContent() {
                   rows={2}
                   value={cultivationDescription}
                   onChange={(e) => setCultivationDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="π.χ. Βιολογική καλλιέργεια χωρίς φυτοφάρμακα, πιστοποιημένη από ΔΗΩ..."
                   data-testid="cultivation-description-textarea"
                 />
@@ -307,7 +307,7 @@ function EditProductContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="price" className="block text-sm font-medium text-neutral-700 mb-1">
                   Τιμή (€) *
                 </label>
                 <input
@@ -318,14 +318,14 @@ function EditProductContent() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="π.χ. 3.50"
                   data-testid="price-input"
                 />
               </div>
 
               <div>
-                <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="stock" className="block text-sm font-medium text-neutral-700 mb-1">
                   Απόθεμα *
                 </label>
                 <input
@@ -335,7 +335,7 @@ function EditProductContent() {
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="π.χ. 25"
                   data-testid="stock-input"
                 />
@@ -358,19 +358,19 @@ function EditProductContent() {
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
                 data-testid="active-checkbox"
               />
-              <label htmlFor="is_active" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="is_active" className="ml-2 block text-sm text-neutral-700">
                 Ενεργό προϊόν (ορατό στους πελάτες)
               </label>
             </div>
 
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 pt-4 border-t border-neutral-200">
               <button
                 type="submit"
                 disabled={busy}
-                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
                 data-testid="submit-btn"
               >
                 {busy ? 'Ενημέρωση...' : 'Ενημέρωση Προϊόντος'}
@@ -379,7 +379,7 @@ function EditProductContent() {
                 type="button"
                 onClick={() => router.back()}
                 disabled={busy}
-                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-neutral-100 text-neutral-700 py-2 px-4 rounded-lg hover:bg-neutral-200 disabled:bg-neutral-50 disabled:cursor-not-allowed transition-colors"
                 data-testid="cancel-btn"
               >
                 Ακύρωση
