@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\AdminNewOrder;
 use App\Mail\ConsumerOrderPlaced;
 use App\Mail\OrderDelivered;
 use App\Mail\OrderShipped;
@@ -110,6 +111,9 @@ class OrderEmailService
 
         // B) Producer notification emails (one per producer)
         $this->sendProducerNotifications($order);
+
+        // C) Admin notification email
+        $this->sendAdminNotification($order);
     }
 
     /**
@@ -220,6 +224,51 @@ class OrderEmailService
                 ]);
                 // Don't throw - graceful failure
             }
+        }
+    }
+
+    /**
+     * Pass ADMIN-NOTIFY-01: Send notification email to admin.
+     */
+    protected function sendAdminNotification(Order $order): void
+    {
+        $email = config('notifications.admin_notify_email');
+        if (!$email) {
+            Log::warning('ADMIN-NOTIFY-01: No admin email configured, skipping', [
+                'order_id' => $order->id,
+            ]);
+            return;
+        }
+
+        // Idempotency check
+        if (OrderNotification::alreadySent($order->id, 'admin', null, 'order_placed')) {
+            Log::debug('ADMIN-NOTIFY-01: Admin order_placed already sent, skipping', [
+                'order_id' => $order->id,
+            ]);
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new AdminNewOrder($order));
+
+            OrderNotification::recordSent(
+                $order->id,
+                'admin',
+                null,
+                $email,
+                'order_placed'
+            );
+
+            Log::info('ADMIN-NOTIFY-01: Admin notification sent', [
+                'order_id' => $order->id,
+                'email' => $this->maskEmail($email),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('ADMIN-NOTIFY-01: Failed to send admin notification', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            // Don't throw - graceful failure
         }
     }
 
