@@ -59,8 +59,8 @@ Before planning what to build, here's what **already works in production**:
 - Add `cultivation_description` text field (free text explanation)
 - Backend: migration + model + API + validation
 - Frontend: badge/icon on product card, filter on catalog, field in producer product form
-**Effort:** M (2 PRs: backend migration+API, frontend UI+filter)
-**Status:** `[ ]`
+**Effort:** M (1 PR: full-stack, 230 LOC)
+**Status:** `[x]` — PR #2908, deployed 2026-02-15
 
 ### S1-02: Reviews & Ratings
 **Why:** Trust signal #1 for any marketplace. Without reviews, buyers hesitate. PRD says Phase 1.
