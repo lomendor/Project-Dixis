@@ -80,20 +80,20 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <Link href="/" className="text-2xl font-bold text-green-600">
+          <Link href="/" className="text-2xl font-bold text-primary">
             Dixis
           </Link>
-          <h1 className="mt-6 text-3xl font-bold text-gray-900" data-testid="page-title">
+          <h1 className="mt-6 text-3xl font-bold text-neutral-900" data-testid="page-title">
             Δημιουργία Λογαριασμού
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-neutral-600">
             Ή{' '}
             <Link
               href="/auth/login"
-              className="font-medium text-green-600 hover:text-green-500"
+              className="font-medium text-primary hover:text-primary-light"
             >
               συνδεθείτε στον υπάρχοντα λογαριασμό σας
             </Link>
@@ -111,7 +111,7 @@ export default function Register() {
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-neutral-700">
                 Ονοματεπώνυμο
               </label>
               <div className="mt-1">
@@ -124,14 +124,14 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   data-testid="register-name"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md placeholder-neutral-400 focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="Εισάγετε το ονοματεπώνυμό σας"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
                 Ηλ. Ταχυδρομείο
               </label>
               <div className="mt-1">
@@ -144,14 +144,14 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   data-testid="register-email"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md placeholder-neutral-400 focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="Εισάγετε το email σας"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="role" className="block text-sm font-medium text-neutral-700">
                 Τύπος Λογαριασμού
               </label>
               <div className="mt-1">
@@ -161,19 +161,19 @@ export default function Register() {
                   value={formData.role}
                   onChange={handleChange}
                   data-testid="register-role"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 >
                   <option value="consumer">Καταναλωτής (Αγορά προϊόντων)</option>
                   <option value="producer">Παραγωγός (Πώληση προϊόντων)</option>
                 </select>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-neutral-500">
                 Επιλέξτε &ldquo;Καταναλωτής&rdquo; για αγορά ή &ldquo;Παραγωγός&rdquo; για πώληση προϊόντων
               </p>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
                 Κωδικός Πρόσβασης
               </label>
               <div className="mt-1">
@@ -186,17 +186,17 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   data-testid="register-password"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md placeholder-neutral-400 focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="Δημιουργήστε έναν κωδικό"
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-neutral-500">
                 Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες
               </p>
             </div>
 
             <div>
-              <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password_confirmation" className="block text-sm font-medium text-neutral-700">
                 Επιβεβαίωση Κωδικού
               </label>
               <div className="mt-1">
@@ -209,7 +209,7 @@ export default function Register() {
                   value={formData.password_confirmation}
                   onChange={handleChange}
                   data-testid="register-password-confirm"
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  className="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md placeholder-neutral-400 focus:outline-none focus:ring-primary focus:border-primary"
                   placeholder="Επιβεβαιώστε τον κωδικό σας"
                 />
               </div>
@@ -220,7 +220,7 @@ export default function Register() {
                 type="submit"
                 disabled={registerLoading}
                 data-testid="register-submit"
-                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
               >
                 {registerLoading && (
                   <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -237,7 +237,7 @@ export default function Register() {
             <div className="text-center">
               <Link
                 href="/"
-                className="text-sm text-gray-600 hover:text-green-600"
+                className="text-sm text-neutral-600 hover:text-primary"
               >
                 ← Επιστροφή στα Προϊόντα
               </Link>

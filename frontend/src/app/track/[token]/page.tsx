@@ -64,11 +64,11 @@ export default async function TrackPage({ params }: { params: { token: string } 
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
           <div className="text-5xl mb-4">🔍</div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Παραγγελία δεν βρέθηκε</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl font-semibold text-neutral-900 mb-2">Παραγγελία δεν βρέθηκε</h1>
+          <p className="text-neutral-600">
             Ο σύνδεσμος παρακολούθησης δεν είναι έγκυρος ή η παραγγελία δεν υπάρχει.
           </p>
         </div>
@@ -89,60 +89,60 @@ export default async function TrackPage({ params }: { params: { token: string } 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-neutral-50 py-8 px-4">
       <div className="max-w-xl mx-auto">
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Παρακολούθηση Παραγγελίας</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 mb-6">Παρακολούθηση Παραγγελίας</h1>
 
           {/* Order Info */}
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-4 border-b">
-              <span className="text-gray-600">Κωδικός:</span>
+              <span className="text-neutral-600">Κωδικός:</span>
               <span className="font-mono font-semibold text-lg">#{order.id}</span>
             </div>
 
             <div className="flex items-center justify-between pb-4 border-b">
-              <span className="text-gray-600">Κατάσταση:</span>
+              <span className="text-neutral-600">Κατάσταση:</span>
               <StatusBadge status={order.status} />
             </div>
 
             <div className="flex items-center justify-between pb-4 border-b">
-              <span className="text-gray-600">Ημερομηνία:</span>
+              <span className="text-neutral-600">Ημερομηνία:</span>
               <span>{formatDateStable(order.created_at)}</span>
             </div>
 
             <div className="flex items-center justify-between pb-4 border-b">
-              <span className="text-gray-600">Προϊόντα:</span>
+              <span className="text-neutral-600">Προϊόντα:</span>
               <span>{order.items_count} τεμάχια</span>
             </div>
 
             <div className="flex items-center justify-between pb-4 border-b">
-              <span className="text-gray-600">Σύνολο:</span>
-              <span className="font-semibold text-emerald-600">{fmt(order.total)}</span>
+              <span className="text-neutral-600">Σύνολο:</span>
+              <span className="font-semibold text-primary">{fmt(order.total)}</span>
             </div>
           </div>
 
           {/* Shipment Info */}
           {order.shipment && (
             <div className="mt-6 pt-6 border-t">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Πληροφορίες Αποστολής</h2>
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Πληροφορίες Αποστολής</h2>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Κατάσταση αποστολής:</span>
+                  <span className="text-neutral-600">Κατάσταση αποστολής:</span>
                   <span className="capitalize">{statusLabels[order.shipment.status] || order.shipment.status}</span>
                 </div>
 
                 {order.shipment.carrier_code && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Μεταφορέας:</span>
+                    <span className="text-neutral-600">Μεταφορέας:</span>
                     <span className="uppercase">{order.shipment.carrier_code}</span>
                   </div>
                 )}
 
                 {order.shipment.tracking_code && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Αριθμός Αποστολής:</span>
+                    <span className="text-neutral-600">Αριθμός Αποστολής:</span>
                     <span className="font-mono">{order.shipment.tracking_code}</span>
                   </div>
                 )}
@@ -153,7 +153,7 @@ export default async function TrackPage({ params }: { params: { token: string } 
                       href={order.shipment.tracking_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                      className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
                     >
                       Παρακολούθηση στον Μεταφορέα
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,20 +170,20 @@ export default async function TrackPage({ params }: { params: { token: string } 
 
                 {order.shipment.shipped_at && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Ημ/νία αποστολής:</span>
+                    <span className="text-neutral-600">Ημ/νία αποστολής:</span>
                     <span>{formatDateStable(order.shipment.shipped_at)}</span>
                   </div>
                 )}
 
                 {order.shipment.estimated_delivery && !order.shipment.delivered_at && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Εκτιμώμενη παράδοση:</span>
+                    <span className="text-neutral-600">Εκτιμώμενη παράδοση:</span>
                     <span>{formatDateStable(order.shipment.estimated_delivery)}</span>
                   </div>
                 )}
 
                 {order.shipment.delivered_at && (
-                  <div className="flex items-center justify-between text-emerald-600">
+                  <div className="flex items-center justify-between text-primary">
                     <span>Παραδόθηκε:</span>
                     <span>{formatDateStable(order.shipment.delivered_at)}</span>
                   </div>
@@ -194,10 +194,10 @@ export default async function TrackPage({ params }: { params: { token: string } 
 
           {/* Footer */}
           <div className="mt-8 pt-6 border-t text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-neutral-500">
               Αυτός ο σύνδεσμος είναι μόνο για ενημέρωση κατάστασης.
             </p>
-            <a href="/" className="text-emerald-600 hover:underline text-sm mt-2 inline-block">
+            <a href="/" className="text-primary hover:underline text-sm mt-2 inline-block">
               Επιστροφή στην αρχική
             </a>
           </div>

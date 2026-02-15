@@ -34,13 +34,13 @@ export function FilterStrip({ label, options, selected, paramName, basePath }: F
 
   const pillBase =
     'px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200'
-  const pillActive = 'bg-green-600 text-white shadow-sm'
+  const pillActive = 'bg-primary text-white shadow-sm'
   const pillInactive =
-    'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+    'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
 
   return (
     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider shrink-0">
+      <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider shrink-0">
         {label}
       </span>
       <button

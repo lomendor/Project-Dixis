@@ -38,7 +38,7 @@ export default function CartClient({ items }: { items: CartItem[] }) {
   };
 
   if (!items.length) {
-    return <p className="text-gray-500">Το καλάθι σας είναι άδειο.</p>;
+    return <p className="text-neutral-500">Το καλάθι σας είναι άδειο.</p>;
   }
 
   return (
@@ -65,7 +65,7 @@ export default function CartClient({ items }: { items: CartItem[] }) {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => updateQty(item.slug, item.qty - 1)}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    className="px-2 py-1 bg-neutral-200 rounded hover:bg-neutral-300"
                     disabled={isPending}
                   >
                     -
@@ -73,7 +73,7 @@ export default function CartClient({ items }: { items: CartItem[] }) {
                   <span className="min-w-[2rem] text-center">{item.qty}</span>
                   <button
                     onClick={() => updateQty(item.slug, item.qty + 1)}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                    className="px-2 py-1 bg-neutral-200 rounded hover:bg-neutral-300"
                     disabled={isPending}
                   >
                     +
