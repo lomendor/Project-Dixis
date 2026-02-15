@@ -31,7 +31,7 @@ function CreateProductContent() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/categories')
+    fetch('/api/public/categories')
       .then((r) => r.json())
       .then((data) => {
         setCategories(data.categories || []);

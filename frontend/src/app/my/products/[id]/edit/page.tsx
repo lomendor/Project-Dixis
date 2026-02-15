@@ -52,7 +52,7 @@ function EditProductContent() {
 
   useEffect(() => {
     // Fetch dynamic categories
-    fetch('/api/categories')
+    fetch('/api/public/categories')
       .then((r) => r.json())
       .then((data) => {
         setCategories(data.categories || []);

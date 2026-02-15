@@ -78,7 +78,7 @@ function ProducerProductsContent() {
 
   // Fetch categories from API
   useEffect(() => {
-    fetch('/api/categories')
+    fetch('/api/public/categories')
       .then((r) => r.json())
       .then((data) => {
         setCategories(data.categories || []);
