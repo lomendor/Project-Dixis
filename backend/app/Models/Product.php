@@ -22,6 +22,8 @@ class Product extends Model
         'category',
         'is_organic',
         'is_seasonal',
+        'cultivation_type',
+        'cultivation_description',
         'image_url',
         'status',
         'is_active',

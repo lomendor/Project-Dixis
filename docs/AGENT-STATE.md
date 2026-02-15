@@ -39,7 +39,7 @@
 
 ## WIP (max 1)
 
-_(empty — pick from NEXT)_
+**S1-01: Cultivation Type** — Adding cultivation_type field (organic, biodynamic, etc.) to products. PR pending.
 
 ---
 
@@ -56,7 +56,7 @@ The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized
 | **5** | B2B & Revenue | Business registration, Subscription plans, Bulk orders |
 | **6** | Community & Vision | Forum, Courses, Carbon footprint, Referral program |
 
-**Current focus: Stage 1, starting with S1-01 (Cultivation Type).**
+**Current focus: Stage 1. S1-01 (Cultivation Type) in progress.**
 
 **Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 

@@ -20,6 +20,7 @@ interface Filters {
   minPrice: string;
   maxPrice: string;
   organic: boolean | null;
+  cultivationType: string;
   sort: string;
   dir: string;
 }
@@ -52,6 +53,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
     minPrice: '',
     maxPrice: '',
     organic: null,
+    cultivationType: '',
     sort: 'created_at',
     dir: 'desc'
   });
@@ -175,14 +177,15 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
       minPrice: '',
       maxPrice: '',
       organic: null,
+      cultivationType: '',
       sort: 'created_at',
       dir: 'desc'
     });
   }, []);
 
-  const hasActiveFilters = useMemo(() => 
-    filters.search || filters.category || filters.producer || 
-    filters.minPrice || filters.maxPrice || filters.organic !== null,
+  const hasActiveFilters = useMemo(() =>
+    filters.search || filters.category || filters.producer ||
+    filters.minPrice || filters.maxPrice || filters.organic !== null || filters.cultivationType,
     [filters]
   );
 
@@ -447,17 +450,20 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                       </div>
                     </div>
 
-                    {/* Organic Filter */}
+                    {/* S1-01: Cultivation Type Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-2">Βιολογικά</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Καλλιέργεια</label>
                       <select
-                        value={filters.organic === null ? '' : filters.organic.toString()}
-                        onChange={(e) => updateFilter('organic', e.target.value === '' ? null : e.target.value === 'true')}
+                        value={filters.cultivationType}
+                        onChange={(e) => updateFilter('cultivationType', e.target.value)}
                         className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                       >
-                        <option value="">Όλα τα προϊόντα</option>
-                        <option value="true">Μόνο βιολογικά</option>
-                        <option value="false">Μη βιολογικά</option>
+                        <option value="">Όλοι οι τύποι</option>
+                        <option value="organic_certified">🌿 Βιολογική (Πιστοποιημένη)</option>
+                        <option value="organic_transitional">🌱 Βιολογική (Μεταβατική)</option>
+                        <option value="biodynamic">✨ Βιοδυναμική</option>
+                        <option value="traditional_natural">🌾 Παραδοσιακή / Φυσική</option>
+                        <option value="conventional">Συμβατική</option>
                       </select>
                     </div>
                   </div>
@@ -492,10 +498,27 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                     {product.name}
                   </h3>
                   
-                  <p className="text-sm text-neutral-600 mb-2">
+                  <p className="text-sm text-neutral-600 mb-1">
                     Από {product.producer.name}
                   </p>
-                  
+
+                  {/* S1-01: Cultivation type mini-badge */}
+                  {product.cultivation_type && product.cultivation_type !== 'conventional' && (
+                    <span className={`inline-block px-2 py-0.5 mb-2 rounded-full text-[10px] font-medium ${
+                      product.cultivation_type === 'organic_certified' ? 'bg-green-100 text-green-800' :
+                      product.cultivation_type === 'organic_transitional' ? 'bg-lime-100 text-lime-800' :
+                      product.cultivation_type === 'biodynamic' ? 'bg-purple-100 text-purple-800' :
+                      product.cultivation_type === 'traditional_natural' ? 'bg-amber-100 text-amber-800' :
+                      'bg-neutral-100 text-neutral-600'
+                    }`}>
+                      {product.cultivation_type === 'organic_certified' ? '🌿 Βιολογικό' :
+                       product.cultivation_type === 'organic_transitional' ? '🌱 Βιολογικό (Μεταβ.)' :
+                       product.cultivation_type === 'biodynamic' ? '✨ Βιοδυναμικό' :
+                       product.cultivation_type === 'traditional_natural' ? '🌾 Παραδοσιακό' :
+                       product.cultivation_type}
+                    </span>
+                  )}
+
                   <div className="flex items-center justify-between mb-4">
                     <span data-testid="product-price" className="text-xl font-bold text-primary">
                       €{product.price} / {product.unit}
