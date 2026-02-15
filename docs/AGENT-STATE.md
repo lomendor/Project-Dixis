@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (S1-01 Cultivation Type deployed to production)
+**Updated**: 2026-02-15 (S1-02 Reviews & Ratings deployed to production)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -56,7 +56,7 @@ The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized
 | **5** | B2B & Revenue | Business registration, Subscription plans, Bulk orders |
 | **6** | Community & Vision | Forum, Courses, Carbon footprint, Referral program |
 
-**Current focus: Stage 1. S1-01 ✅ done. Next: S1-02 (Reviews & Ratings).**
+**Current focus: Stage 1. S1-01 ✅ done. S1-02 ✅ done. Next: S1-03 (Product Q&A).**
 
 **Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 
@@ -82,6 +82,8 @@ The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized
 - **PALETTE-REFRESH** — Freshen brand palette: primary #0f5c2e→#1a7a3e (brighter), new primary-light #1f8f48, Hellenize Navigation labels (all Greek). (PR #2903, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-03** — Brand color round 3: shared components (Navigation, CategoryStrip, ProductCard, ProductSearchInput, AddToCartButton, PaymentMethodSelector, ProducerCard). Eliminates last emerald + off-brand green/gray in customer-facing UI. (PR #2901, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-02** — Brand color round 2: homepage (HomeClient.tsx) hero/filters/product cards, Add-to-Cart button, loading skeletons — all gray→neutral, green→primary. (PR #2899, deployed 2026-02-15) ✅
+- **S1-02: Reviews & Ratings** — Full review system: reviews table (user_id, product_id, order_id, rating 1-5, title, comment, verified_purchase, approved), ReviewController (public list + summary + auth create), ReviewResource, star rating on product cards + detail page, ReviewSection client component with submit form. Verified purchase auto-detection. (PRs #2911, #2912, deployed 2026-02-15) ✅
+- **S1-01: Cultivation Type** — Add cultivation_type (organic_certified, biodynamic, etc.) to products: migration, model, API, form fields, product cards + detail page badges, catalog filter. (PR #2908, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-01** — Unify all storefront pages to brand color palette: gray→neutral, emerald/blue/green→primary across 9 files (cart, checkout, success, order, thank-you, products, Stripe payment). Zero logic changes, pure visual consistency. (PR #2896, deployed 2026-02-15) ✅
 - **PRODUCT-DETAIL-POLISH-01** — Product detail page UX: brand-consistent colors (text-blue-600 → text-primary), chevron breadcrumb, inline price+stock layout, producer name above category. (PR #2893, deployed 2026-02-15) ✅
 - **OG-SEO-FIX-01** — Fix social sharing previews + structured data: all logo.svg refs → logo.png (real Dixis logo). Delete dead logo.svg route handler + old green abstract SVG + 5 unused Next.js boilerplate SVGs. (PR #2892, deployed 2026-02-15) ✅
