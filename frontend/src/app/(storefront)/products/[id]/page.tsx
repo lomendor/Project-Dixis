@@ -134,26 +134,30 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       <main className="container mx-auto px-4 py-6">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
-        <ol className="flex items-center gap-2">
+        <ol className="flex items-center gap-1.5 text-neutral-500">
           <li>
-            <Link href="/" className="text-blue-600 hover:underline">
+            <Link href="/" className="hover:text-primary transition-colors">
               {t('nav.home')}
             </Link>
           </li>
-          <li className="text-gray-400">/</li>
+          <li aria-hidden="true">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </li>
           <li>
-            <Link href="/products" className="text-blue-600 hover:underline">
+            <Link href="/products" className="hover:text-primary transition-colors">
               {t('products.title')}
             </Link>
           </li>
-          <li className="text-gray-400">/</li>
-          <li className="text-gray-600">{p.title}</li>
+          <li aria-hidden="true">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </li>
+          <li className="text-neutral-900 font-medium truncate max-w-[200px]">{p.title}</li>
         </ol>
       </nav>
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Product Image */}
-        <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-100">
           {p.imageUrl ? (
             <Image
               src={p.imageUrl}
@@ -165,12 +169,12 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               data-testid="product-image"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <div className="w-full h-full flex items-center justify-center text-neutral-400">
               <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
@@ -184,57 +188,48 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             {p.title}
           </h1>
 
-          {p.category && (
-            <p className="text-gray-600 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
-          )}
-
           {/* Producer - Pass FIX-MOBILE-CARDS-01: Link to producer page */}
           {p.producer?.name && (
-            <p className="text-sm text-emerald-700 mb-4" data-testid="product-producer">
-              Από τον παραγωγό:{' '}
+            <p className="text-sm text-primary font-semibold uppercase tracking-wider mb-1" data-testid="product-producer">
               {(p.producerSlug || p.producerId) ? (
-                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="font-medium hover:underline">
+                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="hover:underline">
                   {p.producer.name}
                 </Link>
               ) : (
-                <span className="font-medium">{p.producer.name}</span>
+                <span>{p.producer.name}</span>
               )}
             </p>
           )}
 
-          {/* Price */}
-          <div className="mb-4">
-            <span className="text-sm text-gray-600 block mb-1">
-              {t('product.price')}
-            </span>
-            <span className="text-3xl font-bold" data-testid="product-price">
-              {fmt(Number(p.price||0))} / {p.unit}
-            </span>
-          </div>
+          {p.category && (
+            <p className="text-sm text-neutral-500 mb-4">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
+          )}
 
-          {/* Stock Status */}
-          <div className="mb-6" data-testid="product-stock">
-            <span className="text-sm text-gray-600 block mb-1">
-              {t('product.stock')}
+          {/* Price + Stock */}
+          <div className="mb-6 flex items-baseline gap-3">
+            <span className="text-3xl font-bold text-neutral-900" data-testid="product-price">
+              {fmt(Number(p.price||0))}
             </span>
+            <span className="text-lg text-neutral-500">/ {p.unit}</span>
             <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 Number(p.stock||0) > 0
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-primary-pale text-primary'
+                  : 'bg-red-100 text-red-600'
               }`}
+              data-testid="product-stock"
             >
-              {Number(p.stock||0) > 0 ? t('product.inStock') : t('product.outOfStock')} ({Number(p.stock||0)})
+              {Number(p.stock||0) > 0 ? t('product.inStock') : t('product.outOfStock')}
             </span>
           </div>
 
           {/* Description */}
           {p.description && (
             <div className="mb-6">
-              <h2 className="text-lg font-semibold mb-2">
+              <h2 className="text-base font-semibold text-neutral-900 mb-2">
                 {t('product.description')}
               </h2>
-              <p className="text-gray-700 whitespace-pre-line">
+              <p className="text-neutral-600 leading-relaxed whitespace-pre-line">
                 {p.description}
               </p>
             </div>
@@ -254,23 +249,13 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       </div>
 
       {/* Back to Products */}
-      <div className="mt-8">
+      <div className="mt-10 pt-6 border-t border-neutral-200">
         <Link
           href="/products"
-          className="inline-flex items-center text-blue-600 hover:underline"
+          className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors"
         >
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {t('product.backToProducts')}
         </Link>
