@@ -71,13 +71,13 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // Stripe Elements requires js.stripe.com scripts
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+              // Stripe Elements requires js.stripe.com scripts; Plausible analytics script
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://plausible.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              // Stripe API calls require api.stripe.com and r.stripe.com (analytics)
-              `connect-src 'self' ${apiOrigin} ${sentryDsn} https://api.stripe.com https://r.stripe.com`,
+              // Stripe API calls, Sentry, and Plausible analytics
+              `connect-src 'self' ${apiOrigin} ${sentryDsn} https://api.stripe.com https://r.stripe.com https://plausible.io`,
               // Stripe Elements uses iframes from js.stripe.com and hooks.stripe.com
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'none'",
