@@ -71,8 +71,9 @@ Before planning what to build, here's what **already works in production**:
 - Review list on product detail page
 - Producer sees reviews in dashboard
 - Admin moderation (approve/reject)
-**Effort:** L (4 PRs: model+migration, API endpoints, product page UI, producer dashboard integration)
-**Status:** `[ ]`
+**Effort:** L (2 PRs: backend model+migration+API, frontend stars+review section+form)
+**Status:** `[x]` — PRs #2911 (backend), #2912 (frontend), deployed 2026-02-15
+**Note:** Producer dashboard reviews + admin moderation deferred to S1-02b when needed.
 
 ### S1-03: Q&A on Product Pages
 **Why:** Reduces purchase anxiety. Publicly visible answers help ALL visitors. PRD says Phase 1.
