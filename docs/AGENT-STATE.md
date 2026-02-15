@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (BACKLOG — master roadmap created from owner's PRD)
+**Updated**: 2026-02-15 (S1-01 Cultivation Type deployed to production)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -39,7 +39,7 @@
 
 ## WIP (max 1)
 
-**S1-01: Cultivation Type** — Adding cultivation_type field (organic, biodynamic, etc.) to products. PR pending.
+_(empty — pick from NEXT)_
 
 ---
 
@@ -56,7 +56,7 @@ The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized
 | **5** | B2B & Revenue | Business registration, Subscription plans, Bulk orders |
 | **6** | Community & Vision | Forum, Courses, Carbon footprint, Referral program |
 
-**Current focus: Stage 1. S1-01 (Cultivation Type) in progress.**
+**Current focus: Stage 1. S1-01 ✅ done. Next: S1-02 (Reviews & Ratings).**
 
 **Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 
@@ -75,6 +75,8 @@ The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized
 
 ## Recently Done (last 10)
 
+- **S1-01: CULTIVATION-TYPE** — Products now track cultivation method (organic_certified, biodynamic, traditional_natural, etc.). Migration + model + API filter + producer forms + product detail badge + homepage filter. Replaces binary is_organic with richer enum. (PR #2908, deployed 2026-02-15) ✅
+- **BACKLOG-ROADMAP** — Master backlog created from owner's PRD with 6 stages and 25+ tickets. (PR #2907, 2026-02-15) ✅
 - **ADMIN-NOTIFY-01** — Admin email notification when new order placed: AdminNewOrder Mailable, Greek Blade template (order total, customer, payment method, admin link), hooked into OrderEmailService as Step C. Idempotent, feature-flagged. ADMIN_NOTIFY_EMAIL set on prod. (PR #2905, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-04** — Brand color round 4: auth pages (login, register, forgot/reset-password, verify-email), CartClient, CartBadge, CustomerDetailsForm, track page, Toast, FilterStrip — all gray→neutral, green/emerald→primary. (PR #2904, deployed 2026-02-15) ✅
 - **PALETTE-REFRESH** — Freshen brand palette: primary #0f5c2e→#1a7a3e (brighter), new primary-light #1f8f48, Hellenize Navigation labels (all Greek). (PR #2903, deployed 2026-02-15) ✅
