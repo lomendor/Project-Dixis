@@ -98,8 +98,8 @@ export default function ProducerOrdersPage() {
         onClick={() => setActiveFilter(status)}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
           isActive
-            ? 'bg-green-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            ? 'bg-primary text-white'
+            : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-300'
         }`}
       >
         {label} ({count})
@@ -113,16 +113,16 @@ export default function ProducerOrdersPage() {
         <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-neutral-900">
               {t('producerOrders.orderNumber').replace('{id}', String(order.id))}
             </h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-neutral-600 mt-1">
               {order.user?.name || t('producerOrders.guest')}
             </p>
             <time
               dateTime={order.created_at}
               suppressHydrationWarning
-              className="block text-sm text-gray-500"
+              className="block text-sm text-neutral-500"
             >
               {mounted
                 ? new Date(order.created_at).toLocaleString('el-GR', {
@@ -143,7 +143,7 @@ export default function ProducerOrdersPage() {
             >
               {getStatusLabel(order.status)}
             </span>
-            <p className="text-xl font-bold text-gray-900 mt-2">
+            <p className="text-xl font-bold text-neutral-900 mt-2">
               {formatCurrency(parseFloat(order.total))}
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function ProducerOrdersPage() {
 
         {/* Order Items */}
         <div className="border-t pt-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">
+          <h4 className="text-sm font-medium text-neutral-700 mb-2">
             {t('producerOrders.products')} ({(order.orderItems ?? []).length})
           </h4>
           <div className="space-y-2">
@@ -160,13 +160,13 @@ export default function ProducerOrdersPage() {
                 key={item.id}
                 className="flex justify-between items-center text-sm"
               >
-                <span className="text-gray-700">
+                <span className="text-neutral-700">
                   {item.product_name || item.product?.name}
                 </span>
-                <span className="text-gray-600">
+                <span className="text-neutral-600">
                   {item.quantity} × {formatCurrency(parseFloat(item.unit_price))}
                   {' = '}
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-neutral-900">
                     {formatCurrency(parseFloat(item.total_price))}
                   </span>
                 </span>
@@ -201,12 +201,12 @@ export default function ProducerOrdersPage() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-gray-50" data-testid="producer-orders-page">
+      <div className="min-h-screen bg-neutral-50" data-testid="producer-orders-page">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
+            <p className="text-neutral-600 mt-2">
               {t('producerOrders.subtitle')}
             </p>
           </div>
@@ -267,7 +267,7 @@ export default function ProducerOrdersPage() {
               <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={loadOrders}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg transition-colors"
               >
                 {t('producerOrders.tryAgain')}
               </button>
@@ -275,7 +275,7 @@ export default function ProducerOrdersPage() {
           ) : orders.length === 0 ? (
             /* Empty State */
             <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="text-neutral-400 mb-4">
                 <svg
                   className="mx-auto h-12 w-12"
                   fill="none"
@@ -290,10 +290,10 @@ export default function ProducerOrdersPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-neutral-900 mb-2">
                 {t('producerOrders.noOrders')}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-neutral-600">
                 {activeFilter === 'all'
                   ? t('producerOrders.noOrdersYet')
                   : t('producerOrders.noOrdersStatus').replace('{status}', getStatusLabel(activeFilter as OrderStatus))}

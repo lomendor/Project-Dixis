@@ -186,14 +186,14 @@ function ProducerProductsContent() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
             <div className="animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
+              <div className="h-6 bg-neutral-200 rounded w-1/3 mb-6"></div>
               <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-20 bg-gray-200 rounded"></div>
+                  <div key={i} className="h-20 bg-neutral-200 rounded"></div>
                 ))}
               </div>
             </div>
@@ -206,7 +206,7 @@ function ProducerProductsContent() {
   // Redirect to onboarding if not approved
   if (!producerStatus.isApproved) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-neutral-50 py-8">
         <div className="max-w-2xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-sm p-8">
             <div className="text-center" data-testid="not-approved-notice">
@@ -216,15 +216,15 @@ function ProducerProductsContent() {
                   <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">📝</span>
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="no-profile-title">
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-2" data-testid="no-profile-title">
                     Απαιτείται Αίτηση Παραγωγού
                   </h2>
-                  <p className="text-gray-600 mb-6" data-testid="no-profile-message">
+                  <p className="text-neutral-600 mb-6" data-testid="no-profile-message">
                     Για να διαχειρίζεστε προϊόντα, πρέπει πρώτα να υποβάλετε αίτηση παραγωγού και να εγκριθείτε.
                   </p>
                   <button
                     onClick={() => router.push('/producer/onboarding')}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                    className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-light transition-colors"
                     data-testid="goto-onboarding-btn"
                   >
                     Υποβολή Αίτησης Παραγωγού
@@ -236,10 +236,10 @@ function ProducerProductsContent() {
                   <div className="w-16 h-16 mx-auto mb-4 bg-yellow-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">⏳</span>
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="pending-approval-title">
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-2" data-testid="pending-approval-title">
                     Ολοκληρώστε το Προφίλ σας
                   </h2>
-                  <p className="text-gray-600 mb-6" data-testid="pending-approval-message">
+                  <p className="text-neutral-600 mb-6" data-testid="pending-approval-message">
                     Το προφίλ σας δεν έχει ενεργοποιηθεί ακόμα. Ολοκληρώστε τη ρύθμιση για να διαχειρίζεστε προϊόντα.
                   </p>
                   <div className="space-y-3">
@@ -253,7 +253,7 @@ function ProducerProductsContent() {
                     <br />
                     <button
                       onClick={() => router.push('/producer/dashboard')}
-                      className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="bg-neutral-100 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-200 transition-colors"
                       data-testid="goto-dashboard-btn"
                     >
                       Πίνακας Ελέγχου
@@ -266,16 +266,16 @@ function ProducerProductsContent() {
                   <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
                     <span className="text-2xl">❌</span>
                   </div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="rejected-title">
+                  <h2 className="text-xl font-semibold text-neutral-900 mb-2" data-testid="rejected-title">
                     Λογαριασμός Ανενεργός
                   </h2>
-                  <p className="text-gray-600 mb-6" data-testid="rejected-message">
+                  <p className="text-neutral-600 mb-6" data-testid="rejected-message">
                     Ο λογαριασμός σας είναι προσωρινά ανενεργός. Επικοινωνήστε μαζί μας για περισσότερες πληροφορίες.
                   </p>
                   <div className="space-y-3">
                     <button
                       onClick={() => router.push('/producer/onboarding')}
-                      className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                      className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-light transition-colors"
                       data-testid="resubmit-btn"
                     >
                       Νέα Αίτηση
@@ -283,7 +283,7 @@ function ProducerProductsContent() {
                     <br />
                     <button
                       onClick={() => router.push('/contact')}
-                      className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="bg-neutral-100 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-200 transition-colors"
                       data-testid="contact-support-btn"
                     >
                       Επικοινωνία
@@ -300,22 +300,22 @@ function ProducerProductsContent() {
 
   // Approved producer - show products management
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-neutral-200">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900" data-testid="page-title">
+                <h1 className="text-2xl font-bold text-neutral-900" data-testid="page-title">
                   Διαχείριση Προϊόντων
                 </h1>
-                <p className="mt-1 text-gray-600">
+                <p className="mt-1 text-neutral-600">
                   Προσθήκη και επεξεργασία των προϊόντων σας
                 </p>
               </div>
               <button
                 onClick={() => router.push('/my/products/create')}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
                 data-testid="add-product-btn"
               >
                 + Νέο Προϊόν
@@ -330,7 +330,7 @@ function ProducerProductsContent() {
           )}
 
           {/* Search and Filter */}
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-neutral-200">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <input
@@ -338,7 +338,7 @@ function ProducerProductsContent() {
                   placeholder="Αναζήτηση προϊόντος..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   data-testid="search-input"
                 />
               </div>
@@ -346,7 +346,7 @@ function ProducerProductsContent() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   data-testid="category-filter"
                 >
                   <option value="">Όλες οι κατηγορίες</option>
@@ -360,7 +360,7 @@ function ProducerProductsContent() {
               {(searchQuery || categoryFilter) && (
                 <button
                   onClick={() => { setSearchQuery(''); setCategoryFilter(''); }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-neutral-600 hover:text-neutral-800 border border-neutral-300 rounded-lg hover:bg-neutral-50"
                   data-testid="clear-filters-btn"
                 >
                   Καθαρισμός
@@ -372,13 +372,13 @@ function ProducerProductsContent() {
           <div className="p-6" data-testid="products-section">
             {products.length === 0 ? (
               <div className="text-center py-12" data-testid="no-products-state">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
                   <span className="text-2xl">{searchQuery || categoryFilter ? '🔍' : '📦'}</span>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-neutral-900 mb-2">
                   {searchQuery || categoryFilter ? 'Δεν βρέθηκαν προϊόντα' : 'Κανένα προϊόν ακόμα'}
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-neutral-600 mb-6">
                   {searchQuery || categoryFilter
                     ? 'Δοκιμάστε διαφορετικούς όρους αναζήτησης ή φίλτρα.'
                     : 'Ξεκινήστε προσθέτοντας το πρώτο σας προϊόν για να το δουν οι πελάτες.'}
@@ -386,7 +386,7 @@ function ProducerProductsContent() {
                 {searchQuery || categoryFilter ? (
                   <button
                     onClick={() => { setSearchQuery(''); setCategoryFilter(''); }}
-                    className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="bg-neutral-100 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-200 transition-colors"
                     data-testid="clear-filters-empty-btn"
                   >
                     Καθαρισμός Φίλτρων
@@ -394,7 +394,7 @@ function ProducerProductsContent() {
                 ) : (
                   <button
                     onClick={() => router.push('/my/products/create')}
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                    className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-light transition-colors"
                     data-testid="add-first-product-btn"
                   >
                     Προσθήκη Πρώτου Προϊόντος
@@ -403,30 +403,30 @@ function ProducerProductsContent() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200" data-testid="products-table">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-neutral-200" data-testid="products-table">
+                  <thead className="bg-neutral-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Εικόνα
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Προϊόν
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Τιμή
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Απόθεμα
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Κατάσταση
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Ενέργειες
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-neutral-200">
                     {products.map((product) => (
                       <tr key={product.id} data-testid={`product-row-${product.id}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -438,28 +438,28 @@ function ProducerProductsContent() {
                               data-testid={`product-thumbnail-${product.id}`}
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center" data-testid={`product-placeholder-${product.id}`}>
-                              <span className="text-gray-400 text-xs">📦</span>
+                            <div className="w-12 h-12 bg-neutral-200 rounded flex items-center justify-center" data-testid={`product-placeholder-${product.id}`}>
+                              <span className="text-neutral-400 text-xs">📦</span>
                             </div>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-gray-900" data-testid={`product-name-${product.id}`}>
+                            <div className="text-sm font-medium text-neutral-900" data-testid={`product-name-${product.id}`}>
                               {product.title || product.name}
                             </div>
-                            <div className="text-sm text-gray-500">{product.name}</div>
+                            <div className="text-sm text-neutral-500">{product.name}</div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`product-price-${product.id}`}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900" data-testid={`product-price-${product.id}`}>
                           {product.price.toFixed(2)} {product.currency}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-testid={`product-stock-${product.id}`}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900" data-testid={`product-stock-${product.id}`}>
                           {product.stock}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap" data-testid={`product-status-${product.id}`}>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            product.is_active ? 'bg-primary-pale text-primary' : 'bg-neutral-100 text-neutral-800'
                           }`}>
                             {product.is_active ? 'Ενεργό' : 'Ανενεργό'}
                           </span>
@@ -474,7 +474,7 @@ function ProducerProductsContent() {
                           </button>
                           <button
                             onClick={() => router.push(`/products/${product.id}`)}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-primary hover:text-primary-light"
                             data-testid={`view-product-${product.id}`}
                           >
                             Προβολή
@@ -500,12 +500,12 @@ function ProducerProductsContent() {
         {deleteModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-modal">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-              <h3 className="text-xl font-bold text-gray-900 mb-4" data-testid="delete-modal-title">
+              <h3 className="text-xl font-bold text-neutral-900 mb-4" data-testid="delete-modal-title">
                 Επιβεβαίωση Διαγραφής
               </h3>
-              <p className="text-gray-600 mb-6" data-testid="delete-modal-message">
+              <p className="text-neutral-600 mb-6" data-testid="delete-modal-message">
                 Είστε σίγουροι ότι θέλετε να διαγράψετε το προϊόν{' '}
-                <strong className="text-gray-900">&quot;{productToDelete?.name}&quot;</strong>;
+                <strong className="text-neutral-900">&quot;{productToDelete?.name}&quot;</strong>;
                 <br />
                 Η ενέργεια αυτή δεν μπορεί να αναιρεθεί.
               </p>
@@ -513,7 +513,7 @@ function ProducerProductsContent() {
                 <button
                   onClick={() => setDeleteModalOpen(false)}
                   disabled={deleting}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   data-testid="delete-modal-cancel"
                 >
                   Ακύρωση

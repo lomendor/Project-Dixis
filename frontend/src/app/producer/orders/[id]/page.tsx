@@ -164,12 +164,12 @@ export default function ProducerOrderDetailsPage() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Link */}
           <Link
             href="/producer/orders"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+            className="inline-flex items-center text-sm text-neutral-600 hover:text-neutral-900 mb-6"
           >
             <svg
               className="w-4 h-4 mr-2"
@@ -211,7 +211,7 @@ export default function ProducerOrderDetailsPage() {
               <p className="text-red-600 mb-4">{error}</p>
               <button
                 onClick={loadOrder}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg transition-colors"
               >
                 Δοκιμάστε Ξανά
               </button>
@@ -222,10 +222,10 @@ export default function ProducerOrderDetailsPage() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-bold text-neutral-900">
                       Παραγγελία #{order.id}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-neutral-500 mt-1">
                       {new Date(order.created_at).toLocaleDateString('el-GR', {
                         year: 'numeric',
                         month: 'long',
@@ -248,7 +248,7 @@ export default function ProducerOrderDetailsPage() {
               {/* Status Update Section */}
               {getNextStatus(order.status) && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h2 className="text-lg font-semibold text-neutral-900 mb-4">
                     Ενημέρωση Κατάστασης
                   </h2>
                   <div className="flex items-center gap-4">
@@ -259,8 +259,8 @@ export default function ProducerOrderDetailsPage() {
                       disabled={updating}
                       className={`flex-1 sm:flex-none px-6 py-3 rounded-lg font-medium transition-colors ${
                         updating
-                          ? 'bg-gray-300 cursor-not-allowed'
-                          : 'bg-green-600 hover:bg-green-700 text-white'
+                          ? 'bg-neutral-300 cursor-not-allowed'
+                          : 'bg-primary hover:bg-primary-light text-white'
                       }`}
                     >
                       {updating ? (
@@ -290,7 +290,7 @@ export default function ProducerOrderDetailsPage() {
                         nextStatusLabels[order.status]
                       )}
                     </button>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-neutral-500">
                       Τρέχουσα: {statusLabels[order.status]} →{' '}
                       {statusLabels[getNextStatus(order.status)!]}
                     </p>
@@ -354,20 +354,20 @@ export default function ProducerOrderDetailsPage() {
 
               {/* Customer Info + Shipping Address */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-neutral-900 mb-4">
                   Πληροφορίες Πελάτη
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500">Όνομα</p>
-                    <p className="text-gray-900">
+                    <p className="text-sm text-neutral-500">Όνομα</p>
+                    <p className="text-neutral-900">
                       {order.user?.name || 'Επισκέπτης'}
                     </p>
                   </div>
                   {(order.user?.email || order.shipping_address?.email) && (
                     <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="text-gray-900">
+                      <p className="text-sm text-neutral-500">Email</p>
+                      <p className="text-neutral-900">
                         {order.user?.email || order.shipping_address?.email}
                       </p>
                     </div>
@@ -409,7 +409,7 @@ export default function ProducerOrderDetailsPage() {
 
               {/* Order Items */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-neutral-900 mb-4">
                   Προϊόντα ({order.orderItems.length})
                 </h2>
                 <div className="divide-y">
@@ -419,14 +419,14 @@ export default function ProducerOrderDetailsPage() {
                       className="py-4 flex justify-between items-center"
                     >
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-neutral-900">
                           {item.product_name || item.product?.name}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-neutral-500">
                           {item.quantity} × {formatCurrency(parseFloat(item.unit_price))}
                         </p>
                       </div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-neutral-900">
                         {formatCurrency(parseFloat(item.total_price))}
                       </p>
                     </div>
@@ -436,15 +436,15 @@ export default function ProducerOrderDetailsPage() {
                 {/* Order Summary */}
                 <div className="border-t pt-4 mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Υποσύνολο</span>
-                    <span className="text-gray-900">
+                    <span className="text-neutral-500">Υποσύνολο</span>
+                    <span className="text-neutral-900">
                       {formatCurrency(parseFloat(order.subtotal))}
                     </span>
                   </div>
                   {parseFloat(order.shipping_cost) > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Μεταφορικά</span>
-                      <span className="text-gray-900">
+                      <span className="text-neutral-500">Μεταφορικά</span>
+                      <span className="text-neutral-900">
                         {formatCurrency(parseFloat(order.shipping_cost))}
                       </span>
                     </div>
