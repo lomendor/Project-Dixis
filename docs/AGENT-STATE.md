@@ -66,6 +66,8 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **PHASE-4B: Cart Sync Race Fix** — Version-counter optimistic lock in Zustand cart store. If user adds item during login cart sync, mergeServerCart() merges instead of overwriting — zero item loss. (PR #2890, deployed 2026-02-15) ✅
+- **UI-POLISH: Favicon + Minimal Header** — Replaced all icons (favicon, PWA, apple-touch) with correct Dixis logo (fruits/leaves). Removed Επικοινωνία from header nav (footer only). Cleaner, more minimal navigation. (PRs #2885-#2887, deployed 2026-02-15) ✅
 - **PHASE-4A: Zod API Validation** — Non-blocking Zod schemas for 12 critical API response endpoints (Product, Order, ShippingQuote, User, Auth, PaymentConfig). Validates at runtime, logs mismatches to Sentry, never crashes. Also fixed CI E2E setup (mock_session cookie for middleware auth). (PR #2883, deployed 2026-02-15) ✅
 - **GREEK-UI-POLISH** — Hellenize last English strings: SkipLink ("Μετάβαση στο περιεχόμενο"), Email labels ("Ηλ. Ταχυδρομείο"). Fixed /producers public route (exact segment matching in requiresAuth). (PRs #2879, #2881, deployed 2026-02-15) ✅
 - **STRATEGIC-FIX-2B + V1-REALITY-SYNC** — Middleware auth for /producer, /admin, /account, /ops (cookie-based redirect to login). Updated all PRD docs to match production reality (email, Stripe, verification all DONE). Email system verified e2e. (PRs #2872-#2876, deployed 2026-02-15) ✅

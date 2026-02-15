@@ -103,6 +103,7 @@
 ### 4B. Cart Sync Race Condition Fix
 - Add debounce/lock to cart sync in AuthContext
 - Prevent add-to-cart during sync-in-flight
+**Status**: [x] PR #2890 — version-counter optimistic lock, mergeServerCart (zero UI disruption)
 
 ### 4C. Prisma Schema Cleanup
 - Remove duplicate fields (total vs total_amount on Order)
@@ -134,4 +135,7 @@
 | 2026-02-15 | 2B: Middleware Auth | PRs #2873-#2876 | Cookie-based auth for /producer, /admin, /account, /ops |
 | 2026-02-15 | Greek UI Polish | PRs #2879, #2881 | SkipLink + Email labels hellenized, /producers public fix |
 | 2026-02-15 | 4A: Zod API Validation | PR #2883 | 12 endpoints validated, non-blocking Sentry logging |
+| 2026-02-15 | UI: Favicon + Logo | PRs #2885-#2887 | Correct Dixis logo for favicon, header, all PWA icons |
+| 2026-02-15 | UI: Minimal Header | PR #2885 | Remove Επικοινωνία from header nav (footer only) |
+| 2026-02-15 | 4B: Cart Sync Race | PR #2890 | Version-counter merge prevents item loss during login sync |
 | | | | |
