@@ -66,6 +66,8 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **PHASE-4A: Zod API Validation** — Non-blocking Zod schemas for 12 critical API response endpoints (Product, Order, ShippingQuote, User, Auth, PaymentConfig). Validates at runtime, logs mismatches to Sentry, never crashes. Also fixed CI E2E setup (mock_session cookie for middleware auth). (PR #2883, deployed 2026-02-15) ✅
+- **GREEK-UI-POLISH** — Hellenize last English strings: SkipLink ("Μετάβαση στο περιεχόμενο"), Email labels ("Ηλ. Ταχυδρομείο"). Fixed /producers public route (exact segment matching in requiresAuth). (PRs #2879, #2881, deployed 2026-02-15) ✅
 - **STRATEGIC-FIX-2B + V1-REALITY-SYNC** — Middleware auth for /producer, /admin, /account, /ops (cookie-based redirect to login). Updated all PRD docs to match production reality (email, Stripe, verification all DONE). Email system verified e2e. (PRs #2872-#2876, deployed 2026-02-15) ✅
 - **SECURITY-AUDIT-FIX-01** — Deep functional audit found CRITICAL: GET /api/v1/public/orders exposed ALL orders without auth. Fixed: removed public order list/detail routes, added UUID-based order lookup (by-token), thank-you page uses token not ID, commission-preview requires auth. Also fixed: homepage product images, producers location field mapping, PM2 env vars for standalone. (PRs #2826-#2828, deployed 2026-02-13) ✅
 - **LAUNCH-POLISH-01** — Hellenize ALL metadata (title, description, OG, Twitter, JSON-LD, manifest). Rebrand "Project Dixis" → "Dixis". Remove fake "500+" social proof. Enable card payments on prod (Stripe flag + publishable key). (PRs #2802, #2804, deployed 2026-02-13) ✅
