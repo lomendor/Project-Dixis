@@ -13,14 +13,36 @@ import type { NextRequest } from 'next/server';
  * at the project root. All middleware logic MUST live here.
  */
 
-const PROTECTED_PREFIXES = ['/producer', '/admin', '/account', '/ops']
 const LOGIN_PATH = '/auth/login'
+
+// Public routes that START with /producer but are NOT protected
+const PUBLIC_PRODUCER_PATHS = ['/producers']
+
+/**
+ * Check if a path requires authentication.
+ * Uses exact segment matching to avoid false positives:
+ * - /producer/dashboard → protected ✅
+ * - /producers (public listing) → NOT protected ✅
+ * - /producers/join → NOT protected ✅
+ */
+function requiresAuth(pathname: string): boolean {
+  // Public paths that would otherwise match
+  if (PUBLIC_PRODUCER_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
+    return false
+  }
+  // Protected prefixes — must match exact segment boundary
+  if (pathname === '/producer' || pathname.startsWith('/producer/')) return true
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return true
+  if (pathname === '/account' || pathname.startsWith('/account/')) return true
+  if (pathname === '/ops' || pathname.startsWith('/ops/')) return true
+  return false
+}
 
 export const config = {
   matcher: [
-    // Canonical redirect applies to all paths
+    // Canonical redirect + auth guard applies to all non-static paths
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
-    // Protected endpoints hidden in production
+    // Protected API endpoints hidden in production
     '/api/ci/:path*',
     '/api/dev/:path*',
     '/api/ops/test-error',
@@ -45,8 +67,7 @@ export default function middleware(req: NextRequest) {
   // 2. Strategic Fix 2B: Server-side auth for protected pages
   //    Checks for session cookie (Sanctum SPA) or mock cookie (E2E tests).
   //    Does NOT verify token validity — just checks presence for fast redirect.
-  const needsAuth = PROTECTED_PREFIXES.some(prefix => pathname.startsWith(prefix))
-  if (needsAuth) {
+  if (requiresAuth(pathname)) {
     const hasSession = req.cookies.has('dixis_session') || req.cookies.has('mock_session')
     if (!hasSession) {
       const loginUrl = new URL(LOGIN_PATH, req.url)
