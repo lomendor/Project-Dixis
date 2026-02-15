@@ -85,8 +85,8 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-primary">
-              Project Dixis
+            <Link href="/" className="text-xl font-bold text-primary-dark">
+              Dixis
             </Link>
           </div>
 
@@ -98,26 +98,18 @@ export default function Navigation() {
                 className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                 data-testid="nav-products"
               >
-                Products
-              </Link>
-
-              <Link
-                href="/contact"
-                className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-                data-testid="nav-contact"
-              >
-                Επικοινωνία
+                Προϊόντα
               </Link>
 
               <CartIcon />
-              
+
               {isAuthenticated && isProducer && (
                 <Link
                   href="/producer/dashboard"
                   className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-dashboard"
                 >
-                  Dashboard
+                  Πίνακας
                 </Link>
               )}
             </div>
@@ -128,14 +120,14 @@ export default function Navigation() {
             {isAuthenticated ? (
               <div data-testid="user-menu" className="flex items-center space-x-4">
                 <span className="text-sm text-neutral-700">
-                  Hello, {user?.name}
+                  Γεια, {user?.name}
                 </span>
                 <button
                   data-testid="logout-btn"
                   onClick={handleLogout}
                   className="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Logout
+                  Αποσύνδεση
                 </button>
               </div>
             ) : (
@@ -145,14 +137,14 @@ export default function Navigation() {
                   className="text-neutral-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-login"
                 >
-                  Login
+                  Σύνδεση
                 </Link>
                 <Link
                   href="/auth/register"
                   className="bg-primary hover:bg-primary-light text-white px-3 py-2 rounded-md text-sm font-medium"
                   data-testid="nav-register"
                 >
-                  Sign Up
+                  Εγγραφή
                 </Link>
               </div>
             )}
@@ -200,29 +192,21 @@ export default function Navigation() {
                 className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                 data-testid="mobile-nav-products"
               >
-                Products
-              </Link>
-
-              <Link
-                href="/contact"
-                className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-                data-testid="mobile-nav-contact"
-              >
-                Επικοινωνία
+                Προϊόντα
               </Link>
 
               <CartIcon
                 className="block text-base font-medium"
                 isMobile={true}
               />
-              
+
               {isAuthenticated && isProducer && (
                 <Link
                   href="/producer/dashboard"
                   className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                   data-testid="mobile-nav-dashboard"
                   >
-                  Dashboard
+                  Πίνακας
                 </Link>
               )}
             </div>
@@ -243,7 +227,7 @@ export default function Navigation() {
                       {user?.name}
                     </div>
                     <div className="text-sm font-medium text-neutral-500">
-                      {user?.role === 'producer' ? 'Producer' : 'Consumer'}
+                      {user?.role === 'producer' ? 'Παραγωγός' : 'Πελάτης'}
                     </div>
                   </div>
                   <button

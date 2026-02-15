@@ -14,10 +14,11 @@ const config: Config = {
           DEFAULT: 'hsl(var(--brand-primary))',
           foreground: 'hsl(var(--brand-primary-foreground))'
         },
-        // Primary - Cyprus Green (agricultural, trust, freshness)
+        // Primary - Fresh Mediterranean Green (alive, natural, inviting)
         primary: {
-          DEFAULT: '#0f5c2e',
-          light: '#1a7a3e',
+          DEFAULT: '#1a7a3e',
+          light: '#1f8f48',
+          dark: '#0f5c2e',
           pale: '#e8f5ed',
           foreground: '#ffffff'
         },
@@ -62,7 +63,7 @@ const config: Config = {
         'sm': '0 1px 2px rgba(0,0,0,0.05)',
         'md': '0 4px 12px rgba(0,0,0,0.08)',
         'lg': '0 8px 24px rgba(0,0,0,0.12)',
-        'glow': '0 0 20px rgba(15,92,46,0.15)',
+        'glow': '0 0 20px rgba(26,122,62,0.15)',
         'card': '0 2px 8px rgba(0,0,0,0.06), 0 8px 16px rgba(0,0,0,0.04)',
         'card-hover': '0 4px 12px rgba(0,0,0,0.1), 0 12px 24px rgba(0,0,0,0.08)'
       },
