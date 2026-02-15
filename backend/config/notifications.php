@@ -62,4 +62,15 @@ return [
     |
     */
     'email_verification_required' => env('EMAIL_VERIFICATION_REQUIRED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pass ADMIN-NOTIFY-01: Admin Notification Email
+    |--------------------------------------------------------------------------
+    |
+    | Email address that receives admin notifications for new orders.
+    | Falls back to MAIL_FROM_ADDRESS if not set.
+    |
+    */
+    'admin_notify_email' => env('ADMIN_NOTIFY_EMAIL', env('MAIL_FROM_ADDRESS', 'info@dixis.gr')),
 ];
