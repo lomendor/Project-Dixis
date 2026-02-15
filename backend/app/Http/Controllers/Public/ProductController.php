@@ -23,7 +23,14 @@ class ProductController extends Controller
 
         $query = Product::query()->with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
-        }, 'producer']);
+        }, 'producer'])
+            // S1-02: Include review stats (approved reviews only)
+            ->withCount(['reviews as reviews_count' => function ($q) {
+                $q->where('is_approved', true);
+            }])
+            ->withAvg(['reviews as reviews_avg_rating' => function ($q) {
+                $q->where('is_approved', true);
+            }], 'rating');
 
         // Default to active products only
         $query->where('is_active', true);
@@ -133,6 +140,11 @@ class ProductController extends Controller
             // Format price consistently
             $data['price'] = number_format($product->price, 2);
 
+            // S1-02: Include review stats
+            $data['reviews_count'] = (int) ($product->reviews_count ?? 0);
+            $data['reviews_avg_rating'] = $product->reviews_avg_rating
+                ? round((float) $product->reviews_avg_rating, 1) : null;
+
             return $data;
         });
 
@@ -155,6 +167,12 @@ class ProductController extends Controller
         $query = Product::with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
         }, 'producer'])
+            ->withCount(['reviews as reviews_count' => function ($q) {
+                $q->where('is_approved', true);
+            }])
+            ->withAvg(['reviews as reviews_avg_rating' => function ($q) {
+                $q->where('is_approved', true);
+            }], 'rating')
             ->where('is_active', true);
 
         if (is_numeric($id)) {
@@ -178,6 +196,11 @@ class ProductController extends Controller
 
         // Format price consistently
         $data['price'] = number_format($product->price, 2);
+
+        // S1-02: Include review stats
+        $data['reviews_count'] = (int) ($product->reviews_count ?? 0);
+        $data['reviews_avg_rating'] = $product->reviews_avg_rating
+            ? round((float) $product->reviews_avg_rating, 1) : null;
 
         // Pass PERF-PRODUCTS-CACHE-01: Add cache headers for CDN/proxy caching
         return response()->json($data)

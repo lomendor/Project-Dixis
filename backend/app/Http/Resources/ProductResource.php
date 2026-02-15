@@ -43,6 +43,11 @@ class ProductResource extends JsonResource
                 'business_name' => $this->producer?->business_name,
                 'location' => $this->producer?->location,
             ]),
+            // S1-02: Review summary (loaded via withCount/withAvg)
+            'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
+            'reviews_avg_rating' => $this->when(isset($this->reviews_avg_rating), function () {
+                return $this->reviews_avg_rating ? round((float) $this->reviews_avg_rating, 1) : null;
+            }),
         ];
     }
 }
