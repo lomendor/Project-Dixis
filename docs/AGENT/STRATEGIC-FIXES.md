@@ -98,6 +98,7 @@
 - All `apiClient.request<T>()` calls trust backend blindly
 - Add Zod schemas for Order, Product, Producer, ShippingQuote
 - Validate response before returning
+**Status**: [x] PR #2883 — 12 endpoints validated, non-blocking (Sentry-logged)
 
 ### 4B. Cart Sync Race Condition Fix
 - Add debounce/lock to cart sync in AuthContext
@@ -131,4 +132,6 @@
 | 2026-02-14 | 2A: Auth Token Migration (FE) | PR #2868 | CSRF cookie fetch, XSRF header, simplified initAuth (56 LOC) |
 | 2026-02-15 | V1 Docs Reality Sync | PR #2872 | PRD-MUST-V1, PRD-AUDIT updated: all blockers resolved |
 | 2026-02-15 | 2B: Middleware Auth | PRs #2873-#2876 | Cookie-based auth for /producer, /admin, /account, /ops |
+| 2026-02-15 | Greek UI Polish | PRs #2879, #2881 | SkipLink + Email labels hellenized, /producers public fix |
+| 2026-02-15 | 4A: Zod API Validation | PR #2883 | 12 endpoints validated, non-blocking Sentry logging |
 | | | | |
