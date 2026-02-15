@@ -66,6 +66,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **BRAND-COLOR-UNIFY-03** — Brand color round 3: shared components (Navigation, CategoryStrip, ProductCard, ProductSearchInput, AddToCartButton, PaymentMethodSelector, ProducerCard). Eliminates last emerald + off-brand green/gray in customer-facing UI. (PR #2901, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-02** — Brand color round 2: homepage (HomeClient.tsx) hero/filters/product cards, Add-to-Cart button, loading skeletons — all gray→neutral, green→primary. (PR #2899, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-01** — Unify all storefront pages to brand color palette: gray→neutral, emerald/blue/green→primary across 9 files (cart, checkout, success, order, thank-you, products, Stripe payment). Zero logic changes, pure visual consistency. (PR #2896, deployed 2026-02-15) ✅
 - **PRODUCT-DETAIL-POLISH-01** — Product detail page UX: brand-consistent colors (text-blue-600 → text-primary), chevron breadcrumb, inline price+stock layout, producer name above category. (PR #2893, deployed 2026-02-15) ✅
