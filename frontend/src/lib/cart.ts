@@ -21,6 +21,10 @@ export type AddResult = { status: 'added' }
 
 type State = {
   items: Record<string, CartItem>
+  /** Internal version counter — incremented on every user mutation (add/inc/dec/clear).
+   *  Used to detect if user modified cart while server sync was in-flight.
+   *  (Pass FIX-CART-SYNC-RACE-01) */
+  _version: number
   /** Attempts to add item. Returns conflict info if producer mismatch. */
   add: (item: Omit<CartItem,'qty'>) => AddResult
   inc: (id: string) => void
@@ -28,34 +32,42 @@ type State = {
   clear: () => void
   /** Force-add item after user confirms (clears cart first) */
   forceAdd: (item: Omit<CartItem,'qty'>) => void
-  /** Replace cart with server items (used after sync) */
+  /** Replace cart with server items (used after sync).
+   *  @deprecated Use mergeServerCart for race-safe sync */
   replaceWithServerCart: (serverItems: CartItem[]) => void
+  /** Race-safe server sync: if user modified cart during sync (version changed),
+   *  merge server items with local instead of overwriting.
+   *  (Pass FIX-CART-SYNC-RACE-01) */
+  mergeServerCart: (serverItems: CartItem[], versionAtSyncStart: number) => void
   /** Get items in format suitable for sync API */
   getItemsForSync: () => { product_id: number; quantity: number }[]
+  /** Read current version (for sync coordination) */
+  getVersion: () => number
 }
 
 export const useCart = create<State>()(
   persist(
     (set, get) => ({
       items: {},
+      _version: 0,
       add: (p): AddResult => {
         const items = { ...get().items }
         // Multi-producer carts allowed (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
         const cur = items[p.id]
         items[p.id] = cur ? { ...cur, qty: cur.qty + 1 } : { ...p, qty: 1 }
-        set({ items })
+        set({ items, _version: get()._version + 1 })
         return { status: 'added' }
       },
       forceAdd: (p) => {
         // Clear cart and add new item (user confirmed replacing cart)
-        set({ items: { [p.id]: { ...p, qty: 1 } } })
+        set({ items: { [p.id]: { ...p, qty: 1 } }, _version: get()._version + 1 })
       },
       inc: (id) => {
         const items = { ...get().items }
         const cur = items[id]
         if (!cur) return
         items[id] = { ...cur, qty: cur.qty + 1 }
-        set({ items })
+        set({ items, _version: get()._version + 1 })
       },
       dec: (id) => {
         const items = { ...get().items }
@@ -67,15 +79,38 @@ export const useCart = create<State>()(
         } else {
           items[id] = { ...cur, qty: nextQty }
         }
-        set({ items })
+        set({ items, _version: get()._version + 1 })
       },
-      clear: () => set({ items: {} }),
+      clear: () => set({ items: {}, _version: get()._version + 1 }),
       replaceWithServerCart: (serverItems: CartItem[]) => {
         const newItems: Record<string, CartItem> = {}
         for (const item of serverItems) {
           newItems[item.id] = item
         }
         set({ items: newItems })
+      },
+      mergeServerCart: (serverItems: CartItem[], versionAtSyncStart: number) => {
+        const currentVersion = get()._version
+        if (currentVersion === versionAtSyncStart) {
+          // No user changes during sync — safe to replace entirely
+          const newItems: Record<string, CartItem> = {}
+          for (const item of serverItems) {
+            newItems[item.id] = item
+          }
+          set({ items: newItems })
+        } else {
+          // User modified cart during sync — merge server items with local,
+          // keeping local items that were added/modified during sync
+          const merged = { ...get().items }
+          for (const item of serverItems) {
+            if (!merged[item.id]) {
+              // Server item not in local cart — add it
+              merged[item.id] = item
+            }
+            // If item exists locally, keep local version (user's intent takes priority)
+          }
+          set({ items: merged })
+        }
       },
       getItemsForSync: () => {
         const items = get().items
@@ -86,6 +121,7 @@ export const useCart = create<State>()(
             quantity: item.qty,
           }))
       },
+      getVersion: () => get()._version,
     }),
     { name: 'dixis:cart:v1' }
   )
