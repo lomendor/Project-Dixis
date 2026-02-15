@@ -1,5 +1,6 @@
 // API client utility with Bearer token support
 // NOTE: URL resolution delegates to @/env (SSOT). Do NOT add new process.env reads here.
+// Phase 4A: Zod validation on critical API responses (non-blocking, Sentry-logged)
 
 /**
  * Structured API error — carries status, code, and extra fields from backend.
@@ -342,6 +343,42 @@ export interface TopProduct {
 //
 // SSOT: Delegates to @/env for URL resolution. Do NOT duplicate logic here.
 import { API_BASE_URL as _envApiBase } from '@/env';
+import type { ZodSchema } from 'zod';
+import * as Sentry from '@sentry/nextjs';
+import {
+  ProductSchema,
+  ProductsPageSchema,
+  OrderSchema,
+  ShippingQuoteSchema,
+  ZoneShippingQuoteSchema,
+  CartShippingQuoteSchema,
+  UserSchema,
+  AuthResponseSchema,
+  PaymentConfigSchema,
+} from '@/lib/validation/api-schemas';
+
+/**
+ * Non-blocking Zod validation for API responses.
+ * Logs to Sentry on failure but ALWAYS returns the data — never crashes the app.
+ */
+function validateApiResponse<T>(data: T, schema: ZodSchema, endpoint: string): T {
+  try {
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      Sentry.captureMessage('api_response_validation_failed', {
+        level: 'warning',
+        tags: { 'api.endpoint': endpoint },
+        extra: {
+          errors: result.error.issues.slice(0, 5),
+          endpoint,
+        },
+      });
+    }
+  } catch {
+    // Validation itself must never crash the app
+  }
+  return data;
+}
 
 export function getApiBaseUrl(): string {
   return _envApiBase;
@@ -575,8 +612,8 @@ class ApiClient {
     
     const queryString = searchParams.toString();
     const endpoint = `public/products${queryString ? `?${queryString}` : ''}`;
-    
-    return this.request<{
+
+    const result = await this.request<{
       current_page: number;
       data: Product[];
       first_page_url: string;
@@ -591,10 +628,12 @@ class ApiClient {
       to: number;
       total: number;
     }>(endpoint);
+    return validateApiResponse(result, ProductsPageSchema, 'getProducts');
   }
 
   async getProduct(id: number): Promise<Product> {
-    return this.request<Product>(`public/products/${id}`);
+    const result = await this.request<Product>(`public/products/${id}`);
+    return validateApiResponse(result, ProductSchema, 'getProduct');
   }
 
   // Auth methods
@@ -602,10 +641,14 @@ class ApiClient {
     // Fetch CSRF cookie before auth request (Strategic Fix 2A — Sanctum SPA)
     await this.fetchCsrfCookie();
 
-    const response = await this.request<AuthResponse>('auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const response = validateApiResponse(
+      await this.request<AuthResponse>('auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      }),
+      AuthResponseSchema,
+      'login',
+    );
 
     // DEBUG: Token instrumentation (masked) - enable with DEBUG_AUTH=1 in localStorage
     if (response.token) {
@@ -660,7 +703,7 @@ class ApiClient {
   async getProfile(): Promise<User> {
     // Backend returns { user: {...} }, we need to unwrap it
     const response = await this.request<{ user: User }>('auth/profile');
-    return response.user;
+    return validateApiResponse(response.user, UserSchema, 'getProfile');
   }
 
   // Cart methods
@@ -717,10 +760,11 @@ class ApiClient {
 
   // Shipping methods
   async getShippingQuote(data: ShippingQuoteRequest): Promise<ShippingQuote> {
-    return this.request<ShippingQuote>('shipping/quote', {
+    const result = await this.request<ShippingQuote>('shipping/quote', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return validateApiResponse(result, ShippingQuoteSchema, 'getShippingQuote');
   }
 
   // Order methods
@@ -760,7 +804,7 @@ class ApiClient {
    */
   async getOrderByToken(token: string): Promise<Order> {
     const response = await this.request<{ data: Order }>(`public/orders/by-token/${token}`);
-    return response.data;
+    return validateApiResponse(response.data, OrderSchema, 'getOrderByToken');
   }
 
   /**
@@ -794,7 +838,7 @@ class ApiClient {
         ? { 'X-Idempotency-Key': idempotencyKey }
         : undefined,
     });
-    return response.data;
+    return validateApiResponse(response.data, OrderSchema, 'createOrder');
   }
 
   // Producer methods
@@ -972,10 +1016,20 @@ class ApiClient {
     threshold?: number;
     source: 'zone' | 'fallback' | 'threshold' | 'pickup';
   }> {
-    return this.request('public/shipping/quote', {
+    const result = await this.request<{
+      price_eur: number;
+      zone_name: string | null;
+      zone_id?: number;
+      method: string;
+      free_shipping: boolean;
+      free_shipping_reason?: 'threshold' | 'pickup';
+      threshold?: number;
+      source: 'zone' | 'fallback' | 'threshold' | 'pickup';
+    }>('public/shipping/quote', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return validateApiResponse(result, ZoneShippingQuoteSchema, 'getZoneShippingQuote');
   }
 
   // Pass ORDER-SHIPPING-SPLIT-01 + COD-COMPLETE: Get per-producer shipping breakdown for cart
@@ -1004,10 +1058,30 @@ class ApiClient {
     zone_name: string | null;
     method: string;
   }> {
-    return this.request('public/shipping/quote-cart', {
+    const result = await this.request<{
+      producers: {
+        producer_id: number;
+        producer_name: string;
+        subtotal: number;
+        shipping_cost: number;
+        is_free: boolean;
+        free_reason: 'threshold' | 'pickup' | null;
+        threshold?: number;
+        zone: string | null;
+        weight_grams: number;
+      }[];
+      total_shipping: number;
+      cod_fee: number;
+      payment_method: string;
+      quoted_at: string;
+      currency: string;
+      zone_name: string | null;
+      method: string;
+    }>('public/shipping/quote-cart', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return validateApiResponse(result, CartShippingQuoteSchema, 'getCartShippingQuote');
   }
 
   // Pass 51: Check if card payments are enabled (feature flag)
@@ -1017,7 +1091,12 @@ class ApiClient {
     stripe_public_key?: string;
   }> {
     try {
-      return this.request('public/payments/config');
+      const result = await this.request<{
+        card_enabled: boolean;
+        cod_enabled: boolean;
+        stripe_public_key?: string;
+      }>('public/payments/config');
+      return validateApiResponse(result, PaymentConfigSchema, 'getPaymentConfig');
     } catch {
       // Fallback: if endpoint doesn't exist, assume card disabled
       return { card_enabled: false, cod_enabled: true };

@@ -99,11 +99,20 @@ async function ciGlobalSetup() {
 
     console.log('   Mock auth tokens set in localStorage');
 
-    // Also set a cookie for backend auth (if needed by API calls)
+    // Also set cookies for backend auth and middleware auth bypass
     await context.addCookies([
       {
         name: 'auth_token',
         value: 'mock_token',
+        domain: '127.0.0.1',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax'
+      },
+      {
+        name: 'mock_session',
+        value: 'e2e_authenticated',
         domain: '127.0.0.1',
         path: '/',
         httpOnly: false,
@@ -130,7 +139,16 @@ async function ciGlobalSetup() {
 
     // Create a minimal fallback storageState so tests don't crash
     const fallbackState = {
-      cookies: [],
+      cookies: [{
+        name: 'mock_session',
+        value: 'e2e_authenticated',
+        domain: '127.0.0.1',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax' as const,
+        expires: -1
+      }],
       origins: [{
         origin: baseURL,
         localStorage: [
