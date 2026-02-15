@@ -46,12 +46,12 @@ function AdminCategoriesContent() {
   async function loadCategories() {
     setLoading(true);
     try {
-      const response = await fetch('/api/categories');
+      const response = await fetch('/api/public/categories');
       if (!response.ok) throw new Error('Failed to load categories');
 
       const data = await response.json();
       // Fetch ALL categories (not just active) for admin view
-      const allCategoriesResponse = await fetch('/api/categories?includeInactive=true');
+      const allCategoriesResponse = await fetch('/api/public/categories?includeInactive=true');
       const allData = allCategoriesResponse.ok
         ? await allCategoriesResponse.json()
         : data;
@@ -70,7 +70,7 @@ function AdminCategoriesContent() {
     setProcessingIds(prev => new Set(prev).add(category.id));
 
     try {
-      const response = await fetch(`/api/categories/${category.id}`, {
+      const response = await fetch(`/api/admin/categories/${category.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !category.isActive })
@@ -116,7 +116,7 @@ function AdminCategoriesContent() {
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/categories/${categoryToEdit.id}`, {
+      const response = await fetch(`/api/admin/categories/${categoryToEdit.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
