@@ -10,6 +10,7 @@ import EmptyState from '@/components/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { greekNormalize, greekTextContains } from '@/lib/utils/greekNormalize';
+import StarRating from '@/components/StarRating';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
 
@@ -501,6 +502,13 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                   <p className="text-sm text-neutral-600 mb-1">
                     Από {product.producer.name}
                   </p>
+
+                  {/* S1-02: Star rating on cards */}
+                  {product.reviews_avg_rating && (
+                    <div className="mb-1">
+                      <StarRating rating={product.reviews_avg_rating} count={product.reviews_count} size="xs" />
+                    </div>
+                  )}
 
                   {/* S1-01: Cultivation type mini-badge */}
                   {product.cultivation_type && product.cultivation_type !== 'conventional' && (

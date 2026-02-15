@@ -45,6 +45,9 @@ export interface Product {
   image_url?: string | null;
   cultivation_type?: CultivationType | null;
   cultivation_description?: string | null;
+  // S1-02: Review stats (from backend withCount/withAvg)
+  reviews_count?: number;
+  reviews_avg_rating?: number | null;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;

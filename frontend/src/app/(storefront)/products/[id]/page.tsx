@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
+import ReviewSection from '@/components/product/ReviewSection';
+import StarRating from '@/components/StarRating';
 import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
 import { getCategoryBySlug } from '@/data/categories';
@@ -57,7 +59,10 @@ async function getProductById(id: string) {
       producerSlug: raw.producer?.slug || null,
       producerName: raw.producer?.name || null,
       cultivationType: raw.cultivation_type || null,
-      cultivationDescription: raw.cultivation_description || null
+      cultivationDescription: raw.cultivation_description || null,
+      // S1-02: Review stats
+      reviewsCount: raw.reviews_count ?? 0,
+      reviewsAvgRating: raw.reviews_avg_rating ?? null
     };
   } catch {
     return null;
@@ -203,6 +208,13 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </p>
           )}
 
+          {/* S1-02: Star rating summary */}
+          {p.reviewsAvgRating && (
+            <div className="mb-1">
+              <StarRating rating={p.reviewsAvgRating} count={p.reviewsCount} size="sm" />
+            </div>
+          )}
+
           {p.category && (
             <p className="text-sm text-neutral-500 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
           )}
@@ -275,6 +287,9 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           </div>
         </div>
       </div>
+
+      {/* S1-02: Reviews Section */}
+      <ReviewSection productId={p.id} />
 
       {/* Back to Products */}
       <div className="mt-10 pt-6 border-t border-neutral-200">
