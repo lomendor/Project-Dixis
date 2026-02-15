@@ -66,6 +66,7 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **BRAND-COLOR-UNIFY-01** — Unify all storefront pages to brand color palette: gray→neutral, emerald/blue/green→primary across 9 files (cart, checkout, success, order, thank-you, products, Stripe payment). Zero logic changes, pure visual consistency. (PR #2896, deployed 2026-02-15) ✅
 - **PRODUCT-DETAIL-POLISH-01** — Product detail page UX: brand-consistent colors (text-blue-600 → text-primary), chevron breadcrumb, inline price+stock layout, producer name above category. (PR #2893, deployed 2026-02-15) ✅
 - **OG-SEO-FIX-01** — Fix social sharing previews + structured data: all logo.svg refs → logo.png (real Dixis logo). Delete dead logo.svg route handler + old green abstract SVG + 5 unused Next.js boilerplate SVGs. (PR #2892, deployed 2026-02-15) ✅
 - **PHASE-4B: Cart Sync Race Fix** — Version-counter optimistic lock in Zustand cart store. If user adds item during login cart sync, mergeServerCart() merges instead of overwriting — zero item loss. (PR #2890, deployed 2026-02-15) ✅
