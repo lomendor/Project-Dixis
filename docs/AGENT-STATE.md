@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (ADMIN-NOTIFY-01 — admin email on new orders)
+**Updated**: 2026-02-15 (BACKLOG — master roadmap created from owner's PRD)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -43,13 +43,22 @@ _(empty — pick from NEXT)_
 
 ---
 
-## NEXT (correct priority — marketplace-first)
+## NEXT — See `docs/BACKLOG.md`
 
-| # | Pass ID | What | Why | Scope |
-|---|---------|------|-----|-------|
-_(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-AUDIT doc.)_
+The master backlog is now at **`docs/BACKLOG.md`**. It has 6 stages, prioritized by business impact:
 
-**Note**: Full architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified. Remaining: H1 status/bulk routes (Prisma→Laravel, blocked by email/audit coupling), M1 deprecated product routes (DEFER, needed for E2E).
+| Stage | Theme | Key Items |
+|-------|-------|-----------|
+| **1** | Trust & Core Commerce | Cultivation type, Reviews, Q&A, Wishlist, Certifications |
+| **2** | UI/UX Polish | Homepage redesign, Product cards, Mobile audit, Loading states |
+| **3** | Growth & Engagement | Cost transparency, Seasonal calendar, Cart abandonment, SEO |
+| **4** | Differentiators | Virtual tours, **Adopt-a-Tree**, Pre-orders, Limited editions |
+| **5** | B2B & Revenue | Business registration, Subscription plans, Bulk orders |
+| **6** | Community & Vision | Forum, Courses, Carbon footprint, Referral program |
+
+**Current focus: Stage 1, starting with S1-01 (Cultivation Type).**
+
+**Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 
 ---
 
