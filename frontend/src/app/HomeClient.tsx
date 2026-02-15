@@ -254,7 +254,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
   const safeProducts = Array.isArray(products) ? products : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Products JSON-LD */}
       {safeProducts.length > 0 && (
         <script
@@ -267,28 +267,28 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
       
       <main id="main-content" data-testid="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section - Mobile First */}
-        <section className="py-12 md:py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-green-50 via-emerald-50/30 to-white mb-8">
+        <section className="py-12 md:py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary-pale via-primary-pale/30 to-white mb-8">
           <div className="max-w-3xl mx-auto text-center">
             <h1
               data-testid="page-title"
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-green-800 via-emerald-700 to-green-600 bg-clip-text text-transparent leading-tight"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary leading-tight"
             >
               Φρέσκα Προϊόντα από Τοπικούς Παραγωγούς
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 mb-8 leading-relaxed px-4">
+            <p className="text-lg md:text-xl text-neutral-700 mb-8 leading-relaxed px-4">
               Ανακαλύψτε βιολογικά λαχανικά, τοπικά προϊόντα και φρέσκα φρούτα απευθείας από Έλληνες παραγωγούς.
               Υποστηρίξτε τη βιώσιμη γεωργία και απολαύστε την καλύτερη ποιότητα.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="#products"
-                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-gradient-to-r from-green-700 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:from-green-800 hover:to-emerald-700 transition-all duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-primary-light transition-all duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
               >
                 Εξερεύνησε Προϊόντα
               </a>
               <Link
                 href="/producers"
-                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white text-green-700 font-semibold rounded-lg border-2 border-green-700 hover:bg-green-50 transition-colors duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
+                className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary-pale transition-colors duration-200 touch-manipulation active:scale-95 w-full sm:w-auto"
               >
                 Γίνε Παραγωγός
               </Link>
@@ -310,13 +310,13 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                     placeholder="Αναζήτηση προϊόντων (π.χ. πορτοκάλια, portokalia, Πορτοκάλια)..."
                     value={filters.search}
                     onChange={(e) => updateFilter('search', e.target.value)}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-2 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                   {/* Search type indicator */}
                   {filters.search && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
                       {searchState.isGreek && (
-                        <span className="text-xs text-green-600 font-medium" title="Ελληνικό κείμενο">ΕΛ</span>
+                        <span className="text-xs text-primary font-medium" title="Ελληνικό κείμενο">ΕΛ</span>
                       )}
                       {searchState.isLatin && (
                         <span className="text-xs text-blue-600 font-medium" title="Λατινικό κείμενο (θα μεταγραφεί)">EN</span>
@@ -329,7 +329,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 </div>
                 {/* Search hints for Greek normalization */}
                 {filters.search && searchState.variants.length > 1 && (
-                  <div className="mt-2 text-xs text-gray-600">
+                  <div className="mt-2 text-xs text-neutral-600">
                     <span className="font-medium">Αναζήτηση για:</span> {searchState.variants.slice(0, 3).join(', ')}
                     {searchState.variants.length > 3 && ` +${searchState.variants.length - 3} ακόμη παραλλαγές`}
                   </div>
@@ -338,14 +338,14 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                  className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 flex items-center gap-2"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
                   Φίλτρα
                   {hasActiveFilters && (
-                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                    <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">
                       {Object.values(filters).filter(v => v && v !== 'created_at' && v !== 'desc').length}
                     </span>
                   )}
@@ -353,7 +353,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 {hasActiveFilters && (
                   <button
                     onClick={clearAllFilters}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    className="px-4 py-2 text-neutral-600 hover:text-neutral-800"
                   >
                     Καθαρισμός
                   </button>
@@ -367,11 +367,11 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Category Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Κατηγορία</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Κατηγορία</label>
                     <select
                       value={filters.category}
                       onChange={(e) => updateFilter('category', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="">Όλες οι κατηγορίες</option>
                       {categories.map((category) => (
@@ -384,11 +384,11 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
 
                   {/* Producer Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Παραγωγός</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Παραγωγός</label>
                     <select
                       value={filters.producer}
                       onChange={(e) => updateFilter('producer', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
                       <option value="">Όλοι οι παραγωγοί</option>
                       {producers.map((producer) => (
@@ -401,22 +401,22 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
 
                   {/* Price Range */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Εύρος τιμής (€)</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Εύρος τιμής (€)</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
                         placeholder="Ελάχ."
                         value={filters.minPrice}
                         onChange={(e) => updateFilter('minPrice', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                       />
-                      <span className="self-center text-gray-500">-</span>
+                      <span className="self-center text-neutral-500">-</span>
                       <input
                         type="number"
                         placeholder="Μέγ."
                         value={filters.maxPrice}
                         onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -425,12 +425,12 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                   <div className="space-y-4">
                     {/* Sort Options */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Ταξινόμηση</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Ταξινόμηση</label>
                       <div className="flex gap-2">
                         <select
                           value={filters.sort}
                           onChange={(e) => updateFilter('sort', e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="flex-1 px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
                           <option value="created_at">Νεότερα</option>
                           <option value="name">Όνομα</option>
@@ -439,7 +439,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                         <select
                           value={filters.dir}
                           onChange={(e) => updateFilter('dir', e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
                           <option value="asc">↑</option>
                           <option value="desc">↓</option>
@@ -449,11 +449,11 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
 
                     {/* Organic Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Βιολογικά</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Βιολογικά</label>
                       <select
                         value={filters.organic === null ? '' : filters.organic.toString()}
                         onChange={(e) => updateFilter('organic', e.target.value === '' ? null : e.target.value === 'true')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                       >
                         <option value="">Όλα τα προϊόντα</option>
                         <option value="true">Μόνο βιολογικά</option>
@@ -488,20 +488,20 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 />
 
                 <div className="p-4">
-                  <h3 data-testid="product-title" className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 data-testid="product-title" className="text-lg font-semibold text-neutral-900 mb-2 line-clamp-2">
                     {product.name}
                   </h3>
                   
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-sm text-neutral-600 mb-2">
                     Από {product.producer.name}
                   </p>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <span data-testid="product-price" className="text-xl font-bold text-green-600">
+                    <span data-testid="product-price" className="text-xl font-bold text-primary">
                       €{product.price} / {product.unit}
                     </span>
                     {product.stock !== null && (
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-neutral-500">
                         Απόθεμα: {product.stock}
                       </span>
                     )}
@@ -514,13 +514,13 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                         {product.categories.slice(0, 2).map((category) => (
                           <span
                             key={category.id}
-                            className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+                            className="px-2 py-1 bg-primary-pale text-primary text-xs rounded-full"
                           >
                             {category.name}
                           </span>
                         ))}
                         {product.categories.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          <span className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs rounded-full">
                             +{product.categories.length - 2} ακόμη
                           </span>
                         )}
@@ -532,7 +532,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                     <Link
                       href={`/products/${product.id}`}
                       data-testid="product-view-details"
-                      className="relative z-10 flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-center text-sm font-medium"
+                      className="relative z-10 flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 px-4 py-2 rounded-lg text-center text-sm font-medium"
                     >
                       Λεπτομέρειες
                     </Link>
@@ -540,7 +540,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                       data-testid="add-to-cart"
                       onClick={() => handleAddToCart(product.id)}
                       disabled={product.stock === 0 || addingToCart.has(product.id)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      className="flex-1 bg-primary hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                       aria-label={`Προσθήκη ${product.name} στο καλάθι`}
                     >
                       {product.stock === 0

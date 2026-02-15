@@ -72,13 +72,13 @@ export default function Add({ product, translations }: AddProps) {
     <form onSubmit={handleAdd} className="space-y-2">
       <button
         type="submit"
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition"
+        className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-6 rounded-lg transition"
         data-testid="add-to-cart-button"
       >
         {translations.addToCart}
       </button>
       {added && (
-        <p role="status" className="text-green-600 text-sm text-center">
+        <p role="status" className="text-primary text-sm text-center">
           ✓ {translations.cartAdded}
         </p>
       )}
