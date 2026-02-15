@@ -99,7 +99,7 @@ export default function StripePaymentForm({
         <PaymentElement />
       </div>
 
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-neutral-600">
         <p>Συνολικό ποσό: <strong>€{amount.toFixed(2)}</strong></p>
         <p>Ασφαλής πληρωμή μέσω Stripe</p>
       </div>
@@ -107,7 +107,7 @@ export default function StripePaymentForm({
       <button
         type="submit"
         disabled={!stripe || disabled || isProcessing}
-        className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="w-full px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
       >
         {isProcessing ? 'Επεξεργασία...' : `Πληρωμή €${amount.toFixed(2)}`}
       </button>

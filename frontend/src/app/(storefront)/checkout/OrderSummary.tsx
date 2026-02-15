@@ -61,7 +61,7 @@ export default function OrderSummary({
 
         {/* Zone info fallback for single-producer */}
         {!cartShippingQuote && shippingQuote?.zone_name && (
-          <p className="text-xs text-gray-500" data-testid="shipping-zone">
+          <p className="text-xs text-neutral-500" data-testid="shipping-zone">
             {t('checkoutPage.shippingZone')}: {shippingQuote.zone_name}
           </p>
         )}
@@ -85,7 +85,7 @@ export default function OrderSummary({
         </div>
 
         {!shippingQuote && (
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-neutral-500 mt-1">
             {t('checkoutPage.shippingNote')}
           </p>
         )}
