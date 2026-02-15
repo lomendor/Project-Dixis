@@ -92,7 +92,7 @@ export default function AddressForm({ initial, onChange }: Props) {
       />
       <Field
         id="email"
-        label="Email"
+        label="Ηλ. Ταχυδρομείο"
         value={addr.email ?? ''}
         onC={(v) => set('email', v)}
         error={errors.email}

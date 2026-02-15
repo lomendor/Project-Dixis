@@ -132,7 +132,7 @@ export default function Register() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+                Ηλ. Ταχυδρομείο
               </label>
               <div className="mt-1">
                 <input
