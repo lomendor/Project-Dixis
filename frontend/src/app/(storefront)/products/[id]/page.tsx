@@ -55,7 +55,9 @@ async function getProductById(id: string) {
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
       producerSlug: raw.producer?.slug || null,
-      producerName: raw.producer?.name || null
+      producerName: raw.producer?.name || null,
+      cultivationType: raw.cultivation_type || null,
+      cultivationDescription: raw.cultivation_description || null
     };
   } catch {
     return null;
@@ -202,7 +204,33 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           )}
 
           {p.category && (
-            <p className="text-sm text-neutral-500 mb-4">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
+            <p className="text-sm text-neutral-500 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
+          )}
+
+          {/* S1-01: Cultivation Type Badge */}
+          {p.cultivationType && (
+            <div className="mb-4" data-testid="cultivation-badge">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                p.cultivationType === 'organic_certified' ? 'bg-green-100 text-green-800' :
+                p.cultivationType === 'organic_transitional' ? 'bg-lime-100 text-lime-800' :
+                p.cultivationType === 'biodynamic' ? 'bg-purple-100 text-purple-800' :
+                p.cultivationType === 'traditional_natural' ? 'bg-amber-100 text-amber-800' :
+                p.cultivationType === 'conventional' ? 'bg-neutral-100 text-neutral-700' :
+                'bg-neutral-100 text-neutral-600'
+              }`}>
+                <span>{
+                  p.cultivationType === 'organic_certified' ? '🌿 Βιολογική (Πιστοποιημένη)' :
+                  p.cultivationType === 'organic_transitional' ? '🌱 Βιολογική (Μεταβατική)' :
+                  p.cultivationType === 'biodynamic' ? '✨ Βιοδυναμική' :
+                  p.cultivationType === 'traditional_natural' ? '🌾 Παραδοσιακή / Φυσική' :
+                  p.cultivationType === 'conventional' ? 'Συμβατική' :
+                  'Άλλο'
+                }</span>
+              </span>
+              {p.cultivationDescription && (
+                <p className="mt-1 text-xs text-neutral-500">{p.cultivationDescription}</p>
+              )}
+            </div>
           )}
 
           {/* Price + Stock */}

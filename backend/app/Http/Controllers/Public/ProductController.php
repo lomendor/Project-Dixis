@@ -89,6 +89,14 @@ class ProductController extends Controller
             }
         }
 
+        // Cultivation type filter
+        if ($cultivationType = $request->get('cultivation_type')) {
+            $allowed = ['conventional', 'organic_certified', 'organic_transitional', 'biodynamic', 'traditional_natural', 'other'];
+            if (in_array($cultivationType, $allowed)) {
+                $query->where('cultivation_type', $cultivationType);
+            }
+        }
+
         // Sorting
         // When FTS is active and no explicit sort requested, order by search_rank DESC
         $sortField = $request->get('sort', $usesFts ? 'relevance' : 'created_at');

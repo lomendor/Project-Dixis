@@ -47,6 +47,8 @@ function EditProductContent() {
   const [stock, setStock] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [cultivationType, setCultivationType] = useState('');
+  const [cultivationDescription, setCultivationDescription] = useState('');
 
   useEffect(() => {
     // Fetch dynamic categories
@@ -82,6 +84,8 @@ function EditProductContent() {
       setStock(product.stock?.toString() || '');
       setImageUrl(product.image_url || null);
       setIsActive(product.is_active ?? true);
+      setCultivationType(product.cultivation_type || '');
+      setCultivationDescription(product.cultivation_description || '');
     } catch (err: any) {
       setError(err.message || 'Σφάλμα φόρτωσης προϊόντος');
     } finally {
@@ -106,6 +110,8 @@ function EditProductContent() {
         description: description || undefined,
         image_url: imageUrl,
         is_active: isActive,
+        cultivation_type: cultivationType || undefined,
+        cultivation_description: cultivationDescription || undefined,
       });
 
       router.push('/my/products');
@@ -256,6 +262,48 @@ function EditProductContent() {
                 data-testid="description-textarea"
               />
             </div>
+
+            {/* S1-01: Cultivation Type */}
+            <div>
+              <label htmlFor="cultivation_type" className="block text-sm font-medium text-gray-700 mb-1">
+                Τρόπος Καλλιέργειας
+              </label>
+              <select
+                id="cultivation_type"
+                value={cultivationType}
+                onChange={(e) => setCultivationType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                data-testid="cultivation-type-select"
+              >
+                <option value="">Επιλέξτε τρόπο καλλιέργειας</option>
+                <option value="conventional">Συμβατική</option>
+                <option value="organic_certified">Βιολογική (Πιστοποιημένη)</option>
+                <option value="organic_transitional">Βιολογική (Μεταβατική)</option>
+                <option value="biodynamic">Βιοδυναμική</option>
+                <option value="traditional_natural">Παραδοσιακή / Φυσική</option>
+                <option value="other">Άλλο</option>
+              </select>
+              <p className="mt-1 text-sm text-gray-500">
+                Πώς παράχθηκε το προϊόν;
+              </p>
+            </div>
+
+            {cultivationType && (
+              <div>
+                <label htmlFor="cultivation_description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Περιγραφή Καλλιέργειας
+                </label>
+                <textarea
+                  id="cultivation_description"
+                  rows={2}
+                  value={cultivationDescription}
+                  onChange={(e) => setCultivationDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="π.χ. Βιολογική καλλιέργεια χωρίς φυτοφάρμακα, πιστοποιημένη από ΔΗΩ..."
+                  data-testid="cultivation-description-textarea"
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>

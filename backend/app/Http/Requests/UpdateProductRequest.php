@@ -35,6 +35,8 @@ class UpdateProductRequest extends FormRequest
             'category' => 'nullable|string|max:100',
             'is_organic' => 'nullable|boolean',
             'is_seasonal' => 'nullable|boolean',
+            'cultivation_type' => 'nullable|string|in:conventional,organic_certified,organic_transitional,biodynamic,traditional_natural,other',
+            'cultivation_description' => 'nullable|string|max:1000',
             'image_url' => 'nullable|url|max:500',
             'status' => 'nullable|string|in:available,unavailable,discontinued',
             'is_active' => 'nullable|boolean',

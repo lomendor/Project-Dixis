@@ -28,6 +28,9 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+// S1-01: CultivationType — how the product was produced
+export type CultivationType = 'conventional' | 'organic_certified' | 'organic_transitional' | 'biodynamic' | 'traditional_natural' | 'other';
+
 export interface Product {
   id: number;
   name: string;
@@ -40,6 +43,8 @@ export interface Product {
   description: string | null;
   category?: string;
   image_url?: string | null;
+  cultivation_type?: CultivationType | null;
+  cultivation_description?: string | null;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
@@ -1215,6 +1220,8 @@ class ApiClient {
     description?: string;
     image_url?: string | null;
     is_active?: boolean;
+    cultivation_type?: string;
+    cultivation_description?: string;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
       method: 'POST',
@@ -1234,6 +1241,8 @@ class ApiClient {
     description?: string;
     image_url?: string | null;
     is_active?: boolean;
+    cultivation_type?: string;
+    cultivation_description?: string;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {
       method: 'PATCH',
