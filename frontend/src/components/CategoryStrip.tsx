@@ -110,8 +110,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
             whitespace-nowrap transition-all duration-200
             ${
               !currentCat
-                ? 'bg-green-600 text-white shadow-md'
-                : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
             }
           `}
         >
@@ -134,8 +134,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     whitespace-nowrap transition-all duration-200
                     ${
                       isSelected
-                        ? 'bg-green-600 text-white shadow-md'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
                     }
                   `}
                 >
@@ -158,8 +158,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     whitespace-nowrap transition-all duration-200
                     ${
                       isSelected
-                        ? 'bg-green-600 text-white shadow-md'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:border-green-400 hover:bg-green-50'
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
                     }
                   `}
                 >
