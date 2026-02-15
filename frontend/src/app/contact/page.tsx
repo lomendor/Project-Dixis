@@ -18,17 +18,17 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-xl">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Επικοινωνία</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Επικοινωνία</h1>
+          <p className="mt-2 text-sm text-neutral-600">
             Έχετε ερωτήσεις ή σχόλια; Συμπληρώστε τη φόρμα και θα σας απαντήσουμε σύντομα.
           </p>
         </div>
 
         {state === "ok" && (
-          <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">
+          <div className="mb-6 p-4 rounded-lg bg-primary-pale border border-primary/20 text-primary text-sm">
             <span className="font-medium">Ευχαριστούμε!</span> Θα επικοινωνήσουμε σύντομα.
           </div>
         )}
@@ -38,10 +38,10 @@ export default function ContactPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sm:p-8">
           <form onSubmit={onSubmit} className="space-y-5">
             <div>
-              <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="contact-name" className="block text-sm font-medium text-neutral-700 mb-1">
                 Ονοματεπώνυμο
               </label>
               <input
@@ -50,12 +50,12 @@ export default function ContactPage() {
                 placeholder="π.χ. Μαρία Παπαδοπούλου"
                 required
                 minLength={2}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               />
             </div>
 
             <div>
-              <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="contact-email" className="block text-sm font-medium text-neutral-700 mb-1">
                 Email
               </label>
               <input
@@ -64,12 +64,12 @@ export default function ContactPage() {
                 type="email"
                 placeholder="you@example.com"
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               />
             </div>
 
             <div>
-              <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="contact-message" className="block text-sm font-medium text-neutral-700 mb-1">
                 Μήνυμα
               </label>
               <textarea
@@ -79,7 +79,7 @@ export default function ContactPage() {
                 required
                 minLength={10}
                 rows={5}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-y"
+                className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-y"
               />
             </div>
 
@@ -89,7 +89,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={state === "sending"}
-              className="w-full rounded-lg bg-green-700 hover:bg-green-800 text-white font-medium px-6 py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg bg-primary hover:bg-primary-light text-white font-medium px-6 py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {state === "sending" ? "Αποστολή..." : "Αποστολή"}
             </button>

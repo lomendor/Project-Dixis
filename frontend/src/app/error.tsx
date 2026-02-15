@@ -17,22 +17,22 @@ export default function Error({
         </svg>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-900">Κάτι πήγε στραβά</h1>
+      <h1 className="text-2xl font-bold text-neutral-900">Κάτι πήγε στραβά</h1>
 
-      <p className="text-gray-600 mt-2 max-w-md">
+      <p className="text-neutral-600 mt-2 max-w-md">
         Προέκυψε ένα απρόσμενο σφάλμα. Δοκιμάστε ξανά ή επιστρέψτε στην αρχική.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
         <button
           onClick={reset}
-          className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition"
+          className="inline-flex items-center justify-center bg-primary hover:bg-primary-light text-white font-medium py-3 px-6 rounded-lg transition"
         >
           Δοκιμάστε ξανά
         </button>
         <Link
           href="/"
-          className="inline-flex items-center justify-center border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg transition"
+          className="inline-flex items-center justify-center border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium py-3 px-6 rounded-lg transition"
         >
           Αρχική σελίδα
         </Link>

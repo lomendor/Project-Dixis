@@ -143,8 +143,8 @@ function OrderLookupContent() {
 
   return (
     <main className="max-w-2xl mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold text-gray-900">Εύρεση Παραγγελίας</h2>
-      <p className="text-gray-500 mt-1.5">
+      <h2 className="text-2xl font-bold text-neutral-900">Εύρεση Παραγγελίας</h2>
+      <p className="text-neutral-500 mt-1.5">
         Βάλτε τον αριθμό παραγγελίας (π.χ. <code>DX-20251017-AB12</code>) και το
         email σας.
       </p>
@@ -159,7 +159,7 @@ function OrderLookupContent() {
                 if (errNo) setErrNo('');
               }}
               placeholder="Αρ. παραγγελίας (DX-YYYYMMDD-####)"
-              className="border border-gray-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="border border-neutral-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               aria-invalid={!!errNo}
               disabled={disableAll}
               data-testid="lookup-order-no"
@@ -189,7 +189,7 @@ function OrderLookupContent() {
               placeholder="Διεύθυνση email"
               ref={emailRef}
               type="email"
-              className="border border-gray-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="border border-neutral-300 px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               aria-invalid={!!errEmail}
               disabled={disableAll}
               data-testid="lookup-email"
@@ -227,7 +227,7 @@ function OrderLookupContent() {
               type="button"
               onClick={onClear}
               disabled={disableAll}
-              className="border border-gray-300 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border border-neutral-300 px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="clear-remembered-email"
             >
               Καθαρισμός email
@@ -253,14 +253,14 @@ function OrderLookupContent() {
       )}
 
       {result && (
-        <div className="mt-5 text-sm border border-gray-200 rounded-lg p-4 bg-gray-50" data-testid="lookup-result">
+        <div className="mt-5 text-sm border border-neutral-200 rounded-lg p-4 bg-neutral-50" data-testid="lookup-result">
           {/* AG40: Copy order link button */}
           <div className="mb-3 flex items-center gap-3">
             <button
               type="button"
               data-testid="copy-order-link-lookup"
               onClick={onCopyCurrent}
-              className="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+              className="border border-neutral-300 px-3 py-1.5 rounded-lg text-sm hover:bg-neutral-100 transition-colors"
             >
               Αντιγραφή συνδέσμου
             </button>
@@ -305,7 +305,7 @@ function OrderLookupContent() {
 
 export default function OrderLookupPage() {
   return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-gray-500">Φόρτωση…</div>}>
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-neutral-500">Φόρτωση…</div>}>
       <OrderLookupContent />
     </Suspense>
   );
