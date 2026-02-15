@@ -58,7 +58,7 @@ function OrderDetailsPage(): React.JSX.Element {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="max-w-4xl mx-auto py-8 px-4">
           <div className="flex items-center justify-center min-h-96">
             <LoadingSpinner size="lg" />
@@ -70,7 +70,7 @@ function OrderDetailsPage(): React.JSX.Element {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="max-w-4xl mx-auto py-8 px-4">
           <div data-testid="error-message" className="text-center py-12">
             <div className="text-red-400 mb-4">
@@ -78,20 +78,20 @@ function OrderDetailsPage(): React.JSX.Element {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Η Παραγγελία Δεν Βρέθηκε</h3>
-            <p className="text-gray-500 mb-6">{error || 'Η παραγγελία που αναζητάτε δεν βρέθηκε.'}</p>
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">Η Παραγγελία Δεν Βρέθηκε</h3>
+            <p className="text-neutral-500 mb-6">{error || 'Η παραγγελία που αναζητάτε δεν βρέθηκε.'}</p>
             <div className="space-x-4">
               <button
                 onClick={() => router.back()}
                 data-testid="back-button"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="inline-flex items-center px-4 py-2 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 Πίσω
               </button>
               <Link
                 href="/account/orders"
                 data-testid="view-all-orders-link"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 Όλες οι Παραγγελίες
               </Link>
@@ -167,7 +167,7 @@ function OrderDetailsPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         {/* Header with back navigation */}
         <div className="mb-8">
@@ -175,7 +175,7 @@ function OrderDetailsPage(): React.JSX.Element {
             <Link
               href="/account/orders"
               data-testid="back-to-orders-link"
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+              className="inline-flex items-center text-sm text-neutral-500 hover:text-neutral-700"
             >
               <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -185,8 +185,8 @@ function OrderDetailsPage(): React.JSX.Element {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Παραγγελία #{order.id}</h1>
-              <p className="text-gray-600">Ημερομηνία: {formatDate(order.created_at)}</p>
+              <h1 className="text-3xl font-bold text-neutral-900 mb-2">Παραγγελία #{order.id}</h1>
+              <p className="text-neutral-600">Ημερομηνία: {formatDate(order.created_at)}</p>
             </div>
             <span
               data-testid="order-status-badge"
@@ -201,11 +201,11 @@ function OrderDetailsPage(): React.JSX.Element {
           {/* Main Order Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Order Items */}
-            <div data-testid="order-items-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Προϊόντα Παραγγελίας ({totalItems})</h2>
+            <div data-testid="order-items-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h2 className="text-lg font-semibold text-neutral-900">Προϊόντα Παραγγελίας ({totalItems})</h2>
               </div>
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-neutral-200">
                 {orderItems.map((item) => (
                   <div
                     key={item.id}
@@ -223,14 +223,14 @@ function OrderDetailsPage(): React.JSX.Element {
                         data-testid="product-image"
                       />
                     ) : (
-                      <div className="h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
-                        <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="h-16 w-16 bg-neutral-200 rounded-md flex items-center justify-center">
+                        <svg className="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
                     )}
                     <div className="ml-4 flex-1">
-                      <h3 className="text-sm font-medium text-gray-900" data-testid="product-name">
+                      <h3 className="text-sm font-medium text-neutral-900" data-testid="product-name">
                         {item.product_name || item.product?.name || 'Προϊόν'}
                       </h3>
                       {item.producer && (
@@ -238,19 +238,19 @@ function OrderDetailsPage(): React.JSX.Element {
                           από {item.producer.name}
                         </p>
                       )}
-                      <div className="mt-1 flex items-center text-sm text-gray-500">
+                      <div className="mt-1 flex items-center text-sm text-neutral-500">
                         <span data-testid="item-quantity">Ποσότητα: {item.quantity}</span>
                         <span className="mx-2">•</span>
                         <span data-testid="item-unit">
                           {item.product_unit || item.product?.unit || 'τεμ.'}
                         </span>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-1 text-sm text-neutral-500">
                         <span data-testid="unit-price">€{safeMoney(item.unit_price || item.price)} / τεμάχιο</span>
                       </div>
                     </div>
                     <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-900" data-testid="item-total">
+                      <p className="text-sm font-medium text-neutral-900" data-testid="item-total">
                         €{safeMoney(item.total_price)}
                       </p>
                     </div>
@@ -260,9 +260,9 @@ function OrderDetailsPage(): React.JSX.Element {
             </div>
 
             {/* Order Timeline */}
-            <div data-testid="order-timeline-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Χρονολόγιο Παραγγελίας</h2>
+            <div data-testid="order-timeline-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h2 className="text-lg font-semibold text-neutral-900">Χρονολόγιο Παραγγελίας</h2>
               </div>
               <div className="p-6">
                 <div className="flow-root">
@@ -280,9 +280,9 @@ function OrderDetailsPage(): React.JSX.Element {
                           <div className="min-w-0 flex-1">
                             <div>
                               <div className="text-sm">
-                                <span className="font-medium text-gray-900">Παραγγελία υποβλήθηκε</span>
+                                <span className="font-medium text-neutral-900">Παραγγελία υποβλήθηκε</span>
                               </div>
-                              <p className="mt-0.5 text-sm text-gray-500">
+                              <p className="mt-0.5 text-sm text-neutral-500">
                                 {formatDate(order.created_at)}
                               </p>
                             </div>
@@ -296,10 +296,10 @@ function OrderDetailsPage(): React.JSX.Element {
                           <div className="relative flex items-center space-x-3">
                             <div>
                               <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                                statusConfig.color.includes('green') ? 'bg-green-100' : 'bg-gray-100'
+                                statusConfig.color.includes('green') ? 'bg-green-100' : 'bg-neutral-100'
                               }`}>
                                 <svg className={`h-4 w-4 ${
-                                  statusConfig.color.includes('green') ? 'text-green-600' : 'text-gray-400'
+                                  statusConfig.color.includes('green') ? 'text-green-600' : 'text-neutral-400'
                                 }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -308,9 +308,9 @@ function OrderDetailsPage(): React.JSX.Element {
                             <div className="min-w-0 flex-1">
                               <div>
                                 <div className="text-sm">
-                                  <span className="font-medium text-gray-900">Κατάσταση: {statusConfig.text}</span>
+                                  <span className="font-medium text-neutral-900">Κατάσταση: {statusConfig.text}</span>
                                 </div>
-                                <p className="mt-0.5 text-sm text-gray-500">
+                                <p className="mt-0.5 text-sm text-neutral-500">
                                   Τρέχουσα κατάσταση
                                 </p>
                               </div>
@@ -328,37 +328,37 @@ function OrderDetailsPage(): React.JSX.Element {
           {/* Order Summary Sidebar */}
           <div className="space-y-6">
             {/* Payment Summary */}
-            <div data-testid="payment-summary-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Σύνοψη Παραγγελίας</h2>
+            <div data-testid="payment-summary-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h2 className="text-lg font-semibold text-neutral-900">Σύνοψη Παραγγελίας</h2>
               </div>
               <div className="p-6 space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Υποσύνολο</span>
-                  <span className="text-sm font-medium text-gray-900" data-testid="subtotal-amount">
+                  <span className="text-sm text-neutral-600">Υποσύνολο</span>
+                  <span className="text-sm font-medium text-neutral-900" data-testid="subtotal-amount">
                     €{safeMoney(order.subtotal)}
                   </span>
                 </div>
                 {order.tax_amount && safeMoney(order.tax_amount) !== '—' && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">ΦΠΑ</span>
-                    <span className="text-sm font-medium text-gray-900" data-testid="tax-amount">
+                    <span className="text-sm text-neutral-600">ΦΠΑ</span>
+                    <span className="text-sm font-medium text-neutral-900" data-testid="tax-amount">
                       €{safeMoney(order.tax_amount)}
                     </span>
                   </div>
                 )}
                 {order.shipping_amount && safeMoney(order.shipping_amount) !== '—' && (
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Αποστολή</span>
-                    <span className="text-sm font-medium text-gray-900" data-testid="shipping-amount">
+                    <span className="text-sm text-neutral-600">Αποστολή</span>
+                    <span className="text-sm font-medium text-neutral-900" data-testid="shipping-amount">
                       €{safeMoney(order.shipping_amount)}
                     </span>
                   </div>
                 )}
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-neutral-200 pt-4">
                   <div className="flex justify-between">
-                    <span className="text-base font-medium text-gray-900">Σύνολο</span>
-                    <span className="text-base font-medium text-gray-900" data-testid="total-amount">
+                    <span className="text-base font-medium text-neutral-900">Σύνολο</span>
+                    <span className="text-base font-medium text-neutral-900" data-testid="total-amount">
                       €{safeMoney(order.total_amount)}
                     </span>
                   </div>
@@ -367,35 +367,35 @@ function OrderDetailsPage(): React.JSX.Element {
             </div>
 
             {/* Shipping & Payment Info */}
-            <div data-testid="shipping-payment-info-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Αποστολή & Πληρωμή</h2>
+            <div data-testid="shipping-payment-info-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+              <div className="px-6 py-4 border-b border-neutral-200">
+                <h2 className="text-lg font-semibold text-neutral-900">Αποστολή & Πληρωμή</h2>
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Πληρωμής</h3>
-                  <p className="text-sm text-gray-600" data-testid="payment-method">
+                  <h3 className="text-sm font-medium text-neutral-900 mb-1">Τρόπος Πληρωμής</h3>
+                  <p className="text-sm text-neutral-600" data-testid="payment-method">
                     {formatPaymentMethod(order.payment_method)}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 mb-1">Τρόπος Αποστολής</h3>
-                  <p className="text-sm text-gray-600" data-testid="shipping-method">
+                  <h3 className="text-sm font-medium text-neutral-900 mb-1">Τρόπος Αποστολής</h3>
+                  <p className="text-sm text-neutral-600" data-testid="shipping-method">
                     {formatShippingMethod(order.shipping_method, order.shipping_method_label)}
                   </p>
                 </div>
                 {hasShippingAddress(order.shipping_address) && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-1">Διεύθυνση Αποστολής</h3>
-                    <p className="text-sm text-gray-600 whitespace-pre-line" data-testid="shipping-address">
+                    <h3 className="text-sm font-medium text-neutral-900 mb-1">Διεύθυνση Αποστολής</h3>
+                    <p className="text-sm text-neutral-600 whitespace-pre-line" data-testid="shipping-address">
                       {formatShippingAddress(order.shipping_address)}
                     </p>
                   </div>
                 )}
                 {order.notes && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-1">Σημειώσεις Παραγγελίας</h3>
-                    <p className="text-sm text-gray-600" data-testid="order-notes">
+                    <h3 className="text-sm font-medium text-neutral-900 mb-1">Σημειώσεις Παραγγελίας</h3>
+                    <p className="text-sm text-neutral-600" data-testid="order-notes">
                       {order.notes}
                     </p>
                   </div>
@@ -404,13 +404,13 @@ function OrderDetailsPage(): React.JSX.Element {
             </div>
 
             {/* Pass REORDER-01: Reorder Button */}
-            <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
               <div className="p-6">
                 <button
                   onClick={handleReorder}
                   disabled={reordering || orderItems.length === 0}
                   data-testid="reorder-button"
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {reordering ? (
                     <>
@@ -429,7 +429,7 @@ function OrderDetailsPage(): React.JSX.Element {
                     </>
                   )}
                 </button>
-                <p className="mt-2 text-xs text-gray-500 text-center">
+                <p className="mt-2 text-xs text-neutral-500 text-center">
                   Προσθέτει όλα τα προϊόντα στο καλάθι
                 </p>
               </div>

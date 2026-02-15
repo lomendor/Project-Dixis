@@ -103,16 +103,16 @@ export default async function ProducerProfilePage(
   const productCount = producer.products.length;
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <nav className="mb-6 text-sm" aria-label="Breadcrumb">
           <ol className="flex items-center gap-2">
             <li><Link href="/" className="text-primary hover:underline">Αρχική</Link></li>
-            <li className="text-gray-400">/</li>
+            <li className="text-neutral-400">/</li>
             <li><Link href="/producers" className="text-primary hover:underline">Παραγωγοί</Link></li>
-            <li className="text-gray-400">/</li>
-            <li className="text-gray-600">{producer.name}</li>
+            <li className="text-neutral-400">/</li>
+            <li className="text-neutral-600">{producer.name}</li>
           </ol>
         </nav>
 
@@ -131,7 +131,7 @@ export default async function ProducerProfilePage(
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full min-h-[240px] flex items-center justify-center text-gray-400">
+                <div className="w-full h-full min-h-[240px] flex items-center justify-center text-neutral-400">
                   <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
@@ -146,11 +146,11 @@ export default async function ProducerProfilePage(
                   {producer.category}
                 </span>
               )}
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
                 {producer.name}
               </h1>
               {producer.region && (
-                <p className="text-sm text-gray-500 flex items-center gap-1.5 mb-4">
+                <p className="text-sm text-neutral-500 flex items-center gap-1.5 mb-4">
                   <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -159,7 +159,7 @@ export default async function ProducerProfilePage(
                 </p>
               )}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-neutral-100 px-3 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1.5 text-sm text-neutral-600 bg-neutral-100 px-3 py-1 rounded-full">
                   <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
@@ -186,20 +186,20 @@ export default async function ProducerProfilePage(
         {/* Story / Description section */}
         {producer.description && (
           <div className="bg-primary/5 rounded-xl border border-primary/10 p-6 sm:p-8 mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-neutral-900 mb-3 flex items-center gap-2">
               <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
               </svg>
               Η Ιστορία μας
             </h2>
-            <p className="text-gray-700 leading-relaxed">{producer.description}</p>
+            <p className="text-neutral-700 leading-relaxed">{producer.description}</p>
           </div>
         )}
 
         {/* Map section — only if coordinates exist */}
         {producer.latitude && producer.longitude && (
           <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-neutral-900 mb-3 flex items-center gap-2">
               <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -219,7 +219,7 @@ export default async function ProducerProfilePage(
         {productCount > 0 ? (
           <>
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-neutral-900">
                 Τα Προϊόντα μας
               </h2>
               <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
@@ -248,8 +248,8 @@ export default async function ProducerProfilePage(
             </div>
           </>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-            <p className="text-gray-500 text-lg">
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-300">
+            <p className="text-neutral-500 text-lg">
               Δεν υπάρχουν ακόμα προϊόντα από αυτόν τον παραγωγό.
             </p>
           </div>
