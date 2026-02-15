@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: `${siteUrl}/logo.svg`,
+        url: `${siteUrl}/logo.png`,
         width: 400,
         height: 400,
         alt: 'Dixis — Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Dixis — Φρέσκα τοπικά προϊόντα",
     description: "Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς.",
-    images: [`${siteUrl}/logo.svg`],
+    images: [`${siteUrl}/logo.png`],
   },
 };
 
