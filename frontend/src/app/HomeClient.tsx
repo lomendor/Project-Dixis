@@ -300,6 +300,65 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           </div>
         </section>
 
+        {/* How It Works Section */}
+        <section className="py-10 mb-6">
+          <h2 className="text-2xl font-bold text-center text-neutral-800 mb-8">
+            Πώς Λειτουργεί
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 bg-primary-pale rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-neutral-800 mb-2">Ανακαλύψτε</h3>
+              <p className="text-sm text-neutral-600">Βρείτε τοπικά προϊόντα από πιστοποιημένους Έλληνες παραγωγούς</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 bg-primary-pale rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-neutral-800 mb-2">Παραγγείλτε</h3>
+              <p className="text-sm text-neutral-600">Προσθέστε στο καλάθι και πληρώστε με κάρτα ή αντικαταβολή</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 bg-primary-pale rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-neutral-800 mb-2">Παραλάβετε</h3>
+              <p className="text-sm text-neutral-600">Λάβετε τα προϊόντα στην πόρτα σας, φρέσκα από τον παραγωγό</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Trust Badges */}
+        <div className="flex flex-wrap justify-center gap-6 mb-8 py-4 border-t border-b border-neutral-200">
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Ασφαλείς Πληρωμές</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Απευθείας από Παραγωγούς</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-neutral-600">
+            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+            <span>100% Ελληνικά Προϊόντα</span>
+          </div>
+        </div>
+
         {/* Search & Filters Section */}
         <div className="py-6">
           
@@ -589,14 +648,33 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
         )}
 
         {safeProducts.length === 0 && !loading && !error && (
-  <div data-testid="home-empty" style={{padding:24, textAlign:'center'}}>
-    <h3 style={{fontWeight:600, fontSize:16, marginBottom:8}}>Δεν υπάρχουν προϊόντα</h3>
-    <p style={{color:'#666', fontSize:12, marginBottom:12}}>Προσθέστε προϊόντα ή αλλάξτε φίλτρα.</p>
-    <button type="button" onClick={()=>{ try { window.location.reload(); } catch(_) {} }} style={{padding:'6px 12px', border:'1px solid #ddd', borderRadius:6, background:'#fff', cursor:'pointer'}}>
-      Ανανέωση
-    </button>
-  </div>
-)}
+          <div data-testid="home-empty" className="py-16 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-neutral-800 mb-2">Δεν βρέθηκαν προϊόντα</h3>
+            <p className="text-sm text-neutral-500 mb-4">Δοκιμάστε να αλλάξετε τα φίλτρα ή κάντε ανανέωση.</p>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors text-sm font-medium"
+              >
+                Καθαρισμός Φίλτρων
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { try { window.location.reload(); } catch { /* noop */ } }}
+                className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors text-sm font-medium text-neutral-700"
+              >
+                Ανανέωση
+              </button>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
