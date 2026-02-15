@@ -116,14 +116,14 @@ export default function ProducerDashboard() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="producer-dashboard">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="dashboard-title">
+          <h1 className="text-3xl font-bold text-neutral-900 mb-2" data-testid="dashboard-title">
             {t('producerDashboard.title')}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-neutral-600">
             {t('producerDashboard.welcome').replace('{name}', user?.name || '')}
           </p>
         </div>
@@ -137,7 +137,7 @@ export default function ProducerDashboard() {
             <p className="text-red-600 mb-4">{error}</p>
             <button
               onClick={loadDashboardData}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+              className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg"
               data-testid="retry-button"
             >
               {t('producerDashboard.tryAgain')}
@@ -151,14 +151,14 @@ export default function ProducerDashboard() {
                 <div key={index} className="bg-white rounded-lg shadow-md p-6" data-testid={stat.testId}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">
+                      <p className="text-sm font-medium text-neutral-600">
                         {stat.title}
                       </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-2">
+                      <p className="text-2xl font-bold text-neutral-900 mt-2">
                         {stat.value}
                       </p>
                     </div>
-                    <div className="text-green-600">
+                    <div className="text-primary">
                       {stat.icon}
                     </div>
                   </div>
@@ -170,12 +170,12 @@ export default function ProducerDashboard() {
             <div className="bg-white rounded-lg shadow-md">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-neutral-900">
                     {t('producerDashboard.topProducts')}
                   </h2>
                   <Link
                     href="/producer/products"
-                    className="text-sm text-green-600 hover:text-green-700 font-medium"
+                    className="text-sm text-primary hover:text-primary-light font-medium"
                   >
                     {t('producerDashboard.viewAllProducts')} →
                   </Link>
@@ -183,20 +183,20 @@ export default function ProducerDashboard() {
 
                 {topProducts.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="text-gray-400 mb-4">
+                    <div className="text-neutral-400 mb-4">
                       <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="text-lg font-medium text-neutral-900 mb-2">
                       {t('producerDashboard.noProductsYet')}
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-neutral-600 mb-4">
                       {t('producerDashboard.startSelling')}
                     </p>
                     <button
                       onClick={() => router.push('/my/products/create')}
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
+                      className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg"
                     >
                       {t('producerDashboard.addProduct')}
                     </button>
@@ -217,21 +217,21 @@ export default function ProducerDashboard() {
                               height={48}
                             />
                           ) : (
-                            <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
-                              <span className="text-xs text-gray-400">{t('producerDashboard.noImage')}</span>
+                            <div className="h-12 w-12 rounded-lg bg-neutral-200 flex items-center justify-center">
+                              <span className="text-xs text-neutral-400">{t('producerDashboard.noImage')}</span>
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm font-medium text-neutral-900 truncate">{product.name}</p>
+                          <p className="text-sm text-neutral-600">
                             {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-neutral-500">
                               {product.stock !== null ? `${product.stock} ${product.unit}(s)` : t('producerDashboard.inStock')}
                             </span>
-                            <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                            <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-primary-pale text-primary">
                               {t('producerDashboard.active')}
                             </span>
                           </div>
@@ -242,26 +242,26 @@ export default function ProducerDashboard() {
 
                   {/* Desktop table layout */}
                   <div className="hidden md:block overflow-x-auto -mx-6">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-neutral-200">
+                      <thead className="bg-neutral-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             {t('producerDashboard.product')}
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             {t('producerDashboard.price')}
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             {t('producerDashboard.stock')}
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             {t('producerDashboard.status')}
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      <tbody className="bg-white divide-y divide-neutral-200">
                         {topProducts.slice(0, 5).map((product) => (
-                          <tr key={product.id} className="hover:bg-gray-50">
+                          <tr key={product.id} className="hover:bg-neutral-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-10 w-10 relative">
@@ -274,17 +274,17 @@ export default function ProducerDashboard() {
                                       height={40}
                                     />
                                   ) : (
-                                    <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center">
-                                      <span className="text-xs text-gray-400">{t('producerDashboard.noImage')}</span>
+                                    <div className="h-10 w-10 rounded-lg bg-neutral-200 flex items-center justify-center">
+                                      <span className="text-xs text-neutral-400">{t('producerDashboard.noImage')}</span>
                                     </div>
                                   )}
                                 </div>
                                 <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="text-sm font-medium text-neutral-900">
                                     {product.name}
                                   </div>
                                   {product.categories.length > 0 && (
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-sm text-neutral-500">
                                       {product.categories[0].name}
                                     </div>
                                   )}
@@ -292,12 +292,12 @@ export default function ProducerDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-neutral-900">
                                 {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                              <div className="text-sm text-neutral-900">
                                 {product.stock !== null ? (
                                   `${product.stock} ${product.unit}(s)`
                                 ) : (
@@ -306,7 +306,7 @@ export default function ProducerDashboard() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-primary-pale text-primary">
                                 {t('producerDashboard.active')}
                               </span>
                             </td>
@@ -322,53 +322,53 @@ export default function ProducerDashboard() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">
                 {t('producerDashboard.quickActions')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <button
                   onClick={() => router.push('/my/products/create')}
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                   data-testid="quick-action-add-product"
                 >
-                  <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-neutral-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">{t('producerDashboard.addProduct')}</span>
+                  <span className="text-sm font-medium text-neutral-900">{t('producerDashboard.addProduct')}</span>
                 </button>
 
                 <button
                   onClick={() => router.push('/my/orders')}
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                   data-testid="quick-action-view-orders"
                 >
-                  <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-neutral-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">{t('producerDashboard.viewOrders')}</span>
+                  <span className="text-sm font-medium text-neutral-900">{t('producerDashboard.viewOrders')}</span>
                 </button>
 
                 <button
                   onClick={() => router.push('/account/notifications')}
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                   data-testid="quick-action-notifications"
                 >
-                  <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-neutral-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">{t('producerDashboard.notifications')}</span>
+                  <span className="text-sm font-medium text-neutral-900">{t('producerDashboard.notifications')}</span>
                 </button>
 
                 <button
                   onClick={() => router.push('/producer/settings')}
-                  className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                   data-testid="quick-action-settings"
                 >
-                  <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-neutral-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-900">{t('producerDashboard.settings')}</span>
+                  <span className="text-sm font-medium text-neutral-900">{t('producerDashboard.settings')}</span>
                 </button>
               </div>
             </div>
