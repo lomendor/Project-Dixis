@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (V1-REALITY-SYNC — docs audit, middleware auth)
+**Updated**: 2026-02-15 (ADMIN-NOTIFY-01 — admin email on new orders)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -66,6 +66,9 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **ADMIN-NOTIFY-01** — Admin email notification when new order placed: AdminNewOrder Mailable, Greek Blade template (order total, customer, payment method, admin link), hooked into OrderEmailService as Step C. Idempotent, feature-flagged. ADMIN_NOTIFY_EMAIL set on prod. (PR #2905, deployed 2026-02-15) ✅
+- **BRAND-COLOR-UNIFY-04** — Brand color round 4: auth pages (login, register, forgot/reset-password, verify-email), CartClient, CartBadge, CustomerDetailsForm, track page, Toast, FilterStrip — all gray→neutral, green/emerald→primary. (PR #2904, deployed 2026-02-15) ✅
+- **PALETTE-REFRESH** — Freshen brand palette: primary #0f5c2e→#1a7a3e (brighter), new primary-light #1f8f48, Hellenize Navigation labels (all Greek). (PR #2903, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-03** — Brand color round 3: shared components (Navigation, CategoryStrip, ProductCard, ProductSearchInput, AddToCartButton, PaymentMethodSelector, ProducerCard). Eliminates last emerald + off-brand green/gray in customer-facing UI. (PR #2901, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-02** — Brand color round 2: homepage (HomeClient.tsx) hero/filters/product cards, Add-to-Cart button, loading skeletons — all gray→neutral, green→primary. (PR #2899, deployed 2026-02-15) ✅
 - **BRAND-COLOR-UNIFY-01** — Unify all storefront pages to brand color palette: gray→neutral, emerald/blue/green→primary across 9 files (cart, checkout, success, order, thank-you, products, Stripe payment). Zero logic changes, pure visual consistency. (PR #2896, deployed 2026-02-15) ✅
