@@ -66,6 +66,8 @@ _(Architecture audit complete — all items FIXED, WONTFIX, or DEFER. See ARCH-A
 
 ## Recently Done (last 10)
 
+- **PRODUCT-DETAIL-POLISH-01** — Product detail page UX: brand-consistent colors (text-blue-600 → text-primary), chevron breadcrumb, inline price+stock layout, producer name above category. (PR #2893, deployed 2026-02-15) ✅
+- **OG-SEO-FIX-01** — Fix social sharing previews + structured data: all logo.svg refs → logo.png (real Dixis logo). Delete dead logo.svg route handler + old green abstract SVG + 5 unused Next.js boilerplate SVGs. (PR #2892, deployed 2026-02-15) ✅
 - **PHASE-4B: Cart Sync Race Fix** — Version-counter optimistic lock in Zustand cart store. If user adds item during login cart sync, mergeServerCart() merges instead of overwriting — zero item loss. (PR #2890, deployed 2026-02-15) ✅
 - **UI-POLISH: Favicon + Minimal Header** — Replaced all icons (favicon, PWA, apple-touch) with correct Dixis logo (fruits/leaves). Removed Επικοινωνία from header nav (footer only). Cleaner, more minimal navigation. (PRs #2885-#2887, deployed 2026-02-15) ✅
 - **PHASE-4A: Zod API Validation** — Non-blocking Zod schemas for 12 critical API response endpoints (Product, Order, ShippingQuote, User, Auth, PaymentConfig). Validates at runtime, logs mismatches to Sentry, never crashes. Also fixed CI E2E setup (mock_session cookie for middleware auth). (PR #2883, deployed 2026-02-15) ✅
