@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import UploadImage from '@/components/UploadImage.client';
 import { apiClient } from '@/lib/api';
+import { greekToSlug } from '@/lib/slugify';
 
 type Category = {
   id: string;
@@ -46,6 +47,8 @@ function CreateProductContent() {
   // Form state
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [showSlug, setShowSlug] = useState(false);
   const [category, setCategory] = useState('');
   const [unit, setUnit] = useState('');
   const [description, setDescription] = useState('');
@@ -113,39 +116,58 @@ function CreateProductContent() {
                 id="title"
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (!slugManuallyEdited) {
+                    setSlug(greekToSlug(e.target.value));
+                  }
+                }}
                 required
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="π.χ. Βιολογικές Ντομάτες Κρήτης"
                 data-testid="title-input"
               />
+              {slug && (
+                <p className="mt-1 text-sm text-neutral-500">
+                  URL: /products/<span className="font-mono text-neutral-700">{slug}</span>
+                  {' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowSlug(!showSlug)}
+                    className="text-primary hover:text-primary-light underline"
+                  >
+                    {showSlug ? 'Απόκρυψη' : 'Επεξεργασία'}
+                  </button>
+                </p>
+              )}
             </div>
 
-            <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-neutral-700 mb-1">
-                Όνομα (slug) *
-              </label>
-              <input
-                id="slug"
-                type="text"
-                value={slug}
-                onChange={(e) => {
-                  // Auto-normalize: lowercase, replace spaces with dashes, remove invalid chars
-                  const normalized = e.target.value
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^a-z0-9-]/g, '');
-                  setSlug(normalized);
-                }}
-                required
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="π.χ. biologikes-tomates"
-                data-testid="slug-input"
-              />
-              <p className="mt-1 text-sm text-neutral-500">
-                Χρησιμοποιείται στο URL (μόνο λατινικά, παύλες)
-              </p>
-            </div>
+            {showSlug && (
+              <div>
+                <label htmlFor="slug" className="block text-sm font-medium text-neutral-700 mb-1">
+                  URL Προϊόντος (slug)
+                </label>
+                <input
+                  id="slug"
+                  type="text"
+                  value={slug}
+                  onChange={(e) => {
+                    const normalized = e.target.value
+                      .toLowerCase()
+                      .replace(/\s+/g, '-')
+                      .replace(/[^a-z0-9-]/g, '');
+                    setSlug(normalized);
+                    setSlugManuallyEdited(true);
+                  }}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. biologikes-tomates"
+                  data-testid="slug-input"
+                />
+                <p className="mt-1 text-sm text-neutral-500">
+                  Χρησιμοποιείται στο URL (μόνο λατινικά, παύλες). Αφήστε κενό για αυτόματη δημιουργία.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
