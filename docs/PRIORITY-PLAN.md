@@ -44,8 +44,7 @@ We have a technically solid MVP+ with working:
 - [ ] Consumer buys producer's product → producer sees order in dashboard
 - [ ] Leave a review on a purchased product
 **Effort:** Manual testing, fix any blockers found
-**Status:** `[~]` Infrastructure verified. Manual user-flow testing pending (owner task).
-**Note:** `/api/categories` returns 500 (Prisma connection issue on VPS) — product forms may not show category dropdown. Needs investigation.
+**Status:** `[x]` Infrastructure verified + fixed. Categories API 500 resolved (3 chained fixes: migration, nginx routing, PM2 env). All pages 200 OK. Manual user-flow testing pending (owner task).
 
 ### A3: Seed Data Cleanup
 **Why:** When real producers arrive, they'll see dummy data alongside their real products. That looks unprofessional.

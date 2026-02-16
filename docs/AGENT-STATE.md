@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-15 (Producer Launch Prep — pivot from features to real users)
+**Updated**: 2026-02-16 (Infra fixes + Cultivation Filter deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -75,6 +75,12 @@
 
 ## Recently Done (last 10)
 
+- **CULTIVATION-FILTER-UI** — Pill-style cultivation type filter on /products page (Βιολογική, Παραδοσιακή, Συμβατική). Server-side filtering via Laravel ?cultivation_type= param. Counts per type, auto-hidden when no data. All 17 products now have cultivation_type values. (PR #2930, deployed 2026-02-16) ✅
+- **FAVICON-FIX** — Standalone build missing public/ files (favicons, hero images). Fixed postbuild to copy public/. to standalone output. (PR #2929, deployed 2026-02-16) ✅
+- **PM2-ENV-FIX** — Next.js standalone mode doesn't load .env at runtime. Fixed ecosystem.config.js to parse shared env file and inject vars via PM2 env block. (PR #2927, deployed 2026-02-16) ✅
+- **CATEGORIES-NGINX-FIX** — /api/categories fell into Laravel catch-all (404). Created /api/public/categories + /api/admin/categories/[id] routes matching nginx whitelist. Updated 5 frontend fetch calls. (PR #2925, deployed 2026-02-16) ✅
+- **CATEGORY-MIGRATION** — Category table had no migration file (created via db push). Created migration + resolved as applied on production. (PR #2923, deployed 2026-02-16) ✅
+- **OPS-CLEANUP** — Closed 50+ stale automated ops issues (E2E smoke failures + uptime alerts from before fixes). Closed stale docs PR #2810. 0 open issues. ✅
 - **S1-01: CULTIVATION-TYPE** — Products now track cultivation method (organic_certified, biodynamic, traditional_natural, etc.). Migration + model + API filter + producer forms + product detail badge + homepage filter. Replaces binary is_organic with richer enum. (PR #2908, deployed 2026-02-15) ✅
 - **BACKLOG-ROADMAP** — Master backlog created from owner's PRD with 6 stages and 25+ tickets. (PR #2907, 2026-02-15) ✅
 - **ADMIN-NOTIFY-01** — Admin email notification when new order placed: AdminNewOrder Mailable, Greek Blade template (order total, customer, payment method, admin link), hooked into OrderEmailService as Step C. Idempotent, feature-flagged. ADMIN_NOTIFY_EMAIL set on prod. (PR #2905, deployed 2026-02-15) ✅
