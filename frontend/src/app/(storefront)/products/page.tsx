@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
+import { CultivationFilter } from '@/components/CultivationFilter';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
 import { getServerApiUrl } from '@/env';
@@ -20,6 +21,7 @@ type ApiItem = {
   categorySlug?: string;
   categorySlugs?: string[];
   stock?: number | null;
+  cultivationType?: string | null;
 };
 
 /**
@@ -34,7 +36,8 @@ type ApiItem = {
  */
 async function getData(
   search?: string,
-  category?: string
+  category?: string,
+  cultivationType?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
   const isServer = typeof window === 'undefined';
   const base = isServer
@@ -50,6 +53,9 @@ async function getData(
     }
     if (category) {
       params.set('category', category);
+    }
+    if (cultivationType) {
+      params.set('cultivation_type', cultivationType);
     }
 
     const res = await fetch(`${base}/public/products?${params.toString()}`, {
@@ -88,6 +94,7 @@ async function getData(
       categorySlug: p.categories?.[0]?.slug || p.category || null,
       categorySlugs: p.categories?.map((c: any) => c.slug) || [],
       stock: typeof p.stock === 'number' ? p.stock : null,
+      cultivationType: p.cultivation_type || null,
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
@@ -168,20 +175,34 @@ function filterDemoBySearch(items: ApiItem[], search: string): ApiItem[] {
 }
 
 interface PageProps {
-  searchParams: Promise<{ cat?: string; search?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
   const categoryFilter = params.cat || null;
   const searchQuery = params.search || null;
+  const cultivationFilter = params.cult || null;
 
-  // Fetch products (server-side filtering for category + search)
+  // Fetch products (server-side filtering for category + search + cultivation)
   const { items, isDemo, apiTotal } = await getData(
     searchQuery || undefined,
-    categoryFilter || undefined
+    categoryFilter || undefined,
+    cultivationFilter || undefined
   );
   const total = items.length;
+
+  // Fetch ALL products (without cult filter) to build cultivation counts for the strip
+  const allForCounts = cultivationFilter
+    ? await getData(searchQuery || undefined, categoryFilter || undefined)
+    : { items };
+  const cultivationCounts: Record<string, number> = {};
+  for (const item of allForCounts.items) {
+    if (item.cultivationType) {
+      cultivationCounts[item.cultivationType] = (cultivationCounts[item.cultivationType] || 0) + 1;
+    }
+  }
+  const hasCultivationData = Object.keys(cultivationCounts).length > 0;
 
   // Fetch active categories from real data (for the strip)
   const activeCategories = await getActiveCategories();
@@ -193,6 +214,9 @@ export default async function Page({ searchParams }: PageProps) {
     }
     if (searchQuery) {
       return `Δεν βρέθηκαν προϊόντα για "${searchQuery}".`;
+    }
+    if (cultivationFilter) {
+      return 'Δεν υπάρχουν προϊόντα με αυτόν τον τρόπο καλλιέργειας.';
     }
     if (categoryFilter) {
       return 'Δεν υπάρχουν προϊόντα σε αυτή την κατηγορία.';
@@ -227,7 +251,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {/* Category Strip */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Suspense fallback={<div className="h-10 bg-neutral-100 rounded animate-pulse" />}>
             <CategoryStrip
               selectedCategory={categoryFilter}
@@ -235,6 +259,18 @@ export default async function Page({ searchParams }: PageProps) {
             />
           </Suspense>
         </div>
+
+        {/* Cultivation Type Filter — only shown when products have cultivation data */}
+        {hasCultivationData && (
+          <div className="mb-6">
+            <Suspense fallback={null}>
+              <CultivationFilter
+                selectedCultivation={cultivationFilter}
+                availableCounts={cultivationCounts}
+              />
+            </Suspense>
+          </div>
+        )}
 
         {items.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
