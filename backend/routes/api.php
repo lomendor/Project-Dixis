@@ -415,10 +415,12 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1');
     });
 
-    // Pass PAYOUT-03: Admin Settlement Dashboard
+    // Pass PAYOUT-03 + PAYOUT-05: Admin Settlement Dashboard + CSV Export
     Route::middleware('auth:sanctum')->prefix('admin/settlements')->group(function () {
         Route::get('summary', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'summary'])
             ->middleware('throttle:60,1');
+        Route::get('export', [App\Http\Controllers\Api\Admin\SettlementExportController::class, 'exportCsv'])
+            ->middleware('throttle:10,1'); // 10 exports per minute
         Route::get('/', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'index'])
             ->middleware('throttle:60,1');
         Route::get('{id}', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'show'])
