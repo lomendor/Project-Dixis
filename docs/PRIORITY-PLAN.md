@@ -53,7 +53,7 @@ We have a technically solid MVP+ with working:
 - Ensure categories make sense for real Greek products
 - Verify product images aren't broken
 **Effort:** S (1 PR, ~50 LOC)
-**Status:** `[ ]`
+**Status:** `[x]` Done — PR #2937. Reviewed all 5 seed producers + 17 products. Added Unsplash images to 10 products that were missing them. All 17 products now have images.
 
 ---
 
@@ -107,7 +107,7 @@ We have a technically solid MVP+ with working:
 - Error messages clear and in Greek
 - Mobile-friendly forms
 **Effort:** Testing + fixes
-**Status:** `[ ]`
+**Status:** `[x]` Done — PR #2937. Full flow tested on production: register → onboarding → admin approval → product creation → visible in catalog. All steps verified via API. Test data cleaned up after.
 
 ### C2: Product Upload UX
 **Why:** Producers will add products. This must be straightforward.
@@ -117,7 +117,7 @@ We have a technically solid MVP+ with working:
 - Image upload: works? reasonable file size limits?
 - Preview before publish?
 **Effort:** S-M (fixes if needed)
-**Status:** `[ ]`
+**Status:** `[x]` Done — PR #2937. Fixed 3 issues: (1) Slug field confusing for Greek producers → auto-generate from title via greekToSlug() transliteration, hidden by default. (2) Image upload 401 for producers → added Laravel Sanctum Bearer token support to upload route. (3) Storage path wrong in standalone mode → smart CWD detection. Also fixed pre-existing leaflet build blocker.
 
 ### C3: Quick Start Guide Content
 **Why:** Producers need a "what do I do first?" guide.
@@ -177,7 +177,7 @@ By end of Day 3:
 - [ ] 3-5 real producers invited and onboarded
 - [ ] At least 1 producer has added real products with real photos
 - [x] Platform visually polished enough to not embarrass us (6 PRs deployed)
-- [~] Zero critical bugs in producer/consumer flows — pages load, APIs work, manual flow test pending
+- [x] Zero critical bugs in producer/consumer flows — C1 full flow tested, C2 upload/slug/auth fixed, all pages 200 OK
 - [ ] Quick start guide ready for producers (owner task)
 
 ---
@@ -186,8 +186,8 @@ By end of Day 3:
 
 ```
 Day 1: ✅ Analytics CSP + UI Polish (homepage, dashboard, all producer pages, all consumer pages)
-Day 2: Manual flow testing + Seed cleanup + Plausible activation (owner)
-Day 3: Producer onboarding testing + fixes + INVITE REAL PRODUCERS
+Day 2: ✅ Manual flow testing + Seed cleanup + C1/C2/A3 all done (PR #2937 deployed)
+Day 3: INVITE REAL PRODUCERS + Plausible activation (owner) + Quick start guide (owner)
 Day 3+: Monitor, collect feedback, fix what breaks
 ```
 
@@ -200,5 +200,7 @@ Day 3+: Monitor, collect feedback, fix what breaks
 | #2918 | Producer dashboard brand palette | 94 |
 | #2920 | All producer/my pages brand palette (9 files) | 474 |
 | #2921 | All consumer pages brand palette (10 files) | 278 |
+| #2930 | Cultivation filter UI | ~100 |
+| #2937 | Producer launch prep C2: auto-slug, upload auth fix, seed images | 178 |
 
 **The next feature we build should be the one our first real producer asks for.**
