@@ -33,6 +33,9 @@ class UpdateProducerRequest extends FormRequest
             'business_name' => 'nullable|string|max:255',
             'tax_id' => 'nullable|string|max:20',
             'tax_office' => 'nullable|string|max:255',
+            // Pass PAYOUT-01: IBAN for producer settlements (any EU IBAN format)
+            'iban' => ['nullable', 'string', 'max:34', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{4,30}$/'],
+            'bank_account_holder' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'location' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:500',

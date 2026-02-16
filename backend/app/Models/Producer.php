@@ -16,6 +16,8 @@ class Producer extends Model
         'business_name',
         'tax_id',
         'tax_office',
+        'iban',
+        'bank_account_holder',
         'description',
         'location',
         'address',

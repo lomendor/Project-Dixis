@@ -76,6 +76,9 @@ export interface Producer {
   phone?: string;
   email?: string;
   website?: string;
+  // Pass PAYOUT-01: Banking details (visible to owner/admin only)
+  iban?: string;
+  bank_account_holder?: string;
 }
 
 export interface CartItem {
