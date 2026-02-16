@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-16 (Producer Launch Prep C1/C2/A3 complete + deployed)
+**Updated**: 2026-02-16 (Commission System deployed + Post-commission consolidation)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -26,6 +26,7 @@
 - **Admin**: phone OTP login → dashboard stats → manage orders → bulk status update ✅
 - **Shipping**: cost calc by postal code + weight, per-producer free threshold, **COD** (+€4 fee) ✅
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
+- **Commission System**: Configurable rules (B2C/B2B, per-producer, per-category, amount tiers), wired to checkout, admin CRUD + preview calculator, producer sees breakdown on orders, feature flag toggle in admin settings. **Flag OFF in production** — ready to activate. ✅
 
 ### What is BROKEN or MISSING
 - **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
@@ -39,22 +40,24 @@
 
 ## WIP (max 1)
 
-**None** — All code tasks from Producer Launch Prep complete (Phases A3, B, C done). Remaining items are owner tasks: A1 (Plausible analytics), C3 (Quick start guide), D (Post-launch monitoring). See `docs/PRIORITY-PLAN.md`.
+**PAYOUT-01** — Add IBAN + bank_account_holder to Producer model (migration, validation, settings form). Part of Revenue Foundation Phase 1.
 
 ---
 
-## NEXT — Producer Launch Prep (3-day sprint)
+## NEXT — Revenue Foundation (Payouts)
 
-**Strategy pivot:** Stop building features nobody uses. Prepare for REAL producers in 3 days.
+**Commission system DONE. Next: Payout infrastructure so we can actually pay producers.**
 
-| Phase | What | Timeline |
-|-------|------|----------|
-| **A** | Technical foundations (analytics, smoke test, seed cleanup) | Day 1 |
-| **B** | UI polish sprint (homepage, dashboard, cards, producer page) | Day 1-2 |
-| **C** | Producer onboarding readiness (registration flow, product upload UX) | Day 2-3 |
-| **D** | Post-launch monitoring (analytics, feedback, bug fixes) | Day 3+ |
+| Step | What | Status |
+|------|------|--------|
+| PAYOUT-01 | Add IBAN field to Producer model + settings form | 🔄 In progress |
+| PAYOUT-02 | Settlement generation artisan command | Pending |
+| PAYOUT-03 | Admin settlement dashboard | Pending |
+| PAYOUT-04 | Producer payout history page | Pending |
+| PAYOUT-05 | Settlement CSV/PDF export | Pending |
 
-**Full plan:** `docs/PRIORITY-PLAN.md`
+**Gap analysis:** `docs/BUSINESS-LOGIC-GAP-ANALYSIS.md`
+**Payout research:** `docs/DEEP-RESEARCH-PROMPT-PAYOUTS.md` (prompt) + `docs/RESEARCH-PAYOUTS-FINDINGS.md` (findings)
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 
 **Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings.
@@ -75,6 +78,7 @@
 
 ## Recently Done (last 10)
 
+- **COMMISSION-ENGINE** — Full commission system: (1) CommissionService wired to CheckoutService — creates Commission record per order when flag ON (PR #2932). (2) Admin CRUD for commission rules + preview calculator at /admin/commissions (PR #2933). (3) Feature flag activation via env var COMMISSION_ENGINE_ENABLED + producer order detail shows commission breakdown (PR #2934). (4) Admin toggle in /admin/settings to activate/deactivate via Pennant (PR #2935). Default rules seeded: B2C 12%, B2B 7%, B2C volume 10%. **Flag OFF in production — ready to activate.** (PRs #2932-#2935, merged 2026-02-16) ✅
 - **PRODUCER-LAUNCH-PREP-C2** — Phase C complete: (C1) Full producer registration flow tested E2E on production (register→onboard→approve→create product→visible in catalog). (C2) Auto-slug from Greek titles (greekToSlug transliteration), image upload auth fixed for producers (Sanctum Bearer token support), storage path fixed for standalone mode, leaflet dependency fixed. (A3) Seed data verified, Unsplash images added to all 17 products. (PR #2937, deployed 2026-02-16) ✅
 - **CULTIVATION-FILTER-UI** — Pill-style cultivation type filter on /products page (Βιολογική, Παραδοσιακή, Συμβατική). Server-side filtering via Laravel ?cultivation_type= param. Counts per type, auto-hidden when no data. All 17 products now have cultivation_type values. (PR #2930, deployed 2026-02-16) ✅
 - **FAVICON-FIX** — Standalone build missing public/ files (favicons, hero images). Fixed postbuild to copy public/. to standalone output. (PR #2929, deployed 2026-02-16) ✅

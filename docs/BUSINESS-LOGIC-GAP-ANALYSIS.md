@@ -11,8 +11,10 @@ The platform has a **solid B2C consumer experience** (browse, cart, checkout, St
 
 | System | Code Exists | Wired to Checkout | Active in Prod | Admin UI |
 |--------|:-----------:|:-----------------:|:--------------:|:--------:|
-| Commission Calculation | Yes | **NO** | **NO** (flag OFF) | **NO** |
-| Commission Records | Yes (model) | **NO** (never written) | **NO** | **NO** |
+| Commission Calculation | ✅ Yes | ✅ **YES** (PR #2932) | ⏸️ Flag OFF (ready) | ✅ **YES** (PR #2933) |
+| Commission Records | ✅ Yes | ✅ **YES** (written on checkout) | ⏸️ Flag OFF | ✅ CRUD + Preview |
+| Producer Commission Display | ✅ Yes | ✅ **YES** (PR #2934) | ⏸️ Flag OFF | N/A |
+| Commission Toggle | ✅ Yes | N/A | ✅ **YES** (PR #2935) | ✅ Admin Settings |
 | Producer Payouts | Partial (fields) | **NO** | **NO** | **NO** |
 | Settlement Reports | Yes (model) | **NO** (never written) | **NO** | **NO** |
 | B2B Registration | **NO** | N/A | **NO** | **NO** |
@@ -20,7 +22,7 @@ The platform has a **solid B2C consumer experience** (browse, cart, checkout, St
 | Wholesale Pricing | **NO** | N/A | **NO** | **NO** |
 | Invoice Generation | **NO** | N/A | **NO** | **NO** |
 
-**Bottom line:** Every order placed today generates **zero commission records** and has **no mechanism** for paying producers. We're operating a marketplace without a revenue model implementation.
+**Update (2026-02-16):** Commission system fully implemented (PRs #2932-#2935, deployed). Flag is OFF — needs owner decision to activate. Next priority: **Payout infrastructure** (PAYOUT-01 through PAYOUT-05).
 
 ---
 
@@ -47,27 +49,15 @@ The platform has a **solid B2C consumer experience** (browse, cart, checkout, St
 5. Applies rounding (UP/DOWN/NEAREST)
 6. Returns `{ commission_cents, rule_id, breakdown }`
 
-### What's MISSING
+### ✅ ALL IMPLEMENTED (2026-02-16)
 
-1. **Commission NOT wired to checkout** — `CheckoutService::processCheckout()` creates Orders but NEVER calls `CommissionService`. No Commission record is ever created.
-
-2. **Feature flag is OFF** — Even if wired, returns 0 in production.
-
-3. **No admin UI** for commission rules — Rules can only be managed via database/seeder. No CRUD interface.
-
-4. **No producer-facing display** — Producers don't see commission breakdown on their orders.
-
-5. **No cost transparency UI** (S3-01 in backlog) — Consumers don't see fee breakdown.
-
-### What needs to happen
-
-| Step | What | Effort | Priority |
-|------|------|--------|----------|
-| COMM-01 | Wire CommissionService into CheckoutService (after order creation, create Commission record per order) | S (~50 LOC) | **CRITICAL** |
-| COMM-02 | Activate feature flag on production (`Feature::activate('commission_engine_v1')`) | Config only | **CRITICAL** |
-| COMM-03 | Admin UI: list/create/edit/toggle commission rules | M (~150 LOC) | HIGH |
-| COMM-04 | Producer dashboard: show commission breakdown per order in order detail | S (~80 LOC) | HIGH |
-| COMM-05 | Cost transparency on product page (consumer sees "producer gets X%") | S (~60 LOC) | MEDIUM |
+| Step | What | Status | PR |
+|------|------|--------|-----|
+| COMM-01 | Wire CommissionService into CheckoutService | ✅ DONE | #2932 |
+| COMM-02 | Feature flag activation (env var + admin toggle) | ✅ DONE (flag OFF, ready) | #2934, #2935 |
+| COMM-03 | Admin UI: CRUD commission rules + preview calculator | ✅ DONE | #2933 |
+| COMM-04 | Producer dashboard: commission breakdown per order | ✅ DONE | #2934 |
+| COMM-05 | Cost transparency on product page (consumer sees "producer gets X%") | ❌ NOT DONE | Deferred |
 
 ### Design Questions for Owner
 
@@ -213,31 +203,29 @@ The platform has a **solid B2C consumer experience** (browse, cart, checkout, St
 
 ## 5. Recommended Priority Order
 
-### Phase 1: Revenue Foundation (can start NOW, while onboarding producers)
+### Phase 1: Revenue Foundation — PARTIALLY DONE
 
-> These are essential for actually making money from the marketplace.
+| # | Task | Effort | Status |
+|---|------|--------|--------|
+| 1 | COMM-01: Wire commission to checkout | S | ✅ DONE (PR #2932) |
+| 2 | COMM-02: Activate feature flag | Config | ✅ DONE — flag OFF, owner decision pending |
+| 3 | COMM-03: Admin commission rules CRUD | M | ✅ DONE (PR #2933) |
+| 4 | COMM-04: Producer commission display | S | ✅ DONE (PR #2934) |
+| 5 | PAYOUT-01: IBAN field for producers | S | 🔄 **IN PROGRESS** |
+| 6 | PAYOUT-02: Settlement generation command | M | ❌ Not started |
+| 7 | PAYOUT-03: Admin settlement dashboard | M | ❌ Not started |
 
-| # | Task | Effort | Why |
-|---|------|--------|-----|
-| 1 | COMM-01: Wire commission to checkout | S | Without this, we earn nothing |
-| 2 | COMM-02: Activate feature flag | Config | Make it work in production |
-| 3 | PAYOUT-01: IBAN field for producers | S | Need bank details to pay them |
-| 4 | PAYOUT-02: Settlement generation command | M | Know how much to pay each producer |
-| 5 | PAYOUT-03: Admin settlement dashboard | M | Admin can see and mark payouts |
-
-**Total: ~5 PRs, ~2 weeks. After this, Dixis can track commissions and pay producers.**
+**Commission DONE. Remaining: Payout infrastructure (3 PRs).**
 
 ### Phase 2: Visibility & Control (after first real orders)
 
-| # | Task | Effort | Why |
-|---|------|--------|-----|
-| 6 | COMM-03: Admin commission rules CRUD | M | Change rates without code |
-| 7 | COMM-04: Producer commission display | S | Transparency with producers |
-| 8 | PAYOUT-04: Producer payout history | S | Producers see their earnings |
-| 9 | PAYOUT-05: Settlement CSV/PDF export | S | Admin does bank transfers efficiently |
-| 10 | COMM-05: Cost transparency UI (S3-01) | S | Consumer differentiator |
+| # | Task | Effort | Status |
+|---|------|--------|--------|
+| 8 | PAYOUT-04: Producer payout history | S | ❌ Not started |
+| 9 | PAYOUT-05: Settlement CSV/PDF export | S | ❌ Not started |
+| 10 | COMM-05: Cost transparency UI (S3-01) | S | ❌ Not started |
 
-**Total: ~5 PRs, ~2 weeks.**
+**Total: ~3 PRs, ~1 week.**
 
 ### Phase 3: B2B MVP (when business demand appears)
 
@@ -264,13 +252,13 @@ The platform has a **solid B2C consumer experience** (browse, cart, checkout, St
 ## Summary
 
 ```
-TODAY:  Orders work, payments work, but Dixis earns 0 EUR per order.
-        No commission tracking. No producer payouts. No B2B.
+2026-02-16: Commission system BUILT + DEPLOYED (PRs #2932-#2935). Flag OFF.
+            Next: Turn on flag (owner decision) + build payout infrastructure.
 
-PHASE 1 (2 weeks): Commission active + settlement reports = Dixis earns money + can pay producers.
-PHASE 2 (2 weeks): Admin control + producer transparency = Professional operation.
+REMAINING PHASE 1 (~1 week): PAYOUT-01 (IBAN) + PAYOUT-02 (settlement gen) + PAYOUT-03 (admin dashboard)
+PHASE 2 (~1 week): Payout history + CSV export + cost transparency
 PHASE 3 (4-6 weeks): B2B MVP = New revenue stream from businesses.
 PHASE 4 (6-8 weeks): B2B full + automated payouts = Scaled operations.
 ```
 
-**The user can onboard producers NOW while Phase 1 is built. The first few orders can have commissions calculated retroactively if needed.**
+**Producers can be onboarded NOW. Commission flag should be activated before first real order.**
