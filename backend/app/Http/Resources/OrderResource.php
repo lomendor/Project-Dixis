@@ -91,6 +91,14 @@ class OrderResource extends JsonResource
                 'items' => OrderItemResource::collection($this->orderItems ?? []),
                 'order_items' => OrderItemResource::collection($this->orderItems ?? []), // Alias
             ]),
+            // Pass COMM-ENGINE-WIRE-01: Include commission data when loaded
+            $this->mergeWhen($this->relationLoaded('commission'), [
+                'commission' => $this->commission ? [
+                    'platform_fee' => number_format((float) $this->commission->platform_fee, 2),
+                    'platform_fee_vat' => number_format((float) $this->commission->platform_fee_vat, 2),
+                    'producer_payout' => number_format((float) $this->commission->producer_payout, 2),
+                ] : null,
+            ]),
             // Pass MP-ORDERS-SHIPPING-V1-02: Include per-producer shipping breakdown
             $this->mergeWhen($this->relationLoaded('shippingLines'), [
                 'shipping_lines' => $this->shippingLines->map(fn ($line) => [
