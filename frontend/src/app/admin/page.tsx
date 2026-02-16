@@ -103,6 +103,7 @@ export default async function Page() {
           <QuickAction href="/admin/producers" icon="🧑‍🌾" label="Παραγωγοί" />
           <QuickAction href="/admin/categories" icon="📂" label="Κατηγορίες" />
           <QuickAction href="/admin/analytics" icon="📈" label="Αναλυτικά" />
+          <QuickAction href="/admin/commissions" icon="💰" label="Προμήθειες" />
         </div>
       </section>
 

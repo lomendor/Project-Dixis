@@ -401,6 +401,20 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
     });
 
+    // Admin Commission Rules CRUD
+    Route::middleware('auth:sanctum')->prefix('admin/commission-rules')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'index'])
+            ->middleware('throttle:60,1');
+        Route::post('/', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'store'])
+            ->middleware('throttle:30,1');
+        Route::patch('{id}', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'update'])
+            ->middleware('throttle:30,1');
+        Route::post('{id}/toggle', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'toggleActive'])
+            ->middleware('throttle:30,1');
+        Route::get('preview', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'preview'])
+            ->middleware('throttle:60,1');
+    });
+
 });
 
 // Pass 51: Card payment checkout (authenticated)
