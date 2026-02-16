@@ -20,6 +20,9 @@ interface SettingsFormData {
   location: string;
   tax_id: string;
   tax_office: string;
+  // Pass PAYOUT-01: Banking details for settlements
+  iban: string;
+  bank_account_holder: string;
   social_media: string[];
   // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
   free_shipping_threshold_eur: string; // String for form input, converted on submit
@@ -56,6 +59,8 @@ function ProducerSettingsContent() {
     location: '',
     tax_id: '',
     tax_office: '',
+    iban: '',
+    bank_account_holder: '',
     social_media: [''],
     free_shipping_threshold_eur: '', // Empty means use system default
   });
@@ -86,6 +91,9 @@ function ProducerSettingsContent() {
           location: producer.location || '',
           tax_id: (producer as any).tax_id || '',
           tax_office: (producer as any).tax_office || '',
+          // Pass PAYOUT-01: Banking details
+          iban: (producer as any).iban || '',
+          bank_account_holder: (producer as any).bank_account_holder || '',
           social_media: (producer as any).social_media && (producer as any).social_media.length > 0
             ? (producer as any).social_media
             : [''],
@@ -491,6 +499,51 @@ function ProducerSettingsContent() {
                       + Προσθήκη Συνδέσμου
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Banking Details — Pass PAYOUT-01 */}
+            <div>
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Τραπεζικά Στοιχεία</h2>
+              <p className="text-sm text-neutral-500 mb-4">
+                Απαιτείται για τις εκκαθαρίσεις πωλήσεων. Τα στοιχεία αυτά είναι ορατά μόνο σε εσάς και τη διαχείριση.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="iban" className="block text-sm font-medium text-neutral-700 mb-1">
+                    IBAN
+                  </label>
+                  <input
+                    id="iban"
+                    type="text"
+                    value={formData.iban}
+                    onChange={(e) => {
+                      // Auto-format: uppercase, remove spaces
+                      const cleaned = e.target.value.toUpperCase().replace(/\s/g, '');
+                      setFormData({ ...formData, iban: cleaned });
+                    }}
+                    maxLength={34}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                    placeholder="GR1601101250000000012300695"
+                  />
+                  <p className="mt-1 text-sm text-neutral-500">
+                    Ελληνικό IBAN (27 χαρακτήρες, ξεκινά με GR)
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="bank_account_holder" className="block text-sm font-medium text-neutral-700 mb-1">
+                    Δικαιούχος Λογαριασμού
+                  </label>
+                  <input
+                    id="bank_account_holder"
+                    type="text"
+                    value={formData.bank_account_holder}
+                    onChange={(e) => setFormData({ ...formData, bank_account_holder: e.target.value })}
+                    className="w-full md:w-1/2 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Ονοματεπώνυμο ή Επωνυμία"
+                  />
                 </div>
               </div>
             </div>

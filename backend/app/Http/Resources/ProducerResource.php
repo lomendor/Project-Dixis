@@ -14,7 +14,14 @@ class ProducerResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        // Pass PAYOUT-01: IBAN visible only to the producer themselves or admin
+        $user = $request->user();
+        $isOwnerOrAdmin = $user && (
+            ($user->producer && $user->producer->id === $this->id) ||
+            !empty($user->is_admin)
+        );
+
+        return array_merge([
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
@@ -42,6 +49,10 @@ class ProducerResource extends JsonResource
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-        ];
+        ], $isOwnerOrAdmin ? [
+            // Pass PAYOUT-01: Banking details (owner/admin only)
+            'iban' => $this->iban,
+            'bank_account_holder' => $this->bank_account_holder,
+        ] : []);
     }
 }
