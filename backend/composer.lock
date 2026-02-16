@@ -1276,16 +1276,16 @@
         },
         {
             "name": "laravel/pennant",
-            "version": "v1.18.3",
+            "version": "v1.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/pennant.git",
-                "reference": "1dc2aa4e645cf806b8ae5057a133a9fd62fd6410"
+                "reference": "178c654f10db832161b28c872f4b10035000c054"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/pennant/zipball/1dc2aa4e645cf806b8ae5057a133a9fd62fd6410",
-                "reference": "1dc2aa4e645cf806b8ae5057a133a9fd62fd6410",
+                "url": "https://api.github.com/repos/laravel/pennant/zipball/178c654f10db832161b28c872f4b10035000c054",
+                "reference": "178c654f10db832161b28c872f4b10035000c054",
                 "shasum": ""
             },
             "require": {
@@ -1301,9 +1301,8 @@
             },
             "require-dev": {
                 "laravel/octane": "^1.4|^2.0",
-                "orchestra/testbench": "^8.0|^9.0|^10.0",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^9.0|^10.4|^11.5"
+                "orchestra/testbench": "^8.36|^9.15|^10.8",
+                "phpstan/phpstan": "^1.10"
             },
             "type": "library",
             "extra": {
@@ -1349,7 +1348,7 @@
                 "issues": "https://github.com/laravel/pennant/issues",
                 "source": "https://github.com/laravel/pennant"
             },
-            "time": "2025-10-13T16:33:58+00:00"
+            "time": "2026-02-02T05:44:53+00:00"
         },
         {
             "name": "laravel/prompts",
