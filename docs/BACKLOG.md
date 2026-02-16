@@ -192,7 +192,7 @@ Before planning what to build, here's what **already works in production**:
 - Simple bar chart or pie icon
 - Comparison with traditional supply chain (optional)
 **Effort:** S (1 PR — data exists, just needs UI)
-**Status:** `[ ]`
+**Status:** `[x]` ✅ Done (PR #2960, deployed 2026-02-16) — Green trust badge on product pages showing producer 88% / platform 12%.
 
 ### S3-02: Seasonal Calendar & Products
 **Why:** Greek agriculture is seasonal. This creates urgency and regular return visits.
@@ -414,7 +414,7 @@ Before planning what to build, here's what **already works in production**:
 | S2-04 | Checkout Polish | High | M | 2 |
 | S2-05 | Mobile Audit | High | M | 2 |
 | S2-06 | Loading States | Medium | S | 2 |
-| S3-01 | Cost Transparency | Critical | S | 3 |
+| S3-01 | Cost Transparency | Critical | S | 3 | ✅ Done |
 | S3-02 | Seasonal Calendar | High | M | 3 |
 | S3-03 | Cart Abandonment Emails | High | M | 3 |
 | S3-04 | SEO Foundation | High | M | 3 |

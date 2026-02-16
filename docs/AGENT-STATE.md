@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-16 (Payout Infrastructure complete — 5 PRs merged)
+**Updated**: 2026-02-17 (S3-01 Cost Transparency deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -64,7 +64,7 @@
 
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 **Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings.
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency.
 
 ---
 
@@ -81,6 +81,7 @@
 
 ## Recently Done (last 10)
 
+- **S3-01: COST-TRANSPARENCY** — Green trust badge on every product detail page: "Ο παραγωγός λαμβάνει το 88% της τιμής / Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας". Static display using locked B2C rate (12%). Core differentiator per PRD. (PR #2960, deployed 2026-02-16) ✅
 - **PAYOUT-INFRASTRUCTURE** — Complete payout system: (1) IBAN + bank_account_holder field on Producer model with conditional visibility (PR #2952). (2) CommissionSettlement model + `dixis:generate-settlements` artisan command with 14-day hold, €20 min, monthly schedule (PR #2954). (3) Admin settlement dashboard at /admin/settlements — view/pay/cancel settlements, summary cards, IBAN display (PR #2955). (4) Producer payout history at /producer/settlements — see pending/paid amounts, IBAN reminder (PR #2956). (5) CSV export for bank transfer batches with BOM for Excel UTF-8, semicolon delimiter (PR #2958). (PRs #2952-#2958, merged 2026-02-16) ✅
 - **COMMISSION-ENGINE** — Full commission system: (1) CommissionService wired to CheckoutService — creates Commission record per order when flag ON (PR #2932). (2) Admin CRUD for commission rules + preview calculator at /admin/commissions (PR #2933). (3) Feature flag activation via env var COMMISSION_ENGINE_ENABLED + producer order detail shows commission breakdown (PR #2934). (4) Admin toggle in /admin/settings to activate/deactivate via Pennant (PR #2935). Default rules seeded: B2C 12%, B2B 7%, B2C volume 10%. **Flag OFF in production — ready to activate.** (PRs #2932-#2935, merged 2026-02-16) ✅
 - **PRODUCER-LAUNCH-PREP-C2** — Phase C complete: (C1) Full producer registration flow tested E2E on production (register→onboard→approve→create product→visible in catalog). (C2) Auto-slug from Greek titles (greekToSlug transliteration), image upload auth fixed for producers (Sanctum Bearer token support), storage path fixed for standalone mode, leaflet dependency fixed. (A3) Seed data verified, Unsplash images added to all 17 products. (PR #2937, deployed 2026-02-16) ✅
