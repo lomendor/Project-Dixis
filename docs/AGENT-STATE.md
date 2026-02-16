@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-16 (Infra fixes + Cultivation Filter deployed)
+**Updated**: 2026-02-16 (Producer Launch Prep C1/C2/A3 complete + deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -39,7 +39,7 @@
 
 ## WIP (max 1)
 
-**Producer Launch Prep** — See `docs/PRIORITY-PLAN.md`
+**None** — All code tasks from Producer Launch Prep complete (Phases A3, B, C done). Remaining items are owner tasks: A1 (Plausible analytics), C3 (Quick start guide), D (Post-launch monitoring). See `docs/PRIORITY-PLAN.md`.
 
 ---
 
@@ -75,6 +75,7 @@
 
 ## Recently Done (last 10)
 
+- **PRODUCER-LAUNCH-PREP-C2** — Phase C complete: (C1) Full producer registration flow tested E2E on production (register→onboard→approve→create product→visible in catalog). (C2) Auto-slug from Greek titles (greekToSlug transliteration), image upload auth fixed for producers (Sanctum Bearer token support), storage path fixed for standalone mode, leaflet dependency fixed. (A3) Seed data verified, Unsplash images added to all 17 products. (PR #2937, deployed 2026-02-16) ✅
 - **CULTIVATION-FILTER-UI** — Pill-style cultivation type filter on /products page (Βιολογική, Παραδοσιακή, Συμβατική). Server-side filtering via Laravel ?cultivation_type= param. Counts per type, auto-hidden when no data. All 17 products now have cultivation_type values. (PR #2930, deployed 2026-02-16) ✅
 - **FAVICON-FIX** — Standalone build missing public/ files (favicons, hero images). Fixed postbuild to copy public/. to standalone output. (PR #2929, deployed 2026-02-16) ✅
 - **PM2-ENV-FIX** — Next.js standalone mode doesn't load .env at runtime. Fixed ecosystem.config.js to parse shared env file and inject vars via PM2 env block. (PR #2927, deployed 2026-02-16) ✅
