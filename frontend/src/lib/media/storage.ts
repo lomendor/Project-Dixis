@@ -23,15 +23,28 @@ async function maybeProcess(buf: Uint8Array, mime: string): Promise<Uint8Array>{
 export async function putObjectFs(data: Buf, mime: string): Promise<PutResult>{
   const { writeFile, mkdir } = await import('fs/promises');
   const { join } = await import('path');
+  const { existsSync } = await import('fs');
   const raw = data instanceof Uint8Array ? data : Buffer.from(data as ArrayBuffer);
   const processed = await maybeProcess(raw, mime);
   const hash = sha16(processed);
   const ext = extFromMime(mime);
   const folder = yyyymm();
   const key = `${hash}.${ext}`;
-  const dir = join(process.cwd(), 'frontend', 'public', 'uploads', folder);
-  await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, key), processed);
+  // Smart path detection: works in dev (repo root or frontend/), standalone mode, or production
+  const cwd = process.cwd();
+  let publicDir: string;
+  if (existsSync(join(cwd, 'public'))) {
+    // CWD has public/ — use it directly (standalone mode, or frontend/ cwd)
+    publicDir = join(cwd, 'public', 'uploads', folder);
+  } else if (existsSync(join(cwd, 'frontend', 'public'))) {
+    // Repo root — prefix with frontend/
+    publicDir = join(cwd, 'frontend', 'public', 'uploads', folder);
+  } else {
+    // Fallback — try cwd/public anyway
+    publicDir = join(cwd, 'public', 'uploads', folder);
+  }
+  await mkdir(publicDir, { recursive: true });
+  await writeFile(join(publicDir, key), processed);
   return { url: `/uploads/${folder}/${key}`, key: `uploads/${folder}/${key}` };
 }
 
