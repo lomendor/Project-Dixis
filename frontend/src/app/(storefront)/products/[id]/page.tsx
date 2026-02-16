@@ -275,6 +275,23 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </div>
           )}
 
+          {/* S3-01: Cost Transparency — show where the money goes */}
+          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3" data-testid="cost-transparency">
+            <div className="flex items-start gap-2">
+              <svg className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">
+                  Ο παραγωγός λαμβάνει το 88% της τιμής
+                </p>
+                <p className="text-xs text-emerald-700 mt-0.5">
+                  Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Add to Cart — Pass CART-UX-FEEDBACK-01: include imageUrl */}
           <div className="mt-auto">
             <Add
