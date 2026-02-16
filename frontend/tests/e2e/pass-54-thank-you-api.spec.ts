@@ -17,7 +17,8 @@ test.describe('Pass 54: Thank-You Page API Source', () => {
     let legacyApiCalled = false;
 
     // Intercept Laravel API call (the correct source)
-    await page.route('**/api/v1/public/orders/*', async (route) => {
+    // CI-SMOKE-FIX: Use ** glob to match /api/v1/public/orders/by-token/123
+    await page.route('**/api/v1/public/orders/**', async (route) => {
       laravelApiCalled = true;
       // Return mock order data
       await route.fulfill({
@@ -80,7 +81,8 @@ test.describe('Pass 54: Thank-You Page API Source', () => {
 
   test('@smoke thank-you page shows order details from Laravel', async ({ page }) => {
     // Mock Laravel API response with specific values
-    await page.route('**/api/v1/public/orders/*', async (route) => {
+    // CI-SMOKE-FIX: Use ** glob to match /api/v1/public/orders/by-token/456
+    await page.route('**/api/v1/public/orders/**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
