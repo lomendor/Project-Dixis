@@ -100,8 +100,9 @@ class ProducerOrderController extends Controller
         $producerId = $user->producer->id;
 
         // Find order scoped to producer
+        // Pass COMM-ENGINE-ACTIVATE-01: Eager-load commission for producer visibility
         $order = Order::forProducer($producerId)
-            ->with(['user', 'orderItems' => function ($q) use ($producerId) {
+            ->with(['user', 'commission', 'orderItems' => function ($q) use ($producerId) {
                 $q->where('producer_id', $producerId);
             }])
             ->find($id);
@@ -113,9 +114,20 @@ class ProducerOrderController extends Controller
             ], 404);
         }
 
+        // Build commission breakdown for frontend
+        $commissionData = null;
+        if ($order->commission) {
+            $commissionData = [
+                'platform_fee' => number_format((float) $order->commission->platform_fee, 2),
+                'platform_fee_vat' => number_format((float) $order->commission->platform_fee_vat, 2),
+                'producer_payout' => number_format((float) $order->commission->producer_payout, 2),
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'order' => $order,
+            'commission' => $commissionData,
         ]);
     }
 

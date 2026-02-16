@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
+
+interface CommissionData {
+  platform_fee: string;
+  platform_fee_vat: string;
+  producer_payout: string;
+}
 import AuthGuard from '@/components/AuthGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
@@ -53,6 +59,7 @@ export default function ProducerOrderDetailsPage() {
   const orderId = Number(params.id);
 
   const [order, setOrder] = useState<ProducerOrder | null>(null);
+  const [commission, setCommission] = useState<CommissionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -75,6 +82,10 @@ export default function ProducerOrderDetailsPage() {
       setLoading(true);
       const response = await apiClient.getProducerOrder(orderId);
       setOrder(response.order);
+      // Pass COMM-ENGINE-ACTIVATE-01: Commission data from backend
+      if (response.commission) {
+        setCommission(response.commission);
+      }
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load order');
@@ -455,6 +466,26 @@ export default function ProducerOrderDetailsPage() {
                       {formatCurrency(parseFloat(order.total))}
                     </span>
                   </div>
+
+                  {/* Pass COMM-ENGINE-ACTIVATE-01: Commission breakdown for producer */}
+                  {commission && (
+                    <div className="mt-4 pt-4 border-t border-dashed border-neutral-300 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-neutral-500">Προμήθεια πλατφόρμας</span>
+                        <span className="text-red-600">-{formatCurrency(parseFloat(commission.platform_fee))}</span>
+                      </div>
+                      {parseFloat(commission.platform_fee_vat) > 0 && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-neutral-400 ml-2">incl. ΦΠΑ</span>
+                          <span className="text-neutral-400">{formatCurrency(parseFloat(commission.platform_fee_vat))}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-lg font-bold pt-2 border-t border-dashed border-neutral-300">
+                        <span className="text-emerald-700">Καθαρό ποσό</span>
+                        <span className="text-emerald-600">{formatCurrency(parseFloat(commission.producer_payout))}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

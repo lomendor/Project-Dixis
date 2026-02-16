@@ -958,8 +958,8 @@ class ApiClient {
     return { ...raw, orders };
   }
 
-  async getProducerOrder(orderId: number): Promise<{ success: boolean; order: ProducerOrder }> {
-    const raw = await this.request<{ success: boolean; order: ProducerOrderRaw }>(`producer/orders/${orderId}`);
+  async getProducerOrder(orderId: number): Promise<{ success: boolean; order: ProducerOrder; commission?: { platform_fee: string; platform_fee_vat: string; producer_payout: string } | null }> {
+    const raw = await this.request<{ success: boolean; order: ProducerOrderRaw; commission?: { platform_fee: string; platform_fee_vat: string; producer_payout: string } | null }>(`producer/orders/${orderId}`);
 
     // Normalize snake_case (order_items) to camelCase (orderItems)
     const order: ProducerOrder = {
