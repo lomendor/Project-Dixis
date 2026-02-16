@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-16 (Commission System deployed + Post-commission consolidation)
+**Updated**: 2026-02-16 (Payout Infrastructure complete — 5 PRs merged)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -27,6 +27,7 @@
 - **Shipping**: cost calc by postal code + weight, per-producer free threshold, **COD** (+€4 fee) ✅
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
 - **Commission System**: Configurable rules (B2C/B2B, per-producer, per-category, amount tiers), wired to checkout, admin CRUD + preview calculator, producer sees breakdown on orders, feature flag toggle in admin settings. **Flag OFF in production** — ready to activate. ✅
+- **Payout Infrastructure**: IBAN field on producer profile, monthly settlement generation command (14-day hold, €20 minimum), admin settlement dashboard (view/pay/cancel), producer payout history page, CSV export for bank transfers. **Ready to use when commission flag is activated.** ✅
 
 ### What is BROKEN or MISSING
 - **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
@@ -40,28 +41,30 @@
 
 ## WIP (max 1)
 
-**PAYOUT-01** — Add IBAN + bank_account_holder to Producer model (migration, validation, settings form). Part of Revenue Foundation Phase 1.
+**None** — Ready for next task. Deploy pending (new code merged but not yet deployed to VPS).
 
 ---
 
-## NEXT — Revenue Foundation (Payouts)
+## NEXT — Feature Backlog
 
-**Commission system DONE. Next: Payout infrastructure so we can actually pay producers.**
+**Commission + Payout infrastructure DONE. Waiting for real producers + orders.**
 
 | Step | What | Status |
 |------|------|--------|
-| PAYOUT-01 | Add IBAN field to Producer model + settings form | 🔄 In progress |
-| PAYOUT-02 | Settlement generation artisan command | Pending |
-| PAYOUT-03 | Admin settlement dashboard | Pending |
-| PAYOUT-04 | Producer payout history page | Pending |
-| PAYOUT-05 | Settlement CSV/PDF export | Pending |
+| PAYOUT-01 | IBAN field on Producer + settings form | ✅ Merged (PR #2952) |
+| PAYOUT-02 | Settlement generation command + model | ✅ Merged (PR #2954) |
+| PAYOUT-03 | Admin settlement dashboard | ✅ Merged (PR #2955) |
+| PAYOUT-04 | Producer payout history page | ✅ Merged (PR #2956) |
+| PAYOUT-05 | Settlement CSV export | ✅ Merged (PR #2958) |
 
-**Gap analysis:** `docs/BUSINESS-LOGIC-GAP-ANALYSIS.md`
-**Payout research:** `docs/DEEP-RESEARCH-PROMPT-PAYOUTS.md` (prompt) + `docs/RESEARCH-PAYOUTS-FINDINGS.md` (findings)
+**Owner decisions (locked 2026-02-16):**
+- Commission activation: after 1st real producer order
+- B2C rate: 12% (seeded), Payout: Monthly (1st of month), Min: €20, Hold: 14 days
+- IBAN: collected before 1st payout (optional at onboarding)
+
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
-
+**Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
 **Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings.
-**Previous note**: Architecture audit resolved. H1 Phase 1+2 done, L6 i18n unified.
 
 ---
 
@@ -78,6 +81,7 @@
 
 ## Recently Done (last 10)
 
+- **PAYOUT-INFRASTRUCTURE** — Complete payout system: (1) IBAN + bank_account_holder field on Producer model with conditional visibility (PR #2952). (2) CommissionSettlement model + `dixis:generate-settlements` artisan command with 14-day hold, €20 min, monthly schedule (PR #2954). (3) Admin settlement dashboard at /admin/settlements — view/pay/cancel settlements, summary cards, IBAN display (PR #2955). (4) Producer payout history at /producer/settlements — see pending/paid amounts, IBAN reminder (PR #2956). (5) CSV export for bank transfer batches with BOM for Excel UTF-8, semicolon delimiter (PR #2958). (PRs #2952-#2958, merged 2026-02-16) ✅
 - **COMMISSION-ENGINE** — Full commission system: (1) CommissionService wired to CheckoutService — creates Commission record per order when flag ON (PR #2932). (2) Admin CRUD for commission rules + preview calculator at /admin/commissions (PR #2933). (3) Feature flag activation via env var COMMISSION_ENGINE_ENABLED + producer order detail shows commission breakdown (PR #2934). (4) Admin toggle in /admin/settings to activate/deactivate via Pennant (PR #2935). Default rules seeded: B2C 12%, B2B 7%, B2C volume 10%. **Flag OFF in production — ready to activate.** (PRs #2932-#2935, merged 2026-02-16) ✅
 - **PRODUCER-LAUNCH-PREP-C2** — Phase C complete: (C1) Full producer registration flow tested E2E on production (register→onboard→approve→create product→visible in catalog). (C2) Auto-slug from Greek titles (greekToSlug transliteration), image upload auth fixed for producers (Sanctum Bearer token support), storage path fixed for standalone mode, leaflet dependency fixed. (A3) Seed data verified, Unsplash images added to all 17 products. (PR #2937, deployed 2026-02-16) ✅
 - **CULTIVATION-FILTER-UI** — Pill-style cultivation type filter on /products page (Βιολογική, Παραδοσιακή, Συμβατική). Server-side filtering via Laravel ?cultivation_type= param. Counts per type, auto-hidden when no data. All 17 products now have cultivation_type values. (PR #2930, deployed 2026-02-16) ✅
