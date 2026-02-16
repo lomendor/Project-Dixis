@@ -415,6 +415,20 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1');
     });
 
+    // Pass PAYOUT-03: Admin Settlement Dashboard
+    Route::middleware('auth:sanctum')->prefix('admin/settlements')->group(function () {
+        Route::get('summary', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'summary'])
+            ->middleware('throttle:60,1');
+        Route::get('/', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'index'])
+            ->middleware('throttle:60,1');
+        Route::get('{id}', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'show'])
+            ->middleware('throttle:60,1');
+        Route::post('{id}/pay', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'markPaid'])
+            ->middleware('throttle:30,1');
+        Route::post('{id}/cancel', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'markCancelled'])
+            ->middleware('throttle:30,1');
+    });
+
     // Pass COMM-ENGINE-TOGGLE-01: Admin toggle for commission feature flag
     Route::middleware('auth:sanctum')->prefix('admin/settings')->group(function () {
         Route::get('commission-engine', function (Illuminate\Http\Request $request) {
