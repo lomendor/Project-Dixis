@@ -39,10 +39,18 @@ async function getData(
   category?: string,
   cultivationType?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
+  // Pass CI-SMOKE-STABILIZE-002: In CI mode, use internal Next.js API
+  // which reads from Prisma DB (seeded with ci:seed) — same pattern as products/[id]/page.tsx
+  const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const isServer = typeof window === 'undefined';
-  const base = isServer
-    ? getServerApiUrl()
-    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
+  let base: string;
+  if (isCI && isServer) {
+    base = 'http://127.0.0.1:3001/api/v1';
+  } else if (isServer) {
+    base = getServerApiUrl();
+  } else {
+    base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  }
 
   try {
     // Build URL with all params — let the backend handle filtering
@@ -111,10 +119,17 @@ async function getData(
  * Cached at the same 60s interval.
  */
 async function getActiveCategories(): Promise<{ slug: string; name: string; count: number }[]> {
+  // Pass CI-SMOKE-STABILIZE-002: CI fallback (same as getData above)
+  const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const isServer = typeof window === 'undefined';
-  const base = isServer
-    ? getServerApiUrl()
-    : (process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1');
+  let base: string;
+  if (isCI && isServer) {
+    base = 'http://127.0.0.1:3001/api/v1';
+  } else if (isServer) {
+    base = getServerApiUrl();
+  } else {
+    base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  }
 
   try {
     const res = await fetch(`${base}/public/products?per_page=100`, {
