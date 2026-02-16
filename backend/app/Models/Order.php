@@ -106,6 +106,15 @@ class Order extends Model
     }
 
     /**
+     * Get the commission record for the order.
+     * Pass COMM-ENGINE-WIRE-01: Commission relationship for checkout integration.
+     */
+    public function commission()
+    {
+        return $this->hasOne(Commission::class);
+    }
+
+    /**
      * Get the shipment for the order.
      */
     public function shipment()

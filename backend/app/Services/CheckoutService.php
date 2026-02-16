@@ -3,17 +3,20 @@
 namespace App\Services;
 
 use App\Models\CheckoutSession;
+use App\Models\Commission;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderShippingLine;
 use App\Models\Producer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Exceptions\ShippingChangedException;
 
 /**
  * Pass MP-ORDERS-SPLIT-01: Checkout Service
  * Pass SHIP-CALC-V2-01: Wire ShippingService for weight/zone-based calculation
  * Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
+ * Pass COMM-ENGINE-WIRE-01: Commission calculation after order creation
  *
  * Handles multi-producer order splitting. Creates a CheckoutSession parent
  * with N child Orders (one per producer) when cart has items from multiple producers.
@@ -21,10 +24,12 @@ use App\Exceptions\ShippingChangedException;
 class CheckoutService
 {
     private ShippingService $shippingService;
+    private CommissionService $commissionService;
 
-    public function __construct(ShippingService $shippingService)
+    public function __construct(ShippingService $shippingService, CommissionService $commissionService)
     {
         $this->shippingService = $shippingService;
+        $this->commissionService = $commissionService;
     }
 
     /**
@@ -210,6 +215,9 @@ class CheckoutService
                 'locked_at' => now(),
             ]);
 
+            // Pass COMM-ENGINE-WIRE-01: Calculate and store commission for this producer order
+            $this->createCommissionRecord($order, (int) $producerId);
+
             // Accumulate session totals
             $sessionSubtotal += $producerSubtotal;
             $sessionShippingTotal += $shippingCost;
@@ -342,6 +350,12 @@ class CheckoutService
             ]);
         }
 
+        // Pass COMM-ENGINE-WIRE-01: Calculate and store commission for single-producer order
+        $producerId = $productData[0]['product']->producer_id ?? 0;
+        if ($producerId) {
+            $this->createCommissionRecord($order, (int) $producerId);
+        }
+
         $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
 
         return [
@@ -467,5 +481,65 @@ class CheckoutService
         }
 
         return (float) config('shipping.cod_fee_eur', 4.00);
+    }
+
+    /**
+     * Calculate and store commission for an order.
+     * Pass COMM-ENGINE-WIRE-01: Commission record creation after order.
+     *
+     * Sets total_cents + channel on the order (required by CommissionService),
+     * then calculates fee and creates a Commission record if fee > 0.
+     * Safe: returns null when feature flag is OFF (zero commission).
+     *
+     * @param Order $order
+     * @param int $producerId
+     * @return Commission|null
+     */
+    private function createCommissionRecord(Order $order, int $producerId): ?Commission
+    {
+        // Set commission context fields on the order (total_cents + channel are in fillable)
+        $order->total_cents = (int) round((float) $order->total * 100);
+        $order->channel = 'B2C';
+        $order->save();
+
+        // Set producer_id as transient attribute AFTER save (not a DB column on orders)
+        // CommissionService reads it via data_get($order, 'producer_id')
+        $order->setAttribute('producer_id', $producerId);
+
+        // Calculate commission (returns 0 when flag is OFF)
+        $feeResult = $this->commissionService->calculateFee($order);
+
+        if ($feeResult['commission_cents'] <= 0) {
+            return null;
+        }
+
+        $platformFee = $feeResult['commission_cents'] / 100;
+        $vatAmount = 0.00;
+
+        // If VAT was included in the calculation, extract it
+        if (isset($feeResult['breakdown']['vat_mode']) && $feeResult['breakdown']['vat_mode'] === 'INCLUDE') {
+            // Fee already includes 24% VAT — extract the VAT portion
+            $vatAmount = round($platformFee - ($platformFee / 1.24), 2);
+        }
+
+        $commission = Commission::create([
+            'order_id' => $order->id,
+            'producer_id' => $producerId,
+            'channel' => $order->channel,
+            'order_gross' => $order->total,
+            'platform_fee' => $platformFee,
+            'platform_fee_vat' => $vatAmount,
+            'producer_payout' => round((float) $order->total - $platformFee, 2),
+            'currency' => $order->currency ?? 'EUR',
+        ]);
+
+        Log::info('Commission created', [
+            'order_id' => $order->id,
+            'producer_id' => $producerId,
+            'rule_id' => $feeResult['rule_id'],
+            'commission_cents' => $feeResult['commission_cents'],
+        ]);
+
+        return $commission;
     }
 }
