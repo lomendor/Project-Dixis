@@ -84,4 +84,20 @@ class Producer extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    /**
+     * Pass PAYOUT-02: Get commissions for this producer.
+     */
+    public function commissions()
+    {
+        return $this->hasMany(Commission::class);
+    }
+
+    /**
+     * Pass PAYOUT-02: Get settlement batches for this producer.
+     */
+    public function settlements()
+    {
+        return $this->hasMany(CommissionSettlement::class);
+    }
 }

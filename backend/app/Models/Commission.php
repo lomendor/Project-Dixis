@@ -15,6 +15,7 @@ class Commission extends Model
         'platform_fee_vat',
         'producer_payout',
         'currency',
+        'settlement_id', // Pass PAYOUT-02: link to settlement batch
     ];
 
     protected $casts = [
@@ -30,5 +31,21 @@ class Commission extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Pass PAYOUT-02: Get the settlement this commission belongs to.
+     */
+    public function settlement()
+    {
+        return $this->belongsTo(CommissionSettlement::class, 'settlement_id');
+    }
+
+    /**
+     * Scope: unsettled commissions (not yet assigned to a settlement).
+     */
+    public function scopeUnsettled($query)
+    {
+        return $query->whereNull('settlement_id');
     }
 }

@@ -25,3 +25,19 @@ Schedule::command('producers:digest-weekly')
     ->timezone('Europe/Athens')
     ->withoutOverlapping()
     ->runInBackground();
+
+/*
+|--------------------------------------------------------------------------
+| Pass PAYOUT-02: Monthly Settlement Generation
+|--------------------------------------------------------------------------
+|
+| Runs on the 1st of each month at 06:00 Europe/Athens.
+| Aggregates delivered orders with 14-day hold into settlements.
+| Min payout: €20 (below deferred to next period).
+|
+*/
+Schedule::command('dixis:generate-settlements')
+    ->monthlyOn(1, '06:00')  // 1st of month at 06:00
+    ->timezone('Europe/Athens')
+    ->withoutOverlapping()
+    ->runInBackground();
