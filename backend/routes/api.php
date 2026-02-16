@@ -1064,6 +1064,10 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
             ->middleware('throttle:60,1'); // 60 requests per minute
     });
 
+    // Pass PAYOUT-04: Producer payout history
+    Route::get('settlements', [App\Http\Controllers\Api\Producer\ProducerSettlementController::class, 'index'])
+        ->middleware('throttle:60,1');
+
     // Producer Order Management (AG126.1)
     Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'index'])
         ->middleware('throttle:60,1'); // 60 requests per minute
