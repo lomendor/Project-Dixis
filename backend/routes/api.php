@@ -415,6 +415,34 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1');
     });
 
+    // Pass COMM-ENGINE-TOGGLE-01: Admin toggle for commission feature flag
+    Route::middleware('auth:sanctum')->prefix('admin/settings')->group(function () {
+        Route::get('commission-engine', function (Illuminate\Http\Request $request) {
+            if ($request->user()?->role !== 'admin') {
+                return response()->json(['error' => 'Forbidden'], 403);
+            }
+            return response()->json([
+                'enabled' => \Laravel\Pennant\Feature::active('commission_engine_v1'),
+            ]);
+        })->middleware('throttle:60,1');
+
+        Route::post('commission-engine', function (Illuminate\Http\Request $request) {
+            if ($request->user()?->role !== 'admin') {
+                return response()->json(['error' => 'Forbidden'], 403);
+            }
+            $enabled = (bool) $request->input('enabled', false);
+            if ($enabled) {
+                \Laravel\Pennant\Feature::activate('commission_engine_v1');
+            } else {
+                \Laravel\Pennant\Feature::deactivate('commission_engine_v1');
+            }
+            return response()->json([
+                'success' => true,
+                'enabled' => \Laravel\Pennant\Feature::active('commission_engine_v1'),
+            ]);
+        })->middleware('throttle:10,1');
+    });
+
 });
 
 // Pass 51: Card payment checkout (authenticated)
