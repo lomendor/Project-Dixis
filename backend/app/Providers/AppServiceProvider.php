@@ -27,8 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Pass COMM-ENGINE-ACTIVATE-01: Commission engine controlled via env var
+        // Pass COMM-ENGINE-TOGGLE-01: Commission engine controlled via env var
         // Defaults to false — set COMMISSION_ENGINE_ENABLED=true in .env to activate
+        // Can also be toggled at runtime via admin settings (Pennant activate/deactivate)
         Feature::define('commission_engine_v1', fn() => (bool) env('COMMISSION_ENGINE_ENABLED', false));
 
         $this->configureRateLimiting();

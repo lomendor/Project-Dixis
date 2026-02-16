@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import { prisma } from '@/lib/db/client';
 import { fetchProductCounts } from '@/lib/laravel/counts';
+import CommissionToggle from './CommissionToggle';
 
 /**
  * Pass ADMIN-SETTINGS-01: Settings page with real system info.
@@ -77,6 +78,12 @@ export default async function AdminSettingsPage() {
         <ConfigRow label="Δωρεάν αποστολή" value="Εξαρτάται ανά παραγωγό" />
         <ConfigRow label="Ζώνες" value="Ηπειρωτική, Νησιά, Παραλαβή" />
         <ConfigRow label="Προεπιλογή" value="Courier (ηπειρωτική)" />
+      </SettingsSection>
+
+      {/* Commission Engine — Pass COMM-ENGINE-TOGGLE-01 */}
+      <SettingsSection title="Προμήθειες">
+        <CommissionToggle />
+        <ConfigRow label="Διαχείριση κανόνων" value="/admin/commissions" />
       </SettingsSection>
 
       {/* System */}
