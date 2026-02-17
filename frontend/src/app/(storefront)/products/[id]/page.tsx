@@ -156,6 +156,19 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* T3-03: BreadcrumbList JSON-LD for Google rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          'itemListElement': [
+            { '@type': 'ListItem', 'position': 1, 'name': 'Αρχική', 'item': baseUrl },
+            { '@type': 'ListItem', 'position': 2, 'name': 'Προϊόντα', 'item': `${baseUrl}/products` },
+            { '@type': 'ListItem', 'position': 3, 'name': p.title, 'item': `${baseUrl}/products/${id}` },
+          ],
+        }) }}
+      />
       <main className="container mx-auto px-4 py-6">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
