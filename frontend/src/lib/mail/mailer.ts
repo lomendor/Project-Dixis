@@ -12,7 +12,7 @@ export async function sendMailSafe(msg: Mail): Promise<void> {
     return;
   }
 
-  // Production: TODO implement real SMTP when configured
+  // Production email is handled by Laravel + Resend. This is a legacy Next.js stub.
   if (process.env.NODE_ENV !== 'test') {
     console.log('[mail] noop to=%s subject=%s', msg.to, msg.subject);
   }

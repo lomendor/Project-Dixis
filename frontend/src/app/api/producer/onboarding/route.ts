@@ -7,7 +7,8 @@ import { NextResponse } from 'next/server';
  * This route previously returned mock data (always userId=1, no DB write),
  * which misled users into thinking registration succeeded.
  *
- * TODO: Wire to Laravel producer registration API when backend is ready.
+ * Producer registration is now handled via Laravel API (PRODUCER-ONBOARD-01).
+ * This legacy stub returns 503 for any remaining direct hits.
  */
 export async function POST() {
   return NextResponse.json(

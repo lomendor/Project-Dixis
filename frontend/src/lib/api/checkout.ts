@@ -263,7 +263,7 @@ export class CheckoutApiClient {
         };
       }
 
-      // TODO: Add proper order totals validation if needed
+      // Order totals are validated server-side by Laravel CheckoutService
 
       return {
         success: true,
@@ -313,7 +313,7 @@ export class CheckoutApiClient {
       if (!validatePostalCodeCity(postalCode, city)) {
         errors.push({ field: 'city', message: 'Η πόλη δεν αντιστοιχεί στον ΤΚ', code: 'MISMATCH' });
       }
-      // TODO: Add proper order totals validation if needed
+      // Order totals are validated server-side by Laravel CheckoutService
       if (errors.length > 0) {
         return { success: false, errors, validationProof: `Business validation failed` };
       }

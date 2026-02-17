@@ -238,23 +238,25 @@ export class VivaWalletProvider implements PaymentProvider {
 }
 
 /**
- * Stripe Payment Provider (placeholder for future implementation)
+ * Stripe Payment Provider — Legacy stub.
+ * Stripe payments are handled via Laravel backend + Stripe.js on the frontend.
+ * This class exists only to satisfy the PaymentProvider interface.
  */
 export class StripeProvider implements PaymentProvider {
   name = 'Stripe';
 
   async initPayment(orderId: string, amountCents: number, currency: string): Promise<PaymentInitResult> {
-    // TODO: Implement Stripe API integration
-    throw new Error('Stripe provider not yet implemented');
+    // Stripe integration is handled by Laravel backend (enabled 2026-02-13)
+    throw new Error('Use Laravel Stripe integration instead');
   }
 
   async confirmPayment(orderId: string, token?: string): Promise<PaymentResult> {
-    // TODO: Implement Stripe confirmation
-    throw new Error('Stripe provider not yet implemented');
+    // Stripe confirmation is handled by Laravel backend
+    throw new Error('Use Laravel Stripe integration instead');
   }
 
   isSupported(): boolean {
-    return false; // Not implemented yet
+    return false; // Stripe is handled by Laravel, not this provider class
   }
 }
 

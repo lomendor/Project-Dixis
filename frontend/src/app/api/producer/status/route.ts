@@ -11,8 +11,8 @@ import { NextResponse } from 'next/server';
  * Returns null status so the onboarding page shows the form
  * (which itself returns 503 on submit with an honest message).
  *
- * TODO: Wire to Laravel GET /api/v1/producer/me when backend has
- *       a registration flow for NEW producers (not existing ones).
+ * Producer registration is now wired to Laravel (PRODUCER-ONBOARD-01).
+ * This stub remains for unauthenticated/pre-registration status checks.
  */
 export async function GET() {
   return NextResponse.json({

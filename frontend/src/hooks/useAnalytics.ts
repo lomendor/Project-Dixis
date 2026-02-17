@@ -46,7 +46,7 @@ class EventBatcher {
   flush() {
     if (this.events.length === 0) return;
 
-    // TODO: Send to analytics endpoint when configured
+    // Analytics sent via Plausible script (see layout.tsx CSP)
 
     // Clear batch
     this.events = [];
