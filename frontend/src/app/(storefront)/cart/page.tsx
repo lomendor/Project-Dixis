@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCart, cartTotalCents } from '@/lib/cart'
+import { useCart, cartTotalCents, isMultiProducerCart } from '@/lib/cart'
 
 export default function CartPage() {
   const router = useRouter()
@@ -41,6 +41,18 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
+          <>
+          {/* T2.5-06: Multi-producer notice — early warning before checkout */}
+          {isMultiProducerCart(items) && (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm mb-4" data-testid="multi-producer-notice">
+              <svg className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-amber-800">
+                Το καλάθι σας περιέχει προϊόντα από διαφορετικούς παραγωγούς. Θα λάβετε <strong>ξεχωριστά δέματα</strong> για κάθε παραγωγό.
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 bg-white border rounded-xl divide-y">
               {list.map((it) => (
@@ -93,6 +105,7 @@ export default function CartPage() {
               </Link>
             </aside>
           </div>
+          </>
         )}
       </div>
     </main>
