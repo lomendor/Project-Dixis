@@ -58,8 +58,7 @@ Schedule::call(function () {
     ->name('low-stock-check')
     ->dailyAt('08:00')
     ->timezone('Europe/Athens')
-    ->withoutOverlapping()
-    ->runInBackground();
+    ->withoutOverlapping();
 
 /*
 |--------------------------------------------------------------------------
