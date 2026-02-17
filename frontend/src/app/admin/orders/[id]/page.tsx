@@ -86,14 +86,8 @@ export default function AdminOrderDetail({
             ID Παραγγελίας:{' '}
             <strong data-testid="detail-order-id">{data.id}</strong>
           </div>
-          <div className="mb-2">
-            <a
-              href={`/orders/lookup?ordNo=${orderNumber(data.id, data.createdAt)}`}
-              className="text-blue-600 underline text-xs"
-              data-testid="customer-view-link"
-            >
-              Προβολή πελάτη →
-            </a>
+          <div className="mb-2 text-xs text-neutral-500" data-testid="customer-view-link">
+            Παρακολούθηση: /track/[token]
           </div>
           <table className="text-sm">
             <tbody>
