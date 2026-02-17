@@ -5,6 +5,7 @@ import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
 import ReviewSection from '@/components/product/ReviewSection';
+import RelatedProducts from '@/components/product/RelatedProducts';
 import StarRating from '@/components/StarRating';
 import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
@@ -315,6 +316,9 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
 
       {/* S1-02: Reviews Section */}
       <ReviewSection productId={p.id} />
+
+      {/* RELATED-PRODUCTS-01: "You might also like" section */}
+      <RelatedProducts productId={p.id} producerId={p.producerId} />
 
       {/* Back to Products */}
       <div className="mt-10 pt-6 border-t border-neutral-200">
