@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Schema;
  * products.producer_id — every producer dashboard query
  * products.is_active   — public catalogue filter (WHERE is_active = true)
  * orders.created_at    — analytics/admin date range queries
- * order_items.product_id — revenue analytics, "top products" joins
+ *
+ * Note: order_items.product_id already indexed in create_order_items_table
  */
 return new class extends Migration
 {
@@ -24,10 +25,6 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->index('created_at');
         });
-
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->index('product_id');
-        });
     }
 
     public function down(): void
@@ -39,10 +36,6 @@ return new class extends Migration
 
         Schema::table('orders', function (Blueprint $table) {
             $table->dropIndex(['created_at']);
-        });
-
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropIndex(['product_id']);
         });
     }
 };
