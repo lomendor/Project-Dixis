@@ -123,6 +123,14 @@ class Order extends Model
     }
 
     /**
+     * T1-05: Get status change history for timeline display.
+     */
+    public function statusHistory()
+    {
+        return $this->hasMany(OrderStatusHistory::class)->orderBy('changed_at', 'asc');
+    }
+
+    /**
      * Get the shipping lines for multi-producer orders.
      * Pass MP-ORDERS-SHIPPING-V1: Per-producer shipping breakdown.
      */
