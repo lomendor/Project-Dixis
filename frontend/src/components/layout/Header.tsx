@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
+import HeaderSearch from '@/components/layout/HeaderSearch';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslations } from '@/contexts/LocaleContext';
 
@@ -77,8 +78,11 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Desktop Right Side: Utilities + Auth */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Desktop Right Side: Search + Cart + Auth */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Search - Pass HEADER-SEARCH-01 */}
+          <HeaderSearch />
+
           {/* Cart - visible for all roles */}
           <CartIcon data-testid="header-cart" />
 
@@ -229,6 +233,11 @@ export default function Header() {
       {mobileMenuOpen && (
         <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg" data-testid="mobile-menu">
           <div className="max-w-6xl mx-auto px-4 py-2">
+            {/* Mobile Search - Pass HEADER-SEARCH-01 */}
+            <div className="py-2">
+              <HeaderSearch isMobile />
+            </div>
+
             {/* Primary Navigation */}
             {navLinks.map((link) => (
               <Link
