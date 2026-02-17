@@ -67,7 +67,7 @@ export default function AddToCartButton(props: {
       className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded text-sm transition-colors ${
         isAdded
           ? 'bg-primary text-white'
-          : 'bg-neutral-900 text-white hover:bg-neutral-800'
+          : 'bg-primary text-white hover:bg-primary-light'
       }`}
       onClick={handleClick}
       disabled={isAdded}
