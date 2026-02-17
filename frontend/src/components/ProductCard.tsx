@@ -3,9 +3,11 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import AddToCartButton from '@/components/AddToCartButton'
+import StarRating from '@/components/StarRating'
 
 /**
  * Pass FIX-STOCK-GUARD-01: Added stock prop for OOS awareness
+ * Pass PRODUCT-CARD-RATINGS-01: Added reviewsCount + reviewsAvgRating
  */
 type Props = {
   id: string | number
@@ -17,11 +19,13 @@ type Props = {
   image?: string | null
   stock?: number | null
   hideProducerLink?: boolean
+  reviewsCount?: number
+  reviewsAvgRating?: number | null
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock, hideProducerLink }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock, hideProducerLink, reviewsCount, reviewsAvgRating }: Props) {
   const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
@@ -72,6 +76,12 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
             {title}
           </h3>
         </Link>
+        {/* Pass PRODUCT-CARD-RATINGS-01: Show star rating on card */}
+        {reviewsAvgRating != null && reviewsAvgRating > 0 && (
+          <div className="mt-1" data-testid="product-card-rating">
+            <StarRating rating={reviewsAvgRating} count={reviewsCount} size="xs" />
+          </div>
+        )}
       </div>
 
       {/* Non-clickable section - price + add to cart button */}
