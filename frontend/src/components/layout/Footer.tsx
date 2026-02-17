@@ -34,6 +34,9 @@ export default function Footer() {
               <Link href="/producers" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Παραγωγοί
               </Link>
+              <Link href="/about" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+                Σχετικά με εμάς
+              </Link>
             </nav>
           </div>
 
