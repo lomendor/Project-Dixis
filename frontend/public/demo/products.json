@@ -1,7 +1,0 @@
-[
-  { "id": 101, "title": "Φρέσκες Τομάτες Βιολογικές", "producer_name": "Κτήμα Παπαδόπουλου", "price_text": "2,80€ / kg", "image": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&h=800&fit=crop" },
-  { "id": 102, "title": "Πατάτες Νάξου Α΄", "producer_name": "Αγρόκτημα Νάξου", "price_text": "1,90€ / kg", "image": "https://images.unsplash.com/photo-1560807707-8cc77767d783?w=800&h=800&fit=crop" },
-  { "id": 103, "title": "Ελαιόλαδο Εξαιρετικό Παρθένο 750ml", "producer_name": "Ελαιώνες Μεσσηνίας", "price_text": "10,90€", "image": "https://images.unsplash.com/photo-1546549039-49fae046cd54?w=800&h=800&fit=crop" },
-  { "id": 104, "title": "Μέλι Θυμαρίσιο 450g", "producer_name": "Μελισσόκηπος Αιγαίου", "price_text": "8,50€", "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=800&fit=crop" },
-  { "id": 105, "title": "Αυγά Ελευθέρας Βοσκής 6τμχ", "producer_name": "Φάρμα Πιερίας", "price_text": "3,20€", "image": "https://images.unsplash.com/photo-1517959105821-eaf2591984dd?w=800&h=800&fit=crop" }
-]
