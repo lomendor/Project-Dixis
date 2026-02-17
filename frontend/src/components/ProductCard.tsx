@@ -29,6 +29,7 @@ const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EU
 
 export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating }: Props) {
   const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
+  const isOOS = typeof stock === 'number' && stock <= 0
   const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
   const originalPrice = hasDiscount ? fmtEUR.format(priceCents / 100) : null
   const hasImage = image && image.length > 0
@@ -41,7 +42,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
     <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
       {/* Image — navigates to product page */}
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
-        <div data-testid="product-card-image" className="relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden">
+        <div data-testid="product-card-image" className={`relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden${isOOS ? ' opacity-50 grayscale' : ''}`}>
           {hasImage ? (
             <Image
               src={image}
@@ -57,8 +58,13 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
               </svg>
             </div>
           )}
-          {/* Pass SEASONAL-DISCOUNT-01: Badge overlays */}
+          {/* Pass SEASONAL-DISCOUNT-01 + T2.5-05: Badge overlays */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {isOOS && (
+              <span data-testid="badge-oos" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-neutral-200 text-neutral-600 shadow-sm">
+                Εξαντλήθηκε
+              </span>
+            )}
             {isSeasonal && (
               <span data-testid="badge-seasonal" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-100 text-amber-800 shadow-sm">
                 🍊 Εποχιακό
