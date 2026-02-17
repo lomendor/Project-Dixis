@@ -62,8 +62,10 @@ export default function CartPage() {
                       {it.imageUrl ? (
                         <Image src={it.imageUrl} alt={it.title} width={80} height={80} className="w-full h-full object-cover"/>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                          📦
+                        <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
                         </div>
                       )}
                     </div>
@@ -87,7 +89,7 @@ export default function CartPage() {
             <aside className="bg-white border rounded-xl p-6 h-fit">
               <div className="flex items-center justify-between">
                 <span className="text-neutral-600">Υποσύνολο</span>
-                <span className="text-lg font-bold" data-testid="total">Σύνολο: {fmt.format(totalCents / 100)}</span>
+                <span className="text-lg font-bold" data-testid="total">{fmt.format(totalCents / 100)}</span>
               </div>
               <p className="text-xs text-neutral-500 mt-2">Οι τελικές χρεώσεις (μεταφορικά/ΦΠΑ) υπολογίζονται κατά την ολοκλήρωση.</p>
               <button
@@ -99,7 +101,7 @@ export default function CartPage() {
               </button>
               <button
                 onClick={handleCheckout}
-                className="mt-4 w-full inline-flex justify-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation"
+                className="mt-4 w-full inline-flex justify-center bg-primary text-white px-4 py-3 rounded-lg font-medium hover:bg-primary-light focus:ring-2 focus:ring-primary/50 focus:outline-none active:opacity-90 touch-manipulation"
                 data-testid="go-checkout"
               >
                 Ολοκλήρωση παραγγελίας
