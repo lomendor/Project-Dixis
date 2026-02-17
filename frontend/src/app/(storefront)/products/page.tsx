@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
 import { CultivationFilter } from '@/components/CultivationFilter';
@@ -187,6 +188,29 @@ function filterDemoBySearch(items: ApiItem[], search: string): ApiItem[] {
       item.title.toLowerCase().includes(term) ||
       (item.producerName && item.producerName.toLowerCase().includes(term))
   );
+}
+
+// SEO: Dynamic metadata for filtered product views
+const cultivationLabels: Record<string, string> = {
+  organic_certified: 'Βιολογικά',
+  biodynamic: 'Βιοδυναμικά',
+  traditional_natural: 'Παραδοσιακά',
+  conventional: 'Συμβατικά',
+};
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const parts: string[] = [];
+  if (params.cult && cultivationLabels[params.cult]) parts.push(cultivationLabels[params.cult]);
+  if (params.search) parts.push(`"${params.search}"`);
+  const suffix = parts.length > 0 ? ` — ${parts.join(', ')}` : '';
+  const title = `Προϊόντα${suffix} | Dixis`;
+  const description = `Ανακαλύψτε τοπικά ελληνικά προϊόντα${suffix} απευθείας από Έλληνες παραγωγούς.`;
+  return { title, description };
 }
 
 interface PageProps {
