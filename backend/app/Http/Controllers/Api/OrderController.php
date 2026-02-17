@@ -100,11 +100,16 @@ class OrderController extends Controller
             $insufficientStock = [];
 
             foreach ($cartItems as $cartItem) {
-                $product = $cartItem->product;
+                // T2.5-02: Re-fetch with row-level lock to prevent race conditions.
+                // Without lockForUpdate(), two concurrent checkouts could both pass
+                // the stock check and oversell. Matches V1 OrderController pattern.
+                $product = Product::where('id', $cartItem->product_id)
+                    ->lockForUpdate()
+                    ->first();
 
                 // Check if product is still active
-                if (! $product->is_active) {
-                    $unavailableProducts[] = $product->name;
+                if (! $product || ! $product->is_active) {
+                    $unavailableProducts[] = $cartItem->product->name ?? "Product #{$cartItem->product_id}";
 
                     continue;
                 }
