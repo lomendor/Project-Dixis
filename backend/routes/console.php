@@ -55,6 +55,7 @@ Schedule::command('dixis:generate-settlements')
 Schedule::call(function () {
     app(\App\Services\InventoryService::class)->checkLowStockAlerts();
 })
+    ->name('low-stock-check')
     ->dailyAt('08:00')
     ->timezone('Europe/Athens')
     ->withoutOverlapping()
