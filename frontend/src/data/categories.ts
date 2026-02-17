@@ -1,6 +1,7 @@
 /**
- * Categories v0: Static category definitions for demo/fallback mode
+ * Categories v1: Static category definitions with Fluent Emoji 3D icons
  * When DB is online, these can be replaced with fetched categories
+ * Emoji PNGs: Microsoft Fluent Emoji (MIT), stored in public/icons/categories/
  */
 
 export interface Category {
@@ -8,7 +9,10 @@ export interface Category {
   slug: string;
   labelEl: string;
   labelEn: string;
-  icon: string; // Lucide icon name
+  icon: string; // Lucide icon name (legacy)
+  emoji: string; // Fluent Emoji 3D PNG filename (without extension)
+  /** Tailwind bg color class for unselected chip */
+  chipBg: string;
 }
 
 export const CATEGORIES: Category[] = [
@@ -18,6 +22,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Ελαιόλαδο & Ελιές',
     labelEn: 'Olive Oil & Olives',
     icon: 'Droplets',
+    emoji: 'olive',
+    chipBg: 'bg-category-olive',
   },
   {
     id: 2,
@@ -25,6 +31,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Μέλι & Κυψέλη',
     labelEn: 'Honey & Bee Products',
     icon: 'Hexagon',
+    emoji: 'honey',
+    chipBg: 'bg-category-honey',
   },
   {
     id: 3,
@@ -32,6 +40,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Όσπρια',
     labelEn: 'Legumes',
     icon: 'Bean',
+    emoji: 'beans',
+    chipBg: 'bg-category-vegetables',
   },
   {
     id: 4,
@@ -39,6 +49,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Δημητριακά & Ρύζια',
     labelEn: 'Grains & Rice',
     icon: 'Wheat',
+    emoji: 'rice',
+    chipBg: 'bg-category-bakery',
   },
   {
     id: 5,
@@ -46,6 +58,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Ζυμαρικά',
     labelEn: 'Pasta',
     icon: 'Utensils',
+    emoji: 'pasta',
+    chipBg: 'bg-category-bakery',
   },
   {
     id: 6,
@@ -53,6 +67,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Αλεύρια & Αρτοποιία',
     labelEn: 'Flours & Bakery',
     icon: 'Croissant',
+    emoji: 'bread',
+    chipBg: 'bg-category-bakery',
   },
   {
     id: 7,
@@ -60,6 +76,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Ξηροί Καρποί & Αποξηραμένα',
     labelEn: 'Nuts & Dried Fruits',
     icon: 'Nut',
+    emoji: 'nuts',
+    chipBg: 'bg-category-fruits',
   },
   {
     id: 8,
@@ -67,6 +85,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Βότανα & Μπαχαρικά',
     labelEn: 'Herbs & Spices',
     icon: 'Leaf',
+    emoji: 'herbs',
+    chipBg: 'bg-category-vegetables',
   },
   {
     id: 9,
@@ -74,6 +94,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Γλυκά, Μαρμελάδες & Αλείμματα',
     labelEn: 'Sweets, Jams & Spreads',
     icon: 'Cherry',
+    emoji: 'candy',
+    chipBg: 'bg-category-fruits',
   },
   {
     id: 10,
@@ -81,6 +103,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Σάλτσες, Conserves & Τουρσιά',
     labelEn: 'Sauces, Preserves & Pickles',
     icon: 'Soup',
+    emoji: 'jar',
+    chipBg: 'bg-category-meat',
   },
   {
     id: 11,
@@ -88,6 +112,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Ποτά & Αποστάγματα',
     labelEn: 'Beverages & Spirits',
     icon: 'Wine',
+    emoji: 'beverage',
+    chipBg: 'bg-category-wine',
   },
   {
     id: 12,
@@ -95,6 +121,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Γαλακτοκομικά',
     labelEn: 'Dairy Products',
     icon: 'Milk',
+    emoji: 'cheese',
+    chipBg: 'bg-category-dairy',
   },
   {
     id: 13,
@@ -102,6 +130,8 @@ export const CATEGORIES: Category[] = [
     labelEl: 'Φρούτα & Λαχανικά',
     labelEn: 'Fruits & Vegetables',
     icon: 'Apple',
+    emoji: 'apple',
+    chipBg: 'bg-category-fruits',
   },
 ];
 

@@ -1,71 +1,59 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CATEGORIES } from '@/data/categories';
-import {
-  Droplets,
-  Hexagon,
-  Bean,
-  Wheat,
-  Utensils,
-  Croissant,
-  Nut,
-  Leaf,
-  Cherry,
-  Soup,
-  Wine,
-  Milk,
-  Apple,
-  Carrot,
-  LayoutGrid,
-} from 'lucide-react';
+import { CATEGORIES, getCategoryBySlug } from '@/data/categories';
 
-// Map slug keywords to Lucide icons
-const iconBySlug: Record<string, React.ComponentType<{ className?: string }>> = {
-  'olive-oil': Droplets,
-  'honey': Hexagon,
-  'legumes': Bean,
-  'grains': Wheat,
-  'pasta': Utensils,
-  'flours': Croissant,
-  'nuts': Nut,
-  'herbs': Leaf,
-  'sweets': Cherry,
-  'sauces': Soup,
-  'wine': Wine,
-  'beverages': Wine,
-  'dairy': Milk,
-  'fruits': Apple,
-  'vegetables': Carrot,
+/** Emoji-to-slug mapping for dynamic categories (API-sourced) */
+const slugEmojiMap: Record<string, string> = {
+  'olive-oil': 'olive',
+  'honey': 'honey',
+  'legumes': 'beans',
+  'grains': 'rice',
+  'pasta': 'pasta',
+  'flours': 'bread',
+  'nuts': 'nuts',
+  'herbs': 'herbs',
+  'sweets': 'candy',
+  'sauces': 'jar',
+  'wine': 'beverage',
+  'beverages': 'beverage',
+  'dairy': 'cheese',
+  'fruits': 'apple',
+  'vegetables': 'apple',
 };
 
-// Map icon names to components (fallback for static CATEGORIES)
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Droplets,
-  Hexagon,
-  Bean,
-  Wheat,
-  Utensils,
-  Croissant,
-  Nut,
-  Leaf,
-  Cherry,
-  Soup,
-  Wine,
-  Milk,
-  Apple,
-  Carrot,
+/** Pastel bg for dynamic categories (fallback when no static match) */
+const slugChipBgMap: Record<string, string> = {
+  'olive-oil': 'bg-category-olive',
+  'honey': 'bg-category-honey',
+  'legumes': 'bg-category-vegetables',
+  'grains': 'bg-category-bakery',
+  'pasta': 'bg-category-bakery',
+  'flours': 'bg-category-bakery',
+  'nuts': 'bg-category-fruits',
+  'herbs': 'bg-category-vegetables',
+  'sweets': 'bg-category-fruits',
+  'sauces': 'bg-category-meat',
+  'wine': 'bg-category-wine',
+  'beverages': 'bg-category-wine',
+  'dairy': 'bg-category-dairy',
+  'fruits': 'bg-category-fruits',
+  'vegetables': 'bg-category-vegetables',
 };
 
-/**
- * Pick the best icon for a category based on its slug.
- * Checks if any key in iconBySlug is contained in the slug string.
- */
-function getIconForSlug(slug: string): React.ComponentType<{ className?: string }> | null {
-  for (const [key, icon] of Object.entries(iconBySlug)) {
-    if (slug.includes(key)) return icon;
+function getEmojiForSlug(slug: string): string {
+  for (const [key, emoji] of Object.entries(slugEmojiMap)) {
+    if (slug.includes(key)) return emoji;
   }
-  return null;
+  return 'basket';
+}
+
+function getChipBgForSlug(slug: string): string {
+  for (const [key, bg] of Object.entries(slugChipBgMap)) {
+    if (slug.includes(key)) return bg;
+  }
+  return 'bg-neutral-50';
 }
 
 interface DynamicCategory {
@@ -108,23 +96,30 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
           aria-pressed={!currentCat}
           aria-label="Όλες οι κατηγορίες"
           className={`
-            flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+            flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
             whitespace-nowrap transition-all duration-200
             ${
               !currentCat
                 ? 'bg-primary text-white shadow-md'
-                : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                : 'bg-neutral-50 text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:shadow-sm'
             }
           `}
         >
-          <LayoutGrid className="w-4 h-4" />
+          <Image
+            src="/icons/categories/basket.png"
+            alt=""
+            width={24}
+            height={24}
+            className="w-6 h-6 flex-shrink-0"
+          />
           <span>Όλα</span>
         </button>
 
         {useDynamic
           ? /* Dynamic categories from API data */
             dynamicCategories.map((cat) => {
-              const IconComponent = getIconForSlug(cat.slug);
+              const emoji = getEmojiForSlug(cat.slug);
+              const chipBg = getChipBgForSlug(cat.slug);
               const isSelected = currentCat === cat.slug;
 
               return (
@@ -134,23 +129,28 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   aria-pressed={isSelected}
                   aria-label={`Κατηγορία: ${cat.name}`}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                    flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
                     whitespace-nowrap transition-all duration-200
                     ${
                       isSelected
                         ? 'bg-primary text-white shadow-md'
-                        : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                        : `${chipBg} text-neutral-700 border border-neutral-200/60 hover:border-primary/40 hover:shadow-sm`
                     }
                   `}
                 >
-                  {IconComponent && <IconComponent className="w-4 h-4" />}
+                  <Image
+                    src={`/icons/categories/${emoji}.png`}
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 flex-shrink-0"
+                  />
                   <span>{cat.name}</span>
                 </button>
               );
             })
           : /* Static fallback categories */
             CATEGORIES.map((category) => {
-              const IconComponent = iconMap[category.icon];
               const isSelected = currentCat === category.slug;
 
               return (
@@ -160,16 +160,22 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   aria-pressed={isSelected}
                   aria-label={`Κατηγορία: ${category.labelEl}`}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                    flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
                     whitespace-nowrap transition-all duration-200
                     ${
                       isSelected
                         ? 'bg-primary text-white shadow-md'
-                        : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                        : `${category.chipBg} text-neutral-700 border border-neutral-200/60 hover:border-primary/40 hover:shadow-sm`
                     }
                   `}
                 >
-                  {IconComponent && <IconComponent className="w-4 h-4" />}
+                  <Image
+                    src={`/icons/categories/${category.emoji}.png`}
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 flex-shrink-0"
+                  />
                   <span>{category.labelEl}</span>
                 </button>
               );
