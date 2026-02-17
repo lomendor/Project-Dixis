@@ -55,24 +55,39 @@ export async function GET(
         const match = orders.find((o: any) => String(o.id) === laravelId);
 
         if (match) {
+          // Parse shipping_address JSON safely
+          let shippingAddress = null;
+          try {
+            shippingAddress = typeof match.shipping_address === 'string'
+              ? JSON.parse(match.shipping_address)
+              : match.shipping_address || null;
+          } catch { /* ignore parse errors */ }
+
           return NextResponse.json({
             id: `A-${match.id}`,
+            laravelId: match.id,
             customer: match.user?.name || match.user?.email || 'N/A',
             email: match.user?.email || null,
             total: `€${Number(match.total_amount || 0).toFixed(2)}`,
             totalRaw: Number(match.total_amount || 0),
+            subtotal: Number(match.subtotal || 0),
+            shippingCost: Number(match.shipping_cost || match.shipping_amount || 0),
+            codFee: Number(match.cod_fee || 0),
             status: match.status,
             paymentStatus: match.payment_status,
             paymentMethod: match.payment_method,
+            paymentRef: match.payment_reference || null,
             shippingMethod: match.shipping_method,
+            shippingAddress,
+            postalCode: shippingAddress?.postal_code || match.postal_code || null,
             createdAt: match.created_at,
             updatedAt: match.updated_at,
             items: (match.order_items || match.orderItems || []).map((item: any) => ({
               id: item.id,
               productName: item.product_name || item.product?.name || 'N/A',
               quantity: item.quantity,
-              unitPrice: item.unit_price,
-              totalPrice: item.total_price,
+              unitPrice: Number(item.unit_price || 0),
+              totalPrice: Number(item.total_price || 0),
             })),
           });
         }
