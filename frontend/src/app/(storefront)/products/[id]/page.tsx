@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
 import ReviewSection from '@/components/product/ReviewSection';
 import StarRating from '@/components/StarRating';
+import ImageGallery from '@/components/product/ImageGallery';
 import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
 import { getCategoryBySlug } from '@/data/categories';
@@ -53,6 +53,12 @@ async function getProductById(id: string) {
       isActive: raw.is_active !== false,
       category: raw.category,
       imageUrl: raw.image_url || raw.images?.[0]?.url || null,
+      images: (raw.images || []).map((img: any) => ({
+        id: img.id,
+        url: img.url || img.image_path,
+        altText: img.alt_text || null,
+        isPrimary: !!img.is_primary,
+      })),
       producer: raw.producer ? { name: raw.producer.name } : null,
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
@@ -171,31 +177,8 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       </nav>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Product Image */}
-        <div className="relative aspect-square rounded-xl overflow-hidden bg-neutral-100">
-          {p.imageUrl ? (
-            <Image
-              src={p.imageUrl}
-              alt={p.title}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              data-testid="product-image"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-neutral-400">
-              <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-          )}
-        </div>
+        {/* Product Image Gallery — Pass IMAGE-GALLERY-01 */}
+        <ImageGallery images={p.images} fallbackUrl={p.imageUrl} alt={p.title} />
 
         {/* Product Info */}
         <div className="flex flex-col">
