@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
@@ -12,9 +12,11 @@ import Footer from '@/components/layout/Footer';
 import IOSGuard from './IOSGuard';
 import Analytics from '@/components/Analytics';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// T3-03: Inter has full Greek subset support (Geist only has latin)
+const inter = Inter({
+  variable: "--font-geist-sans",  // Keep same CSS var for zero Tailwind breakage
+  subsets: ["latin", "greek", "greek-ext"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -105,7 +107,7 @@ export default function RootLayout({
   return (
     <html lang="el-GR" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
         <IOSGuard />
