@@ -27,6 +27,8 @@ type ApiProduct = {
   images?: ApiImage[];
   category?: string;
   categories?: { id: number; name: string; slug: string }[];
+  reviews_count?: number;
+  reviews_avg_rating?: number | null;
 };
 
 type ApiProducer = {
@@ -242,6 +244,8 @@ export default async function ProducerProfilePage(
                     image={imageUrl}
                     stock={p.stock}
                     hideProducerLink
+                    reviewsCount={p.reviews_count}
+                    reviewsAvgRating={p.reviews_avg_rating}
                   />
                 );
               })}

@@ -23,6 +23,8 @@ type ApiItem = {
   categorySlugs?: string[];
   stock?: number | null;
   cultivationType?: string | null;
+  reviewsCount?: number;
+  reviewsAvgRating?: number | null;
 };
 
 /**
@@ -104,6 +106,8 @@ async function getData(
       categorySlugs: p.categories?.map((c: any) => c.slug) || [],
       stock: typeof p.stock === 'number' ? p.stock : null,
       cultivationType: p.cultivation_type || null,
+      reviewsCount: p.reviews_count ?? 0,
+      reviewsAvgRating: p.reviews_avg_rating ?? null,
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
@@ -325,6 +329,8 @@ export default async function Page({ searchParams }: PageProps) {
                 priceCents={p.priceCents}
                 image={p.imageUrl}
                 stock={p.stock}
+                reviewsCount={p.reviewsCount}
+                reviewsAvgRating={p.reviewsAvgRating}
               />
             ))}
           </div>
