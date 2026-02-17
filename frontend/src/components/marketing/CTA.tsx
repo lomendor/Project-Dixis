@@ -11,7 +11,7 @@ import Link from 'next/link';
  */
 export default function CTA() {
   return (
-    <section className="bg-primary-pale py-12 sm:py-16 lg:py-20">
+    <section className="bg-gradient-to-br from-accent-cream to-accent-beige py-12 sm:py-16 lg:py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
         {/* Heading - mobile-optimized */}
         <h2 className="text-3xl font-bold text-neutral-900 mb-4 sm:text-4xl lg:text-5xl">
@@ -41,7 +41,7 @@ export default function CTA() {
         </div>
 
         {/* Trust indicator - subtle */}
-        <div className="mt-10 pt-8 border-t border-primary/20">
+        <div className="mt-10 pt-8 border-t border-accent-gold/20">
           <div className="flex flex-wrap justify-center gap-6 text-sm text-neutral-600">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">

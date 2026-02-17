@@ -11,14 +11,14 @@ import Link from 'next/link';
  */
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-b from-primary-pale to-white">
+    <section className="bg-gradient-to-b from-accent-cream via-primary-pale/30 to-white">
       {/* Mobile-first container with generous padding */}
       <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
         <div className="max-w-3xl mx-auto text-center">
           {/* Heading - optimized for mobile readability */}
           <h1 className="text-4xl font-bold text-neutral-900 leading-tight mb-6 sm:text-5xl lg:text-6xl">
             Φρέσκα τοπικά προϊόντα
-            <span className="block text-primary mt-2">
+            <span className="block text-accent-gold mt-2">
               από Έλληνες παραγωγούς
             </span>
           </h1>
