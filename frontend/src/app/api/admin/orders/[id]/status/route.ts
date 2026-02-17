@@ -53,6 +53,23 @@ export async function POST(
       data: { status: to }
     });
 
+    // T2-04: Restore stock when order is cancelled
+    if (to === 'CANCELLED') {
+      const items = await prisma.orderItem.findMany({
+        where: { orderId: id },
+        select: { productId: true, qty: true }
+      });
+      for (const item of items) {
+        if (item.productId) {
+          await prisma.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.qty } }
+          });
+          console.log(`[cancel] Restored ${item.qty} stock for product ${item.productId}`);
+        }
+      }
+    }
+
     // Audit log for order status change
     await logAdminAction({
       admin,
