@@ -6,7 +6,7 @@ interface LoadingSpinnerProps {
 
 export default function LoadingSpinner({ 
   size = 'md', 
-  text = 'Loading...', 
+  text = 'Φόρτωση...',
   fullScreen = false 
 }: LoadingSpinnerProps) {
   const spinnerSizes = {
@@ -22,10 +22,10 @@ export default function LoadingSpinner({
   return (
     <div className={containerClass} data-testid="loading-spinner">
       <div 
-        className={`animate-spin rounded-full ${spinnerSizes[size]} border-b-2 border-green-600 mb-4`}
+        className={`animate-spin rounded-full ${spinnerSizes[size]} border-b-2 border-primary mb-4`}
         data-testid="loading-spinner-icon"
       ></div>
-      <p className="text-gray-600 text-sm font-medium" data-testid="loading-spinner-text">{text}</p>
+      <p className="text-neutral-600 text-sm font-medium" data-testid="loading-spinner-text">{text}</p>
     </div>
   );
 }
