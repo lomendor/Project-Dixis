@@ -54,8 +54,9 @@ export default async function Page() {
   const now = new Date();
   const from7 = new Date(now.getTime() - T7);
   const from30 = new Date(now.getTime() - T30);
+  const from90 = new Date(now.getTime() - T30 * 3);
 
-  const [orders7, pendingCount, productCounts, latest, topItems] = await Promise.all([
+  const [orders7, pendingCount, productCounts, latest, topItems, orders30, orders90] = await Promise.all([
     prisma.order.findMany({ where: { createdAt: { gte: from7 } }, select: { id: true, total: true } }),
     prisma.order.count({ where: { status: 'PENDING' } }),
     fetchProductCounts(thr()),
@@ -71,12 +72,30 @@ export default async function Page() {
       orderBy: { _sum: { qty: 'desc' } },
       take: 10,
     }).catch((): TopProduct[] => []),
+    // T2-06: Revenue breakdown queries (excludes cancelled)
+    prisma.order.findMany({
+      where: { createdAt: { gte: from30 }, status: { not: 'CANCELLED' } },
+      select: { id: true, total: true },
+    }),
+    prisma.order.findMany({
+      where: { createdAt: { gte: from90 }, status: { not: 'CANCELLED' } },
+      select: { id: true, total: true },
+    }),
   ]);
   const lowStockCount = productCounts.lowStock;
 
   const revenue7 = orders7.reduce((s: number, o: OrderSummary) => s + Number(o.total ?? 0), 0);
   const orders7Count = orders7.length;
   const fmtMoney = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
+
+  // T2-06: Revenue calculations
+  function calcRevenue(ords: { id: string; total: number | null }[]) {
+    const total = ords.reduce((s, o) => s + Number(o.total ?? 0), 0);
+    const avg = ords.length > 0 ? total / ords.length : 0;
+    return { total, count: ords.length, avg };
+  }
+  const rev30 = calcRevenue(orders30);
+  const rev90 = calcRevenue(orders90);
 
   return (
     <div className="space-y-6" data-testid="admin-dashboard">
@@ -90,6 +109,12 @@ export default async function Page() {
         <KpiCard label="Έσοδα (7ημ)" value={fmtMoney(revenue7)} />
         <KpiCard label="Εκκρεμείς" value={String(pendingCount)} accent={pendingCount > 0} />
         <KpiCard label={`Χαμηλό απόθεμα (\u2264 ${thr()})`} value={String(lowStockCount)} accent={lowStockCount > 0} />
+      </section>
+
+      {/* T2-06: Revenue Insights */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="revenue-insights">
+        <RevenueCard title="30 ημέρες" data={rev30} fmtMoney={fmtMoney} />
+        <RevenueCard title="90 ημέρες" data={rev90} fmtMoney={fmtMoney} />
       </section>
 
       {/* Quick Actions */}
@@ -216,6 +241,31 @@ function QuickAction({ href, icon, label }: { href: string; icon: string; label:
       <span className="text-lg" aria-hidden="true">{icon}</span>
       {label}
     </Link>
+  );
+}
+
+interface RevData {
+  total: number; count: number; avg: number;
+}
+
+function RevenueCard({ title, data, fmtMoney }: { title: string; data: RevData; fmtMoney: (n: number) => string }) {
+  return (
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+        Έσοδα · {title}
+      </h3>
+      <div className="text-2xl font-bold text-neutral-900 mb-1">{fmtMoney(data.total)}</div>
+      <div className="grid grid-cols-2 gap-3 mt-3">
+        <div className="bg-neutral-50 rounded-lg p-3 text-center">
+          <div className="text-lg font-bold text-neutral-900">{data.count}</div>
+          <div className="text-xs text-neutral-500">Παραγγελίες</div>
+        </div>
+        <div className="bg-neutral-50 rounded-lg p-3 text-center">
+          <div className="text-lg font-bold text-neutral-900">{fmtMoney(data.avg)}</div>
+          <div className="text-xs text-neutral-500">Μ.Ο. παραγγελίας</div>
+        </div>
+      </div>
+    </div>
   );
 }
 
