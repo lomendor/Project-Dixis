@@ -1,8 +1,13 @@
 'use client'
 
-import { useRef } from 'react'
+/**
+ * T4: Enhanced with per-field validation on blur + ARIA attributes.
+ * Validates: name, phone (Greek format), email, address, city, postcode.
+ * Shows inline Greek error messages with role="alert" for screen readers.
+ */
+
+import { useRef, useState, useCallback } from 'react'
 import { useTranslations } from '@/contexts/LocaleContext'
-import type { CartShippingQuote, ShippingQuote } from './types'
 
 interface SavedAddress {
   name?: string
@@ -22,6 +27,34 @@ interface CustomerDetailsFormProps {
   onClearShipping: () => void
 }
 
+/** Validate a single field; returns error message or empty string */
+function validateField(name: string, value: string, isGuest: boolean): string {
+  const v = value.trim()
+  switch (name) {
+    case 'name':
+      return v.length < 2 ? 'Παρακαλώ εισάγετε το ονοματεπώνυμό σας' : ''
+    case 'phone': {
+      const digits = v.replace(/[\s\-()]/g, '')
+      return !/^\+?\d{10,14}$/.test(digits)
+        ? 'Εισάγετε έγκυρο τηλέφωνο (π.χ. 6971234567)'
+        : ''
+    }
+    case 'email':
+      if (!isGuest && !v) return '' // optional for logged-in users
+      return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+        ? 'Εισάγετε έγκυρη διεύθυνση email'
+        : ''
+    case 'address':
+      return v.length < 3 ? 'Παρακαλώ εισάγετε τη διεύθυνσή σας' : ''
+    case 'city':
+      return v.length < 2 ? 'Παρακαλώ εισάγετε την πόλη σας' : ''
+    case 'postcode':
+      return !/^\d{5}$/.test(v) ? 'Ο ΤΚ πρέπει να είναι 5 ψηφία' : ''
+    default:
+      return ''
+  }
+}
+
 export default function CustomerDetailsForm({
   isGuest,
   savedAddress,
@@ -33,6 +66,28 @@ export default function CustomerDetailsForm({
 }: CustomerDetailsFormProps) {
   const t = useTranslations()
   const postalDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Per-field error tracking
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const { name, value } = e.target
+      setTouched((prev) => ({ ...prev, [name]: true }))
+      const error = validateField(name, value, isGuest)
+      setFieldErrors((prev) => ({ ...prev, [name]: error }))
+    },
+    [isGuest]
+  )
+
+  /** Dynamic class for inputs — red border when invalid + touched */
+  const inputClass = (name: string) =>
+    `w-full h-11 px-4 border rounded-lg text-base ${
+      touched[name] && fieldErrors[name]
+        ? 'border-red-400 focus:ring-red-300'
+        : 'border-neutral-300'
+    }`
 
   return (
     <>
@@ -53,6 +108,7 @@ export default function CustomerDetailsForm({
       )}
 
       <div className="space-y-4">
+        {/* Full name */}
         <div>
           <label htmlFor="checkout-name" className="block text-sm font-medium mb-1">{t('checkoutPage.fullName')}</label>
           <input
@@ -60,12 +116,20 @@ export default function CustomerDetailsForm({
             name="name"
             required
             autoComplete="name"
+            aria-required="true"
+            aria-invalid={touched.name && !!fieldErrors.name}
+            aria-describedby={touched.name && fieldErrors.name ? 'error-name' : undefined}
             defaultValue={savedAddress?.name || user?.name || ''}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('name')}
             data-testid="checkout-name"
           />
+          {touched.name && fieldErrors.name && (
+            <p id="error-name" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>
+          )}
         </div>
 
+        {/* Phone */}
         <div>
           <label htmlFor="checkout-phone" className="block text-sm font-medium mb-1">{t('checkoutPage.phone')}</label>
           <input
@@ -75,13 +139,21 @@ export default function CustomerDetailsForm({
             inputMode="tel"
             required
             autoComplete="tel"
+            aria-required="true"
+            aria-invalid={touched.phone && !!fieldErrors.phone}
+            aria-describedby={touched.phone && fieldErrors.phone ? 'error-phone' : undefined}
             placeholder="+30 210 1234567"
             defaultValue={savedAddress?.phone || ''}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('phone')}
             data-testid="checkout-phone"
           />
+          {touched.phone && fieldErrors.phone && (
+            <p id="error-phone" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.phone}</p>
+          )}
         </div>
 
+        {/* Email */}
         <div>
           <label htmlFor="checkout-email" className="block text-sm font-medium mb-1">
             Email{isGuest && <span className="text-red-500 ml-1">*</span>}
@@ -93,17 +165,28 @@ export default function CustomerDetailsForm({
             inputMode="email"
             required={isGuest}
             autoComplete="email"
+            aria-required={isGuest}
+            aria-invalid={touched.email && !!fieldErrors.email}
+            aria-describedby={
+              (touched.email && fieldErrors.email ? 'error-email' : '') +
+              (isGuest ? ' email-hint' : '') || undefined
+            }
             defaultValue={user?.email || ''}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('email')}
             data-testid="checkout-email"
           />
           {isGuest && (
-            <p className="text-xs text-neutral-500 mt-1">
+            <p id="email-hint" className="text-xs text-neutral-500 mt-1">
               {t('checkoutPage.emailRequired')}
             </p>
           )}
+          {touched.email && fieldErrors.email && (
+            <p id="error-email" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
+          )}
         </div>
 
+        {/* Address */}
         <div>
           <label htmlFor="checkout-address" className="block text-sm font-medium mb-1">{t('checkoutPage.address')}</label>
           <input
@@ -111,12 +194,20 @@ export default function CustomerDetailsForm({
             name="address"
             required
             autoComplete="street-address"
+            aria-required="true"
+            aria-invalid={touched.address && !!fieldErrors.address}
+            aria-describedby={touched.address && fieldErrors.address ? 'error-address' : undefined}
             defaultValue={savedAddress?.line1 || ''}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('address')}
             data-testid="checkout-address"
           />
+          {touched.address && fieldErrors.address && (
+            <p id="error-address" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.address}</p>
+          )}
         </div>
 
+        {/* City */}
         <div>
           <label htmlFor="checkout-city" className="block text-sm font-medium mb-1">{t('checkoutPage.city')}</label>
           <input
@@ -124,12 +215,20 @@ export default function CustomerDetailsForm({
             name="city"
             required
             autoComplete="address-level2"
+            aria-required="true"
+            aria-invalid={touched.city && !!fieldErrors.city}
+            aria-describedby={touched.city && fieldErrors.city ? 'error-city' : undefined}
             defaultValue={savedAddress?.city || ''}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('city')}
             data-testid="checkout-city"
           />
+          {touched.city && fieldErrors.city && (
+            <p id="error-city" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.city}</p>
+          )}
         </div>
 
+        {/* Postal code */}
         <div>
           <label htmlFor="checkout-postcode" className="block text-sm font-medium mb-1">{t('checkoutPage.postalCode')}</label>
           <input
@@ -139,6 +238,9 @@ export default function CustomerDetailsForm({
             inputMode="numeric"
             pattern="[0-9]{5}"
             autoComplete="postal-code"
+            aria-required="true"
+            aria-invalid={touched.postcode && !!fieldErrors.postcode}
+            aria-describedby={touched.postcode && fieldErrors.postcode ? 'error-postcode' : undefined}
             placeholder="10671"
             value={postalCode}
             onChange={(e) => {
@@ -156,9 +258,13 @@ export default function CustomerDetailsForm({
                 onClearShipping()
               }
             }}
-            className="w-full h-11 px-4 border rounded-lg text-base"
+            onBlur={handleBlur}
+            className={inputClass('postcode')}
             data-testid="checkout-postal"
           />
+          {touched.postcode && fieldErrors.postcode && (
+            <p id="error-postcode" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.postcode}</p>
+          )}
         </div>
       </div>
     </>
