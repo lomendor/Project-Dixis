@@ -95,6 +95,8 @@ export function CultivationFilter({
         {/* "All" option */}
         <button
           onClick={() => handleClick(null)}
+          aria-pressed={!current}
+          aria-label="Όλοι οι τρόποι καλλιέργειας"
           className={`
             flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
             transition-all duration-200
@@ -118,6 +120,8 @@ export function CultivationFilter({
             <button
               key={opt.value}
               onClick={() => handleClick(opt.value)}
+              aria-pressed={isSelected}
+              aria-label={`Καλλιέργεια: ${opt.label}`}
               className={`
                 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
                 transition-all duration-200

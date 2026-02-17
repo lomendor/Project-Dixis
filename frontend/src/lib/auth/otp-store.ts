@@ -53,8 +53,6 @@ export function storeOtp(phone: string): string {
 
   otpStore.set(normalizePhone(phone), entry);
 
-  console.log(`[OTP] Stored for ${maskPhone(phone)}, expires in 5 min`);
-
   return code;
 }
 
@@ -68,14 +66,12 @@ export function verifyOtp(phone: string, code: string): { valid: boolean; error?
   const entry = otpStore.get(normalizedPhone);
 
   if (!entry) {
-    console.log(`[OTP] No entry found for ${maskPhone(phone)}`);
     return { valid: false, error: 'Δεν βρέθηκε κωδικός OTP. Παρακαλώ ζητήστε νέο κωδικό.' };
   }
 
   // Check expiry
   if (Date.now() > entry.expiresAt) {
     otpStore.delete(normalizedPhone);
-    console.log(`[OTP] Expired for ${maskPhone(phone)}`);
     return { valid: false, error: 'Ο κωδικός OTP έληξε. Παρακαλώ ζητήστε νέο κωδικό.' };
   }
 
@@ -83,19 +79,16 @@ export function verifyOtp(phone: string, code: string): { valid: boolean; error?
   entry.attempts++;
   if (entry.attempts > MAX_ATTEMPTS) {
     otpStore.delete(normalizedPhone);
-    console.log(`[OTP] Max attempts exceeded for ${maskPhone(phone)}`);
     return { valid: false, error: 'Πολλές αποτυχημένες προσπάθειες. Παρακαλώ ζητήστε νέο κωδικό.' };
   }
 
   // Verify code
   if (entry.code !== code) {
-    console.log(`[OTP] Invalid code for ${maskPhone(phone)} (attempt ${entry.attempts}/${MAX_ATTEMPTS})`);
     return { valid: false, error: `Λανθασμένος κωδικός. Απομένουν ${MAX_ATTEMPTS - entry.attempts} προσπάθειες.` };
   }
 
   // Success - delete the entry (single use)
   otpStore.delete(normalizedPhone);
-  console.log(`[OTP] Verified successfully for ${maskPhone(phone)}`);
 
   return { valid: true };
 }
@@ -143,7 +136,5 @@ function cleanupExpired(): void {
     }
   }
 
-  if (cleaned > 0) {
-    console.log(`[OTP] Cleaned up ${cleaned} expired entries`);
-  }
+  // Cleanup is silent — no logging needed in production
 }

@@ -162,7 +162,7 @@ function CheckoutContent() {
           <button
             type="submit"
             disabled={loading || cardProcessing || !!cartShippingError || shippingLoading || (!shippingQuote && !cartShippingQuote)}
-            className="w-full h-12 mt-4 bg-primary hover:bg-primary-light disabled:bg-neutral-400 text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
+            className="w-full h-12 mt-4 bg-primary hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
             data-testid="checkout-submit"
           >
             {cardProcessing
