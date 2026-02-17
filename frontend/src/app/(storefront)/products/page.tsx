@@ -322,7 +322,7 @@ export default async function Page({ searchParams }: PageProps) {
         {items.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
-            {items.map((p: ApiItem) => (
+            {items.map((p: ApiItem, index: number) => (
               <ProductCard
                 key={p.id}
                 id={p.id}
@@ -337,6 +337,7 @@ export default async function Page({ searchParams }: PageProps) {
                 reviewsAvgRating={p.reviewsAvgRating}
                 discountPriceCents={p.discountPriceCents}
                 isSeasonal={p.isSeasonal}
+                priority={index < 4}
               />
             ))}
           </div>

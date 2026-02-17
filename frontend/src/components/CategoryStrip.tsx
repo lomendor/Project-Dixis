@@ -105,6 +105,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         {/* "All" option */}
         <button
           onClick={() => handleCategoryClick(null)}
+          aria-pressed={!currentCat}
+          aria-label="Όλες οι κατηγορίες"
           className={`
             flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
             whitespace-nowrap transition-all duration-200
@@ -129,6 +131,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                 <button
                   key={cat.slug}
                   onClick={() => handleCategoryClick(cat.slug)}
+                  aria-pressed={isSelected}
+                  aria-label={`Κατηγορία: ${cat.name}`}
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                     whitespace-nowrap transition-all duration-200
@@ -153,6 +157,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                 <button
                   key={category.id}
                   onClick={() => handleCategoryClick(category.slug)}
+                  aria-pressed={isSelected}
+                  aria-label={`Κατηγορία: ${category.labelEl}`}
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                     whitespace-nowrap transition-all duration-200

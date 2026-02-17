@@ -8,6 +8,7 @@ import StarRating from '@/components/StarRating'
 /**
  * Pass FIX-STOCK-GUARD-01: Added stock prop for OOS awareness
  * Pass PRODUCT-CARD-RATINGS-01: Added reviewsCount + reviewsAvgRating
+ * T5: Added priority prop for LCP image optimization
  */
 type Props = {
   id: string | number
@@ -23,11 +24,13 @@ type Props = {
   hideProducerLink?: boolean
   reviewsCount?: number
   reviewsAvgRating?: number | null
+  /** T5: Set true for above-the-fold cards to preload LCP image */
+  priority?: boolean
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, priority }: Props) {
   const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
   const isOOS = typeof stock === 'number' && stock <= 0
   const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
@@ -50,6 +53,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority={priority}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-neutral-400">

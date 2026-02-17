@@ -69,7 +69,7 @@ export default function manifest(): MetadataRoute.Manifest {
         name: 'Προϊόντα',
         short_name: 'Προϊόντα',
         description: 'Περιηγηθείτε σε φρέσκα προϊόντα από τοπικούς παραγωγούς',
-        url: '/',
+        url: '/products',
         icons: [
           {
             src: '/icons/products-96x96.png',
