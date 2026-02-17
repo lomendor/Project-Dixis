@@ -33,7 +33,7 @@
 - **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
 - **Producer Onboarding Flow**: ✅ FIXED — Form collects business_name, phone, city, region, description, tax_id
 - **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy + polished admin UI (ADMIN-PRODUCERS)
-- **Viva Wallet**: ❌ Frontend UI exists, backend throws "not yet implemented"
+- **Viva Wallet**: ✅ REMOVED (VIVA-CLEANUP) — All dead code deleted (unauthenticated payment endpoints were a security risk)
 - **Seed Data**: ✅ FIXED (SEED-DATA-FIX) — All producers, products, categories now in Greek with rich descriptions
 - **20 stale PRs**: ✅ FIXED (STALE-PR-CLEANUP) — All 5 remaining PRs closed with explanations
 
@@ -64,7 +64,7 @@
 
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 **Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y.
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
 
 ---
 
@@ -75,12 +75,13 @@
 | **Stripe (Card Payments)** | ✅ ENABLED (frontend flag + key deployed 2026-02-13) |
 | **COD (Cash on Delivery)** | ✅ ENABLED (+€4.00 fee) |
 | **Resend (Email)** | ✅ ENABLED |
-| **Viva Wallet** | ❌ NOT IMPLEMENTED (backend stub only) |
+| **Viva Wallet** | ❌ REMOVED — All dead code deleted (PR #2971, VIVA-CLEANUP) |
 
 ---
 
 ## Recently Done (last 10)
 
+- **HARDENING-5PR** — Production hardening (zero new features, net ~-750 LOC): (1) VIVA-CLEANUP (CRITICAL): Deleted all Viva Wallet dead code — unauthenticated `/api/viva-verify` could mark orders as paid, webhook skipped signature validation. 7 files, -836 LOC (PR #2971). (2) DEAD-STUBS: Deleted 6 superseded files — `useProducerAuth` hook (0 importers), producer status/onboarding stubs (always 503/null), order-lookup (always 404), checkout/success (dead page). -644 LOC (PR #2972). (3) ROBOTS-HARDEN: Expanded robots.txt disallow from `/ops` only to 9 private paths (`/admin`, `/api`, `/auth`, `/producer`, `/account`, `/my`, `/checkout`, `/internal`) (PR #2973). (4) CART-EXPIRY: Added 7-day TTL to Zustand cart — `_lastUpdated` timestamp on every mutation, auto-clear on rehydrate if stale. Prevents checkout failures from outdated prices/deleted products (PR #2975). (5) DEMO-DEAD-CODE: Deleted obsolete demo product fallback layer — `lib/products.ts` (3-tier fallback, 0 importers), demo-products API + page, products-empty redirect, public/demo/products.json. -159 LOC (PR #2977). All 5 PRs merged. ✅
 - **HOUSEKEEPING-3PR** — Production housekeeping (no new features): (1) SEO: aggregateRating in product JSON-LD for Google star ratings + dynamic generateMetadata on /products catalog page (PR #2965). (2) Dead TODO cleanup: removed all 10 stale TODOs across 8 files — zero TODO/FIXME remaining in src/ (PR #2966). (3) a11y: aria-labels on BuyBox quantity + UploadImage file input, explicit img dimensions to prevent CLS (PR #2967). All 3 PRs merged without --admin bypass. ✅
 - **CI-E2E-GREEN** — Fixed 3 E2E test failures that blocked every PR merge (required --admin bypass): (1) auth-nav-regression: /products SSR fetch hung in CI because getServerApiUrl() pointed to non-existent Laravel — added CI fallback to 127.0.0.1:3001 (PR #2962). (2) pass-54-thank-you-api: glob pattern `*` didn't match multi-segment URL `/orders/by-token/123` — changed to `**` (PR #2963). (3) MPC3 checkout submit: full checkout requires real Laravel backend — skipped in CI (PR #2963). **Result: 96 tests pass, 10 skip, 0 fail. No more --admin bypass needed.** ✅
 - **S3-01: COST-TRANSPARENCY** — Green trust badge on every product detail page: "Ο παραγωγός λαμβάνει το 88% της τιμής / Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας". Static display using locked B2C rate (12%). Core differentiator per PRD. (PR #2960, deployed 2026-02-16) ✅
