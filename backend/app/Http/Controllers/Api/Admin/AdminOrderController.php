@@ -128,6 +128,22 @@ class AdminOrderController extends Controller
             'status' => $newStatus,
         ]);
 
+        // T2-04: Restore stock when order is cancelled
+        if ($newStatus === 'cancelled') {
+            $order->load('orderItems.product');
+            foreach ($order->orderItems as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                    \Log::info('Stock restored on cancellation', [
+                        'order_id' => $order->id,
+                        'product_id' => $item->product_id,
+                        'quantity_restored' => $item->quantity,
+                        'new_stock' => $item->product->fresh()->stock,
+                    ]);
+                }
+            }
+        }
+
         // T1-05: Persist status change to history table for timeline
         OrderStatusHistory::create([
             'order_id' => $order->id,

@@ -70,13 +70,17 @@ export function OrderStatusQuickActions({ orderId, currentStatus, paymentMethod,
     }
   }
 
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+
   const showPacking = ['PENDING', 'PAID'].includes(status.toUpperCase())
   const showShipped = status.toUpperCase() === 'PACKING'
+  // T2-04: Show cancel button for cancellable statuses
+  const showCancel = ['PENDING', 'PAID', 'PACKING'].includes(status.toUpperCase())
   // Pass COD-COMPLETE: Show confirm payment for COD orders with pending payment
   const isCod = (paymentMethod || '').toUpperCase() === 'COD'
   const showConfirmPayment = isCod && !paidConfirmed
 
-  if (!showPacking && !showShipped && !showConfirmPayment) {
+  if (!showPacking && !showShipped && !showConfirmPayment && !showCancel) {
     return null
   }
 
@@ -118,6 +122,40 @@ export function OrderStatusQuickActions({ orderId, currentStatus, paymentMethod,
           >
             {loading ? 'Αλλαγή...' : 'Απεστάλη'}
           </button>
+        )}
+        {/* T2-04: Cancel order with confirmation */}
+        {showCancel && !showCancelConfirm && (
+          <button
+            onClick={() => setShowCancelConfirm(true)}
+            disabled={loading}
+            data-testid="qa-cancel"
+            className="w-full px-4 py-2 border-2 border-red-300 text-red-700 hover:bg-red-50 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Ακύρωση Παραγγελίας
+          </button>
+        )}
+        {showCancelConfirm && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg space-y-2">
+            <p className="text-sm text-red-800 font-medium">
+              Σίγουρα θέλετε να ακυρώσετε; Το απόθεμα θα επιστραφεί αυτόματα.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowCancelConfirm(false); handleStatusChange('CANCELLED'); }}
+                disabled={loading}
+                data-testid="qa-cancel-confirm"
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+              >
+                {loading ? 'Ακύρωση...' : 'Ναι, ακύρωσε'}
+              </button>
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 px-4 py-2 border rounded-lg text-sm"
+              >
+                Όχι
+              </button>
+            </div>
+          </div>
         )}
       </div>
       <div className="mt-3 text-sm text-gray-500">
