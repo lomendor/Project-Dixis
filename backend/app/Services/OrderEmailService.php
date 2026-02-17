@@ -7,6 +7,7 @@ use App\Mail\ConsumerOrderPlaced;
 use App\Mail\OrderDelivered;
 use App\Mail\OrderShipped;
 use App\Mail\ProducerNewOrder;
+use App\Mail\ProducerOrderShipped;
 use App\Models\Order;
 use App\Models\OrderNotification;
 use App\Models\Producer;
@@ -87,6 +88,65 @@ class OrderEmailService
                 'error' => $e->getMessage(),
             ]);
             // Don't throw - graceful failure
+        }
+
+        // T2-02: Send per-producer notification for shipped/delivered
+        $this->sendProducerStatusNotifications($order, $newStatus);
+    }
+
+    /**
+     * T2-02: Send shipped/delivered notification to each producer with items in this order.
+     */
+    protected function sendProducerStatusNotifications(Order $order, string $status): void
+    {
+        $order->load('orderItems.producer');
+
+        $producerIds = $order->orderItems
+            ->pluck('producer_id')
+            ->unique()
+            ->filter();
+
+        $event = "order_{$status}";
+
+        foreach ($producerIds as $producerId) {
+            $producer = Producer::with('user')->find($producerId);
+            if (!$producer) {
+                continue;
+            }
+
+            $email = $producer->user?->email ?? $producer->email ?? null;
+            if (!$email) {
+                continue;
+            }
+
+            // Idempotency check
+            if (OrderNotification::alreadySent($order->id, 'producer', $producerId, $event)) {
+                continue;
+            }
+
+            try {
+                Mail::to($email)->send(new ProducerOrderShipped($order, $producer, $status));
+
+                OrderNotification::recordSent(
+                    $order->id,
+                    'producer',
+                    $producerId,
+                    $email,
+                    $event
+                );
+
+                Log::info("T2-02: Producer {$event} notification sent", [
+                    'order_id' => $order->id,
+                    'producer_id' => $producerId,
+                    'email' => $this->maskEmail($email),
+                ]);
+            } catch (\Exception $e) {
+                Log::error("T2-02: Failed to send producer {$event} notification", [
+                    'order_id' => $order->id,
+                    'producer_id' => $producerId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
