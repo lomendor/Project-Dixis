@@ -298,10 +298,10 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               </svg>
               <div>
                 <p className="text-sm font-medium text-emerald-900">
-                  Ο παραγωγός λαμβάνει το 88% της τιμής
+                  88¢ από κάθε €1 πάνε στον παραγωγό
                 </p>
                 <p className="text-xs text-emerald-700 mt-0.5">
-                  Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας
+                  Ασφαλείς πληρωμές · Υποστήριξη · Ποιοτικός έλεγχος
                 </p>
               </div>
             </div>
