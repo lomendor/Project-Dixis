@@ -33,8 +33,38 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Unauthenticated.'
+                    'error' => 'unauthenticated',
+                    'message' => 'Unauthenticated.',
                 ], 401);
+            }
+        });
+
+        // T2.5-04: Consistent JSON error responses for API routes
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, $request) {
+            if ($request->is('api/*')) {
+                $model = class_basename($e->getModel());
+                return response()->json([
+                    'error' => 'not_found',
+                    'message' => "{$model} not found.",
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'error' => 'forbidden',
+                    'message' => 'Forbidden.',
+                ], 403);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'error' => 'not_found',
+                    'message' => 'Route not found.',
+                ], 404);
             }
         });
     })->create();
