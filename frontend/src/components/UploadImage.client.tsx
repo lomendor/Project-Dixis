@@ -45,7 +45,7 @@ export default function UploadImage({ value, onChange, accept='image/*', maxMB=5
       <label style={{display:'block', marginBottom:6, fontWeight:600}}>{label}</label>
       {value ? (
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
-          <img src={value} alt="Εικόνα προϊόντος" style={{width:96,height:96,objectFit:'cover',borderRadius:8,border:'1px solid #e5e7eb'}}/>
+          <img src={value} alt="Εικόνα προϊόντος" width={96} height={96} style={{objectFit:'cover',borderRadius:8,border:'1px solid #e5e7eb'}}/>
           <div style={{display:'flex',gap:8}}>
             <button type="button" className="btn" onClick={()=>onChange(null)}>Αφαίρεση εικόνας</button>
             <button type="button" className="btn" onClick={()=>inputRef.current?.click()} disabled={busy}>{busy?'Ανέβασμα…':'Ανέβασμα νέας'}</button>
@@ -59,7 +59,7 @@ export default function UploadImage({ value, onChange, accept='image/*', maxMB=5
           {err && <p style={{color:'#b91c1c'}}>{err}</p>}
         </div>
       )}
-      <input ref={inputRef} type="file" accept={accept} style={{display:'none'}} onChange={onPick}/>
+      <input ref={inputRef} type="file" accept={accept} style={{display:'none'}} onChange={onPick} aria-label="Επιλογή αρχείου"/>
     </div>
   );
 }
