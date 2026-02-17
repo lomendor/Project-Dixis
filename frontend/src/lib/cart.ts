@@ -19,12 +19,17 @@ export type CartItem = {
  */
 export type AddResult = { status: 'added' }
 
+/** Cart TTL — 7 days in milliseconds (CART-EXPIRY) */
+const CART_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
 type State = {
   items: Record<string, CartItem>
   /** Internal version counter — incremented on every user mutation (add/inc/dec/clear).
    *  Used to detect if user modified cart while server sync was in-flight.
    *  (Pass FIX-CART-SYNC-RACE-01) */
   _version: number
+  /** Epoch ms of last user mutation — cart expires after CART_TTL_MS (CART-EXPIRY) */
+  _lastUpdated: number
   /** Attempts to add item. Returns conflict info if producer mismatch. */
   add: (item: Omit<CartItem,'qty'>) => AddResult
   inc: (id: string) => void
@@ -50,24 +55,25 @@ export const useCart = create<State>()(
     (set, get) => ({
       items: {},
       _version: 0,
+      _lastUpdated: 0,
       add: (p): AddResult => {
         const items = { ...get().items }
         // Multi-producer carts allowed (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
         const cur = items[p.id]
         items[p.id] = cur ? { ...cur, qty: cur.qty + 1 } : { ...p, qty: 1 }
-        set({ items, _version: get()._version + 1 })
+        set({ items, _version: get()._version + 1, _lastUpdated: Date.now() })
         return { status: 'added' }
       },
       forceAdd: (p) => {
         // Clear cart and add new item (user confirmed replacing cart)
-        set({ items: { [p.id]: { ...p, qty: 1 } }, _version: get()._version + 1 })
+        set({ items: { [p.id]: { ...p, qty: 1 } }, _version: get()._version + 1, _lastUpdated: Date.now() })
       },
       inc: (id) => {
         const items = { ...get().items }
         const cur = items[id]
         if (!cur) return
         items[id] = { ...cur, qty: cur.qty + 1 }
-        set({ items, _version: get()._version + 1 })
+        set({ items, _version: get()._version + 1, _lastUpdated: Date.now() })
       },
       dec: (id) => {
         const items = { ...get().items }
@@ -79,9 +85,9 @@ export const useCart = create<State>()(
         } else {
           items[id] = { ...cur, qty: nextQty }
         }
-        set({ items, _version: get()._version + 1 })
+        set({ items, _version: get()._version + 1, _lastUpdated: Date.now() })
       },
-      clear: () => set({ items: {}, _version: get()._version + 1 }),
+      clear: () => set({ items: {}, _version: get()._version + 1, _lastUpdated: Date.now() }),
       replaceWithServerCart: (serverItems: CartItem[]) => {
         const newItems: Record<string, CartItem> = {}
         for (const item of serverItems) {
@@ -123,7 +129,15 @@ export const useCart = create<State>()(
       },
       getVersion: () => get()._version,
     }),
-    { name: 'dixis:cart:v1' }
+    {
+      name: 'dixis:cart:v1',
+      onRehydrateStorage: () => (state) => {
+        // CART-EXPIRY: Clear cart if older than 7 days
+        if (state && state._lastUpdated > 0 && Date.now() - state._lastUpdated > CART_TTL_MS) {
+          state.clear()
+        }
+      },
+    }
   )
 )
 
