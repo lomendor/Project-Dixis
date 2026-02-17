@@ -23,6 +23,8 @@ type ApiItem = {
   categorySlugs?: string[];
   stock?: number | null;
   cultivationType?: string | null;
+  discountPriceCents?: number | null;
+  isSeasonal?: boolean;
 };
 
 /**
@@ -104,6 +106,8 @@ async function getData(
       categorySlugs: p.categories?.map((c: any) => c.slug) || [],
       stock: typeof p.stock === 'number' ? p.stock : null,
       cultivationType: p.cultivation_type || null,
+      discountPriceCents: p.discount_price ? Math.round(parseFloat(p.discount_price) * 100) : null,
+      isSeasonal: !!p.is_seasonal,
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
@@ -325,6 +329,8 @@ export default async function Page({ searchParams }: PageProps) {
                 priceCents={p.priceCents}
                 image={p.imageUrl}
                 stock={p.stock}
+                discountPriceCents={p.discountPriceCents}
+                isSeasonal={p.isSeasonal}
               />
             ))}
           </div>
