@@ -30,7 +30,7 @@ type Props = {
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, priority }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, priority, index }: Props & { index?: number }) {
   const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
   const isOOS = typeof stock === 'number' && stock <= 0
   const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
@@ -42,7 +42,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
   const producerUrl = (producerSlug || producerId) ? `/producers/${producerSlug || producerId}` : null
 
   return (
-    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
+    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300 opacity-0 animate-fade-in-up" style={typeof index === 'number' ? { animationDelay: `${index * 60}ms` } : undefined}>
       {/* Image — navigates to product page */}
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
         <div data-testid="product-card-image" className={`relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden${isOOS ? ' opacity-50 grayscale' : ''}`}>

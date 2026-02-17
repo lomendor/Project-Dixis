@@ -100,7 +100,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
   const useDynamic = dynamicCategories && dynamicCategories.length > 0;
 
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide">
+    <div className="w-full relative">
+      <div className="overflow-x-auto scrollbar-hide scroll-smooth">
       <div className="flex gap-2 pb-2 min-w-max px-1">
         {/* "All" option */}
         <button
@@ -175,6 +176,10 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               );
             })}
       </div>
+      </div>
+      {/* Fade edges to indicate horizontal scroll */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-white to-transparent" />
     </div>
   );
 }

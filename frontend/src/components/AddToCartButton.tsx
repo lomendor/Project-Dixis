@@ -64,10 +64,10 @@ export default function AddToCartButton(props: {
 
   return (
     <button
-      className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded text-sm transition-colors ${
+      className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded text-sm transition-all duration-200 ${
         isAdded
-          ? 'bg-primary text-white'
-          : 'bg-primary text-white hover:bg-primary-light'
+          ? 'bg-primary text-white animate-cart-bounce'
+          : 'bg-primary text-white hover:bg-primary-light active:scale-95'
       }`}
       onClick={handleClick}
       disabled={isAdded}

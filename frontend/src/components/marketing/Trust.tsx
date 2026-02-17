@@ -56,7 +56,8 @@ export default function Trust() {
           {trustPoints.map((point, index) => (
             <div
               key={index}
-              className="bg-primary-pale rounded-xl p-6 sm:p-8 text-center hover:shadow-card transition-shadow duration-200"
+              className="bg-primary-pale rounded-xl p-6 sm:p-8 text-center hover:shadow-card transition-shadow duration-200 opacity-0 animate-fade-in-up"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Icon - centered, generous spacing */}
               <div className="flex justify-center mb-5">
