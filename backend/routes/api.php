@@ -198,9 +198,11 @@ Route::prefix('v1/auth')->group(function () {
 
 // Public API v1 routes
 Route::prefix('v1')->group(function () {
-    // Products (public, read-only)
-    Route::get('products', [App\Http\Controllers\Api\V1\ProductController::class, 'index'])->name('api.v1.products.index');
-    Route::get('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'show'])->name('api.v1.products.show');
+    // Products (public, read-only) — T4: rate-limited to prevent scraping/DDoS
+    Route::get('products', [App\Http\Controllers\Api\V1\ProductController::class, 'index'])->name('api.v1.products.index')
+        ->middleware('throttle:120,1');
+    Route::get('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'show'])->name('api.v1.products.show')
+        ->middleware('throttle:120,1');
 
     // Products CRUD (authenticated)
     Route::middleware('auth:sanctum')->group(function () {
@@ -225,12 +227,14 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:5,1'); // 5 checkouts per minute
     });
 
-    // Producers (public, read-only)
-    Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index');
-    Route::get('producers/{producer}', [App\Http\Controllers\Api\V1\ProducerController::class, 'show'])->name('api.v1.producers.show');
+    // Producers (public, read-only) — T4: rate-limited
+    Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index')
+        ->middleware('throttle:120,1');
+    Route::get('producers/{producer}', [App\Http\Controllers\Api\V1\ProducerController::class, 'show'])->name('api.v1.producers.show')
+        ->middleware('throttle:120,1');
 
-    // Enhanced Public Products API
-    Route::prefix('public')->group(function () {
+    // Enhanced Public Products API — T4: rate-limited group
+    Route::prefix('public')->middleware('throttle:120,1')->group(function () {
         Route::get('products', [App\Http\Controllers\Public\ProductController::class, 'index']);
         Route::get('products/{id}', [App\Http\Controllers\Public\ProductController::class, 'show']);
 

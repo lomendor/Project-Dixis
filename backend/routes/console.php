@@ -41,3 +41,30 @@ Schedule::command('dixis:generate-settlements')
     ->timezone('Europe/Athens')
     ->withoutOverlapping()
     ->runInBackground();
+
+/*
+|--------------------------------------------------------------------------
+| T4: Daily Low Stock Alerts
+|--------------------------------------------------------------------------
+|
+| Checks all active products with stock <= 5 and emails their producers.
+| InventoryService also checks reactively per-product after checkout,
+| but this daily sweep catches anything missed.
+|
+*/
+Schedule::call(function () {
+    app(\App\Services\InventoryService::class)->checkLowStockAlerts();
+})
+    ->name('low-stock-check')
+    ->dailyAt('08:00')
+    ->timezone('Europe/Athens')
+    ->withoutOverlapping();
+
+/*
+|--------------------------------------------------------------------------
+| T4: Prune Expired Sanctum Tokens
+|--------------------------------------------------------------------------
+*/
+Schedule::command('sanctum:prune-expired --hours=48')
+    ->daily()
+    ->runInBackground();

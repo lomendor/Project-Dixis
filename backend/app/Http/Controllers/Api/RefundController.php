@@ -48,6 +48,15 @@ class RefundController extends Controller
             );
 
             if ($result['success']) {
+                // T4: Audit trail — log successful refunds for financial accountability
+                Log::info('Refund created successfully', [
+                    'order_id' => $orderId,
+                    'amount_cents' => $result['amount_cents'] ?? null,
+                    'reason' => $request->input('reason', 'requested_by_customer'),
+                    'admin_id' => $request->user()?->id,
+                    'refund_id' => $result['refund_id'] ?? null,
+                ]);
+
                 // Send refund issued notification
                 $refundAmount = ($result['amount_cents'] ?? 0) / 100; // Convert cents to euros
                 $this->notificationService->sendRefundIssuedNotification($order, $refundAmount);
