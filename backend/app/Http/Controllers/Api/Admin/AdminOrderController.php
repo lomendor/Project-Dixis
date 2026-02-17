@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
 use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -127,14 +128,21 @@ class AdminOrderController extends Controller
             'status' => $newStatus,
         ]);
 
-        // Optional: Log the status change with note
-        // (Could extend with order_status_history table in future)
+        // T1-05: Persist status change to history table for timeline
+        OrderStatusHistory::create([
+            'order_id' => $order->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'changed_by' => $request->user()->id,
+            'note' => $validated['note'] ?? null,
+            'changed_at' => now(),
+        ]);
+
         \Log::info("Order status updated", [
             'order_id' => $order->id,
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
             'admin_id' => $request->user()->id,
-            'note' => $validated['note'] ?? null,
         ]);
 
         // Pass 54: Send status update email notification

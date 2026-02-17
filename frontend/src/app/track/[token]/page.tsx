@@ -1,5 +1,7 @@
 import StatusBadge from '@/components/admin/StatusBadge'
 import { getServerApiUrl } from '@/env'
+import Timeline from './components/Timeline'
+import { normalizeStatus } from '@/lib/tracking/status'
 
 /**
  * Pass TRACKING-DISPLAY-01: Public order tracking page using Laravel API
@@ -17,6 +19,12 @@ function formatDateStable(date: string | Date | null): string {
   return d.toISOString().slice(0, 16).replace('T', ' ')
 }
 
+interface StatusHistoryEntry {
+  status: string
+  changed_at: string
+  note: string | null
+}
+
 interface TrackingOrder {
   id: number
   status: string
@@ -25,6 +33,7 @@ interface TrackingOrder {
   updated_at: string
   items_count: number
   total: number
+  status_history?: StatusHistoryEntry[]
   shipment?: {
     status: string
     carrier_code: string | null
@@ -120,6 +129,16 @@ export default async function TrackPage({ params }: { params: { token: string } 
               <span className="text-neutral-600">Σύνολο:</span>
               <span className="font-semibold text-primary">{fmt(order.total)}</span>
             </div>
+          </div>
+
+          {/* T1-05: Status Timeline */}
+          <div className="mt-6 pt-6 border-t">
+            <h2 className="text-lg font-semibold text-neutral-900 mb-2">Πρόοδος Παραγγελίας</h2>
+            <Timeline
+              currentStatus={normalizeStatus(order.status)}
+              history={order.status_history}
+              orderCreatedAt={order.created_at}
+            />
           </div>
 
           {/* Shipment Info */}

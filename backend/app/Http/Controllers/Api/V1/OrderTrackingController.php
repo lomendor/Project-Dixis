@@ -35,7 +35,7 @@ class OrderTrackingController extends Controller
             ], 400);
         }
 
-        $order = Order::with(['shipment', 'orderItems'])
+        $order = Order::with(['shipment', 'orderItems', 'statusHistory'])
             ->where('public_token', $token)
             ->first();
 
@@ -71,6 +71,13 @@ class OrderTrackingController extends Controller
                 'estimated_delivery' => $order->shipment->estimated_delivery?->toISOString(),
             ];
         }
+
+        // T1-05: Include status history for timeline display (no PII)
+        $response['status_history'] = $order->statusHistory->map(fn ($h) => [
+            'status' => $h->new_status,
+            'changed_at' => $h->changed_at?->toISOString(),
+            'note' => $h->note,
+        ])->values()->toArray();
 
         return response()->json([
             'ok' => true,
