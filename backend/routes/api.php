@@ -324,8 +324,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 status checks per minute
     });
 
-    // Refunds (admin only - simplified auth for now)
-    Route::middleware('auth:sanctum')->prefix('refunds')->group(function () {
+    // Refunds (admin only) — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('refunds')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\RefundController::class, 'index'])
             ->middleware('throttle:60,1'); // 60 requests per minute
         Route::post('orders/{order}', [App\Http\Controllers\Api\RefundController::class, 'create'])
@@ -348,8 +348,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:10,1'); // 10 requests per minute
     });
 
-    // Admin Analytics (simplified auth for now - should be admin middleware in production)
-    Route::middleware('auth:sanctum')->prefix('admin/analytics')->group(function () {
+    // Admin Analytics — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/analytics')->group(function () {
         Route::get('sales', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'sales'])
             ->middleware('throttle:60,1'); // 60 requests per minute
         Route::get('orders', [App\Http\Controllers\Api\Admin\AnalyticsController::class, 'orders'])
@@ -362,16 +362,16 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:120,1'); // 120 requests per minute for dashboard
     });
 
-    // Admin Product Moderation (Pass 24)
-    Route::middleware('auth:sanctum')->prefix('admin/products')->group(function () {
+    // Admin Product Moderation (Pass 24) — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/products')->group(function () {
         Route::get('pending', [App\Http\Controllers\Api\Admin\AdminProductController::class, 'pending'])
             ->middleware('throttle:60,1'); // 60 requests per minute
         Route::patch('{product}/moderate', [App\Http\Controllers\Api\Admin\AdminProductController::class, 'moderate'])
             ->middleware('throttle:30,1'); // 30 moderation actions per minute
     });
 
-    // Admin Order Management (Pass 25 + Pass 61)
-    Route::middleware('auth:sanctum')->prefix('admin/orders')->group(function () {
+    // Admin Order Management (Pass 25 + Pass 61) — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/orders')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'index'])
             ->middleware('throttle:60,1'); // 60 requests per minute (Pass 61)
         Route::patch('{order}/status', [App\Http\Controllers\Api\Admin\AdminOrderController::class, 'updateStatus'])
@@ -381,8 +381,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 payment confirms per minute
     });
 
-    // Admin Shipping (read-only rate tables interface)
-    Route::middleware('auth:sanctum')->prefix('admin/shipping')->group(function () {
+    // Admin Shipping (read-only rate tables interface) — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/shipping')->group(function () {
         Route::get('rates', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getRates'])
             ->middleware('throttle:60,1'); // 60 requests per minute
         Route::get('zones', [App\Http\Controllers\Api\Admin\ShippingController::class, 'getZoneInfo'])
@@ -391,8 +391,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1'); // 30 simulations per minute
     });
 
-    // PRODUCER-ONBOARD-01: Admin Producer Management
-    Route::middleware('auth:sanctum')->prefix('admin/producers')->group(function () {
+    // PRODUCER-ONBOARD-01: Admin Producer Management — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/producers')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'index'])
             ->middleware('throttle:60,1');
         Route::patch('{producer}/approve', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'approve'])
@@ -401,8 +401,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
     });
 
-    // Admin Commission Rules CRUD
-    Route::middleware('auth:sanctum')->prefix('admin/commission-rules')->group(function () {
+    // Admin Commission Rules CRUD — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/commission-rules')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'index'])
             ->middleware('throttle:60,1');
         Route::post('/', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'store'])
@@ -415,8 +415,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1');
     });
 
-    // Pass PAYOUT-03 + PAYOUT-05: Admin Settlement Dashboard + CSV Export
-    Route::middleware('auth:sanctum')->prefix('admin/settlements')->group(function () {
+    // Pass PAYOUT-03 + PAYOUT-05: Admin Settlement Dashboard + CSV Export — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/settlements')->group(function () {
         Route::get('summary', [App\Http\Controllers\Api\Admin\AdminSettlementController::class, 'summary'])
             ->middleware('throttle:60,1');
         Route::get('export', [App\Http\Controllers\Api\Admin\SettlementExportController::class, 'exportCsv'])
@@ -431,8 +431,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
     });
 
-    // Pass COMM-ENGINE-TOGGLE-01: Admin toggle for commission feature flag
-    Route::middleware('auth:sanctum')->prefix('admin/settings')->group(function () {
+    // Pass COMM-ENGINE-TOGGLE-01: Admin toggle for commission feature flag — T2.5-01: added 'admin' middleware
+    Route::middleware(['auth:sanctum', 'admin'])->prefix('admin/settings')->group(function () {
         Route::get('commission-engine', function (Illuminate\Http\Request $request) {
             if ($request->user()?->role !== 'admin') {
                 return response()->json(['error' => 'Forbidden'], 403);
