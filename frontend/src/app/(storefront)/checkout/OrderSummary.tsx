@@ -87,6 +87,16 @@ export default function OrderSummary({
           </div>
         )}
 
+        {/* T3-02: Estimated delivery time */}
+        {(cartShippingQuote || shippingQuote) && !cartShippingError && (
+          <div className="flex items-center gap-1.5 text-xs text-neutral-500 pt-1" data-testid="delivery-estimate">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Εκτιμώμενη παράδοση: 2–5 εργάσιμες ημέρες</span>
+          </div>
+        )}
+
         {/* Total with shipping + COD fee */}
         <div className="flex justify-between font-bold text-lg pt-2 border-t" data-testid="total-line">
           <span>{t('checkoutPage.total')}:</span>
