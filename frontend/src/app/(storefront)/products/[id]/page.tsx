@@ -11,8 +11,8 @@ import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
 import { getCategoryBySlug } from '@/data/categories';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// T3-01: ISR — regenerate every 5 minutes (was force-dynamic + revalidate=0)
+export const revalidate = 300;
 
 // Helper to fetch product from API
 async function getProductById(id: string) {
@@ -37,7 +37,7 @@ async function getProductById(id: string) {
   }
 
   try {
-    const res = await fetch(`${base}/public/products/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${base}/public/products/${id}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const json = await res.json();
     const raw = json?.data ?? json;
