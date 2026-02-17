@@ -66,7 +66,7 @@ class InventoryService
 
         // T1-03: Send email notification to producer
         try {
-            Mail::to($user->email)->send(new LowStockAlert($product, $producer));
+            Mail::to($user->email)->queue(new LowStockAlert($product, $producer));
 
             Log::info('Low stock email sent', [
                 'to' => $user->email,

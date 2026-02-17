@@ -87,7 +87,7 @@ class NotificationService
 
         // T2-01: Send actual refund confirmation email
         try {
-            Mail::to($buyer->email)->send(new RefundConfirmation($order, $refundAmount));
+            Mail::to($buyer->email)->queue(new RefundConfirmation($order, $refundAmount));
             Log::info('Refund confirmation email sent', [
                 'to' => $buyer->email,
                 'order_id' => $order->id,

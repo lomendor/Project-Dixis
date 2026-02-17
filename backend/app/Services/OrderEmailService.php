@@ -68,7 +68,7 @@ class OrderEmailService
                 ? new OrderShipped($order)
                 : new OrderDelivered($order);
 
-            Mail::to($email)->send($mailable);
+            Mail::to($email)->queue($mailable);
 
             OrderNotification::recordSent(
                 $order->id,
@@ -125,7 +125,7 @@ class OrderEmailService
             }
 
             try {
-                Mail::to($email)->send(new ProducerOrderShipped($order, $producer, $status));
+                Mail::to($email)->queue(new ProducerOrderShipped($order, $producer, $status));
 
                 OrderNotification::recordSent(
                     $order->id,
@@ -198,7 +198,7 @@ class OrderEmailService
         }
 
         try {
-            Mail::to($email)->send(new ConsumerOrderPlaced($order));
+            Mail::to($email)->queue(new ConsumerOrderPlaced($order));
 
             OrderNotification::recordSent(
                 $order->id,
@@ -261,7 +261,7 @@ class OrderEmailService
             }
 
             try {
-                Mail::to($email)->send(new ProducerNewOrder($order, $producer));
+                Mail::to($email)->queue(new ProducerNewOrder($order, $producer));
 
                 OrderNotification::recordSent(
                     $order->id,
@@ -309,7 +309,7 @@ class OrderEmailService
         }
 
         try {
-            Mail::to($email)->send(new AdminNewOrder($order));
+            Mail::to($email)->queue(new AdminNewOrder($order));
 
             OrderNotification::recordSent(
                 $order->id,
