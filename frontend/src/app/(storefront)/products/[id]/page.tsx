@@ -129,7 +129,15 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       'priceCurrency': 'EUR',
       'availability': Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       'url': `${baseUrl}/products/${id}`
-    }
+    },
+    // S1-02 SEO: Show star ratings in Google search results
+    ...(p.reviewsAvgRating ? {
+      'aggregateRating': {
+        '@type': 'AggregateRating',
+        'ratingValue': p.reviewsAvgRating,
+        'reviewCount': p.reviewsCount || 1
+      }
+    } : {})
   };
 
   return (
