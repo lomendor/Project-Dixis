@@ -100,6 +100,13 @@ export default function PaymentMethodSelector({
         </label>
       )}
 
+      {/* T3-02: Stripe trust text — payment data is not stored on Dixis */}
+      {cardEnabled && (
+        <p className="text-xs text-neutral-500 mt-1 pl-7">
+          Τα στοιχεία πληρωμής δεν αποθηκεύονται στο Dixis
+        </p>
+      )}
+
       {/* Pass PAY-GUEST-CARD-GATE-01: Message for guests when card flag is enabled but user not logged in */}
       {/* Only render after auth loading completes to avoid hydration mismatch */}
       {!authLoading && !isAuthenticated && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
