@@ -138,7 +138,7 @@ export default async function FeaturedProducts() {
         <div className="text-center mt-10 sm:mt-12">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-lg border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-accent-cream text-accent-gold font-semibold rounded-lg border-2 border-accent-gold transition-all duration-200 active:scale-[0.98] touch-manipulation"
           >
             Εξερευνήστε Περισσότερα Προϊόντα
           </Link>
