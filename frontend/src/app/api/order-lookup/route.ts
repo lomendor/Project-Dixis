@@ -4,10 +4,8 @@ import { parseOrderNo } from '../../../lib/orderNumber';
 
 export const dynamic = 'force-dynamic';
 
-// TODO [H1-Phase2]: Proxy to Laravel API for real order lookup.
-// CheckoutOrder model was deleted (H1-ORDER-MODEL Phase 1) — it was never
-// populated in production, so this endpoint always returned 404 anyway.
-// When Laravel exposes a lookup-by-orderNo endpoint, wire it here.
+// Order lookup stub. Public order tracking uses /track/[token] with
+// Laravel token-based lookup instead. This legacy endpoint returns 404.
 
 export async function POST(req: Request) {
   if (!(await rateLimit('order-lookup', 60))) {

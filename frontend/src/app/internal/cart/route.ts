@@ -10,10 +10,8 @@ import { NextResponse } from 'next/server';
  * so Next.js API routes under /api/* are unreachable.
  * Using /internal/* prefix instead.
  *
- * TODO: Implement proper server-side cart if needed for:
- * - Cart persistence across devices
- * - Cart sync with backend
- * - Pre-checkout validation
+ * Cart is managed client-side via Zustand store with localStorage.
+ * Checkout validation happens server-side in Laravel.
  */
 export async function GET() {
   return NextResponse.json({
