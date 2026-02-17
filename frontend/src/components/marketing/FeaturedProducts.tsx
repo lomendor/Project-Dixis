@@ -24,6 +24,8 @@ interface ApiProduct {
   images?: { id: number; url: string; is_primary: boolean }[];
   producer_id?: string | number;
   producer?: { id: string; name: string; slug: string } | null;
+  reviews_count?: number;
+  reviews_avg_rating?: number | null;
 }
 
 async function getProducts(): Promise<ApiProduct[]> {
@@ -88,6 +90,8 @@ export default async function FeaturedProducts() {
                   priceCents={Math.round(product.price * 100)}
                   image={imageUrl}
                   stock={product.stock}
+                  reviewsCount={product.reviews_count}
+                  reviewsAvgRating={product.reviews_avg_rating}
                 />
               );
             })}
