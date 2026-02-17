@@ -7,7 +7,7 @@ export default function BuyBox({ product }:{ product: { id: string|number; title
   const title = String(product.title ?? product.name ?? 'Προϊόν');
   return (
     <div className="mt-6 flex gap-3 items-center">
-      <input type="number" min={1} value={qty} onChange={e=>setQty(Number(e.target.value||1))} className="h-10 w-20 border rounded-md px-3" />
+      <input type="number" min={1} value={qty} onChange={e=>setQty(Number(e.target.value||1))} className="h-10 w-20 border rounded-md px-3" aria-label="Ποσότητα" />
       <AddToCartButton id={product.id} title={title} price={Number(product.price ?? 0)} currency={product.currency ?? 'EUR'} qty={qty} producerId={product.producerId ? String(product.producerId) : undefined} producerName={product.producerName} />
     </div>
   );
