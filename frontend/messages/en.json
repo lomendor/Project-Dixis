@@ -9,7 +9,9 @@
     "logout": "Logout",
     "myOrders": "My Orders",
     "cart": "Cart",
-    "contact": "Contact"
+    "contact": "Contact",
+    "search": "Search",
+    "searchPlaceholder": "Search products..."
   },
   "home": {
     "title": "Dixis — Fresh local products",
