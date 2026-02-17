@@ -42,7 +42,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
   const producerUrl = (producerSlug || producerId) ? `/producers/${producerSlug || producerId}` : null
 
   return (
-    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-card-hover hover:border-primary/20 transition-all duration-300">
+    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-card hover:shadow-card-hover hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
       {/* Image — navigates to product page */}
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
         <div data-testid="product-card-image" className={`relative aspect-square sm:h-48 sm:aspect-auto w-full bg-neutral-100 overflow-hidden${isOOS ? ' opacity-50 grayscale' : ''}`}>
@@ -62,6 +62,8 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
               </svg>
             </div>
           )}
+          {/* Subtle gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
           {/* Pass SEASONAL-DISCOUNT-01 + T2.5-05: Badge overlays */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {isOOS && (
@@ -89,12 +91,12 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
           <Link
             href={producerUrl}
             data-testid="product-card-producer-link"
-            className="text-xs font-semibold text-primary uppercase tracking-wider truncate block hover:underline transition-colors"
+            className="text-xs font-semibold text-accent-gold uppercase tracking-wider truncate block hover:underline transition-colors"
           >
             {producer || 'Παραγωγός'}
           </Link>
         ) : (
-          <span data-testid="product-card-producer" className="text-xs font-semibold text-primary uppercase tracking-wider truncate block">
+          <span data-testid="product-card-producer" className="text-xs font-semibold text-accent-gold uppercase tracking-wider truncate block">
             {producer || 'Παραγωγός'}
           </span>
         )}
@@ -113,7 +115,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
 
       {/* Non-clickable section - price + add to cart button */}
       {/* Pass FIX-MOBILE-CARDS-01: Stack vertically on mobile, row on sm+ */}
-      <div className="px-2.5 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-neutral-100">
+      <div className="px-2.5 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-neutral-100 bg-accent-cream">
         <span data-testid="product-card-price" className={`text-base sm:text-lg font-bold ${hasDiscount ? 'text-red-600' : 'text-neutral-900'}`}>
           {displayPrice}
           {originalPrice && <span className="ml-1.5 text-xs sm:text-sm font-normal text-neutral-400 line-through">{originalPrice}</span>}
