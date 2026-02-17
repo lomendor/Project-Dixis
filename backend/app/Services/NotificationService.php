@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\RefundConfirmation;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\User;
@@ -72,6 +73,7 @@ class NotificationService
 
     /**
      * Send notification for refund issued event
+     * T2-01: Now sends actual RefundConfirmation email (not just log)
      */
     public function sendRefundIssuedNotification(Order $order, float $refundAmount): void
     {
@@ -83,11 +85,21 @@ class NotificationService
             'message' => 'Έγινε επιστροφή €{refund_amount} για την παραγγελία #{order_id}',
         ]);
 
-        $this->sendEmail($buyer->email, 'refund_issued', [
-            'user_name' => $buyer->name,
-            'order_id' => $order->id,
-            'refund_amount' => number_format($refundAmount, 2),
-        ]);
+        // T2-01: Send actual refund confirmation email
+        try {
+            Mail::to($buyer->email)->send(new RefundConfirmation($order, $refundAmount));
+            Log::info('Refund confirmation email sent', [
+                'to' => $buyer->email,
+                'order_id' => $order->id,
+                'refund_amount' => $refundAmount,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send refund confirmation email', [
+                'email' => $buyer->email,
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
