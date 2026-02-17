@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/ops'],
+        disallow: ['/admin', '/api', '/auth', '/producer', '/account', '/ops', '/my', '/checkout', '/internal'],
       },
     ],
     sitemap: 'https://dixis.gr/sitemap.xml',
