@@ -90,12 +90,16 @@ export default function CartPage() {
                 <span className="text-lg font-bold" data-testid="total">Σύνολο: {fmt.format(totalCents / 100)}</span>
               </div>
               <p className="text-xs text-neutral-500 mt-2">Οι τελικές χρεώσεις (μεταφορικά/ΦΠΑ) υπολογίζονται κατά την ολοκλήρωση.</p>
-              <button onClick={clear} className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50">
+              <button
+                onClick={() => { if (window.confirm('Είστε σίγουροι ότι θέλετε να αδειάσετε το καλάθι;')) clear() }}
+                className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50"
+                data-testid="clear-cart"
+              >
                 Καθαρισμός
               </button>
               <button
                 onClick={handleCheckout}
-                className="mt-4 w-full inline-flex justify-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light"
+                className="mt-4 w-full inline-flex justify-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation"
                 data-testid="go-checkout"
               >
                 Ολοκλήρωση παραγγελίας

@@ -174,7 +174,7 @@ export default function RootLayout({
               <AuthProvider>
                 <Header />
                 <div className="max-w-6xl mx-auto px-4 py-8">
-                  <main data-testid="page-root">
+                  <main id="main-content" data-testid="page-root">
                     {children}
                   </main>
                 </div>
