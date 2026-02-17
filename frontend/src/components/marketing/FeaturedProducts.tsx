@@ -3,14 +3,17 @@ import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
 import { getServerApiUrl } from '@/env';
 
 /**
- * Featured Products Section - Mobile-first product showcase
+ * Pass FEATURED-PRODUCTS-01: Curated featured products section for homepage.
+ *
+ * Strategy: fetch all products, sort by rating (best first), then by newest.
+ * Shows up to 8 products that have images and stock — creating a curated feel.
  *
  * Features:
  * - Server component for optimal performance
- * - Fetches latest products from API
+ * - Smart product ranking: rated products first, then newest
+ * - Only shows in-stock products with images (curated quality)
  * - Mobile-first grid (2-col mobile, 3-col tablet, 4-col desktop)
- * - Generous whitespace and touch-friendly cards
- * - Fallback UI for loading/error states
+ * - CI/test environment fallback
  */
 
 interface ApiProduct {
@@ -18,6 +21,8 @@ interface ApiProduct {
   name: string;
   slug: string;
   price: number;
+  discount_price?: number | null;
+  is_seasonal?: boolean;
   unit: string;
   stock: number;
   image_url?: string | null;
@@ -28,39 +33,64 @@ interface ApiProduct {
   reviews_avg_rating?: number | null;
 }
 
-async function getProducts(): Promise<ApiProduct[]> {
+async function getFeaturedProducts(): Promise<ApiProduct[]> {
+  const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
+  const isServer = typeof window === 'undefined';
+  let base: string;
+  if (isCI && isServer) {
+    base = 'http://127.0.0.1:3001/api/v1';
+  } else if (isServer) {
+    base = getServerApiUrl();
+  } else {
+    base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+  }
+
   try {
-    const base = getServerApiUrl();
-    const res = await fetch(`${base}/public/products?limit=8`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetch(`${base}/public/products?per_page=50`, {
+      next: { revalidate: 3600 },
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    if (!res.ok) {
-      return [];
-    }
+    if (!res.ok) return [];
 
-    const data = await res.json();
-    return data.data || [];
+    const json = await res.json();
+    const all: ApiProduct[] = json?.data ?? [];
+
+    // Curate: only products with stock and an image
+    const curated = all.filter((p) => {
+      const hasImage = p.image_url || (p.images && p.images.length > 0);
+      return p.stock > 0 && hasImage;
+    });
+
+    // Sort: best-rated first, then newest (by id desc as proxy)
+    curated.sort((a, b) => {
+      const ratingA = a.reviews_avg_rating ?? 0;
+      const ratingB = b.reviews_avg_rating ?? 0;
+      if (ratingB !== ratingA) return ratingB - ratingA;
+      return Number(b.id) - Number(a.id);
+    });
+
+    return curated.slice(0, 8);
   } catch {
     return [];
   }
 }
 
 export default async function FeaturedProducts() {
-  const products = await getProducts();
+  const products = await getFeaturedProducts();
   const hasProducts = products.length > 0;
 
   return (
-    <section className="bg-neutral-50 py-12 sm:py-16 lg:py-20">
+    <section className="bg-neutral-50 py-12 sm:py-16 lg:py-20" data-testid="featured-products">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Section header - mobile-optimized */}
+        {/* Section header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-10 gap-4">
           <div>
             <h2 className="text-3xl font-bold text-neutral-900 mb-2 sm:text-4xl">
               Προτεινόμενα Προϊόντα
             </h2>
             <p className="text-lg text-neutral-600">
-              Ανακαλύψτε τα πιο δημοφιλή προϊόντα από τοπικούς παραγωγούς
+              Τα καλύτερα προϊόντα από τοπικούς παραγωγούς
             </p>
           </div>
           <Link
@@ -74,7 +104,7 @@ export default async function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Products grid - mobile-first */}
+        {/* Products grid */}
         {hasProducts ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {products.map((product) => {
@@ -97,7 +127,6 @@ export default async function FeaturedProducts() {
             })}
           </div>
         ) : (
-          /* Loading skeletons */
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(8)].map((_, i) => (
               <ProductCardSkeleton key={i} />
@@ -105,7 +134,7 @@ export default async function FeaturedProducts() {
           </div>
         )}
 
-        {/* CTA below products - mobile-optimized */}
+        {/* CTA */}
         <div className="text-center mt-10 sm:mt-12">
           <Link
             href="/products"
