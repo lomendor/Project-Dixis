@@ -64,7 +64,7 @@
 
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 **Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency.
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y.
 
 ---
 
@@ -81,6 +81,7 @@
 
 ## Recently Done (last 10)
 
+- **HOUSEKEEPING-3PR** — Production housekeeping (no new features): (1) SEO: aggregateRating in product JSON-LD for Google star ratings + dynamic generateMetadata on /products catalog page (PR #2965). (2) Dead TODO cleanup: removed all 10 stale TODOs across 8 files — zero TODO/FIXME remaining in src/ (PR #2966). (3) a11y: aria-labels on BuyBox quantity + UploadImage file input, explicit img dimensions to prevent CLS (PR #2967). All 3 PRs merged without --admin bypass. ✅
 - **CI-E2E-GREEN** — Fixed 3 E2E test failures that blocked every PR merge (required --admin bypass): (1) auth-nav-regression: /products SSR fetch hung in CI because getServerApiUrl() pointed to non-existent Laravel — added CI fallback to 127.0.0.1:3001 (PR #2962). (2) pass-54-thank-you-api: glob pattern `*` didn't match multi-segment URL `/orders/by-token/123` — changed to `**` (PR #2963). (3) MPC3 checkout submit: full checkout requires real Laravel backend — skipped in CI (PR #2963). **Result: 96 tests pass, 10 skip, 0 fail. No more --admin bypass needed.** ✅
 - **S3-01: COST-TRANSPARENCY** — Green trust badge on every product detail page: "Ο παραγωγός λαμβάνει το 88% της τιμής / Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας". Static display using locked B2C rate (12%). Core differentiator per PRD. (PR #2960, deployed 2026-02-16) ✅
 - **PAYOUT-INFRASTRUCTURE** — Complete payout system: (1) IBAN + bank_account_holder field on Producer model with conditional visibility (PR #2952). (2) CommissionSettlement model + `dixis:generate-settlements` artisan command with 14-day hold, €20 min, monthly schedule (PR #2954). (3) Admin settlement dashboard at /admin/settlements — view/pay/cancel settlements, summary cards, IBAN display (PR #2955). (4) Producer payout history at /producer/settlements — see pending/paid amounts, IBAN reminder (PR #2956). (5) CSV export for bank transfer batches with BOM for Excel UTF-8, semicolon delimiter (PR #2958). (PRs #2952-#2958, merged 2026-02-16) ✅
