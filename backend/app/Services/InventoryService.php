@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Notification;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Mail\LowStockAlert;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -63,21 +64,17 @@ class InventoryService
             ],
         ]);
 
-        // Send email notification
+        // T1-03: Send email notification to producer
         try {
-            // For now, we'll just log the email that would be sent
-            // In a real implementation, you'd create a Mail class and send it
-            Log::info('Low stock email notification', [
+            Mail::to($user->email)->send(new LowStockAlert($product, $producer));
+
+            Log::info('Low stock email sent', [
                 'to' => $user->email,
                 'product_name' => $product->name,
                 'stock' => $product->stock,
-                'producer_name' => $producer->name,
             ]);
-
-            // Uncomment when email implementation is ready:
-            // Mail::to($user->email)->send(new LowStockAlert($product, $producer));
         } catch (\Exception $e) {
-            Log::error('Failed to send low stock email notification', [
+            Log::error('Failed to send low stock email', [
                 'user_id' => $user->id,
                 'product_id' => $product->id,
                 'error' => $e->getMessage(),
