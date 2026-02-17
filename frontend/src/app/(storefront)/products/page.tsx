@@ -25,6 +25,8 @@ type ApiItem = {
   cultivationType?: string | null;
   reviewsCount?: number;
   reviewsAvgRating?: number | null;
+  discountPriceCents?: number | null;
+  isSeasonal?: boolean;
 };
 
 /**
@@ -108,6 +110,8 @@ async function getData(
       cultivationType: p.cultivation_type || null,
       reviewsCount: p.reviews_count ?? 0,
       reviewsAvgRating: p.reviews_avg_rating ?? null,
+      discountPriceCents: p.discount_price ? Math.round(parseFloat(p.discount_price) * 100) : null,
+      isSeasonal: !!p.is_seasonal,
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
@@ -331,6 +335,8 @@ export default async function Page({ searchParams }: PageProps) {
                 stock={p.stock}
                 reviewsCount={p.reviewsCount}
                 reviewsAvgRating={p.reviewsAvgRating}
+                discountPriceCents={p.discountPriceCents}
+                isSeasonal={p.isSeasonal}
               />
             ))}
           </div>

@@ -16,8 +16,10 @@ type Props = {
   producerId?: string | number | null
   producerSlug?: string | null
   priceCents: number
+  discountPriceCents?: number | null
   image?: string | null
   stock?: number | null
+  isSeasonal?: boolean
   hideProducerLink?: boolean
   reviewsCount?: number
   reviewsAvgRating?: number | null
@@ -25,8 +27,10 @@ type Props = {
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, image, stock, hideProducerLink, reviewsCount, reviewsAvgRating }: Props) {
-  const price = typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—'
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating }: Props) {
+  const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
+  const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
+  const originalPrice = hasDiscount ? fmtEUR.format(priceCents / 100) : null
   const hasImage = image && image.length > 0
   const productUrl = `/products/${id}`
 
@@ -53,6 +57,19 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
               </svg>
             </div>
           )}
+          {/* Pass SEASONAL-DISCOUNT-01: Badge overlays */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {isSeasonal && (
+              <span data-testid="badge-seasonal" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-100 text-amber-800 shadow-sm">
+                🍊 Εποχιακό
+              </span>
+            )}
+            {hasDiscount && (
+              <span data-testid="badge-discount" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700 shadow-sm">
+                -{Math.round(((priceCents - discountPriceCents) / priceCents) * 100)}%
+              </span>
+            )}
+          </div>
         </div>
       </Link>
 
@@ -87,7 +104,10 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
       {/* Non-clickable section - price + add to cart button */}
       {/* Pass FIX-MOBILE-CARDS-01: Stack vertically on mobile, row on sm+ */}
       <div className="px-2.5 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-neutral-100">
-        <span data-testid="product-card-price" className="text-base sm:text-lg font-bold text-neutral-900">{price}</span>
+        <span data-testid="product-card-price" className={`text-base sm:text-lg font-bold ${hasDiscount ? 'text-red-600' : 'text-neutral-900'}`}>
+          {displayPrice}
+          {originalPrice && <span className="ml-1.5 text-xs sm:text-sm font-normal text-neutral-400 line-through">{originalPrice}</span>}
+        </span>
         <div data-testid="product-card-add" className="w-full sm:w-auto">
           {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
           {/* Pass CART-UX-FEEDBACK-01: Include imageUrl for cart thumbnails */}

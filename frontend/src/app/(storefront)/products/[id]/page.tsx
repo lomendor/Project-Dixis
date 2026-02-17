@@ -69,7 +69,10 @@ async function getProductById(id: string) {
       cultivationDescription: raw.cultivation_description || null,
       // S1-02: Review stats
       reviewsCount: raw.reviews_count ?? 0,
-      reviewsAvgRating: raw.reviews_avg_rating ?? null
+      reviewsAvgRating: raw.reviews_avg_rating ?? null,
+      // Pass SEASONAL-DISCOUNT-01: Discount + seasonal data
+      discountPrice: raw.discount_price ? parseFloat(raw.discount_price) : null,
+      isSeasonal: !!raw.is_seasonal,
     };
   } catch {
     return null;
@@ -237,11 +240,31 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </div>
           )}
 
+          {/* Pass SEASONAL-DISCOUNT-01: Seasonal badge on detail page */}
+          {p.isSeasonal && (
+            <div className="mb-3" data-testid="seasonal-badge">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                🍊 Εποχιακό Προϊόν
+              </span>
+            </div>
+          )}
+
           {/* Price + Stock */}
           <div className="mb-6 flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-neutral-900" data-testid="product-price">
-              {fmt(Number(p.price||0))}
-            </span>
+            {p.discountPrice != null && p.discountPrice < Number(p.price || 0) ? (
+              <>
+                <span className="text-3xl font-bold text-red-600" data-testid="product-price">
+                  {fmt(p.discountPrice)}
+                </span>
+                <span className="text-lg text-neutral-400 line-through" data-testid="product-original-price">
+                  {fmt(Number(p.price || 0))}
+                </span>
+              </>
+            ) : (
+              <span className="text-3xl font-bold text-neutral-900" data-testid="product-price">
+                {fmt(Number(p.price||0))}
+              </span>
+            )}
             <span className="text-lg text-neutral-500">/ {p.unit}</span>
             <span
               className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
