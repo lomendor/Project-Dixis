@@ -153,6 +153,14 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
                 {/* Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Show per-producer shipping for multi-producer orders */}
                 {order.isMultiProducer && order.shippingLines && order.shippingLines.length > 1 ? (
                   <>
+                    <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-2.5 my-2" data-testid="multi-producer-notice">
+                      <svg className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-xs text-amber-800">
+                        Θα λάβετε <strong>ξεχωριστά δέματα</strong> από κάθε παραγωγό.
+                      </p>
+                    </div>
                     <div className="text-neutral-600 font-medium pt-1">Μεταφορικά ανά παραγωγό:</div>
                     {order.shippingLines.map((line, idx) => (
                       <div key={idx} className="flex justify-between pl-3 text-neutral-600">

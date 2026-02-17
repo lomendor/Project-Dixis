@@ -50,6 +50,19 @@ export default function OrderSummary({
           <span>{fmt.format(subtotal)}</span>
         </div>
 
+        {/* Multi-producer separate shipments notice */}
+        {cartShippingQuote && cartShippingQuote.producers.length > 1 && (
+          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm" data-testid="multi-producer-notice">
+            <svg className="w-4 h-4 mt-0.5 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-amber-800">
+              Η παραγγελία σας περιλαμβάνει προϊόντα από {cartShippingQuote.producers.length} παραγωγούς.
+              Θα λάβετε <strong>ξεχωριστά δέματα</strong> από κάθε παραγωγό.
+            </p>
+          </div>
+        )}
+
         {/* Per-producer shipping breakdown */}
         <ShippingBreakdownDisplay
           producers={cartShippingQuote?.producers ?? null}
