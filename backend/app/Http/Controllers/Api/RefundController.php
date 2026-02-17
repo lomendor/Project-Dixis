@@ -68,6 +68,13 @@ class RefundController extends Controller
                 ], 200);
             }
 
+            // T5: Log provider-level refund failures for debugging
+            Log::warning('Refund provider returned failure', [
+                'order_id' => $orderId,
+                'admin_id' => $request->user()?->id,
+                'result' => $result,
+            ]);
+
             return response()->json($result, 422);
 
         } catch (\Exception $e) {
