@@ -7,6 +7,7 @@ import { useTranslations } from '@/contexts/LocaleContext'
 import StripeProvider from '@/components/payment/StripeProvider'
 import StripePaymentForm from '@/components/payment/StripePaymentForm'
 import ShippingChangedModal from '@/components/checkout/ShippingChangedModal'
+import CheckoutStepper from '@/components/checkout/CheckoutStepper'
 import OrderSummary from './OrderSummary'
 import CustomerDetailsForm from './CustomerDetailsForm'
 import { useCheckout } from './useCheckout'
@@ -76,6 +77,7 @@ function CheckoutContent() {
       <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-xl sm:text-2xl font-bold mb-6">{t('checkout.title')}</h1>
+          <CheckoutStepper currentStep={3} />
 
           <div className="bg-white border rounded-xl p-6 mb-6">
             <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment') || 'Card Payment'}</h2>
@@ -116,6 +118,7 @@ function CheckoutContent() {
     <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-xl sm:text-2xl font-bold mb-6" data-testid="checkout-title">{t('checkout.title')}</h1>
+        <CheckoutStepper currentStep={1} />
 
         <OrderSummary
           cartItems={cartItems}
