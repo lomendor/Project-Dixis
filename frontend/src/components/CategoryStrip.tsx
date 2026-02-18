@@ -109,9 +109,9 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         <Image
           src="/icons/categories/basket.png"
           alt=""
-          width={56}
-          height={56}
-          className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 drop-shadow-sm"
+          width={80}
+          height={80}
+          className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 drop-shadow-sm"
         />
         <span
           className={`text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2

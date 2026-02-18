@@ -79,7 +79,7 @@ export function ProductSearchInput() {
         placeholder={t('products.searchPlaceholder')}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="w-full pl-10 pr-10 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all"
+        className="w-full pl-11 pr-10 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all"
         aria-label={t('products.searchPlaceholder')}
       />
       {inputValue && (
