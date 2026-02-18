@@ -28,13 +28,13 @@ export default function CTA() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
           >
             Δείτε τα Προϊόντα
           </Link>
           <Link
             href="/auth/register"
-            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-lg border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-full border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
           >
             Δημιουργία Λογαριασμού
           </Link>
