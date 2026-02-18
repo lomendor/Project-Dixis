@@ -154,19 +154,23 @@ export function useCheckout() {
     }
   }, [cartItems, subtotal, t, paymentMethod])
 
+  // Keep a stable ref for use in effects to avoid stale closure issues
+  const fetchShippingRef = useRef(fetchCartShippingQuote)
+  useEffect(() => { fetchShippingRef.current = fetchCartShippingQuote }, [fetchCartShippingQuote])
+
   // Auto-fetch shipping when postal code is pre-filled from saved address
   useEffect(() => {
     if (postalCode && postalCode.length === 5 && !shippingQuote && !shippingLoading) {
-      fetchCartShippingQuote(postalCode)
+      fetchShippingRef.current(postalCode)
     }
-  }, [postalCode, savedAddress]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [postalCode, savedAddress, shippingQuote, shippingLoading])
 
   // Re-fetch when payment method changes (COD fee differs)
   useEffect(() => {
     if (postalCode && postalCode.length === 5) {
-      fetchCartShippingQuote(postalCode, paymentMethod)
+      fetchShippingRef.current(postalCode, paymentMethod)
     }
-  }, [paymentMethod]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [paymentMethod, postalCode])
 
   // --- Handlers ---
 
