@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CATEGORIES, getCategoryBySlug } from '@/data/categories';
+import { CATEGORIES } from '@/data/categories';
 
-/** Emoji-to-slug mapping for dynamic categories (API-sourced) */
-const slugEmojiMap: Record<string, string> = {
+/** Icon filename mapping for dynamic (API-sourced) categories */
+const slugIconMap: Record<string, string> = {
   'olive-oil': 'olive',
   'honey': 'honey',
   'legumes': 'beans',
@@ -22,8 +22,8 @@ const slugEmojiMap: Record<string, string> = {
   'cosmetics': 'cosmetics',
 };
 
-/** Pastel bg for dynamic categories (fallback when no static match) */
-const slugChipBgMap: Record<string, string> = {
+/** Pastel bg for dynamic categories */
+const slugBgMap: Record<string, string> = {
   'olive-oil': 'bg-category-olive',
   'honey': 'bg-category-honey',
   'legumes': 'bg-category-vegetables',
@@ -40,15 +40,15 @@ const slugChipBgMap: Record<string, string> = {
   'cosmetics': 'bg-category-dairy',
 };
 
-function getEmojiForSlug(slug: string): string {
-  for (const [key, emoji] of Object.entries(slugEmojiMap)) {
-    if (slug.includes(key)) return emoji;
+function getIconForSlug(slug: string): string {
+  for (const [key, icon] of Object.entries(slugIconMap)) {
+    if (slug.includes(key)) return icon;
   }
   return 'basket';
 }
 
-function getChipBgForSlug(slug: string): string {
-  for (const [key, bg] of Object.entries(slugChipBgMap)) {
+function getBgForSlug(slug: string): string {
+  for (const [key, bg] of Object.entries(slugBgMap)) {
     if (slug.includes(key)) return bg;
   }
   return 'bg-neutral-50';
@@ -62,8 +62,15 @@ interface DynamicCategory {
 
 interface CategoryStripProps {
   selectedCategory?: string | null;
-  /** Dynamic categories extracted from real product data */
   dynamicCategories?: DynamicCategory[];
+}
+
+/** Unified category item for rendering */
+interface CategoryItem {
+  slug: string;
+  label: string;
+  icon: string;
+  chipBg: string;
 }
 
 export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryStripProps) {
@@ -81,121 +88,89 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
     router.push(`/products?${params.toString()}`);
   };
 
-  // Use dynamic categories if available (from real API data),
-  // otherwise fall back to static CATEGORIES
+  // Normalize dynamic or static categories into unified items
   const useDynamic = dynamicCategories && dynamicCategories.length > 0;
+  const items: CategoryItem[] = useDynamic
+    ? dynamicCategories.map((cat) => ({
+        slug: cat.slug,
+        label: cat.name,
+        icon: getIconForSlug(cat.slug),
+        chipBg: getBgForSlug(cat.slug),
+      }))
+    : CATEGORIES.map((cat) => ({
+        slug: cat.slug,
+        label: cat.labelEl,
+        icon: cat.emoji,
+        chipBg: cat.chipBg,
+      }));
 
   return (
-    <div
-      className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3"
-      role="group"
-      aria-label="Κατηγορίες προϊόντων"
-    >
-      {/* "All" card */}
+    <div role="group" aria-label="Κατηγορίες προϊόντων">
+      {/* "Όλα" pill — above the grid, CultivationFilter-style */}
       <button
         onClick={() => handleCategoryClick(null)}
         aria-pressed={!currentCat}
         aria-label="Όλες οι κατηγορίες"
         className={`
-          flex flex-col items-center justify-center gap-2 p-3 sm:p-4
-          rounded-xl transition-all duration-200 cursor-pointer
+          inline-flex items-center gap-2 px-4 py-2 mb-3 rounded-full text-sm font-medium
+          transition-all duration-200
           ${
             !currentCat
-              ? 'bg-white ring-2 ring-primary shadow-md'
-              : 'bg-accent-cream hover:shadow-card-hover hover:scale-[1.03]'
+              ? 'bg-primary text-white shadow-md'
+              : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
           }
         `}
       >
         <Image
           src="/icons/categories/basket.png"
           alt=""
-          width={80}
-          height={80}
-          className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 drop-shadow-sm"
+          width={20}
+          height={20}
+          className="w-5 h-5 flex-shrink-0"
         />
-        <span
-          className={`text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2
-            ${!currentCat ? 'text-primary' : 'text-neutral-700'}`}
-        >
-          Όλα
-        </span>
+        <span>Όλα</span>
       </button>
 
-      {useDynamic
-        ? /* Dynamic categories from API data */
-          dynamicCategories.map((cat) => {
-            const emoji = getEmojiForSlug(cat.slug);
-            const chipBg = getChipBgForSlug(cat.slug);
-            const isSelected = currentCat === cat.slug;
+      {/* Category grid — 2 cols mobile, 5 cols tablet+ = perfect 10 */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {items.map((item) => {
+          const isSelected = currentCat === item.slug;
 
-            return (
-              <button
-                key={cat.slug}
-                onClick={() => handleCategoryClick(cat.slug)}
-                aria-pressed={isSelected}
-                aria-label={`Κατηγορία: ${cat.name}`}
-                className={`
-                  flex flex-col items-center justify-center gap-2 p-3 sm:p-4
-                  rounded-xl transition-all duration-200 cursor-pointer
-                  ${
-                    isSelected
-                      ? 'bg-white ring-2 ring-primary shadow-md'
-                      : `${chipBg} hover:shadow-card-hover hover:scale-[1.03]`
-                  }
-                `}
+          return (
+            <button
+              key={item.slug}
+              onClick={() => handleCategoryClick(item.slug)}
+              aria-pressed={isSelected}
+              aria-label={`Κατηγορία: ${item.label}`}
+              className={`
+                group flex flex-col items-center justify-center gap-2 p-3 sm:p-4
+                rounded-xl transition-all duration-300 cursor-pointer
+                ${
+                  isSelected
+                    ? 'bg-primary/5 ring-2 ring-primary shadow-md'
+                    : `${item.chipBg} hover:-translate-y-1 hover:shadow-card-hover`
+                }
+              `}
+            >
+              <Image
+                src={`/icons/categories/${item.icon}.png`}
+                alt=""
+                width={80}
+                height={80}
+                className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 drop-shadow-sm
+                           group-hover:scale-110 transition-transform duration-300"
+              />
+              <span
+                className={`text-sm sm:text-base font-medium text-center leading-tight
+                  line-clamp-2 min-h-[2.5rem] flex items-center
+                  ${isSelected ? 'text-primary' : 'text-neutral-700'}`}
               >
-                <Image
-                  src={`/icons/categories/${emoji}.png`}
-                  alt=""
-                  width={56}
-                  height={56}
-                  className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 drop-shadow-sm"
-                />
-                <span
-                  className={`text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2
-                    ${isSelected ? 'text-primary' : 'text-neutral-700'}`}
-                >
-                  {cat.name}
-                </span>
-              </button>
-            );
-          })
-        : /* Static fallback categories */
-          CATEGORIES.map((category) => {
-            const isSelected = currentCat === category.slug;
-
-            return (
-              <button
-                key={category.id}
-                onClick={() => handleCategoryClick(category.slug)}
-                aria-pressed={isSelected}
-                aria-label={`Κατηγορία: ${category.labelEl}`}
-                className={`
-                  flex flex-col items-center justify-center gap-2 p-3 sm:p-4
-                  rounded-xl transition-all duration-200 cursor-pointer
-                  ${
-                    isSelected
-                      ? 'bg-white ring-2 ring-primary shadow-md'
-                      : `${category.chipBg} hover:shadow-card-hover hover:scale-[1.03]`
-                  }
-                `}
-              >
-                <Image
-                  src={`/icons/categories/${category.emoji}.png`}
-                  alt=""
-                  width={56}
-                  height={56}
-                  className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 drop-shadow-sm"
-                />
-                <span
-                  className={`text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2
-                    ${isSelected ? 'text-primary' : 'text-neutral-700'}`}
-                >
-                  {category.labelEl}
-                </span>
-              </button>
-            );
-          })}
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
