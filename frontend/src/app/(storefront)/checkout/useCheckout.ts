@@ -130,7 +130,6 @@ export function useCheckout() {
         setShippingQuote(null)
       } else {
         setCartShippingQuote(null)
-        setCartShippingError(null)
         try {
           const legacyQuote = await apiClient.getZoneShippingQuote({
             postal_code: postal,
@@ -138,6 +137,7 @@ export function useCheckout() {
             subtotal: subtotal,
           })
           trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: true })
+          setCartShippingError(null)
           setShippingQuote({
             price_eur: legacyQuote.price_eur,
             zone_name: legacyQuote.zone_name,
@@ -147,6 +147,7 @@ export function useCheckout() {
         } catch {
           trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: false })
           setShippingQuote(null)
+          setCartShippingError('Δεν ήταν δυνατός ο υπολογισμός μεταφορικών. Δοκιμάστε ξανά.')
         }
       }
     } finally {
