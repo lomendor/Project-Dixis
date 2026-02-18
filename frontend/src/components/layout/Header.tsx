@@ -47,7 +47,7 @@ export default function Header() {
   // Cart visible for all roles (producers can also shop as customers)
 
   return (
-    <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
+    <header className="border-b border-accent-gold/10 bg-accent-cream/95 backdrop-blur-sm supports-[backdrop-filter]:bg-accent-cream/80 sticky top-0 z-40">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo - Desktop: 48px, Mobile: 36px (per NAVIGATION-V1.md) */}
         <Link
@@ -71,7 +71,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-neutral-600 hover:text-primary transition-colors"
+              className="text-sm font-medium text-neutral-700 hover:text-accent-gold transition-colors"
             >
               {link.label}
             </Link>
@@ -193,7 +193,7 @@ export default function Header() {
               </Link>
               <Link
                 href="/auth/register"
-                className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-md transition-colors"
+                className="text-sm font-medium bg-primary hover:bg-primary-light text-white px-5 py-2 rounded-full transition-colors"
                 data-testid="nav-register"
               >
                 {t('nav.signup')}
@@ -231,7 +231,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-neutral-200 bg-white shadow-lg" data-testid="mobile-menu">
+        <nav className="md:hidden border-t border-accent-gold/10 bg-accent-cream shadow-lg" data-testid="mobile-menu">
           <div className="max-w-6xl mx-auto px-4 py-2">
             {/* Mobile Search - Pass HEADER-SEARCH-01 */}
             <div className="py-2">
