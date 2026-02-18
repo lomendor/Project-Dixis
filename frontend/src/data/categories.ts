@@ -1,7 +1,9 @@
 /**
- * Categories v1: Static category definitions with Fluent Emoji 3D icons
- * When DB is online, these can be replaced with fetched categories
- * Emoji PNGs: Microsoft Fluent Emoji (MIT), stored in public/icons/categories/
+ * Categories v2: 10 locker-compatible categories (was 13)
+ * Removed: dairy, fruits-vegetables (need refrigeration)
+ * Merged: grains-rice into legumes, flours-bakery into pasta
+ * Added: cosmetics (natural cosmetics)
+ * Icon PNGs stored in public/icons/categories/
  */
 
 export interface Category {
@@ -9,8 +11,7 @@ export interface Category {
   slug: string;
   labelEl: string;
   labelEn: string;
-  icon: string; // Lucide icon name (legacy)
-  emoji: string; // Fluent Emoji 3D PNG filename (without extension)
+  emoji: string; // PNG filename (without extension) in public/icons/categories/
   /** Tailwind bg color class for unselected chip */
   chipBg: string;
 }
@@ -21,7 +22,6 @@ export const CATEGORIES: Category[] = [
     slug: 'olive-oil-olives',
     labelEl: 'Ελαιόλαδο & Ελιές',
     labelEn: 'Olive Oil & Olives',
-    icon: 'Droplets',
     emoji: 'olive',
     chipBg: 'bg-category-olive',
   },
@@ -30,108 +30,72 @@ export const CATEGORIES: Category[] = [
     slug: 'honey-bee',
     labelEl: 'Μέλι & Κυψέλη',
     labelEn: 'Honey & Bee Products',
-    icon: 'Hexagon',
     emoji: 'honey',
     chipBg: 'bg-category-honey',
   },
   {
     id: 3,
-    slug: 'legumes',
-    labelEl: 'Όσπρια',
-    labelEn: 'Legumes',
-    icon: 'Bean',
+    slug: 'legumes-grains',
+    labelEl: 'Όσπρια & Δημητριακά',
+    labelEn: 'Legumes & Grains',
     emoji: 'beans',
     chipBg: 'bg-category-vegetables',
   },
   {
     id: 4,
-    slug: 'grains-rice',
-    labelEl: 'Δημητριακά & Ρύζια',
-    labelEn: 'Grains & Rice',
-    icon: 'Wheat',
-    emoji: 'rice',
-    chipBg: 'bg-category-bakery',
-  },
-  {
-    id: 5,
-    slug: 'pasta',
-    labelEl: 'Ζυμαρικά',
-    labelEn: 'Pasta',
-    icon: 'Utensils',
+    slug: 'pasta-flours',
+    labelEl: 'Ζυμαρικά & Αλεύρια',
+    labelEn: 'Pasta & Flours',
     emoji: 'pasta',
     chipBg: 'bg-category-bakery',
   },
   {
-    id: 6,
-    slug: 'flours-bakery',
-    labelEl: 'Αλεύρια & Αρτοποιία',
-    labelEn: 'Flours & Bakery',
-    icon: 'Croissant',
-    emoji: 'bread',
-    chipBg: 'bg-category-bakery',
-  },
-  {
-    id: 7,
+    id: 5,
     slug: 'nuts-dried',
-    labelEl: 'Ξηροί Καρποί & Αποξηραμένα',
+    labelEl: 'Ξηροί Καρποί',
     labelEn: 'Nuts & Dried Fruits',
-    icon: 'Nut',
     emoji: 'nuts',
     chipBg: 'bg-category-fruits',
   },
   {
-    id: 8,
+    id: 6,
     slug: 'herbs-spices',
     labelEl: 'Βότανα & Μπαχαρικά',
     labelEn: 'Herbs & Spices',
-    icon: 'Leaf',
     emoji: 'herbs',
     chipBg: 'bg-category-vegetables',
   },
   {
-    id: 9,
+    id: 7,
     slug: 'sweets-spreads',
-    labelEl: 'Γλυκά, Μαρμελάδες & Αλείμματα',
-    labelEn: 'Sweets, Jams & Spreads',
-    icon: 'Cherry',
+    labelEl: 'Γλυκά & Αλείμματα',
+    labelEn: 'Sweets & Spreads',
     emoji: 'candy',
     chipBg: 'bg-category-fruits',
   },
   {
-    id: 10,
+    id: 8,
     slug: 'sauces-preserves',
-    labelEl: 'Σάλτσες, Conserves & Τουρσιά',
-    labelEn: 'Sauces, Preserves & Pickles',
-    icon: 'Soup',
+    labelEl: 'Σάλτσες & Κονσέρβες',
+    labelEn: 'Sauces & Preserves',
     emoji: 'jar',
     chipBg: 'bg-category-meat',
   },
   {
-    id: 11,
+    id: 9,
     slug: 'beverages',
     labelEl: 'Ποτά & Αποστάγματα',
     labelEn: 'Beverages & Spirits',
-    icon: 'Wine',
     emoji: 'beverage',
     chipBg: 'bg-category-wine',
   },
   {
-    id: 12,
-    slug: 'dairy',
-    labelEl: 'Γαλακτοκομικά',
-    labelEn: 'Dairy Products',
-    icon: 'Milk',
-    emoji: 'cheese',
+    id: 10,
+    slug: 'cosmetics',
+    labelEl: 'Φυσικά Καλλυντικά',
+    labelEn: 'Natural Cosmetics',
+    emoji: 'cosmetics',
     chipBg: 'bg-category-dairy',
-  },
-  {
-    id: 13,
-    slug: 'fruits-vegetables',
-    labelEl: 'Φρούτα & Λαχανικά',
-    labelEn: 'Fruits & Vegetables',
-    icon: 'Apple',
-    emoji: 'apple',
-    chipBg: 'bg-category-fruits',
   },
 ];
 

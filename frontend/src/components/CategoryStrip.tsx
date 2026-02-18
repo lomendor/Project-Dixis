@@ -9,18 +9,17 @@ const slugEmojiMap: Record<string, string> = {
   'olive-oil': 'olive',
   'honey': 'honey',
   'legumes': 'beans',
-  'grains': 'rice',
+  'grains': 'beans',
+  'rice': 'beans',
   'pasta': 'pasta',
-  'flours': 'bread',
+  'flours': 'pasta',
   'nuts': 'nuts',
   'herbs': 'herbs',
   'sweets': 'candy',
   'sauces': 'jar',
   'wine': 'beverage',
   'beverages': 'beverage',
-  'dairy': 'cheese',
-  'fruits': 'apple',
-  'vegetables': 'apple',
+  'cosmetics': 'cosmetics',
 };
 
 /** Pastel bg for dynamic categories (fallback when no static match) */
@@ -28,7 +27,8 @@ const slugChipBgMap: Record<string, string> = {
   'olive-oil': 'bg-category-olive',
   'honey': 'bg-category-honey',
   'legumes': 'bg-category-vegetables',
-  'grains': 'bg-category-bakery',
+  'grains': 'bg-category-vegetables',
+  'rice': 'bg-category-vegetables',
   'pasta': 'bg-category-bakery',
   'flours': 'bg-category-bakery',
   'nuts': 'bg-category-fruits',
@@ -37,9 +37,7 @@ const slugChipBgMap: Record<string, string> = {
   'sauces': 'bg-category-meat',
   'wine': 'bg-category-wine',
   'beverages': 'bg-category-wine',
-  'dairy': 'bg-category-dairy',
-  'fruits': 'bg-category-fruits',
-  'vegetables': 'bg-category-vegetables',
+  'cosmetics': 'bg-category-dairy',
 };
 
 function getEmojiForSlug(slug: string): string {
