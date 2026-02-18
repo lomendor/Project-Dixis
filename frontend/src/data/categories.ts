@@ -1,6 +1,6 @@
 /**
- * Categories v2: 10 locker-compatible categories (was 13)
- * Removed: dairy, fruits-vegetables (need refrigeration)
+ * Categories v3: 9 locker-compatible categories (was 10)
+ * Removed: dairy, fruits-vegetables (need refrigeration), beverages (alcohol license)
  * Merged: grains-rice into legumes, flours-bakery into pasta
  * Added: cosmetics (natural cosmetics)
  * Icon PNGs stored in public/icons/categories/
@@ -28,7 +28,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 2,
     slug: 'honey-bee',
-    labelEl: 'Μέλι & Κυψέλη',
+    labelEl: 'Μέλι & Προϊόντα Μελισσοκομίας',
     labelEn: 'Honey & Bee Products',
     emoji: 'honey',
     chipBg: 'bg-category-honey',
@@ -52,8 +52,8 @@ export const CATEGORIES: Category[] = [
   {
     id: 5,
     slug: 'nuts-dried',
-    labelEl: 'Ξηροί Καρποί',
-    labelEn: 'Nuts & Dried Fruits',
+    labelEl: 'Ξηροί Καρποί & Σνακ',
+    labelEn: 'Nuts & Snacks',
     emoji: 'nuts',
     chipBg: 'bg-category-fruits',
   },
@@ -76,21 +76,13 @@ export const CATEGORIES: Category[] = [
   {
     id: 8,
     slug: 'sauces-preserves',
-    labelEl: 'Σάλτσες & Κονσέρβες',
-    labelEn: 'Sauces & Preserves',
+    labelEl: 'Σάλτσες & Τουρσιά',
+    labelEn: 'Sauces & Pickles',
     emoji: 'jar',
     chipBg: 'bg-category-meat',
   },
   {
     id: 9,
-    slug: 'beverages',
-    labelEl: 'Ποτά & Αποστάγματα',
-    labelEn: 'Beverages & Spirits',
-    emoji: 'beverage',
-    chipBg: 'bg-category-wine',
-  },
-  {
-    id: 10,
     slug: 'cosmetics',
     labelEl: 'Φυσικά Καλλυντικά',
     labelEn: 'Natural Cosmetics',
