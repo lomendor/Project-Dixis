@@ -309,9 +309,9 @@ export default async function Page({ searchParams }: PageProps) {
             fallback={
               <div>
                 <div className="h-10 w-24 bg-neutral-100 rounded-full animate-pulse mb-3" />
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="h-28 sm:h-32 bg-neutral-100 rounded-xl animate-pulse" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div key={i} className="h-36 sm:h-44 bg-neutral-100 rounded-xl animate-pulse" />
                   ))}
                 </div>
               </div>

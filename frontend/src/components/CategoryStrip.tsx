@@ -17,8 +17,6 @@ const slugIconMap: Record<string, string> = {
   'herbs': 'herbs',
   'sweets': 'candy',
   'sauces': 'jar',
-  'wine': 'beverage',
-  'beverages': 'beverage',
   'cosmetics': 'cosmetics',
 };
 
@@ -35,8 +33,6 @@ const slugBgMap: Record<string, string> = {
   'herbs': 'bg-category-vegetables',
   'sweets': 'bg-category-fruits',
   'sauces': 'bg-category-meat',
-  'wine': 'bg-category-wine',
-  'beverages': 'bg-category-wine',
   'cosmetics': 'bg-category-dairy',
 };
 
@@ -131,8 +127,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         <span>Όλα</span>
       </button>
 
-      {/* Category grid — 2 cols mobile, 5 cols tablet+ = perfect 10 */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      {/* Category grid — 2 cols mobile, 3 cols tablet+ = perfect 3×3 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         {items.map((item) => {
           const isSelected = currentCat === item.slug;
 
@@ -143,12 +139,12 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               aria-pressed={isSelected}
               aria-label={`Κατηγορία: ${item.label}`}
               className={`
-                group flex flex-col items-center justify-center gap-2 p-3 sm:p-4
-                rounded-xl transition-all duration-300 cursor-pointer
+                group flex flex-col items-center justify-center gap-3 p-4 sm:p-6
+                rounded-xl border-2 transition-all duration-300 ease-out cursor-pointer
                 ${
                   isSelected
-                    ? 'bg-primary/5 ring-2 ring-primary shadow-md'
-                    : `${item.chipBg} hover:-translate-y-1 hover:shadow-card-hover`
+                    ? 'border-primary/40 shadow-glow bg-white'
+                    : `border-transparent ${item.chipBg} hover:shadow-card-hover hover:border-primary/20`
                 }
               `}
             >
@@ -157,13 +153,13 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                 alt=""
                 width={80}
                 height={80}
-                className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 drop-shadow-sm
-                           group-hover:scale-110 transition-transform duration-300"
+                className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 drop-shadow-md
+                           group-hover:scale-105 transition-transform duration-300 ease-out"
               />
               <span
-                className={`text-sm sm:text-base font-medium text-center leading-tight
+                className={`text-sm font-semibold text-center leading-snug
                   line-clamp-2 min-h-[2.5rem] flex items-center
-                  ${isSelected ? 'text-primary' : 'text-neutral-700'}`}
+                  ${isSelected ? 'text-primary' : 'text-neutral-800'}`}
               >
                 {item.label}
               </span>
