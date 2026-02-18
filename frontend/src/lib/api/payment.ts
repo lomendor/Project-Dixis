@@ -63,6 +63,8 @@ export interface PaymentStatusResponse {
 import { API_BASE_URL } from '@/env';
 
 class PaymentApiClient {
+  private static readonly TIMEOUT_MS = 30_000; // 30s timeout for payment APIs
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -70,21 +72,34 @@ class PaymentApiClient {
     const token = localStorage.getItem('auth_token');
     const url = `${API_BASE_URL}${endpoint}`;
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers,
-      },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), PaymentApiClient.TIMEOUT_MS);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Network error' }));
-      throw new Error(`HTTP ${response.status}: ${error.message || 'Unknown error'}`);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(`HTTP ${response.status}: ${error.message || 'Unknown error'}`);
+      }
+
+      return response.json();
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        throw new Error('Η σύνδεση έληξε. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return response.json();
   }
 
   async getPaymentMethods(): Promise<PaymentMethodsResponse> {
