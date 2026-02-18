@@ -12,7 +12,7 @@ export default function Footer() {
     setLocale(newLocale);
   };
   return (
-    <footer className="border-t border-neutral-200 bg-white mt-auto">
+    <footer className="border-t border-accent-gold/10 bg-accent-cream/50 mt-auto">
       {/* Mobile-first padding */}
       <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
@@ -26,7 +26,7 @@ export default function Footer() {
 
           {/* Quick Links - touch-friendly spacing */}
           <div>
-            <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Γρήγοροι Σύνδεσμοι</h4>
+            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Γρήγοροι Σύνδεσμοι</h4>
             <nav className="flex flex-col gap-1" data-testid="footer-quick-links">
               <Link href="/products" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Προϊόντα
@@ -42,7 +42,7 @@ export default function Footer() {
 
           {/* For Producers - touch-friendly spacing */}
           <div>
-            <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Για Παραγωγούς</h4>
+            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Για Παραγωγούς</h4>
             <nav className="flex flex-col gap-1">
               <Link href="/producers" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Γίνε Παραγωγός
@@ -55,7 +55,7 @@ export default function Footer() {
 
           {/* Legal & Support - touch-friendly spacing */}
           <div>
-            <h4 className="font-semibold text-neutral-900 mb-3 sm:mb-4">Υποστήριξη</h4>
+            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Υποστήριξη</h4>
             <nav className="flex flex-col gap-1">
               <Link href="/faq" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Συχνές Ερωτήσεις
@@ -74,7 +74,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar - mobile-first spacing */}
-        <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-accent-gold/10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <p className="text-sm text-neutral-500">
             © {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
           </p>

@@ -81,11 +81,12 @@ export default async function FeaturedProducts() {
   const hasProducts = products.length > 0;
 
   return (
-    <section className="bg-neutral-50 py-12 sm:py-16 lg:py-20" data-testid="featured-products">
+    <section className="bg-gradient-to-b from-white to-accent-cream/30 py-16 sm:py-20 lg:py-24" data-testid="featured-products">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Section header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-10 gap-4">
           <div>
+            <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">Επιλεγμένα για Εσάς</p>
             <h2 className="text-3xl font-bold text-neutral-900 mb-2 sm:text-4xl">
               Προτεινόμενα Προϊόντα
             </h2>
@@ -106,7 +107,7 @@ export default async function FeaturedProducts() {
 
         {/* Products grid */}
         {hasProducts ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
             {products.map((product) => {
               const imageUrl = product.image_url || product.images?.[0]?.url || null;
               return (
@@ -127,7 +128,7 @@ export default async function FeaturedProducts() {
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
             {[...Array(8)].map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
