@@ -15,40 +15,14 @@ interface CultivationOption {
   value: CultivationType;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  color: string; // active bg + text color classes
 }
 
 const CULTIVATION_OPTIONS: CultivationOption[] = [
-  {
-    value: 'organic_certified',
-    label: 'Βιολογική',
-    icon: Leaf,
-    color: 'bg-green-600 text-white',
-  },
-  {
-    value: 'organic_transitional',
-    label: 'Μεταβατική',
-    icon: Sprout,
-    color: 'bg-lime-600 text-white',
-  },
-  {
-    value: 'biodynamic',
-    label: 'Βιοδυναμική',
-    icon: Sparkles,
-    color: 'bg-purple-600 text-white',
-  },
-  {
-    value: 'traditional_natural',
-    label: 'Παραδοσιακή',
-    icon: Wheat,
-    color: 'bg-amber-600 text-white',
-  },
-  {
-    value: 'conventional',
-    label: 'Συμβατική',
-    icon: FlaskConical,
-    color: 'bg-neutral-600 text-white',
-  },
+  { value: 'organic_certified', label: 'Βιολογική', icon: Leaf },
+  { value: 'organic_transitional', label: 'Μεταβατική', icon: Sprout },
+  { value: 'biodynamic', label: 'Βιοδυναμική', icon: Sparkles },
+  { value: 'traditional_natural', label: 'Παραδοσιακή', icon: Wheat },
+  { value: 'conventional', label: 'Συμβατική', icon: FlaskConical },
 ];
 
 interface CultivationFilterProps {
@@ -85,12 +59,6 @@ export function CultivationFilter({
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-2 mb-2">
-        <Leaf className="w-4 h-4 text-primary" />
-        <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-          Τρόπος Καλλιέργειας
-        </span>
-      </div>
       <div className="flex flex-wrap gap-2">
         {/* "All" option */}
         <button
@@ -127,8 +95,8 @@ export function CultivationFilter({
                 transition-all duration-200
                 ${
                   isSelected
-                    ? `${opt.color} shadow-sm`
-                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
                 }
               `}
             >

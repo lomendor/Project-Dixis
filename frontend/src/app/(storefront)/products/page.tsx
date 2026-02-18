@@ -4,6 +4,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
 import { CultivationFilter } from '@/components/CultivationFilter';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
+import { ProductSort } from '@/components/ProductSort';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
 import { getServerApiUrl } from '@/env';
 
@@ -42,7 +43,9 @@ type ApiItem = {
 async function getData(
   search?: string,
   category?: string,
-  cultivationType?: string
+  cultivationType?: string,
+  sort?: string,
+  dir?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
   // Pass CI-SMOKE-STABILIZE-002: In CI mode, use internal Next.js API
   // which reads from Prisma DB (seeded with ci:seed) — same pattern as products/[id]/page.tsx
@@ -69,6 +72,12 @@ async function getData(
     }
     if (cultivationType) {
       params.set('cultivation_type', cultivationType);
+    }
+    if (sort) {
+      params.set('sort', sort);
+    }
+    if (dir) {
+      params.set('direction', dir);
     }
 
     const res = await fetch(`${base}/public/products?${params.toString()}`, {
@@ -209,7 +218,7 @@ const cultivationLabels: Record<string, string> = {
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
   const parts: string[] = [];
@@ -222,7 +231,7 @@ export async function generateMetadata({
 }
 
 interface PageProps {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
@@ -230,12 +239,16 @@ export default async function Page({ searchParams }: PageProps) {
   const categoryFilter = params.cat || null;
   const searchQuery = params.search || null;
   const cultivationFilter = params.cult || null;
+  const sortField = params.sort || undefined;
+  const sortDir = params.dir || undefined;
 
-  // Fetch products (server-side filtering for category + search + cultivation)
+  // Fetch products (server-side filtering for category + search + cultivation + sort)
   const { items, isDemo, apiTotal } = await getData(
     searchQuery || undefined,
     categoryFilter || undefined,
-    cultivationFilter || undefined
+    cultivationFilter || undefined,
+    sortField,
+    sortDir
   );
   const total = items.length;
 
@@ -281,46 +294,52 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Προϊόντα</h1>
-            <p className="mt-1 text-sm text-neutral-600">
-              {searchQuery
-                ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
-                : `Απευθείας από παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} συνολικά`}.`}
-            </p>
-          </div>
-
-          {/* Search Input */}
-          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100 rounded-lg animate-pulse" />}>
-            <ProductSearchInput />
-          </Suspense>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Προϊόντα</h1>
+          <p className="mt-1 text-sm text-neutral-600">
+            {searchQuery
+              ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
+              : `Απευθείας από παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} συνολικά`}.`}
+          </p>
         </div>
 
-        {/* Category Strip */}
-        <div className="mb-4">
+        {/* Filter Card */}
+        <div className="bg-white rounded-xl border border-neutral-100 shadow-card p-4 mb-6 space-y-3">
+          {/* Row 1: Search + Sort */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <Suspense fallback={<div className="h-10 w-full bg-neutral-100 rounded-lg animate-pulse" />}>
+                <ProductSearchInput />
+              </Suspense>
+            </div>
+            <div className="sm:w-48">
+              <Suspense fallback={<div className="h-10 w-full bg-neutral-100 rounded-lg animate-pulse" />}>
+                <ProductSort />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Row 2: Category Strip */}
           <Suspense fallback={<div className="h-10 bg-neutral-100 rounded animate-pulse" />}>
             <CategoryStrip
               selectedCategory={categoryFilter}
               dynamicCategories={activeCategories}
             />
           </Suspense>
-        </div>
 
-        {/* Cultivation Type Filter — only shown when products have cultivation data */}
-        {hasCultivationData && (
-          <div className="mb-6">
+          {/* Row 3: Cultivation (conditional) */}
+          {hasCultivationData && (
             <Suspense fallback={null}>
               <CultivationFilter
                 selectedCultivation={cultivationFilter}
                 availableCounts={cultivationCounts}
               />
             </Suspense>
-          </div>
-        )}
+          )}
+        </div>
 
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" data-testid="products-grid">
             {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
             {items.map((p: ApiItem, index: number) => (
               <ProductCard
