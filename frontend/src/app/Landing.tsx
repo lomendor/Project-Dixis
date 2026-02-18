@@ -48,11 +48,11 @@ export default function LandingPage() {
       <section className="container mx-auto px-4 pt-20 pb-16">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-neutral-900 mb-6" data-testid="landing-hero">
-            Φρέσκα τοπικά προϊόντα από Έλληνες παραγωγούς
+            Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς
           </h1>
           <p className="text-xl md:text-2xl text-neutral-700 mb-8">
-            Η νέα πλατφόρμα που συνδέει παραγωγούς με καταναλωτές για ποιοτικά,
-            φρέσκα προϊόντα απευθείας στην πόρτα σας.
+            Η νέα πλατφόρμα που συνδέει παραγωγούς με καταναλωτές για αυθεντικά,
+            παραδοσιακά προϊόντα απευθείας στην πόρτα σας.
           </p>
           <div className="inline-block bg-primary-pale text-primary-dark px-6 py-3 rounded-full font-semibold">
             🚀 Σύντομα διαθέσιμο
@@ -70,7 +70,7 @@ export default function LandingPage() {
             </h3>
             <p className="text-neutral-600">
               Γνωρίστε τον παραγωγό πίσω από κάθε προϊόν.
-              Φρέσκα, βιολογικά και τοπικά προϊόντα με πιστοποίηση.
+              Αυθεντικά, παραδοσιακά ελληνικά προϊόντα με πιστοποίηση.
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default function LandingPage() {
             </h3>
             <p className="text-neutral-600">
               Παραδόσεις εντός 24-48 ωρών.
-              Τα προϊόντα έρχονται φρέσκα από το χωράφι στο σπίτι σας.
+              Τα προϊόντα έρχονται απευθείας από τον παραγωγό στην πόρτα σας.
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-neutral-700 mb-6">
                 <li className="flex items-start">
                   <span className="text-primary mr-2">✓</span>
-                  <span>Φρέσκα προϊόντα απευθείας στην πόρτα σου</span>
+                  <span>Αυθεντικά προϊόντα απευθείας στην πόρτα σου</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-primary mr-2">✓</span>
@@ -147,7 +147,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-primary mr-2">✓</span>
-                  <span>Βιολογικά και τοπικά προϊόντα</span>
+                  <span>Παραδοσιακά και χειροποίητα προϊόντα</span>
                 </li>
               </ul>
             </div>

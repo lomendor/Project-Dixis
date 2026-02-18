@@ -2,7 +2,7 @@
  * Trust Section - Build confidence with key value propositions
  *
  * T7: Differentiated card backgrounds to break green monotony
- * - Card 1 (Freshness): green = nature
+ * - Card 1 (Quality): green = nature
  * - Card 2 (Producers): beige/gold = premium, trust
  * - Card 3 (Delivery): blue = logistics, reliability
  */
@@ -14,8 +14,8 @@ export default function Trust() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      title: 'Φρεσκάδα Εγγυημένη',
-      description: 'Όλα τα προϊόντα μας είναι φρέσκα και συλλέγονται την ίδια μέρα ή την προηγούμενη της παράδοσης.',
+      title: 'Ποιότητα Εγγυημένη',
+      description: 'Όλα τα προϊόντα μας είναι επιλεγμένα με αυστηρά κριτήρια ποιότητας, απευθείας από Έλληνες παραγωγούς.',
       cardBg: 'bg-primary-pale',
     },
     {
@@ -49,7 +49,7 @@ export default function Trust() {
             Γιατί να επιλέξετε το Dixis;
           </h2>
           <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-            Η δέσμευσή μας για ποιότητα, φρεσκάδα και υποστήριξη των τοπικών κοινοτήτων.
+            Η δέσμευσή μας για αυθεντικότητα, ποιότητα και υποστήριξη των τοπικών κοινοτήτων.
           </p>
         </div>
 

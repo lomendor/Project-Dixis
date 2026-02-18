@@ -225,15 +225,15 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
     return {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Φρέσκα τοπικά προϊόντα',
-      description: 'Βιολογικά προϊόντα από τοπικούς Έλληνες παραγωγούς',
+      name: 'Αυθεντικά Ελληνικά Προϊόντα',
+      description: 'Παραδοσιακά προϊόντα απευθείας από Έλληνες παραγωγούς',
       url: siteUrl,
       numberOfItems: list.length,
       itemListElement: list.slice(0, 10).map((product, index) => ({
         '@type': 'Product',
         position: index + 1,
         name: product?.name || 'Product',
-        description: product?.description || 'Φρέσκο προϊόν από τοπικό παραγωγό',
+        description: product?.description || 'Αυθεντικό ελληνικό προϊόν από Έλληνα παραγωγό',
         image: product?.images?.[0]?.url || product?.images?.[0]?.image_path || undefined,
         offers: {
           '@type': 'Offer',
@@ -249,7 +249,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
           '@type': 'Brand',
           name: (product as { brand?: string })?.brand || product?.producer?.name || 'Dixis',
         },
-        category: product?.categories?.[0]?.name || (product as { category?: { name?: string } })?.category?.name || 'Fresh Produce',
+        category: product?.categories?.[0]?.name || (product as { category?: { name?: string } })?.category?.name || 'Artisan Products',
       })),
     };
   };
@@ -277,11 +277,11 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
               data-testid="page-title"
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-primary leading-tight"
             >
-              Φρέσκα Προϊόντα από Τοπικούς Παραγωγούς
+              Αυθεντικά Ελληνικά Προϊόντα από Έλληνες Παραγωγούς
             </h1>
             <p className="text-lg md:text-xl text-neutral-700 mb-8 leading-relaxed px-4">
-              Ανακαλύψτε βιολογικά λαχανικά, τοπικά προϊόντα και φρέσκα φρούτα απευθείας από Έλληνες παραγωγούς.
-              Υποστηρίξτε τη βιώσιμη γεωργία και απολαύστε την καλύτερη ποιότητα.
+              Ανακαλύψτε ελαιόλαδο, μέλι, βότανα και χειροποίητα προϊόντα απευθείας από Έλληνες παραγωγούς.
+              Υποστηρίξτε τους τοπικούς παραγωγούς και απολαύστε την καλύτερη ποιότητα.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
@@ -331,7 +331,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 </svg>
               </div>
               <h3 className="font-semibold text-neutral-800 mb-2">Παραλάβετε</h3>
-              <p className="text-sm text-neutral-600">Λάβετε τα προϊόντα στην πόρτα σας, φρέσκα από τον παραγωγό</p>
+              <p className="text-sm text-neutral-600">Λάβετε τα προϊόντα στην πόρτα σας, απευθείας από τον παραγωγό</p>
             </div>
           </div>
         </section>

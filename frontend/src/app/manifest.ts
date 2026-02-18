@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Dixis — Φρέσκα τοπικά προϊόντα',
+    name: 'Dixis — Αυθεντικά Ελληνικά Προϊόντα',
     short_name: 'Dixis',
-    description: 'Ανακαλύψτε φρέσκα τοπικά προϊόντα απευθείας από Έλληνες παραγωγούς',
+    description: 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από Έλληνες παραγωγούς',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
@@ -68,7 +68,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: 'Προϊόντα',
         short_name: 'Προϊόντα',
-        description: 'Περιηγηθείτε σε φρέσκα προϊόντα από τοπικούς παραγωγούς',
+        description: 'Περιηγηθείτε σε αυθεντικά ελληνικά προϊόντα από Έλληνες παραγωγούς',
         url: '/products',
         icons: [
           {
@@ -98,7 +98,7 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '1280x720',
         type: 'image/png',
         form_factor: 'wide',
-        label: 'Αρχική σελίδα με φρέσκα προϊόντα από τοπικούς παραγωγούς',
+        label: 'Αρχική σελίδα με αυθεντικά ελληνικά προϊόντα από παραγωγούς',
       },
       {
         src: '/screenshots/mobile-products.png',
