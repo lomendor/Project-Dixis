@@ -45,19 +45,11 @@ export function ProductSort() {
 
   return (
     <div className="relative">
-      <svg
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-      </svg>
       <select
         value={currentValue}
         onChange={handleChange}
         aria-label="Ταξινόμηση προϊόντων"
-        className="w-full appearance-none pl-9 pr-8 py-2 border border-neutral-300 rounded-lg bg-white text-sm text-neutral-700 focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all cursor-pointer"
+        className="w-full appearance-none pl-3.5 pr-8 py-2.5 border border-neutral-300 rounded-xl bg-white text-sm font-medium text-neutral-700 focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all cursor-pointer"
       >
         {SORT_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>

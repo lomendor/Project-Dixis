@@ -66,7 +66,7 @@ export function ProductSearchInput() {
   return (
     <div className="relative w-full">
       <svg
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -79,7 +79,7 @@ export function ProductSearchInput() {
         placeholder={t('products.searchPlaceholder')}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        className="w-full pl-10 pr-10 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all"
+        className="w-full pl-10 pr-10 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all"
         aria-label={t('products.searchPlaceholder')}
       />
       {inputValue && (
