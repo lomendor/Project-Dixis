@@ -101,7 +101,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
             ${
               !currentCat
                 ? 'bg-primary text-white shadow-md'
-                : 'bg-neutral-50 text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:shadow-sm'
+                : 'bg-neutral-50 text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale/60 hover:shadow-sm'
             }
           `}
         >
@@ -134,7 +134,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     ${
                       isSelected
                         ? 'bg-primary text-white shadow-md'
-                        : `${chipBg} text-neutral-700 border border-neutral-200/60 hover:border-primary/40 hover:shadow-sm`
+                        : `${chipBg} text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale/60 hover:shadow-sm`
                     }
                   `}
                 >
@@ -165,7 +165,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     ${
                       isSelected
                         ? 'bg-primary text-white shadow-md'
-                        : `${category.chipBg} text-neutral-700 border border-neutral-200/60 hover:border-primary/40 hover:shadow-sm`
+                        : `${category.chipBg} text-neutral-700 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale/60 hover:shadow-sm`
                     }
                   `}
                 >

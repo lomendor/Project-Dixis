@@ -304,7 +304,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {/* Filter Card */}
-        <div className="bg-white rounded-xl border border-neutral-100 shadow-card p-4 mb-6 space-y-3">
+        <div className="bg-white rounded-xl border border-neutral-200 shadow-card p-5 mb-6 space-y-4">
           {/* Row 1: Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
@@ -312,12 +312,14 @@ export default async function Page({ searchParams }: PageProps) {
                 <ProductSearchInput />
               </Suspense>
             </div>
-            <div className="sm:w-48">
+            <div className="sm:w-52">
               <Suspense fallback={<div className="h-10 w-full bg-neutral-100 rounded-lg animate-pulse" />}>
                 <ProductSort />
               </Suspense>
             </div>
           </div>
+
+          <div className="border-t border-neutral-100" />
 
           {/* Row 2: Category Strip */}
           <Suspense fallback={<div className="h-10 bg-neutral-100 rounded animate-pulse" />}>
