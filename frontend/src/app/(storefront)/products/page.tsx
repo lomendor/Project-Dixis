@@ -303,28 +303,7 @@ export default async function Page({ searchParams }: PageProps) {
           </p>
         </div>
 
-        {/* Category Grid — standalone section above filters */}
-        <section className="mb-6" aria-label="Κατηγορίες">
-          <Suspense
-            fallback={
-              <div>
-                <div className="h-10 w-24 bg-neutral-100 rounded-full animate-pulse mb-3" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <div key={i} className="h-36 sm:h-44 bg-neutral-100 rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              </div>
-            }
-          >
-            <CategoryStrip
-              selectedCategory={categoryFilter}
-              dynamicCategories={activeCategories}
-            />
-          </Suspense>
-        </section>
-
-        {/* Filter Card — search + sort + cultivation */}
+        {/* Filter Card — search + sort + categories + cultivation */}
         <div className="bg-white rounded-xl border border-neutral-200 shadow-card p-5 mb-6 space-y-4">
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -339,6 +318,22 @@ export default async function Page({ searchParams }: PageProps) {
               </Suspense>
             </div>
           </div>
+
+          {/* Categories */}
+          <Suspense
+            fallback={
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="h-9 w-24 bg-neutral-100 rounded-full animate-pulse" />
+                ))}
+              </div>
+            }
+          >
+            <CategoryStrip
+              selectedCategory={categoryFilter}
+              dynamicCategories={activeCategories}
+            />
+          </Suspense>
 
           {/* Cultivation (conditional) */}
           {hasCultivationData && (
