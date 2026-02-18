@@ -16,7 +16,7 @@ export default function Trust() {
       ),
       title: 'Ποιότητα Εγγυημένη',
       description: 'Όλα τα προϊόντα μας είναι επιλεγμένα με αυστηρά κριτήρια ποιότητας, απευθείας από Έλληνες παραγωγούς.',
-      cardBg: 'bg-primary-pale',
+      cardBg: 'bg-white border border-accent-gold/10',
     },
     {
       icon: (
@@ -26,7 +26,7 @@ export default function Trust() {
       ),
       title: 'Τοπικοί Παραγωγοί',
       description: 'Γνωρίστε τους ανθρώπους πίσω από κάθε προϊόν. Υποστηρίζουμε μικρούς Έλληνες παραγωγούς.',
-      cardBg: 'bg-accent-beige',
+      cardBg: 'bg-white border border-accent-gold/10',
     },
     {
       icon: (
@@ -36,15 +36,16 @@ export default function Trust() {
       ),
       title: 'Γρήγορη Παράδοση',
       description: 'Παραλάβετε τα προϊόντα σας εντός 24-48 ωρών. Δωρεάν παράδοση για παραγγελίες άνω των 30€.',
-      cardBg: 'bg-blue-50',
+      cardBg: 'bg-white border border-accent-gold/10',
     },
   ];
 
   return (
-    <section className="bg-white py-12 sm:py-16 lg:py-20">
+    <section className="bg-accent-cream/30 py-12 sm:py-16 lg:py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Section header - mobile-optimized */}
         <div className="text-center mb-10 sm:mb-12">
+          <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">Η Υπόσχεσή μας</p>
           <h2 className="text-3xl font-bold text-neutral-900 mb-4 sm:text-4xl">
             Γιατί να επιλέξετε το Dixis;
           </h2>

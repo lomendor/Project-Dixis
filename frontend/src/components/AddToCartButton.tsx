@@ -50,7 +50,7 @@ export default function AddToCartButton(props: {
   if (isOutOfStock) {
     return (
       <button
-        className="h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded text-sm bg-red-100 text-red-600 cursor-not-allowed"
+        className="h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded-full text-sm bg-red-100 text-red-600 cursor-not-allowed"
         disabled
         aria-label={`${props.title} - Εξαντλήθηκε`}
         aria-live="polite"
@@ -64,7 +64,7 @@ export default function AddToCartButton(props: {
 
   return (
     <button
-      className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded text-sm transition-all duration-200 active:scale-95 ${
+      className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded-full text-sm transition-all duration-200 active:scale-95 ${
         isAdded
           ? 'bg-accent-gold text-white'
           : 'bg-primary text-white hover:bg-primary-light'

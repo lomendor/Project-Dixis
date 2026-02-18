@@ -136,12 +136,12 @@ export function ProductCardSkeleton() {
     <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white border border-neutral-200/80 rounded-xl overflow-hidden animate-pulse">
       <div className="aspect-square sm:aspect-[4/5] bg-accent-beige/60 w-full" />
       <div className="p-2.5 sm:p-4 flex-grow flex flex-col">
-        <div className="h-3 bg-neutral-200 w-1/3 mb-3 rounded" />
-        <div className="h-5 sm:h-6 bg-neutral-200 w-full mb-2 rounded" />
-        <div className="h-5 sm:h-6 bg-neutral-200 w-2/3 rounded" />
+        <div className="h-3 bg-accent-beige/60 w-1/3 mb-3 rounded" />
+        <div className="h-5 sm:h-6 bg-accent-beige/60 w-full mb-2 rounded" />
+        <div className="h-5 sm:h-6 bg-accent-beige/60 w-2/3 rounded" />
         <div className="mt-auto pt-3 sm:pt-4 flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center border-t border-neutral-100">
-          <div className="h-5 sm:h-6 bg-neutral-200 w-1/4 rounded" />
-          <div className="h-9 bg-neutral-200 w-full sm:w-24 rounded-lg" />
+          <div className="h-5 sm:h-6 bg-accent-beige/60 w-1/4 rounded" />
+          <div className="h-9 bg-accent-beige/60 w-full sm:w-24 rounded-lg" />
         </div>
       </div>
     </div>

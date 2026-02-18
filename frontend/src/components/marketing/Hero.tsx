@@ -13,9 +13,10 @@ export default function Hero() {
   return (
     <section className="bg-gradient-to-b from-accent-cream via-primary-pale/30 to-white">
       {/* Mobile-first container with generous padding */}
-      <div className="max-w-6xl mx-auto px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+      <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
         <div className="max-w-3xl mx-auto text-center">
           {/* Heading - optimized for mobile readability */}
+          <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-3">Αγορά Παραγωγών</p>
           <h1 className="text-4xl font-bold text-neutral-900 leading-tight mb-6 sm:text-5xl lg:text-6xl">
             Αυθεντικά Ελληνικά Προϊόντα
             <span className="block text-accent-gold mt-2">
@@ -33,7 +34,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
             <Link
               href="/products"
-              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
+              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
             >
               Δείτε τα Προϊόντα
             </Link>
@@ -46,7 +47,7 @@ export default function Hero() {
           </div>
 
           {/* Trust indicator - subtle, mobile-optimized */}
-          <div className="mt-10 pt-8 border-t border-neutral-200">
+          <div className="mt-10 pt-8 border-t border-accent-gold/20">
             <div className="flex justify-center gap-6 flex-wrap">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
