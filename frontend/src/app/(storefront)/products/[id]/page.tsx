@@ -169,7 +169,8 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           ],
         }) }}
       />
-      <main className="container mx-auto px-4 py-6">
+      <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/30 to-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm" aria-label="Breadcrumb">
         <ol className="flex items-center gap-1.5 text-neutral-500">
@@ -193,21 +194,17 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
         </ol>
       </nav>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Product Image Gallery — Pass IMAGE-GALLERY-01 */}
         <ImageGallery images={p.images} fallbackUrl={p.imageUrl} alt={p.title} />
 
         {/* Product Info */}
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold mb-2" data-testid="product-title">
-            {p.title}
-          </h1>
-
-          {/* Producer - Pass FIX-MOBILE-CARDS-01: Link to producer page */}
+          {/* Producer ABOVE title (provenance-first, Natoora pattern) */}
           {p.producer?.name && (
-            <p className="text-sm text-primary font-semibold uppercase tracking-wider mb-1" data-testid="product-producer">
+            <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2" data-testid="product-producer">
               {(p.producerSlug || p.producerId) ? (
-                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="hover:underline">
+                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="hover:underline transition-colors">
                   {p.producer.name}
                 </Link>
               ) : (
@@ -215,6 +212,10 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               )}
             </p>
           )}
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2" data-testid="product-title">
+            {p.title}
+          </h1>
 
           {/* S1-02: Star rating summary */}
           {p.reviewsAvgRating && (
@@ -304,16 +305,16 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           )}
 
           {/* S3-01: Cost Transparency — show where the money goes */}
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3" data-testid="cost-transparency">
+          <div className="mb-6 rounded-lg border border-accent-gold/20 bg-accent-cream p-3" data-testid="cost-transparency">
             <div className="flex items-start gap-2">
-              <svg className="w-4 h-4 mt-0.5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 mt-0.5 text-accent-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-emerald-900">
+                <p className="text-sm font-medium text-neutral-900">
                   88¢ από κάθε €1 πάνε στον παραγωγό
                 </p>
-                <p className="text-xs text-emerald-700 mt-0.5">
+                <p className="text-xs text-neutral-600 mt-0.5">
                   Ασφαλείς πληρωμές · Υποστήριξη · Ποιοτικός έλεγχος
                 </p>
               </div>
@@ -340,16 +341,17 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       <RelatedProducts productId={p.id} producerId={p.producerId} />
 
       {/* Back to Products */}
-      <div className="mt-10 pt-6 border-t border-neutral-200">
+      <div className="mt-10 pt-6 border-t border-accent-gold/10">
         <Link
           href="/products"
-          className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors"
+          className="inline-flex items-center text-sm text-neutral-500 hover:text-accent-gold transition-colors"
         >
           <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           {t('product.backToProducts')}
         </Link>
+      </div>
       </div>
     </main>
     </>
