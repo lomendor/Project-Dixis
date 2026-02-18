@@ -285,7 +285,7 @@ export default async function Page({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Demo mode banner */}
         {isDemo && (
@@ -294,17 +294,24 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         )}
 
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Προϊόντα</h1>
-          <p className="mt-1 text-sm text-neutral-600">
+        <div className="mb-8">
+          <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">
+            Αγορά Παραγωγών
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900">
             {searchQuery
-              ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
-              : `Απευθείας από παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} συνολικά`}.`}
+              ? `Αποτελέσματα για "${searchQuery}"`
+              : 'Αυθεντικά Ελληνικά Προϊόντα'}
+          </h1>
+          <p className="mt-2 text-base text-neutral-600 max-w-xl">
+            {searchQuery
+              ? `${total} προϊόν${total !== 1 ? 'τα' : ''} βρέθηκαν.`
+              : `Απευθείας από Έλληνες παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} επιλεγμένα προϊόντα`}.`}
           </p>
         </div>
 
         {/* Filter Card — search + sort + categories + cultivation */}
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-card p-5 mb-6 space-y-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-neutral-200/60 shadow-sm p-5 mb-8 space-y-4">
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
@@ -347,7 +354,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" data-testid="products-grid">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7" data-testid="products-grid">
             {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
             {items.map((p: ApiItem, index: number) => (
               <ProductCard
