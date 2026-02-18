@@ -87,8 +87,8 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
             transition-all duration-200
             ${
               !currentCat
-                ? 'bg-primary text-white shadow-md'
-                : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                ? 'bg-primary text-white shadow-card'
+                : 'bg-white text-neutral-700 border border-accent-gold/20 hover:border-accent-gold/50 hover:bg-accent-cream'
             }
           `}
         >

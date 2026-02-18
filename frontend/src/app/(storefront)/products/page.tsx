@@ -311,16 +311,16 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {/* Filter Card — search + sort + categories + cultivation */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-neutral-200/60 shadow-sm p-5 mb-8 space-y-4">
+        <div className="bg-accent-cream/60 rounded-xl border border-accent-gold/15 shadow-card p-6 mb-8 space-y-5">
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
-              <Suspense fallback={<div className="h-10 w-full bg-neutral-100 rounded-lg animate-pulse" />}>
+              <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
                 <ProductSearchInput />
               </Suspense>
             </div>
             <div className="sm:w-52">
-              <Suspense fallback={<div className="h-10 w-full bg-neutral-100 rounded-lg animate-pulse" />}>
+              <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
                 <ProductSort />
               </Suspense>
             </div>
@@ -331,7 +331,7 @@ export default async function Page({ searchParams }: PageProps) {
             fallback={
               <div className="flex flex-wrap gap-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-9 w-24 bg-neutral-100 rounded-full animate-pulse" />
+                  <div key={i} className="h-9 w-24 bg-accent-beige/50 rounded-full animate-pulse" />
                 ))}
               </div>
             }

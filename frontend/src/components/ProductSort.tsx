@@ -49,7 +49,7 @@ export function ProductSort() {
         value={currentValue}
         onChange={handleChange}
         aria-label="Ταξινόμηση προϊόντων"
-        className="w-full appearance-none pl-3.5 pr-8 py-2.5 border border-neutral-300 rounded-xl bg-white text-sm font-medium text-neutral-700 focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none transition-all cursor-pointer"
+        className="w-full appearance-none pl-3.5 pr-8 py-2.5 border border-neutral-200 rounded-xl bg-white text-sm font-medium text-neutral-800 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold/30 outline-none transition-all cursor-pointer"
       >
         {SORT_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -58,7 +58,7 @@ export function ProductSort() {
         ))}
       </select>
       <svg
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
