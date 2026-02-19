@@ -225,6 +225,7 @@ class GreekProductSeeder extends Seeder
         foreach ($products as $item) {
             $productData = array_merge($item['data'], [
                 'producer_id' => $item['producer']->id,
+                'image_url' => $item['image'],
             ]);
 
             $product = Product::firstOrCreate(
