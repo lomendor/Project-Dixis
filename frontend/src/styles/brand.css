@@ -47,16 +47,18 @@
   --danger-light: #fee2e2;
 
   /* -------------------------------------------------------------------------
-     CATEGORY COLORS - Wolt-style pastel backgrounds
+     CATEGORY COLORS - 10 unified categories (pastel backgrounds)
      ------------------------------------------------------------------------- */
-  --category-vegetables: #e8f5ed;
-  --category-fruits: #fef3c7;
-  --category-dairy: #e0f2fe;
-  --category-meat: #fee2e2;
-  --category-bakery: #f5f0e6;
-  --category-honey: #fef9c3;
-  --category-wine: #fce7f3;
   --category-olive: #ecfccb;
+  --category-honey: #fef9c3;
+  --category-nuts: #fef3c7;
+  --category-cosmetics: #e0f2fe;
+  --category-beverages: #fce7f3;
+  --category-sweets: #fde2e4;
+  --category-pasta: #f5f0e6;
+  --category-herbs: #e8f5ed;
+  --category-sauces: #fee2e2;
+  --category-legumes: #efebe9;
 
   /* -------------------------------------------------------------------------
      TYPOGRAPHY

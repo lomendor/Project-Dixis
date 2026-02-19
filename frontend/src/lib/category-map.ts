@@ -1,30 +1,38 @@
 /**
- * Category slug mapping between Laravel and Prisma/storefront.
+ * Category slug mapping between Laravel and storefront.
  *
- * STOREFRONT-LARAVEL-01 Phase 2-3: The storefront CategoryStrip uses Prisma
- * slugs (e.g. "fruits-vegetables"), but Laravel products carry Laravel
- * slugs (e.g. "fruits"). This mapping bridges the two until categories
- * are fully unified in Laravel.
+ * Phase 10: Backend and frontend now share the same 10 unified slugs.
+ * This map handles any lingering legacy slugs during the transition period.
+ * Once all products are migrated, this can be simplified to a passthrough.
  */
 
-/** Map a Laravel category slug to the corresponding Prisma/storefront slug. */
-const LARAVEL_TO_STOREFRONT: Record<string, string> = {
-  // Original 8 categories
-  'fruits': 'fruits-vegetables',
-  'vegetables': 'fruits-vegetables',
-  'herbs-spices': 'herbs-spices',
-  'grains-cereals': 'grains-rice',
-  'dairy-products': 'dairy',
-  'olive-oil-olives': 'olive-oil-olives',
+/** Map a Laravel category slug to the corresponding storefront slug. */
+const LEGACY_TO_UNIFIED: Record<string, string> = {
+  // Legacy slugs → unified slugs (transition period)
+  'fruits': 'legumes-grains',
+  'vegetables': 'legumes-grains',
+  'herbs-spices': 'herbs-spices-tea',
+  'grains-cereals': 'legumes-grains',
+  'dairy-products': 'nuts-dried',
   'wine-beverages': 'beverages',
   'honey-preserves': 'honey-bee',
-  // Phase 3: New categories added for Greek products
-  'legumes': 'legumes',
+  'legumes': 'legumes-grains',
   'pasta-trahanas': 'pasta',
-  'flours-bakery': 'flours-bakery',
+  'flours-bakery': 'legumes-grains',
   'nuts-dried-fruits': 'nuts-dried',
-  'sweets-preserves': 'sweets-spreads',
-  'sauces-pickles': 'sauces-preserves',
+  'sweets-preserves': 'sweets-jams',
+  'sauces-pickles': 'sauces-spreads',
+  // Unified slugs map to themselves (identity)
+  'olive-oil-olives': 'olive-oil-olives',
+  'honey-bee': 'honey-bee',
+  'nuts-dried': 'nuts-dried',
+  'cosmetics': 'cosmetics',
+  'beverages': 'beverages',
+  'sweets-jams': 'sweets-jams',
+  'pasta': 'pasta',
+  'herbs-spices-tea': 'herbs-spices-tea',
+  'sauces-spreads': 'sauces-spreads',
+  'legumes-grains': 'legumes-grains',
 };
 
 /**
@@ -33,5 +41,5 @@ const LARAVEL_TO_STOREFRONT: Record<string, string> = {
  */
 export function toStorefrontSlug(laravelSlug: string | null | undefined): string | null {
   if (!laravelSlug) return null;
-  return LARAVEL_TO_STOREFRONT[laravelSlug] ?? laravelSlug;
+  return LEGACY_TO_UNIFIED[laravelSlug] ?? laravelSlug;
 }

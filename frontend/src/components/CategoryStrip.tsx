@@ -13,103 +13,53 @@ import {
   CookingPot,
   Sparkles,
   LayoutGrid,
-  Apple,
-  Carrot,
   Grape,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES } from '@/data/categories';
 
-/* ── Frontend label overrides (rename backend categories) ── */
-const SLUG_LABEL_OVERRIDE: Record<string, string> = {
-  'dairy-products': 'Ξηροί Καρποί',
-};
-
 /* ── Custom image icons (used instead of Lucide for specific categories) ── */
 const SLUG_IMAGE_MAP: Record<string, string> = {
-  'dairy-products': '/icons/categories/nuts-bowl.png',
-  'honey': '/icons/categories/honey-3d.png',
-  'olive-oil': '/icons/categories/olive-oil-3d.png',
+  'nuts-dried': '/icons/categories/nuts-bowl.png',
+  'honey-bee': '/icons/categories/honey-3d.png',
+  'olive-oil-olives': '/icons/categories/olive-oil-3d.png',
   'cosmetics': '/icons/categories/cosmetics-3d.png',
 };
 
-/* ── Icon mapping (partial slug match) ── */
+/* ── Icon mapping (exact slug → Lucide component) ── */
 const SLUG_ICON_MAP: Record<string, LucideIcon> = {
-  'olive-oil': Droplets,
-  'honey': Flower2,
-  'legumes': Bean,
-  'grains': Bean,
-  'rice': Bean,
-  'pasta': Wheat,
-  'flours': Wheat,
-  'nuts': Nut,
-  'herbs': Leaf,
-  'sweets': Candy,
-  'sauces': CookingPot,
-  'cosmetics': Sparkles,
-  'fruits': Apple,
-  'vegetables': Carrot,
-  'wine': Grape,
-};
-
-const STATIC_ICON_MAP: Record<string, LucideIcon> = {
   'olive-oil-olives': Droplets,
   'honey-bee': Flower2,
-  'legumes-grains': Bean,
-  'pasta-flours': Wheat,
   'nuts-dried': Nut,
-  'herbs-spices': Leaf,
-  'sweets-spreads': Candy,
-  'sauces-preserves': CookingPot,
   'cosmetics': Sparkles,
+  'beverages': Grape,
+  'sweets-jams': Candy,
+  'pasta': Wheat,
+  'herbs-spices-tea': Leaf,
+  'sauces-spreads': CookingPot,
+  'legumes-grains': Bean,
 };
 
-/* ── Background color mapping (Wolt-style pastel cards) ── */
+/* ── Background color mapping (pastel cards) ── */
 const SLUG_BG_MAP: Record<string, string> = {
-  'olive-oil': 'bg-category-olive',
-  'honey': 'bg-category-honey',
-  'legumes': 'bg-category-vegetables',
-  'grains': 'bg-category-vegetables',
-  'rice': 'bg-category-vegetables',
-  'pasta': 'bg-category-bakery',
-  'flours': 'bg-category-bakery',
-  'nuts': 'bg-category-fruits',
-  'herbs': 'bg-category-vegetables',
-  'sweets': 'bg-category-fruits',
-  'sauces': 'bg-category-meat',
-  'cosmetics': 'bg-category-dairy',
-  'fruits': 'bg-category-fruits',
-  'vegetables': 'bg-category-vegetables',
-  'dairy': 'bg-category-fruits',
-  'wine': 'bg-category-wine',
-};
-
-const STATIC_BG_MAP: Record<string, string> = {
   'olive-oil-olives': 'bg-category-olive',
   'honey-bee': 'bg-category-honey',
-  'legumes-grains': 'bg-category-vegetables',
-  'pasta-flours': 'bg-category-bakery',
-  'nuts-dried': 'bg-category-fruits',
-  'herbs-spices': 'bg-category-vegetables',
-  'sweets-spreads': 'bg-category-fruits',
-  'sauces-preserves': 'bg-category-meat',
-  'cosmetics': 'bg-category-dairy',
+  'nuts-dried': 'bg-category-nuts',
+  'cosmetics': 'bg-category-cosmetics',
+  'beverages': 'bg-category-beverages',
+  'sweets-jams': 'bg-category-sweets',
+  'pasta': 'bg-category-pasta',
+  'herbs-spices-tea': 'bg-category-herbs',
+  'sauces-spreads': 'bg-category-sauces',
+  'legumes-grains': 'bg-category-legumes',
 };
 
 function getIconForSlug(slug: string): LucideIcon {
-  if (STATIC_ICON_MAP[slug]) return STATIC_ICON_MAP[slug];
-  for (const [key, icon] of Object.entries(SLUG_ICON_MAP)) {
-    if (slug.includes(key)) return icon;
-  }
-  return LayoutGrid;
+  return SLUG_ICON_MAP[slug] ?? LayoutGrid;
 }
 
 function getBgForSlug(slug: string): string {
-  if (STATIC_BG_MAP[slug]) return STATIC_BG_MAP[slug];
-  for (const [key, bg] of Object.entries(SLUG_BG_MAP)) {
-    if (slug.includes(key)) return bg;
-  }
-  return 'bg-accent-cream';
+  return SLUG_BG_MAP[slug] ?? 'bg-accent-cream';
 }
 
 /* ── Types ── */
@@ -150,29 +100,20 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
 
   const useDynamic = dynamicCategories && dynamicCategories.length > 0;
 
-  /* Helper: resolve custom image for a slug */
-  function getImageForSlug(slug: string): string | undefined {
-    if (SLUG_IMAGE_MAP[slug]) return SLUG_IMAGE_MAP[slug];
-    for (const [key, img] of Object.entries(SLUG_IMAGE_MAP)) {
-      if (slug.includes(key)) return img;
-    }
-    return undefined;
-  }
-
   const items: CategoryItem[] = useDynamic
     ? dynamicCategories.map((cat) => ({
         slug: cat.slug,
-        label: SLUG_LABEL_OVERRIDE[cat.slug] || cat.name,
+        label: cat.name,
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
-        customImage: getImageForSlug(cat.slug),
+        customImage: SLUG_IMAGE_MAP[cat.slug],
       }))
     : CATEGORIES.map((cat) => ({
         slug: cat.slug,
         label: cat.labelEl,
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
-        customImage: getImageForSlug(cat.slug),
+        customImage: SLUG_IMAGE_MAP[cat.slug],
       }));
 
   return (

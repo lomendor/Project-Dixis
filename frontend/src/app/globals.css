@@ -25,15 +25,17 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Category pastel backgrounds (Wolt-style cards) */
-  --color-category-vegetables: #e8f5ed;
-  --color-category-fruits: #fef3c7;
-  --color-category-dairy: #e0f2fe;
-  --color-category-meat: #fee2e2;
-  --color-category-bakery: #f5f0e6;
-  --color-category-honey: #fef9c3;
-  --color-category-wine: #fce7f3;
+  /* Category pastel backgrounds — 10 unified categories */
   --color-category-olive: #ecfccb;
+  --color-category-honey: #fef9c3;
+  --color-category-nuts: #fef3c7;
+  --color-category-cosmetics: #e0f2fe;
+  --color-category-beverages: #fce7f3;
+  --color-category-sweets: #fde2e4;
+  --color-category-pasta: #f5f0e6;
+  --color-category-herbs: #e8f5ed;
+  --color-category-sauces: #fee2e2;
+  --color-category-legumes: #efebe9;
 }
 
 /* =============================================================================
@@ -306,15 +308,17 @@ textarea::placeholder {
   color: var(--neutral-800);
 }
 
-/* Category background colors */
-.category-vegetables { background: var(--category-vegetables); }
-.category-fruits { background: var(--category-fruits); }
-.category-dairy { background: var(--category-dairy); }
-.category-meat { background: var(--category-meat); }
-.category-bakery { background: var(--category-bakery); }
-.category-honey { background: var(--category-honey); }
-.category-wine { background: var(--category-wine); }
+/* Category background colors — 10 unified categories */
 .category-olive { background: var(--category-olive); }
+.category-honey { background: var(--category-honey); }
+.category-nuts { background: var(--category-nuts); }
+.category-cosmetics { background: var(--category-cosmetics); }
+.category-beverages { background: var(--category-beverages); }
+.category-sweets { background: var(--category-sweets); }
+.category-pasta { background: var(--category-pasta); }
+.category-herbs { background: var(--category-herbs); }
+.category-sauces { background: var(--category-sauces); }
+.category-legumes { background: var(--category-legumes); }
 
 /* =============================================================================
    PRODUCT CARDS

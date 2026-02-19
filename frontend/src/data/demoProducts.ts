@@ -54,7 +54,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     producerName: 'Μέλι Βορείου Ελλάδος',
     categorySlug: 'honey-bee',
   },
-  // Legumes - Producer: Αγροτικός Συν/μός Πρεσπών (demo-producer-4)
+  // Legumes & Grains - Producer: Αγροτικός Συν/μός Πρεσπών (demo-producer-4)
   {
     id: 'demo-5',
     name: 'Φασόλια Γίγαντες Πρεσπών ΠΟΠ',
@@ -62,9 +62,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '500g',
     producerId: 'demo-producer-4',
     producerName: 'Αγροτικός Συν/μός Πρεσπών',
-    categorySlug: 'legumes',
+    categorySlug: 'legumes-grains',
   },
-  // Legumes - Producer: Green Farm Co. (demo-producer-5)
+  // Legumes & Grains - Producer: Green Farm Co. (demo-producer-5)
   {
     id: 'demo-6',
     name: 'Φακές Εγκλουβής Λευκάδας',
@@ -72,9 +72,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '500g',
     producerId: 'demo-producer-5',
     producerName: 'Green Farm Co.',
-    categorySlug: 'legumes',
+    categorySlug: 'legumes-grains',
   },
-  // Grains & Rice - Producer: Αγρόκτημα Σερρών (demo-producer-6)
+  // Legumes & Grains - Producer: Αγρόκτημα Σερρών (demo-producer-6)
   {
     id: 'demo-7',
     name: 'Ρύζι Καρολίνα Σερρών',
@@ -82,9 +82,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '1kg',
     producerId: 'demo-producer-6',
     producerName: 'Αγρόκτημα Σερρών',
-    categorySlug: 'grains-rice',
+    categorySlug: 'legumes-grains',
   },
-  // Grains & Rice - Producer: Ελληνικά Δημητριακά (demo-producer-7)
+  // Legumes & Grains - Producer: Ελληνικά Δημητριακά (demo-producer-7)
   {
     id: 'demo-8',
     name: 'Κριθαράκι Ολικής Άλεσης',
@@ -92,7 +92,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '500g',
     producerId: 'demo-producer-7',
     producerName: 'Ελληνικά Δημητριακά',
-    categorySlug: 'grains-rice',
+    categorySlug: 'legumes-grains',
   },
   // Pasta - Producer: Γιαγιάς Ζυμαρικά (demo-producer-8)
   {
@@ -113,7 +113,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     producerName: 'Γιαγιάς Ζυμαρικά',
     categorySlug: 'pasta',
   },
-  // Flours & Bakery - Producer: Βιο-Αλεύρια Θεσσαλίας (demo-producer-9)
+  // Legumes & Grains - Producer: Βιο-Αλεύρια Θεσσαλίας (demo-producer-9)
   {
     id: 'demo-11',
     name: 'Αλεύρι Ζέας Βιολογικό',
@@ -121,7 +121,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '1kg',
     producerId: 'demo-producer-9',
     producerName: 'Βιο-Αλεύρια Θεσσαλίας',
-    categorySlug: 'flours-bakery',
+    categorySlug: 'legumes-grains',
   },
   // Nuts & Dried - Producer: Φιστικοπαραγωγοί Αιγίνης (demo-producer-10)
   {
@@ -143,7 +143,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     producerName: 'Αγρόκτημα Κύμης',
     categorySlug: 'nuts-dried',
   },
-  // Herbs & Spices - Producer: Βότανα Μάνης (demo-producer-12)
+  // Herbs, Spices & Tea - Producer: Βότανα Μάνης (demo-producer-12)
   {
     id: 'demo-14',
     name: 'Ρίγανη Βουνού Ταϋγέτου',
@@ -151,9 +151,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '100g',
     producerId: 'demo-producer-12',
     producerName: 'Βότανα Μάνης',
-    categorySlug: 'herbs-spices',
+    categorySlug: 'herbs-spices-tea',
   },
-  // Herbs & Spices - Producer: Κροκοπαραγωγοί Κοζάνης (demo-producer-13)
+  // Herbs, Spices & Tea - Producer: Κροκοπαραγωγοί Κοζάνης (demo-producer-13)
   {
     id: 'demo-15',
     name: 'Κρόκος Κοζάνης ΠΟΠ',
@@ -161,9 +161,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '1g',
     producerId: 'demo-producer-13',
     producerName: 'Κροκοπαραγωγοί Κοζάνης',
-    categorySlug: 'herbs-spices',
+    categorySlug: 'herbs-spices-tea',
   },
-  // Sweets & Spreads - Producer: Χιώτικα Γλυκά (demo-producer-14)
+  // Sweets & Jams - Producer: Χιώτικα Γλυκά (demo-producer-14)
   {
     id: 'demo-16',
     name: 'Μαρμελάδα Πορτοκάλι Χίου',
@@ -171,9 +171,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '380g',
     producerId: 'demo-producer-14',
     producerName: 'Χιώτικα Γλυκά',
-    categorySlug: 'sweets-spreads',
+    categorySlug: 'sweets-jams',
   },
-  // Sweets & Spreads - Producer: Αμπελώνες Νεμέας (demo-producer-15)
+  // Sweets & Jams - Producer: Αμπελώνες Νεμέας (demo-producer-15)
   {
     id: 'demo-17',
     name: 'Πετιμέζι Παραδοσιακό',
@@ -181,9 +181,9 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '500ml',
     producerId: 'demo-producer-15',
     producerName: 'Αμπελώνες Νεμέας',
-    categorySlug: 'sweets-spreads',
+    categorySlug: 'sweets-jams',
   },
-  // Sauces & Preserves - Producer: Σαντορινιά Γεύση (demo-producer-16)
+  // Sauces & Spreads - Producer: Σαντορινιά Γεύση (demo-producer-16)
   {
     id: 'demo-18',
     name: 'Σάλτσα Ντομάτας Σαντορίνης',
@@ -191,7 +191,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     unit: '500g',
     producerId: 'demo-producer-16',
     producerName: 'Σαντορινιά Γεύση',
-    categorySlug: 'sauces-preserves',
+    categorySlug: 'sauces-spreads',
   },
 ];
 
