@@ -310,7 +310,28 @@ export default async function Page({ searchParams }: PageProps) {
           </p>
         </div>
 
-        {/* Filter Card — search + sort + categories + cultivation */}
+        {/* Category Cards (Wolt-style, standalone above filter) */}
+        <div className="mb-6">
+          <Suspense
+            fallback={
+              <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 min-w-[76px] sm:min-w-[88px]">
+                    <div className="w-[68px] h-[68px] sm:w-[80px] sm:h-[80px] rounded-2xl bg-accent-beige/50 animate-pulse" />
+                    <div className="h-3 w-12 bg-accent-beige/50 rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            }
+          >
+            <CategoryStrip
+              selectedCategory={categoryFilter}
+              dynamicCategories={activeCategories}
+            />
+          </Suspense>
+        </div>
+
+        {/* Filter Card — search + sort + cultivation */}
         <div className="bg-accent-cream/60 rounded-xl border border-accent-gold/15 shadow-card p-6 mb-8 space-y-5">
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
@@ -325,22 +346,6 @@ export default async function Page({ searchParams }: PageProps) {
               </Suspense>
             </div>
           </div>
-
-          {/* Categories */}
-          <Suspense
-            fallback={
-              <div className="flex flex-wrap gap-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-9 w-24 bg-accent-beige/50 rounded-full animate-pulse" />
-                ))}
-              </div>
-            }
-          >
-            <CategoryStrip
-              selectedCategory={categoryFilter}
-              dynamicCategories={activeCategories}
-            />
-          </Suspense>
 
           {/* Cultivation (conditional) */}
           {hasCultivationData && (
