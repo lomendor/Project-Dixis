@@ -1,9 +1,9 @@
 /**
- * Categories v3: 9 locker-compatible categories (was 10)
+ * Categories v4: 9 locker-compatible categories
  * Removed: dairy, fruits-vegetables (need refrigeration), beverages (alcohol license)
  * Merged: grains-rice into legumes, flours-bakery into pasta
  * Added: cosmetics (natural cosmetics)
- * Icon PNGs stored in public/icons/categories/
+ * Icons: Lucide React SVGs (see CategoryStrip.tsx for rendering)
  */
 
 export interface Category {
@@ -11,7 +11,7 @@ export interface Category {
   slug: string;
   labelEl: string;
   labelEn: string;
-  emoji: string; // PNG filename (without extension) in public/icons/categories/
+  iconName: string; // Lucide icon name (rendered by CategoryStrip)
   /** Tailwind bg color class for unselected chip */
   chipBg: string;
 }
@@ -22,7 +22,7 @@ export const CATEGORIES: Category[] = [
     slug: 'olive-oil-olives',
     labelEl: 'Ελαιόλαδο & Ελιές',
     labelEn: 'Olive Oil & Olives',
-    emoji: 'olive',
+    iconName: 'Droplets',
     chipBg: 'bg-category-olive',
   },
   {
@@ -30,7 +30,7 @@ export const CATEGORIES: Category[] = [
     slug: 'honey-bee',
     labelEl: 'Μέλι & Προϊόντα Μελισσοκομίας',
     labelEn: 'Honey & Bee Products',
-    emoji: 'honey',
+    iconName: 'Flower2',
     chipBg: 'bg-category-honey',
   },
   {
@@ -38,7 +38,7 @@ export const CATEGORIES: Category[] = [
     slug: 'legumes-grains',
     labelEl: 'Όσπρια & Δημητριακά',
     labelEn: 'Legumes & Grains',
-    emoji: 'beans',
+    iconName: 'Bean',
     chipBg: 'bg-category-vegetables',
   },
   {
@@ -46,7 +46,7 @@ export const CATEGORIES: Category[] = [
     slug: 'pasta-flours',
     labelEl: 'Ζυμαρικά & Αλεύρια',
     labelEn: 'Pasta & Flours',
-    emoji: 'pasta',
+    iconName: 'Wheat',
     chipBg: 'bg-category-bakery',
   },
   {
@@ -54,7 +54,7 @@ export const CATEGORIES: Category[] = [
     slug: 'nuts-dried',
     labelEl: 'Ξηροί Καρποί & Σνακ',
     labelEn: 'Nuts & Snacks',
-    emoji: 'nuts',
+    iconName: 'Nut',
     chipBg: 'bg-category-fruits',
   },
   {
@@ -62,7 +62,7 @@ export const CATEGORIES: Category[] = [
     slug: 'herbs-spices',
     labelEl: 'Βότανα & Μπαχαρικά',
     labelEn: 'Herbs & Spices',
-    emoji: 'herbs',
+    iconName: 'Leaf',
     chipBg: 'bg-category-vegetables',
   },
   {
@@ -70,7 +70,7 @@ export const CATEGORIES: Category[] = [
     slug: 'sweets-spreads',
     labelEl: 'Γλυκά & Αλείμματα',
     labelEn: 'Sweets & Spreads',
-    emoji: 'candy',
+    iconName: 'Candy',
     chipBg: 'bg-category-fruits',
   },
   {
@@ -78,7 +78,7 @@ export const CATEGORIES: Category[] = [
     slug: 'sauces-preserves',
     labelEl: 'Σάλτσες & Τουρσιά',
     labelEn: 'Sauces & Pickles',
-    emoji: 'jar',
+    iconName: 'CookingPot',
     chipBg: 'bg-category-meat',
   },
   {
@@ -86,7 +86,7 @@ export const CATEGORIES: Category[] = [
     slug: 'cosmetics',
     labelEl: 'Φυσικά Καλλυντικά',
     labelEn: 'Natural Cosmetics',
-    emoji: 'cosmetics',
+    iconName: 'Sparkles',
     chipBg: 'bg-category-dairy',
   },
 ];
