@@ -25,6 +25,20 @@ const SLUG_IMAGE_MAP: Record<string, string> = {
   'olive-oil-olives': '/icons/categories/olive-oil-3d.png',
   'cosmetics': '/icons/categories/cosmetics-3d.png',
   'herbs-spices-tea': '/icons/categories/herbs-spices-3d.png',
+  'pasta': '/icons/categories/pasta-3d.png',
+  'beverages': '/icons/categories/beverages-3d.png',
+  'sweets-jams': '/icons/categories/sweets-3d.png',
+  'legumes-grains': '/icons/categories/legumes-3d.png',
+  'sauces-spreads': '/icons/categories/sauces-3d.png',
+};
+
+/* ── Per-icon scale overrides (some PNGs have more whitespace) ── */
+const SLUG_SCALE_MAP: Record<string, number> = {
+  'herbs-spices-tea': 1.3,
+  'beverages': 1.7,
+  'pasta': 1.45,
+  'legumes-grains': 1.6,
+  'sweets-jams': 1.4,
 };
 
 /* ── Icon mapping (exact slug → Lucide component) ── */
@@ -81,6 +95,7 @@ interface CategoryItem {
   icon: LucideIcon;
   bg: string;
   customImage?: string;
+  imageScale?: number;
 }
 
 /* ── Component ── */
@@ -108,6 +123,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
         customImage: SLUG_IMAGE_MAP[cat.slug],
+        imageScale: SLUG_SCALE_MAP[cat.slug],
       }))
     : CATEGORIES.map((cat) => ({
         slug: cat.slug,
@@ -115,22 +131,23 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
         customImage: SLUG_IMAGE_MAP[cat.slug],
+        imageScale: SLUG_SCALE_MAP[cat.slug],
       }));
 
   return (
     <div className="w-full" role="group" aria-label="Κατηγορίες προϊόντων">
-      {/* Horizontal scroll mobile, wrap desktop */}
-      <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+      {/* Horizontal scroll mobile, flex-wrap desktop (Wolt-style compact) */}
+      <div className="flex gap-1.5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:justify-start sm:gap-x-1 sm:gap-y-2 sm:overflow-visible scrollbar-hide">
         {/* "Όλα" card */}
         <button
           onClick={() => handleCategoryClick(null)}
           aria-pressed={!currentCat}
           aria-label="Όλες οι κατηγορίες"
-          className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px] group"
+          className="flex flex-col items-center gap-1.5 w-[92px] sm:w-[120px] shrink-0 sm:shrink group"
         >
           <div
             className={`
-              w-[76px] h-[76px] sm:w-[100px] sm:h-[100px]
+              w-[84px] h-[84px] sm:w-[112px] sm:h-[112px]
               rounded-2xl flex items-center justify-center
               transition-all duration-200
               group-hover:scale-105 group-hover:shadow-card
@@ -142,10 +159,10 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               bg-accent-cream
             `}
           >
-            <LayoutGrid className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-500" />
+            <LayoutGrid className="w-11 h-11 sm:w-14 sm:h-14 text-neutral-500" />
           </div>
           <span
-            className={`text-xs sm:text-sm font-medium text-center leading-tight min-h-[2rem] sm:min-h-[2.5rem] flex items-start justify-center
+            className={`text-[11px] sm:text-xs font-medium text-center leading-tight min-h-[2rem] sm:min-h-[2.25rem] flex items-start justify-center
               ${!currentCat ? 'text-primary font-semibold' : 'text-neutral-600'}
             `}
           >
@@ -164,12 +181,12 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               onClick={() => handleCategoryClick(item.slug)}
               aria-pressed={isSelected}
               aria-label={`Κατηγορία: ${item.label}`}
-              className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px] group"
+              className="flex flex-col items-center gap-1.5 w-[92px] sm:w-[120px] shrink-0 sm:shrink group"
             >
               <div
                 className={`
-                  w-[76px] h-[76px] sm:w-[100px] sm:h-[100px]
-                  rounded-2xl flex items-center justify-center
+                  w-[84px] h-[84px] sm:w-[112px] sm:h-[112px]
+                  rounded-2xl flex items-center justify-center overflow-hidden
                   transition-all duration-200
                   group-hover:scale-105 group-hover:shadow-card
                   ${
@@ -184,16 +201,17 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   <Image
                     src={item.customImage}
                     alt={item.label}
-                    width={100}
-                    height={100}
-                    className="w-[62px] h-[62px] sm:w-[84px] sm:h-[84px] object-contain"
+                    width={112}
+                    height={112}
+                    className="w-[80px] h-[80px] sm:w-[108px] sm:h-[108px] object-contain"
+                    style={item.imageScale ? { transform: `scale(${item.imageScale})` } : undefined}
                   />
                 ) : (
-                  <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-700" />
+                  <Icon className="w-11 h-11 sm:w-14 sm:h-14 text-neutral-700" />
                 )}
               </div>
               <span
-                className={`text-xs sm:text-sm font-medium text-center leading-tight max-w-[84px] sm:max-w-[108px] line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] flex items-start justify-center
+                className={`text-[11px] sm:text-xs font-medium text-center leading-tight max-w-[88px] sm:max-w-[116px] line-clamp-2 min-h-[2rem] sm:min-h-[2.25rem] flex items-start justify-center
                   ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
                 `}
               >
