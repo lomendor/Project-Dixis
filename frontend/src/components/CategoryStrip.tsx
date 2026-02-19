@@ -28,6 +28,9 @@ const SLUG_LABEL_OVERRIDE: Record<string, string> = {
 /* ── Custom image icons (used instead of Lucide for specific categories) ── */
 const SLUG_IMAGE_MAP: Record<string, string> = {
   'dairy-products': '/icons/categories/nuts-bowl.png',
+  'honey': '/icons/categories/honey-3d.png',
+  'olive-oil': '/icons/categories/olive-oil-3d.png',
+  'cosmetics': '/icons/categories/cosmetics-3d.png',
 };
 
 /* ── Icon mapping (partial slug match) ── */
@@ -241,7 +244,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     alt={item.label}
                     width={80}
                     height={80}
-                    className="w-11 h-11 sm:w-14 sm:h-14 object-contain"
+                    className="w-[56px] h-[56px] sm:w-[68px] sm:h-[68px] object-contain"
                   />
                 ) : (
                   <Icon className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-700" />
