@@ -20,10 +20,11 @@ import { CATEGORIES } from '@/data/categories';
 
 /* ── Custom image icons (used instead of Lucide for specific categories) ── */
 const SLUG_IMAGE_MAP: Record<string, string> = {
-  'nuts-dried': '/icons/categories/nuts-bowl.png',
+  'nuts-dried': '/icons/categories/nuts-3d.png',
   'honey-bee': '/icons/categories/honey-3d.png',
   'olive-oil-olives': '/icons/categories/olive-oil-3d.png',
   'cosmetics': '/icons/categories/cosmetics-3d.png',
+  'herbs-spices-tea': '/icons/categories/herbs-spices-3d.png',
 };
 
 /* ── Icon mapping (exact slug → Lucide component) ── */
@@ -144,7 +145,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
             <LayoutGrid className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-500" />
           </div>
           <span
-            className={`text-xs sm:text-sm font-medium text-center leading-tight
+            className={`text-xs sm:text-sm font-medium text-center leading-tight min-h-[2rem] sm:min-h-[2.5rem] flex items-start justify-center
               ${!currentCat ? 'text-primary font-semibold' : 'text-neutral-600'}
             `}
           >
@@ -192,7 +193,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                 )}
               </div>
               <span
-                className={`text-xs sm:text-sm font-medium text-center leading-tight max-w-[84px] sm:max-w-[108px] line-clamp-2
+                className={`text-xs sm:text-sm font-medium text-center leading-tight max-w-[84px] sm:max-w-[108px] line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] flex items-start justify-center
                   ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
                 `}
               >
