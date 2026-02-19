@@ -32,6 +32,9 @@ class ProductSeeder extends Seeder
         $herbsTea = Category::where('slug', 'herbs-spices-tea')->first();
         $nutsDried = Category::where('slug', 'nuts-dried')->first();
         $honey = Category::where('slug', 'honey-bee')->first();
+        $pasta = Category::where('slug', 'pasta')->first();
+        $sauces = Category::where('slug', 'sauces-spreads')->first();
+        $sweets = Category::where('slug', 'sweets-jams')->first();
 
         // Get producers by slug for explicit assignment, with fallbacks
         $ktima = $producers->firstWhere('slug', 'ktima-papadopoulou') ?? $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
@@ -40,48 +43,47 @@ class ProductSeeder extends Seeder
 
         // Create products distributed across producers
         $productsData = [
-            // ΚΤΗΜΑ ΠΑΠΑΔΟΠΟΥΛΟΥ — λαχανικά, βότανα, φρούτα
+            // ΚΤΗΜΑ ΠΑΠΑΔΟΠΟΥΛΟΥ — όσπρια, ζυμαρικά, βότανα
             [
                 'product_data' => [
                     'producer_id' => $ktima->id,
-                    'name' => 'Ντομάτες Βιολογικές',
-                    'slug' => 'ntomates-viologikes',
-                    'description' => 'Φρέσκες βιολογικές ντομάτες από το κτήμα μας στη Μεσσηνία. Καλλιεργούνται χωρίς φυτοφάρμακα με παραδοσιακές μεθόδους.',
-                    'price' => 3.50,
-                    'weight_per_unit' => 1.000,
-                    'unit' => 'kg',
+                    'name' => 'Φακές Εγχώριες 500g',
+                    'slug' => 'fakes-egchories-500g',
+                    'description' => 'Εγχώριες φακές ψιλές, ιδανικές για σούπα και σαλάτα. Πλούσιες σε πρωτεΐνη και σίδηρο.',
+                    'price' => 4.20,
+                    'weight_per_unit' => 0.500,
+                    'unit' => 'συσκευασία',
                     'stock' => 100,
-                    'category' => 'Vegetables',
-                    'is_organic' => true,
-                    'image_url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa',
+                    'category' => 'Legumes',
+                    'is_organic' => false,
+                    'image_url' => 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082',
                     'status' => 'available',
                     'is_active' => true,
                 ],
                 'categories' => [$legumeGrains],
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa', 'is_primary' => true, 'sort_order' => 0],
-                    ['url' => 'https://images.unsplash.com/photo-1546470427-a465b4e8c3c8', 'is_primary' => false, 'sort_order' => 1],
+                    ['url' => 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
             [
                 'product_data' => [
                     'producer_id' => $ktima->id,
-                    'name' => 'Μαρούλι Φρέσκο',
-                    'slug' => 'marouli-fresko',
-                    'description' => 'Τραγανό φρέσκο μαρούλι, ιδανικό για σαλάτες. Μαζεύεται κάθε πρωί από τον κήπο μας.',
-                    'price' => 2.25,
-                    'weight_per_unit' => 0.300,
-                    'unit' => 'τεμάχιο',
+                    'name' => 'Χυλοπίτες Σπιτικές 500g',
+                    'slug' => 'chilopites-spitikes-500g',
+                    'description' => 'Σπιτικές χυλοπίτες με αυγά ελευθέρας βοσκής και σιμιγδάλι. Παραδοσιακή συνταγή από τη Μεσσηνία.',
+                    'price' => 5.90,
+                    'weight_per_unit' => 0.500,
+                    'unit' => 'συσκευασία',
                     'stock' => 50,
-                    'category' => 'Vegetables',
+                    'category' => 'Pasta',
                     'is_organic' => false,
-                    'image_url' => 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1',
+                    'image_url' => 'https://images.unsplash.com/photo-1551462147-ff29053bfc14',
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$legumeGrains],
+                'categories' => [$pasta],
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1', 'is_primary' => true, 'sort_order' => 0],
+                    ['url' => 'https://images.unsplash.com/photo-1551462147-ff29053bfc14', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
             [
@@ -149,47 +151,47 @@ class ProductSeeder extends Seeder
                     ['url' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
-            // ΓΑΛΑΚΤΟΚΟΜΙΚΑ ΟΛΥΜΠΟΥ — φρούτα, γαλακτοκομικά
+            // ΓΑΛΑΚΤΟΚΟΜΙΚΑ ΟΛΥΜΠΟΥ — σάλτσες, ζυμαρικά
             [
                 'product_data' => [
                     'producer_id' => $galakto->id,
-                    'name' => 'Μήλα Ζαγοράς Πηλίου',
-                    'slug' => 'mila-zagoras-piliou',
-                    'description' => 'Τραγανά μήλα ΠΟΠ Ζαγοράς Πηλίου. Φυσική γλυκύτητα και τραγανή υφή, ιδανικά για κατανάλωση και μαγειρική.',
-                    'price' => 4.00,
-                    'weight_per_unit' => 1.000,
-                    'unit' => 'kg',
+                    'name' => 'Πετιμέζι Παραδοσιακό 500ml',
+                    'slug' => 'petimezi-paradosiako-500ml',
+                    'description' => 'Παραδοσιακό πετιμέζι από σταφύλια Θεσσαλίας. Φυσικό γλυκαντικό, πλούσιο σε σίδηρο.',
+                    'price' => 6.50,
+                    'weight_per_unit' => 0.700,
+                    'unit' => 'φιάλη',
                     'stock' => 75,
-                    'category' => 'Fruits',
+                    'category' => 'Sauces',
                     'is_organic' => false,
-                    'image_url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
+                    'image_url' => 'https://images.unsplash.com/photo-1474722883778-792e7990302f',
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$legumeGrains],
+                'categories' => [$sauces],
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', 'is_primary' => true, 'sort_order' => 0],
+                    ['url' => 'https://images.unsplash.com/photo-1474722883778-792e7990302f', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
             [
                 'product_data' => [
                     'producer_id' => $galakto->id,
-                    'name' => 'Φέτα ΠΟΠ Θεσσαλίας 400g',
-                    'slug' => 'feta-pop-thessalias-400g',
-                    'description' => 'Αυθεντική φέτα ΠΟΠ από γάλα ελευθέρας βοσκής στους πρόποδες του Ολύμπου. Κρεμώδης υφή, πλούσια γεύση.',
-                    'price' => 8.50,
-                    'weight_per_unit' => 0.400,
+                    'name' => 'Τραχανάς Ξινός 500g',
+                    'slug' => 'trachanas-xinos-500g',
+                    'description' => 'Ξινός τραχανάς από ξινόγαλο και σιτάρι. Παραδοσιακή συνταγή Θεσσαλίας, ιδανικός για σούπα.',
+                    'price' => 5.80,
+                    'weight_per_unit' => 0.500,
                     'unit' => 'συσκευασία',
                     'stock' => 60,
-                    'category' => 'Dairy',
+                    'category' => 'Pasta',
                     'is_organic' => false,
-                    'image_url' => 'https://images.unsplash.com/photo-1626957341926-98752fc2ba90',
+                    'image_url' => 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9',
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$nutsDried],
+                'categories' => [$pasta],
                 'images' => [
-                    ['url' => 'https://images.unsplash.com/photo-1626957341926-98752fc2ba90', 'is_primary' => true, 'sort_order' => 0],
+                    ['url' => 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9', 'is_primary' => true, 'sort_order' => 0],
                 ],
             ],
         ];
