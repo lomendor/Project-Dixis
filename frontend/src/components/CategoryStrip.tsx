@@ -12,6 +12,10 @@ import {
   CookingPot,
   Sparkles,
   LayoutGrid,
+  Apple,
+  Carrot,
+  Milk,
+  Grape,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES } from '@/data/categories';
@@ -30,6 +34,11 @@ const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   'sweets': Candy,
   'sauces': CookingPot,
   'cosmetics': Sparkles,
+  // Backend-only slugs (CategorySeeder.php)
+  'fruits': Apple,
+  'vegetables': Carrot,
+  'dairy': Milk,
+  'wine': Grape,
 };
 
 /** Static icon mapping keyed by category slug from categories.ts */
