@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import {
   Droplets,
   Flower2,
@@ -14,11 +15,20 @@ import {
   LayoutGrid,
   Apple,
   Carrot,
-  Milk,
   Grape,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES } from '@/data/categories';
+
+/* ── Frontend label overrides (rename backend categories) ── */
+const SLUG_LABEL_OVERRIDE: Record<string, string> = {
+  'dairy-products': 'Ξηροί Καρποί',
+};
+
+/* ── Custom image icons (used instead of Lucide for specific categories) ── */
+const SLUG_IMAGE_MAP: Record<string, string> = {
+  'dairy-products': '/icons/categories/nuts-bowl.png',
+};
 
 /* ── Icon mapping (partial slug match) ── */
 const SLUG_ICON_MAP: Record<string, LucideIcon> = {
@@ -36,7 +46,6 @@ const SLUG_ICON_MAP: Record<string, LucideIcon> = {
   'cosmetics': Sparkles,
   'fruits': Apple,
   'vegetables': Carrot,
-  'dairy': Milk,
   'wine': Grape,
 };
 
@@ -68,7 +77,7 @@ const SLUG_BG_MAP: Record<string, string> = {
   'cosmetics': 'bg-category-dairy',
   'fruits': 'bg-category-fruits',
   'vegetables': 'bg-category-vegetables',
-  'dairy': 'bg-category-dairy',
+  'dairy': 'bg-category-fruits',
   'wine': 'bg-category-wine',
 };
 
@@ -117,6 +126,7 @@ interface CategoryItem {
   label: string;
   icon: LucideIcon;
   bg: string;
+  customImage?: string;
 }
 
 /* ── Component ── */
@@ -136,18 +146,30 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
   };
 
   const useDynamic = dynamicCategories && dynamicCategories.length > 0;
+
+  /* Helper: resolve custom image for a slug */
+  function getImageForSlug(slug: string): string | undefined {
+    if (SLUG_IMAGE_MAP[slug]) return SLUG_IMAGE_MAP[slug];
+    for (const [key, img] of Object.entries(SLUG_IMAGE_MAP)) {
+      if (slug.includes(key)) return img;
+    }
+    return undefined;
+  }
+
   const items: CategoryItem[] = useDynamic
     ? dynamicCategories.map((cat) => ({
         slug: cat.slug,
-        label: cat.name,
+        label: SLUG_LABEL_OVERRIDE[cat.slug] || cat.name,
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
+        customImage: getImageForSlug(cat.slug),
       }))
     : CATEGORIES.map((cat) => ({
         slug: cat.slug,
         label: cat.labelEl,
         icon: getIconForSlug(cat.slug),
         bg: getBgForSlug(cat.slug),
+        customImage: getImageForSlug(cat.slug),
       }));
 
   return (
@@ -213,7 +235,17 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   ${item.bg}
                 `}
               >
-                <Icon className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-700" />
+                {item.customImage ? (
+                  <Image
+                    src={item.customImage}
+                    alt={item.label}
+                    width={80}
+                    height={80}
+                    className="w-11 h-11 sm:w-14 sm:h-14 object-contain"
+                  />
+                ) : (
+                  <Icon className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-700" />
+                )}
               </div>
               <span
                 className={`text-xs font-medium text-center leading-tight max-w-[76px] sm:max-w-[88px] line-clamp-2
