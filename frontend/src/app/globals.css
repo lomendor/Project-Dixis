@@ -24,6 +24,16 @@
   --color-primary-foreground: var(--brand-primary-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Category pastel backgrounds (Wolt-style cards) */
+  --color-category-vegetables: #e8f5ed;
+  --color-category-fruits: #fef3c7;
+  --color-category-dairy: #e0f2fe;
+  --color-category-meat: #fee2e2;
+  --color-category-bakery: #f5f0e6;
+  --color-category-honey: #fef9c3;
+  --color-category-wine: #fce7f3;
+  --color-category-olive: #ecfccb;
 }
 
 /* =============================================================================

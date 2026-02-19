@@ -175,7 +175,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               bg-accent-cream
             `}
           >
-            <LayoutGrid className="w-7 h-7 sm:w-9 sm:h-9 text-neutral-500" />
+            <LayoutGrid className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-500" />
           </div>
           <span
             className={`text-xs font-medium text-center leading-tight
@@ -213,7 +213,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   ${item.bg}
                 `}
               >
-                <Icon className="w-7 h-7 sm:w-9 sm:h-9 text-neutral-700" />
+                <Icon className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-700" />
               </div>
               <span
                 className={`text-xs font-medium text-center leading-tight max-w-[76px] sm:max-w-[88px] line-clamp-2
