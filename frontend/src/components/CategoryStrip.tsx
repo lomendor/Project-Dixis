@@ -1,30 +1,58 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Droplets,
+  Flower2,
+  Bean,
+  Wheat,
+  Nut,
+  Leaf,
+  Candy,
+  CookingPot,
+  Sparkles,
+  LayoutGrid,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES } from '@/data/categories';
 
-/** Icon filename mapping for dynamic (API-sourced) categories */
-const slugIconMap: Record<string, string> = {
-  'olive-oil': 'olive',
-  'honey': 'honey',
-  'legumes': 'beans',
-  'grains': 'beans',
-  'rice': 'beans',
-  'pasta': 'pasta',
-  'flours': 'pasta',
-  'nuts': 'nuts',
-  'herbs': 'herbs',
-  'sweets': 'candy',
-  'sauces': 'jar',
-  'cosmetics': 'cosmetics',
+/** Lucide icon mapping for dynamic (API-sourced) categories */
+const SLUG_ICON_MAP: Record<string, LucideIcon> = {
+  'olive-oil': Droplets,
+  'honey': Flower2,
+  'legumes': Bean,
+  'grains': Bean,
+  'rice': Bean,
+  'pasta': Wheat,
+  'flours': Wheat,
+  'nuts': Nut,
+  'herbs': Leaf,
+  'sweets': Candy,
+  'sauces': CookingPot,
+  'cosmetics': Sparkles,
 };
 
-function getIconForSlug(slug: string): string {
-  for (const [key, icon] of Object.entries(slugIconMap)) {
+/** Static icon mapping keyed by category slug from categories.ts */
+const STATIC_ICON_MAP: Record<string, LucideIcon> = {
+  'olive-oil-olives': Droplets,
+  'honey-bee': Flower2,
+  'legumes-grains': Bean,
+  'pasta-flours': Wheat,
+  'nuts-dried': Nut,
+  'herbs-spices': Leaf,
+  'sweets-spreads': Candy,
+  'sauces-preserves': CookingPot,
+  'cosmetics': Sparkles,
+};
+
+function getIconForSlug(slug: string): LucideIcon {
+  // Exact match first (static categories)
+  if (STATIC_ICON_MAP[slug]) return STATIC_ICON_MAP[slug];
+  // Partial match (dynamic API categories)
+  for (const [key, icon] of Object.entries(SLUG_ICON_MAP)) {
     if (slug.includes(key)) return icon;
   }
-  return 'basket';
+  return LayoutGrid;
 }
 
 interface DynamicCategory {
@@ -42,7 +70,7 @@ interface CategoryStripProps {
 interface CategoryItem {
   slug: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryStripProps) {
@@ -71,7 +99,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
     : CATEGORIES.map((cat) => ({
         slug: cat.slug,
         label: cat.labelEl,
-        icon: cat.emoji,
+        icon: getIconForSlug(cat.slug),
       }));
 
   return (
@@ -92,18 +120,13 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
             }
           `}
         >
-          <Image
-            src="/icons/categories/basket.png"
-            alt=""
-            width={20}
-            height={20}
-            className="w-5 h-5 flex-shrink-0"
-          />
+          <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
           <span>Όλα</span>
         </button>
 
         {/* Category pills */}
         {items.map((item) => {
+          const Icon = item.icon;
           const isSelected = currentCat === item.slug;
 
           return (
@@ -117,18 +140,12 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                 transition-all duration-200
                 ${
                   isSelected
-                    ? 'bg-primary text-white shadow-md'
-                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                    ? 'bg-primary text-white shadow-card'
+                    : 'bg-white text-neutral-700 border border-accent-gold/20 hover:border-accent-gold/50 hover:bg-accent-cream'
                 }
               `}
             >
-              <Image
-                src={`/icons/categories/${item.icon}.png`}
-                alt=""
-                width={20}
-                height={20}
-                className="w-5 h-5 flex-shrink-0"
-              />
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
               <span>{item.label}</span>
             </button>
           );
