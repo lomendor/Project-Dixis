@@ -1,8 +1,8 @@
 /**
- * Categories v4: 9 locker-compatible categories
- * Removed: dairy, fruits-vegetables (need refrigeration), beverages (alcohol license)
- * Merged: grains-rice into legumes, flours-bakery into pasta
- * Added: cosmetics (natural cosmetics)
+ * Categories v5: 10 definitive locker-compatible categories
+ *
+ * Phase 10: Unified backend + frontend taxonomy.
+ * All shelf-stable, parcel-deliverable Greek artisan products.
  * Icons: Lucide React SVGs (see CategoryStrip.tsx for rendering)
  */
 
@@ -12,7 +12,7 @@ export interface Category {
   labelEl: string;
   labelEn: string;
   iconName: string; // Lucide icon name (rendered by CategoryStrip)
-  /** Tailwind bg color class for unselected chip */
+  /** Tailwind bg color class for card */
   chipBg: string;
 }
 
@@ -28,66 +28,74 @@ export const CATEGORIES: Category[] = [
   {
     id: 2,
     slug: 'honey-bee',
-    labelEl: 'Μέλι & Προϊόντα Μελισσοκομίας',
+    labelEl: 'Μέλι & Προϊόντα Μέλισσας',
     labelEn: 'Honey & Bee Products',
     iconName: 'Flower2',
     chipBg: 'bg-category-honey',
   },
   {
     id: 3,
-    slug: 'legumes-grains',
-    labelEl: 'Όσπρια & Δημητριακά',
-    labelEn: 'Legumes & Grains',
-    iconName: 'Bean',
-    chipBg: 'bg-category-vegetables',
+    slug: 'nuts-dried',
+    labelEl: 'Ξηροί Καρποί',
+    labelEn: 'Nuts & Dried Fruits',
+    iconName: 'Nut',
+    chipBg: 'bg-category-nuts',
   },
   {
     id: 4,
-    slug: 'pasta-flours',
-    labelEl: 'Ζυμαρικά & Αλεύρια',
-    labelEn: 'Pasta & Flours',
-    iconName: 'Wheat',
-    chipBg: 'bg-category-bakery',
-  },
-  {
-    id: 5,
-    slug: 'nuts-dried',
-    labelEl: 'Ξηροί Καρποί & Σνακ',
-    labelEn: 'Nuts & Snacks',
-    iconName: 'Nut',
-    chipBg: 'bg-category-fruits',
-  },
-  {
-    id: 6,
-    slug: 'herbs-spices',
-    labelEl: 'Βότανα & Μπαχαρικά',
-    labelEn: 'Herbs & Spices',
-    iconName: 'Leaf',
-    chipBg: 'bg-category-vegetables',
-  },
-  {
-    id: 7,
-    slug: 'sweets-spreads',
-    labelEl: 'Γλυκά & Αλείμματα',
-    labelEn: 'Sweets & Spreads',
-    iconName: 'Candy',
-    chipBg: 'bg-category-fruits',
-  },
-  {
-    id: 8,
-    slug: 'sauces-preserves',
-    labelEl: 'Σάλτσες & Τουρσιά',
-    labelEn: 'Sauces & Pickles',
-    iconName: 'CookingPot',
-    chipBg: 'bg-category-meat',
-  },
-  {
-    id: 9,
     slug: 'cosmetics',
     labelEl: 'Φυσικά Καλλυντικά',
     labelEn: 'Natural Cosmetics',
     iconName: 'Sparkles',
-    chipBg: 'bg-category-dairy',
+    chipBg: 'bg-category-cosmetics',
+  },
+  {
+    id: 5,
+    slug: 'beverages',
+    labelEl: 'Ποτά',
+    labelEn: 'Beverages',
+    iconName: 'Grape',
+    chipBg: 'bg-category-beverages',
+  },
+  {
+    id: 6,
+    slug: 'sweets-jams',
+    labelEl: 'Γλυκά & Μαρμελάδες',
+    labelEn: 'Sweets & Jams',
+    iconName: 'Candy',
+    chipBg: 'bg-category-sweets',
+  },
+  {
+    id: 7,
+    slug: 'pasta',
+    labelEl: 'Ζυμαρικά',
+    labelEn: 'Pasta',
+    iconName: 'Wheat',
+    chipBg: 'bg-category-pasta',
+  },
+  {
+    id: 8,
+    slug: 'herbs-spices-tea',
+    labelEl: 'Βότανα, Μπαχαρικά & Τσάι',
+    labelEn: 'Herbs, Spices & Tea',
+    iconName: 'Leaf',
+    chipBg: 'bg-category-herbs',
+  },
+  {
+    id: 9,
+    slug: 'sauces-spreads',
+    labelEl: 'Σάλτσες & Αλείμματα',
+    labelEn: 'Sauces & Spreads',
+    iconName: 'CookingPot',
+    chipBg: 'bg-category-sauces',
+  },
+  {
+    id: 10,
+    slug: 'legumes-grains',
+    labelEl: 'Όσπρια & Δημητριακά',
+    labelEn: 'Legumes & Grains',
+    iconName: 'Bean',
+    chipBg: 'bg-category-legumes',
   },
 ];
 

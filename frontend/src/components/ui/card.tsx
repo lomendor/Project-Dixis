@@ -123,25 +123,27 @@ export function ProductCard({
 export interface CategoryCardProps extends React.HTMLAttributes<HTMLDivElement> {
   icon: React.ReactNode;
   label: string;
-  category?: 'vegetables' | 'fruits' | 'dairy' | 'meat' | 'bakery' | 'honey' | 'wine' | 'olive';
+  category?: 'olive' | 'honey' | 'nuts' | 'cosmetics' | 'beverages' | 'sweets' | 'pasta' | 'herbs' | 'sauces' | 'legumes';
 }
 
 export function CategoryCard({
   className,
   icon,
   label,
-  category = 'vegetables',
+  category = 'olive',
   ...props
 }: CategoryCardProps) {
   const categoryColors = {
-    vegetables: 'bg-category-vegetables',
-    fruits: 'bg-category-fruits',
-    dairy: 'bg-category-dairy',
-    meat: 'bg-category-meat',
-    bakery: 'bg-category-bakery',
-    honey: 'bg-category-honey',
-    wine: 'bg-category-wine',
     olive: 'bg-category-olive',
+    honey: 'bg-category-honey',
+    nuts: 'bg-category-nuts',
+    cosmetics: 'bg-category-cosmetics',
+    beverages: 'bg-category-beverages',
+    sweets: 'bg-category-sweets',
+    pasta: 'bg-category-pasta',
+    herbs: 'bg-category-herbs',
+    sauces: 'bg-category-sauces',
+    legumes: 'bg-category-legumes',
   };
 
   return (
