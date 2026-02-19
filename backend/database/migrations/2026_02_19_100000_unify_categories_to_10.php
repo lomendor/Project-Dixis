@@ -70,8 +70,19 @@ return new class extends Migration
 
     public function up(): void
     {
-        // Step 1: Create all 10 target categories (if they don't exist)
         $now = now();
+
+        // Step 0: Temporarily rename old categories that will be merged/deleted
+        // to avoid unique name collisions (e.g. nuts-dried-fruits already has
+        // name "Ξηροί Καρποί" which collides with new nuts-dried target).
+        $allOldSlugs = array_merge(array_keys(self::SLUG_MAP), self::DELETE_SLUGS);
+        foreach ($allOldSlugs as $oldSlug) {
+            DB::table('categories')
+                ->where('slug', $oldSlug)
+                ->update(['name' => DB::raw("name || ' [migrating]'"), 'updated_at' => $now]);
+        }
+
+        // Step 1: Create all 10 target categories (if they don't exist)
         foreach (self::TARGET_CATEGORIES as $slug => $name) {
             $exists = DB::table('categories')->where('slug', $slug)->exists();
             if (! $exists) {
