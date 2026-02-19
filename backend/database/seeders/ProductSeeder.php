@@ -26,13 +26,12 @@ class ProductSeeder extends Seeder
             return;
         }
 
-        // Get categories for assignment
-        $vegetables = Category::where('slug', 'vegetables')->first();
-        $fruits = Category::where('slug', 'fruits')->first();
+        // Get categories for assignment (Phase 10: unified slugs)
+        $legumeGrains = Category::where('slug', 'legumes-grains')->first();
         $oliveOil = Category::where('slug', 'olive-oil-olives')->first();
-        $herbs = Category::where('slug', 'herbs-spices')->first();
-        $dairy = Category::where('slug', 'dairy-products')->first();
-        $honey = Category::where('slug', 'honey-preserves')->first();
+        $herbsTea = Category::where('slug', 'herbs-spices-tea')->first();
+        $nutsDried = Category::where('slug', 'nuts-dried')->first();
+        $honey = Category::where('slug', 'honey-bee')->first();
 
         // Get producers by slug for explicit assignment, with fallbacks
         $ktima = $producers->firstWhere('slug', 'ktima-papadopoulou') ?? $producers->firstWhere('slug', 'green-farm-co') ?? $producers->first();
@@ -58,7 +57,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$vegetables],
+                'categories' => [$legumeGrains],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1592841200221-a6898f307baa', 'is_primary' => true, 'sort_order' => 0],
                     ['url' => 'https://images.unsplash.com/photo-1546470427-a465b4e8c3c8', 'is_primary' => false, 'sort_order' => 1],
@@ -80,7 +79,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$vegetables],
+                'categories' => [$legumeGrains],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1', 'is_primary' => true, 'sort_order' => 0],
                 ],
@@ -101,7 +100,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$herbs],
+                'categories' => [$herbsTea],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1629978452215-6ab392d7abb9', 'is_primary' => true, 'sort_order' => 0],
                 ],
@@ -145,7 +144,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$honey ?? $oliveOil],
+                'categories' => [$honey],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38', 'is_primary' => true, 'sort_order' => 0],
                 ],
@@ -167,7 +166,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$fruits],
+                'categories' => [$legumeGrains],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', 'is_primary' => true, 'sort_order' => 0],
                 ],
@@ -188,7 +187,7 @@ class ProductSeeder extends Seeder
                     'status' => 'available',
                     'is_active' => true,
                 ],
-                'categories' => [$dairy ?? $vegetables],
+                'categories' => [$nutsDried],
                 'images' => [
                     ['url' => 'https://images.unsplash.com/photo-1626957341926-98752fc2ba90', 'is_primary' => true, 'sort_order' => 0],
                 ],

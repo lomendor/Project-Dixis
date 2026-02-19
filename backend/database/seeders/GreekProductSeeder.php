@@ -95,7 +95,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'sweets-preserves',
+                'category' => 'sweets-jams',
                 'image' => 'https://images.unsplash.com/photo-1597714026720-8f74c62310ba',
             ],
             [
@@ -110,7 +110,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'dairy-products',
+                'category' => 'nuts-dried',
                 'image' => 'https://images.unsplash.com/photo-1559561853-08451507cbe7',
             ],
             [
@@ -125,7 +125,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => true,
                     'is_active' => true,
                 ],
-                'category' => 'fruits',
+                'category' => 'legumes-grains',
                 'image' => 'https://images.unsplash.com/photo-1547036967-23d11aacaee0',
             ],
             [
@@ -140,7 +140,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'vegetables',
+                'category' => 'legumes-grains',
                 'image' => 'https://images.unsplash.com/photo-1518977676601-b53f82ber39a',
             ],
             [
@@ -155,7 +155,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'pasta-trahanas',
+                'category' => 'pasta',
                 'image' => 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9',
             ],
 
@@ -172,7 +172,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => true,
                     'is_active' => true,
                 ],
-                'category' => 'honey-preserves',
+                'category' => 'honey-bee',
                 'image' => 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
             ],
             [
@@ -187,7 +187,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'wine-beverages',
+                'category' => 'beverages',
                 'image' => 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b',
             ],
             [
@@ -202,7 +202,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => true,
                     'is_active' => true,
                 ],
-                'category' => 'herbs-spices',
+                'category' => 'herbs-spices-tea',
                 'image' => 'https://images.unsplash.com/photo-1515586000433-45406d8e6662',
             ],
             [
@@ -217,7 +217,7 @@ class GreekProductSeeder extends Seeder
                     'is_organic' => false,
                     'is_active' => true,
                 ],
-                'category' => 'wine-beverages',
+                'category' => 'beverages',
                 'image' => 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d',
             ],
         ];
