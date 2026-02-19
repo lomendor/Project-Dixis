@@ -61,7 +61,7 @@
 
 **User-reported issues (for later):**
 - Product renaming (improve Greek product names)
-- Photo mismatch (some products show different photo on card vs detail page)
+- ~~Photo mismatch~~ ✅ FIXED (PR #3056, migration syncs image_url from product_images)
 
 ---
 
@@ -78,6 +78,7 @@
 
 ## Recently Done (last 10)
 
+- **IMAGE-SYNC-FIX** — Fixed photo mismatch bug: 7/17 products showed different image on card vs detail. Migration syncs `products.image_url` from `product_images`. Seeder also fixed to prevent recurrence. (PR #3056, deployed 2026-02-19) ✅
 - **CATEGORY-UNIFY-10** — Unified 14 backend + 9 frontend categories into exactly 10 definitive locker-compatible categories. Backend migration reassigns all products via `category_product` pivot. Frontend cleanup removes all hacks (SLUG_LABEL_OVERRIDE, STATIC_ICON_MAP, partial matching). 10 in DB, 7 visible (cosmetics/sauces/legumes pending products). (PRs #3052-#3054, deployed 2026-02-19) ✅
 - **UI-REDESIGN-10PHASES** — Premium marketplace visual overhaul (Phases 1-10, 17 PRs): Warm cream backgrounds, full-width layout, gold accents on header/footer/filters, producer prominence on cards, Wolt-style category cards with pastel backgrounds, 4 custom 3D icons (honey/olive-oil/nuts/cosmetics) + 6 Lucide SVGs, bigger 100px desktop cards. (PRs #3038-#3050, deployed 2026-02-17–2026-02-19) ✅
 - **HARDENING-5PR** — Production hardening: Viva dead code removed, dead stubs deleted, robots.txt expanded, cart TTL, demo dead code deleted. (PRs #2971-#2977, deployed 2026-02-17) ✅
