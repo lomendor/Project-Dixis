@@ -26,16 +26,16 @@
   --font-mono: var(--font-geist-mono);
 
   /* Category pastel backgrounds — 10 unified categories */
-  --color-category-olive: #ecfccb;
-  --color-category-honey: #fef9c3;
-  --color-category-nuts: #fef3c7;
-  --color-category-cosmetics: #e0f2fe;
-  --color-category-beverages: #fce7f3;
-  --color-category-sweets: #fde2e4;
-  --color-category-pasta: #f5f0e6;
-  --color-category-herbs: #e8f5ed;
-  --color-category-sauces: #fee2e2;
-  --color-category-legumes: #efebe9;
+  --color-category-olive: #d4edbc;
+  --color-category-honey: #fce588;
+  --color-category-nuts: #f5d5b0;
+  --color-category-cosmetics: #f5c6e0;
+  --color-category-beverages: #d5c8e8;
+  --color-category-sweets: #f8c0c8;
+  --color-category-pasta: #f5e4a0;
+  --color-category-herbs: #b8e0cc;
+  --color-category-sauces: #f5c8a8;
+  --color-category-legumes: #d8ccb0;
 }
 
 /* =============================================================================
