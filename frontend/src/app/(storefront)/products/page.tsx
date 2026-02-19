@@ -314,11 +314,11 @@ export default async function Page({ searchParams }: PageProps) {
         <div className="mb-6">
           <Suspense
             fallback={
-              <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
+              <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 min-w-[76px] sm:min-w-[88px]">
-                    <div className="w-[68px] h-[68px] sm:w-[80px] sm:h-[80px] rounded-2xl bg-accent-beige/50 animate-pulse" />
-                    <div className="h-3 w-12 bg-accent-beige/50 rounded animate-pulse" />
+                  <div key={i} className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px]">
+                    <div className="w-[76px] h-[76px] sm:w-[100px] sm:h-[100px] rounded-2xl bg-accent-beige/50 animate-pulse" />
+                    <div className="h-3.5 w-14 bg-accent-beige/50 rounded animate-pulse" />
                   </div>
                 ))}
               </div>

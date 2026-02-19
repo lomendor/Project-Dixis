@@ -178,17 +178,17 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
   return (
     <div className="w-full" role="group" aria-label="Κατηγορίες προϊόντων">
       {/* Horizontal scroll mobile, wrap desktop */}
-      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
+      <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible scrollbar-hide">
         {/* "Όλα" card */}
         <button
           onClick={() => handleCategoryClick(null)}
           aria-pressed={!currentCat}
           aria-label="Όλες οι κατηγορίες"
-          className="flex flex-col items-center gap-1.5 min-w-[76px] sm:min-w-[88px] group"
+          className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px] group"
         >
           <div
             className={`
-              w-[68px] h-[68px] sm:w-[80px] sm:h-[80px]
+              w-[76px] h-[76px] sm:w-[100px] sm:h-[100px]
               rounded-2xl flex items-center justify-center
               transition-all duration-200
               group-hover:scale-105 group-hover:shadow-card
@@ -200,10 +200,10 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               bg-accent-cream
             `}
           >
-            <LayoutGrid className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-500" />
+            <LayoutGrid className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-500" />
           </div>
           <span
-            className={`text-xs font-medium text-center leading-tight
+            className={`text-xs sm:text-sm font-medium text-center leading-tight
               ${!currentCat ? 'text-primary font-semibold' : 'text-neutral-600'}
             `}
           >
@@ -222,11 +222,11 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               onClick={() => handleCategoryClick(item.slug)}
               aria-pressed={isSelected}
               aria-label={`Κατηγορία: ${item.label}`}
-              className="flex flex-col items-center gap-1.5 min-w-[76px] sm:min-w-[88px] group"
+              className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px] group"
             >
               <div
                 className={`
-                  w-[68px] h-[68px] sm:w-[80px] sm:h-[80px]
+                  w-[76px] h-[76px] sm:w-[100px] sm:h-[100px]
                   rounded-2xl flex items-center justify-center
                   transition-all duration-200
                   group-hover:scale-105 group-hover:shadow-card
@@ -242,16 +242,16 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                   <Image
                     src={item.customImage}
                     alt={item.label}
-                    width={80}
-                    height={80}
-                    className="w-[56px] h-[56px] sm:w-[68px] sm:h-[68px] object-contain"
+                    width={100}
+                    height={100}
+                    className="w-[62px] h-[62px] sm:w-[84px] sm:h-[84px] object-contain"
                   />
                 ) : (
-                  <Icon className="w-9 h-9 sm:w-11 sm:h-11 text-neutral-700" />
+                  <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-700" />
                 )}
               </div>
               <span
-                className={`text-xs font-medium text-center leading-tight max-w-[76px] sm:max-w-[88px] line-clamp-2
+                className={`text-xs sm:text-sm font-medium text-center leading-tight max-w-[84px] sm:max-w-[108px] line-clamp-2
                   ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
                 `}
               >
