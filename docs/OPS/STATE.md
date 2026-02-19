@@ -1,11 +1,28 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-12 (UX-QUICK-WINS-01)
+**Last Updated**: 2026-02-19 (CATEGORY-UNIFY-10 + UI-REDESIGN)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
 > **Current size**: ~600 lines (target ≤350). ⚠️ Over limit — archive next pass.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-02-19 — CATEGORY-UNIFY-10 + UI-REDESIGN (Phases 1-10)
+
+**Status**: ✅ DONE (deployed)
+
+**What was done**:
+- Unified 14 backend categories → 10 via migration (reassign products via pivot table)
+- Unified 9 frontend categories → 10 (matching slugs, all hacks removed)
+- Premium UI redesign: cream backgrounds, gold accents, warm header/footer
+- Wolt-style category cards with pastel backgrounds + custom 3D icons
+- 4 custom 3D icons (honey/olive-oil/nuts/cosmetics) + 6 Lucide SVGs
+- Migration fix for unique name collision (PR #3054)
+
+**PRs**: #3038-#3054 (17 PRs total for UI + 3 PRs for category unification)
+**Production**: Deployed, 10 categories live, 7 visible (3 pending products), healthz 200
 
 ---
 

@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-17 (CI E2E fully GREEN — no more --admin bypass needed)
+**Updated**: 2026-02-19 (Phase 10 — 10 Definitive Categories deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -28,34 +28,27 @@
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
 - **Commission System**: Configurable rules (B2C/B2B, per-producer, per-category, amount tiers), wired to checkout, admin CRUD + preview calculator, producer sees breakdown on orders, feature flag toggle in admin settings. **Flag OFF in production** — ready to activate. ✅
 - **Payout Infrastructure**: IBAN field on producer profile, monthly settlement generation command (14-day hold, €20 minimum), admin settlement dashboard (view/pay/cancel), producer payout history page, CSV export for bank transfers. **Ready to use when commission flag is activated.** ✅
+- **Categories**: 10 definitive locker-compatible categories, unified backend + frontend, Wolt-style cards with custom 3D icons ✅
 
 ### What is BROKEN or MISSING
-- **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01) — Self-service register → onboarding form → admin approval → email notifications
-- **Producer Onboarding Flow**: ✅ FIXED — Form collects business_name, phone, city, region, description, tax_id
-- **Admin Approve Producers**: ✅ FIXED — Laravel endpoints + frontend proxy + polished admin UI (ADMIN-PRODUCERS)
-- **Viva Wallet**: ✅ REMOVED (VIVA-CLEANUP) — All dead code deleted (unauthenticated payment endpoints were a security risk)
-- **Seed Data**: ✅ FIXED (SEED-DATA-FIX) — All producers, products, categories now in Greek with rich descriptions
-- **20 stale PRs**: ✅ FIXED (STALE-PR-CLEANUP) — All 5 remaining PRs closed with explanations
+- **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01)
+- **Producer Onboarding Flow**: ✅ FIXED
+- **Admin Approve Producers**: ✅ FIXED (ADMIN-PRODUCERS)
+- **Viva Wallet**: ✅ REMOVED (VIVA-CLEANUP)
+- **Seed Data**: ✅ FIXED (SEED-DATA-FIX)
+- **20 stale PRs**: ✅ FIXED (STALE-PR-CLEANUP)
 
 ---
 
 ## WIP (max 1)
 
-**None** — Ready for next task. CI is GREEN (all PR merges work without `--admin` bypass).
+**None** — Ready for next task. CI is GREEN.
 
 ---
 
 ## NEXT — Feature Backlog
 
 **Commission + Payout infrastructure DONE. Waiting for real producers + orders.**
-
-| Step | What | Status |
-|------|------|--------|
-| PAYOUT-01 | IBAN field on Producer + settings form | ✅ Merged (PR #2952) |
-| PAYOUT-02 | Settlement generation command + model | ✅ Merged (PR #2954) |
-| PAYOUT-03 | Admin settlement dashboard | ✅ Merged (PR #2955) |
-| PAYOUT-04 | Producer payout history page | ✅ Merged (PR #2956) |
-| PAYOUT-05 | Settlement CSV export | ✅ Merged (PR #2958) |
 
 **Owner decisions (locked 2026-02-16):**
 - Commission activation: after 1st real producer order
@@ -65,6 +58,10 @@
 **Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
 **Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
 **Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
+
+**User-reported issues (for later):**
+- Product renaming (improve Greek product names)
+- Photo mismatch (some products show different photo on card vs detail page)
 
 ---
 
@@ -81,64 +78,16 @@
 
 ## Recently Done (last 10)
 
-- **HARDENING-5PR** — Production hardening (zero new features, net ~-750 LOC): (1) VIVA-CLEANUP (CRITICAL): Deleted all Viva Wallet dead code — unauthenticated `/api/viva-verify` could mark orders as paid, webhook skipped signature validation. 7 files, -836 LOC (PR #2971). (2) DEAD-STUBS: Deleted 6 superseded files — `useProducerAuth` hook (0 importers), producer status/onboarding stubs (always 503/null), order-lookup (always 404), checkout/success (dead page). -644 LOC (PR #2972). (3) ROBOTS-HARDEN: Expanded robots.txt disallow from `/ops` only to 9 private paths (`/admin`, `/api`, `/auth`, `/producer`, `/account`, `/my`, `/checkout`, `/internal`) (PR #2973). (4) CART-EXPIRY: Added 7-day TTL to Zustand cart — `_lastUpdated` timestamp on every mutation, auto-clear on rehydrate if stale. Prevents checkout failures from outdated prices/deleted products (PR #2975). (5) DEMO-DEAD-CODE: Deleted obsolete demo product fallback layer — `lib/products.ts` (3-tier fallback, 0 importers), demo-products API + page, products-empty redirect, public/demo/products.json. -159 LOC (PR #2977). All 5 PRs merged. ✅
-- **HOUSEKEEPING-3PR** — Production housekeeping (no new features): (1) SEO: aggregateRating in product JSON-LD for Google star ratings + dynamic generateMetadata on /products catalog page (PR #2965). (2) Dead TODO cleanup: removed all 10 stale TODOs across 8 files — zero TODO/FIXME remaining in src/ (PR #2966). (3) a11y: aria-labels on BuyBox quantity + UploadImage file input, explicit img dimensions to prevent CLS (PR #2967). All 3 PRs merged without --admin bypass. ✅
-- **CI-E2E-GREEN** — Fixed 3 E2E test failures that blocked every PR merge (required --admin bypass): (1) auth-nav-regression: /products SSR fetch hung in CI because getServerApiUrl() pointed to non-existent Laravel — added CI fallback to 127.0.0.1:3001 (PR #2962). (2) pass-54-thank-you-api: glob pattern `*` didn't match multi-segment URL `/orders/by-token/123` — changed to `**` (PR #2963). (3) MPC3 checkout submit: full checkout requires real Laravel backend — skipped in CI (PR #2963). **Result: 96 tests pass, 10 skip, 0 fail. No more --admin bypass needed.** ✅
-- **S3-01: COST-TRANSPARENCY** — Green trust badge on every product detail page: "Ο παραγωγός λαμβάνει το 88% της τιμής / Μόνο 12% παρακρατείται για τη λειτουργία της πλατφόρμας". Static display using locked B2C rate (12%). Core differentiator per PRD. (PR #2960, deployed 2026-02-16) ✅
-- **PAYOUT-INFRASTRUCTURE** — Complete payout system: (1) IBAN + bank_account_holder field on Producer model with conditional visibility (PR #2952). (2) CommissionSettlement model + `dixis:generate-settlements` artisan command with 14-day hold, €20 min, monthly schedule (PR #2954). (3) Admin settlement dashboard at /admin/settlements — view/pay/cancel settlements, summary cards, IBAN display (PR #2955). (4) Producer payout history at /producer/settlements — see pending/paid amounts, IBAN reminder (PR #2956). (5) CSV export for bank transfer batches with BOM for Excel UTF-8, semicolon delimiter (PR #2958). (PRs #2952-#2958, merged 2026-02-16) ✅
-- **COMMISSION-ENGINE** — Full commission system: (1) CommissionService wired to CheckoutService — creates Commission record per order when flag ON (PR #2932). (2) Admin CRUD for commission rules + preview calculator at /admin/commissions (PR #2933). (3) Feature flag activation via env var COMMISSION_ENGINE_ENABLED + producer order detail shows commission breakdown (PR #2934). (4) Admin toggle in /admin/settings to activate/deactivate via Pennant (PR #2935). Default rules seeded: B2C 12%, B2B 7%, B2C volume 10%. **Flag OFF in production — ready to activate.** (PRs #2932-#2935, merged 2026-02-16) ✅
-- **PRODUCER-LAUNCH-PREP-C2** — Phase C complete: (C1) Full producer registration flow tested E2E on production (register→onboard→approve→create product→visible in catalog). (C2) Auto-slug from Greek titles (greekToSlug transliteration), image upload auth fixed for producers (Sanctum Bearer token support), storage path fixed for standalone mode, leaflet dependency fixed. (A3) Seed data verified, Unsplash images added to all 17 products. (PR #2937, deployed 2026-02-16) ✅
-- **CULTIVATION-FILTER-UI** — Pill-style cultivation type filter on /products page (Βιολογική, Παραδοσιακή, Συμβατική). Server-side filtering via Laravel ?cultivation_type= param. Counts per type, auto-hidden when no data. All 17 products now have cultivation_type values. (PR #2930, deployed 2026-02-16) ✅
-- **FAVICON-FIX** — Standalone build missing public/ files (favicons, hero images). Fixed postbuild to copy public/. to standalone output. (PR #2929, deployed 2026-02-16) ✅
-- **PM2-ENV-FIX** — Next.js standalone mode doesn't load .env at runtime. Fixed ecosystem.config.js to parse shared env file and inject vars via PM2 env block. (PR #2927, deployed 2026-02-16) ✅
-- **CATEGORIES-NGINX-FIX** — /api/categories fell into Laravel catch-all (404). Created /api/public/categories + /api/admin/categories/[id] routes matching nginx whitelist. Updated 5 frontend fetch calls. (PR #2925, deployed 2026-02-16) ✅
-- **CATEGORY-MIGRATION** — Category table had no migration file (created via db push). Created migration + resolved as applied on production. (PR #2923, deployed 2026-02-16) ✅
-- **OPS-CLEANUP** — Closed 50+ stale automated ops issues (E2E smoke failures + uptime alerts from before fixes). Closed stale docs PR #2810. 0 open issues. ✅
-- **S1-01: CULTIVATION-TYPE** — Products now track cultivation method (organic_certified, biodynamic, traditional_natural, etc.). Migration + model + API filter + producer forms + product detail badge + homepage filter. Replaces binary is_organic with richer enum. (PR #2908, deployed 2026-02-15) ✅
-- **BACKLOG-ROADMAP** — Master backlog created from owner's PRD with 6 stages and 25+ tickets. (PR #2907, 2026-02-15) ✅
-- **ADMIN-NOTIFY-01** — Admin email notification when new order placed: AdminNewOrder Mailable, Greek Blade template (order total, customer, payment method, admin link), hooked into OrderEmailService as Step C. Idempotent, feature-flagged. ADMIN_NOTIFY_EMAIL set on prod. (PR #2905, deployed 2026-02-15) ✅
-- **BRAND-COLOR-UNIFY-04** — Brand color round 4: auth pages (login, register, forgot/reset-password, verify-email), CartClient, CartBadge, CustomerDetailsForm, track page, Toast, FilterStrip — all gray→neutral, green/emerald→primary. (PR #2904, deployed 2026-02-15) ✅
-- **PALETTE-REFRESH** — Freshen brand palette: primary #0f5c2e→#1a7a3e (brighter), new primary-light #1f8f48, Hellenize Navigation labels (all Greek). (PR #2903, deployed 2026-02-15) ✅
-- **BRAND-COLOR-UNIFY-03** — Brand color round 3: shared components (Navigation, CategoryStrip, ProductCard, ProductSearchInput, AddToCartButton, PaymentMethodSelector, ProducerCard). Eliminates last emerald + off-brand green/gray in customer-facing UI. (PR #2901, deployed 2026-02-15) ✅
-- **BRAND-COLOR-UNIFY-02** — Brand color round 2: homepage (HomeClient.tsx) hero/filters/product cards, Add-to-Cart button, loading skeletons — all gray→neutral, green→primary. (PR #2899, deployed 2026-02-15) ✅
-- **S1-02: Reviews & Ratings** — Full review system: reviews table (user_id, product_id, order_id, rating 1-5, title, comment, verified_purchase, approved), ReviewController (public list + summary + auth create), ReviewResource, star rating on product cards + detail page, ReviewSection client component with submit form. Verified purchase auto-detection. (PRs #2911, #2912, deployed 2026-02-15) ✅
-- **S1-01: Cultivation Type** — Add cultivation_type (organic_certified, biodynamic, etc.) to products: migration, model, API, form fields, product cards + detail page badges, catalog filter. (PR #2908, deployed 2026-02-15) ✅
-- **BRAND-COLOR-UNIFY-01** — Unify all storefront pages to brand color palette: gray→neutral, emerald/blue/green→primary across 9 files (cart, checkout, success, order, thank-you, products, Stripe payment). Zero logic changes, pure visual consistency. (PR #2896, deployed 2026-02-15) ✅
-- **PRODUCT-DETAIL-POLISH-01** — Product detail page UX: brand-consistent colors (text-blue-600 → text-primary), chevron breadcrumb, inline price+stock layout, producer name above category. (PR #2893, deployed 2026-02-15) ✅
-- **OG-SEO-FIX-01** — Fix social sharing previews + structured data: all logo.svg refs → logo.png (real Dixis logo). Delete dead logo.svg route handler + old green abstract SVG + 5 unused Next.js boilerplate SVGs. (PR #2892, deployed 2026-02-15) ✅
-- **PHASE-4B: Cart Sync Race Fix** — Version-counter optimistic lock in Zustand cart store. If user adds item during login cart sync, mergeServerCart() merges instead of overwriting — zero item loss. (PR #2890, deployed 2026-02-15) ✅
-- **UI-POLISH: Favicon + Minimal Header** — Replaced all icons (favicon, PWA, apple-touch) with correct Dixis logo (fruits/leaves). Removed Επικοινωνία from header nav (footer only). Cleaner, more minimal navigation. (PRs #2885-#2887, deployed 2026-02-15) ✅
-- **PHASE-4A: Zod API Validation** — Non-blocking Zod schemas for 12 critical API response endpoints (Product, Order, ShippingQuote, User, Auth, PaymentConfig). Validates at runtime, logs mismatches to Sentry, never crashes. Also fixed CI E2E setup (mock_session cookie for middleware auth). (PR #2883, deployed 2026-02-15) ✅
-- **GREEK-UI-POLISH** — Hellenize last English strings: SkipLink ("Μετάβαση στο περιεχόμενο"), Email labels ("Ηλ. Ταχυδρομείο"). Fixed /producers public route (exact segment matching in requiresAuth). (PRs #2879, #2881, deployed 2026-02-15) ✅
-- **STRATEGIC-FIX-2B + V1-REALITY-SYNC** — Middleware auth for /producer, /admin, /account, /ops (cookie-based redirect to login). Updated all PRD docs to match production reality (email, Stripe, verification all DONE). Email system verified e2e. (PRs #2872-#2876, deployed 2026-02-15) ✅
-- **SECURITY-AUDIT-FIX-01** — Deep functional audit found CRITICAL: GET /api/v1/public/orders exposed ALL orders without auth. Fixed: removed public order list/detail routes, added UUID-based order lookup (by-token), thank-you page uses token not ID, commission-preview requires auth. Also fixed: homepage product images, producers location field mapping, PM2 env vars for standalone. (PRs #2826-#2828, deployed 2026-02-13) ✅
-- **LAUNCH-POLISH-01** — Hellenize ALL metadata (title, description, OG, Twitter, JSON-LD, manifest). Rebrand "Project Dixis" → "Dixis". Remove fake "500+" social proof. Enable card payments on prod (Stripe flag + publishable key). (PRs #2802, #2804, deployed 2026-02-13) ✅
-- **UX-QUICK-WINS-01** — Hellenize all English UI strings (HomeClient filters/cards, contact, waitlist, order-lookup, footer). Rewrite 404/500 error pages with proper layout + CTAs. New `/faq` page (Greek accordion). (deployed 2026-02-12) ✅
-- **L6-I18N-UNIFY** — Remove next-intl, unify on LocaleContext. Delete deprecated CheckoutClient.tsx (561 LOC). Architecture audit 100% resolved. (deployed 2026-02-12) ✅
-- **H1-ORDER-MODEL Phase 2** — Proxy admin order detail/summary to Laravel API. Remaining: status+bulk routes still use Prisma Order (email/audit coupling) (deployed 2026-02-12) ✅
-- **H1-ORDER-MODEL Phase 1** — Delete CheckoutOrder model (never populated in prod), 8 dead routes/pages, orderStore.ts. Stub admin detail/summary. Remaining: Prisma Order (Phase 2) (deployed 2026-02-12) ✅
-- **AUDIT-CLEANUP-02** — Delete 3 orphaned order pages + producer DELETE route, convert 3 inline-style files to Tailwind, mark 5 audit items WONTFIX/DEFER (deployed 2026-02-12) ✅
-- **CONSOLE-CLEANUP** — Remove PII from logs (phone/email in 4 files), remove 30+ debug console.log from 6 files (PR #2792, deployed 2026-02-12) ✅
-- **CSP-FIX + PRISMA-IMPORT-UNIFY** — Delete dead `csp.ts` (localhost in CSP), unify all Prisma imports to `@/lib/db/client`, delete 2 deprecated shim files (PR #2789, deployed 2026-02-12) ✅
-- **ORDER-CONSOLIDATE** — Delete 5 duplicate tracking APIs/pages (169 LOC), fix email tracking link + confirmation page to use canonical `/track/` path (PR #2788, deployed 2026-02-12) ✅
-- **DEAD-CODE-CLEANUP** — Delete 42 dead files (3,058 LOC): 16 components, 6 libs, 5 API routes, 8 legacy/dev pages, 3 redirect stubs (PR #2786, deployed 2026-02-12) ✅
-- **AUTH-FIX-CRITICAL** — Add requireAdmin() to 4 unprotected admin endpoints + production blocks on /api/ops/status and /dev-check (PR #2783, deployed 2026-02-12) ✅
-- **ARCH-AUDIT** — Full architecture audit: 82 API routes, 14 Prisma models, ~200 frontend files. Found CRITICAL auth holes, dead code, duplicate systems. Report: `docs/PRODUCT/ARCH-AUDIT-2026-02-12.md` (2026-02-12) ✅
-- **ADMIN-PRODUCTS-TAILWIND** — Convert admin products page from inline styles to Tailwind (PR #2780, deployed 2026-02-12) ✅
-- **STALE-PR-CLEANUP** — Close 5 stale PRs (#2547, #2598, #2625, #2654, #2656) — 0 open PRs (2026-02-12) ✅
-- **UX-POLISH-01** — Hellenize checkout/order-lookup, polish shared components (AdminEmptyState, AdminLoading, Skeleton), remove skeleton.css (PR #2776, deployed 2026-02-12) ✅
-- **ADMIN-PRODUCERS** — Admin producers page: fix status mapping, add filters/detail row, Tailwind conversion (PR #2774, deployed 2026-02-12) ✅
-- **COD-COMPLETE** — Cash on Delivery: shipping quote COD fee display + admin mark-as-paid endpoint (PRs #2771–#2772, deployed 2026-02-12) ✅
-- **SEED-DATA-FIX** — Greek names, descriptions for all producers/products/categories + data migration (PRs #2768–#2769, deployed 2026-02-12) ✅
-- **PRODUCER-ONBOARD-01** — Producer self-service registration + onboarding form + admin approve/reject + email notifications (PRs #2760–#2765, deployed 2026-02-12) ✅
-- **FULL-AUDIT** — Deep functional audit of all user journeys, reset priorities to marketplace-first (2026-02-11)
-- **PROD-IMAGE-FIX-01** — Product image fallback + cart i18n (PR #2757, deployed 2026-02-11) ✅
-- **PROD-STABILITY-02** — nginx cleanup, Prisma singleton, Neon pooling (PR #2755, deployed 2026-02-11) ✅
-- **PROD-FIX-SPRINT-01** — Cart toast, legal pages, producer redirect (PRs #2749/#2751/#2753, deployed 2026-02-11) ✅
-- **ADMIN-BULK-STATUS-01** — Bulk order status update (PR #2744, deployed 2026-02-11) ✅
-- **CLEANUP-SPRINT-01** — PrismaClient singleton, SQLite compat, XSS fix (#2738-#2743) ✅
-- **DUAL-DB-MIGRATION** — Laravel SSOT for products (PRs #2734-#2737, deployed 2026-02-11) ✅
-- **AUTH-UNIFY** — Fix producer dashboard auth (PRs #2721-#2722, deployed 2026-02-10) ✅
+- **CATEGORY-UNIFY-10** — Unified 14 backend + 9 frontend categories into exactly 10 definitive locker-compatible categories. Backend migration reassigns all products via `category_product` pivot. Frontend cleanup removes all hacks (SLUG_LABEL_OVERRIDE, STATIC_ICON_MAP, partial matching). 10 in DB, 7 visible (cosmetics/sauces/legumes pending products). (PRs #3052-#3054, deployed 2026-02-19) ✅
+- **UI-REDESIGN-10PHASES** — Premium marketplace visual overhaul (Phases 1-10, 17 PRs): Warm cream backgrounds, full-width layout, gold accents on header/footer/filters, producer prominence on cards, Wolt-style category cards with pastel backgrounds, 4 custom 3D icons (honey/olive-oil/nuts/cosmetics) + 6 Lucide SVGs, bigger 100px desktop cards. (PRs #3038-#3050, deployed 2026-02-17–2026-02-19) ✅
+- **HARDENING-5PR** — Production hardening: Viva dead code removed, dead stubs deleted, robots.txt expanded, cart TTL, demo dead code deleted. (PRs #2971-#2977, deployed 2026-02-17) ✅
+- **CI-E2E-GREEN** — Fixed 3 E2E failures: SSR fetch fallback, glob pattern fix, checkout skip in CI. 96 tests pass, 0 fail. (PRs #2962-#2963, deployed 2026-02-17) ✅
+- **S3-01: COST-TRANSPARENCY** — Green trust badge on product detail: "88% στον παραγωγό / 12% πλατφόρμα". (PR #2960, deployed 2026-02-16) ✅
+- **PAYOUT-INFRASTRUCTURE** — Complete payout: IBAN field, settlement generation, admin dashboard, producer history, CSV export. (PRs #2952-#2958, deployed 2026-02-16) ✅
+- **COMMISSION-ENGINE** — Commission system wired to checkout, admin CRUD, feature flag, producer breakdown. Flag OFF — ready to activate. (PRs #2932-#2935, deployed 2026-02-16) ✅
+- **PRODUCER-LAUNCH-PREP** — Producer registration E2E tested on production. Auto-slug, image upload auth, storage path fixes. (PR #2937, deployed 2026-02-16) ✅
+- **S1-02: Reviews & Ratings** — Full review system: star ratings on cards + detail page, submit form, verified purchase detection. (PRs #2911-#2912, deployed 2026-02-15) ✅
+- **S1-01: CULTIVATION-TYPE** — Cultivation method tracking (organic, biodynamic, traditional). Migration + model + API + filter UI + badges. (PR #2908, deployed 2026-02-15) ✅
 
 ---
 
@@ -167,6 +116,7 @@
 - **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
 - **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva NOT working.
 - **Producer routes**: `/producer/*` (dashboard, orders), `/my/products/*` (product CRUD)
+- **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **Deploy**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`
 
 ---
@@ -182,4 +132,4 @@
 
 ---
 
-_Lines: ~100 | Target: ≤150_
+_Lines: ~120 | Target: ≤150_
