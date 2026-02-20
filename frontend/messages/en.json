@@ -320,6 +320,25 @@
     "noOrdersStatus": "No orders with status \"{status}\".",
     "tryAgain": "Try Again"
   },
+  "reviews": {
+    "title": "Reviews",
+    "writeReview": "Write a Review",
+    "noReviewsYet": "No reviews yet.",
+    "beFirstToReview": "Be the first to review!",
+    "loginToReview": "Login to write a review.",
+    "ratingRequired": "Rating *",
+    "titlePlaceholder": "Title (optional)",
+    "commentPlaceholder": "Your review (optional)",
+    "submitting": "Submitting...",
+    "submitReview": "Submit Review",
+    "cancel": "Cancel",
+    "loading": "Loading reviews...",
+    "verifiedPurchase": "Verified Purchase",
+    "anonymous": "Anonymous",
+    "reviewSubmitted": "Review submitted!",
+    "selectRating": "Please select a rating",
+    "networkError": "Network error"
+  },
   "producerDashboard": {
     "title": "Producer Dashboard",
     "welcome": "Welcome, {name}! Here is your business overview.",

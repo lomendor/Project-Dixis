@@ -320,6 +320,25 @@
     "noOrdersStatus": "Δεν υπάρχουν παραγγελίες με κατάσταση \"{status}\".",
     "tryAgain": "Δοκιμάστε Ξανά"
   },
+  "reviews": {
+    "title": "Αξιολογήσεις",
+    "writeReview": "Γράψτε Αξιολόγηση",
+    "noReviewsYet": "Δεν υπάρχουν αξιολογήσεις ακόμη.",
+    "beFirstToReview": "Γίνετε ο πρώτος που θα αξιολογήσει!",
+    "loginToReview": "Συνδεθείτε για να γράψετε αξιολόγηση.",
+    "ratingRequired": "Βαθμολογία *",
+    "titlePlaceholder": "Τίτλος (προαιρετικό)",
+    "commentPlaceholder": "Η αξιολόγησή σας (προαιρετικό)",
+    "submitting": "Υποβολή...",
+    "submitReview": "Υποβολή Αξιολόγησης",
+    "cancel": "Ακύρωση",
+    "loading": "Φόρτωση αξιολογήσεων...",
+    "verifiedPurchase": "Επαληθευμένη Αγορά",
+    "anonymous": "Ανώνυμος",
+    "reviewSubmitted": "Η αξιολόγηση υποβλήθηκε!",
+    "selectRating": "Παρακαλώ επιλέξτε βαθμολογία",
+    "networkError": "Σφάλμα δικτύου"
+  },
   "producerDashboard": {
     "title": "Ταμπλό Παραγωγού",
     "welcome": "Καλώς ήρθατε, {name}! Εδώ είναι η επισκόπηση της επιχείρησής σας.",

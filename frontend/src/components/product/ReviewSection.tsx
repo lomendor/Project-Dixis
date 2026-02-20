@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import StarRating from '@/components/StarRating';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 interface Review {
   id: number;
@@ -25,6 +26,7 @@ interface ReviewMeta {
  */
 export default function ReviewSection({ productId }: { productId: number }) {
   const { user } = useAuth();
+  const t = useTranslations();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [meta, setMeta] = useState<ReviewMeta>({ total: 0, avg_rating: null });
   const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (rating === 0) { setError('Please select a rating'); return; }
+    if (rating === 0) { setError(t('reviews.selectRating')); return; }
     setError('');
     setSubmitting(true);
 
@@ -76,12 +78,12 @@ export default function ReviewSection({ productId }: { productId: number }) {
       });
       const json = await res.json();
       if (!res.ok) { setError(json.message || 'Error'); return; }
-      setSuccess('Review submitted!');
+      setSuccess(t('reviews.reviewSubmitted'));
       setShowForm(false);
       setRating(0); setTitle(''); setComment('');
       fetchReviews(); // Refresh list
     } catch {
-      setError('Network error');
+      setError(t('reviews.networkError'));
     } finally {
       setSubmitting(false);
     }
@@ -97,7 +99,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-neutral-900">
-            Reviews
+            {t('reviews.title')}
           </h2>
           {meta.avg_rating && (
             <div className="flex items-center gap-2 mt-1">
@@ -112,7 +114,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
             className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
             data-testid="write-review-btn"
           >
-            Write a Review
+            {t('reviews.writeReview')}
           </button>
         )}
       </div>
@@ -125,7 +127,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
 
           {/* Star selector */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Rating *</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">{t('reviews.ratingRequired')}</label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -147,7 +149,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title (optional)"
+            placeholder={t('reviews.titlePlaceholder')}
             maxLength={150}
             className="w-full px-3 py-2 mb-3 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
           />
@@ -155,7 +157,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Your review (optional)"
+            placeholder={t('reviews.commentPlaceholder')}
             rows={3}
             maxLength={2000}
             className="w-full px-3 py-2 mb-3 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
@@ -163,10 +165,10 @@ export default function ReviewSection({ productId }: { productId: number }) {
 
           <div className="flex gap-2">
             <button type="submit" disabled={submitting} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50">
-              {submitting ? 'Submitting...' : 'Submit Review'}
+              {submitting ? t('reviews.submitting') : t('reviews.submitReview')}
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="text-neutral-600 px-4 py-2 rounded-lg text-sm hover:bg-neutral-100">
-              Cancel
+              {t('reviews.cancel')}
             </button>
           </div>
         </form>
@@ -174,10 +176,10 @@ export default function ReviewSection({ productId }: { productId: number }) {
 
       {/* Review List */}
       {loading ? (
-        <div className="text-center py-8 text-neutral-500">Loading reviews...</div>
+        <div className="text-center py-8 text-neutral-500">{t('reviews.loading')}</div>
       ) : reviews.length === 0 ? (
         <p className="text-neutral-500 text-sm py-4">
-          No reviews yet. {user ? 'Be the first to review!' : 'Login to write a review.'}
+          {t('reviews.noReviewsYet')} {user ? t('reviews.beFirstToReview') : t('reviews.loginToReview')}
         </p>
       ) : (
         <div className="space-y-4">
@@ -187,14 +189,14 @@ export default function ReviewSection({ productId }: { productId: number }) {
                 <StarRating rating={review.rating} size="xs" showCount={false} />
                 {review.is_verified_purchase && (
                   <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
-                    Verified Purchase
+                    {t('reviews.verifiedPurchase')}
                   </span>
                 )}
               </div>
               {review.title && <p className="font-medium text-sm text-neutral-900">{review.title}</p>}
               {review.comment && <p className="text-sm text-neutral-600 mt-1">{review.comment}</p>}
               <p className="text-xs text-neutral-400 mt-2">
-                {review.user?.name || 'Anonymous'} &middot; {formatDate(review.created_at)}
+                {review.user?.name || t('reviews.anonymous')} &middot; {formatDate(review.created_at)}
               </p>
             </div>
           ))}
