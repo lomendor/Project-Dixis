@@ -121,6 +121,13 @@ class ProductController extends Controller
         if ($usesFts && $sortField === 'relevance') {
             // FTS ranking: best matches first
             $query->orderByRaw('search_rank DESC');
+        } elseif ($sortField === 'rating') {
+            // Sort by average review rating (NULLs last)
+            $dir = $sortDir === 'asc' ? 'ASC' : 'DESC';
+            $nullsPos = $sortDir === 'asc' ? 'FIRST' : 'LAST';
+            $query->orderByRaw(
+                "(SELECT AVG(r.rating) FROM reviews r WHERE r.product_id = products.id AND r.is_approved = true) {$dir} NULLS {$nullsPos}"
+            );
         } elseif (in_array($sortField, $allowedSorts)) {
             $query->orderBy($sortField, $sortDir === 'asc' ? 'asc' : 'desc');
         } else {

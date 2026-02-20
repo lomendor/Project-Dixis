@@ -68,7 +68,7 @@ export function CultivationFilter({
           aria-pressed={!current}
           aria-label="Όλοι οι τρόποι καλλιέργειας"
           className={`
-            flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium
+            flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0
             transition-all duration-200
             ${
               !current
@@ -92,7 +92,7 @@ export function CultivationFilter({
               aria-pressed={isSelected}
               aria-label={`Καλλιέργεια: ${opt.label}`}
               className={`
-                flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium
+                flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0
                 transition-all duration-200 border
                 ${
                   isSelected
