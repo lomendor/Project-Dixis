@@ -104,9 +104,12 @@ class ProductController extends Controller
             }
         }
 
-        // Minimum rating filter (uses HAVING because reviews_avg_rating is an aggregate)
+        // Minimum rating filter (subquery approach — PostgreSQL doesn't allow HAVING on aliases)
         if ($minRating = $request->get('min_rating')) {
-            $query->having('reviews_avg_rating', '>=', (float) $minRating);
+            $query->whereRaw(
+                '(select avg(r.rating) from reviews r where r.product_id = products.id and r.is_approved = true) >= ?',
+                [(float) $minRating]
+            );
         }
 
         // Sorting
