@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
 import { CultivationFilter } from '@/components/CultivationFilter';
-import { RatingFilter } from '@/components/RatingFilter';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
 import { ProductSort } from '@/components/ProductSort';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
@@ -46,8 +45,7 @@ async function getData(
   category?: string,
   cultivationType?: string,
   sort?: string,
-  dir?: string,
-  minRating?: string
+  dir?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
   // Pass CI-SMOKE-STABILIZE-002: In CI mode, use internal Next.js API
   // which reads from Prisma DB (seeded with ci:seed) — same pattern as products/[id]/page.tsx
@@ -81,10 +79,6 @@ async function getData(
     if (dir) {
       params.set('dir', dir);
     }
-    if (minRating) {
-      params.set('min_rating', minRating);
-    }
-
     const res = await fetch(`${base}/public/products?${params.toString()}`, {
       next: { revalidate: 60 },
       headers: { 'Content-Type': 'application/json' },
@@ -223,7 +217,7 @@ const cultivationLabels: Record<string, string> = {
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string; min_rating?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
   const parts: string[] = [];
@@ -236,7 +230,7 @@ export async function generateMetadata({
 }
 
 interface PageProps {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string; min_rating?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
@@ -244,7 +238,6 @@ export default async function Page({ searchParams }: PageProps) {
   const categoryFilter = params.cat || null;
   const searchQuery = params.search || null;
   const cultivationFilter = params.cult || null;
-  const ratingFilter = params.min_rating || null;
   const sortField = params.sort || undefined;
   const sortDir = params.dir || undefined;
 
@@ -254,8 +247,7 @@ export default async function Page({ searchParams }: PageProps) {
     categoryFilter || undefined,
     cultivationFilter || undefined,
     sortField,
-    sortDir,
-    ratingFilter || undefined
+    sortDir
   );
 
   // Fetch ALL products (without cult filter) to build cultivation counts for the strip
@@ -300,16 +292,11 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         )}
 
-        <div className="mb-4">
-          <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">
-            Αγορά Παραγωγών
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900">
-            {searchQuery
-              ? `Αποτελέσματα για "${searchQuery}"`
-              : 'Αυθεντικά Ελληνικά Προϊόντα'}
-          </h1>
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
+          {searchQuery
+            ? `Αποτελέσματα για "${searchQuery}"`
+            : 'Αυθεντικά Ελληνικά Προϊόντα'}
+        </h1>
 
         {/* Category Cards (Wolt-style, standalone above filter) */}
         <div className="mb-4">
@@ -348,8 +335,8 @@ export default async function Page({ searchParams }: PageProps) {
             </div>
           </div>
 
-          {/* Row 2: All pills in one unified row */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Row 2: Cultivation pills — scroll on mobile, wrap on desktop */}
+          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 scrollbar-hide">
             {hasCultivationData && (
               <Suspense fallback={null}>
                 <CultivationFilter
@@ -358,12 +345,6 @@ export default async function Page({ searchParams }: PageProps) {
                 />
               </Suspense>
             )}
-            {hasCultivationData && (
-              <div className="hidden lg:block w-px h-5 bg-neutral-300/50 mx-0.5" aria-hidden="true" />
-            )}
-            <Suspense fallback={null}>
-              <RatingFilter selectedRating={ratingFilter} />
-            </Suspense>
           </div>
         </div>
 
