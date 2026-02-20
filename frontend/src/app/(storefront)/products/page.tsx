@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
 import { CategoryStrip } from '@/components/CategoryStrip';
 import { CultivationFilter } from '@/components/CultivationFilter';
+import { RatingFilter } from '@/components/RatingFilter';
 import { ProductSearchInput } from '@/components/ProductSearchInput';
 import { ProductSort } from '@/components/ProductSort';
 import { DEMO_PRODUCTS } from '@/data/demoProducts';
@@ -45,7 +46,8 @@ async function getData(
   category?: string,
   cultivationType?: string,
   sort?: string,
-  dir?: string
+  dir?: string,
+  minRating?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
   // Pass CI-SMOKE-STABILIZE-002: In CI mode, use internal Next.js API
   // which reads from Prisma DB (seeded with ci:seed) — same pattern as products/[id]/page.tsx
@@ -78,6 +80,9 @@ async function getData(
     }
     if (dir) {
       params.set('dir', dir);
+    }
+    if (minRating) {
+      params.set('min_rating', minRating);
     }
 
     const res = await fetch(`${base}/public/products?${params.toString()}`, {
@@ -218,7 +223,7 @@ const cultivationLabels: Record<string, string> = {
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string; min_rating?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
   const parts: string[] = [];
@@ -231,7 +236,7 @@ export async function generateMetadata({
 }
 
 interface PageProps {
-  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string; min_rating?: string }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
@@ -239,16 +244,18 @@ export default async function Page({ searchParams }: PageProps) {
   const categoryFilter = params.cat || null;
   const searchQuery = params.search || null;
   const cultivationFilter = params.cult || null;
+  const ratingFilter = params.min_rating || null;
   const sortField = params.sort || undefined;
   const sortDir = params.dir || undefined;
 
-  // Fetch products (server-side filtering for category + search + cultivation + sort)
+  // Fetch products (server-side filtering for category + search + cultivation + rating + sort)
   const { items, isDemo, apiTotal } = await getData(
     searchQuery || undefined,
     categoryFilter || undefined,
     cultivationFilter || undefined,
     sortField,
-    sortDir
+    sortDir,
+    ratingFilter || undefined
   );
   const total = items.length;
 
@@ -356,6 +363,11 @@ export default async function Page({ searchParams }: PageProps) {
               />
             </Suspense>
           )}
+
+          {/* Rating filter */}
+          <Suspense fallback={null}>
+            <RatingFilter selectedRating={ratingFilter} />
+          </Suspense>
         </div>
 
         {items.length > 0 ? (
