@@ -47,40 +47,79 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
     async function fetchOrder() {
       try {
         // SECURITY FIX: Fetch by UUID token instead of sequential ID
+        // Pass CHECKOUT-TOKEN-FIX-01: showByToken now returns either OrderResource
+        // or CheckoutSessionResource (for multi-producer orders)
         const laravelOrder = await apiClient.getOrderByToken(orderToken)
 
-        // Transform Laravel order format to thank-you page format
-        const orderItems = laravelOrder.items || laravelOrder.order_items || []
-        // Pass MP-MULTI-PRODUCER-CHECKOUT-02: Prefer shipping_total (multi-producer sum)
-        // over shipping_amount (single-producer). Backend provides shipping_total when
-        // order has multiple producers with separate shipments.
-        const shippingAmount = laravelOrder.shipping_total
-          ? parseFloat(laravelOrder.shipping_total)
-          : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
-        // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Include per-producer shipping lines
-        // Pass TRACKING-DISPLAY-01: Include public_token for tracking link
-        const transformedOrder: Order = {
-          id: String(laravelOrder.id),
-          status: laravelOrder.status,
-          total: parseFloat(laravelOrder.total_amount) || 0,
-          subtotal: parseFloat(laravelOrder.subtotal) || 0,
-          shipping: shippingAmount,
-          codFee: parseFloat(laravelOrder.cod_fee) || 0,
-          vat: parseFloat(laravelOrder.tax_amount) || 0,
-          zone: 'mainland', // Default, could be derived from shipping_address if needed
-          email: null, // Not exposed in public order response for privacy
-          name: null,
-          isMultiProducer: laravelOrder.is_multi_producer || false,
-          shippingLines: laravelOrder.shipping_lines || [],
-          publicToken: laravelOrder.public_token || undefined,
-          items: orderItems.map((item) => ({
-            id: String(item.id),
-            qty: item.quantity,
-            price: parseFloat(item.unit_price || item.price) || 0,
-            titleSnap: item.product_name || 'Προϊόν',
-          })),
+        // Detect if this is a CheckoutSession (multi-producer) or single Order
+        const isCheckoutSession = (laravelOrder as any).type === 'checkout_session'
+
+        if (isCheckoutSession) {
+          // Multi-producer: flatten child orders into a single thank-you view
+          const session = laravelOrder as any
+          const allItems: OrderItem[] = []
+
+          // Collect items from all child orders
+          const childOrders = session.orders || []
+          for (const childOrder of childOrders) {
+            const items = childOrder.items || childOrder.order_items || []
+            for (const item of items) {
+              allItems.push({
+                id: String(item.id),
+                qty: item.quantity,
+                price: parseFloat(item.unit_price || item.price) || 0,
+                titleSnap: item.product_name || 'Προϊόν',
+              })
+            }
+          }
+
+          const transformedOrder: Order = {
+            id: String(session.id),
+            status: session.status,
+            total: parseFloat(session.total) || 0,
+            subtotal: parseFloat(session.subtotal) || 0,
+            shipping: parseFloat(session.shipping_total) || 0,
+            codFee: parseFloat(session.cod_fee) || 0,
+            vat: 0,
+            zone: 'mainland',
+            email: null,
+            name: null,
+            isMultiProducer: session.is_multi_producer || false,
+            shippingLines: session.shipping_lines || [],
+            publicToken: session.public_token || undefined,
+            items: allItems,
+          }
+          setOrder(transformedOrder)
+        } else {
+          // Single-producer: existing logic
+          const orderItems = laravelOrder.items || laravelOrder.order_items || []
+          const shippingAmount = laravelOrder.shipping_total
+            ? parseFloat(laravelOrder.shipping_total)
+            : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
+          const transformedOrder: Order = {
+            id: String(laravelOrder.id),
+            status: laravelOrder.status,
+            total: parseFloat(laravelOrder.total_amount) || 0,
+            subtotal: parseFloat(laravelOrder.subtotal) || 0,
+            shipping: shippingAmount,
+            codFee: parseFloat(laravelOrder.cod_fee) || 0,
+            vat: parseFloat(laravelOrder.tax_amount) || 0,
+            zone: 'mainland',
+            email: null,
+            name: null,
+            isMultiProducer: laravelOrder.is_multi_producer || false,
+            shippingLines: laravelOrder.shipping_lines || [],
+            publicToken: laravelOrder.public_token || undefined,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            items: orderItems.map((item: any) => ({
+              id: String(item.id),
+              qty: item.quantity,
+              price: parseFloat(item.unit_price || item.price) || 0,
+              titleSnap: item.product_name || 'Προϊόν',
+            })),
+          }
+          setOrder(transformedOrder)
         }
-        setOrder(transformedOrder)
       } catch {
         setError('Αποτυχία φόρτωσης παραγγελίας')
       } finally {

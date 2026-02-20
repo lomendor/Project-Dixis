@@ -21,6 +21,8 @@ class CheckoutSessionResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            // Pass CHECKOUT-TOKEN-FIX-01: UUID token for safe public access
+            'public_token' => $this->public_token,
             'type' => 'checkout_session',
             'status' => $this->status,
             'is_multi_producer' => $this->order_count > 1,

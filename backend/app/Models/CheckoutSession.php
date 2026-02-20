@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 /**
  * Pass MP-ORDERS-SCHEMA-01: CheckoutSession Model
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * to a single Stripe PaymentIntent.
  *
  * @property int $id
+ * @property string|null $public_token
  * @property int|null $user_id
  * @property string|null $stripe_payment_intent_id
  * @property string $subtotal
@@ -37,6 +39,7 @@ class CheckoutSession extends Model
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
+        'public_token',
         'user_id',
         'stripe_payment_intent_id',
         'subtotal',
@@ -46,6 +49,21 @@ class CheckoutSession extends Model
         'currency',
         'order_count',
     ];
+
+    /**
+     * Pass CHECKOUT-TOKEN-FIX-01: Auto-generate UUID public_token on creation.
+     * Same pattern as Order model — safe for public access (not guessable).
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (self $session) {
+            if (empty($session->public_token)) {
+                $session->public_token = (string) Str::uuid();
+            }
+        });
+    }
 
     protected $casts = [
         'subtotal' => 'decimal:2',

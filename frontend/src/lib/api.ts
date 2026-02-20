@@ -813,9 +813,12 @@ class ApiClient {
    * Used by thank-you page and email confirmation links.
    * Replaces the old getPublicOrder(id) which used sequential IDs.
    */
-  async getOrderByToken(token: string): Promise<Order> {
-    const response = await this.request<{ data: Order }>(`public/orders/by-token/${token}`);
-    return validateApiResponse(response.data, OrderSchema, 'getOrderByToken');
+  // Pass CHECKOUT-TOKEN-FIX-01: Returns either Order or CheckoutSession
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getOrderByToken(token: string): Promise<any> {
+    const response = await this.request<{ data: any }>(`public/orders/by-token/${token}`);
+    // Skip strict schema validation — response can be OrderResource or CheckoutSessionResource
+    return response.data;
   }
 
   /**

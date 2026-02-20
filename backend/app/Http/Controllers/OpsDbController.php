@@ -9,11 +9,11 @@ class OpsDbController extends Controller
 {
     public function slow(Request $request): JsonResponse
     {
-        // Απλή προστασία: απαιτείται X-Ops-Key να ταιριάζει με OPS_KEY
+        // Pass CHECKOUT-TOKEN-FIX-01: Timing-safe token comparison
         if (app()->environment('production')) {
-            $hdr = $request->header('X-Ops-Key');
-            $key = config('ops.key');
-            if (!$key || $hdr !== $key) {
+            $hdr = (string) $request->header('X-Ops-Key', '');
+            $key = (string) config('ops.key', '');
+            if (empty($key) || !hash_equals($key, $hdr)) {
                 abort(403, 'Forbidden');
             }
         }
