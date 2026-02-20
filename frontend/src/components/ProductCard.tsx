@@ -24,13 +24,15 @@ type Props = {
   hideProducerLink?: boolean
   reviewsCount?: number
   reviewsAvgRating?: number | null
+  /** S1-01: Cultivation type for badge overlay */
+  cultivationType?: string | null
   /** T5: Set true for above-the-fold cards to preload LCP image */
   priority?: boolean
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, priority }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, cultivationType, priority }: Props) {
   const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
   const isOOS = typeof stock === 'number' && stock <= 0
   const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
@@ -79,6 +81,22 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
             {hasDiscount && (
               <span data-testid="badge-discount" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700 shadow-sm">
                 -{Math.round(((priceCents - discountPriceCents) / priceCents) * 100)}%
+              </span>
+            )}
+            {/* S1-01: Cultivation type badge */}
+            {cultivationType && cultivationType !== 'conventional' && (
+              <span data-testid="badge-cultivation" className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold shadow-sm ${
+                cultivationType === 'organic_certified' ? 'bg-green-100 text-green-800' :
+                cultivationType === 'organic_transitional' ? 'bg-lime-100 text-lime-800' :
+                cultivationType === 'biodynamic' ? 'bg-purple-100 text-purple-800' :
+                cultivationType === 'traditional_natural' ? 'bg-amber-100 text-amber-800' :
+                'bg-neutral-100 text-neutral-700'
+              }`}>
+                {cultivationType === 'organic_certified' ? '🌿 Βιολογικό' :
+                 cultivationType === 'organic_transitional' ? '🌱 Βιολογικό' :
+                 cultivationType === 'biodynamic' ? '✨ Βιοδυναμικό' :
+                 cultivationType === 'traditional_natural' ? '🌾 Παραδοσιακό' :
+                 cultivationType}
               </span>
             )}
           </div>

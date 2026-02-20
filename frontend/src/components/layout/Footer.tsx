@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-accent-gold/10 bg-accent-cream/50 mt-auto">
       {/* Mobile-first padding */}
-      <div className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
+      <div className="max-w-[1600px] mx-auto px-4 py-8 sm:py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="md:col-span-1">

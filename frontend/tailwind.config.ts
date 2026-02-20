@@ -49,16 +49,16 @@ const config: Config = {
         danger: { DEFAULT: '#ef4444', light: '#fee2e2' },
         // Category pastel backgrounds (Wolt-style)
         category: {
-          olive: '#d4edbc',       // πράσινο-λαδί
-          honey: '#fce588',       // ζεστό κίτρινο μέλι
-          nuts: '#f5d5b0',        // ζεστό βερίκοκο
-          cosmetics: '#f5c6e0',   // ροζ-μωβ
-          beverages: '#d5c8e8',   // λεβάντα
-          sweets: '#f8c0c8',      // τριανταφυλλί
-          pasta: '#f5e4a0',       // ζεστό χρυσαφί-σιτάρι
-          herbs: '#b8e0cc',       // φρέσκο μέντα
-          sauces: '#f5c8a8',      // απαλό κοράλι
-          legumes: '#d8ccb0',     // ζεστή άμμος
+          olive: '#e8f5dc',       // light πράσινο-λαδί
+          honey: '#fef2c0',       // light ζεστό κίτρινο μέλι
+          nuts: '#fae8d0',        // light ζεστό βερίκοκο
+          cosmetics: '#fce0ef',   // light ροζ-μωβ
+          beverages: '#e8e0f4',   // light λεβάντα
+          sweets: '#fce0e4',      // light τριανταφυλλί
+          pasta: '#faf0c8',       // light χρυσαφί-σιτάρι
+          herbs: '#d4f0e2',       // light μέντα
+          sauces: '#fae0cc',      // light κοράλι
+          legumes: '#e8e0cc',     // light άμμος
         }
       },
       boxShadow: {
