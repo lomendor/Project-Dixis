@@ -107,7 +107,7 @@ export default async function FeaturedProducts() {
 
         {/* Products grid */}
         {hasProducts ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7">
             {products.map((product) => {
               const imageUrl = product.image_url || product.images?.[0]?.url || null;
               return (
@@ -128,7 +128,7 @@ export default async function FeaturedProducts() {
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7">
             {[...Array(8)].map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}

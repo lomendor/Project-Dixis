@@ -77,7 +77,7 @@ async function getData(
       params.set('sort', sort);
     }
     if (dir) {
-      params.set('direction', dir);
+      params.set('dir', dir);
     }
 
     const res = await fetch(`${base}/public/products?${params.toString()}`, {
