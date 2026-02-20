@@ -286,7 +286,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* Demo mode banner */}
         {isDemo && (
           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
@@ -359,7 +359,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7" data-testid="products-grid">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7" data-testid="products-grid">
             {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
             {items.map((p: ApiItem, index: number) => (
               <ProductCard
@@ -376,6 +376,7 @@ export default async function Page({ searchParams }: PageProps) {
                 reviewsAvgRating={p.reviewsAvgRating}
                 discountPriceCents={p.discountPriceCents}
                 isSeasonal={p.isSeasonal}
+                cultivationType={p.cultivationType}
                 priority={index < 4}
               />
             ))}

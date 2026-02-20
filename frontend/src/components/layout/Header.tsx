@@ -48,7 +48,7 @@ export default function Header() {
 
   return (
     <header className="border-b border-accent-gold/10 bg-accent-cream/95 backdrop-blur-sm supports-[backdrop-filter]:bg-accent-cream/80 sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo - Desktop: 48px, Mobile: 36px (per NAVIGATION-V1.md) */}
         <Link
           href="/"

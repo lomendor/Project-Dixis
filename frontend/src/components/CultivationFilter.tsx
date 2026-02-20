@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Leaf, Sprout, Sparkles, Wheat, FlaskConical, LayoutGrid } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 
 export type CultivationType =
   | 'conventional'
@@ -14,15 +14,18 @@ export type CultivationType =
 interface CultivationOption {
   value: CultivationType;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  emoji: string;
+  /** Tailwind classes for unselected state */
+  pillBg: string;
+  pillText: string;
 }
 
 const CULTIVATION_OPTIONS: CultivationOption[] = [
-  { value: 'organic_certified', label: 'Βιολογική', icon: Leaf },
-  { value: 'organic_transitional', label: 'Μεταβατική', icon: Sprout },
-  { value: 'biodynamic', label: 'Βιοδυναμική', icon: Sparkles },
-  { value: 'traditional_natural', label: 'Παραδοσιακή', icon: Wheat },
-  { value: 'conventional', label: 'Συμβατική', icon: FlaskConical },
+  { value: 'organic_certified', label: 'Βιολογική', emoji: '🌿', pillBg: 'bg-green-50 border-green-200', pillText: 'text-green-800' },
+  { value: 'organic_transitional', label: 'Μεταβατική', emoji: '🌱', pillBg: 'bg-lime-50 border-lime-200', pillText: 'text-lime-800' },
+  { value: 'biodynamic', label: 'Βιοδυναμική', emoji: '✨', pillBg: 'bg-purple-50 border-purple-200', pillText: 'text-purple-800' },
+  { value: 'traditional_natural', label: 'Παραδοσιακή', emoji: '🌾', pillBg: 'bg-amber-50 border-amber-200', pillText: 'text-amber-800' },
+  { value: 'conventional', label: 'Συμβατική', emoji: '', pillBg: 'bg-neutral-50 border-neutral-200', pillText: 'text-neutral-700' },
 ];
 
 interface CultivationFilterProps {
@@ -80,7 +83,6 @@ export function CultivationFilter({
         </button>
 
         {visibleOptions.map((opt) => {
-          const Icon = opt.icon;
           const isSelected = current === opt.value;
           const count = availableCounts?.[opt.value] || 0;
 
@@ -91,21 +93,21 @@ export function CultivationFilter({
               aria-pressed={isSelected}
               aria-label={`Καλλιέργεια: ${opt.label}`}
               className={`
-                flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium
-                transition-all duration-200
+                flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium
+                transition-all duration-200 border
                 ${
                   isSelected
-                    ? 'bg-primary text-white shadow-md'
-                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-primary/40 hover:bg-primary-pale'
+                    ? 'bg-primary text-white shadow-md border-primary'
+                    : `${opt.pillBg} ${opt.pillText} hover:shadow-sm`
                 }
               `}
             >
-              <Icon className="w-4 h-4" />
+              {opt.emoji && <span className="text-base leading-none">{opt.emoji}</span>}
               <span>{opt.label}</span>
               {count > 0 && (
                 <span
                   className={`ml-0.5 text-xs ${
-                    isSelected ? 'opacity-80' : 'text-accent-gold/60'
+                    isSelected ? 'opacity-80' : 'opacity-60'
                   }`}
                 >
                   ({count})

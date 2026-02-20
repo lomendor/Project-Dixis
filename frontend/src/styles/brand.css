@@ -49,16 +49,16 @@
   /* -------------------------------------------------------------------------
      CATEGORY COLORS - 10 unified categories (pastel backgrounds)
      ------------------------------------------------------------------------- */
-  --category-olive: #d4edbc;
-  --category-honey: #fce588;
-  --category-nuts: #f5d5b0;
-  --category-cosmetics: #f5c6e0;
-  --category-beverages: #d5c8e8;
-  --category-sweets: #f8c0c8;
-  --category-pasta: #f5e4a0;
-  --category-herbs: #b8e0cc;
-  --category-sauces: #f5c8a8;
-  --category-legumes: #d8ccb0;
+  --category-olive: #e8f5dc;
+  --category-honey: #fef2c0;
+  --category-nuts: #fae8d0;
+  --category-cosmetics: #fce0ef;
+  --category-beverages: #e8e0f4;
+  --category-sweets: #fce0e4;
+  --category-pasta: #faf0c8;
+  --category-herbs: #d4f0e2;
+  --category-sauces: #fae0cc;
+  --category-legumes: #e8e0cc;
 
   /* -------------------------------------------------------------------------
      TYPOGRAPHY
