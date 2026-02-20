@@ -104,6 +104,11 @@ class ProductController extends Controller
             }
         }
 
+        // Minimum rating filter (uses HAVING because reviews_avg_rating is an aggregate)
+        if ($minRating = $request->get('min_rating')) {
+            $query->having('reviews_avg_rating', '>=', (float) $minRating);
+        }
+
         // Sorting
         // When FTS is active and no explicit sort requested, order by search_rank DESC
         $sortField = $request->get('sort', $usesFts ? 'relevance' : 'created_at');
