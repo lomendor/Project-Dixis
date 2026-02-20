@@ -217,15 +217,10 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:10,1');
     });
 
-    // Authenticated user orders
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('orders', [App\Http\Controllers\Api\OrderController::class, 'index'])->name('api.v1.orders.index');
-        Route::get('orders/{order}', [App\Http\Controllers\Api\OrderController::class, 'show'])->name('api.v1.orders.show');
-        Route::post('orders', [App\Http\Controllers\Api\OrderController::class, 'store'])->name('api.v1.orders.store')
-            ->middleware('throttle:10,1'); // 10 requests per minute for order creation
-        Route::post('orders/checkout', [App\Http\Controllers\Api\OrderController::class, 'checkout'])->name('api.v1.orders.checkout')
-            ->middleware('throttle:5,1'); // 5 checkouts per minute
-    });
+    // DEPRECATED: Legacy OrderController routes removed (Pass CHECKOUT-TOKEN-FIX-01)
+    // These used flat 10% tax, no multi-producer support, no stock locking.
+    // All order creation now goes through V1\OrderController at POST /public/orders.
+    // User order listing migrated to V1\OrderController::index (line above).
 
     // Producers (public, read-only) — T4: rate-limited
     Route::get('producers', [App\Http\Controllers\Api\V1\ProducerController::class, 'index'])->name('api.v1.producers.index')
@@ -1100,9 +1095,11 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
 });
 
 // === OPS: Commission preview (simple JSON) ===
-Route::get('/ops/commission/preview', function (Illuminate\Http\Request $request) {
-    // Simple token auth
-    if ($request->header('x-ops-token') !== env('OPS_TOKEN')) {
+// Pass CHECKOUT-TOKEN-FIX-01: Added throttle + hash_equals for timing-safe token comparison
+Route::middleware('throttle:10,1')->get('/ops/commission/preview', function (Illuminate\Http\Request $request) {
+    // Timing-safe token auth (prevents timing side-channel attacks)
+    $opsToken = (string) config('payments.ops_token', '');
+    if (empty($opsToken) || !hash_equals($opsToken, (string) $request->header('x-ops-token', ''))) {
         abort(404);
     }
 
@@ -1170,7 +1167,9 @@ Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewControll
     ->middleware('auth:sanctum');
 
 // Ops: DB slow queries endpoint (guarded by X-Ops-Key in production)
+// Pass CHECKOUT-TOKEN-FIX-01: Added throttle to prevent abuse
 Route::get('/ops/db/slow-queries', [OpsDbController::class, 'slow'])
+    ->middleware('throttle:10,1')
     ->name('ops.db.slow');
 
 // Internal: AdminUser lookup for OTP email delivery (Next.js → Laravel)

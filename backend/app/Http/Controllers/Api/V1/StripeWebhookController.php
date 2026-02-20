@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Services\OrderEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -147,6 +148,7 @@ class StripeWebhookController extends Controller
      * Updates CheckoutSession and all child orders, then sends emails.
      *
      * Pass MP-PAYMENT-EMAIL-TRUTH-01: Ensures emails only sent after payment confirmation.
+     * Pass CHECKOUT-TOKEN-FIX-01: Wrapped in DB::transaction to prevent partial paid state.
      */
     private function handleMultiProducerPaymentSuccess(int $checkoutSessionId, $stripeSession): void
     {
@@ -168,22 +170,26 @@ class StripeWebhookController extends Controller
             return;
         }
 
-        // Update CheckoutSession status
-        $checkoutSession->update([
-            'status' => CheckoutSession::STATUS_PAID,
-            'stripe_payment_intent_id' => $stripeSession->payment_intent ?? $stripeSession->id,
-        ]);
+        // Atomic: update session + all child orders in a single transaction
+        DB::transaction(function () use ($checkoutSession, $stripeSession) {
+            // Update CheckoutSession status
+            $checkoutSession->update([
+                'status' => CheckoutSession::STATUS_PAID,
+                'stripe_payment_intent_id' => $stripeSession->payment_intent ?? $stripeSession->id,
+            ]);
 
-        // Update all child orders to paid
-        $orders = $checkoutSession->orders;
-        foreach ($orders as $order) {
-            if ($order->payment_status !== 'paid') {
-                $order->update([
-                    'payment_status' => 'paid',
-                    'payment_reference' => $stripeSession->id,
-                ]);
+            // Update all child orders to paid
+            foreach ($checkoutSession->orders as $order) {
+                if ($order->payment_status !== 'paid') {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'payment_reference' => $stripeSession->id,
+                    ]);
+                }
             }
-        }
+        });
+
+        $orders = $checkoutSession->orders;
 
         Log::info('Stripe webhook: Multi-producer checkout marked as paid', [
             'checkout_session_id' => $checkoutSessionId,
@@ -192,7 +198,7 @@ class StripeWebhookController extends Controller
             'amount_total' => $stripeSession->amount_total,
         ]);
 
-        // Send emails for all orders
+        // Send emails for all orders (outside transaction — email failure shouldn't roll back payment)
         $this->sendPaymentConfirmationEmails($orders->all());
     }
 

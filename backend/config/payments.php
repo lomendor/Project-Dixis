@@ -47,4 +47,26 @@ return [
     |
     */
     'cod_enabled' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Commission Engine
+    |--------------------------------------------------------------------------
+    |
+    | Pass CHECKOUT-TOKEN-FIX-01: Moved from env() to config().
+    | Controls Laravel Pennant feature flag 'commission_engine_v1'.
+    | Default false — no commission deducted from producer payouts.
+    |
+    */
+    'commission_engine_enabled' => env('COMMISSION_ENGINE_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ops Token (Internal admin endpoints)
+    |--------------------------------------------------------------------------
+    |
+    | Token for /ops/* endpoints. Compared with hash_equals() for timing safety.
+    |
+    */
+    'ops_token' => env('OPS_TOKEN', ''),
 ];
