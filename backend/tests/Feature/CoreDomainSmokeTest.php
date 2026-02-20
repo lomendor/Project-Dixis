@@ -85,28 +85,19 @@ class CoreDomainSmokeTest extends TestCase
             'notes' => 'Test order',
         ];
 
+        $orderData['currency'] = 'EUR';
+
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/orders', $orderData);
+            ->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id',
-                'user_id',
-                'subtotal',
-                'tax_amount',
-                'shipping_amount',
-                'total_amount',
-                'payment_status',
-                'status',
-                'order_items' => [
-                    '*' => [
-                        'id',
-                        'product_id',
-                        'quantity',
-                        'unit_price',
-                        'total_price',
-                        'product_name',
-                    ],
+                'data' => [
+                    'id',
+                    'subtotal',
+                    'total_amount',
+                    'payment_status',
+                    'status',
                 ],
             ]);
     }

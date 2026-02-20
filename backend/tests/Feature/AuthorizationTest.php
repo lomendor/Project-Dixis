@@ -73,8 +73,9 @@ class AuthorizationTest extends TestCase
             'shipping_method' => 'HOME',
         ];
 
+        // POST /api/v1/public/orders — auth.optional captures user_id
         $response = $this->actingAs($consumer, 'sanctum')
-            ->postJson('/api/v1/orders', $orderData);
+            ->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201); // Created
     }
@@ -82,9 +83,10 @@ class AuthorizationTest extends TestCase
     #[Group('mvp')]
     public function test_producer_cannot_create_orders(): void
     {
+        // OrderPolicy::create() blocks producers — they sell, don't buy
         $producerUser = User::factory()->producer()->create();
         Producer::factory()->create(['user_id' => $producerUser->id]);
-        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true]);
+        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true, 'stock' => 100]);
 
         $orderData = [
             'items' => [
@@ -98,9 +100,9 @@ class AuthorizationTest extends TestCase
         ];
 
         $response = $this->actingAs($producerUser, 'sanctum')
-            ->postJson('/api/v1/orders', $orderData);
+            ->postJson('/api/v1/public/orders', $orderData);
 
-        $response->assertStatus(403); // Forbidden
+        $response->assertStatus(403); // Forbidden — producers cannot create orders
     }
 
     #[Group('mvp')]
@@ -121,8 +123,8 @@ class AuthorizationTest extends TestCase
 
         $response->assertStatus(201);
 
-        // Admin can create orders
-        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true]);
+        // Admin can create orders via public endpoint
+        $product = Product::factory()->create(['price' => 10.00, 'is_active' => true, 'stock' => 100]);
         $orderData = [
             'items' => [
                 [
@@ -135,7 +137,7 @@ class AuthorizationTest extends TestCase
         ];
 
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/v1/orders', $orderData);
+            ->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201);
     }

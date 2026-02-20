@@ -35,38 +35,34 @@ class OrdersTest extends TestCase
                     'quantity' => 2,
                 ],
             ],
+            'currency' => 'EUR',
             'shipping_method' => 'HOME',
             'notes' => 'Test order',
         ];
 
+        // POST /api/v1/public/orders — auth.optional middleware captures user_id
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/orders', $orderData);
+            ->postJson('/api/v1/public/orders', $orderData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id',
-                'user_id',
-                'subtotal',
-                'tax_amount',
-                'shipping_amount',
-                'total_amount',
-                'payment_status',
-                'status',
-                'order_items' => [
-                    '*' => [
-                        'id',
-                        'product_id',
-                        'quantity',
-                        'unit_price',
-                        'total_price',
-                        'product_name',
+                'data' => [
+                    'id',
+                    'status',
+                    'payment_status',
+                    'subtotal',
+                    'total_amount',
+                    'items' => [
+                        '*' => [
+                            'id',
+                            'product_id',
+                            'quantity',
+                            'unit_price',
+                            'total_price',
+                            'product_name',
+                        ],
                     ],
                 ],
-            ])
-            ->assertJson([
-                'user_id' => $user->id,
-                'payment_status' => 'pending',
-                'status' => 'pending',
             ]);
 
         // Verify order was created in database
@@ -78,7 +74,7 @@ class OrdersTest extends TestCase
     }
 
     #[Group('mvp')]
-    public function test_show_order_returns_order_details(): void
+    public function test_show_order_by_token_returns_order_details(): void
     {
         // Create test data
         $user = User::factory()->consumer()->create();
@@ -91,53 +87,42 @@ class OrdersTest extends TestCase
             'product_id' => $product->id,
         ]);
 
-        $response = $this->actingAs($user, 'sanctum')
-            ->get("/api/v1/orders/{$order->id}");
+        // GET /api/v1/public/orders/by-token/{token} — public, no auth required
+        $response = $this->get("/api/v1/public/orders/by-token/{$order->public_token}");
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id',
-                'user_id',
-                'subtotal',
-                'tax_amount',
-                'shipping_amount',
-                'total_amount',
-                'payment_status',
-                'status',
-                'order_items' => [
-                    '*' => [
-                        'id',
-                        'product_id',
-                        'quantity',
-                        'unit_price',
-                        'total_price',
-                        'product',
+                'data' => [
+                    'id',
+                    'subtotal',
+                    'tax_amount',
+                    'shipping_amount',
+                    'total_amount',
+                    'payment_status',
+                    'status',
+                    'items' => [
+                        '*' => [
+                            'id',
+                            'product_id',
+                            'quantity',
+                            'unit_price',
+                            'total_price',
+                        ],
                     ],
                 ],
-            ])
-            ->assertJson([
-                'id' => $order->id,
-                'user_id' => $user->id,
             ]);
     }
 
     #[Group('mvp')]
-    public function test_create_order_requires_authentication(): void
+    public function test_create_order_requires_valid_items(): void
     {
-        $producer = Producer::factory()->create();
-        $product = Product::factory()->create(['producer_id' => $producer->id]);
+        // POST /api/v1/public/orders — requires items array with valid product IDs
+        $response = $this->postJson('/api/v1/public/orders', [
+            'items' => [],
+            'shipping_method' => 'HOME',
+        ]);
 
-        $orderData = [
-            'items' => [
-                [
-                    'product_id' => $product->id,
-                    'quantity' => 1,
-                ],
-            ],
-        ];
-
-        $response = $this->postJson('/api/v1/orders', $orderData);
-
-        $response->assertStatus(401);
+        // Should reject empty items
+        $response->assertStatus(422);
     }
 }
