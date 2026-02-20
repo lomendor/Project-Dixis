@@ -61,9 +61,8 @@ export function CultivationFilter({
   };
 
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap gap-2.5">
-        {/* "All" option */}
+    <>
+      {/* "All" option */}
         <button
           onClick={() => handleClick(null)}
           aria-pressed={!current}
@@ -116,7 +115,6 @@ export function CultivationFilter({
             </button>
           );
         })}
-      </div>
-    </div>
+    </>
   );
 }

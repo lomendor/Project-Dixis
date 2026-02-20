@@ -332,36 +332,39 @@ export default async function Page({ searchParams }: PageProps) {
           </Suspense>
         </div>
 
-        {/* Filter Card — search + sort + cultivation */}
-        <div className="bg-accent-cream/60 rounded-xl border border-accent-gold/15 shadow-card p-4 mb-5 space-y-3">
-          {/* Search + Sort */}
-          <div className="flex flex-col sm:flex-row gap-3">
+        {/* Filter area — compact 2-row layout */}
+        <div className="rounded-lg border border-accent-gold/10 bg-white/40 py-2 px-3 mb-4 space-y-2">
+          {/* Row 1: Search + Sort */}
+          <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="flex-1">
               <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
                 <ProductSearchInput />
               </Suspense>
             </div>
-            <div className="sm:w-52">
+            <div className="sm:w-48">
               <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
                 <ProductSort />
               </Suspense>
             </div>
           </div>
 
-          {/* Cultivation (conditional) */}
-          {hasCultivationData && (
+          {/* Row 2: All pills in one unified row */}
+          <div className="flex flex-wrap items-center gap-2">
+            {hasCultivationData && (
+              <Suspense fallback={null}>
+                <CultivationFilter
+                  selectedCultivation={cultivationFilter}
+                  availableCounts={cultivationCounts}
+                />
+              </Suspense>
+            )}
+            {hasCultivationData && (
+              <div className="hidden lg:block w-px h-5 bg-neutral-300/50 mx-0.5" aria-hidden="true" />
+            )}
             <Suspense fallback={null}>
-              <CultivationFilter
-                selectedCultivation={cultivationFilter}
-                availableCounts={cultivationCounts}
-              />
+              <RatingFilter selectedRating={ratingFilter} />
             </Suspense>
-          )}
-
-          {/* Rating filter */}
-          <Suspense fallback={null}>
-            <RatingFilter selectedRating={ratingFilter} />
-          </Suspense>
+          </div>
         </div>
 
         {items.length > 0 ? (

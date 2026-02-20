@@ -33,7 +33,7 @@ export function RatingFilter({ selectedRating }: RatingFilterProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <>
       {RATING_OPTIONS.map((opt) => {
         const isSelected = current === opt.value;
         return (
@@ -57,6 +57,6 @@ export function RatingFilter({ selectedRating }: RatingFilterProps) {
           </button>
         );
       })}
-    </div>
+    </>
   );
 }
