@@ -6,7 +6,7 @@ const SORT_OPTIONS = [
   { value: 'created_at_desc', label: 'Νεότερα' },
   { value: 'price_asc', label: 'Τιμή: Χαμηλότερη' },
   { value: 'price_desc', label: 'Τιμή: Υψηλότερη' },
-  { value: 'rating_desc', label: 'Κορυφαία βαθμολογία' },
+  { value: 'rating_desc', label: 'Βαθμολογία' },
   { value: 'name_asc', label: 'Αλφαβητικά' },
 ] as const;
 

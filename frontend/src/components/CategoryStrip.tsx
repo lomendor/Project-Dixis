@@ -143,7 +143,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
           <div
             className={`
               w-[96px] h-[96px] xl:w-[128px] xl:h-[128px]
-              rounded-2xl flex items-center justify-center
+              rounded-2xl flex items-center justify-center overflow-hidden
               transition-all duration-200
               group-hover:scale-105 group-hover:shadow-card
               ${
@@ -154,7 +154,13 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               bg-accent-cream
             `}
           >
-            <LayoutGrid className="w-12 h-12 xl:w-16 xl:h-16 text-neutral-500" />
+            <Image
+              src="/icons/categories/all-3d.png"
+              alt="Όλα τα προϊόντα"
+              width={128}
+              height={128}
+              className="w-[88px] h-[88px] xl:w-[120px] xl:h-[120px] object-contain"
+            />
           </div>
           <span
             className={`text-[11px] xl:text-xs font-medium text-center leading-tight min-h-[2rem] xl:min-h-[2.25rem] flex items-start justify-center

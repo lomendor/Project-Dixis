@@ -214,19 +214,52 @@ const cultivationLabels: Record<string, string> = {
   conventional: 'Συμβατικά',
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+
 export async function generateMetadata({
   searchParams,
 }: {
   searchParams: Promise<{ cat?: string; search?: string; cult?: string; sort?: string; dir?: string }>;
 }): Promise<Metadata> {
   const params = await searchParams;
+  const hasFilters = params.cult || params.search || params.cat;
   const parts: string[] = [];
   if (params.cult && cultivationLabels[params.cult]) parts.push(cultivationLabels[params.cult]);
   if (params.search) parts.push(`"${params.search}"`);
   const suffix = parts.length > 0 ? ` — ${parts.join(', ')}` : '';
-  const title = `Προϊόντα${suffix} | Dixis`;
-  const description = `Ανακαλύψτε τοπικά ελληνικά προϊόντα${suffix} απευθείας από Έλληνες παραγωγούς.`;
-  return { title, description };
+
+  // When no filters: this is the homepage (redirected from /)
+  const title = hasFilters
+    ? `Προϊόντα${suffix} | Dixis`
+    : 'Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς | Dixis';
+  const description = hasFilters
+    ? `Ανακαλύψτε τοπικά ελληνικά προϊόντα${suffix} απευθείας από Έλληνες παραγωγούς.`
+    : 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από Έλληνες παραγωγούς. Ελαιόλαδο, μέλι, βότανα και χειροποίητα προϊόντα — από τον παραγωγό στην πόρτα σας.';
+
+  return {
+    title,
+    description,
+    keywords: [
+      'τοπικά προϊόντα Ελλάδα',
+      'Έλληνες παραγωγοί',
+      'αυθεντικά ελληνικά προϊόντα',
+      'ελληνικό μέλι',
+      'ελαιόλαδο',
+      'βότανα',
+      'παραδοσιακά ελληνικά προϊόντα',
+    ],
+    openGraph: {
+      title: 'Dixis — Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς',
+      description: 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από Έλληνες παραγωγούς.',
+      url: `${siteUrl}/products`,
+      images: [{ url: `${siteUrl}/og-products.jpg`, width: 1200, height: 630, alt: 'Dixis — Ελληνικά Προϊόντα' }],
+    },
+    twitter: {
+      title: 'Dixis — Αυθεντικά Ελληνικά Προϊόντα',
+      description: 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από Έλληνες παραγωγούς.',
+      images: [`${siteUrl}/twitter-products.jpg`],
+    },
+  };
 }
 
 interface PageProps {
