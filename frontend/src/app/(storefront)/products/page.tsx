@@ -257,7 +257,6 @@ export default async function Page({ searchParams }: PageProps) {
     sortDir,
     ratingFilter || undefined
   );
-  const total = items.length;
 
   // Fetch ALL products (without cult filter) to build cultivation counts for the strip
   const allForCounts = cultivationFilter
@@ -292,7 +291,7 @@ export default async function Page({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-10 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1600px] mx-auto">
         {/* Demo mode banner */}
         {isDemo && (
@@ -301,7 +300,7 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="mb-4">
           <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">
             Αγορά Παραγωγών
           </p>
@@ -310,15 +309,10 @@ export default async function Page({ searchParams }: PageProps) {
               ? `Αποτελέσματα για "${searchQuery}"`
               : 'Αυθεντικά Ελληνικά Προϊόντα'}
           </h1>
-          <p className="mt-2 text-base text-neutral-600 max-w-xl">
-            {searchQuery
-              ? `${total} προϊόν${total !== 1 ? 'τα' : ''} βρέθηκαν.`
-              : `Απευθείας από Έλληνες παραγωγούς — ${categoryFilter ? `${total} στην κατηγορία` : `${apiTotal || total} επιλεγμένα προϊόντα`}.`}
-          </p>
         </div>
 
         {/* Category Cards (Wolt-style, standalone above filter) */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Suspense
             fallback={
               <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
@@ -339,7 +333,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {/* Filter Card — search + sort + cultivation */}
-        <div className="bg-accent-cream/60 rounded-xl border border-accent-gold/15 shadow-card p-6 mb-8 space-y-5">
+        <div className="bg-accent-cream/60 rounded-xl border border-accent-gold/15 shadow-card p-4 mb-5 space-y-3">
           {/* Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
