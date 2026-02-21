@@ -16,12 +16,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Header Navigation - Guest @smoke', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/products');
     await page.waitForLoadState('domcontentloaded');
   });
 
@@ -75,7 +76,8 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
 test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '1');
@@ -131,7 +133,8 @@ test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '2');
@@ -193,7 +196,8 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '3');
@@ -233,12 +237,13 @@ test.describe('Header Navigation - Mobile @smoke', () => {
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/products');
     await page.waitForLoadState('domcontentloaded');
   });
 
@@ -289,19 +294,39 @@ test.describe('Header Navigation - Mobile @smoke', () => {
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
-    // Wait for auth hydration to complete before checking mobile menu.
-    // Header.tsx gates auth UI on `isHydrated && !loading`. On mobile, the desktop
-    // user-menu doesn't exist (hidden md:flex), so we poll the loading placeholder:
-    // it disappears once showAuthUI becomes true.
-    // The placeholder has aria-hidden="true" and animate-pulse class inside mobile-menu.
-    // We open the menu, then poll until the logout btn appears (auth hydrated as authenticated).
+    // Wait for React to hydrate — check auth state via localStorage readback
+    await page.waitForFunction(() => {
+      return localStorage.getItem('auth_token') === 'mock_token';
+    }, { timeout: 5000 });
     await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
 
+    // Diagnostic: dump mobile menu HTML + auth state to identify what's rendering
+    const diagnostics = await page.evaluate(() => {
+      const menu = document.querySelector('[data-testid="mobile-menu"]');
+      const authState = {
+        auth_token: localStorage.getItem('auth_token'),
+        user_role: localStorage.getItem('user_role'),
+        e2e_mode: localStorage.getItem('e2e_mode'),
+      };
+      return {
+        menuHTML: menu?.innerHTML?.substring(0, 2000) || 'MENU NOT FOUND',
+        authState,
+        url: window.location.href,
+        testIds: Array.from(menu?.querySelectorAll('[data-testid]') || []).map(
+          el => el.getAttribute('data-testid')
+        ),
+      };
+    });
+    console.log('=== MOBILE MENU DIAGNOSTICS ===');
+    console.log('URL:', diagnostics.url);
+    console.log('Auth state:', JSON.stringify(diagnostics.authState));
+    console.log('TestIDs in menu:', JSON.stringify(diagnostics.testIds));
+    console.log('Menu HTML (first 2000 chars):', diagnostics.menuHTML);
+    console.log('=== END DIAGNOSTICS ===');
+
     // Poll for authenticated content — logout btn appears once auth hydration completes.
-    // If menu rendered guest links first (login/register), React will re-render when
-    // isAuthenticated flips to true. Give generous timeout for CI.
     await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
