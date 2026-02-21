@@ -15,7 +15,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Pass 55: Card Option Guardrail @smoke', () => {
   test('card payment option "Κάρτα" is visible for authenticated users', async ({ page }) => {
     // Set up mock auth (authenticated user required for card option)
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from / that causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock-ci-token-for-e2e');
       localStorage.setItem(
@@ -45,8 +46,7 @@ test.describe('Pass 55: Card Option Guardrail @smoke', () => {
     });
 
     // Navigate to checkout
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     // Handle potential auth redirect
     const currentUrl = page.url();
@@ -99,7 +99,8 @@ test.describe('Pass 55: Card Option Guardrail @smoke', () => {
 
   test('COD option always available alongside Card', async ({ page }) => {
     // Set up mock auth
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from / that causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock-ci-token-for-e2e');
       localStorage.setItem(
@@ -115,8 +116,7 @@ test.describe('Pass 55: Card Option Guardrail @smoke', () => {
       );
     });
 
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     const currentUrl = page.url();
     if (currentUrl.includes('/login')) {

@@ -12,7 +12,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Pass 52: Card Payment Init @smoke', () => {
   test.beforeEach(async ({ page }) => {
     // CI-safe auth: Set mock auth tokens in localStorage (matches global-setup.ts CI behavior)
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from / that causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock-ci-token-for-e2e');
       localStorage.setItem(
@@ -44,8 +45,7 @@ test.describe('Pass 52: Card Payment Init @smoke', () => {
     });
 
     // Go to checkout
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     // Check if checkout page loaded (may redirect to login in some configs)
     const url = page.url();
@@ -143,8 +143,7 @@ test.describe('Pass 52: Card Payment Init @smoke', () => {
       );
     });
 
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     // Check if checkout page loaded
     const url = page.url();
