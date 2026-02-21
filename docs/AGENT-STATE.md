@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-19 (Phase 10 — 10 Definitive Categories deployed)
+**Updated**: 2026-02-21 (Phase 10 — Monitoring cleanup, false alarms fixed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -78,6 +78,7 @@
 
 ## Recently Done (last 10)
 
+- **MONITORING-CLEANUP** — Fixed false alarm epidemic: production-smoke 307 redirect bug (add `-L`), uptime-ping dedup (no more duplicate issues), disabled 10 redundant legacy cron workflows, closed 14 stale auto-generated P0/P1 issues. 4 canonical monitors kept active. (PR #3075, merged 2026-02-21) ✅
 - **IMAGE-SYNC-FIX** — Fixed photo mismatch bug: 7/17 products showed different image on card vs detail. Migration syncs `products.image_url` from `product_images`. Seeder also fixed to prevent recurrence. (PR #3056, deployed 2026-02-19) ✅
 - **CATEGORY-UNIFY-10** — Unified 14 backend + 9 frontend categories into exactly 10 definitive locker-compatible categories. Backend migration reassigns all products via `category_product` pivot. Frontend cleanup removes all hacks (SLUG_LABEL_OVERRIDE, STATIC_ICON_MAP, partial matching). 10 in DB, 7 visible (cosmetics/sauces/legumes pending products). (PRs #3052-#3054, deployed 2026-02-19) ✅
 - **UI-REDESIGN-10PHASES** — Premium marketplace visual overhaul (Phases 1-10, 17 PRs): Warm cream backgrounds, full-width layout, gold accents on header/footer/filters, producer prominence on cards, Wolt-style category cards with pastel backgrounds, 4 custom 3D icons (honey/olive-oil/nuts/cosmetics) + 6 Lucide SVGs, bigger 100px desktop cards. (PRs #3038-#3050, deployed 2026-02-17–2026-02-19) ✅
