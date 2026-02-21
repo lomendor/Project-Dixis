@@ -2,11 +2,9 @@ name: MON1 uptime monitoring
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/10 * * * *"
-  push:
-    paths:
-      - ".github/workflows/monitor-uptime-mon1.yml"
+  # DISABLED: redundant — consolidated into uptime-monitor.yml + production-smoke.yml
+  # schedule:
+  #   - cron: "*/10 * * * *"
 
 jobs:
   mon1:

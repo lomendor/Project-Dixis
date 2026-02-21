@@ -23,7 +23,7 @@ jobs:
           BODY_B64=$(cat /tmp/body 2>/dev/null | base64 -w0 || echo "")
           echo "body_b64=$BODY_B64" >> $GITHUB_OUTPUT
 
-      - name: Create issue on failure
+      - name: Create or update issue on failure
         if: steps.ping.outputs.status != '200'
         uses: actions/github-script@v7
         env:
@@ -34,22 +34,43 @@ jobs:
             const status = process.env.STATUS || '000';
             const bodyB64 = process.env.BODY_B64 || '';
             const body = bodyB64 ? Buffer.from(bodyB64, 'base64').toString('utf-8') : '(no body)';
-            const title = `❌ Uptime failure (${status}) on https://dixis.gr/api/healthz`;
-            const description = [
-              'Automated uptime check failed.',
-              '',
-              '**Status:** ' + status,
-              '',
-              '```json',
-              body.substring(0, 4000),
-              '```',
-              '',
-              `**Time:** ${new Date().toISOString()}`
-            ].join('\n');
-            await github.rest.issues.create({
+
+            // Dedup: check for existing open uptime issue
+            const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title,
-              body: description,
-              labels: ['P1-high','ops','uptime']
+              state: 'open',
+              labels: 'uptime',
+              per_page: 1
             });
+
+            if (issues.length > 0) {
+              // Add comment to existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: `⏰ Health check failed again at ${new Date().toISOString()}\n**Status:** ${status}`
+              });
+            } else {
+              // Create new issue
+              const title = `❌ Uptime failure (${status}) on https://dixis.gr/api/healthz`;
+              const description = [
+                'Automated uptime check failed.',
+                '',
+                '**Status:** ' + status,
+                '',
+                '```json',
+                body.substring(0, 4000),
+                '```',
+                '',
+                `**Time:** ${new Date().toISOString()}`
+              ].join('\n');
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body: description,
+                labels: ['P1-high','ops','uptime']
+              });
+            }

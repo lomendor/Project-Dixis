@@ -1,8 +1,10 @@
 name: Uptime Alert (on failure)
 on:
-  workflow_run:
-    workflows: ["Uptime smoke"]
-    types: [completed]
+  workflow_dispatch:
+  # DISABLED: "Uptime smoke" cron disabled — this alert has no trigger
+  # workflow_run:
+  #   workflows: ["Uptime smoke"]
+  #   types: [completed]
 
 jobs:
   open-issue-on-failure:
