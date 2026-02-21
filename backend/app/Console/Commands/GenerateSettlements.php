@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\DB;
  * via scheduler, or manually via artisan.
  *
  * Eligibility: Commission must be linked to a delivered order AND
- * the order must have been delivered >= $holdDays ago (default 14).
+ * the order must have been delivered >= $holdDays ago (default 14)
+ * AND the order must NOT be fully refunded (refund_id is null).
+ * Partially refunded orders are included but flagged for manual review.
  *
  * Owner decisions applied:
  * - Frequency: Monthly (1st of each month)
@@ -56,16 +58,34 @@ class GenerateSettlements extends Command
         $this->newLine();
 
         // Find unsettled commissions with delivered orders within the hold window
+        // Exclude fully-refunded orders (refund_id is set by Stripe refund flow)
         $eligibleCommissions = Commission::unsettled()
             ->whereHas('order', function ($q) use ($eligibleBefore) {
                 $q->where('status', 'delivered')
-                  ->where('updated_at', '<=', $eligibleBefore);
+                  ->where('updated_at', '<=', $eligibleBefore)
+                  ->whereNull('refund_id');
             })
+            ->with('order') // eager load for partial refund check below
             ->get();
 
         if ($eligibleCommissions->isEmpty()) {
             $this->info('No eligible commissions found for this period.');
             return 0;
+        }
+
+        // Warn about orders with partial refunds (included but need manual review)
+        $partiallyRefunded = $eligibleCommissions->filter(function ($commission) {
+            return $commission->order
+                && $commission->order->refunded_amount_cents > 0;
+        });
+
+        if ($partiallyRefunded->isNotEmpty()) {
+            $this->warn("WARNING: {$partiallyRefunded->count()} commission(s) have partially refunded orders. Review manually:");
+            foreach ($partiallyRefunded as $c) {
+                $refundedEur = ($c->order->refunded_amount_cents ?? 0) / 100;
+                $this->warn("  Order #{$c->order_id}: refunded EUR {$refundedEur}");
+            }
+            $this->newLine();
         }
 
         // Group by producer
