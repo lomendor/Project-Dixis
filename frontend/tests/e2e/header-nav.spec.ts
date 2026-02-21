@@ -16,12 +16,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Header Navigation - Guest @smoke', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/products');
     await page.waitForLoadState('domcontentloaded');
   });
 
@@ -75,7 +76,8 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
 test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '1');
@@ -131,7 +133,8 @@ test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '2');
@@ -193,7 +196,8 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '3');
@@ -233,12 +237,13 @@ test.describe('Header Navigation - Mobile @smoke', () => {
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/products');
     await page.waitForLoadState('domcontentloaded');
   });
 
