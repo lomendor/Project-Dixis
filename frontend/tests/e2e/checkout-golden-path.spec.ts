@@ -82,7 +82,7 @@ test.describe('Checkout Golden Path @prod', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify checkout form is visible
     const checkoutForm = page.getByTestId('checkout-form');
@@ -147,7 +147,7 @@ test.describe('Checkout Golden Path @prod', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify checkout form is visible (not blocked)
     const checkoutForm = page.getByTestId('checkout-form');

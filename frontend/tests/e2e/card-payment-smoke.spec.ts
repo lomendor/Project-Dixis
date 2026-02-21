@@ -101,7 +101,7 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check if we got redirected to login (auth token not validated by backend)
     const currentUrl = page.url();
@@ -180,7 +180,7 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
     });
 
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check if redirected to login
     if (page.url().includes('/login')) {

@@ -46,7 +46,7 @@ test.describe('Pass 55: Card Option Guardrail @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Handle potential auth redirect
     const currentUrl = page.url();
@@ -116,7 +116,7 @@ test.describe('Pass 55: Card Option Guardrail @smoke', () => {
     });
 
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const currentUrl = page.url();
     if (currentUrl.includes('/login')) {

@@ -21,7 +21,7 @@ test.describe('Guest Checkout @smoke', () => {
   test('guest can access checkout page without login', async ({ page }) => {
     // Navigate directly to checkout (guest checkout should be accessible without cart)
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify checkout page loads without redirect to login
     // Guest may see empty cart notice or checkout form
@@ -69,7 +69,7 @@ test.describe('Guest Checkout @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify guest notice is displayed
     const guestNotice = page.getByTestId('guest-checkout-notice');
@@ -132,7 +132,7 @@ test.describe('Guest Checkout @regression', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Fill in guest checkout form
     await page.getByTestId('checkout-name').fill('Γιάννης Παπαδόπουλος');
@@ -181,7 +181,7 @@ test.describe('Guest Checkout @regression', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Fill in form WITHOUT email
     await page.getByTestId('checkout-name').fill('Γιάννης Παπαδόπουλος');
@@ -211,7 +211,7 @@ test.describe('Auth-Protected Pages Guard @smoke', () => {
 
   test('account/orders requires authentication', async ({ page }) => {
     await page.goto('/account/orders');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Should redirect to login, show auth required message, or NOT show orders content
     const url = page.url();
@@ -226,7 +226,7 @@ test.describe('Auth-Protected Pages Guard @smoke', () => {
 
   test('producer dashboard requires authentication', async ({ page }) => {
     await page.goto('/producer/dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Should redirect to login, show auth required message, or NOT show dashboard content
     const url = page.url();

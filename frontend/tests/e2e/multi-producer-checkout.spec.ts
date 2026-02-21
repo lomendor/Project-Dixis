@@ -67,7 +67,7 @@ test.describe('Multi-Producer Checkout Flow @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Pass MP-SHIPPING-BREAKDOWN-TRUTH-01: Checkout should NOT be blocked
     // The old blocking message should NOT appear
@@ -98,7 +98,7 @@ test.describe('Multi-Producer Checkout Flow @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify checkout form is shown (not blocked)
     const blockedMessage = page.getByTestId('multi-producer-blocked');
@@ -135,7 +135,7 @@ test.describe('Multi-Producer Checkout Flow @smoke', () => {
 
     // Navigate to checkout
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify checkout form is visible (not blocked)
     const checkoutForm = page.getByTestId('checkout-form');
