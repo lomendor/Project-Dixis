@@ -289,15 +289,20 @@ test.describe('Header Navigation - Mobile @smoke', () => {
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
-    // Open the mobile menu
+    // Wait for auth hydration to complete before checking mobile menu.
+    // Header.tsx gates auth UI on `isHydrated && !loading`. On mobile, the desktop
+    // user-menu doesn't exist (hidden md:flex), so we poll the loading placeholder:
+    // it disappears once showAuthUI becomes true.
+    // The placeholder has aria-hidden="true" and animate-pulse class inside mobile-menu.
+    // We open the menu, then poll until the logout btn appears (auth hydrated as authenticated).
     await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
 
-    // Auth context needs hydration time — after reload, useEffect reads mock_token
-    // from localStorage and sets isAuthenticated=true. The mobile menu re-renders
-    // from loading placeholder → authenticated links. Use generous timeout.
-    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 15000 });
+    // Poll for authenticated content — logout btn appears once auth hydration completes.
+    // If menu rendered guest links first (login/register), React will re-render when
+    // isAuthenticated flips to true. Give generous timeout for CI.
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
   });
