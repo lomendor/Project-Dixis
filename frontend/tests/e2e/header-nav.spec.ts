@@ -289,10 +289,16 @@ test.describe('Header Navigation - Mobile @smoke', () => {
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
+    // Open the mobile menu
+    await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
+
+    // Auth context needs hydration time — after reload, useEffect reads mock_token
+    // from localStorage and sets isAuthenticated=true. The mobile menu re-renders
+    // from loading placeholder → authenticated links. Use generous timeout.
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
-    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible();
   });
 });
