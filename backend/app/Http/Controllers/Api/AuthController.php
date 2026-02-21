@@ -166,10 +166,12 @@ class AuthController extends Controller
         // Revoke current API token
         $request->user()->currentAccessToken()->delete();
 
-        // Invalidate session cookie (SPA auth)
+        // Invalidate session cookie (SPA auth) — guard for API tests without session store
         Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json([
             'message' => 'Logged out successfully',

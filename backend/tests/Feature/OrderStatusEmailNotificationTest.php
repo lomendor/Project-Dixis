@@ -43,7 +43,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service = new OrderEmailService();
         $service->sendOrderStatusNotification($order, 'shipped');
 
-        Mail::assertNothingSent();
+        Mail::assertNothingQueued();
         $this->assertEquals(0, OrderNotification::count());
     }
 
@@ -58,7 +58,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service = new OrderEmailService();
         $service->sendOrderStatusNotification($order, 'shipped');
 
-        Mail::assertSent(OrderShipped::class, function ($mail) use ($order) {
+        Mail::assertQueued(OrderShipped::class, function ($mail) use ($order) {
             return $mail->order->id === $order->id;
         });
 
@@ -80,7 +80,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service = new OrderEmailService();
         $service->sendOrderStatusNotification($order, 'delivered');
 
-        Mail::assertSent(OrderDelivered::class, function ($mail) use ($order) {
+        Mail::assertQueued(OrderDelivered::class, function ($mail) use ($order) {
             return $mail->order->id === $order->id;
         });
 
@@ -104,7 +104,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service->sendOrderStatusNotification($order, 'shipped');
 
         // Only ONE email sent
-        Mail::assertSent(OrderShipped::class, 1);
+        Mail::assertQueued(OrderShipped::class, 1);
 
         // Only ONE notification record
         $this->assertEquals(1, OrderNotification::where('order_id', $order->id)
@@ -125,7 +125,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service->sendOrderStatusNotification($order, 'delivered');
 
         // Only ONE email sent
-        Mail::assertSent(OrderDelivered::class, 1);
+        Mail::assertQueued(OrderDelivered::class, 1);
 
         // Only ONE notification record
         $this->assertEquals(1, OrderNotification::where('order_id', $order->id)
@@ -148,7 +148,7 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service->sendOrderStatusNotification($order, 'processing');
         $service->sendOrderStatusNotification($order, 'cancelled');
 
-        Mail::assertNothingSent();
+        Mail::assertNothingQueued();
         $this->assertEquals(0, OrderNotification::count());
     }
 
@@ -169,8 +169,8 @@ class OrderStatusEmailNotificationTest extends TestCase
         // Should not throw
         $service->sendOrderStatusNotification($order, 'shipped');
 
-        // No email sent (no crash)
-        Mail::assertNothingSent();
+        // No email queued (no crash)
+        Mail::assertNothingQueued();
     }
 
     /** @test */
@@ -191,8 +191,8 @@ class OrderStatusEmailNotificationTest extends TestCase
         $service->sendOrderStatusNotification($order, 'delivered');
 
         // Both emails should be sent (separate events)
-        Mail::assertSent(OrderShipped::class, 1);
-        Mail::assertSent(OrderDelivered::class, 1);
+        Mail::assertQueued(OrderShipped::class, 1);
+        Mail::assertQueued(OrderDelivered::class, 1);
 
         // Two notification records
         $this->assertEquals(2, OrderNotification::where('order_id', $order->id)->count());

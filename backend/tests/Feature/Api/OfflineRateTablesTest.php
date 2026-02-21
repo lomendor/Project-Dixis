@@ -244,8 +244,8 @@ class OfflineRateTablesTest extends TestCase
 
     public function test_admin_shipping_rates_endpoint()
     {
-        // Create a user for authentication
-        $user = \App\Models\User::factory()->create();
+        // Create an admin user for authentication (admin middleware required)
+        $user = \App\Models\User::factory()->admin()->create();
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/admin/shipping/rates');
@@ -275,7 +275,7 @@ class OfflineRateTablesTest extends TestCase
 
     public function test_admin_shipping_simulate_endpoint()
     {
-        $user = \App\Models\User::factory()->create();
+        $user = \App\Models\User::factory()->admin()->create();
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/v1/admin/shipping/simulate');

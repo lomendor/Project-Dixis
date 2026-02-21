@@ -48,8 +48,8 @@ class OrderEmailNotificationTest extends TestCase
         // Act
         $service->sendOrderPlacedNotifications($order);
 
-        // Assert: No emails sent
-        Mail::assertNothingSent();
+        // Assert: No emails queued
+        Mail::assertNothingQueued();
         $this->assertEquals(0, OrderNotification::count());
     }
 
@@ -67,7 +67,7 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Consumer email sent
-        Mail::assertSent(ConsumerOrderPlaced::class, function ($mail) use ($order) {
+        Mail::assertQueued(ConsumerOrderPlaced::class, function ($mail) use ($order) {
             return $mail->order->id === $order->id;
         });
 
@@ -104,7 +104,7 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Producer email sent
-        Mail::assertSent(ProducerNewOrder::class, function ($mail) use ($order, $producer) {
+        Mail::assertQueued(ProducerNewOrder::class, function ($mail) use ($order, $producer) {
             return $mail->order->id === $order->id && $mail->producer->id === $producer->id;
         });
 
@@ -132,7 +132,7 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Only ONE consumer email sent
-        Mail::assertSent(ConsumerOrderPlaced::class, 1);
+        Mail::assertQueued(ConsumerOrderPlaced::class, 1);
 
         // Assert: Only ONE notification record
         $this->assertEquals(1, OrderNotification::where('order_id', $order->id)
@@ -177,7 +177,7 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Two producer emails sent (one per producer)
-        Mail::assertSent(ProducerNewOrder::class, 2);
+        Mail::assertQueued(ProducerNewOrder::class, 2);
 
         // Assert: Two producer notification records
         $this->assertEquals(2, OrderNotification::where('order_id', $order->id)
@@ -202,8 +202,8 @@ class OrderEmailNotificationTest extends TestCase
         // Act: Should not throw
         $service->sendOrderPlacedNotifications($order);
 
-        // Assert: No consumer email sent (no crash)
-        Mail::assertNotSent(ConsumerOrderPlaced::class);
+        // Assert: No consumer email queued (no crash)
+        Mail::assertNotQueued(ConsumerOrderPlaced::class);
     }
 
     /** @test */
@@ -231,8 +231,8 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Consumer email sent, producer email not sent (no crash)
-        Mail::assertSent(ConsumerOrderPlaced::class, 1);
-        Mail::assertNotSent(ProducerNewOrder::class);
+        Mail::assertQueued(ConsumerOrderPlaced::class, 1);
+        Mail::assertNotQueued(ProducerNewOrder::class);
     }
 
     /** @test */
@@ -280,14 +280,14 @@ class OrderEmailNotificationTest extends TestCase
         $service->sendOrderPlacedNotifications($order);
 
         // Assert: Each producer email has correct item count
-        Mail::assertSent(ProducerNewOrder::class, function ($mail) use ($producer1) {
+        Mail::assertQueued(ProducerNewOrder::class, function ($mail) use ($producer1) {
             if ($mail->producer->id === $producer1->id) {
                 return $mail->producerItems->count() === 2;
             }
             return true;
         });
 
-        Mail::assertSent(ProducerNewOrder::class, function ($mail) use ($producer2) {
+        Mail::assertQueued(ProducerNewOrder::class, function ($mail) use ($producer2) {
             if ($mail->producer->id === $producer2->id) {
                 return $mail->producerItems->count() === 1;
             }

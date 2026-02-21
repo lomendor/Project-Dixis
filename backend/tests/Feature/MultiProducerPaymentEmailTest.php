@@ -97,9 +97,9 @@ class MultiProducerPaymentEmailTest extends TestCase
         $this->assertEquals('checkout_session', $data['response']->json('data.type'));
         $this->assertEquals(2, $data['response']->json('data.order_count'));
 
-        // NO emails should be sent at creation for CARD payment
-        Mail::assertNotSent(ConsumerOrderPlaced::class);
-        Mail::assertNotSent(ProducerOrderNotification::class);
+        // NO emails should be queued at creation for CARD payment
+        Mail::assertNotQueued(ConsumerOrderPlaced::class);
+        Mail::assertNotQueued(ProducerOrderNotification::class);
     }
 
     /**
@@ -114,7 +114,7 @@ class MultiProducerPaymentEmailTest extends TestCase
         $data['response']->assertStatus(201);
 
         // COD orders should trigger emails immediately
-        Mail::assertSent(ConsumerOrderPlaced::class);
+        Mail::assertQueued(ConsumerOrderPlaced::class);
     }
 
     /**
@@ -178,8 +178,8 @@ class MultiProducerPaymentEmailTest extends TestCase
             $emailService->sendOrderPlacedNotifications($siblingOrder);
         }
 
-        // Verify consumer email sent (at least once)
-        Mail::assertSent(ConsumerOrderPlaced::class, function ($mail) use ($user) {
+        // Verify consumer email queued (at least once)
+        Mail::assertQueued(ConsumerOrderPlaced::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });
     }
@@ -203,8 +203,8 @@ class MultiProducerPaymentEmailTest extends TestCase
             $this->assertEquals('pending', $order->payment_status);
         }
 
-        // No emails sent
-        Mail::assertNotSent(ConsumerOrderPlaced::class);
+        // No emails queued
+        Mail::assertNotQueued(ConsumerOrderPlaced::class);
     }
 
     /**
@@ -349,6 +349,6 @@ class MultiProducerPaymentEmailTest extends TestCase
         }
 
         $this->assertTrue($skipped);
-        Mail::assertNotSent(ConsumerOrderPlaced::class);
+        Mail::assertNotQueued(ConsumerOrderPlaced::class);
     }
 }
