@@ -298,7 +298,6 @@ test.describe('Header Navigation - Mobile @smoke', () => {
     await page.waitForFunction(() => {
       return localStorage.getItem('auth_token') === 'mock_token';
     }, { timeout: 5000 });
-
     await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
