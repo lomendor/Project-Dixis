@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { apiClient, ShippingLine } from '@/lib/api'
+import { apiClient, ShippingLine, OrderItem as ApiOrderItem, isCheckoutSession, type OrderOrCheckoutSession, type CheckoutSessionResponse, type Order as ApiOrder } from '@/lib/api'
 
 interface OrderItem {
   id: string
@@ -52,11 +52,10 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
         const laravelOrder = await apiClient.getOrderByToken(orderToken)
 
         // Detect if this is a CheckoutSession (multi-producer) or single Order
-        const isCheckoutSession = (laravelOrder as any).type === 'checkout_session'
-
-        if (isCheckoutSession) {
+        // Uses discriminated union type guard — no `as any` casts needed
+        if (isCheckoutSession(laravelOrder)) {
           // Multi-producer: flatten child orders into a single thank-you view
-          const session = laravelOrder as any
+          const session: CheckoutSessionResponse = laravelOrder
           const allItems: OrderItem[] = []
 
           // Collect items from all child orders
@@ -91,27 +90,27 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
           }
           setOrder(transformedOrder)
         } else {
-          // Single-producer: existing logic
-          const orderItems = laravelOrder.items || laravelOrder.order_items || []
-          const shippingAmount = laravelOrder.shipping_total
-            ? parseFloat(laravelOrder.shipping_total)
-            : (parseFloat(laravelOrder.shipping_amount) || laravelOrder.shipping_cost || 0)
+          // Single-producer: typed as ApiOrder
+          const singleOrder: ApiOrder = laravelOrder
+          const orderItems = singleOrder.items || singleOrder.order_items || []
+          const shippingAmount = singleOrder.shipping_total
+            ? parseFloat(singleOrder.shipping_total)
+            : (parseFloat(singleOrder.shipping_amount) || singleOrder.shipping_cost || 0)
           const transformedOrder: Order = {
-            id: String(laravelOrder.id),
-            status: laravelOrder.status,
-            total: parseFloat(laravelOrder.total_amount) || 0,
-            subtotal: parseFloat(laravelOrder.subtotal) || 0,
+            id: String(singleOrder.id),
+            status: singleOrder.status,
+            total: parseFloat(singleOrder.total_amount) || 0,
+            subtotal: parseFloat(singleOrder.subtotal) || 0,
             shipping: shippingAmount,
-            codFee: parseFloat(laravelOrder.cod_fee) || 0,
-            vat: parseFloat(laravelOrder.tax_amount) || 0,
+            codFee: parseFloat(singleOrder.cod_fee || '0') || 0,
+            vat: parseFloat(singleOrder.tax_amount) || 0,
             zone: 'mainland',
             email: null,
             name: null,
-            isMultiProducer: laravelOrder.is_multi_producer || false,
-            shippingLines: laravelOrder.shipping_lines || [],
-            publicToken: laravelOrder.public_token || undefined,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            items: orderItems.map((item: any) => ({
+            isMultiProducer: singleOrder.is_multi_producer || false,
+            shippingLines: singleOrder.shipping_lines || [],
+            publicToken: singleOrder.public_token || undefined,
+            items: orderItems.map((item: ApiOrderItem) => ({
               id: String(item.id),
               qty: item.quantity,
               price: parseFloat(item.unit_price || item.price) || 0,

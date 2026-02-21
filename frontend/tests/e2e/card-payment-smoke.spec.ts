@@ -73,7 +73,8 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
 
   test('card payment option visible for authenticated user', async ({ page }) => {
     // Set up authenticated user session
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from / that causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'smoke-test-token');
       localStorage.setItem('user', JSON.stringify({
@@ -100,8 +101,7 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
     });
 
     // Navigate to checkout
-    await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     // Check if we got redirected to login (auth token not validated by backend)
     const currentUrl = page.url();
@@ -160,7 +160,8 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
     // COD should always be available regardless of Stripe config
     // This ensures users can always complete checkout
 
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from /
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       // Set up cart without auth (guest checkout)
       localStorage.setItem('dixis-cart', JSON.stringify({
@@ -180,7 +181,7 @@ test.describe('Pass CARD-PAYMENT-SMOKE-01: Card Payment Smoke @smoke', () => {
     });
 
     await page.goto('/checkout');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check if redirected to login
     if (page.url().includes('/login')) {

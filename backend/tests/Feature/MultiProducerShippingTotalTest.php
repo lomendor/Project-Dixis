@@ -64,7 +64,7 @@ class MultiProducerShippingTotalTest extends TestCase
 
         // Fetch order via API
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson("/api/v1/public/orders/{$order->id}");
+            ->getJson("/api/v1/public/orders/by-token/{$order->public_token}");
 
         $response->assertStatus(200);
         $response->assertJsonPath('data.shipping_total', '7.00');
@@ -113,7 +113,7 @@ class MultiProducerShippingTotalTest extends TestCase
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson("/api/v1/public/orders/{$order->id}");
+            ->getJson("/api/v1/public/orders/by-token/{$order->public_token}");
 
         $response->assertStatus(200);
         $response->assertJsonPath('data.shipping_total', '3.50');
@@ -155,7 +155,7 @@ class MultiProducerShippingTotalTest extends TestCase
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
-            ->getJson("/api/v1/public/orders/{$order->id}");
+            ->getJson("/api/v1/public/orders/by-token/{$order->public_token}");
 
         $response->assertStatus(200);
         $response->assertJsonPath('data.shipping_total', '3.50');

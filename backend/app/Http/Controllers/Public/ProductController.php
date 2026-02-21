@@ -190,10 +190,25 @@ class ProductController extends Controller
             }], 'rating')
             ->where('is_active', true);
 
+        // Validate ID format: must be positive integer or valid slug string
         if (is_numeric($id)) {
-            $product = $query->findOrFail((int) $id);
+            $intId = (int) $id;
+            if ($intId <= 0) {
+                return response()->json([
+                    'message' => 'Product not found',
+                    'error' => 'Invalid product ID format',
+                ], 404);
+            }
+            $product = $query->find($intId);
         } else {
-            $product = $query->where('slug', $id)->firstOrFail();
+            $product = $query->where('slug', $id)->first();
+        }
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found',
+                'error' => 'Invalid product ID format',
+            ], 404);
         }
 
         $data = $product->toArray();

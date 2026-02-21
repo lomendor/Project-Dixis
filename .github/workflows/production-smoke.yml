@@ -23,9 +23,10 @@ jobs:
   homepage:
     runs-on: ubuntu-latest
     steps:
-      - name: Homepage HEAD
+      - name: Homepage (follow redirects)
         run: |
           set -euo pipefail
-          CODE=$(curl -skI --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/)
+          # Next.js redirects / → /products (307), so use -L to follow
+          CODE=$(curl -sk -L --max-time 30 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w "%{http_code}" https://dixis.gr/)
           echo "HTTP $CODE"
           test "$CODE" = "200"

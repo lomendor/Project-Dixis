@@ -92,15 +92,15 @@ class RefundTest extends TestCase
 
     public function test_refund_api_endpoint()
     {
-        $user = User::factory()->create();
+        $admin = User::factory()->admin()->create();
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'user_id' => $admin->id,
             'payment_status' => 'paid',
             'payment_intent_id' => 'fake_pi_test123',
             'total_amount' => 45.50,
         ]);
 
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($admin, 'sanctum')
             ->postJson("/api/v1/refunds/orders/{$order->id}", [
                 'amount_cents' => 2000,
                 'reason' => 'customer_request',
@@ -129,9 +129,9 @@ class RefundTest extends TestCase
 
     public function test_get_refund_info_endpoint()
     {
-        $user = User::factory()->create();
+        $admin = User::factory()->admin()->create();
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'user_id' => $admin->id,
             'payment_status' => 'paid',
             'payment_intent_id' => 'fake_pi_test123',
             'total_amount' => 45.50,
@@ -140,7 +140,7 @@ class RefundTest extends TestCase
             'refunded_at' => now(),
         ]);
 
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($admin, 'sanctum')
             ->getJson("/api/v1/refunds/orders/{$order->id}");
 
         $response->assertStatus(200)

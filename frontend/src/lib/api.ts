@@ -159,6 +159,39 @@ export interface Order {
   orders?: Order[]; // Child orders for multi-producer checkout
 }
 
+// Pass CHECKOUT-TOKEN-FIX-01: CheckoutSession response for multi-producer orders
+// Returned by showByToken when the token belongs to a checkout_sessions row.
+export interface CheckoutSessionResponse {
+  id: number;
+  public_token: string;
+  type: 'checkout_session'; // Discriminant field
+  status: string;
+  is_multi_producer: boolean;
+  order_count: number;
+  subtotal: string;
+  shipping_total: string;
+  cod_fee: string;
+  total: string;
+  currency: string;
+  stripe_payment_intent_id: string | null;
+  payment_order_id?: number;
+  created_at: string;
+  updated_at: string;
+  orders: Order[];
+  shipping_lines: ShippingLine[];
+}
+
+/**
+ * Discriminated union: API can return either an Order or a CheckoutSession.
+ * Use `isCheckoutSession()` type guard to narrow the type.
+ */
+export type OrderOrCheckoutSession = Order | CheckoutSessionResponse;
+
+/** Runtime type guard for CheckoutSession responses. */
+export function isCheckoutSession(data: OrderOrCheckoutSession): data is CheckoutSessionResponse {
+  return 'type' in data && data.type === 'checkout_session';
+}
+
 // Pass TRACKING-DISPLAY-01: Public order tracking response
 export interface OrderTrackingResponse {
   ok: boolean;
@@ -814,10 +847,10 @@ class ApiClient {
    * Replaces the old getPublicOrder(id) which used sequential IDs.
    */
   // Pass CHECKOUT-TOKEN-FIX-01: Returns either Order or CheckoutSession
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getOrderByToken(token: string): Promise<any> {
-    const response = await this.request<{ data: any }>(`public/orders/by-token/${token}`);
-    // Skip strict schema validation — response can be OrderResource or CheckoutSessionResource
+  async getOrderByToken(token: string): Promise<OrderOrCheckoutSession> {
+    const response = await this.request<{ data: OrderOrCheckoutSession }>(`public/orders/by-token/${token}`);
+    // Skip strict Zod validation — response can be OrderResource or CheckoutSessionResource.
+    // The discriminant field `type === 'checkout_session'` is checked by isCheckoutSession().
     return response.data;
   }
 

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Pennant\Feature;
 use App\Models\Order;
 use App\Models\CommissionRule;
+use App\Models\User;
 
 class OrderCommissionPreviewTest extends TestCase
 {
@@ -16,18 +17,22 @@ class OrderCommissionPreviewTest extends TestCase
     {
         Feature::define('commission_engine_v1', fn() => false);
 
+        $user = User::factory()->admin()->create();
         $order = Order::factory()->create([
             'total_cents' => 10000,
             'channel' => 'B2C',
         ]);
 
-        $this->getJson("/api/orders/{$order->id}/commission-preview")
+        $this->actingAs($user, 'sanctum')
+            ->getJson("/api/orders/{$order->id}/commission-preview")
             ->assertStatus(404);
     }
 
     public function test_returns_preview_when_flag_on(): void
     {
         Feature::define('commission_engine_v1', fn() => true);
+
+        $user = User::factory()->admin()->create();
 
         // Default active rule 12% για B2C
         CommissionRule::create([
@@ -45,7 +50,8 @@ class OrderCommissionPreviewTest extends TestCase
             'channel' => 'B2C',
         ]);
 
-        $res = $this->getJson("/api/orders/{$order->id}/commission-preview")
+        $res = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/orders/{$order->id}/commission-preview")
             ->assertOk()
             ->assertJsonStructure([
                 'order_id',
@@ -70,8 +76,11 @@ class OrderCommissionPreviewTest extends TestCase
     {
         Feature::define('commission_engine_v1', fn() => true);
 
+        $user = User::factory()->admin()->create();
+
         // Try to access an order that doesn't exist
-        $this->getJson('/api/orders/999999/commission-preview')
+        $this->actingAs($user, 'sanctum')
+            ->getJson('/api/orders/999999/commission-preview')
             ->assertStatus(404);
     }
 }

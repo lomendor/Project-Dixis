@@ -1,9 +1,10 @@
 name: Uptime Smokes
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"
   workflow_dispatch:
+  # DISABLED: redundant — consolidated into uptime-monitor.yml + production-smoke.yml
+  # schedule:
+  #   - cron: "*/10 * * * *"
 
 jobs:
   smokes:

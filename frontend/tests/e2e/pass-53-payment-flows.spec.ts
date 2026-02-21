@@ -14,7 +14,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Pass 53: Payment Flows @regression', () => {
   test.beforeEach(async ({ page }) => {
     // CI-safe auth: Set mock auth tokens in localStorage
-    await page.goto('/');
+    // Use /products directly to avoid 307 redirect from / that causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock-ci-token-for-e2e');
       localStorage.setItem(
@@ -43,8 +44,7 @@ test.describe('Pass 53: Payment Flows @regression', () => {
 
   test('CARD flow: payment init does NOT return 404', async ({ page }) => {
     // Go to checkout
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     // Check if checkout page loaded (may redirect to login in some configs)
     const url = page.url();
@@ -115,8 +115,7 @@ test.describe('Pass 53: Payment Flows @regression', () => {
   });
 
   test('COD flow: checkout completes without card redirect', async ({ page }) => {
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     const url = page.url();
     if (url.includes('/login') || url.includes('/auth')) {
@@ -190,8 +189,7 @@ test.describe('Pass 53: Payment Flows @regression', () => {
   });
 
   test('both payment methods are available', async ({ page }) => {
-    await page.goto('/checkout');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/checkout', { waitUntil: 'domcontentloaded' });
 
     const url = page.url();
     if (url.includes('/login') || url.includes('/auth')) {

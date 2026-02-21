@@ -1,8 +1,10 @@
 name: prod-smoke-alert
 on:
-  workflow_run:
-    workflows: ["prod-smoke"]
-    types: [completed]
+  workflow_dispatch:
+  # DISABLED: "prod-smoke" cron disabled — this alert has no trigger
+  # workflow_run:
+  #   workflows: ["prod-smoke"]
+  #   types: [completed]
 
 jobs:
   alert:

@@ -16,13 +16,14 @@ import { test, expect } from '@playwright/test';
 test.describe('Header Navigation - Guest @smoke', () => {
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/products');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('logo is visible and links to home', async ({ page }) => {
@@ -75,7 +76,8 @@ test.describe('Header Navigation - Guest @smoke', () => {
 
 test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '1');
@@ -131,7 +133,8 @@ test.describe('Header Navigation - Consumer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '2');
@@ -193,7 +196,8 @@ test.describe('Header Navigation - Producer with Mock Auth @smoke', () => {
 
 test.describe('Header Navigation - Admin with Mock Auth @smoke', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products');
     await page.evaluate(() => {
       localStorage.setItem('auth_token', 'mock_token');
       localStorage.setItem('user_id', '3');
@@ -233,13 +237,24 @@ test.describe('Header Navigation - Mobile @smoke', () => {
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
-    await page.goto('/');
+
+    // Mock backend API calls — CI has no Laravel backend, without mocking
+    // page.reload() hangs waiting for API responses (causes 120s test timeout)
+    await page.route('**/api/v1/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [] }),
+      });
+    });
+
+    // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
   });
 
   test('hamburger menu button is visible on mobile', async ({ page }) => {
@@ -266,8 +281,7 @@ test.describe('Header Navigation - Mobile @smoke', () => {
       localStorage.setItem('user_name', 'E2E Test Consumer');
       localStorage.setItem('e2e_mode', 'true');
     });
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     const logo = page.locator('[data-testid="header-logo"]');
     await expect(logo).toBeVisible({ timeout: 10000 });
@@ -286,13 +300,21 @@ test.describe('Header Navigation - Mobile @smoke', () => {
       localStorage.setItem('user_name', 'E2E Test Consumer');
       localStorage.setItem('e2e_mode', 'true');
     });
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
+    // Use domcontentloaded — don't wait for network (API calls may hang without backend)
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
+    // Wait for main content to render (confirms page loaded after reload)
+    await page.locator('main, body').first().waitFor({ state: 'visible', timeout: 10000 });
+
+    await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
+
+    // Poll for authenticated content — logout btn appears once auth hydration completes.
+    // If menu rendered guest links first (login/register), React will re-render when
+    // isAuthenticated flips to true. Give generous timeout for CI.
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
-    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible();
   });
 });
