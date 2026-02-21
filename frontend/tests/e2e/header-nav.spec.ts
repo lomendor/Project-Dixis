@@ -237,14 +237,24 @@ test.describe('Header Navigation - Mobile @smoke', () => {
 
   test.beforeEach(async ({ page, context }) => {
     await context.clearCookies();
+
+    // Mock backend API calls — CI has no Laravel backend, without mocking
+    // page.reload() hangs waiting for API responses (causes 120s test timeout)
+    await page.route('**/api/v1/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [] }),
+      });
+    });
+
     // Use /products instead of '/' — homepage returns 307 redirect which causes ERR_ABORTED
-    await page.goto('/products');
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('/products');
-    await page.waitForLoadState('domcontentloaded');
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
   });
 
   test('hamburger menu button is visible on mobile', async ({ page }) => {
@@ -271,8 +281,7 @@ test.describe('Header Navigation - Mobile @smoke', () => {
       localStorage.setItem('user_name', 'E2E Test Consumer');
       localStorage.setItem('e2e_mode', 'true');
     });
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     const logo = page.locator('[data-testid="header-logo"]');
     await expect(logo).toBeVisible({ timeout: 10000 });
@@ -291,42 +300,19 @@ test.describe('Header Navigation - Mobile @smoke', () => {
       localStorage.setItem('user_name', 'E2E Test Consumer');
       localStorage.setItem('e2e_mode', 'true');
     });
-    await page.reload();
-    await page.waitForLoadState('domcontentloaded');
+    // Use domcontentloaded — don't wait for network (API calls may hang without backend)
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
-    // Wait for React to hydrate — check auth state via localStorage readback
-    await page.waitForFunction(() => {
-      return localStorage.getItem('auth_token') === 'mock_token';
-    }, { timeout: 5000 });
+    // Wait for main content to render (confirms page loaded after reload)
+    await page.locator('main, body').first().waitFor({ state: 'visible', timeout: 10000 });
+
     await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
 
-    // Diagnostic: dump mobile menu HTML + auth state to identify what's rendering
-    const diagnostics = await page.evaluate(() => {
-      const menu = document.querySelector('[data-testid="mobile-menu"]');
-      const authState = {
-        auth_token: localStorage.getItem('auth_token'),
-        user_role: localStorage.getItem('user_role'),
-        e2e_mode: localStorage.getItem('e2e_mode'),
-      };
-      return {
-        menuHTML: menu?.innerHTML?.substring(0, 2000) || 'MENU NOT FOUND',
-        authState,
-        url: window.location.href,
-        testIds: Array.from(menu?.querySelectorAll('[data-testid]') || []).map(
-          el => el.getAttribute('data-testid')
-        ),
-      };
-    });
-    console.log('=== MOBILE MENU DIAGNOSTICS ===');
-    console.log('URL:', diagnostics.url);
-    console.log('Auth state:', JSON.stringify(diagnostics.authState));
-    console.log('TestIDs in menu:', JSON.stringify(diagnostics.testIds));
-    console.log('Menu HTML (first 2000 chars):', diagnostics.menuHTML);
-    console.log('=== END DIAGNOSTICS ===');
-
     // Poll for authenticated content — logout btn appears once auth hydration completes.
+    // If menu rendered guest links first (login/register), React will re-render when
+    // isAuthenticated flips to true. Give generous timeout for CI.
     await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 30000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
