@@ -22,7 +22,7 @@ test.describe('Logo Visibility - Core Tests @smoke', () => {
       sessionStorage.clear();
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const logo = page.locator('[data-testid="header-logo"]');
     await expect(logo).toBeVisible({ timeout: 10000 });
@@ -65,7 +65,7 @@ test.describe('Logo Visibility - Core Tests @smoke', () => {
       sessionStorage.clear();
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const logo = page.locator('[data-testid="header-logo"]');
     await expect(logo).toBeVisible({ timeout: 10000 });
@@ -100,7 +100,7 @@ test.describe('Logo Visibility - Core Tests @smoke', () => {
       sessionStorage.clear();
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const trackOrderLink = page.locator('header').getByRole('link', { name: /παρακολούθηση|track order/i });
     await expect(trackOrderLink).not.toBeVisible();

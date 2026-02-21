@@ -74,7 +74,7 @@ test.describe('Locale @smoke', () => {
     }]);
 
     // Navigate to products page and wait for stable state
-    await page.goto('/products', { waitUntil: 'networkidle' });
+    await page.goto('/products', { waitUntil: 'domcontentloaded' });
 
     // Wait for page content to be visible (indicates hydration complete)
     // search-input may render twice during hydration (EN + EL locale). Use .first().

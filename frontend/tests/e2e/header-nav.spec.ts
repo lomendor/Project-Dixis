@@ -22,7 +22,7 @@ test.describe('Header Navigation - Guest @smoke', () => {
       sessionStorage.clear();
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('logo is visible and links to home', async ({ page }) => {
@@ -239,7 +239,7 @@ test.describe('Header Navigation - Mobile @smoke', () => {
       sessionStorage.clear();
     });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('hamburger menu button is visible on mobile', async ({ page }) => {
