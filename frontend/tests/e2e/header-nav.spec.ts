@@ -289,15 +289,22 @@ test.describe('Header Navigation - Mobile @smoke', () => {
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
-    // Open the mobile menu
-    await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 10000 });
+    // Wait for auth hydration BEFORE opening mobile menu.
+    // The hamburger button is visible immediately, but auth context hasn't hydrated yet.
+    // If we open the menu too early, it renders guest links and may not re-render.
+    // Use the desktop user-menu as a hydration signal — it only appears when authenticated.
+    // It exists in DOM on mobile too (just hidden via CSS), but its presence means auth is ready.
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="header-user-menu"]');
+      return el !== null;
+    }, { timeout: 15000 });
+
+    // Now open the mobile menu — auth is hydrated, menu will render authenticated links
+    await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 5000 });
     await page.locator('[data-testid="mobile-menu-button"]').click();
     await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
 
-    // Auth context needs hydration time — after reload, useEffect reads mock_token
-    // from localStorage and sets isAuthenticated=true. The mobile menu re-renders
-    // from loading placeholder → authenticated links. Use generous timeout.
-    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('[data-testid="mobile-logout-btn"]')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="mobile-nav-orders"]')).toBeVisible();
     await expect(page.locator('[data-testid="mobile-user-section"]')).toBeVisible();
   });
