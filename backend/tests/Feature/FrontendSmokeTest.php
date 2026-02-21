@@ -267,7 +267,8 @@ class FrontendSmokeTest extends TestCase
         $appleProduct->categories()->attach($fruitCategory->id);
 
         // STEP 1: Test search functionality
-        $searchResponse = $this->getJson('/api/v1/public/products?search=tomato');
+        // Note: PostgreSQL 'simple' dictionary doesn't stem, so search for exact word form
+        $searchResponse = $this->getJson('/api/v1/public/products?search=Tomatoes');
 
         $searchResponse->assertStatus(200);
         $products = $searchResponse->json('data');

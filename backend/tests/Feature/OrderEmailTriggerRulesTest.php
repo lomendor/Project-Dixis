@@ -58,8 +58,8 @@ class OrderEmailTriggerRulesTest extends TestCase
 
         $response->assertStatus(201);
 
-        // Verify consumer email was sent
-        Mail::assertSent(ConsumerOrderPlaced::class, function ($mail) use ($user) {
+        // Verify consumer email was queued
+        Mail::assertQueued(ConsumerOrderPlaced::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });
     }
@@ -92,8 +92,8 @@ class OrderEmailTriggerRulesTest extends TestCase
 
         $response->assertStatus(201);
 
-        // Verify NO email was sent (email comes after payment confirmation)
-        Mail::assertNotSent(ConsumerOrderPlaced::class);
+        // Verify NO email was queued (email comes after payment confirmation)
+        Mail::assertNotQueued(ConsumerOrderPlaced::class);
     }
 
     /**
@@ -131,8 +131,8 @@ class OrderEmailTriggerRulesTest extends TestCase
         $emailService = app(\App\Services\OrderEmailService::class);
         $emailService->sendOrderPlacedNotifications($order);
 
-        // Verify email was sent
-        Mail::assertSent(ConsumerOrderPlaced::class, function ($mail) use ($user) {
+        // Verify email was queued
+        Mail::assertQueued(ConsumerOrderPlaced::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });
     }
