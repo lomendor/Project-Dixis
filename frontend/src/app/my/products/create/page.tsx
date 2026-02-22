@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
-import UploadImage from '@/components/UploadImage.client';
+import MultiImageUpload, { type ImageItem } from '@/components/MultiImageUpload.client';
 import { apiClient } from '@/lib/api';
 import { greekToSlug } from '@/lib/slugify';
 
@@ -54,7 +54,7 @@ function CreateProductContent() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<ImageItem[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
@@ -91,8 +91,10 @@ function CreateProductContent() {
     setBusy(true);
 
     try {
+      const primaryUrl = productImages.find(i => i.is_primary)?.url || productImages[0]?.url || null;
+
       // AUTH-UNIFY-02: Call Laravel directly via apiClient (snake_case fields)
-      await apiClient.createProducerProduct({
+      const result = await apiClient.createProducerProduct({
         name: title,
         slug,
         category,
@@ -101,7 +103,7 @@ function CreateProductContent() {
         unit,
         stock: parseInt(stock),
         description: description || undefined,
-        image_url: imageUrl,
+        image_url: primaryUrl,
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : undefined,
         is_seasonal: isSeasonal || undefined,
@@ -113,6 +115,12 @@ function CreateProductContent() {
         storage_instructions: storageInstructions || undefined,
         shelf_life: shelfLife || undefined,
       });
+
+      // Sync images to the newly created product
+      const pid = result.data.id;
+      for (const img of productImages) {
+        try { await apiClient.addProductImage(pid, img.url); } catch { /* product created OK */ }
+      }
 
       router.push('/my/products');
     } catch (err: any) {
@@ -496,12 +504,11 @@ function CreateProductContent() {
             </div>
 
             <div>
-              <UploadImage
-                value={imageUrl}
-                onChange={setImageUrl}
-                accept="image/*"
+              <MultiImageUpload
+                images={productImages}
+                onChange={setProductImages}
+                maxImages={6}
                 maxMB={5}
-                label="Εικόνα Προϊόντος"
               />
             </div>
 

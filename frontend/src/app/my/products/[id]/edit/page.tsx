@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
-import UploadImage from '@/components/UploadImage.client';
+import MultiImageUpload, { type ImageItem } from '@/components/MultiImageUpload.client';
 import { apiClient } from '@/lib/api';
 import { greekToSlug } from '@/lib/slugify';
 
@@ -47,7 +47,8 @@ function EditProductContent() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<ImageItem[]>([]);
+  const [savedImageIds, setSavedImageIds] = useState<Set<number>>(new Set());
   const [isActive, setIsActive] = useState(true);
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
@@ -110,7 +111,16 @@ function EditProductContent() {
       setDescription(product.description || '');
       setPrice(product.price?.toString() || '');
       setStock(product.stock?.toString() || '');
-      setImageUrl(product.image_url || null);
+      // Load multi-image data (fallback to single image_url for legacy products)
+      if (product.images && product.images.length > 0) {
+        const imgs: ImageItem[] = product.images.map((img: any) => ({
+          id: img.id, url: img.url, is_primary: !!img.is_primary,
+        }));
+        setProductImages(imgs);
+        setSavedImageIds(new Set(imgs.filter(i => i.id).map(i => i.id!)));
+      } else if (product.image_url) {
+        setProductImages([{ url: product.image_url, is_primary: true }]);
+      }
       setIsActive(product.is_active ?? true);
       setDiscountPrice(product.discount_price ? String(product.discount_price) : '');
       setWeightPerUnit(product.weight_per_unit ? String(product.weight_per_unit) : '');
@@ -135,6 +145,25 @@ function EditProductContent() {
     setBusy(true);
 
     try {
+      // Sync image changes: delete removed, add new, set primary
+      const currentIds = new Set(productImages.filter(i => i.id).map(i => i.id!));
+      for (const oldId of savedImageIds) {
+        if (!currentIds.has(oldId)) {
+          try { await apiClient.removeProductImage(productId, oldId); } catch { /* best-effort */ }
+        }
+      }
+      for (const img of productImages) {
+        if (!img.id) {
+          try { await apiClient.addProductImage(productId, img.url); } catch { /* best-effort */ }
+        }
+      }
+      const primaryImg = productImages.find(i => i.is_primary && i.id);
+      if (primaryImg?.id) {
+        try { await apiClient.setPrimaryProductImage(productId, primaryImg.id); } catch { /* best-effort */ }
+      }
+
+      const primaryUrl = productImages.find(i => i.is_primary)?.url || productImages[0]?.url || null;
+
       // AUTH-UNIFY-02: Call Laravel directly via apiClient (snake_case fields)
       await apiClient.updateProducerProduct(productId, {
         name: title,
@@ -145,7 +174,7 @@ function EditProductContent() {
         unit,
         stock: parseInt(stock),
         description: description || undefined,
-        image_url: imageUrl,
+        image_url: primaryUrl,
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : null,
         is_seasonal: isSeasonal,
@@ -551,12 +580,11 @@ function EditProductContent() {
             </div>
 
             <div>
-              <UploadImage
-                value={imageUrl}
-                onChange={setImageUrl}
-                accept="image/*"
+              <MultiImageUpload
+                images={productImages}
+                onChange={setProductImages}
+                maxImages={6}
                 maxMB={5}
-                label="Εικόνα Προϊόντος"
               />
             </div>
 
