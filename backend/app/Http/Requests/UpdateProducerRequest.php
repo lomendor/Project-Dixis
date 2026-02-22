@@ -59,6 +59,17 @@ class UpdateProducerRequest extends FormRequest
             'status' => 'nullable|string|in:active,inactive,pending',
             'is_active' => 'nullable|boolean',
             'user_id' => 'nullable|exists:users,id',
+            // Onboarding V2
+            'onboarding_completed_at' => 'nullable|date',
+            'product_categories' => 'nullable|array',
+            'product_categories.*' => 'string|max:50',
+            'tax_registration_doc_url' => 'nullable|string|max:500',
+            'efet_notification_doc_url' => 'nullable|string|max:500',
+            'haccp_declaration_doc_url' => 'nullable|string|max:500',
+            'haccp_declaration_accepted' => 'nullable|boolean',
+            'beekeeper_registry_number' => 'nullable|string|max:100',
+            'cpnp_notification_number' => 'nullable|string|max:100',
+            'responsible_person_name' => 'nullable|string|max:255',
         ];
     }
 }

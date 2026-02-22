@@ -47,12 +47,23 @@ class ProducerResource extends JsonResource
             'free_shipping_threshold_eur' => $this->free_shipping_threshold_eur,
             'status' => $this->status,
             'is_active' => $this->is_active,
+            // Onboarding V2: public fields
+            'onboarding_completed_at' => $this->onboarding_completed_at?->toISOString(),
+            'product_categories' => $this->product_categories,
+            'haccp_declaration_accepted' => $this->haccp_declaration_accepted,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ], $isOwnerOrAdmin ? [
             // Pass PAYOUT-01: Banking details (owner/admin only)
             'iban' => $this->iban,
             'bank_account_holder' => $this->bank_account_holder,
+            // Onboarding V2: sensitive fields (owner/admin only)
+            'tax_registration_doc_url' => $this->tax_registration_doc_url,
+            'efet_notification_doc_url' => $this->efet_notification_doc_url,
+            'haccp_declaration_doc_url' => $this->haccp_declaration_doc_url,
+            'beekeeper_registry_number' => $this->beekeeper_registry_number,
+            'cpnp_notification_number' => $this->cpnp_notification_number,
+            'responsible_person_name' => $this->responsible_person_name,
         ] : []);
     }
 }

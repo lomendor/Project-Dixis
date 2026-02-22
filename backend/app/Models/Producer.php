@@ -39,6 +39,16 @@ class Producer extends Model
         'user_id',
         'is_active',
         'rejection_reason',
+        // Onboarding V2
+        'onboarding_completed_at',
+        'product_categories',
+        'tax_registration_doc_url',
+        'efet_notification_doc_url',
+        'haccp_declaration_doc_url',
+        'haccp_declaration_accepted',
+        'beekeeper_registry_number',
+        'cpnp_notification_number',
+        'responsible_person_name',
     ];
 
     protected $casts = [
@@ -52,6 +62,10 @@ class Producer extends Model
         'agreement_accepted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        // Onboarding V2
+        'onboarding_completed_at' => 'datetime',
+        'product_categories' => 'array',
+        'haccp_declaration_accepted' => 'boolean',
     ];
 
     /**
