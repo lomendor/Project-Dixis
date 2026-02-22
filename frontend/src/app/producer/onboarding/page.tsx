@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import UploadDocument from '@/components/UploadDocument.client';
 import { CATEGORIES } from '@/data/categories';
 
 /** Categories excluded from MVP (need age verification in checkout) */
@@ -74,6 +75,17 @@ export default function ProducerOnboardingPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [agreementAccepted, setAgreementAccepted] = useState(false);
 
+  // Document uploads
+  const [taxDocUrl, setTaxDocUrl] = useState<string | null>(null);
+  const [efetDocUrl, setEfetDocUrl] = useState<string | null>(null);
+  const [haccpDocUrl, setHaccpDocUrl] = useState<string | null>(null);
+  const [haccpAccepted, setHaccpAccepted] = useState(false);
+
+  // Category-specific fields
+  const [beekeeperNumber, setBeekeeperNumber] = useState('');
+  const [cpnpNumber, setCpnpNumber] = useState('');
+  const [responsiblePerson, setResponsiblePerson] = useState('');
+
   // Check auth + load existing profile
   useEffect(() => {
     if (!isAuthenticated) {
@@ -119,6 +131,14 @@ export default function ProducerOnboardingPage() {
           food_license_number: p.food_license_number || '',
         }));
         if (p.product_categories) setSelectedCategories(p.product_categories);
+        // Pre-fill document uploads and category-specific fields
+        if (p.tax_registration_doc_url) setTaxDocUrl(p.tax_registration_doc_url);
+        if (p.efet_notification_doc_url) setEfetDocUrl(p.efet_notification_doc_url);
+        if (p.haccp_declaration_doc_url) setHaccpDocUrl(p.haccp_declaration_doc_url);
+        if (p.haccp_declaration_accepted) setHaccpAccepted(true);
+        if (p.beekeeper_registry_number) setBeekeeperNumber(p.beekeeper_registry_number);
+        if (p.cpnp_notification_number) setCpnpNumber(p.cpnp_notification_number);
+        if (p.responsible_person_name) setResponsiblePerson(p.responsible_person_name);
       }
     } catch {
       // No profile yet — show form (expected for new registrations)
@@ -154,6 +174,22 @@ export default function ProducerOnboardingPage() {
       setError('Επιλέξτε τουλάχιστον μία κατηγορία προϊόντων');
       return;
     }
+    if (!taxDocUrl) {
+      setError('Ανεβάστε την εκτύπωση TAXIS (ΑΦΜ + ΚΑΔ)');
+      return;
+    }
+    if (!efetDocUrl) {
+      setError('Ανεβάστε τη γνωστοποίηση ΕΦΕΤ / NotifyBusiness');
+      return;
+    }
+    if (selectedCategories.includes('honey-bee') && !beekeeperNumber.trim()) {
+      setError('Συμπληρώστε τον αριθμό μητρώου μελισσοκόμου');
+      return;
+    }
+    if (selectedCategories.includes('cosmetics') && (!cpnpNumber.trim() || !responsiblePerson.trim())) {
+      setError('Συμπληρώστε τον αριθμό CPNP και το υπεύθυνο πρόσωπο για καλλυντικά');
+      return;
+    }
     if (!agreementAccepted) {
       setError('Πρέπει να αποδεχτείτε τη Συμφωνία Συνεργασίας Παραγωγού');
       return;
@@ -165,6 +201,15 @@ export default function ProducerOnboardingPage() {
       await apiClient.updateProducerProfile({
         ...form,
         product_categories: selectedCategories,
+        tax_registration_doc_url: taxDocUrl,
+        efet_notification_doc_url: efetDocUrl,
+        haccp_declaration_doc_url: haccpDocUrl,
+        haccp_declaration_accepted: haccpAccepted,
+        ...(selectedCategories.includes('honey-bee') ? { beekeeper_registry_number: beekeeperNumber } : {}),
+        ...(selectedCategories.includes('cosmetics') ? {
+          cpnp_notification_number: cpnpNumber,
+          responsible_person_name: responsiblePerson,
+        } : {}),
         agreement_accepted_at: new Date().toISOString(),
         onboarding_completed_at: new Date().toISOString(),
       });
@@ -483,7 +528,115 @@ export default function ProducerOnboardingPage() {
               )}
             </fieldset>
 
-            {/* Section 5: Agreement */}
+            {/* Section 5: Document Uploads */}
+            <fieldset>
+              <legend className="text-lg font-semibold text-neutral-800 mb-2">
+                Έγγραφα
+              </legend>
+              <p className="text-sm text-neutral-500 mb-4">
+                Ανεβάστε τα απαραίτητα έγγραφα σε μορφή PDF ή εικόνας.
+              </p>
+              <div className="space-y-4">
+                <UploadDocument
+                  label="Εκτύπωση TAXIS (ΑΦΜ + ΚΑΔ)"
+                  hint="Εκτύπωση από TAXISnet που δείχνει ΑΦΜ και Κωδικό Αριθμό Δραστηριότητας"
+                  required
+                  value={taxDocUrl}
+                  onChange={setTaxDocUrl}
+                />
+                <UploadDocument
+                  label="Γνωστοποίηση ΕΦΕΤ / NotifyBusiness"
+                  hint="Βεβαίωση γνωστοποίησης από τον ΕΦΕΤ ή το NotifyBusiness"
+                  required
+                  value={efetDocUrl}
+                  onChange={setEfetDocUrl}
+                />
+                <UploadDocument
+                  label="Πιστοποιητικό HACCP (προαιρετικό)"
+                  hint="Αν διαθέτετε πιστοποίηση HACCP, ανεβάστε το εδώ"
+                  value={haccpDocUrl}
+                  onChange={setHaccpDocUrl}
+                />
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={haccpAccepted}
+                    onChange={(e) => setHaccpAccepted(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                  />
+                  <span className="text-sm text-neutral-700">
+                    Δηλώνω ότι τηρώ τις αρχές HACCP στην παραγωγή μου
+                    (Κανονισμός ΕΕ 852/2004)
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            {/* Section 6: Category-specific fields */}
+            {selectedCategories.includes('honey-bee') && (
+              <fieldset className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <legend className="text-base font-semibold text-amber-900 mb-3">
+                  Μέλι & Προϊόντα Μέλισσας
+                </legend>
+                <div>
+                  <label htmlFor="beekeeper_number" className="block text-sm font-medium text-amber-800">
+                    Αριθμός Μητρώου Μελισσοκόμου <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="beekeeper_number"
+                    type="text"
+                    value={beekeeperNumber}
+                    onChange={(e) => setBeekeeperNumber(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-amber-300 rounded-md bg-white focus:outline-none focus:ring-primary focus:border-primary"
+                    placeholder="π.χ. ΕΛ-12345"
+                  />
+                  <p className="mt-1 text-xs text-amber-700">
+                    Αριθμός εγγραφής στο μητρώο μελισσοκόμων του ΥΠΑΑΤ
+                  </p>
+                </div>
+              </fieldset>
+            )}
+
+            {selectedCategories.includes('cosmetics') && (
+              <fieldset className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <legend className="text-base font-semibold text-purple-900 mb-3">
+                  Φυσικά Καλλυντικά (Κανονισμός ΕΕ 1223/2009)
+                </legend>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="cpnp_number" className="block text-sm font-medium text-purple-800">
+                      Αριθμός Κοινοποίησης CPNP <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="cpnp_number"
+                      type="text"
+                      value={cpnpNumber}
+                      onChange={(e) => setCpnpNumber(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-purple-300 rounded-md bg-white focus:outline-none focus:ring-primary focus:border-primary"
+                      placeholder="Αριθμός από την πλατφόρμα CPNP"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="responsible_person" className="block text-sm font-medium text-purple-800">
+                      Υπεύθυνο Πρόσωπο (Responsible Person) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="responsible_person"
+                      type="text"
+                      value={responsiblePerson}
+                      onChange={(e) => setResponsiblePerson(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-purple-300 rounded-md bg-white focus:outline-none focus:ring-primary focus:border-primary"
+                      placeholder="Ονοματεπώνυμο υπεύθυνου προσώπου"
+                    />
+                    <p className="mt-1 text-xs text-purple-700">
+                      Το υπεύθυνο πρόσωπο για τα καλλυντικά προϊόντα στην ΕΕ
+                    </p>
+                  </div>
+                </div>
+              </fieldset>
+            )}
+
+            {/* Section 7: Agreement */}
             <div className="border-t pt-5">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
