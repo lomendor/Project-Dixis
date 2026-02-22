@@ -1229,6 +1229,9 @@ class ApiClient {
       address?: string;
       postal_code?: string;
       rejection_reason?: string | null;
+      // Bank details
+      iban?: string | null;
+      bank_account_holder?: string | null;
       // Onboarding V2
       onboarding_completed_at?: string | null;
       product_categories?: string[] | null;
@@ -1258,6 +1261,8 @@ class ApiClient {
     postal_code?: string;
     email?: string;
     food_license_number?: string;
+    iban?: string;
+    bank_account_holder?: string;
     agreement_accepted_at?: string;
     // Onboarding V2
     onboarding_completed_at?: string;

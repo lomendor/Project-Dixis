@@ -32,6 +32,9 @@ interface ProducerProfile {
   address?: string;
   postal_code?: string;
   food_license_number?: string;
+  // Bank details for payouts
+  iban?: string | null;
+  bank_account_holder?: string | null;
   // Onboarding V2 document fields
   tax_registration_doc_url?: string | null;
   efet_notification_doc_url?: string | null;
@@ -79,6 +82,8 @@ export default function ProducerOnboardingPage() {
     region: '',
     description: '',
     food_license_number: '',
+    iban: '',
+    bank_account_holder: '',
   });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [agreementAccepted, setAgreementAccepted] = useState(false);
@@ -137,6 +142,8 @@ export default function ProducerOnboardingPage() {
           region: p.region || '',
           description: p.description || '',
           food_license_number: p.food_license_number || '',
+          iban: p.iban || '',
+          bank_account_holder: p.bank_account_holder || '',
         }));
         if (p.product_categories) setSelectedCategories(p.product_categories);
         // Pre-fill document uploads and category-specific fields
@@ -208,6 +215,15 @@ export default function ProducerOnboardingPage() {
       setError('Ανεβάστε τη γνωστοποίηση ΕΦΕΤ / NotifyBusiness');
       return;
     }
+    if (!form.iban.trim() || !form.bank_account_holder.trim()) {
+      setError('Συμπληρώστε τα τραπεζικά στοιχεία (IBAN και Δικαιούχος)');
+      return;
+    }
+    const ibanClean = form.iban.replace(/\s/g, '').toUpperCase();
+    if (!/^GR\d{2}\d{23}$/.test(ibanClean)) {
+      setError('Το IBAN πρέπει να είναι ελληνικό (GR + 25 ψηφία)');
+      return;
+    }
     if (selectedCategories.includes('honey-bee') && !beekeeperNumber.trim()) {
       setError('Συμπληρώστε τον αριθμό μητρώου μελισσοκόμου');
       return;
@@ -226,6 +242,7 @@ export default function ProducerOnboardingPage() {
       setError(null);
       await apiClient.updateProducerProfile({
         ...form,
+        iban: form.iban.replace(/\s/g, '').toUpperCase(),
         product_categories: selectedCategories,
         tax_registration_doc_url: taxDocUrl,
         efet_notification_doc_url: efetDocUrl,
@@ -515,7 +532,49 @@ export default function ProducerOnboardingPage() {
               />
             </div>
 
-            {/* Section 4: Product Categories */}
+            {/* Section 4: Bank Details */}
+            <fieldset>
+              <legend className="text-lg font-semibold text-neutral-800 mb-2">
+                Τραπεζικά Στοιχεία
+              </legend>
+              <p className="text-sm text-neutral-500 mb-3">
+                Απαραίτητα για την πληρωμή σας. Το IBAN σας δεν εμφανίζεται δημόσια.
+              </p>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label htmlFor="iban" className="block text-sm font-medium text-neutral-700">
+                    IBAN <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="iban"
+                    name="iban"
+                    value={form.iban}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary uppercase"
+                    placeholder="GR00 0000 0000 0000 0000 0000 000"
+                    maxLength={34}
+                  />
+                  <p className="mt-1 text-xs text-neutral-400">Ελληνικό IBAN (ξεκινά με GR)</p>
+                </div>
+                <div>
+                  <label htmlFor="bank_account_holder" className="block text-sm font-medium text-neutral-700">
+                    Δικαιούχος Λογαριασμού <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="bank_account_holder"
+                    name="bank_account_holder"
+                    value={form.bank_account_holder}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                    placeholder="Ονοματεπώνυμο ή Επωνυμία Εταιρείας"
+                  />
+                </div>
+              </div>
+            </fieldset>
+
+            {/* Section 5: Product Categories */}
             <fieldset>
               <legend className="text-lg font-semibold text-neutral-800 mb-2">
                 Κατηγορίες Προϊόντων <span className="text-red-500">*</span>
