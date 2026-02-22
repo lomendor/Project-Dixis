@@ -36,6 +36,14 @@ class ProductResource extends JsonResource
             'storage_instructions' => $this->storage_instructions,
             'shelf_life' => $this->shelf_life,
             'image_url' => $this->image_url,
+            'images' => $this->when($this->relationLoaded('images'), function () {
+                return $this->images->map(fn ($img) => [
+                    'id' => $img->id,
+                    'url' => $img->url,
+                    'is_primary' => $img->is_primary,
+                    'sort_order' => $img->sort_order,
+                ]);
+            }, []),
             'status' => $this->status,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toISOString(),

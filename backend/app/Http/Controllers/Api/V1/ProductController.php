@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -35,7 +36,7 @@ class ProductController extends Controller
         ]);
 
         $query = Product::query()
-            ->with('producer');
+            ->with(['producer', 'images']);
 
         // Filter by active status (default: only active products)
         $isActive = $request->get('is_active', true);
@@ -138,7 +139,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create($data);
-        $product->load('producer');
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
     }
@@ -151,8 +152,8 @@ class ProductController extends Controller
         // Only show active products
         abort_if(! $product->is_active, 404);
 
-        // Eager load producer
-        $product->load('producer');
+        // Eager load producer and images
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
     }
@@ -172,7 +173,7 @@ class ProductController extends Controller
         }
 
         $product->update($data);
-        $product->load('producer');
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
     }
@@ -187,5 +188,110 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json(['message' => 'Product deleted successfully'], 204);
+    }
+
+    /**
+     * Add an image to a product.
+     * Max 6 images per product. First image auto-set as primary.
+     */
+    public function addImage(Request $request, Product $product): JsonResponse
+    {
+        $this->authorize('update', $product);
+
+        $request->validate([
+            'url' => 'required|url|max:500',
+        ]);
+
+        // Limit: max 6 images per product
+        if ($product->images()->count() >= 6) {
+            return response()->json([
+                'message' => 'Μέγιστο 6 εικόνες ανά προϊόν',
+            ], 422);
+        }
+
+        $isPrimary = $product->images()->count() === 0; // First image is primary
+        $nextSort = ($product->images()->max('sort_order') ?? -1) + 1;
+
+        $image = ProductImage::create([
+            'product_id' => $product->id,
+            'url' => $request->url,
+            'is_primary' => $isPrimary,
+            'sort_order' => $nextSort,
+        ]);
+
+        // Sync image_url with primary image (backward compatibility)
+        if ($isPrimary) {
+            $product->update(['image_url' => $request->url]);
+        }
+
+        return response()->json([
+            'message' => 'Η εικόνα προστέθηκε',
+            'image' => [
+                'id' => $image->id,
+                'url' => $image->url,
+                'is_primary' => $image->is_primary,
+                'sort_order' => $image->sort_order,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Remove an image from a product.
+     * If deleted image was primary, next image becomes primary.
+     */
+    public function removeImage(Product $product, ProductImage $image): JsonResponse
+    {
+        $this->authorize('update', $product);
+
+        if ($image->product_id !== $product->id) {
+            return response()->json(['message' => 'Image not found'], 404);
+        }
+
+        $wasPrimary = $image->is_primary;
+        $image->delete();
+
+        // If deleted image was primary, promote the next one
+        if ($wasPrimary) {
+            $nextImage = $product->images()->orderBy('sort_order')->first();
+            if ($nextImage) {
+                $nextImage->update(['is_primary' => true]);
+                $product->update(['image_url' => $nextImage->url]);
+            } else {
+                $product->update(['image_url' => null]);
+            }
+        }
+
+        return response()->json(['message' => 'Η εικόνα αφαιρέθηκε']);
+    }
+
+    /**
+     * Set an image as the primary image for a product.
+     */
+    public function setPrimaryImage(Product $product, ProductImage $image): JsonResponse
+    {
+        $this->authorize('update', $product);
+
+        if ($image->product_id !== $product->id) {
+            return response()->json(['message' => 'Image not found'], 404);
+        }
+
+        // Unset current primary
+        $product->images()->update(['is_primary' => false]);
+
+        // Set new primary
+        $image->update(['is_primary' => true]);
+
+        // Sync legacy image_url
+        $product->update(['image_url' => $image->url]);
+
+        return response()->json([
+            'message' => 'Η εικόνα ορίστηκε ως κύρια',
+            'image' => [
+                'id' => $image->id,
+                'url' => $image->url,
+                'is_primary' => true,
+                'sort_order' => $image->sort_order,
+            ],
+        ]);
     }
 }

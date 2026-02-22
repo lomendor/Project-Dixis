@@ -209,6 +209,12 @@ Route::prefix('v1')->group(function () {
         Route::post('products', [App\Http\Controllers\Api\V1\ProductController::class, 'store'])->name('api.v1.products.store');
         Route::patch('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'update'])->name('api.v1.products.update');
         Route::delete('products/{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'destroy'])->name('api.v1.products.destroy');
+
+        // Product image management (max 6 per product)
+        Route::post('products/{product}/images', [App\Http\Controllers\Api\V1\ProductController::class, 'addImage'])
+            ->middleware('throttle:30,1');
+        Route::delete('products/{product}/images/{image}', [App\Http\Controllers\Api\V1\ProductController::class, 'removeImage']);
+        Route::patch('products/{product}/images/{image}/primary', [App\Http\Controllers\Api\V1\ProductController::class, 'setPrimaryImage']);
     });
 
     // S1-02: Authenticated reviews (create)

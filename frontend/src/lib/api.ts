@@ -1354,6 +1354,30 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  // --- Product Image Management ---
+
+  /** Add an image to a product (max 6). */
+  async addProductImage(productId: number | string, url: string): Promise<{ message: string; image: ProductImage }> {
+    return this.request<{ message: string; image: ProductImage }>(`products/${productId}/images`, {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    });
+  }
+
+  /** Remove an image from a product. */
+  async removeProductImage(productId: number | string, imageId: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`products/${productId}/images/${imageId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /** Set an image as the primary/main image. */
+  async setPrimaryProductImage(productId: number | string, imageId: number): Promise<{ message: string; image: ProductImage }> {
+    return this.request<{ message: string; image: ProductImage }>(`products/${productId}/images/${imageId}/primary`, {
+      method: 'PATCH',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
