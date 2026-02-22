@@ -8,11 +8,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const items = Array.isArray(body?.items) ? body.items : [];
     const zone: Zone = (body?.zone === 'islands' ? 'islands' : 'mainland');
-    if (!items.length) return NextResponse.json({ total: 0, subtotal: 0, zone, threshold: Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? 35) });
+    if (!items.length) return NextResponse.json({ total: 0, subtotal: 0, zone, threshold: Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? 9999) });
     const res = await calcShippingForItems(items, zone);
     return NextResponse.json(res);
   } catch {
-    return NextResponse.json({ total: 0, subtotal: 0, zone: 'mainland', threshold: Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? 35) });
+    return NextResponse.json({ total: 0, subtotal: 0, zone: 'mainland', threshold: Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? 9999) });
   }
 }
 export function GET(){ return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 }); }
