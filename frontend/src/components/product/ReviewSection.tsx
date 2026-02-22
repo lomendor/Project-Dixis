@@ -77,7 +77,7 @@ export default function ReviewSection({ productId }: { productId: number }) {
         body: JSON.stringify({ rating, title: title || undefined, comment: comment || undefined }),
       });
       const json = await res.json();
-      if (!res.ok) { setError(json.message || 'Error'); return; }
+      if (!res.ok) { setError(json.message || 'Σφάλμα'); return; }
       setSuccess(t('reviews.reviewSubmitted'));
       setShowForm(false);
       setRating(0); setTitle(''); setComment('');

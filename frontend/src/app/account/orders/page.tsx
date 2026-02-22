@@ -23,7 +23,7 @@ function OrdersPage(): React.JSX.Element {
         const response = await apiClient.getOrders();
         setOrders(response.orders || []);
       } catch {
-        showToast('error', 'Failed to load your orders. Please try again.');
+        showToast('error', 'Αποτυχία φόρτωσης παραγγελιών. Δοκιμάστε ξανά.');
         setOrders([]); // Explicitly set empty on error
       } finally {
         setLoading(false);

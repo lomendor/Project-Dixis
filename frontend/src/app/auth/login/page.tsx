@@ -59,7 +59,7 @@ function LoginForm() {
       // Strategic Fix 2B: Redirect to intended destination (from middleware) or home
       router.push(redirectTo);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      const errorMessage = err instanceof Error ? err.message : 'Η σύνδεση απέτυχε';
 
       // Set inline error display for form
       setError(errorMessage);

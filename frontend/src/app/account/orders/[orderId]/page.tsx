@@ -26,7 +26,7 @@ function OrderDetailsPage(): React.JSX.Element {
     const fetchOrder = async () => {
       // Validate ID is non-empty
       if (!orderId || typeof orderId !== 'string') {
-        setError('Invalid order ID');
+        setError('Μη έγκυρος κωδικός παραγγελίας');
         setLoading(false);
         return;
       }
@@ -40,13 +40,13 @@ function OrderDetailsPage(): React.JSX.Element {
         const orderData = await apiClient.getOrder(orderId);
         setOrder(orderData);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load order details';
+        const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης λεπτομερειών παραγγελίας';
         setError(errorMessage);
 
         if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-          showToast('error', 'Order not found');
+          showToast('error', 'Η παραγγελία δεν βρέθηκε');
         } else {
-          showToast('error', 'Failed to load order details. Please try again.');
+          showToast('error', 'Αποτυχία φόρτωσης λεπτομερειών. Δοκιμάστε ξανά.');
         }
       } finally {
         setLoading(false);

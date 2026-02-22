@@ -51,7 +51,7 @@ function SettlementsContent() {
           setSettlements(d.settlements || [])
           setSummary(d.summary || null)
         } else {
-          setError(d.error || 'Error')
+          setError(d.error || 'Σφάλμα')
         }
       })
       .catch(() => setError('Σφάλμα φόρτωσης'))

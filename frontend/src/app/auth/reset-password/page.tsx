@@ -65,7 +65,7 @@ function ResetPasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Reset failed');
+        throw new Error(data.message || 'Η επαναφορά απέτυχε');
       }
 
       setSuccess(true);
@@ -75,7 +75,7 @@ function ResetPasswordForm() {
         router.push('/auth/login');
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reset failed');
+      setError(err instanceof Error ? err.message : 'Η επαναφορά απέτυχε');
     } finally {
       setLoading(false);
     }
@@ -200,7 +200,7 @@ export default function ResetPassword() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="text-neutral-600">Loading...</div>
+        <div className="text-neutral-600">Φόρτωση...</div>
       </div>
     }>
       <ResetPasswordForm />

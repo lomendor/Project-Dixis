@@ -61,7 +61,7 @@ export default function AdminSettlementsPage() {
       const d = await api(`${API}${params}`)
       setSettlements(d.settlements || [])
     } catch (e: unknown) {
-      showError(e instanceof Error ? e.message : 'Error loading settlements')
+      showError(e instanceof Error ? e.message : 'Αποτυχία φόρτωσης εκκαθαρίσεων')
     } finally { setLoading(false) }
   }
 
@@ -75,7 +75,7 @@ export default function AdminSettlementsPage() {
       showSuccess(`Εκκαθάριση #${payModal.id} σημειώθηκε ως πληρωμένη`)
       setPayModal(null); setPayNotes(''); load(); loadSummary()
     } catch (e: unknown) {
-      showError(e instanceof Error ? e.message : 'Error')
+      showError(e instanceof Error ? e.message : 'Σφάλμα')
     } finally { setBusy(false) }
   }
 

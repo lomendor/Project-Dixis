@@ -125,7 +125,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
       
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products');
+      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης προϊόντων');
     } finally {
       setLoading(false);
     }
@@ -205,9 +205,9 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
 
     try {
       await apiClient.addToCart(productId, 1);
-      showSuccess('Added to cart!');
+      showSuccess('Προστέθηκε στο καλάθι!');
     } catch {
-      showError('Failed to add to cart');
+      showError('Αποτυχία προσθήκης στο καλάθι');
     } finally {
       setAddingToCart(prev => {
         const newSet = new Set(prev);
