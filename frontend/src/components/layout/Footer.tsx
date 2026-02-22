@@ -63,10 +63,10 @@ export default function Footer() {
               <Link href="/contact" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Επικοινωνία / Σχόλια
               </Link>
-              <Link href="/terms" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/legal/terms" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Όροι Χρήσης
               </Link>
-              <Link href="/privacy" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/legal/privacy" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Πολιτική Απορρήτου
               </Link>
             </nav>
