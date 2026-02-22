@@ -48,6 +48,9 @@ export interface Product {
   // S1-02: Review stats (from backend withCount/withAvg)
   reviews_count?: number;
   reviews_avg_rating?: number | null;
+  // EU 1169/2011: Food compliance
+  allergens?: string[];
+  ingredients?: string | null;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
@@ -1227,6 +1230,8 @@ class ApiClient {
     region?: string;
     description?: string;
     tax_id?: string;
+    food_license_number?: string;
+    agreement_accepted_at?: string;
   }): Promise<{ producer: Record<string, unknown>; message: string }> {
     return this.request('producer/profile', {
       method: 'PATCH',
