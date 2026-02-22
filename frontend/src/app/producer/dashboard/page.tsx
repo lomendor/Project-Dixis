@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
+import ProducerOnboardingGuard from '@/components/ProducerOnboardingGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
@@ -116,6 +117,7 @@ export default function ProducerDashboard() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
+      <ProducerOnboardingGuard>
       <div className="min-h-screen bg-neutral-50">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="producer-dashboard">
         {/* Header */}
@@ -376,6 +378,7 @@ export default function ProducerDashboard() {
         )}
         </main>
       </div>
+      </ProducerOnboardingGuard>
     </AuthGuard>
   );
 }
