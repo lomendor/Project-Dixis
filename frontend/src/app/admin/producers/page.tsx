@@ -17,10 +17,23 @@ interface Producer {
   description: string
   city: string
   taxId: string
+  taxOffice: string
+  address: string
+  postalCode: string
   isActive: boolean
   approvalStatus: string
   rejectionReason: string | null
   createdAt: string
+  // Onboarding V2
+  onboardingCompletedAt: string | null
+  productCategories: string[]
+  taxRegistrationDocUrl: string | null
+  efetNotificationDocUrl: string | null
+  haccpDeclarationDocUrl: string | null
+  haccpDeclarationAccepted: boolean
+  beekeeperRegistryNumber: string | null
+  cpnpNotificationNumber: string | null
+  responsiblePersonName: string | null
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -264,12 +277,50 @@ function AdminProducersContent() {
                           <Detail label="Πόλη" value={p.city} />
                           <Detail label="Περιοχή" value={p.region} />
                           <Detail label="ΑΦΜ" value={p.taxId} />
+                          <Detail label="ΔΟΥ" value={p.taxOffice} />
+                          <Detail label="Διεύθυνση" value={[p.address, p.postalCode].filter(Boolean).join(', ')} />
                           <Detail label="Εγγραφή" value={p.createdAt ? new Date(p.createdAt).toLocaleDateString('el-GR') : ''} />
                           {p.description && (
                             <div className="sm:col-span-2">
                               <span className="text-gray-500">Περιγραφή: </span>
                               <span className="text-gray-900">{p.description}</span>
                             </div>
+                          )}
+                          {/* Product Categories */}
+                          {p.productCategories.length > 0 && (
+                            <div className="sm:col-span-2 mt-2">
+                              <span className="text-gray-500">Κατηγορίες: </span>
+                              <div className="inline-flex flex-wrap gap-1 ml-1">
+                                {p.productCategories.map((cat: string) => (
+                                  <span key={cat} className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                    {cat}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {/* Documents */}
+                          <div className="sm:col-span-2 mt-2 space-y-1">
+                            <p className="text-gray-500 font-medium">Έγγραφα:</p>
+                            <DocLink label="TAXIS (ΑΦΜ+ΚΑΔ)" url={p.taxRegistrationDocUrl} />
+                            <DocLink label="ΕΦΕΤ / NotifyBusiness" url={p.efetNotificationDocUrl} />
+                            <DocLink label="HACCP" url={p.haccpDeclarationDocUrl} />
+                            <div className="text-xs">
+                              <span className="text-gray-500">HACCP δήλωση: </span>
+                              <span className={p.haccpDeclarationAccepted ? 'text-green-700' : 'text-gray-400'}>
+                                {p.haccpDeclarationAccepted ? '✓ Ναι' : '✗ Όχι'}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Category-specific fields */}
+                          {p.beekeeperRegistryNumber && (
+                            <Detail label="Αρ. Μητρώου Μελισσοκόμου" value={p.beekeeperRegistryNumber} />
+                          )}
+                          {p.cpnpNotificationNumber && (
+                            <Detail label="CPNP" value={p.cpnpNotificationNumber} />
+                          )}
+                          {p.responsiblePersonName && (
+                            <Detail label="Υπεύθυνο Πρόσωπο" value={p.responsiblePersonName} />
                           )}
                           {p.rejectionReason && (
                             <div className="sm:col-span-2 mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
@@ -356,6 +407,26 @@ function Detail({ label, value }: { label: string; value: string }) {
     <div>
       <span className="text-gray-500">{label}: </span>
       <span className="text-gray-900">{value}</span>
+    </div>
+  )
+}
+
+function DocLink({ label, url }: { label: string; url: string | null }) {
+  return (
+    <div className="text-xs">
+      <span className="text-gray-500">{label}: </span>
+      {url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline"
+        >
+          Προβολή ↗
+        </a>
+      ) : (
+        <span className="text-gray-400">Δεν ανέβηκε</span>
+      )}
     </div>
   )
 }
