@@ -60,6 +60,18 @@ class CheckoutService
      */
     public function processCheckout(?int $userId, array $productData, array $options): array
     {
+        // COD payment method removed — multi-producer marketplace makes flat COD fee impossible
+        $paymentMethod = $options['payment_method'] ?? 'COD';
+        if (strtoupper($paymentMethod) === 'COD') {
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                response()->json([
+                    'message' => 'Η αντικαταβολή δεν είναι πλέον διαθέσιμη. Παρακαλώ χρησιμοποιήστε κάρτα.',
+                    'errors' => ['payment_method' => ['COD is no longer available']],
+                ], 422)
+            );
+        }
+
         // Group items by producer
         $producerGroups = collect($productData)->groupBy(fn ($item) => $item['product']->producer_id ?? 0);
         $producerIds = $producerGroups->keys()->filter()->values();

@@ -179,12 +179,12 @@ class ShippingQuoteController extends Controller
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'payment_method' => 'sometimes|string|in:COD,CARD',
+            'payment_method' => 'sometimes|string|in:CARD',
         ]);
 
         $postalCode = $validated['postal_code'];
         $method = $validated['method'];
-        $paymentMethod = $validated['payment_method'] ?? 'COD';
+        $paymentMethod = 'CARD'; // COD removed from marketplace
         $isPickup = $method === 'PICKUP';
         $quotedAt = now();
 
@@ -243,11 +243,8 @@ class ShippingQuoteController extends Controller
             $producerGroups[$producerId]['weight_grams'] += (int) ($weightPerUnit * $quantity);
         }
 
-        // Pass COD-COMPLETE: Calculate COD fee (applied once, not per-producer)
-        $codEnabled = config('shipping.enable_cod', false);
-        $codFeeEur = ($paymentMethod === 'COD' && $codEnabled)
-            ? (float) config('shipping.cod_fee_eur', 4.00)
-            : 0.00;
+        // COD removed — always zero
+        $codFeeEur = 0.00;
 
         // Calculate shipping per producer
         $producersResult = [];

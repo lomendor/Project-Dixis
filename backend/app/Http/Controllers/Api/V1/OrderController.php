@@ -182,7 +182,7 @@ class OrderController extends Controller
                 // Pass ORDER-SHIPPING-SPLIT-01: Include quoted_shipping for mismatch detection
                 $checkoutResult = $checkoutService->processCheckout($userId, $productData, [
                     'shipping_method' => $validated['shipping_method'] ?? 'HOME',
-                    'payment_method' => $validated['payment_method'] ?? 'COD',
+                    'payment_method' => $validated['payment_method'] ?? 'CARD',
                     'currency' => $validated['currency'],
                     'shipping_address' => $validated['shipping_address'] ?? null,
                     'notes' => $validated['notes'] ?? null,
@@ -200,28 +200,8 @@ class OrderController extends Controller
                 return new OrderResource($checkoutResult['orders'][0]);
             });
 
-            // Pass 53 + HOTFIX: Send email notifications AFTER transaction commits
-            // HOTFIX-MP-CHECKOUT-GUARD-01: Only send for COD orders.
-            // Card payments send email after payment confirmation (in PaymentController).
-            if ($checkoutResult) {
-                $paymentMethod = $checkoutResult['orders'][0]->payment_method ?? 'COD';
-
-                if ($paymentMethod === 'COD') {
-                    try {
-                        // Send email for each order (for multi-producer, each producer gets their own email)
-                        foreach ($checkoutResult['orders'] as $order) {
-                            $emailService->sendOrderPlacedNotifications($order);
-                        }
-                    } catch (\Exception $e) {
-                        // Log but don't fail the order creation
-                        \Log::error('Pass 53: Email notification failed (order still created)', [
-                            'checkout_session_id' => $checkoutResult['checkout_session']?->id,
-                            'order_count' => count($checkoutResult['orders']),
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-            }
+            // Pass 53: Email notifications sent after payment confirmation (PaymentController).
+            // COD removed — all orders go through card payment flow now.
 
             return $result;
         } catch (ShippingChangedException $e) {
