@@ -60,7 +60,7 @@ async function getProductById(id: string) {
         altText: img.alt_text || null,
         isPrimary: !!img.is_primary,
       })),
-      producer: raw.producer ? { name: raw.producer.name } : null,
+      producer: raw.producer ? { name: raw.producer.name, city: raw.producer.city || null, region: raw.producer.region || null } : null,
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
       producerSlug: raw.producer?.slug || null,
@@ -217,6 +217,9 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
                 </Link>
               ) : (
                 <span>{p.producer.name}</span>
+              )}
+              {p.producer.city && (
+                <span className="text-neutral-400 font-normal normal-case tracking-normal"> · {p.producer.city}{p.producer.region ? `, ${p.producer.region}` : ''}</span>
               )}
             </p>
           )}

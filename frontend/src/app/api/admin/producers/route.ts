@@ -81,6 +81,8 @@ export async function GET(req: NextRequest) {
       beekeeperRegistryNumber: p.beekeeper_registry_number || null,
       cpnpNotificationNumber: p.cpnp_notification_number || null,
       responsiblePersonName: p.responsible_person_name || null,
+      iban: p.iban || null,
+      bankAccountHolder: p.bank_account_holder || null,
     }))
 
     return NextResponse.json({ items, total: json.total || items.length })

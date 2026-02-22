@@ -32,6 +32,9 @@ class ProductResource extends JsonResource
             'cultivation_description' => $this->cultivation_description,
             'allergens' => $this->allergens ?? [],
             'ingredients' => $this->ingredients,
+            'origin' => $this->origin,
+            'storage_instructions' => $this->storage_instructions,
+            'shelf_life' => $this->shelf_life,
             'image_url' => $this->image_url,
             'status' => $this->status,
             'is_active' => $this->is_active,
@@ -43,6 +46,8 @@ class ProductResource extends JsonResource
                 'slug' => $this->producer?->slug,
                 'business_name' => $this->producer?->business_name,
                 'location' => $this->producer?->location,
+                'city' => $this->producer?->city,
+                'region' => $this->producer?->region,
             ]),
             // S1-02: Review summary (loaded via withCount/withAvg)
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
