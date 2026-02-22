@@ -34,6 +34,8 @@ interface Producer {
   beekeeperRegistryNumber: string | null
   cpnpNotificationNumber: string | null
   responsiblePersonName: string | null
+  iban: string | null
+  bankAccountHolder: string | null
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -321,6 +323,14 @@ function AdminProducersContent() {
                           )}
                           {p.responsiblePersonName && (
                             <Detail label="Υπεύθυνο Πρόσωπο" value={p.responsiblePersonName} />
+                          )}
+                          {/* Bank details */}
+                          {(p.iban || p.bankAccountHolder) && (
+                            <div className="sm:col-span-2 mt-2 space-y-1">
+                              <p className="text-gray-500 font-medium">Τραπεζικά:</p>
+                              {p.iban && <Detail label="IBAN" value={p.iban} />}
+                              {p.bankAccountHolder && <Detail label="Δικαιούχος" value={p.bankAccountHolder} />}
+                            </div>
                           )}
                           {p.rejectionReason && (
                             <div className="sm:col-span-2 mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
