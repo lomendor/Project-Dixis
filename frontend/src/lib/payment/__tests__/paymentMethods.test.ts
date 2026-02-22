@@ -19,7 +19,7 @@ describe('Payment Methods Configuration', () => {
     expect(codMethod.id).toBe('cash_on_delivery');
     expect(codMethod.type).toBe('cash_on_delivery');
     expect(codMethod.name).toBe('Αντικαταβολή');
-    expect(codMethod.fixed_fee).toBe(2.00);
+    expect(codMethod.fixed_fee).toBe(4.00);
 
     const cardMethod = PAYMENT_METHODS[1];
     expect(cardMethod.id).toBe('card');
@@ -52,15 +52,15 @@ describe('Payment Methods Configuration', () => {
     const cardMethod = getPaymentMethodById('card')!;
 
     // Cash on delivery: fixed fee only
-    expect(calculatePaymentFees(codMethod, 100)).toBe(2.00);
-    expect(calculatePaymentFees(codMethod, 50)).toBe(2.00);
+    expect(calculatePaymentFees(codMethod, 100)).toBe(4.00);
+    expect(calculatePaymentFees(codMethod, 50)).toBe(4.00);
 
     // Card payment: percentage + fixed fee
     expect(calculatePaymentFees(cardMethod, 100)).toBe(3.20); // 2.9% of 100 + 0.30 = 2.90 + 0.30 = 3.20
     expect(calculatePaymentFees(cardMethod, 50)).toBe(1.75);  // 2.9% of 50 + 0.30 = 1.45 + 0.30 = 1.75
 
     // Edge case: zero amount
-    expect(calculatePaymentFees(codMethod, 0)).toBe(2.00);
+    expect(calculatePaymentFees(codMethod, 0)).toBe(4.00);
     expect(calculatePaymentFees(cardMethod, 0)).toBe(0.30);
   });
 

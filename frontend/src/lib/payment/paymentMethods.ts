@@ -11,7 +11,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
     type: 'cash_on_delivery',
     name: 'Αντικαταβολή',
     description: 'Πληρωμή κατά την παραλαβή',
-    fixed_fee: 2.00,
+    fixed_fee: 4.00, // Must match backend SSOT: backend/config/shipping.php → cod_fee_eur
   },
   {
     id: 'card',

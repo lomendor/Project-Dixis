@@ -39,9 +39,10 @@ export function computeTotalsFromContext(ctx: {
   }
 
   // Add COD fee if payment method is COD
+  // Default 400 cents (€4.00) — matches backend SSOT: backend/config/shipping.php → cod_fee_eur
   if ((ctx?.payment?.method || '').toUpperCase() === 'COD') {
     opts.codFee =
-      typeof ctx?.shipping?.codFeeCents === 'number' ? ctx.shipping.codFeeCents : 200;
+      typeof ctx?.shipping?.codFeeCents === 'number' ? ctx.shipping.codFeeCents : 400;
   }
 
   // Calculate totals

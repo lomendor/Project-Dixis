@@ -5,7 +5,9 @@
 import { RateRow, ZoneRow, QuoteInput, QuoteResult, Surcharge } from './config/types';
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
-const codFeeFor = (m: string) => (m === 'COURIER_COD' ? 2.0 : 0);
+// COD fee must match backend SSOT: backend/config/shipping.php → cod_fee_eur = 4.00
+const COD_FEE_EUR = Number(process.env.NEXT_PUBLIC_COD_FEE_EUR ?? '4.0');
+const codFeeFor = (m: string) => (m === 'COURIER_COD' ? COD_FEE_EUR : 0);
 const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '35');
 
 export function volumetricKg(
@@ -130,7 +132,7 @@ export function quoteV2(
 
   let cost = rate.base;
   const cod = codFeeFor(i.method);
-  if (cod > 0) trace.push('COD=2.0');
+  if (cod > 0) trace.push(`COD=${COD_FEE_EUR}`);
 
   // free shipping threshold (business rule)
   if (i.subtotal >= FREE_SHIPPING_THRESHOLD) {
