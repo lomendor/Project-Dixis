@@ -70,7 +70,11 @@ export default function middleware(req: NextRequest) {
   if (requiresAuth(pathname)) {
     const hasSession = req.cookies.has('dixis_session') || req.cookies.has('mock_session')
     if (!hasSession) {
-      const loginUrl = new URL(LOGIN_PATH, req.url)
+      // Use nextUrl.clone() to preserve the public hostname from the Host header.
+      // req.url contains the internal PM2 URL (localhost:3000), which would
+      // redirect users to localhost instead of dixis.gr in production.
+      const loginUrl = req.nextUrl.clone()
+      loginUrl.pathname = LOGIN_PATH
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
