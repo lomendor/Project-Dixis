@@ -42,6 +42,18 @@ export interface ProducerProfile {
   created_at: string;
   updated_at: string;
 
+  // Onboarding V2
+  onboarding_completed_at?: string | null;
+  product_categories?: string[] | null;
+  rejection_reason?: string | null;
+  tax_registration_doc_url?: string | null;
+  efet_notification_doc_url?: string | null;
+  haccp_declaration_doc_url?: string | null;
+  haccp_declaration_accepted?: boolean;
+  beekeeper_registry_number?: string | null;
+  cpnp_notification_number?: string | null;
+  responsible_person_name?: string | null;
+
   // Relations
   user?: User;
 }

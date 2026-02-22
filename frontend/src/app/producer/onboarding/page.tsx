@@ -32,6 +32,14 @@ interface ProducerProfile {
   address?: string;
   postal_code?: string;
   food_license_number?: string;
+  // Onboarding V2 document fields
+  tax_registration_doc_url?: string | null;
+  efet_notification_doc_url?: string | null;
+  haccp_declaration_doc_url?: string | null;
+  haccp_declaration_accepted?: boolean;
+  beekeeper_registry_number?: string | null;
+  cpnp_notification_number?: string | null;
+  responsible_person_name?: string | null;
 }
 
 const REGIONS = [
