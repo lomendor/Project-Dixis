@@ -54,6 +54,102 @@ const nextStatusLabels: Record<OrderStatus, string> = {
 
 type EmailStatus = 'idle' | 'sending' | 'sent' | 'failed' | 'skipped';
 
+function PackingSlip({ order }: { order: ProducerOrder }) {
+  return (
+    <div className="hidden print:block p-8 max-w-[210mm] mx-auto text-sm text-black">
+      {/* Header */}
+      <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">dixis.gr</h1>
+          <p className="text-xs text-neutral-600 mt-1">Δελτίο Αποστολής</p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-bold">#{order.id}</p>
+          <p className="text-xs text-neutral-600">
+            {new Date(order.created_at).toLocaleDateString('el-GR', {
+              year: 'numeric', month: 'long', day: 'numeric',
+            })}
+          </p>
+          <p className="text-xs mt-1">
+            {statusLabels[order.status]}
+          </p>
+        </div>
+      </div>
+
+      {/* Shipping Address */}
+      {order.shipping_address && (
+        <div className="mb-6 p-4 border border-neutral-300 rounded">
+          <h2 className="font-bold mb-2 text-xs uppercase tracking-wider">Παραλήπτης</h2>
+          <div className="space-y-0.5">
+            {order.shipping_address.name && <p className="font-medium">{order.shipping_address.name}</p>}
+            {order.shipping_address.line1 && <p>{order.shipping_address.line1}</p>}
+            {order.shipping_address.line2 && <p>{order.shipping_address.line2}</p>}
+            {(order.shipping_address.city || order.shipping_address.postal_code) && (
+              <p>{order.shipping_address.city} {order.shipping_address.postal_code}</p>
+            )}
+            {order.shipping_address.phone && <p>Τηλ: {order.shipping_address.phone}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Items Table */}
+      <table className="w-full border-collapse mb-6">
+        <thead>
+          <tr className="border-b-2 border-black">
+            <th className="text-left py-2 font-bold">Προϊόν</th>
+            <th className="text-center py-2 font-bold w-20">Ποσ.</th>
+            <th className="text-right py-2 font-bold w-24">Τιμή</th>
+            <th className="text-right py-2 font-bold w-24">Σύνολο</th>
+          </tr>
+        </thead>
+        <tbody>
+          {order.orderItems.map((item) => (
+            <tr key={item.id} className="border-b border-neutral-300">
+              <td className="py-2">{item.product_name || item.product?.name}</td>
+              <td className="py-2 text-center">{item.quantity}</td>
+              <td className="py-2 text-right">{formatCurrency(parseFloat(item.unit_price))}</td>
+              <td className="py-2 text-right">{formatCurrency(parseFloat(item.total_price))}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Totals */}
+      <div className="flex justify-end">
+        <div className="w-60 space-y-1">
+          <div className="flex justify-between">
+            <span>Υποσύνολο:</span>
+            <span>{formatCurrency(parseFloat(order.subtotal))}</span>
+          </div>
+          {parseFloat(order.shipping_cost) > 0 && (
+            <div className="flex justify-between">
+              <span>Μεταφορικά:</span>
+              <span>{formatCurrency(parseFloat(order.shipping_cost))}</span>
+            </div>
+          )}
+          <div className="flex justify-between font-bold text-base border-t border-black pt-1">
+            <span>Σύνολο:</span>
+            <span>{formatCurrency(parseFloat(order.total))}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Notes */}
+      {order.notes && (
+        <div className="mt-6 p-3 border border-neutral-300 rounded">
+          <p className="text-xs font-bold uppercase tracking-wider mb-1">Σημειώσεις</p>
+          <p>{order.notes}</p>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="mt-8 pt-4 border-t border-neutral-300 text-xs text-neutral-500 text-center">
+        dixis.gr — Ελληνικά τοπικά προϊόντα
+      </div>
+    </div>
+  );
+}
+
 export default function ProducerOrderDetailsPage() {
   const params = useParams();
   const orderId = Number(params.id);
@@ -175,7 +271,10 @@ export default function ProducerOrderDetailsPage() {
 
   return (
     <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-neutral-50">
+      {/* Packing slip — visible only when printing */}
+      {order && <PackingSlip order={order} />}
+
+      <div className="min-h-screen bg-neutral-50 print:hidden">
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Link */}
           <Link
@@ -246,13 +345,25 @@ export default function ProducerOrderDetailsPage() {
                       })}
                     </p>
                   </div>
-                  <span
-                    className={`inline-flex px-4 py-2 text-sm font-semibold rounded-full ${
-                      statusColors[order.status]
-                    }`}
-                  >
-                    {statusLabels[order.status]}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => window.print()}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-neutral-300 text-neutral-700 bg-white hover:bg-neutral-50 transition-colors"
+                      title="Εκτύπωση δελτίου αποστολής"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                      </svg>
+                      Εκτύπωση
+                    </button>
+                    <span
+                      className={`inline-flex px-4 py-2 text-sm font-semibold rounded-full ${
+                        statusColors[order.status]
+                      }`}
+                    >
+                      {statusLabels[order.status]}
+                    </span>
+                  </div>
                 </div>
               </div>
 

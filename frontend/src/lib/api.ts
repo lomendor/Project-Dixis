@@ -249,6 +249,7 @@ export interface ProducerOrderRaw {
   shipping_cost: string;
   total: string;
   currency: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
   shipping_address?: ShippingAddress;
@@ -272,6 +273,7 @@ export interface ProducerOrder {
   shipping_cost: string;
   total: string;
   currency: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
   shipping_address?: ShippingAddress;
