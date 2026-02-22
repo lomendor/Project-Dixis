@@ -96,7 +96,7 @@ export const DEFAULT_OPTIONS: Array<{
 }> = [
   { code: 'PICKUP', label: 'Παραλαβή από κατάστημα', etaDays: 0, baseCost: 0 },
   { code: 'COURIER', label: 'Παράδοση με κούριερ', etaDays: 2, baseCost: 3.5 },
-  { code: 'COURIER_COD', label: 'Αντικαταβολή', etaDays: 2, baseCost: 3.5, codFee: 1.5 },
+  { code: 'COURIER_COD', label: 'Αντικαταβολή', etaDays: 2, baseCost: 3.5, codFee: 4.0 },
 ];
 
 export function calculateShippingCost(
