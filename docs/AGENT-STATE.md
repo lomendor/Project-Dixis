@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-21 (Business policies deployed, financial plan reviewed)
+**Updated**: 2026-02-22 (EU food compliance: allergens, ingredients, producer EFET/agreement)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -88,6 +88,7 @@
 
 ## Recently Done (last 10)
 
+- **EU-FOOD-COMPLIANCE** — EU 1169/2011 allergens (14 mandatory) + ingredients on products. Producer EFET food license number + agreement acceptance fields. Frontend: create/edit forms with allergens checkboxes + ingredients textarea, customer-facing allergens badges + ingredients display, admin compliance warnings in moderation queue. Backend: 2 migrations (allergens JSON + ingredients text on products, food_license_number + agreement_accepted_at on producers). (PR #3090, deployed 2026-02-22) ✅
 - **BUSINESS-POLICIES** — About page claims fixed (no more "χαμηλότερη"), 5 policy docs created (Producer Agreement, Return/Refund, Content Guidelines, Delivery Confirmation, Post-Payout Refund), 3 financial safeguards added. Financial plan reviewed — old plans outdated, realistic model agreed. (PR #3087, deployed 2026-02-21) ✅
 - **TECH-DEBT-CLEANUP** — Deploy workflow fix (`cp -r i18n` → `cp i18n.ts`), 36 stale issues closed (50→14), 100+ stale branch refs pruned, STATE.md archived (1024→48 lines). E2E stabilized: `networkidle` → `domcontentloaded`, `goto('/')` ERR_ABORTED fixed in payment tests, auth hydration timing fix. (PRs #3075-#3080, merged 2026-02-21) ✅
 - **MONITORING-CLEANUP** — Fixed false alarm epidemic: production-smoke 307 redirect bug, uptime-ping dedup, disabled 10 redundant legacy cron workflows, closed 14 stale auto-generated P0/P1 issues. (PR #3075, merged 2026-02-21) ✅
