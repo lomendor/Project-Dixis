@@ -46,15 +46,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cash on Delivery (COD)
+    | Cash on Delivery (COD) — Disabled
     |--------------------------------------------------------------------------
     |
-    | Configuration for Cash on Delivery payment method.
-    | When enabled, adds COD fee to shipping quotes.
+    | COD removed from marketplace. Keys retained for backward compatibility
+    | (existing orders may reference cod_fee). Always returns 0.
     |
     */
-    'enable_cod' => env('SHIPPING_ENABLE_COD', false),
-    'cod_fee_eur' => env('SHIPPING_COD_FEE_EUR', 4.00),
+    'enable_cod' => false,
+    'cod_fee_eur' => 0.00,
 
     /*
     |--------------------------------------------------------------------------

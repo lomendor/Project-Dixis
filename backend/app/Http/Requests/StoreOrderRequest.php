@@ -42,8 +42,8 @@ class StoreOrderRequest extends FormRequest
             'shipping_address.country' => 'nullable|string|max:100',
             // Shipping cost (Pass 48 - Frontend-calculated, EUR)
             'shipping_cost' => 'nullable|numeric|min:0|max:100',
-            // Payment method (optional, defaults to COD)
-            'payment_method' => 'nullable|string|in:COD,CARD,BANK_TRANSFER',
+            // Payment method (COD removed — card only)
+            'payment_method' => 'nullable|string|in:CARD,BANK_TRANSFER',
             // Pass ORDER-SHIPPING-SPLIT-01: Quoted shipping for mismatch detection
             'quoted_shipping' => 'nullable|numeric|min:0|max:200',
             'quoted_at' => 'nullable|date',
@@ -67,7 +67,7 @@ class StoreOrderRequest extends FormRequest
             'notes.max' => 'Notes cannot exceed 1000 characters.',
             'shipping_address.array' => 'Shipping address must be an object.',
             'shipping_address.email.email' => 'Invalid email address format.',
-            'payment_method.in' => 'Payment method must be COD, CARD, or BANK_TRANSFER.',
+            'payment_method.in' => 'Payment method must be CARD or BANK_TRANSFER.',
         ];
     }
 }

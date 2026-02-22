@@ -40,13 +40,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | COD (Cash on Delivery) - Always enabled
+    | COD (Cash on Delivery) - Disabled
     |--------------------------------------------------------------------------
     |
-    | COD is the default payment method and cannot be disabled.
+    | COD removed: multi-producer marketplace makes flat COD fee impossible.
+    | Each courier charges per-shipment COD, so 3 producers = 3 separate fees.
+    | May be re-enabled when carrier integration provides exact COD pricing.
     |
     */
-    'cod_enabled' => true,
+    'cod_enabled' => false,
 
     /*
     |--------------------------------------------------------------------------
