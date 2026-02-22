@@ -51,6 +51,26 @@ function EditProductContent() {
   const [isActive, setIsActive] = useState(true);
   const [cultivationType, setCultivationType] = useState('');
   const [cultivationDescription, setCultivationDescription] = useState('');
+  const [allergens, setAllergens] = useState<string[]>([]);
+  const [ingredients, setIngredients] = useState('');
+
+  // EU 1169/2011 — 14 allergens
+  const EU_ALLERGENS = [
+    { value: 'gluten', label: 'Γλουτένη' },
+    { value: 'crustaceans', label: 'Καρκινοειδή' },
+    { value: 'eggs', label: 'Αβγά' },
+    { value: 'fish', label: 'Ψάρια' },
+    { value: 'peanuts', label: 'Αράπικα φιστίκια' },
+    { value: 'soybeans', label: 'Σόγια' },
+    { value: 'milk', label: 'Γάλα' },
+    { value: 'nuts', label: 'Ξηροί καρποί' },
+    { value: 'celery', label: 'Σέλινο' },
+    { value: 'mustard', label: 'Μουστάρδα' },
+    { value: 'sesame', label: 'Σουσάμι' },
+    { value: 'sulphites', label: 'Θειώδη' },
+    { value: 'lupin', label: 'Λούπινα' },
+    { value: 'molluscs', label: 'Μαλάκια' },
+  ];
 
   useEffect(() => {
     // Fetch dynamic categories
@@ -88,6 +108,8 @@ function EditProductContent() {
       setIsActive(product.is_active ?? true);
       setCultivationType(product.cultivation_type || '');
       setCultivationDescription(product.cultivation_description || '');
+      setAllergens(Array.isArray(product.allergens) ? product.allergens : []);
+      setIngredients(product.ingredients || '');
     } catch (err: any) {
       setError(err.message || 'Σφάλμα φόρτωσης προϊόντος');
     } finally {
@@ -114,6 +136,8 @@ function EditProductContent() {
         is_active: isActive,
         cultivation_type: cultivationType || undefined,
         cultivation_description: cultivationDescription || undefined,
+        allergens: allergens.length > 0 ? allergens : [],
+        ingredients: ingredients || undefined,
       });
 
       router.push('/my/products');
@@ -319,6 +343,55 @@ function EditProductContent() {
                 />
               </div>
             )}
+
+            {/* EU 1169/2011: Allergens */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                Αλλεργιογόνα (EU 1169/2011)
+              </label>
+              <p className="text-xs text-neutral-500 mb-2">
+                Επιλέξτε τα αλλεργιογόνα που περιέχει το προϊόν
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" data-testid="allergens-grid">
+                {EU_ALLERGENS.map((a) => (
+                  <label key={a.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={allergens.includes(a.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAllergens([...allergens, a.value]);
+                        } else {
+                          setAllergens(allergens.filter((v) => v !== a.value));
+                        }
+                      }}
+                      className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                    />
+                    <span className="text-neutral-700">{a.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Ingredients */}
+            <div>
+              <label htmlFor="ingredients" className="block text-sm font-medium text-neutral-700 mb-1">
+                Συστατικά
+              </label>
+              <textarea
+                id="ingredients"
+                rows={3}
+                value={ingredients}
+                onChange={(e) => setIngredients(e.target.value)}
+                maxLength={2000}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="π.χ. Ελαιόλαδο εξαιρετικό παρθένο, θυμάρι, ρίγανη..."
+                data-testid="ingredients-textarea"
+              />
+              <p className="mt-1 text-xs text-neutral-500">
+                {ingredients.length}/2000 χαρακτήρες
+              </p>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>

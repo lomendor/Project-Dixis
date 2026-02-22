@@ -1264,6 +1264,8 @@ class ApiClient {
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;
+    allergens?: string[];
+    ingredients?: string;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
       method: 'POST',
@@ -1285,6 +1287,8 @@ class ApiClient {
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;
+    allergens?: string[];
+    ingredients?: string;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {
       method: 'PATCH',

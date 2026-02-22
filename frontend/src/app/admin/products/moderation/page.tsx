@@ -21,6 +21,8 @@ interface PendingProduct {
   price: number;
   approvalStatus: string;
   producer?: { id: string; name: string };
+  allergens?: string[];
+  ingredients?: string | null;
 }
 
 export default function ModerationQueuePage() {
@@ -138,8 +140,14 @@ export default function ModerationQueuePage() {
             <tbody className="divide-y divide-neutral-100">
               {products.map((p) => (
                 <tr key={p.id} className="hover:bg-neutral-50 transition-colors">
-                  <td className="px-4 py-3 text-sm font-medium text-neutral-900">
-                    {p.title}
+                  <td className="px-4 py-3">
+                    <div className="text-sm font-medium text-neutral-900">{p.title}</div>
+                    {(!p.allergens || p.allergens.length === 0) && !p.ingredients && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full" data-testid={`compliance-warning-${p.id}`}>
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.07 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                        Χωρίς αλλεργιογόνα/συστατικά
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-sm text-neutral-600">
                     {p.producer?.name || '—'}
