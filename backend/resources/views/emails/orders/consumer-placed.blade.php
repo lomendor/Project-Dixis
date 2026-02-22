@@ -57,6 +57,14 @@
             </div>
         </div>
 
+        @if(!empty($trackingUrl))
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="{{ $trackingUrl }}" style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                Παρακολούθηση Παραγγελίας
+            </a>
+        </div>
+        @endif
+
         <p>Θα λάβετε ειδοποίηση όταν η παραγγελία σας αποσταλεί.</p>
     </div>
 
