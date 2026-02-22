@@ -11,6 +11,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import IOSGuard from './IOSGuard';
 import Analytics from '@/components/Analytics';
+import CookieConsent from '@/components/CookieConsent';
 
 // T3-03: Inter has full Greek subset support (Geist only has latin)
 const inter = Inter({
@@ -177,6 +178,7 @@ export default function RootLayout({
                   {children}
                 </main>
                 <Footer />
+                <CookieConsent />
                 <ToastContainer />
               </AuthProvider>
             </ToastProvider>
