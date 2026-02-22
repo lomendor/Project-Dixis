@@ -159,6 +159,24 @@ export default function ProducerOnboardingPage() {
     );
   };
 
+  /** Fire-and-forget admin email notification */
+  const notifyAdmin = () => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    fetch('/api/ops/notify-onboarding', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        business_name: form.business_name,
+        phone: form.phone,
+        email: form.email,
+        city: form.city,
+        product_categories: selectedCategories,
+      }),
+    }).catch(() => {}); // silent — non-blocking
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validate required fields
@@ -214,6 +232,8 @@ export default function ProducerOnboardingPage() {
         onboarding_completed_at: new Date().toISOString(),
       });
       setSuccess(true);
+      // Fire-and-forget: notify admin via email
+      notifyAdmin();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.');
     } finally {
