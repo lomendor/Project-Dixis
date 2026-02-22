@@ -1222,7 +1222,23 @@ class ApiClient {
       location?: string;
       phone?: string;
       email?: string;
+      city?: string;
+      region?: string;
+      tax_id?: string;
+      tax_office?: string;
+      address?: string;
+      postal_code?: string;
       rejection_reason?: string | null;
+      // Onboarding V2
+      onboarding_completed_at?: string | null;
+      product_categories?: string[] | null;
+      tax_registration_doc_url?: string | null;
+      efet_notification_doc_url?: string | null;
+      haccp_declaration_doc_url?: string | null;
+      haccp_declaration_accepted?: boolean;
+      beekeeper_registry_number?: string | null;
+      cpnp_notification_number?: string | null;
+      responsible_person_name?: string | null;
     } | null;
     has_profile: boolean;
   }> {
@@ -1237,8 +1253,22 @@ class ApiClient {
     region?: string;
     description?: string;
     tax_id?: string;
+    tax_office?: string;
+    address?: string;
+    postal_code?: string;
+    email?: string;
     food_license_number?: string;
     agreement_accepted_at?: string;
+    // Onboarding V2
+    onboarding_completed_at?: string;
+    product_categories?: string[];
+    tax_registration_doc_url?: string | null;
+    efet_notification_doc_url?: string | null;
+    haccp_declaration_doc_url?: string | null;
+    haccp_declaration_accepted?: boolean;
+    beekeeper_registry_number?: string | null;
+    cpnp_notification_number?: string | null;
+    responsible_person_name?: string | null;
   }): Promise<{ producer: Record<string, unknown>; message: string }> {
     return this.request('producer/profile', {
       method: 'PATCH',
