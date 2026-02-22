@@ -29,7 +29,9 @@ export default function ProducerOnboardingPage() {
     region: '',
     description: '',
     tax_id: '',
+    food_license_number: '',
   });
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
 
   // Check auth + load existing profile
   useEffect(() => {
@@ -72,11 +74,22 @@ export default function ProducerOnboardingPage() {
       setError('Συμπληρώστε τα υποχρεωτικά πεδία (Επωνυμία, Τηλέφωνο, Πόλη)');
       return;
     }
+    if (form.tax_id && !/^\d{9}$/.test(form.tax_id)) {
+      setError('Το ΑΦΜ πρέπει να είναι ακριβώς 9 ψηφία');
+      return;
+    }
+    if (!agreementAccepted) {
+      setError('Πρέπει να αποδεχτείτε τη Συμφωνία Συνεργασίας Παραγωγού');
+      return;
+    }
 
     try {
       setSubmitting(true);
       setError(null);
-      await apiClient.updateProducerProfile(form);
+      await apiClient.updateProducerProfile({
+        ...form,
+        agreement_accepted_at: new Date().toISOString(),
+      });
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Κάτι πήγε στραβά. Δοκιμάστε ξανά.');
@@ -286,17 +299,61 @@ export default function ProducerOnboardingPage() {
 
             <div>
               <label htmlFor="tax_id" className="block text-sm font-medium text-neutral-700">
-                ΑΦΜ <span className="text-neutral-400 text-xs">(προαιρετικό)</span>
+                ΑΦΜ <span className="text-red-500">*</span>
               </label>
               <input
                 id="tax_id"
                 name="tax_id"
                 type="text"
+                required
+                maxLength={9}
+                pattern="\d{9}"
                 value={form.tax_id}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="9 ψηφία"
               />
+            </div>
+
+            <div>
+              <label htmlFor="food_license_number" className="block text-sm font-medium text-neutral-700">
+                Αριθμός Αδείας ΕΦΕΤ / HACCP
+              </label>
+              <input
+                id="food_license_number"
+                name="food_license_number"
+                type="text"
+                value={form.food_license_number}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                placeholder="Αριθμός εγγραφής ή πιστοποιητικού"
+              />
+              <p className="mt-1 text-xs text-neutral-500">
+                Αν δεν τον έχετε τώρα, μπορείτε να τον συμπληρώσετε αργότερα στις Ρυθμίσεις.
+              </p>
+            </div>
+
+            <div className="border-t pt-5">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreementAccepted}
+                  onChange={(e) => setAgreementAccepted(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm text-neutral-700">
+                  Διάβασα και αποδέχομαι τη{' '}
+                  <a
+                    href="/policies/producer-agreement"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary underline hover:text-primary-light"
+                  >
+                    Συμφωνία Συνεργασίας Παραγωγού
+                  </a>
+                  {' '}<span className="text-red-500">*</span>
+                </span>
+              </label>
             </div>
 
             <button

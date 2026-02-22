@@ -73,6 +73,9 @@ async function getProductById(id: string) {
       // Pass SEASONAL-DISCOUNT-01: Discount + seasonal data
       discountPrice: raw.discount_price ? parseFloat(raw.discount_price) : null,
       isSeasonal: !!raw.is_seasonal,
+      // EU 1169/2011: Allergens + Ingredients
+      allergens: Array.isArray(raw.allergens) ? raw.allergens : [],
+      ingredients: raw.ingredients || null,
     };
   } catch {
     return null;
@@ -300,6 +303,43 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               </h2>
               <p className="text-neutral-600 leading-relaxed whitespace-pre-line">
                 {p.description}
+              </p>
+            </div>
+          )}
+
+          {/* EU 1169/2011: Allergens display */}
+          {p.allergens && p.allergens.length > 0 && (
+            <div className="mb-6" data-testid="allergens-section">
+              <h2 className="text-base font-semibold text-neutral-900 mb-2">
+                Αλλεργιογόνα
+              </h2>
+              <div className="flex flex-wrap gap-1.5">
+                {p.allergens.map((a: string) => {
+                  const labels: Record<string, string> = {
+                    gluten: 'Γλουτένη', crustaceans: 'Καρκινοειδή', eggs: 'Αβγά',
+                    fish: 'Ψάρια', peanuts: 'Αράπικα φιστίκια', soybeans: 'Σόγια',
+                    milk: 'Γάλα', nuts: 'Ξηροί καρποί', celery: 'Σέλινο',
+                    mustard: 'Μουστάρδα', sesame: 'Σουσάμι', sulphites: 'Θειώδη',
+                    lupin: 'Λούπινα', molluscs: 'Μαλάκια',
+                  };
+                  return (
+                    <span key={a} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                      {labels[a] || a}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Ingredients display */}
+          {p.ingredients && (
+            <div className="mb-6" data-testid="ingredients-section">
+              <h2 className="text-base font-semibold text-neutral-900 mb-2">
+                Συστατικά
+              </h2>
+              <p className="text-neutral-600 text-sm leading-relaxed whitespace-pre-line">
+                {p.ingredients}
               </p>
             </div>
           )}

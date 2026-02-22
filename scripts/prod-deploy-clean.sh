@@ -41,17 +41,17 @@ PROD_URL="${DEPLOY_PROD_URL:-https://dixis.gr}"
 fail() { echo ""; echo "STOP: $*" >&2; exit 1; }
 
 check_http() {
-  local label="$1" url="$2"
+  local label="$1" url="$2" accept="${3:-200}"
   local code
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" || echo "000")
   echo "  $label: $code"
-  [ "$code" = "200" ] || fail "$label returned $code (expected 200)"
+  [ "$code" = "$accept" ] || fail "$label returned $code (expected $accept)"
 }
 
 # ── Preflight (local) ──────────────────────────────────────────────────────
 echo "=== PREFLIGHT: prod must be healthy before deploy ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/"
+check_http "homepage" "$PROD_URL/" "307"
 echo ""
 
 # ── Build the SSH command block ─────────────────────────────────────────────
@@ -258,7 +258,7 @@ fi
 echo ""
 echo "=== POSTFLIGHT: public https verification ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/"
+check_http "homepage" "$PROD_URL/" "307"
 check_http "og-products" "$PROD_URL/og-products.jpg"
 check_http "twitter-products" "$PROD_URL/twitter-products.jpg"
 

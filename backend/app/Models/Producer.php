@@ -16,6 +16,8 @@ class Producer extends Model
         'business_name',
         'tax_id',
         'tax_office',
+        'food_license_number',
+        'agreement_accepted_at',
         'iban',
         'bank_account_holder',
         'description',
@@ -47,6 +49,7 @@ class Producer extends Model
         'uses_custom_shipping_rates' => 'boolean',
         'free_shipping_threshold_eur' => 'decimal:2',
         'is_active' => 'boolean',
+        'agreement_accepted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

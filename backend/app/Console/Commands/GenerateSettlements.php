@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\DB;
  * via scheduler, or manually via artisan.
  *
  * Eligibility: Commission must be linked to a delivered order AND
- * the order must have been delivered >= $holdDays ago (default 14).
+ * the order must have been delivered >= $holdDays ago (default 14)
+ * AND the order must NOT have any refund (refund_id is null).
+ * Both full and partial refunds are excluded from auto-settlement.
+ * Partially refunded orders are flagged separately for admin review.
  *
  * Owner decisions applied:
  * - Frequency: Monthly (1st of each month)
@@ -55,17 +58,49 @@ class GenerateSettlements extends Command
         }
         $this->newLine();
 
-        // Find unsettled commissions with delivered orders within the hold window
+        // Find unsettled commissions with delivered orders within the hold window.
+        // Exclude ALL refunded orders (refund_id is set for both full and partial refunds).
         $eligibleCommissions = Commission::unsettled()
             ->whereHas('order', function ($q) use ($eligibleBefore) {
                 $q->where('status', 'delivered')
-                  ->where('updated_at', '<=', $eligibleBefore);
+                  ->where('updated_at', '<=', $eligibleBefore)
+                  ->whereNull('refund_id');
             })
+            ->with('order') // eager load for partial refund check below
             ->get();
 
         if ($eligibleCommissions->isEmpty()) {
             $this->info('No eligible commissions found for this period.');
             return 0;
+        }
+
+        // Separately detect partially-refunded orders that were excluded above.
+        // (whereNull('refund_id') excludes ALL refunds; partial refunds need admin review
+        //  because the non-refunded portion may still warrant a reduced payout.)
+        $excludedRefunded = Commission::unsettled()
+            ->whereHas('order', function ($q) use ($eligibleBefore) {
+                $q->where('status', 'delivered')
+                  ->where('updated_at', '<=', $eligibleBefore)
+                  ->whereNotNull('refund_id');
+            })
+            ->with('order')
+            ->get();
+
+        $partialRefunds = $excludedRefunded->filter(function ($c) {
+            if (! $c->order) {
+                return false;
+            }
+            $totalCents = (int) round($c->order->total * 100);
+            return ($c->order->refunded_amount_cents ?? 0) < $totalCents;
+        });
+
+        if ($partialRefunds->isNotEmpty()) {
+            $this->warn("{$partialRefunds->count()} partially-refunded order(s) excluded. Review for manual payout:");
+            foreach ($partialRefunds as $c) {
+                $refundedEur = ($c->order->refunded_amount_cents ?? 0) / 100;
+                $this->warn("  Order #{$c->order_id}: refunded EUR {$refundedEur} of EUR {$c->order->total}");
+            }
+            $this->newLine();
         }
 
         // Group by producer
