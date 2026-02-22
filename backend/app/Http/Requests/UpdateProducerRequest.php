@@ -31,8 +31,10 @@ class UpdateProducerRequest extends FormRequest
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:producers,slug,'.$producerId,
             'business_name' => 'nullable|string|max:255',
-            'tax_id' => 'nullable|string|max:20',
+            'tax_id' => ['nullable', 'string', 'max:20', 'regex:/^\d{9}$/'],
             'tax_office' => 'nullable|string|max:255',
+            'food_license_number' => 'nullable|string|max:100',
+            'agreement_accepted_at' => 'nullable|date',
             // Pass PAYOUT-01: IBAN for producer settlements (any EU IBAN format)
             'iban' => ['nullable', 'string', 'max:34', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{4,30}$/'],
             'bank_account_holder' => 'nullable|string|max:255',
