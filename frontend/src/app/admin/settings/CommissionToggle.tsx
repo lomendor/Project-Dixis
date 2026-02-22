@@ -36,7 +36,7 @@ export default function CommissionToggle() {
   };
 
   if (enabled === null) {
-    return <span className="text-xs text-neutral-400">Loading...</span>;
+    return <span className="text-xs text-neutral-400">Φόρτωση...</span>;
   }
 
   return (

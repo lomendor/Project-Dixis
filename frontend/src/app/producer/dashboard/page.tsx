@@ -64,7 +64,7 @@ export default function ProducerDashboard() {
       setTopProducts(products);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
     } finally {
       setLoading(false);
     }

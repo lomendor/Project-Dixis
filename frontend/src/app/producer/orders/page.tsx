@@ -73,7 +73,7 @@ export default function ProducerOrdersPage() {
       setCounts(response.meta);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load orders');
+      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης παραγγελιών');
     } finally {
       setLoading(false);
     }

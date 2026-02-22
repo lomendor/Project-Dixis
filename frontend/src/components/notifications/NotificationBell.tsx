@@ -63,7 +63,7 @@ export default function NotificationBell() {
       <button
         onClick={handleToggle}
         className="relative p-2 text-neutral-600 hover:text-primary transition-colors rounded-full hover:bg-neutral-100"
-        aria-label="Notifications"
+        aria-label="Ειδοποιήσεις"
         data-testid="notification-bell"
       >
         {/* Bell Icon */}

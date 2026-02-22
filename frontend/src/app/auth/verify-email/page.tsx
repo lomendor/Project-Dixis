@@ -308,7 +308,7 @@ export default function VerifyEmail() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <div className="text-neutral-600">Loading...</div>
+          <div className="text-neutral-600">Φόρτωση...</div>
         </div>
       }
     >

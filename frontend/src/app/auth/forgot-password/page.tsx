@@ -36,12 +36,12 @@ export default function ForgotPassword() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || 'Request failed');
+        throw new Error(data.message || 'Το αίτημα απέτυχε');
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Request failed');
+      setError(err instanceof Error ? err.message : 'Το αίτημα απέτυχε');
     } finally {
       setLoading(false);
     }

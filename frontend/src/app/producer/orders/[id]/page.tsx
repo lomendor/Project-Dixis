@@ -88,7 +88,7 @@ export default function ProducerOrderDetailsPage() {
       }
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load order');
+      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης παραγγελίας');
     } finally {
       setLoading(false);
     }
@@ -132,7 +132,7 @@ export default function ProducerOrderDetailsPage() {
         setEmailStatus('skipped');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update status');
+      setError(err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης κατάστασης');
     } finally {
       setUpdating(false);
     }
