@@ -6,6 +6,7 @@ import { RateRow, ZoneRow, QuoteInput, QuoteResult, Surcharge } from './config/t
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 const codFeeFor = (m: string) => (m === 'COURIER_COD' ? 2.0 : 0);
+const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '35');
 
 export function volumetricKg(
   l?: number,
@@ -132,8 +133,8 @@ export function quoteV2(
   if (cod > 0) trace.push('COD=2.0');
 
   // free shipping threshold (business rule)
-  if (i.subtotal >= 60) {
-    trace.push('FREE>=60');
+  if (i.subtotal >= FREE_SHIPPING_THRESHOLD) {
+    trace.push(`FREE>=${FREE_SHIPPING_THRESHOLD}`);
     return {
       shippingCost: 0,
       codFee: 0,
