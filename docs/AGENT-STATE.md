@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-22 (EU food compliance: allergens, ingredients, producer EFET/agreement)
+**Updated**: 2026-02-22 (Greek readiness audit: i18n fixes, security hardening, onboarding V2, middleware fix)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -22,8 +22,8 @@
 
 ### What WORKS end-to-end
 - **Customer**: register → login → browse → cart → checkout → Stripe pay → email confirm → order history ✅
-- **Producer** (if account exists): login → add product → edit product → see orders → email on sale ✅
-- **Admin**: phone OTP login → dashboard stats → manage orders → bulk status update ✅
+- **Producer**: register → onboarding V2 (docs + categories + compliance) → admin approve → add products → see orders ✅
+- **Admin**: phone OTP login → dashboard stats → manage orders → bulk status update → approve producers with docs ✅
 - **Shipping**: cost calc by postal code + weight, per-producer free threshold, **COD** (+€4 fee) ✅
 - **Email**: Resend integration, Greek templates, idempotent (no double-sends) ✅
 - **Commission System**: Configurable rules (B2C/B2B, per-producer, per-category, amount tiers), wired to checkout, admin CRUD + preview calculator, producer sees breakdown on orders, feature flag toggle in admin settings. **Flag OFF in production** — ready to activate. ✅
@@ -88,7 +88,12 @@
 
 ## Recently Done (last 10)
 
-- **EU-FOOD-COMPLIANCE** — EU 1169/2011 allergens (14 mandatory) + ingredients on products. Producer EFET food license number + agreement acceptance fields. Frontend: create/edit forms with allergens checkboxes + ingredients textarea, customer-facing allergens badges + ingredients display, admin compliance warnings in moderation queue. Backend: 2 migrations (allergens JSON + ingredients text on products, food_license_number + agreement_accepted_at on producers). (PR #3090, deployed 2026-02-22) ✅
+- **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
+- **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
+- **ONBOARDING-V2** — Producer onboarding: doc uploads (TAXIS, EFET, HACCP), product categories, bank details (IBAN), conditional fields (honey→beekeeper, cosmetics→CPNP). E2E smoke tests. (PRs #3095 + #3103, deployed 2026-02-22) ✅
+- **MIDDLEWARE-REDIRECT-FIX** — Auth redirect in standalone mode behind nginx was sending users to localhost:3000. Fixed via Host header override. (PRs #3101-#3102, deployed 2026-02-22) ✅
+- **EU-MARKETPLACE-READINESS** — EU 1169/2011 allergens/ingredients, IBAN field, shipping threshold fix. (PR #3097, deployed 2026-02-22) ✅
+- **EU-FOOD-COMPLIANCE** — EU 1169/2011 allergens (14 mandatory) + ingredients on products. Producer EFET food license number + agreement acceptance fields. (PR #3090, deployed 2026-02-22) ✅
 - **BUSINESS-POLICIES** — About page claims fixed (no more "χαμηλότερη"), 5 policy docs created (Producer Agreement, Return/Refund, Content Guidelines, Delivery Confirmation, Post-Payout Refund), 3 financial safeguards added. Financial plan reviewed — old plans outdated, realistic model agreed. (PR #3087, deployed 2026-02-21) ✅
 - **TECH-DEBT-CLEANUP** — Deploy workflow fix (`cp -r i18n` → `cp i18n.ts`), 36 stale issues closed (50→14), 100+ stale branch refs pruned, STATE.md archived (1024→48 lines). E2E stabilized: `networkidle` → `domcontentloaded`, `goto('/')` ERR_ABORTED fixed in payment tests, auth hydration timing fix. (PRs #3075-#3080, merged 2026-02-21) ✅
 - **MONITORING-CLEANUP** — Fixed false alarm epidemic: production-smoke 307 redirect bug, uptime-ping dedup, disabled 10 redundant legacy cron workflows, closed 14 stale auto-generated P0/P1 issues. (PR #3075, merged 2026-02-21) ✅
@@ -99,7 +104,6 @@
 - **CI-E2E-GREEN** — Fixed E2E from 100% fail → 100% pass (96 tests). SSR fetch fallback, glob pattern fix, checkout skip in CI. (PRs #2962-#2963, deployed 2026-02-17) ✅
 - **S3-01: COST-TRANSPARENCY** — Green trust badge on product detail: "88% στον παραγωγό / 12% πλατφόρμα". (PR #2960, deployed 2026-02-16) ✅
 - **PAYOUT-INFRASTRUCTURE** — Complete payout: IBAN field, settlement generation, admin dashboard, producer history, CSV export. (PRs #2952-#2958, deployed 2026-02-16) ✅
-- **COMMISSION-ENGINE** — Commission system wired to checkout, admin CRUD, feature flag, producer breakdown. Flag OFF — ready to activate. (PRs #2932-#2935, deployed 2026-02-16) ✅
 
 ---
 
