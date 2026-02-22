@@ -63,11 +63,20 @@ export async function putObjectS3(data: Buf, mime: string): Promise<PutResult>{
   const ext = extFromMime(mime);
   const folder = yyyymm();
   const Key = `uploads/${folder}/${hash}.${ext}`;
+  const accessKeyId = process.env.S3_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
+  if (!accessKeyId || !secretAccessKey) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY must be set in production');
+    }
+    // Dev/CI: fall back to local MinIO defaults (only when env vars are missing)
+    console.warn('[storage] S3 credentials not set — using dev defaults');
+  }
   const client = new S3Client({
     region, endpoint, forcePathStyle,
     credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID || 'minioadmin',
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || 'minioadmin'
+      accessKeyId: accessKeyId || 'minioadmin',
+      secretAccessKey: secretAccessKey || 'minioadmin'
     }
   });
   await client.send(new PutObjectCommand({ Bucket, Key, Body: processed, ContentType: mime, ACL: 'public-read' } as any));

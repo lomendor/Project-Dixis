@@ -1,7 +1,19 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
+/**
+ * Lazy getter for JWT_SECRET — avoids throwing at module evaluation
+ * (which breaks `next build` page data collection).
+ * Throws at request time if missing in production.
+ */
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production');
+  }
+  return '';
+}
 
 interface JwtPayload {
   phone: string;
@@ -26,7 +38,7 @@ export async function getSessionPhone(): Promise<string | null> {
   if (!session?.value) return null;
 
   try {
-    const decoded = jwt.verify(session.value, JWT_SECRET, {
+    const decoded = jwt.verify(session.value, getJwtSecret(), {
       algorithms: ['HS256'],
       issuer: 'dixis-auth',
     }) as JwtPayload;
@@ -55,7 +67,7 @@ export async function getSessionType(): Promise<'admin' | 'user' | null> {
   if (!session?.value) return null;
 
   try {
-    const decoded = jwt.verify(session.value, JWT_SECRET, {
+    const decoded = jwt.verify(session.value, getJwtSecret(), {
       algorithms: ['HS256'],
       issuer: 'dixis-auth',
     }) as JwtPayload;
