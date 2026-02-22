@@ -52,7 +52,6 @@ function EditProductContent() {
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
   const [isSeasonal, setIsSeasonal] = useState(false);
-  const [isOrganic, setIsOrganic] = useState(false);
   const [origin, setOrigin] = useState('');
   const [cultivationType, setCultivationType] = useState('');
   const [cultivationDescription, setCultivationDescription] = useState('');
@@ -116,7 +115,6 @@ function EditProductContent() {
       setDiscountPrice(product.discount_price ? String(product.discount_price) : '');
       setWeightPerUnit(product.weight_per_unit ? String(product.weight_per_unit) : '');
       setIsSeasonal(!!product.is_seasonal);
-      setIsOrganic(!!product.is_organic);
       setOrigin(product.origin || '');
       setCultivationType(product.cultivation_type || '');
       setCultivationDescription(product.cultivation_description || '');
@@ -151,7 +149,6 @@ function EditProductContent() {
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : null,
         is_seasonal: isSeasonal,
-        is_organic: isOrganic,
         origin: origin || undefined,
         cultivation_type: cultivationType || undefined,
         cultivation_description: cultivationDescription || undefined,
@@ -350,16 +347,6 @@ function EditProductContent() {
                   data-testid="seasonal-checkbox"
                 />
                 <span className="text-sm text-neutral-700">🍊 Εποχιακό προϊόν</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isOrganic}
-                  onChange={(e) => setIsOrganic(e.target.checked)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
-                  data-testid="organic-checkbox"
-                />
-                <span className="text-sm text-neutral-700">🌿 Βιολογικό</span>
               </label>
             </div>
 

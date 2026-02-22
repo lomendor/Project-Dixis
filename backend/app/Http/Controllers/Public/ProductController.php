@@ -88,11 +88,16 @@ class ProductController extends Controller
             $query->where('price', '<=', $maxPrice);
         }
 
-        // Organic filter
+        // Organic filter — derived from cultivation_type (is_organic column removed)
         if ($request->has('organic')) {
             $organic = filter_var($request->get('organic'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-            if ($organic !== null) {
-                $query->where('is_organic', $organic);
+            if ($organic === true) {
+                $query->whereIn('cultivation_type', ['organic_certified', 'organic_transitional']);
+            } elseif ($organic === false) {
+                $query->where(function ($q) {
+                    $q->whereNull('cultivation_type')
+                      ->orWhereNotIn('cultivation_type', ['organic_certified', 'organic_transitional']);
+                });
             }
         }
 

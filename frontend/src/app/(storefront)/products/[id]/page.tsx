@@ -81,7 +81,6 @@ async function getProductById(id: string) {
       storageInstructions: raw.storage_instructions || null,
       shelfLife: raw.shelf_life || null,
       weightPerUnit: raw.weight_per_unit ? parseFloat(raw.weight_per_unit) : null,
-      isOrganic: !!raw.is_organic,
     };
   } catch {
     return null;
@@ -245,7 +244,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             )}
           </div>
 
-          {/* S1-01: Cultivation Type Badge */}
+          {/* S1-01: Cultivation Type Badge (single source of truth — no separate organic badge) */}
           {p.cultivationType && (
             <div className="mb-4" data-testid="cultivation-badge">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
@@ -268,15 +267,6 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               {p.cultivationDescription && (
                 <p className="mt-1 text-xs text-neutral-500">{p.cultivationDescription}</p>
               )}
-            </div>
-          )}
-
-          {/* Organic badge */}
-          {p.isOrganic && (
-            <div className="mb-3" data-testid="organic-badge">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                🌿 Βιολογικό Προϊόν
-              </span>
             </div>
           )}
 

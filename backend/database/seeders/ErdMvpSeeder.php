@@ -90,7 +90,6 @@ class ErdMvpSeeder extends Seeder
                 'width_cm' => 8.0,
                 'height_cm' => 6.0,
                 'is_active' => true,
-                'is_organic' => true,
                 'is_seasonal' => false,
                 'status' => 'available',
             ]
@@ -115,7 +114,6 @@ class ErdMvpSeeder extends Seeder
                 'width_cm' => 6.5,
                 'height_cm' => 23.0,
                 'is_active' => true,
-                'is_organic' => true,
                 'is_seasonal' => false,
                 'status' => 'available',
             ]

@@ -57,7 +57,6 @@ export interface Product {
   shelf_life?: string | null;
   discount_price?: string | null;
   weight_per_unit?: number | null;
-  is_organic?: boolean;
   is_seasonal?: boolean;
   categories: Category[];
   images: ProductImage[];
@@ -1284,7 +1283,6 @@ class ApiClient {
     shelf_life?: string;
     discount_price?: number | null;
     weight_per_unit?: number | null;
-    is_organic?: boolean;
     is_seasonal?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
@@ -1314,7 +1312,6 @@ class ApiClient {
     shelf_life?: string;
     discount_price?: number | null;
     weight_per_unit?: number | null;
-    is_organic?: boolean;
     is_seasonal?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {

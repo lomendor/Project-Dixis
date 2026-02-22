@@ -137,8 +137,7 @@ class E2ESeeder extends Seeder
                     'unit' => $productData['unit'],
                     'stock' => $productData['stock'],
                     'is_active' => true,
-                    'weight_per_unit' => 1.000,
-                    'is_organic' => false,
+                    'weight_per_unit' => 1000,
                     'status' => 'available',
                 ]
             );

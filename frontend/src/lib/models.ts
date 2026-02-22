@@ -65,7 +65,6 @@ export interface Product {
   width_cm?: number;
   height_cm?: number;
   is_active: boolean;
-  is_organic: boolean;
   cultivation_type?: 'conventional' | 'organic_certified' | 'organic_transitional' | 'biodynamic' | 'traditional_natural' | 'other' | null;
   cultivation_description?: string | null;
   discount_price?: number;

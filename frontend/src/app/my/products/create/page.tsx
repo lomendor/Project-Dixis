@@ -59,7 +59,6 @@ function CreateProductContent() {
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
   const [isSeasonal, setIsSeasonal] = useState(false);
-  const [isOrganic, setIsOrganic] = useState(false);
   const [origin, setOrigin] = useState('');
   const [cultivationType, setCultivationType] = useState('');
   const [cultivationDescription, setCultivationDescription] = useState('');
@@ -106,7 +105,6 @@ function CreateProductContent() {
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : undefined,
         is_seasonal: isSeasonal || undefined,
-        is_organic: isOrganic || undefined,
         origin: origin || undefined,
         cultivation_type: cultivationType || undefined,
         cultivation_description: cultivationDescription || undefined,
@@ -294,16 +292,6 @@ function CreateProductContent() {
                   data-testid="seasonal-checkbox"
                 />
                 <span className="text-sm text-neutral-700">🍊 Εποχιακό προϊόν</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isOrganic}
-                  onChange={(e) => setIsOrganic(e.target.checked)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
-                  data-testid="organic-checkbox"
-                />
-                <span className="text-sm text-neutral-700">🌿 Βιολογικό</span>
               </label>
             </div>
 
