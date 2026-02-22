@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-6 text-gray-700 space-y-1">
             <li><strong>Στοιχεία εγγραφής:</strong> Ονοματεπώνυμο, email, τηλέφωνο</li>
             <li><strong>Στοιχεία παραγγελίας:</strong> Διεύθυνση αποστολής, ταχυδρομικός κώδικας</li>
-            <li><strong>Στοιχεία πληρωμής:</strong> Τα δεδομένα πληρωμής διαχειρίζονται αποκλειστικά από τον πάροχο πληρωμών (Viva Wallet) — δεν αποθηκεύουμε αριθμούς καρτών</li>
+            <li><strong>Στοιχεία πληρωμής:</strong> Τα δεδομένα πληρωμής διαχειρίζονται αποκλειστικά από τον πάροχο πληρωμών (Stripe) — δεν αποθηκεύουμε αριθμούς καρτών</li>
             <li><strong>Τεχνικά δεδομένα:</strong> Διεύθυνση IP, τύπος browser, cookies λειτουργικότητας</li>
           </ul>
         </section>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
           <p className="text-gray-700 leading-relaxed mb-3">Τα δεδομένα σας μπορεί να κοινοποιηθούν σε:</p>
           <ul className="list-disc pl-6 text-gray-700 space-y-1">
             <li><strong>Παραγωγούς:</strong> Όνομα και διεύθυνση αποστολής για εκτέλεση παραγγελίας</li>
-            <li><strong>Πάροχο πληρωμών:</strong> Viva Wallet για ασφαλείς συναλλαγές</li>
+            <li><strong>Πάροχο πληρωμών:</strong> Stripe για ασφαλείς συναλλαγές</li>
             <li><strong>Μεταφορικές εταιρείες:</strong> Διεύθυνση αποστολής για παράδοση</li>
           </ul>
           <p className="text-gray-700 leading-relaxed mt-3">
