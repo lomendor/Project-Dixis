@@ -1,36 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { paymentManager } from '@/lib/payment-providers';
-
 /**
- * POST /api/checkout/init-payment
- * Initializes a payment session and returns redirect URL for Viva
+ * DEPRECATED: Legacy Viva Wallet payment initialization endpoint.
+ * Payments are now initialized via Laravel backend (Stripe).
+ * Returns 410 Gone to prevent accidental usage.
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { orderId, amountCents } = body;
+import { NextResponse } from 'next/server'
 
-    if (!orderId || !amountCents) {
-      return NextResponse.json(
-        { error: 'Missing orderId or amountCents' },
-        { status: 400 }
-      );
-    }
-
-    const result = await paymentManager.initPayment(orderId, amountCents, 'EUR');
-
-    return NextResponse.json({
-      success: true,
-      redirectUrl: result.redirectUrl,
-      clientSecret: result.clientSecret,
-      vivaOrderCode: result.metadata?.vivaOrderCode,
-    });
-
-  } catch (error) {
-    console.error('Init payment error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Payment init failed' },
-      { status: 500 }
-    );
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'This endpoint has been deprecated.',
+      message: 'Payment initialization now uses Laravel API exclusively.',
+      redirect: 'Use paymentApi.initPayment() which calls Laravel backend',
+    },
+    { status: 410 }
+  )
 }

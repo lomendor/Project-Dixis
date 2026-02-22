@@ -93,8 +93,10 @@ export class FakePaymentProvider implements PaymentProvider {
    * Check if this provider is supported in the current environment
    */
   isSupported(): boolean {
-    // Fake provider is always supported in development
-    return process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_ENABLE_FAKE_PAYMENT === 'true';
+    // SECURITY: Fake provider ONLY available in development mode.
+    // The NEXT_PUBLIC_ENABLE_FAKE_PAYMENT env var is intentionally ignored
+    // to prevent accidental activation in production.
+    return process.env.NODE_ENV === 'development';
   }
 
   /**
