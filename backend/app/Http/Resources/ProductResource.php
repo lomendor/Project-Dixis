@@ -31,6 +31,8 @@ class ProductResource extends JsonResource
             'is_seasonal' => $this->is_seasonal,
             'cultivation_type' => $this->cultivation_type,
             'cultivation_description' => $this->cultivation_description,
+            'allergens' => $this->allergens ?? [],
+            'ingredients' => $this->ingredients,
             'image_url' => $this->image_url,
             'status' => $this->status,
             'is_active' => $this->is_active,
