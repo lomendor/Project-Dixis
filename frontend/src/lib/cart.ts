@@ -22,6 +22,9 @@ export type AddResult = { status: 'added' }
 /** Cart TTL — 7 days in milliseconds (CART-EXPIRY) */
 const CART_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
+/** Maximum quantity per item — prevents abuse and aligns with server-side limit */
+const MAX_QTY_PER_ITEM = 99
+
 type State = {
   items: Record<string, CartItem>
   /** Internal version counter — incremented on every user mutation (add/inc/dec/clear).
@@ -60,7 +63,9 @@ export const useCart = create<State>()(
         const items = { ...get().items }
         // Multi-producer carts allowed (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
         const cur = items[p.id]
-        items[p.id] = cur ? { ...cur, qty: cur.qty + 1 } : { ...p, qty: 1 }
+        const nextQty = cur ? cur.qty + 1 : 1
+        if (nextQty > MAX_QTY_PER_ITEM) return { status: 'added' } // silently cap
+        items[p.id] = cur ? { ...cur, qty: nextQty } : { ...p, qty: 1 }
         set({ items, _version: get()._version + 1, _lastUpdated: Date.now() })
         return { status: 'added' }
       },
@@ -71,7 +76,7 @@ export const useCart = create<State>()(
       inc: (id) => {
         const items = { ...get().items }
         const cur = items[id]
-        if (!cur) return
+        if (!cur || cur.qty >= MAX_QTY_PER_ITEM) return
         items[id] = { ...cur, qty: cur.qty + 1 }
         set({ items, _version: get()._version + 1, _lastUpdated: Date.now() })
       },
