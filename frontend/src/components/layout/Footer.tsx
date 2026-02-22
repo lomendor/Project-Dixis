@@ -73,8 +73,15 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Legal company info — required by Greek e-commerce law (N.4601/2017) */}
+        <div className="mt-8 pt-5 border-t border-accent-gold/10">
+          <p className="text-xs text-neutral-400 text-center leading-relaxed">
+            Dixis — Ηλεκτρονική Αγορά Τοπικών Παραγωγών | info@dixis.gr
+          </p>
+        </div>
+
         {/* Bottom Bar - mobile-first spacing */}
-        <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-accent-gold/10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="mt-4 sm:mt-6 pt-5 sm:pt-6 border-t border-accent-gold/10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <p className="text-sm text-neutral-500">
             © {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
           </p>
