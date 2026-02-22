@@ -308,6 +308,12 @@ Route::prefix('v1')->group(function () {
         Route::get('orders/{order}/shipment', [App\Http\Controllers\Api\ShippingController::class, 'getOrderShipment']);
     });
 
+    // Customer order cancellation (authenticated, only pending orders)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('orders/{order}/cancel', [App\Http\Controllers\Api\V1\OrderController::class, 'cancel'])
+            ->middleware('throttle:5,1'); // 5 cancellations per minute
+    });
+
     // Payment methods (public - no auth required)
     Route::get('payment/methods', [App\Http\Controllers\Api\PaymentController::class, 'getPaymentMethods']);
 

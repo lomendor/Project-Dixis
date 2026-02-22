@@ -848,6 +848,16 @@ class ApiClient {
     return this.request<Order>(`orders/${id}`);
   }
 
+  /**
+   * Cancel a pending order (customer-facing).
+   * Only works for orders with status='pending' owned by the current user.
+   */
+  async cancelOrder(id: number | string): Promise<{ message: string; order: Order }> {
+    return this.request<{ message: string; order: Order }>(`orders/${id}/cancel`, {
+      method: 'POST',
+    });
+  }
+
   // SECURITY FIX: Removed getPublicOrders() — was exposing ALL orders without auth.
   // Orders list is now only available via authenticated getOrders() endpoint.
 
