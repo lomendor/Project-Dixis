@@ -3,7 +3,8 @@ import { getLaravelInternalUrl } from '@/env';
 export type Zone = 'mainland' | 'islands';
 export type Item = { slug: string; qty: number };
 
-const FREE_TH = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '35');
+// Default: no free shipping (9999 = effectively disabled). Producers can set their own threshold.
+const FREE_TH = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '9999');
 const MAX_COST = Number(process.env.NEXT_PUBLIC_SHIP_MAX_COST ?? '19.9');
 
 const ZONES: Record<Zone, { base: number; perItem: number }> = {

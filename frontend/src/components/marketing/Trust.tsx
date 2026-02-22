@@ -35,7 +35,7 @@ export default function Trust() {
         </svg>
       ),
       title: 'Γρήγορη Παράδοση',
-      description: 'Παραλάβετε τα προϊόντα σας εντός 24-48 ωρών. Δωρεάν παράδοση για παραγγελίες άνω των 30€.',
+      description: 'Παραλάβετε τα προϊόντα σας εντός 2-4 εργάσιμων ημερών. Αποστολή σε όλη την Ελλάδα.',
       cardBg: 'bg-white border border-accent-gold/10',
     },
   ];

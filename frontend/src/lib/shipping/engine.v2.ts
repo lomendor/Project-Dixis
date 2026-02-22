@@ -6,7 +6,8 @@ import { RateRow, ZoneRow, QuoteInput, QuoteResult, Surcharge } from './config/t
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 const codFeeFor = (m: string) => (m === 'COURIER_COD' ? 2.0 : 0);
-const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '35');
+// Default: no free shipping (9999 = effectively disabled). Producers can set their own threshold.
+const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '9999');
 
 export function volumetricKg(
   l?: number,

@@ -102,7 +102,7 @@ export const DEFAULT_OPTIONS: Array<{
 export function calculateShippingCost(
   method: DeliveryMethod | ShippingMethod,
   orderValue: number,
-  freeShippingThreshold = 25
+  freeShippingThreshold = 9999
 ): number {
   const normalized = normalizeMethod(method as string);
 
