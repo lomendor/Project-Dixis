@@ -67,7 +67,20 @@ export async function GET(req: NextRequest) {
       description: p.description || '',
       city: p.city || '',
       taxId: p.tax_id || '',
+      taxOffice: p.tax_office || '',
+      address: p.address || '',
+      postalCode: p.postal_code || '',
       createdAt: p.created_at,
+      // Onboarding V2
+      onboardingCompletedAt: p.onboarding_completed_at || null,
+      productCategories: p.product_categories || [],
+      taxRegistrationDocUrl: p.tax_registration_doc_url || null,
+      efetNotificationDocUrl: p.efet_notification_doc_url || null,
+      haccpDeclarationDocUrl: p.haccp_declaration_doc_url || null,
+      haccpDeclarationAccepted: p.haccp_declaration_accepted || false,
+      beekeeperRegistryNumber: p.beekeeper_registry_number || null,
+      cpnpNotificationNumber: p.cpnp_notification_number || null,
+      responsiblePersonName: p.responsible_person_name || null,
     }))
 
     return NextResponse.json({ items, total: json.total || items.length })
