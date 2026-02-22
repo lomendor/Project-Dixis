@@ -10,6 +10,7 @@ use App\Models\CheckoutSession;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderShippingLine;
+use App\Models\OrderStatusHistory;
 use App\Models\Producer;
 use App\Models\Product;
 use App\Services\CheckoutService;
@@ -75,6 +76,59 @@ class OrderController extends Controller
         $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
 
         return new OrderResource($order);
+    }
+
+    /**
+     * Cancel a pending order (customer-facing).
+     * Only the order owner can cancel, and only while status is 'pending'.
+     * Restores stock for cancelled items.
+     */
+    public function cancel(Request $request, Order $order): \Illuminate\Http\JsonResponse
+    {
+        // Only the order owner can cancel
+        if ($order->user_id === null || $order->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Only pending orders can be cancelled by the customer
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'message' => 'Μόνο παραγγελίες σε εκκρεμότητα μπορούν να ακυρωθούν',
+                'status' => $order->status,
+            ], 422);
+        }
+
+        DB::transaction(function () use ($order, $request) {
+            $order->update(['status' => 'cancelled']);
+
+            // Restore stock (same logic as AdminOrderController)
+            $order->load('orderItems.product');
+            foreach ($order->orderItems as $item) {
+                if ($item->product && $item->product->stock !== null) {
+                    $item->product->increment('stock', $item->quantity);
+                }
+            }
+
+            // Record in status history
+            OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'old_status' => 'pending',
+                'new_status' => 'cancelled',
+                'changed_by' => $request->user()->id,
+                'note' => 'Ακυρώθηκε από τον πελάτη',
+                'changed_at' => now(),
+            ]);
+        });
+
+        \Log::info('Order cancelled by customer', [
+            'order_id' => $order->id,
+            'user_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'message' => 'Η παραγγελία ακυρώθηκε επιτυχώς',
+            'order' => new OrderResource($order->fresh()->load(['orderItems.producer', 'shippingLines'])),
+        ]);
     }
 
     /**
