@@ -3,8 +3,8 @@ import { putObject } from '@/lib/media/storage';
 import { getSessionPhone } from '@/lib/auth/session';
 
 export const runtime = 'nodejs';
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX = 5 * 1024 * 1024; // 5MB limit
+const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+const MAX = 10 * 1024 * 1024; // 10MB limit (PDFs can be larger)
 
 /**
  * Validate Laravel Sanctum Bearer token by calling Laravel /api/v1/user.

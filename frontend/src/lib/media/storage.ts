@@ -4,10 +4,12 @@ export type PutResult = { url: string, key?: string };
 type Buf = ArrayBuffer | Uint8Array;
 
 function yyyymm(d=new Date()){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); return `${y}${m}`; }
-function extFromMime(m: string){ if(m.includes('jpeg')) return 'jpg'; if(m.includes('png')) return 'png'; if(m.includes('webp')) return 'webp'; return 'bin'; }
+function extFromMime(m: string){ if(m.includes('jpeg')) return 'jpg'; if(m.includes('png')) return 'png'; if(m.includes('webp')) return 'webp'; if(m.includes('pdf')) return 'pdf'; return 'bin'; }
 function sha16(b: Uint8Array){ const h=createHash('sha256').update(b).digest('hex'); return h.slice(0,16); }
 
 async function maybeProcess(buf: Uint8Array, mime: string): Promise<Uint8Array>{
+  // Skip processing for non-image files (PDFs etc.)
+  if (mime.includes('pdf')) return buf;
   if (String(process.env.ENABLE_IMAGE_PROCESSING || '').toLowerCase() !== 'true') return buf;
   try{
     const sharp = (await import('sharp')).default;
