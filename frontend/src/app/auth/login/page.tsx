@@ -6,6 +6,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
 
+/**
+ * Validate redirect URL to prevent open redirect attacks.
+ * Only allows relative paths starting with '/'.
+ */
+function safeRedirect(url: string | null): string {
+  if (!url) return '/';
+  // Block absolute URLs, protocol-relative URLs, and data: URIs
+  if (url.startsWith('//') || url.includes('://') || url.startsWith('data:')) return '/';
+  // Only allow paths starting with /
+  if (!url.startsWith('/')) return '/';
+  return url;
+}
+
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +30,7 @@ function LoginForm() {
   const t = useTranslations();
 
   // Strategic Fix 2B: Read redirect param set by middleware
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectTo = safeRedirect(searchParams.get('redirect'));
 
   // Redirect authenticated users away from login page
   useEffect(() => {

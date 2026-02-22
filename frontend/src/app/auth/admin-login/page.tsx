@@ -13,6 +13,19 @@ function LoadingSpinner() {
   );
 }
 
+/**
+ * Validate redirect URL to prevent open redirect attacks.
+ * Only allows paths starting with /admin.
+ */
+function safeAdminRedirect(url: string | null): string {
+  if (!url) return '/admin';
+  // Block absolute URLs, protocol-relative URLs, and data: URIs
+  if (url.startsWith('//') || url.includes('://') || url.startsWith('data:')) return '/admin';
+  // Admin login should only redirect to admin paths
+  if (!url.startsWith('/admin')) return '/admin';
+  return url;
+}
+
 function AdminLoginContent() {
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
@@ -23,7 +36,7 @@ function AdminLoginContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get('from') || '/admin';
+  const from = safeAdminRedirect(searchParams.get('from'));
 
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault();

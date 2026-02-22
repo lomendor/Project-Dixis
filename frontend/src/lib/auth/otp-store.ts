@@ -1,3 +1,5 @@
+import { randomInt } from 'crypto';
+
 /**
  * In-memory OTP storage with automatic expiry
  *
@@ -26,14 +28,11 @@ const MAX_ATTEMPTS = 3;
 const OTP_LENGTH = 6;
 
 /**
- * Generate a random 6-digit OTP
+ * Generate a random 6-digit OTP using cryptographically secure randomness.
+ * Node.js crypto.randomInt() uses a CSPRNG, unlike Math.random().
  */
 export function generateOtp(): string {
-  // Generate cryptographically secure random number
-  const min = 100000;
-  const max = 999999;
-  const code = Math.floor(Math.random() * (max - min + 1)) + min;
-  return code.toString();
+  return randomInt(100000, 1000000).toString();
 }
 
 /**
