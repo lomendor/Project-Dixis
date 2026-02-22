@@ -70,12 +70,18 @@ export default function middleware(req: NextRequest) {
   if (requiresAuth(pathname)) {
     const hasSession = req.cookies.has('dixis_session') || req.cookies.has('mock_session')
     if (!hasSession) {
-      // Use nextUrl.clone() to preserve the public hostname from the Host header.
-      // req.url contains the internal PM2 URL (localhost:3000), which would
-      // redirect users to localhost instead of dixis.gr in production.
+      // In standalone mode behind nginx, both req.url and req.nextUrl contain
+      // the internal PM2 URL (http://localhost:3000/...). We must reconstruct
+      // the URL from the Host header to redirect to the correct public domain,
+      // matching the pattern used by the www→apex canonical redirect above.
       const loginUrl = req.nextUrl.clone()
       loginUrl.pathname = LOGIN_PATH
       loginUrl.searchParams.set('redirect', pathname)
+      if (host && host !== 'localhost:3000') {
+        loginUrl.hostname = host.split(':')[0]
+        loginUrl.port = ''
+        loginUrl.protocol = 'https:'
+      }
       return NextResponse.redirect(loginUrl)
     }
   }
