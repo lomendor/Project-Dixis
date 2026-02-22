@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 
     // Map Laravel format to the format expected by storefront pages
     // Laravel returns: { id, name, slug, description, price, unit, stock, is_active,
-    //   is_organic, image_url, producer: { id, name, slug, location }, categories, images }
+    //   cultivation_type, image_url, producer: { id, name, slug, location }, categories, images }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = products.map((p: any) => {
       const categories = p.categories || []

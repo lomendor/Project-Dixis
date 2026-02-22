@@ -34,7 +34,6 @@ class StoreProductRequest extends FormRequest
             'unit' => 'nullable|string|max:50',
             'stock' => 'nullable|integer|min:0',
             'category' => 'nullable|string|max:100',
-            'is_organic' => 'nullable|boolean',
             'is_seasonal' => 'nullable|boolean',
             'cultivation_type' => 'nullable|string|in:conventional,organic_certified,organic_transitional,biodynamic,traditional_natural,other',
             'cultivation_description' => 'nullable|string|max:1000',

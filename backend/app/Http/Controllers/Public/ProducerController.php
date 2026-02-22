@@ -109,7 +109,7 @@ class ProducerController extends Controller
                     'price' => number_format($product->price, 2),
                     'unit' => $product->unit,
                     'stock' => $product->stock,
-                    'is_organic' => $product->is_organic,
+                    'cultivation_type' => $product->cultivation_type,
                     'categories' => $product->categories,
                     'images' => $product->images->map(function ($image) {
                         return [

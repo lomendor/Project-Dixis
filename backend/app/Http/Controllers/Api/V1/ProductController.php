@@ -24,7 +24,6 @@ class ProductController extends Controller
             'is_active' => 'nullable|boolean',
             'category' => 'nullable|string|max:100',
             'producer_id' => 'nullable|integer|exists:producers,id',
-            'is_organic' => 'nullable|boolean',
             'is_seasonal' => 'nullable|boolean',
             'cultivation_type' => 'nullable|string|in:conventional,organic_certified,organic_transitional,biodynamic,traditional_natural,other',
             'min_price' => 'nullable|numeric|min:0',
@@ -63,9 +62,16 @@ class ProductController extends Controller
             $query->where('producer_id', $producerId);
         }
 
-        // Filter by organic
+        // Filter by organic (derived from cultivation_type)
         if ($request->has('is_organic')) {
-            $query->where('is_organic', $request->boolean('is_organic'));
+            if ($request->boolean('is_organic')) {
+                $query->whereIn('cultivation_type', ['organic_certified', 'organic_transitional']);
+            } else {
+                $query->where(function ($q) {
+                    $q->whereNull('cultivation_type')
+                      ->orWhereNotIn('cultivation_type', ['organic_certified', 'organic_transitional']);
+                });
+            }
         }
 
         // Filter by seasonal

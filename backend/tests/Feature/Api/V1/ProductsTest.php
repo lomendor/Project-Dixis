@@ -81,8 +81,8 @@ class ProductsTest extends TestCase
             'unit' => 'kg',
             'stock' => 100,
             'category' => 'vegetables',
-            'is_organic' => true,
             'is_seasonal' => false,
+            'cultivation_type' => 'organic_certified',
             'image_url' => 'https://example.com/tomato.jpg',
             'status' => 'available',
             'is_active' => true,
@@ -106,8 +106,8 @@ class ProductsTest extends TestCase
                     'unit',
                     'stock',
                     'category',
-                    'is_organic',
                     'is_seasonal',
+                    'cultivation_type',
                     'image_url',
                     'status',
                     'is_active',
@@ -121,7 +121,7 @@ class ProductsTest extends TestCase
             ->assertJsonPath('data.discount_price', '2.99')
             ->assertJsonPath('data.has_discount', true)
             ->assertJsonPath('data.effective_price', '2.99')
-            ->assertJsonPath('data.is_organic', true);
+            ->assertJsonPath('data.cultivation_type', 'organic_certified');
 
         $this->assertDatabaseHas('products', [
             'name' => 'Fresh Tomatoes',
@@ -294,14 +294,14 @@ class ProductsTest extends TestCase
     public function test_products_index_filtering_by_organic(): void
     {
         $producer = Producer::factory()->create();
-        Product::factory()->create(['producer_id' => $producer->id, 'is_organic' => true, 'is_active' => true]);
-        Product::factory()->create(['producer_id' => $producer->id, 'is_organic' => false, 'is_active' => true]);
+        Product::factory()->create(['producer_id' => $producer->id, 'cultivation_type' => 'organic_certified', 'is_active' => true]);
+        Product::factory()->create(['producer_id' => $producer->id, 'cultivation_type' => 'conventional', 'is_active' => true]);
 
         $response = $this->getJson('/api/v1/products?is_organic=1');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.is_organic', true);
+            ->assertJsonPath('data.0.cultivation_type', 'organic_certified');
     }
 
     #[Group('mvp')]

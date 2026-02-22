@@ -27,7 +27,6 @@ class ProductResource extends JsonResource
             'unit' => $this->unit,
             'stock' => $this->stock,
             'category' => $this->category,
-            'is_organic' => $this->is_organic,
             'is_seasonal' => $this->is_seasonal,
             'cultivation_type' => $this->cultivation_type,
             'cultivation_description' => $this->cultivation_description,

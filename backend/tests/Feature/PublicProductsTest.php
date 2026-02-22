@@ -34,7 +34,7 @@ class PublicProductsTest extends TestCase
             'price' => 3.50,
             'producer_id' => $producer->id,
             'is_active' => true,
-            'is_organic' => true,
+            'cultivation_type' => 'organic_certified',
         ]);
         $tomatoes->categories()->attach($vegetables->id);
 
@@ -44,7 +44,7 @@ class PublicProductsTest extends TestCase
             'price' => 4.00,
             'producer_id' => $producer->id,
             'is_active' => true,
-            'is_organic' => false,
+            'cultivation_type' => 'conventional',
         ]);
         $apples->categories()->attach($fruits->id);
 
@@ -58,7 +58,7 @@ class PublicProductsTest extends TestCase
             'price' => 2.50,
             'producer_id' => $producer2->id,
             'is_active' => true,
-            'is_organic' => true,
+            'cultivation_type' => 'organic_certified',
         ]);
         $carrots->categories()->attach($vegetables->id);
 
@@ -290,14 +290,14 @@ class PublicProductsTest extends TestCase
 
     public function test_organic_filter_works(): void
     {
-        // Test organic=true filter
+        // Test organic=true filter (matches cultivation_type organic_certified/organic_transitional)
         $response = $this->get('/api/v1/public/products?organic=true');
         $response->assertStatus(200);
         $data = $response->json('data');
 
         $this->assertGreaterThan(0, count($data));
         foreach ($data as $product) {
-            $this->assertTrue($product['is_organic']);
+            $this->assertContains($product['cultivation_type'], ['organic_certified', 'organic_transitional']);
         }
 
         // Test organic=false filter
@@ -307,7 +307,7 @@ class PublicProductsTest extends TestCase
 
         $this->assertGreaterThan(0, count($data));
         foreach ($data as $product) {
-            $this->assertFalse($product['is_organic']);
+            $this->assertNotContains($product['cultivation_type'] ?? null, ['organic_certified', 'organic_transitional']);
         }
     }
 
@@ -320,8 +320,8 @@ class PublicProductsTest extends TestCase
         $data = $response->json('data');
 
         foreach ($data as $product) {
-            // Should be organic
-            $this->assertTrue($product['is_organic']);
+            // Should be organic (cultivation_type)
+            $this->assertContains($product['cultivation_type'], ['organic_certified', 'organic_transitional']);
 
             // Should be in vegetables category
             $categoryNames = collect($product['categories'])->pluck('slug');

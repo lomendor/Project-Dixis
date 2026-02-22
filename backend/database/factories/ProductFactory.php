@@ -28,11 +28,10 @@ class ProductFactory extends Factory
             'slug' => Str::slug($name).'-'.fake()->unique()->randomNumber(5),
             'description' => fake()->paragraph(),
             'price' => fake()->randomFloat(2, 5, 100),
-            'weight_per_unit' => fake()->randomFloat(3, 0.1, 5.0),
+            'weight_per_unit' => fake()->randomFloat(0, 100, 5000), // grams
             'unit' => fake()->randomElement(['kg', 'piece', 'liter', 'box']),
             'stock' => fake()->numberBetween(0, 200),
             'category' => fake()->randomElement(['fruits', 'vegetables', 'dairy', 'meat', 'grains']),
-            'is_organic' => fake()->boolean(40), // 40% chance of being organic
             'status' => fake()->randomElement(['available', 'unavailable', 'seasonal']),
             'is_active' => true,
         ];
