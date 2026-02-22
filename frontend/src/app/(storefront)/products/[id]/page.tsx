@@ -76,6 +76,12 @@ async function getProductById(id: string) {
       // EU 1169/2011: Allergens + Ingredients
       allergens: Array.isArray(raw.allergens) ? raw.allergens : [],
       ingredients: raw.ingredients || null,
+      // Product details
+      origin: raw.origin || null,
+      storageInstructions: raw.storage_instructions || null,
+      shelfLife: raw.shelf_life || null,
+      weightPerUnit: raw.weight_per_unit ? parseFloat(raw.weight_per_unit) : null,
+      isOrganic: !!raw.is_organic,
     };
   } catch {
     return null;
@@ -227,9 +233,17 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </div>
           )}
 
-          {p.category && (
-            <p className="text-sm text-neutral-500 mb-2">{getCategoryBySlug(p.category)?.labelEl || p.category}</p>
-          )}
+          {/* Category + Origin */}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            {p.category && (
+              <span className="text-sm text-neutral-500">{getCategoryBySlug(p.category)?.labelEl || p.category}</span>
+            )}
+            {p.origin && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200" data-testid="origin-badge">
+                📍 {p.origin}
+              </span>
+            )}
+          </div>
 
           {/* S1-01: Cultivation Type Badge */}
           {p.cultivationType && (
@@ -254,6 +268,15 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               {p.cultivationDescription && (
                 <p className="mt-1 text-xs text-neutral-500">{p.cultivationDescription}</p>
               )}
+            </div>
+          )}
+
+          {/* Organic badge */}
+          {p.isOrganic && (
+            <div className="mb-3" data-testid="organic-badge">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                🌿 Βιολογικό Προϊόν
+              </span>
             </div>
           )}
 
@@ -341,6 +364,30 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               <p className="text-neutral-600 text-sm leading-relaxed whitespace-pre-line">
                 {p.ingredients}
               </p>
+            </div>
+          )}
+
+          {/* Product details: weight, storage, shelf life */}
+          {(p.weightPerUnit || p.storageInstructions || p.shelfLife) && (
+            <div className="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 space-y-2" data-testid="product-details-section">
+              {p.weightPerUnit && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-neutral-500 w-36">Καθαρό βάρος:</span>
+                  <span className="text-neutral-800 font-medium">{p.weightPerUnit >= 1000 ? `${(p.weightPerUnit / 1000).toFixed(1)} kg` : `${p.weightPerUnit} g`}</span>
+                </div>
+              )}
+              {p.storageInstructions && (
+                <div className="flex items-start gap-2 text-sm">
+                  <span className="text-neutral-500 w-36 flex-shrink-0">Αποθήκευση:</span>
+                  <span className="text-neutral-800">{p.storageInstructions}</span>
+                </div>
+              )}
+              {p.shelfLife && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-neutral-500 w-36">Διάρκεια ζωής:</span>
+                  <span className="text-neutral-800">{p.shelfLife}</span>
+                </div>
+              )}
             </div>
           )}
 

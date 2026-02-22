@@ -51,6 +51,14 @@ export interface Product {
   // EU 1169/2011: Food compliance
   allergens?: string[];
   ingredients?: string | null;
+  // Product details
+  origin?: string | null;
+  storage_instructions?: string | null;
+  shelf_life?: string | null;
+  discount_price?: string | null;
+  weight_per_unit?: number | null;
+  is_organic?: boolean;
+  is_seasonal?: boolean;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
@@ -1271,6 +1279,13 @@ class ApiClient {
     cultivation_description?: string;
     allergens?: string[];
     ingredients?: string;
+    origin?: string;
+    storage_instructions?: string;
+    shelf_life?: string;
+    discount_price?: number | null;
+    weight_per_unit?: number | null;
+    is_organic?: boolean;
+    is_seasonal?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
       method: 'POST',
@@ -1294,6 +1309,13 @@ class ApiClient {
     cultivation_description?: string;
     allergens?: string[];
     ingredients?: string;
+    origin?: string;
+    storage_instructions?: string;
+    shelf_life?: string;
+    discount_price?: number | null;
+    weight_per_unit?: number | null;
+    is_organic?: boolean;
+    is_seasonal?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {
       method: 'PATCH',
