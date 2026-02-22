@@ -56,10 +56,17 @@ function CreateProductContent() {
   const [stock, setStock] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [discountPrice, setDiscountPrice] = useState('');
+  const [weightPerUnit, setWeightPerUnit] = useState('');
+  const [isSeasonal, setIsSeasonal] = useState(false);
+  const [isOrganic, setIsOrganic] = useState(false);
+  const [origin, setOrigin] = useState('');
   const [cultivationType, setCultivationType] = useState('');
   const [cultivationDescription, setCultivationDescription] = useState('');
   const [allergens, setAllergens] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState('');
+  const [storageInstructions, setStorageInstructions] = useState('');
+  const [shelfLife, setShelfLife] = useState('');
 
   // EU 1169/2011 — 14 allergens
   const EU_ALLERGENS = [
@@ -91,15 +98,22 @@ function CreateProductContent() {
         slug,
         category,
         price: parseFloat(price),
+        discount_price: discountPrice ? parseFloat(discountPrice) : undefined,
         unit,
         stock: parseInt(stock),
         description: description || undefined,
         image_url: imageUrl,
         is_active: isActive,
+        weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : undefined,
+        is_seasonal: isSeasonal || undefined,
+        is_organic: isOrganic || undefined,
+        origin: origin || undefined,
         cultivation_type: cultivationType || undefined,
         cultivation_description: cultivationDescription || undefined,
         allergens: allergens.length > 0 ? allergens : undefined,
         ingredients: ingredients || undefined,
+        storage_instructions: storageInstructions || undefined,
+        shelf_life: shelfLife || undefined,
       });
 
       router.push('/my/products');
@@ -253,6 +267,46 @@ function CreateProductContent() {
               />
             </div>
 
+            {/* Χαρακτηριστικά Προϊόντος */}
+            <div>
+              <label htmlFor="origin" className="block text-sm font-medium text-neutral-700 mb-1">
+                Τόπος Προέλευσης
+              </label>
+              <input
+                id="origin"
+                type="text"
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="π.χ. Κρήτη, Μεσσηνία, Ικαρία"
+                data-testid="origin-input"
+              />
+              <p className="mt-1 text-xs text-neutral-500">Από πού προέρχεται το προϊόν</p>
+            </div>
+
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isSeasonal}
+                  onChange={(e) => setIsSeasonal(e.target.checked)}
+                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                  data-testid="seasonal-checkbox"
+                />
+                <span className="text-sm text-neutral-700">🍊 Εποχιακό προϊόν</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isOrganic}
+                  onChange={(e) => setIsOrganic(e.target.checked)}
+                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                  data-testid="organic-checkbox"
+                />
+                <span className="text-sm text-neutral-700">🌿 Βιολογικό</span>
+              </label>
+            </div>
+
             {/* S1-01: Cultivation Type */}
             <div>
               <label htmlFor="cultivation_type" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -344,6 +398,40 @@ function CreateProductContent() {
               </p>
             </div>
 
+            {/* Οδηγίες αποθήκευσης & Διάρκεια ζωής */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="storage_instructions" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Οδηγίες Αποθήκευσης
+                </label>
+                <input
+                  id="storage_instructions"
+                  type="text"
+                  value={storageInstructions}
+                  onChange={(e) => setStorageInstructions(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. Σε σκιερό, δροσερό μέρος"
+                  data-testid="storage-input"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="shelf_life" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Διάρκεια Ζωής
+                </label>
+                <input
+                  id="shelf_life"
+                  type="text"
+                  value={shelfLife}
+                  onChange={(e) => setShelfLife(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. 18 μήνες"
+                  data-testid="shelf-life-input"
+                />
+              </div>
+            </div>
+
+            {/* Τιμολόγηση & Απόθεμα */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -364,6 +452,26 @@ function CreateProductContent() {
               </div>
 
               <div>
+                <label htmlFor="discount_price" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Τιμή Προσφοράς (€)
+                </label>
+                <input
+                  id="discount_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={discountPrice}
+                  onChange={(e) => setDiscountPrice(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. 2.90"
+                  data-testid="discount-price-input"
+                />
+                <p className="mt-1 text-xs text-neutral-500">Αφήστε κενό αν δεν υπάρχει έκπτωση</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label htmlFor="stock" className="block text-sm font-medium text-neutral-700 mb-1">
                   Απόθεμα *
                 </label>
@@ -378,6 +486,24 @@ function CreateProductContent() {
                   placeholder="π.χ. 25"
                   data-testid="stock-input"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="weight_per_unit" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Βάρος/Όγκος ανά μονάδα
+                </label>
+                <input
+                  id="weight_per_unit"
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  value={weightPerUnit}
+                  onChange={(e) => setWeightPerUnit(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. 500 (σε γραμμάρια)"
+                  data-testid="weight-input"
+                />
+                <p className="mt-1 text-xs text-neutral-500">Καθαρό βάρος σε γραμμάρια ή ml</p>
               </div>
             </div>
 
