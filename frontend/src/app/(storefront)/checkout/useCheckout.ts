@@ -172,9 +172,14 @@ export function useCheckout() {
           })
         } catch (fallbackErr: any) {
           if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return
-          trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: false })
+          trackShippingQuoteFailed({ postalCode: postal, errorCode: fallbackErr?.code ?? err?.code, fallbackUsed: false })
           setShippingQuote(null)
-          setCartShippingError(t('checkoutPage.shippingCalculationError'))
+          // Differentiate: zone unavailable vs generic calculation error
+          if (fallbackErr?.code === 'ZONE_UNAVAILABLE') {
+            setCartShippingError(t('checkoutPage.shippingUnavailable'))
+          } else {
+            setCartShippingError(t('checkoutPage.shippingCalculationError'))
+          }
         }
       }
     } finally {
@@ -246,6 +251,7 @@ export function useCheckout() {
   }
 
   function handleCancelPayment() {
+    sessionStorage.removeItem('dixis:last-order') // Clear PII on cancel
     setStripeClientSecret(null)
     setPendingOrderId(null)
     setPendingThankYouId(null)
@@ -387,6 +393,7 @@ export function useCheckout() {
       } else {
         setError(t('checkoutPage.orderError'))
       }
+      sessionStorage.removeItem('dixis:last-order') // Clear PII on error
       setPendingOrderId(null)
       setPendingThankYouId(null)
       setStripeClientSecret(null)

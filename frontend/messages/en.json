@@ -272,7 +272,7 @@
     "total": "Total",
     "shippingFrom": "From {producer}",
     "totalShipping": "Total shipping",
-    "shippingUnavailable": "Shipping unavailable for {producer} in your area",
+    "shippingUnavailable": "Shipping is not available in your area",
     "shippingChanged": "Shipping changed",
     "shippingChangedMessage": "Shipping cost changed from {old} to {new}. Please confirm to continue.",
     "shippingAccept": "Accept",
@@ -303,6 +303,21 @@
     "validateAddress": "Please enter your address",
     "validateCity": "Please enter your city",
     "validatePostcode": "Postal code must be 5 digits"
+  },
+  "stripe": {
+    "notLoaded": "Payment service is loading. Please wait.",
+    "serviceUnavailable": "Payment service is unavailable. Please contact us.",
+    "formNotLoaded": "Payment form did not load. Please refresh the page.",
+    "processingError": "Error processing payment",
+    "paymentIncomplete": "Payment was not completed. Please try again.",
+    "paymentMalformed": "Payment was not completed correctly. Please try again.",
+    "requires3ds": "Payment requires verification (3D Secure). Please try again.",
+    "unknownStatus": "Payment status: {status}. Please try again.",
+    "unexpectedError": "Unexpected payment error",
+    "totalAmount": "Total amount",
+    "securePayment": "Secure payment via Stripe",
+    "processing": "Processing...",
+    "pay": "Pay"
   },
   "orderConfirmation": {
     "loadError": "Error loading order",
