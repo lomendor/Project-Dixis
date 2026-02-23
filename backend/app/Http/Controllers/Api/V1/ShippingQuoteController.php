@@ -231,7 +231,7 @@ class ShippingQuoteController extends Controller
 
             $quantity = $item['quantity'];
             $itemTotal = $product->price * $quantity;
-            $weightPerUnit = ($product->weight_per_unit ?? 0.5) * 1000; // Convert kg to grams
+            $weightPerUnit = $product->weight_per_unit ?? 500; // Already in grams (migration 2026_02_22_400000), default 500g
 
             $producerGroups[$producerId]['items'][] = [
                 'product_id' => $product->id,
