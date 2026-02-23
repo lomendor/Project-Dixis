@@ -692,8 +692,9 @@ class ApiClient {
 
   // Auth methods
   async login(email: string, password: string): Promise<AuthResponse> {
-    // Fetch CSRF cookie before auth request (Strategic Fix 2A — Sanctum SPA)
-    await this.fetchCsrfCookie();
+    // Best-effort CSRF cookie fetch — auth endpoints are CSRF-exempt on backend.
+    // Kept for defense-in-depth (sets XSRF-TOKEN for subsequent stateful requests).
+    try { await this.fetchCsrfCookie(); } catch { /* non-blocking: auth is CSRF-exempt */ }
 
     const response = validateApiResponse(
       await this.request<AuthResponse>('auth/login', {
@@ -732,8 +733,8 @@ class ApiClient {
     password_confirmation: string;
     role: 'consumer' | 'producer' | 'admin';
   }): Promise<AuthResponse> {
-    // Fetch CSRF cookie before auth request (Strategic Fix 2A — Sanctum SPA)
-    await this.fetchCsrfCookie();
+    // Best-effort CSRF cookie fetch — auth endpoints are CSRF-exempt on backend.
+    try { await this.fetchCsrfCookie(); } catch { /* non-blocking: auth is CSRF-exempt */ }
 
     const response = await this.request<AuthResponse>('auth/register', {
       method: 'POST',
