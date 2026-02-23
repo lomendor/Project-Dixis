@@ -216,3 +216,16 @@ test('@smoke privacy page loads', async ({ page }) => {
 
   await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
 });
+
+// @smoke — Refund request API validates input
+// CI-safe: POST with empty body should return 422 (PR L)
+test('@smoke refund-request API validates input', async ({ request }) => {
+  const res = await request.post('/api/refund-request', {
+    data: {},
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 10000,
+  });
+  expect(res.status()).toBe(422);
+  const json = await res.json();
+  expect(json.ok).toBe(false);
+});

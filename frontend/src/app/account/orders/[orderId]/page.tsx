@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
 import { formatDate, formatStatus, safeMoney, safeText, formatShippingMethod, formatShippingAddress, hasShippingAddress, formatPaymentMethod } from '@/lib/orderUtils';
 import { useCart } from '@/lib/cart';
+import RefundRequestForm from '@/components/orders/RefundRequestForm';
 
 function OrderDetailsPage(): React.JSX.Element {
   const params = useParams();
@@ -434,6 +435,13 @@ function OrderDetailsPage(): React.JSX.Element {
                 </p>
               </div>
             </div>
+
+            {/* Refund Request */}
+            <RefundRequestForm
+              orderId={order.id}
+              orderTotal={`€${safeMoney(order.total_amount)}`}
+              paymentStatus={order.payment_status}
+            />
           </div>
         </div>
       </div>
