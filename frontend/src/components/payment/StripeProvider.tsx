@@ -4,10 +4,13 @@ import React from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 
-// Initialize Stripe — null-safe: returns null if key missing (prevents crash)
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-  : null;
+// Initialize Stripe — null-safe: returns null if key missing or malformed
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const isValidStripeKey = stripeKey && stripeKey.startsWith('pk_');
+if (stripeKey && !isValidStripeKey) {
+  console.warn('[Dixis] Invalid NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: must start with pk_');
+}
+const stripePromise = isValidStripeKey ? loadStripe(stripeKey) : null;
 
 interface StripeProviderProps {
   children: React.ReactNode;

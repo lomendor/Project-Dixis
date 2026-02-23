@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { useToast } from '@/contexts/ToastContext';
+import { useTranslations } from '@/contexts/LocaleContext';
 
 interface StripePaymentFormProps {
   amount: number;
@@ -20,19 +21,30 @@ export default function StripePaymentForm({
   const stripe = useStripe();
   const elements = useElements();
   const { showToast } = useToast();
+  const t = useTranslations();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [stripeTimedOut, setStripeTimedOut] = useState(false);
+
+  // After 5s without Stripe loading, show a permanent error instead of "please wait"
+  useEffect(() => {
+    if (stripe) return undefined; // Already loaded — no cleanup needed
+    const timer = setTimeout(() => { setStripeTimedOut(true) }, 5000);
+    return () => clearTimeout(timer);
+  }, [stripe]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     // Pass PAY-CARD-CONFIRM-GUARD-01: Strict null guards before Stripe call
     if (!stripe) {
-      onPaymentError('Stripe δεν έχει φορτώσει ακόμα. Παρακαλώ περιμένετε.');
+      onPaymentError(stripeTimedOut
+        ? t('stripe.serviceUnavailable')
+        : t('stripe.notLoaded'));
       return;
     }
 
     if (!elements) {
-      onPaymentError('Η φόρμα πληρωμής δεν έχει φορτώσει. Παρακαλώ ανανεώστε τη σελίδα.');
+      onPaymentError(t('stripe.formNotLoaded'));
       return;
     }
 
@@ -51,22 +63,21 @@ export default function StripePaymentForm({
 
       // Case 1: Stripe returned an error
       if (error) {
-        const errorMessage = error.message || 'Σφάλμα κατά την επεξεργασία πληρωμής';
+        const errorMessage = error.message || t('stripe.processingError');
         onPaymentError(errorMessage);
         showToast('error', errorMessage);
         return;
       }
 
       // Case 2: No error but paymentIntent is null/undefined
-      // This can happen with certain Stripe configurations - treat as error
       if (!paymentIntent) {
-        onPaymentError('Η πληρωμή δεν ολοκληρώθηκε. Παρακαλώ δοκιμάστε ξανά.');
+        onPaymentError(t('stripe.paymentIncomplete'));
         return;
       }
 
       // Case 3: PaymentIntent exists but has no ID (malformed)
       if (!paymentIntent.id) {
-        onPaymentError('Η πληρωμή δεν ολοκληρώθηκε σωστά. Παρακαλώ δοκιμάστε ξανά.');
+        onPaymentError(t('stripe.paymentMalformed'));
         return;
       }
 
@@ -78,16 +89,16 @@ export default function StripePaymentForm({
 
       // Case 5: PaymentIntent has a status that requires action (3D Secure, etc.)
       if (paymentIntent.status === 'requires_action') {
-        onPaymentError('Η πληρωμή απαιτεί επιπλέον επαλήθευση (3D Secure). Παρακαλώ δοκιμάστε ξανά.');
+        onPaymentError(t('stripe.requires3ds'));
         return;
       }
 
       // Case 6: Other statuses (processing, requires_payment_method, etc.)
-      onPaymentError(`Η πληρωμή είναι σε κατάσταση: ${paymentIntent.status}. Παρακαλώ δοκιμάστε ξανά.`);
+      onPaymentError(t('stripe.unknownStatus', { status: paymentIntent.status }));
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Απροσδόκητο σφάλμα';
-      onPaymentError(`Απροσδόκητο σφάλμα κατά την επεξεργασία πληρωμής: ${errorMessage}`);
+      const errorMessage = err instanceof Error ? err.message : t('stripe.unexpectedError');
+      onPaymentError(`${t('stripe.unexpectedError')}: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
@@ -100,8 +111,8 @@ export default function StripePaymentForm({
       </div>
 
       <div className="text-sm text-neutral-600">
-        <p>Συνολικό ποσό: <strong>€{amount.toFixed(2)}</strong></p>
-        <p>Ασφαλής πληρωμή μέσω Stripe</p>
+        <p>{t('stripe.totalAmount')}: <strong>€{amount.toFixed(2)}</strong></p>
+        <p>{t('stripe.securePayment')}</p>
       </div>
 
       <button
@@ -109,7 +120,7 @@ export default function StripePaymentForm({
         disabled={!stripe || disabled || isProcessing}
         className="w-full px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
       >
-        {isProcessing ? 'Επεξεργασία...' : `Πληρωμή €${amount.toFixed(2)}`}
+        {isProcessing ? t('stripe.processing') : `${t('stripe.pay')} €${amount.toFixed(2)}`}
       </button>
     </form>
   );

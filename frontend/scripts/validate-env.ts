@@ -26,6 +26,7 @@ const REQUIRED_VARS = [
 const RECOMMENDED_VARS = [
   { name: 'INTERNAL_API_URL', hint: 'Server-side API URL (e.g. https://dixis.gr/api/v1)' },
   { name: 'NEXT_PUBLIC_API_BASE_URL', hint: 'Browser-side API URL' },
+  { name: 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', hint: 'Stripe publishable key (required if card payments enabled)' },
   { name: 'PORT', hint: 'Server port (usually 3000)' },
 ] as const;
 
@@ -68,6 +69,22 @@ for (const { name, hint } of RECOMMENDED_VARS) {
   } else {
     pass(name, value);
   }
+}
+
+// ── Logical consistency checks ──────────────────────────────────────────────
+console.log('\n🔗 Payment Configuration Consistency');
+console.log('─'.repeat(50));
+
+const cardEnabled = process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true';
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+if (cardEnabled && !stripeKey) {
+  fail('STRIPE_KEY', 'NEXT_PUBLIC_PAYMENTS_CARD_FLAG=true but NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is missing');
+} else if (cardEnabled && stripeKey && !stripeKey.startsWith('pk_')) {
+  fail('STRIPE_KEY', `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must start with pk_ (got: ${stripeKey.slice(0, 8)}...)`);
+} else if (cardEnabled && stripeKey) {
+  pass('Payment config', `Card payments ON, Stripe key: ${stripeKey.slice(0, 12)}...`);
+} else {
+  pass('Payment config', 'Card payments OFF — Stripe key not required');
 }
 
 const isQuick = process.argv.includes('--quick');
