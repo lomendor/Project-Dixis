@@ -510,7 +510,10 @@ class ApiClient {
     const csrfUrl = laravelBase.includes('://')
       ? `${laravelBase}/sanctum/csrf-cookie`
       : `/sanctum/csrf-cookie`;
-    await fetch(csrfUrl, { credentials: 'include' });
+    const res = await fetch(csrfUrl, { credentials: 'include' });
+    if (!res.ok) {
+      console.warn(`[CSRF] sanctum/csrf-cookie returned ${res.status} — login may fail with 419`);
+    }
   }
 
   /**

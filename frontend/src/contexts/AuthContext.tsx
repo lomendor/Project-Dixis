@@ -141,17 +141,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Greek error messages based on error type
       let message = 'Η σύνδεση απέτυχε. Παρακαλώ δοκιμάστε ξανά.';
 
-      // Check for specific HTTP status codes
-      if (error.response?.status === 401 || error.response?.status === 422) {
+      // Check for specific HTTP status codes (supports both ApiError.status and axios-style error.response.status)
+      const status = error.status || error.response?.status;
+
+      if (status === 401 || status === 422) {
         // Invalid credentials
         message = 'Λάθος email ή κωδικός πρόσβασης. Παρακαλώ δοκιμάστε ξανά.';
-      } else if (error.response?.status === 429) {
+      } else if (status === 419) {
+        // CSRF token mismatch — sanctum/csrf-cookie may be unreachable
+        message = 'Πρόβλημα ασφαλείας σύνδεσης. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.';
+      } else if (status === 429) {
         // Too many login attempts
         message = 'Πάρα πολλές προσπάθειες σύνδεσης. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
-      } else if (error.response?.status === 500) {
+      } else if (status === 500) {
         // Server error
         message = 'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
-      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response) {
+      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.code === 'REQUEST_TIMEOUT') {
         // Network timeout or connection error
         message = 'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
       }
@@ -185,10 +190,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Greek error messages based on error type
       let message = 'Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.';
 
-      // Check for specific HTTP status codes
-      if (error.response?.status === 422) {
+      // Check for specific HTTP status codes (supports both ApiError.status and axios-style error.response.status)
+      const status = error.status || error.response?.status;
+
+      if (status === 422) {
         // Validation error
-        const errorData = error.response?.data;
+        const errorData = error.response?.data || error;
         if (errorData?.errors) {
           // Extract first error message
           const firstError = Object.values(errorData.errors)[0];
@@ -206,16 +213,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           message = 'Παρακαλώ ελέγξτε τα στοιχεία σας και δοκιμάστε ξανά.';
         }
-      } else if (error.response?.status === 409) {
+      } else if (status === 409) {
         // Conflict - email exists
         message = 'Το email υπάρχει ήδη. Δοκιμάστε να συνδεθείτε.';
-      } else if (error.response?.status === 500) {
+      } else if (status === 419) {
+        // CSRF token mismatch
+        message = 'Πρόβλημα ασφαλείας σύνδεσης. Ανανεώστε τη σελίδα και δοκιμάστε ξανά.';
+      } else if (status === 500) {
         // Server error
         message = 'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
-      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response) {
+      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.code === 'REQUEST_TIMEOUT') {
         // Network timeout or connection error
         message = 'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
-      } else if (error.response?.status === 429) {
+      } else if (status === 429) {
         // Too many requests
         message = 'Πάρα πολλές προσπάθειες. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
       }
