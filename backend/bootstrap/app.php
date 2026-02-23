@@ -23,6 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // API routes should return JSON 401, not redirect to login
         $middleware->redirectGuestsTo(fn () => null);
 
+        // Exempt auth endpoints from CSRF — frontend uses Bearer tokens
+        // (localStorage), making session CSRF redundant for login/register.
+        // Fixes production 419 where nginx routes /sanctum/csrf-cookie
+        // to Next.js instead of Laravel.
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/auth/*',
+        ]);
+
         // Register custom middleware aliases
         $middleware->alias([
             'auth.optional' => \App\Http\Middleware\OptionalSanctumAuth::class,
