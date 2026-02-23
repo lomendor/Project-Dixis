@@ -69,6 +69,9 @@ export default function Footer() {
               <Link href="/privacy" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
                 Πολιτική Απορρήτου
               </Link>
+              <Link href="/legal/returns" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+                Πολιτική Επιστροφών
+              </Link>
             </nav>
           </div>
         </div>
