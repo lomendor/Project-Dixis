@@ -30,7 +30,9 @@ export function useCheckout() {
   // --- State ---
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    process.env.NEXT_PUBLIC_ENABLE_COD === 'true' ? 'cod' : 'card'
+  )
   const [cardProcessing, setCardProcessing] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
