@@ -1,15 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { requireProducer } from '@/lib/auth/requireProducer';
 import { cookies } from 'next/headers';
 import { getLaravelInternalUrl } from '@/env';
 
-/**
- * Pass PAYOUT-04: Proxy GET /api/producer/settlements → Laravel
- *
- * Fixed: Previously read 'auth_token' cookie which is never set by OTP auth.
- * Now uses requireProducer() + 'dixis_session' cookie (same pattern as /api/me/products).
- */
-export async function GET() {
+/** Proxy GET /api/producer/analytics/products → Laravel (with proper OTP auth) */
+export async function GET(req: NextRequest) {
   try {
     await requireProducer();
 
@@ -19,7 +14,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
     }
 
-    const res = await fetch(`${getLaravelInternalUrl()}/producer/settlements`, {
+    const { searchParams } = new URL(req.url);
+    const limit = searchParams.get('limit') || '10';
+
+    const backendUrl = new URL(`${getLaravelInternalUrl()}/producer/analytics/products`);
+    backendUrl.searchParams.set('limit', limit);
+
+    const res = await fetch(backendUrl.toString(), {
       headers: { Authorization: `Bearer ${sessionToken}`, Accept: 'application/json' },
       cache: 'no-store',
     });
@@ -28,7 +29,7 @@ export async function GET() {
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('[producer/settlements] Error:', error);
+    console.error('[producer/analytics/products] Error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

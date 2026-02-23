@@ -1,11 +1,7 @@
-import { API_BASE_URL } from '@/env';
-
 // Import shared types and utilities from admin analytics
 import type {
-  SalesData,
   SalesAnalytics,
   OrdersAnalytics,
-  TopProduct,
   ProductsAnalytics
 } from './analytics';
 
@@ -23,95 +19,61 @@ export interface ProducerSalesAnalytics extends SalesAnalytics {}
 export interface ProducerOrdersAnalytics extends OrdersAnalytics {}
 export interface ProducerProductsAnalytics extends ProductsAnalytics {}
 
-// Producer analytics API client
+/**
+ * Producer analytics API client.
+ *
+ * Calls local Next.js API route proxies (/api/producer/analytics/*) which
+ * handle auth via dixis_session HttpOnly cookie + requireProducer().
+ * This replaces the previous broken localStorage.getItem('auth_token') approach.
+ */
 export const producerAnalyticsApi = {
-  /**
-   * Get sales analytics for the authenticated producer
-   */
   async getSales(period: 'daily' | 'monthly' = 'daily', limit = 30): Promise<ProducerSalesAnalytics> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('Δεν βρέθηκε token πιστοποίησης');
-    }
-
-    const params = new URLSearchParams({
-      period,
-      limit: limit.toString(),
-    });
-
-    const response = await fetch(`${API_BASE_URL}/producer/analytics/sales?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+    const params = new URLSearchParams({ period, limit: limit.toString() });
+    const response = await fetch(`/api/producer/analytics/sales?${params}`, {
+      credentials: 'include',
     });
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(
+        response.status === 401 ? 'AUTH_REQUIRED'
+          : response.status === 403 ? 'PRODUCER_ACCESS_REQUIRED'
+            : `HTTP_${response.status}`
+      );
     }
 
     const data = await response.json();
     return data.analytics;
   },
 
-  /**
-   * Get orders analytics for the authenticated producer
-   */
   async getOrders(): Promise<ProducerOrdersAnalytics> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('Δεν βρέθηκε token πιστοποίησης');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/producer/analytics/orders`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+    const response = await fetch('/api/producer/analytics/orders', {
+      credentials: 'include',
     });
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(
+        response.status === 401 ? 'AUTH_REQUIRED'
+          : response.status === 403 ? 'PRODUCER_ACCESS_REQUIRED'
+            : `HTTP_${response.status}`
+      );
     }
 
     const data = await response.json();
     return data.analytics;
   },
 
-  /**
-   * Get products analytics for the authenticated producer
-   */
   async getProducts(limit = 10): Promise<ProducerProductsAnalytics> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('Δεν βρέθηκε token πιστοποίησης');
-    }
-
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-    });
-
-    const response = await fetch(`${API_BASE_URL}/producer/analytics/products?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+    const params = new URLSearchParams({ limit: limit.toString() });
+    const response = await fetch(`/api/producer/analytics/products?${params}`, {
+      credentials: 'include',
     });
 
     if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error('Απαιτείται πρόσβαση παραγωγού. Βεβαιωθείτε ότι είστε συνδεδεμένος παραγωγός.');
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(
+        response.status === 401 ? 'AUTH_REQUIRED'
+          : response.status === 403 ? 'PRODUCER_ACCESS_REQUIRED'
+            : `HTTP_${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -120,30 +82,36 @@ export const producerAnalyticsApi = {
 };
 
 /**
- * Check if user has producer access
+ * Map producer error codes to user-facing messages.
+ * Returns error codes (not Greek strings) - callers should translate via i18n.
  */
-export function checkProducerAccess(): boolean {
-  // This would typically check user role/producer association
-  // For now, we'll rely on API responses to determine access
-  const token = localStorage.getItem('auth_token');
-  return !!token;
+export type ProducerErrorCode =
+  | 'PRODUCER_ACCESS_REQUIRED'
+  | 'AUTH_REQUIRED'
+  | 'SESSION_EXPIRED'
+  | 'FORBIDDEN'
+  | 'LOAD_FAILED';
+
+export function getProducerErrorCode(error: Error): ProducerErrorCode {
+  if (error.message === 'PRODUCER_ACCESS_REQUIRED') return 'PRODUCER_ACCESS_REQUIRED';
+  if (error.message === 'AUTH_REQUIRED') return 'AUTH_REQUIRED';
+  if (error.message === 'HTTP_401') return 'SESSION_EXPIRED';
+  if (error.message === 'HTTP_403') return 'FORBIDDEN';
+  return 'LOAD_FAILED';
 }
 
 /**
- * Helper to handle producer-specific errors
+ * @deprecated Use getProducerErrorCode() + i18n instead.
+ * Kept for backward compatibility - will be removed in PR 2 (i18n pass).
  */
 export function handleProducerError(error: Error): string {
-  if (error.message.includes('πρόσβαση παραγωγού')) {
-    return 'Πρέπει να είστε συνδεδεμένος παραγωγός για προβολή αναλυτικών. Επικοινωνήστε με την υποστήριξη αν πιστεύετε ότι πρόκειται για σφάλμα.';
-  }
-  if (error.message.includes('token πιστοποίησης')) {
-    return 'Συνδεθείτε για προβολή αναλυτικών παραγωγού.';
-  }
-  if (error.message.includes('HTTP error! status: 401')) {
-    return 'Η συνεδρία σας έληξε. Συνδεθείτε ξανά.';
-  }
-  if (error.message.includes('HTTP error! status: 403')) {
-    return 'Δεν έχετε δικαίωμα προβολής αναλυτικών παραγωγού.';
-  }
-  return 'Αποτυχία φόρτωσης αναλυτικών. Δοκιμάστε ξανά.';
+  const code = getProducerErrorCode(error);
+  const messages: Record<ProducerErrorCode, string> = {
+    PRODUCER_ACCESS_REQUIRED: 'Requires producer access. Make sure you are logged in as a producer.',
+    AUTH_REQUIRED: 'Sign in to view producer analytics.',
+    SESSION_EXPIRED: 'Your session has expired. Please sign in again.',
+    FORBIDDEN: 'You do not have permission to view producer analytics.',
+    LOAD_FAILED: 'Failed to load analytics. Please try again.',
+  };
+  return messages[code];
 }
