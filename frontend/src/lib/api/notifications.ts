@@ -46,11 +46,6 @@ export const notificationApi = {
    * Get paginated notifications for the authenticated user
    */
   async getNotifications(page = 1, perPage = 20, showRead = true): Promise<NotificationResponse> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const params = new URLSearchParams({
       per_page: perPage.toString(),
       show_read: showRead.toString(),
@@ -64,8 +59,8 @@ export const notificationApi = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -79,17 +74,12 @@ export const notificationApi = {
    * Get unread notifications count
    */
   async getUnreadCount(): Promise<UnreadCountResponse> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${API_BASE_URL}/notifications/unread-count`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -103,17 +93,12 @@ export const notificationApi = {
    * Get latest unread notifications for the notification bell
    */
   async getLatestNotifications(limit = 5): Promise<LatestNotificationsResponse> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${API_BASE_URL}/notifications/latest?limit=${limit}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -127,17 +112,12 @@ export const notificationApi = {
    * Mark a specific notification as read
    */
   async markAsRead(notificationId: number): Promise<{ success: boolean; message: string }> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -151,17 +131,12 @@ export const notificationApi = {
    * Mark all notifications as read
    */
   async markAllAsRead(): Promise<{ success: boolean; message: string }> {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
