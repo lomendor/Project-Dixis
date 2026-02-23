@@ -33,6 +33,7 @@ function CheckoutContent() {
     cartShippingError,
     shippingMismatch,
     savedAddress,
+    savedAddressPartial,
     isGuest,
     user,
     handleSubmit,
@@ -136,6 +137,7 @@ function CheckoutContent() {
           <CustomerDetailsForm
             isGuest={isGuest}
             savedAddress={savedAddress}
+            savedAddressPartial={savedAddressPartial}
             user={user}
             postalCode={postalCode}
             onPostalCodeChange={setPostalCode}

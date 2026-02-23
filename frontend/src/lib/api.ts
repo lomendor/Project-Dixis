@@ -623,6 +623,23 @@ class ApiClient {
       });
 
       if (!response.ok) {
+        // On 401, try refreshing CSRF cookie and retry ONCE (session may have expired)
+        if (
+          response.status === 401 &&
+          !options.headers?.['X-Retry-After-CSRF' as keyof HeadersInit]
+        ) {
+          try {
+            await this.fetchCsrfCookie();
+            this.loadTokenFromStorage();
+            return this.request<T>(endpoint, {
+              ...options,
+              headers: { ...options.headers, 'X-Retry-After-CSRF': '1' },
+            });
+          } catch {
+            // CSRF refresh failed — fall through to normal error handling
+          }
+        }
+
         const errorData = await response.json().catch(() => ({}));
         throw new ApiError(
           errorData.message || `HTTP ${response.status}: ${response.statusText}`,
@@ -1064,7 +1081,7 @@ class ApiClient {
     method: 'HOME' | 'COURIER' | 'PICKUP';
     weight_kg?: number;
     subtotal?: number;
-  }): Promise<{
+  }, opts?: { signal?: AbortSignal }): Promise<{
     price_eur: number;
     zone_name: string | null;
     zone_id?: number;
@@ -1086,6 +1103,7 @@ class ApiClient {
     }>('public/shipping/quote', {
       method: 'POST',
       body: JSON.stringify(data),
+      signal: opts?.signal,
     });
     return validateApiResponse(result, ZoneShippingQuoteSchema, 'getZoneShippingQuote');
   }
@@ -1096,7 +1114,7 @@ class ApiClient {
     method: 'HOME' | 'COURIER' | 'PICKUP';
     items: { product_id: number; quantity: number }[];
     payment_method?: 'COD' | 'CARD';
-  }): Promise<{
+  }, opts?: { signal?: AbortSignal }): Promise<{
     producers: {
       producer_id: number;
       producer_name: string;
@@ -1138,6 +1156,7 @@ class ApiClient {
     }>('public/shipping/quote-cart', {
       method: 'POST',
       body: JSON.stringify(data),
+      signal: opts?.signal,
     });
     return validateApiResponse(result, CartShippingQuoteSchema, 'getCartShippingQuote');
   }
