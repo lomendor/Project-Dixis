@@ -44,11 +44,12 @@ export async function requireProducer(): Promise<ProducerSession> {
     // Prisma may fail if table is removed in future — fall through to Laravel
   }
 
-  // 2. Fallback: Check Laravel backend
+  // 2. Fallback: Check Laravel backend (for producers seeded only in Laravel)
   try {
     const laravelBase = getLaravelInternalUrl();
+    const PER_PAGE = 500; // Safety: support up to 500 producers
     const url = new URL(`${laravelBase}/public/producers`);
-    url.searchParams.set('per_page', '100');
+    url.searchParams.set('per_page', String(PER_PAGE));
 
     const res = await fetch(url.toString(), {
       headers: { 'Accept': 'application/json' },
@@ -58,6 +59,12 @@ export async function requireProducer(): Promise<ProducerSession> {
     if (res.ok) {
       const json = await res.json();
       const producers = json?.data ?? [];
+
+      // Warn if we've hit the page limit — producer might be missed
+      if (producers.length >= PER_PAGE) {
+        console.warn(`[requireProducer] Producer count (${producers.length}) hit per_page limit (${PER_PAGE}). Some producers may not be found via fallback.`);
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const match = producers.find((p: any) => p.phone === phone && p.is_active !== false);
 
