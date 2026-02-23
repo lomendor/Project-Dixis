@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslations } from '@/contexts/LocaleContext'
 
 export type PaymentMethod = 'cod' | 'card'
 
@@ -20,6 +21,7 @@ export default function PaymentMethodSelector({
 }: PaymentMethodSelectorProps) {
   // Card payments gated by build-time env flag AND user authentication
   const { isAuthenticated, loading: authLoading } = useAuth()
+  const t = useTranslations()
   const [cardEnabled, setCardEnabled] = useState(false)
 
   // COD gated by build-time env flag (NEXT_PUBLIC_ENABLE_COD)
@@ -43,8 +45,8 @@ export default function PaymentMethodSelector({
   }, [isAuthenticated, value, onChange, codEnabled])
 
   return (
-    <fieldset className="space-y-3" disabled={disabled}>
-      <legend className="font-semibold mb-3">Τρόπος Πληρωμής</legend>
+    <fieldset className="space-y-3" disabled={disabled} aria-label={t('checkoutPage.paymentMethod')}>
+      <legend className="font-semibold mb-3">{t('checkoutPage.paymentMethod')}</legend>
 
       {/* Cash on Delivery - Only if NEXT_PUBLIC_ENABLE_COD=true */}
       {codEnabled && (
@@ -67,11 +69,11 @@ export default function PaymentMethodSelector({
             data-testid="payment-cod"
           />
           <div className="flex-1">
-            <span className="font-medium">Αντικαταβολή</span>
-            <p className="text-sm text-neutral-500">Πληρωμή κατά την παράδοση</p>
+            <span className="font-medium">{t('checkoutPage.codPayment')}</span>
+            <p className="text-sm text-neutral-500">{t('checkoutPage.codPaymentDesc')}</p>
             {codFee != null && codFee > 0 && (
               <p className="text-xs text-amber-600 mt-0.5" data-testid="cod-fee-note">
-                +{new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(codFee)} χρέωση αντικαταβολής
+                {t('checkoutPage.codFeeText', { fee: new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(codFee) })}
               </p>
             )}
           </div>
@@ -99,8 +101,8 @@ export default function PaymentMethodSelector({
             data-testid="payment-card"
           />
           <div className="flex-1">
-            <span className="font-medium">Κάρτα</span>
-            <p className="text-sm text-neutral-500">Ασφαλής πληρωμή με κάρτα</p>
+            <span className="font-medium">{t('checkoutPage.cardPayment')}</span>
+            <p className="text-sm text-neutral-500">{t('checkoutPage.cardPaymentDesc')}</p>
           </div>
           <div className="flex gap-1">
             <span className="text-xs bg-neutral-100 px-2 py-1 rounded">Visa</span>
@@ -112,7 +114,7 @@ export default function PaymentMethodSelector({
       {/* T3-02: Stripe trust text — payment data is not stored on Dixis */}
       {cardEnabled && (
         <p className="text-xs text-neutral-500 mt-1 pl-7">
-          Τα στοιχεία πληρωμής δεν αποθηκεύονται στο Dixis
+          {t('checkoutPage.stripePrivacy')}
         </p>
       )}
 
@@ -121,8 +123,8 @@ export default function PaymentMethodSelector({
       {!authLoading && !isAuthenticated && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
         <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="guest-card-notice">
           <p className="text-sm text-amber-800">
-            Για πληρωμή με κάρτα απαιτείται σύνδεση.{' '}
-            <a href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">Συνδεθείτε</a>
+            {t('checkoutPage.cardRequiresLogin')}{' '}
+            <a href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">{t('checkoutPage.loginLink')}</a>
           </p>
         </div>
       )}
