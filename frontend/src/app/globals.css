@@ -540,10 +540,12 @@ body {
    ============================================================================= */
 
 @media print {
-  .no-print, nav, [data-testid="print-button"] {
+  /* Hide non-print elements */
+  .no-print, nav, footer, [data-testid="print-button"] {
     display: none !important;
   }
 
+  /* Clean typography */
   a {
     text-decoration: none !important;
     color: black !important;
@@ -551,10 +553,23 @@ body {
 
   body {
     background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  .card {
-    box-shadow: none;
+  /* Remove card shadows, let content breathe */
+  .card, .bg-white {
+    box-shadow: none !important;
     border: 1px solid #ddd;
+  }
+
+  /* Fill page width for receipt */
+  .max-w-2xl, .max-w-4xl {
+    max-width: 100% !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 15mm;
   }
 }
