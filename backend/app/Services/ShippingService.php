@@ -199,7 +199,7 @@ class ShippingService
 
         foreach ($order->orderItems as $item) {
             $product = $item->product;
-            $itemWeight = ($product->weight_per_unit ?? 0.5) * $item->quantity; // Default 0.5kg if not set
+            $itemWeight = (($product->weight_per_unit ?? 500) / 1000) * $item->quantity; // weight_per_unit is grams (migration 2026_02_22_400000), convert to kg
             $totalWeight += $itemWeight;
 
             // Estimate dimensions if not provided (fallback)
