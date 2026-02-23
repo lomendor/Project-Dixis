@@ -100,7 +100,6 @@ export default function ShippingBreakdown({
             className="mt-1.5"
           >
             <option value="COURIER">Courier</option>
-            <option value="COURIER_COD">Courier + Αντικαταβολή</option>
             <option value="PICKUP">Παραλαβή</option>
           </Select>
         </label>
@@ -155,7 +154,7 @@ export default function ShippingBreakdown({
           <div>Χρέωση κιλών: <strong>{data.chargeableKg.toFixed(2)} kg</strong></div>
           {/* AG9: Use formatEUR for money display */}
           <div>Κόστος μεταφορικών: <strong data-testid="shippingCost">{formatEUR(data.shippingCost)}</strong></div>
-          {typeof data.codFee === 'number' && <div>Αντικαταβολή: <strong data-testid="codFee">{formatEUR(data.codFee)}</strong></div>}
+          {/* COD removed */}
           <div>Δωρεάν μεταφορικά: <strong data-testid="freeShipping">{data.freeShipping ? 'Ναι' : 'Όχι'}</strong></div>
 
           {/* AG8: Use Tooltip component */}

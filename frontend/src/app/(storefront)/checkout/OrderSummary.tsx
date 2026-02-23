@@ -79,14 +79,6 @@ export default function OrderSummary({
           </p>
         )}
 
-        {/* COD fee row */}
-        {cartShippingQuote && cartShippingQuote.cod_fee > 0 && (
-          <div className="flex justify-between text-sm" data-testid="cod-fee-line">
-            <span>Αντικαταβολή:</span>
-            <span>{fmt.format(cartShippingQuote.cod_fee)}</span>
-          </div>
-        )}
-
         {/* T3-02: Estimated delivery time */}
         {(cartShippingQuote || shippingQuote) && !cartShippingError && (
           <div className="flex items-center gap-1.5 text-xs text-neutral-500 pt-1" data-testid="delivery-estimate">
@@ -97,12 +89,12 @@ export default function OrderSummary({
           </div>
         )}
 
-        {/* Total with shipping + COD fee */}
+        {/* Total with shipping */}
         <div className="flex justify-between font-bold text-lg pt-2 border-t" data-testid="total-line">
           <span>{t('checkoutPage.total')}:</span>
           <span data-testid="checkout-total">
             {shippingQuote
-              ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur) + (cartShippingQuote?.cod_fee ?? 0))
+              ? fmt.format(subtotal + (shippingQuote.free_shipping ? 0 : shippingQuote.price_eur))
               : fmt.format(subtotal)}
           </span>
         </div>

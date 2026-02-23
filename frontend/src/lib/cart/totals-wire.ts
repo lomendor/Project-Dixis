@@ -38,11 +38,7 @@ export function computeTotalsFromContext(ctx: {
     opts.baseShipping = ctx.shipping.baseCostCents;
   }
 
-  // Add COD fee if payment method is COD
-  if ((ctx?.payment?.method || '').toUpperCase() === 'COD') {
-    opts.codFee =
-      typeof ctx?.shipping?.codFeeCents === 'number' ? ctx.shipping.codFeeCents : 200;
-  }
+  // COD removed — codFee always 0
 
   // Calculate totals
   const t = calcTotals(opts);
