@@ -55,8 +55,11 @@ export function useCheckout() {
     postal_code?: string
     phone?: string
   } | null>(null)
+  const [savedAddressPartial, setSavedAddressPartial] = useState(false)
 
   const idempotencyKeyRef = useRef<string>(crypto.randomUUID())
+  const shippingAbortRef = useRef<AbortController | null>(null)
+  const postalCodeRef = useRef(postalCode)
   const isGuest = !isAuthenticated
 
   // --- Derived ---
@@ -66,6 +69,9 @@ export function useCheckout() {
   // --- Effects ---
   useEffect(() => { setIsMounted(true) }, [])
 
+  // Keep postalCodeRef in sync for stale-response guards
+  useEffect(() => { postalCodeRef.current = postalCode }, [postalCode])
+
   // Fetch saved address for logged-in users
   useEffect(() => {
     if (isAuthenticated) {
@@ -73,8 +79,11 @@ export function useCheckout() {
         .then((data) => {
           if (data.address) {
             setSavedAddress(data.address)
-            if (data.address.postal_code && /^\d{5}$/.test(data.address.postal_code)) {
+            const hasValidPostal = data.address.postal_code && /^\d{5}$/.test(data.address.postal_code)
+            if (hasValidPostal) {
               setPostalCode(data.address.postal_code)
+            } else {
+              setSavedAddressPartial(true)
             }
           }
         })
@@ -84,7 +93,7 @@ export function useCheckout() {
     }
   }, [isAuthenticated])
 
-  // Fetch per-producer cart shipping quote
+  // Fetch per-producer cart shipping quote (with AbortController to prevent race conditions)
   const fetchCartShippingQuote = useCallback(async (postal: string, pmMethod?: PaymentMethod) => {
     if (!postal || !/^\d{5}$/.test(postal)) {
       setCartShippingQuote(null)
@@ -101,6 +110,13 @@ export function useCheckout() {
       return
     }
 
+    // Cancel any in-flight shipping request to prevent stale responses
+    if (shippingAbortRef.current) {
+      shippingAbortRef.current.abort()
+    }
+    const controller = new AbortController()
+    shippingAbortRef.current = controller
+
     setShippingLoading(true)
     setCartShippingError(null)
     try {
@@ -115,7 +131,10 @@ export function useCheckout() {
         method: 'HOME',
         items,
         payment_method: selectedMethod === 'card' ? 'CARD' : 'COD',
-      })
+      }, { signal: controller.signal })
+
+      // Guard: discard if postal code changed while request was in flight
+      if (postal !== postalCodeRef.current) return
 
       setCartShippingQuote(quote)
       setShippingQuote({
@@ -125,6 +144,9 @@ export function useCheckout() {
         source: 'cart_quote',
       })
     } catch (err: any) {
+      // Silently ignore aborted requests (user typed a new postal code)
+      if (err instanceof DOMException && err.name === 'AbortError') return
+
       if (err?.code === 'ZONE_UNAVAILABLE') {
         trackShippingQuoteFailed({ postalCode: postal, errorCode: 'ZONE_UNAVAILABLE', fallbackUsed: false })
         setCartShippingError(t('checkoutPage.shippingUnavailable'))
@@ -137,7 +159,9 @@ export function useCheckout() {
             postal_code: postal,
             method: 'HOME',
             subtotal: subtotal,
-          })
+          }, { signal: controller.signal })
+          // Guard: discard stale fallback response too
+          if (postal !== postalCodeRef.current) return
           trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: true })
           setCartShippingError(null)
           setShippingQuote({
@@ -146,14 +170,18 @@ export function useCheckout() {
             free_shipping: legacyQuote.free_shipping,
             source: legacyQuote.source,
           })
-        } catch {
+        } catch (fallbackErr: any) {
+          if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return
           trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: false })
           setShippingQuote(null)
           setCartShippingError(t('checkoutPage.shippingCalculationError'))
         }
       }
     } finally {
-      setShippingLoading(false)
+      // Only clear loading if this request wasn't aborted (a newer one took over)
+      if (!controller.signal.aborted) {
+        setShippingLoading(false)
+      }
     }
   }, [cartItems, subtotal, t, paymentMethod])
 
@@ -399,6 +427,7 @@ export function useCheckout() {
     cartShippingError,
     shippingMismatch,
     savedAddress,
+    savedAddressPartial,
     isGuest,
     user,
     pendingThankYouId,

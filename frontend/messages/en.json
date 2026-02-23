@@ -296,6 +296,7 @@
     "errorTitle": "Checkout Error",
     "errorMessage": "There was a problem completing your order.",
     "savedAddressInUse": "Using your saved shipping address.",
+    "savedAddressPartial": "Your saved address was loaded, but the postal code needs to be updated.",
     "validateName": "Please enter your full name",
     "validatePhone": "Enter a valid phone number (e.g. 6971234567)",
     "validateEmail": "Enter a valid email address",

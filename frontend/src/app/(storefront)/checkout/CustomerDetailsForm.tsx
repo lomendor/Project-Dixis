@@ -20,6 +20,7 @@ interface SavedAddress {
 interface CustomerDetailsFormProps {
   isGuest: boolean
   savedAddress: SavedAddress | null
+  savedAddressPartial?: boolean
   user: { name?: string; email?: string } | null
   postalCode: string
   onPostalCodeChange: (val: string) => void
@@ -58,6 +59,7 @@ function validateField(name: string, value: string, isGuest: boolean): string {
 export default function CustomerDetailsForm({
   isGuest,
   savedAddress,
+  savedAddressPartial,
   user,
   postalCode,
   onPostalCodeChange,
@@ -99,10 +101,18 @@ export default function CustomerDetailsForm({
         </div>
       )}
 
-      {savedAddress && (
+      {savedAddress && !savedAddressPartial && (
         <div className="mb-4 p-3 bg-primary-pale border border-primary/20 rounded-lg" data-testid="saved-address-notice">
           <p className="text-sm text-primary-dark">
             {t('checkoutPage.savedAddressInUse')}
+          </p>
+        </div>
+      )}
+
+      {savedAddress && savedAddressPartial && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="saved-address-partial-notice">
+          <p className="text-sm text-amber-800">
+            {t('checkoutPage.savedAddressPartial')}
           </p>
         </div>
       )}
