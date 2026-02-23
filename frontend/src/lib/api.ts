@@ -523,14 +523,16 @@ class ApiClient {
     return match ? decodeURIComponent(match[1]) : null;
   }
 
+  /**
+   * @deprecated OTP auth uses HttpOnly dixis_session cookie — no localStorage token.
+   * Kept as no-op for backward compatibility (callers still reference it).
+   */
   private loadTokenFromStorage(): void {
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('auth_token');
-    }
+    // No-op: OTP auth uses HttpOnly cookie, not localStorage.
   }
 
   refreshToken(): void {
-    this.loadTokenFromStorage();
+    // No-op: OTP auth uses HttpOnly cookie.
   }
 
   private getHeaders(): HeadersInit {
@@ -538,11 +540,6 @@ class ApiClient {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-
-    // Bearer token for backward compatibility (migration period)
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
 
     // XSRF token from Sanctum cookie (Strategic Fix 2A — SPA auth)
     const xsrf = this.getXsrfToken();
@@ -553,42 +550,13 @@ class ApiClient {
     return headers;
   }
 
+  /**
+   * @deprecated OTP auth uses HttpOnly dixis_session cookie.
+   * Kept for backward compatibility — sets in-memory token only.
+   * No longer persists to localStorage.
+   */
   setToken(token: string | null) {
-    // DEBUG: Token instrumentation (masked for security) - enable with NEXT_PUBLIC_DEBUG_AUTH=1
-    const DEBUG_AUTH = typeof window !== 'undefined' &&
-      (process.env.NEXT_PUBLIC_DEBUG_AUTH === '1' || localStorage.getItem('DEBUG_AUTH') === '1');
-
-    const maskToken = (t: string | null | undefined) =>
-      t ? `${t.slice(0, 6)}...${t.slice(-4)}` : 'null';
-
-    if (DEBUG_AUTH && token && typeof window !== 'undefined') {
-      const parts = token.split('|');
-      console.log('🔐 [setToken] BEFORE save:', {
-        masked: maskToken(token),
-        totalLen: token.length,
-        plainLen: parts[1]?.length,
-      });
-    }
-
     this.token = token;
-    if (typeof window !== 'undefined') {
-      if (token) {
-        localStorage.setItem('auth_token', token);
-
-        if (DEBUG_AUTH) {
-          const saved = localStorage.getItem('auth_token');
-          const savedParts = saved?.split('|');
-          console.log('🔐 [setToken] AFTER save:', {
-            masked: maskToken(saved),
-            totalLen: saved?.length,
-            plainLen: savedParts?.[1]?.length,
-            MATCH: saved === token ? '✅ YES' : '❌ NO - TRUNCATION',
-          });
-        }
-      } else {
-        localStorage.removeItem('auth_token');
-      }
-    }
   }
 
   getToken(): string | null {

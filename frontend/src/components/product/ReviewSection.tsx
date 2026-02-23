@@ -67,13 +67,12 @@ export default function ReviewSection({ productId }: { productId: number }) {
 
     try {
       const base = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${base}/products/${productId}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
+        credentials: 'include',
         body: JSON.stringify({ rating, title: title || undefined, comment: comment || undefined }),
       });
       const json = await res.json();

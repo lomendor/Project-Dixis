@@ -69,7 +69,6 @@ class PaymentApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const token = localStorage.getItem('auth_token');
     const url = `${API_BASE_URL}${endpoint}`;
 
     const controller = new AbortController();
@@ -79,9 +78,9 @@ class PaymentApiClient {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
           ...options.headers,
         },
       });
