@@ -149,7 +149,7 @@ export function useCheckout() {
         } catch {
           trackShippingQuoteFailed({ postalCode: postal, errorCode: err?.code, fallbackUsed: false })
           setShippingQuote(null)
-          setCartShippingError('Δεν ήταν δυνατός ο υπολογισμός μεταφορικών. Δοκιμάστε ξανά.')
+          setCartShippingError(t('checkoutPage.shippingCalculationError'))
         }
       }
     } finally {
@@ -185,11 +185,11 @@ export function useCheckout() {
 
   async function handleStripePaymentSuccess(paymentIntentId: string) {
     if (!pendingOrderId) {
-      setError('Σφάλμα: Δεν βρέθηκε η παραγγελία. Παρακαλώ δοκιμάστε ξανά.')
+      setError(t('checkoutPage.orderNotFoundError'))
       return
     }
     if (!paymentIntentId || typeof paymentIntentId !== 'string' || !paymentIntentId.startsWith('pi_')) {
-      setError('Σφάλμα: Μη έγκυρο αναγνωριστικό πληρωμής. Παρακαλώ δοκιμάστε ξανά.')
+      setError(t('checkoutPage.invalidPaymentError'))
       return
     }
 
@@ -229,13 +229,13 @@ export function useCheckout() {
     e.preventDefault()
 
     if (isGuest && paymentMethod === 'card') {
-      setError('Για πληρωμή με κάρτα απαιτείται σύνδεση.')
+      setError(t('checkoutPage.cardRequiresLogin'))
       return
     }
 
     if (!shippingQuote && !cartShippingQuote && !shippingLoading) {
       trackShippingQuoteNull({ postalCode, itemCount: Object.keys(cartItems).length })
-      setError('Εισάγετε ταχυδρομικό κώδικα για υπολογισμό μεταφορικών.')
+      setError(t('checkoutPage.shippingEnterPostal'))
       return
     }
 
@@ -303,7 +303,7 @@ export function useCheckout() {
       const paymentOrderId = order.payment_order_id ?? order.id
       const thankYouToken = order.public_token || order.id
 
-      sessionStorage.setItem('dixis:last-order-customer', JSON.stringify(body.customer))
+      sessionStorage.setItem('dixis:last-order', JSON.stringify(body.customer))
 
       // Card payment via Stripe
       if (paymentMethod === 'card') {
@@ -353,7 +353,7 @@ export function useCheckout() {
         errorMessage: err?.message,
       })
       if (err?.status === 409) {
-        setError(t('checkoutPage.stockError') || 'Κάποια προϊόντα δεν είναι διαθέσιμα. Ελέγξτε το καλάθι σας.')
+        setError(t('checkoutPage.stockError'))
       } else if (err?.status === 400) {
         setError(err?.message || t('checkoutPage.orderError'))
       } else {
