@@ -7,14 +7,14 @@
 import { z } from 'zod';
 
 // Canonical shipping method codes
-export type ShippingMethod = 'PICKUP' | 'COURIER' | 'COURIER_COD';
+export type ShippingMethod = 'PICKUP' | 'COURIER';
 
 // Legacy alias types for backward compatibility
 export type DeliveryMethod = 'HOME' | 'LOCKER' | 'STORE_PICKUP';
-export type PaymentMethod = 'CARD' | 'COD';
+export type PaymentMethod = 'CARD';
 
 export const DeliveryMethodSchema = z.enum(['HOME', 'LOCKER', 'STORE_PICKUP']);
-export const ShippingMethodSchema = z.enum(['PICKUP', 'COURIER', 'COURIER_COD']);
+export const ShippingMethodSchema = z.enum(['PICKUP', 'COURIER']);
 
 export interface ShippingQuoteRequest {
   items: Array<{
@@ -86,17 +86,15 @@ export const DEFAULT_DELIVERY_OPTIONS: Array<{
   { code: 'LOCKER', label: 'Παράδοση σε locker', etaDays: 1, baseCost: 2.0 },
 ];
 
-// Canonical shipping options with COD fee
+// Canonical shipping options (COD removed)
 export const DEFAULT_OPTIONS: Array<{
   code: ShippingMethod;
   label: string;
   etaDays?: number;
   baseCost: number;
-  codFee?: number;
 }> = [
   { code: 'PICKUP', label: 'Παραλαβή από κατάστημα', etaDays: 0, baseCost: 0 },
   { code: 'COURIER', label: 'Παράδοση με κούριερ', etaDays: 2, baseCost: 3.5 },
-  { code: 'COURIER_COD', label: 'Αντικαταβολή', etaDays: 2, baseCost: 3.5, codFee: 1.5 },
 ];
 
 export function calculateShippingCost(
@@ -116,11 +114,8 @@ export function calculateShippingCost(
   const option = DEFAULT_OPTIONS.find(o => o.code === normalized);
   if (!option) return 0;
 
-  // Calculate total cost: base + COD fee (if applicable)
   const base = Number(option.baseCost || 0);
-  const cod = normalized === 'COURIER_COD' ? Number(option.codFee || 0) : 0;
-
-  return Number((base + cod).toFixed(2));
+  return Number(base.toFixed(2));
 }
 
 /**
@@ -135,9 +130,10 @@ export function normalizeMethod(code?: string): ShippingMethod {
   // Normalize aliases to canonical codes
   if (c === 'HOME' || c === 'LOCKER' || c === 'COURIER_HOME') return 'COURIER';
   if (c === 'STORE_PICKUP' || c === 'PICK-UP' || c === 'PICK_UP') return 'PICKUP';
-  if (c === 'COD' || c === 'CASH_ON_DELIVERY') return 'COURIER_COD';
+  // COD aliases now map to COURIER (COD removed)
+  if (c === 'COD' || c === 'CASH_ON_DELIVERY' || c === 'COURIER_COD') return 'COURIER';
 
   // If already canonical, return as-is
-  const known: readonly ShippingMethod[] = ['PICKUP', 'COURIER', 'COURIER_COD'];
+  const known: readonly ShippingMethod[] = ['PICKUP', 'COURIER'];
   return known.includes(c as ShippingMethod) ? (c as ShippingMethod) : 'COURIER';
 }

@@ -322,7 +322,7 @@ export default function HomeClient({ initialProducts }: HomeClientProps) {
                 </svg>
               </div>
               <h3 className="font-semibold text-neutral-800 mb-2">Παραγγείλτε</h3>
-              <p className="text-sm text-neutral-600">Προσθέστε στο καλάθι και πληρώστε με κάρτα ή αντικαταβολή</p>
+              <p className="text-sm text-neutral-600">Προσθέστε στο καλάθι και πληρώστε με κάρτα</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 mx-auto mb-4 bg-blue-50 rounded-full flex items-center justify-center">

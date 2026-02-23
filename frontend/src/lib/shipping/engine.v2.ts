@@ -5,7 +5,6 @@
 import { RateRow, ZoneRow, QuoteInput, QuoteResult, Surcharge } from './config/types';
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
-const codFeeFor = (m: string) => (m === 'COURIER_COD' ? 2.0 : 0);
 const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_SHIP_FREE_THRESHOLD_EUR ?? '35');
 
 export function volumetricKg(
@@ -116,11 +115,10 @@ export function quoteV2(
   if (!rate) {
     // fallback simple logic
     const base = i.method === 'PICKUP' ? 0 : 3.5;
-    const cod = codFeeFor(i.method);
     trace.push('FALLBACK');
     return {
       shippingCost: round2(base),
-      codFee: round2(cod),
+      codFee: 0,
       surcharges: sur,
       ruleTrace: trace,
       chargeableKg: kg,
@@ -129,8 +127,6 @@ export function quoteV2(
   }
 
   let cost = rate.base;
-  const cod = codFeeFor(i.method);
-  if (cod > 0) trace.push('COD=2.0');
 
   // free shipping threshold (business rule)
   if (i.subtotal >= FREE_SHIPPING_THRESHOLD) {
@@ -147,7 +143,7 @@ export function quoteV2(
 
   return {
     shippingCost: round2(cost),
-    codFee: round2(cod),
+    codFee: 0,
     surcharges: sur,
     ruleTrace: trace,
     chargeableKg: kg,
