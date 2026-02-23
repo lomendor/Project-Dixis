@@ -176,12 +176,10 @@ export default function ProducerOnboardingPage() {
 
   /** Fire-and-forget admin email notification */
   const notifyAdmin = () => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (token) headers['Authorization'] = `Bearer ${token}`;
     fetch('/api/ops/notify-onboarding', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         business_name: form.business_name,
         phone: form.phone,
