@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { getAdminToken } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 import { logAdminAction, createOrderStatusContext } from '@/lib/audit/logger';
 
 function canTransition(from: string, to: string): boolean {
@@ -33,6 +35,50 @@ export async function POST(
       return NextResponse.json({ error: 'missing status' }, { status: 400 });
     }
 
+    // Laravel orders use "A-123" format — proxy status change to Laravel
+    if (id.startsWith('A-')) {
+      const laravelId = id.slice(2);
+      const token = await getAdminToken();
+      if (!token) {
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      }
+
+      // Map Next.js status names to Laravel equivalents
+      const statusMap: Record<string, string> = {
+        PACKING: 'processing',
+        PAID: 'confirmed',
+      };
+      const laravelStatus = statusMap[String(newStatus).toUpperCase()]
+        || String(newStatus).toLowerCase();
+
+      const laravelBase = getLaravelInternalUrl();
+      const laravelRes = await fetch(
+        `${laravelBase}/admin/orders/${laravelId}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: laravelStatus }),
+        }
+      );
+
+      if (!laravelRes.ok) {
+        const errData = await laravelRes.json().catch(() => ({}));
+        console.error(`[admin/orders/${id}/status] Laravel proxy error:`, laravelRes.status, errData);
+        return NextResponse.json(
+          { error: (errData as Record<string, unknown>).error || 'status_change_failed' },
+          { status: laravelRes.status }
+        );
+      }
+
+      console.log(`[order] ${id} (Laravel ${laravelId}) status → ${newStatus}`);
+      return NextResponse.json({ ok: true, orderId: id, status: String(newStatus).toUpperCase() });
+    }
+
+    // Prisma orders (cuid IDs) — use local DB
     const order = await prisma.order.findUnique({ where: { id } });
     if (!order) {
       return NextResponse.json({ error: 'not_found' }, { status: 404 });
