@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { requireAdmin } from '@/lib/auth/admin';
+import { handleAdminError } from '@/lib/admin/laravelProxy';
 import { logAdminAction } from '@/lib/audit/logger';
 
 /**
@@ -98,13 +99,9 @@ export async function PATCH(
     });
 
   } catch (error: unknown) {
-    // Handle admin auth errors
-    if (error instanceof Error && error.name === 'AdminError') {
-      return NextResponse.json(
-        { error: 'Απαιτείται πρόσβαση διαχειριστή' },
-        { status: 403 }
-      );
-    }
+    // Pass FIX-CATEGORIES-AUTH-01: Use shared handleAdminError for proper 401/403 distinction
+    const adminRes = handleAdminError(error);
+    if (adminRes.status !== 500) return adminRes;
 
     console.error('Update category error:', error);
     return NextResponse.json(
