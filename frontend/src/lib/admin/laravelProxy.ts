@@ -1,27 +1,25 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { AdminError } from '@/lib/auth/admin';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
 
 /**
  * Shared helpers for admin API routes that proxy to Laravel.
  *
- * getAdminToken()    — reads the dixis_session JWT (NOT the deleted auth_token)
+ * getAdminToken()    — reads the JWT from the session cookie
  * handleAdminError() — maps AdminError codes to proper HTTP status codes
  *
  * Created: 2026-02-24 — Fix admin dashboard auth (replaces auth_token references)
  */
 
 /**
- * Read the admin JWT token from the dixis_session cookie.
+ * Read the admin JWT token from the session cookie.
  * Falls back to Authorization header for API clients.
- *
- * NOTE: auth_token cookie was removed in PR #3146.
- * All admin routes MUST use dixis_session instead.
  */
 export async function getAdminToken(): Promise<string | null> {
   const cookieStore = await cookies();
   return (
-    cookieStore.get('dixis_session')?.value ||
+    cookieStore.get(SESSION_COOKIE_NAME)?.value ||
     null
   );
 }

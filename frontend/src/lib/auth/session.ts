@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
+import { SESSION_COOKIE_NAME } from './cookies';
 
 /**
  * Lazy getter for JWT_SECRET — avoids throwing at module evaluation
@@ -53,7 +54,7 @@ function logMalformedCookie(source: string, value: string): void {
  */
 export async function getSessionPhone(): Promise<string | null> {
   const cookieStore = await cookies();
-  const session = cookieStore.get('dixis_session');
+  const session = cookieStore.get(SESSION_COOKIE_NAME);
   if (!session?.value) return null;
 
   // Pre-validate JWT structure to avoid cryptic "jwt malformed" errors
@@ -88,7 +89,7 @@ export async function getSessionPhone(): Promise<string | null> {
  */
 export async function getSessionType(): Promise<'admin' | 'user' | null> {
   const cookieStore = await cookies();
-  const session = cookieStore.get('dixis_session');
+  const session = cookieStore.get(SESSION_COOKIE_NAME);
   if (!session?.value) return null;
 
   if (!isJwtFormat(session.value)) {
