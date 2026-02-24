@@ -44,11 +44,12 @@ export default function UploadDocument({
         body: fd,
         credentials: 'include',
       });
-      const j = await r.json();
       if (!r.ok) {
-        setErr(j?.error || 'Σφάλμα ανεβάσματος');
+        const j = await r.json().catch((): null => null);
+        setErr(j?.error || (r.status === 401 ? 'Απαιτείται σύνδεση' : 'Σφάλμα ανεβάσματος'));
         return;
       }
+      const j = await r.json();
       onChange(j.url);
     } finally {
       setBusy(false);
