@@ -19,17 +19,7 @@ async function main() {
     { slug: 'legumes-grains', name: 'Όσπρια & Δημητριακά', icon: '🫘', sortOrder: 10 },
   ];
 
-  // Deactivate stale categories from old seed (13→10 migration)
-  const STALE_SLUGS = [
-    'legumes', 'grains-rice', 'flours-bakery',
-    'herbs-spices', 'sweets-spreads', 'sauces-preserves',
-    'dairy', 'fruits-vegetables',
-  ];
-  await prisma.category.updateMany({
-    where: { slug: { in: STALE_SLUGS } },
-    data: { isActive: false },
-  });
-
+  // Upsert the 10 unified categories (create if missing, update name/icon/order)
   for (const cat of CATEGORIES) {
     await prisma.category.upsert({
       where: { slug: cat.slug },
@@ -37,7 +27,13 @@ async function main() {
       create: { slug: cat.slug, name: cat.name, icon: cat.icon, sortOrder: cat.sortOrder, isActive: true }
     });
   }
-  console.log(`✅ Categories: ${CATEGORIES.length} seeded`);
+  // Deactivate ALL categories not in the unified 10
+  const validSlugs = CATEGORIES.map(c => c.slug);
+  const deactivated = await prisma.category.updateMany({
+    where: { slug: { notIn: validSlugs } },
+    data: { isActive: false },
+  });
+  console.log(`✅ Categories: ${CATEGORIES.length} active, ${deactivated.count} stale deactivated`);
 
   // Idempotent producer upserts
   const producer1 = await prisma.producer.upsert({
