@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 
 /**
  * Pass COD-COMPLETE: Confirm COD payment received.
@@ -28,9 +29,9 @@ export async function POST(
     const rawId = params.id;
     const laravelId = rawId.startsWith('A-') ? rawId.slice(2) : rawId;
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+    const laravelBase = getLaravelInternalUrl();
     const laravelRes = await fetch(
-      `${apiBase}/admin/orders/${laravelId}/payment/confirm`,
+      `${laravelBase}/admin/orders/${laravelId}/payment/confirm`,
       {
         method: 'PATCH',
         headers: {

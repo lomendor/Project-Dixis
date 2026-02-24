@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,11 +32,11 @@ export async function GET(
     const token = await getAdminToken();
 
     if (token) {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+      const laravelBase = getLaravelInternalUrl();
 
       // Search for this specific order by ID
       const laravelRes = await fetch(
-        `${apiBase}/admin/orders?q=${encodeURIComponent(laravelId)}&per_page=1`,
+        `${laravelBase}/admin/orders?q=${encodeURIComponent(laravelId)}&per_page=1`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

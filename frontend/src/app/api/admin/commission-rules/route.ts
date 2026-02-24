@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+import { getLaravelInternalUrl } from '@/env';
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +16,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const params = new URLSearchParams(searchParams);
 
-  const res = await fetch(`${API_BASE}/admin/commission-rules?${params}`, {
+  const res = await fetch(`${getLaravelInternalUrl()}/admin/commission-rules?${params}`, {
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     cache: 'no-store',
   });
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  const res = await fetch(`${API_BASE}/admin/commission-rules`, {
+  const res = await fetch(`${getLaravelInternalUrl()}/admin/commission-rules`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
