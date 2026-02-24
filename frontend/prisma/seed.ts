@@ -5,22 +5,30 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting production seed (idempotent)...');
 
-  // Seed categories — must match src/data/categories.ts (13 official)
+  // Seed categories — must match src/data/categories.ts (10 unified, Phase 10)
   const CATEGORIES = [
     { slug: 'olive-oil-olives', name: 'Ελαιόλαδο & Ελιές', icon: '🫒', sortOrder: 1 },
-    { slug: 'honey-bee', name: 'Μέλι & Κυψέλη', icon: '🍯', sortOrder: 2 },
-    { slug: 'legumes', name: 'Όσπρια', icon: '🫘', sortOrder: 3 },
-    { slug: 'grains-rice', name: 'Δημητριακά & Ρύζια', icon: '🌾', sortOrder: 4 },
-    { slug: 'pasta', name: 'Ζυμαρικά', icon: '🍝', sortOrder: 5 },
-    { slug: 'flours-bakery', name: 'Αλεύρια & Αρτοποιία', icon: '🥐', sortOrder: 6 },
-    { slug: 'nuts-dried', name: 'Ξηροί Καρποί & Αποξηραμένα', icon: '🥜', sortOrder: 7 },
-    { slug: 'herbs-spices', name: 'Βότανα & Μπαχαρικά', icon: '🌿', sortOrder: 8 },
-    { slug: 'sweets-spreads', name: 'Γλυκά, Μαρμελάδες & Αλείμματα', icon: '🍒', sortOrder: 9 },
-    { slug: 'sauces-preserves', name: 'Σάλτσες, Conserves & Τουρσιά', icon: '🥫', sortOrder: 10 },
-    { slug: 'beverages', name: 'Ποτά & Αποστάγματα', icon: '🍷', sortOrder: 11 },
-    { slug: 'dairy', name: 'Γαλακτοκομικά', icon: '🧀', sortOrder: 12 },
-    { slug: 'fruits-vegetables', name: 'Φρούτα & Λαχανικά', icon: '🍎', sortOrder: 13 },
+    { slug: 'honey-bee', name: 'Μέλι & Προϊόντα Μέλισσας', icon: '🍯', sortOrder: 2 },
+    { slug: 'nuts-dried', name: 'Ξηροί Καρποί', icon: '🥜', sortOrder: 3 },
+    { slug: 'cosmetics', name: 'Φυσικά Καλλυντικά', icon: '✨', sortOrder: 4 },
+    { slug: 'beverages', name: 'Ποτά', icon: '🍷', sortOrder: 5 },
+    { slug: 'sweets-jams', name: 'Γλυκά & Μαρμελάδες', icon: '🍒', sortOrder: 6 },
+    { slug: 'pasta', name: 'Ζυμαρικά', icon: '🍝', sortOrder: 7 },
+    { slug: 'herbs-spices-tea', name: 'Βότανα, Μπαχαρικά & Τσάι', icon: '🌿', sortOrder: 8 },
+    { slug: 'sauces-spreads', name: 'Σάλτσες & Αλείμματα', icon: '🥫', sortOrder: 9 },
+    { slug: 'legumes-grains', name: 'Όσπρια & Δημητριακά', icon: '🫘', sortOrder: 10 },
   ];
+
+  // Deactivate stale categories from old seed (13→10 migration)
+  const STALE_SLUGS = [
+    'legumes', 'grains-rice', 'flours-bakery',
+    'herbs-spices', 'sweets-spreads', 'sauces-preserves',
+    'dairy', 'fruits-vegetables',
+  ];
+  await prisma.category.updateMany({
+    where: { slug: { in: STALE_SLUGS } },
+    data: { isActive: false },
+  });
 
   for (const cat of CATEGORIES) {
     await prisma.category.upsert({
@@ -131,7 +139,7 @@ async function main() {
     where: { slug: 'glyko-koutaliou-syko-380g' },
     update: {
       title: 'Γλυκό Κουταλιού Σύκο 380g',
-      category: 'sweets-spreads',
+      category: 'sweets-jams',
       price: 4.5,
       unit: 'jar',
       stock: 40,
@@ -142,7 +150,7 @@ async function main() {
     create: {
       slug: 'glyko-koutaliou-syko-380g',
       title: 'Γλυκό Κουταλιού Σύκο 380g',
-      category: 'sweets-spreads',
+      category: 'sweets-jams',
       price: 4.5,
       unit: 'jar',
       stock: 40,
@@ -152,27 +160,27 @@ async function main() {
     },
   });
 
-  // Product 4 - Feta cheese
+  // Product 4 - Tomato sauce (was feta — dairy removed from MVP)
   const product4 = await prisma.product.upsert({
     where: { slug: 'feta-pop-mytilinis' },
     update: {
-      title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
-      category: 'dairy',
-      price: 6.5,
-      unit: 'pack',
+      title: 'Σάλτσα Ντομάτας Σπιτική 350g',
+      category: 'sauces-spreads',
+      price: 4.5,
+      unit: 'jar',
       stock: 25,
-      description: 'Authentic PDO feta cheese from Mytilini',
+      description: 'Homemade tomato sauce with fresh basil',
       isActive: true,
       producerId: producer1.id,
     },
     create: {
       slug: 'feta-pop-mytilinis',
-      title: 'Φέτα ΠΟΠ Μυτιλήνης 400g',
-      category: 'dairy',
-      price: 6.5,
-      unit: 'pack',
+      title: 'Σάλτσα Ντομάτας Σπιτική 350g',
+      category: 'sauces-spreads',
+      price: 4.5,
+      unit: 'jar',
       stock: 25,
-      description: 'Authentic PDO feta cheese from Mytilini',
+      description: 'Homemade tomato sauce with fresh basil',
       isActive: true,
       producerId: producer1.id,
     },
@@ -204,27 +212,27 @@ async function main() {
     },
   });
 
-  // Product 6 - Organic Oranges
+  // Product 6 - Lentils (was oranges — fruits-vegetables removed from MVP)
   const product6 = await prisma.product.upsert({
     where: { slug: 'portokalia-viologika' },
     update: {
-      title: 'Πορτοκάλια Βιολογικά 5kg',
-      category: 'fruits-vegetables',
-      price: 8.9,
-      unit: 'box',
-      stock: 20,
-      description: 'Organic oranges from Argolida',
+      title: 'Φακές Εγχώριες 500g',
+      category: 'legumes-grains',
+      price: 3.9,
+      unit: 'pack',
+      stock: 45,
+      description: 'Premium Greek lentils from Thessaly',
       isActive: true,
       producerId: producer1.id,
     },
     create: {
       slug: 'portokalia-viologika',
-      title: 'Πορτοκάλια Βιολογικά 5kg',
-      category: 'fruits-vegetables',
-      price: 8.9,
-      unit: 'box',
-      stock: 20,
-      description: 'Organic oranges from Argolida',
+      title: 'Φακές Εγχώριες 500g',
+      category: 'legumes-grains',
+      price: 3.9,
+      unit: 'pack',
+      stock: 45,
+      description: 'Premium Greek lentils from Thessaly',
       isActive: true,
       producerId: producer1.id,
     },
@@ -235,7 +243,7 @@ async function main() {
     where: { slug: 'rigani-vounou' },
     update: {
       title: 'Ρίγανη Βουνού 100g',
-      category: 'herbs-spices',
+      category: 'herbs-spices-tea',
       price: 3.5,
       unit: 'pack',
       stock: 60,
@@ -246,7 +254,7 @@ async function main() {
     create: {
       slug: 'rigani-vounou',
       title: 'Ρίγανη Βουνού 100g',
-      category: 'herbs-spices',
+      category: 'herbs-spices-tea',
       price: 3.5,
       unit: 'pack',
       stock: 60,
@@ -256,27 +264,27 @@ async function main() {
     },
   });
 
-  // Product 8 - Naxos Potatoes
+  // Product 8 - Almonds (was potatoes — fruits-vegetables removed from MVP)
   const product8 = await prisma.product.upsert({
     where: { slug: 'patates-naxou' },
     update: {
-      title: 'Πατάτες Νάξου 3kg',
-      category: 'fruits-vegetables',
-      price: 4.9,
-      unit: 'bag',
+      title: 'Αμύγδαλα Αιγίνης 250g',
+      category: 'nuts-dried',
+      price: 5.9,
+      unit: 'pack',
       stock: 35,
-      description: 'Famous potatoes from Naxos island',
+      description: 'Premium almonds from Aegina island',
       isActive: true,
       producerId: producer1.id,
     },
     create: {
       slug: 'patates-naxou',
-      title: 'Πατάτες Νάξου 3kg',
-      category: 'fruits-vegetables',
-      price: 4.9,
-      unit: 'bag',
+      title: 'Αμύγδαλα Αιγίνης 250g',
+      category: 'nuts-dried',
+      price: 5.9,
+      unit: 'pack',
       stock: 35,
-      description: 'Famous potatoes from Naxos island',
+      description: 'Premium almonds from Aegina island',
       isActive: true,
       producerId: producer1.id,
     },
