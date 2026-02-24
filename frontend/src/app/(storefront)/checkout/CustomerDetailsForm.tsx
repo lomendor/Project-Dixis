@@ -20,6 +20,7 @@ interface SavedAddress {
 interface CustomerDetailsFormProps {
   isGuest: boolean
   savedAddress: SavedAddress | null
+  savedAddressPartial?: boolean
   user: { name?: string; email?: string } | null
   postalCode: string
   onPostalCodeChange: (val: string) => void
@@ -27,29 +28,29 @@ interface CustomerDetailsFormProps {
   onClearShipping: () => void
 }
 
-/** Validate a single field; returns error message or empty string */
+/** Validate a single field; returns translation key or empty string */
 function validateField(name: string, value: string, isGuest: boolean): string {
   const v = value.trim()
   switch (name) {
     case 'name':
-      return v.length < 2 ? 'Παρακαλώ εισάγετε το ονοματεπώνυμό σας' : ''
+      return v.length < 2 ? 'checkoutPage.validateName' : ''
     case 'phone': {
       const digits = v.replace(/[\s\-()]/g, '')
       return !/^\+?\d{10,14}$/.test(digits)
-        ? 'Εισάγετε έγκυρο τηλέφωνο (π.χ. 6971234567)'
+        ? 'checkoutPage.validatePhone'
         : ''
     }
     case 'email':
       if (!isGuest && !v) return '' // optional for logged-in users
       return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-        ? 'Εισάγετε έγκυρη διεύθυνση email'
+        ? 'checkoutPage.validateEmail'
         : ''
     case 'address':
-      return v.length < 3 ? 'Παρακαλώ εισάγετε τη διεύθυνσή σας' : ''
+      return v.length < 3 ? 'checkoutPage.validateAddress' : ''
     case 'city':
-      return v.length < 2 ? 'Παρακαλώ εισάγετε την πόλη σας' : ''
+      return v.length < 2 ? 'checkoutPage.validateCity' : ''
     case 'postcode':
-      return !/^\d{5}$/.test(v) ? 'Ο ΤΚ πρέπει να είναι 5 ψηφία' : ''
+      return !/^\d{5}$/.test(v) ? 'checkoutPage.validatePostcode' : ''
     default:
       return ''
   }
@@ -58,6 +59,7 @@ function validateField(name: string, value: string, isGuest: boolean): string {
 export default function CustomerDetailsForm({
   isGuest,
   savedAddress,
+  savedAddressPartial,
   user,
   postalCode,
   onPostalCodeChange,
@@ -99,10 +101,18 @@ export default function CustomerDetailsForm({
         </div>
       )}
 
-      {savedAddress && (
+      {savedAddress && !savedAddressPartial && (
         <div className="mb-4 p-3 bg-primary-pale border border-primary/20 rounded-lg" data-testid="saved-address-notice">
           <p className="text-sm text-primary-dark">
-            Χρησιμοποιείται η αποθηκευμένη διεύθυνση αποστολής σας.
+            {t('checkoutPage.savedAddressInUse')}
+          </p>
+        </div>
+      )}
+
+      {savedAddress && savedAddressPartial && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="saved-address-partial-notice">
+          <p className="text-sm text-amber-800">
+            {t('checkoutPage.savedAddressPartial')}
           </p>
         </div>
       )}
@@ -125,7 +135,7 @@ export default function CustomerDetailsForm({
             data-testid="checkout-name"
           />
           {touched.name && fieldErrors.name && (
-            <p id="error-name" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>
+            <p id="error-name" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.name)}</p>
           )}
         </div>
 
@@ -149,7 +159,7 @@ export default function CustomerDetailsForm({
             data-testid="checkout-phone"
           />
           {touched.phone && fieldErrors.phone && (
-            <p id="error-phone" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.phone}</p>
+            <p id="error-phone" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.phone)}</p>
           )}
         </div>
 
@@ -182,7 +192,7 @@ export default function CustomerDetailsForm({
             </p>
           )}
           {touched.email && fieldErrors.email && (
-            <p id="error-email" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.email}</p>
+            <p id="error-email" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.email)}</p>
           )}
         </div>
 
@@ -203,7 +213,7 @@ export default function CustomerDetailsForm({
             data-testid="checkout-address"
           />
           {touched.address && fieldErrors.address && (
-            <p id="error-address" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.address}</p>
+            <p id="error-address" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.address)}</p>
           )}
         </div>
 
@@ -224,7 +234,7 @@ export default function CustomerDetailsForm({
             data-testid="checkout-city"
           />
           {touched.city && fieldErrors.city && (
-            <p id="error-city" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.city}</p>
+            <p id="error-city" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.city)}</p>
           )}
         </div>
 
@@ -263,7 +273,7 @@ export default function CustomerDetailsForm({
             data-testid="checkout-postal"
           />
           {touched.postcode && fieldErrors.postcode && (
-            <p id="error-postcode" role="alert" className="text-xs text-red-600 mt-1">{fieldErrors.postcode}</p>
+            <p id="error-postcode" role="alert" className="text-xs text-red-600 mt-1">{t(fieldErrors.postcode)}</p>
           )}
         </div>
       </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/cn';
@@ -38,6 +39,15 @@ export function AdminSidebar({ onClose }: { onClose: () => void }) {
     if (href === '/admin') return pathname === '/admin';
     return pathname.startsWith(href);
   }
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch('/api/auth/admin-logout', { method: 'POST' });
+    } catch {
+      // Cookie clear failed — redirect anyway
+    }
+    window.location.href = '/auth/admin-login';
+  }, []);
 
   return (
     <div className="flex flex-col h-full" data-testid="admin-sidebar">
@@ -83,7 +93,17 @@ export function AdminSidebar({ onClose }: { onClose: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-neutral-200 px-4 py-3 shrink-0">
+      <div className="border-t border-neutral-200 px-4 py-3 shrink-0 space-y-2">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-xs text-red-400 hover:text-red-600 transition-colors w-full"
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
+          Αποσύνδεση
+        </button>
         <Link
           href="/"
           className="flex items-center gap-2 text-xs text-neutral-400 hover:text-neutral-600 transition-colors"

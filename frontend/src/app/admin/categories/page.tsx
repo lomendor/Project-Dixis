@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AuthGuard from '@/components/AuthGuard';
 import { useToast } from '@/contexts/ToastContext';
 
 interface Category {
@@ -14,15 +13,17 @@ interface Category {
   isActive: boolean;
 }
 
+/**
+ * Pass FIX-CATEGORIES-AUTH-01: Removed AuthGuard wrapper.
+ *
+ * AuthGuard uses useAuth() → apiClient.getProfile() which checks Laravel
+ * consumer/producer auth. Admin OTP login creates a dixis_session JWT,
+ * NOT a Laravel session, so AuthGuard always fails → redirect to /auth/login.
+ *
+ * Server-side auth is already handled by admin/layout.tsx (requireAdmin()),
+ * so the client-side AuthGuard was redundant AND broken for admin pages.
+ */
 export default function AdminCategoriesPage() {
-  return (
-    <AuthGuard requireAuth={true} requireRole="admin">
-      <AdminCategoriesContent />
-    </AuthGuard>
-  );
-}
-
-function AdminCategoriesContent() {
   const { showSuccess, showError } = useToast();
 
   // State

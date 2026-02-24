@@ -57,8 +57,7 @@ export default function OrderSummary({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-amber-800">
-              Η παραγγελία σας περιλαμβάνει προϊόντα από {cartShippingQuote.producers.length} παραγωγούς.
-              Θα λάβετε <strong>ξεχωριστά δέματα</strong> από κάθε παραγωγό.
+              {t('checkoutPage.multiProducerNotice', { count: cartShippingQuote.producers.length })}
             </p>
           </div>
         )}
@@ -82,7 +81,7 @@ export default function OrderSummary({
         {/* COD fee row */}
         {cartShippingQuote && cartShippingQuote.cod_fee > 0 && (
           <div className="flex justify-between text-sm" data-testid="cod-fee-line">
-            <span>Αντικαταβολή:</span>
+            <span>{t('checkoutPage.codFeeLabel')}:</span>
             <span>{fmt.format(cartShippingQuote.cod_fee)}</span>
           </div>
         )}
@@ -93,7 +92,7 @@ export default function OrderSummary({
             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Εκτιμώμενη παράδοση: 2–5 εργάσιμες ημέρες</span>
+            <span>{t('checkoutPage.estimatedDelivery')}</span>
           </div>
         )}
 

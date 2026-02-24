@@ -1,22 +1,27 @@
 import { NextResponse } from 'next/server';
 import { sendMail } from '@/server/mailer';
+import { getSessionPhone } from '@/lib/auth/session';
 
 /**
  * Onboarding V2: Notify admin when a producer submits onboarding.
  * Called fire-and-forget from the onboarding form — failure is non-blocking.
- * Auth: requires Laravel Sanctum Bearer token (producer role).
+ * Auth: OTP session cookie (dixis_session) OR Laravel session cookies.
  */
 
-async function validateLaravelToken(req: Request): Promise<boolean> {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return false;
-  const laravelBase =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.LARAVEL_API_URL ||
-    'http://127.0.0.1:8001/api/v1';
+async function validateLaravelSession(req: Request): Promise<boolean> {
+  const cookieHeader = req.headers.get('cookie');
+  if (!cookieHeader) return false;
+
+  // Use internal Laravel URL — NOT NEXT_PUBLIC_API_BASE_URL which points to Next.js itself
+  const laravelOrigin = process.env.LARAVEL_INTERNAL_URL || 'http://127.0.0.1:8001';
   try {
-    const resp = await fetch(`${laravelBase}/user`, {
-      headers: { Authorization: authHeader, Accept: 'application/json' },
+    const resp = await fetch(`${laravelOrigin}/api/user`, {
+      headers: {
+        'Cookie': cookieHeader,
+        'Accept': 'application/json',
+        'Referer': 'https://dixis.gr/',
+        'Origin': 'https://dixis.gr',
+      },
     });
     return resp.ok;
   } catch {
@@ -25,16 +30,18 @@ async function validateLaravelToken(req: Request): Promise<boolean> {
 }
 
 export async function POST(req: Request) {
-  // Auth check — must be authenticated
-  const isAuth = await validateLaravelToken(req);
-  if (!isAuth) {
-    return new NextResponse('Auth required', { status: 401 });
+  // Auth check — support both OTP session and Laravel session
+  const phone = await getSessionPhone();
+  const hasLaravelAuth = !phone ? await validateLaravelSession(req) : false;
+
+  if (!phone && !hasLaravelAuth) {
+    return NextResponse.json({ error: 'Auth required' }, { status: 401 });
   }
 
   try {
     const body = await req.json();
     const businessName = String(body.business_name || '').slice(0, 200);
-    const phone = String(body.phone || '').slice(0, 50);
+    const phoneField = String(body.phone || '').slice(0, 50);
     const email = String(body.email || '').slice(0, 200);
     const city = String(body.city || '').slice(0, 100);
     const categories = Array.isArray(body.product_categories)
@@ -51,7 +58,7 @@ export async function POST(req: Request) {
       `Νέα αίτηση παραγωγού στο Dixis!`,
       ``,
       `Επωνυμία: ${businessName}`,
-      `Τηλέφωνο: ${phone}`,
+      `Τηλέφωνο: ${phoneField}`,
       `Email: ${email || '-'}`,
       `Πόλη: ${city || '-'}`,
       `Κατηγορίες: ${categories}`,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { requireAdmin } from '@/lib/auth/admin';
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 import { prisma } from '@/lib/db/client';
 
 export const dynamic = 'force-dynamic';
@@ -16,9 +17,8 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     await requireAdmin();
-  } catch (e) {
-    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 
   const rawId = ctx?.params?.id;
@@ -30,16 +30,14 @@ export async function GET(
   const laravelId = rawId.startsWith('A-') ? rawId.slice(2) : rawId;
 
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value
-      || new Headers(req.headers).get('authorization')?.replace('Bearer ', '');
+    const token = await getAdminToken();
 
     if (token) {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+      const laravelBase = getLaravelInternalUrl();
 
       // Search for this specific order by ID
       const laravelRes = await fetch(
-        `${apiBase}/admin/orders?q=${encodeURIComponent(laravelId)}&per_page=1`,
+        `${laravelBase}/admin/orders?q=${encodeURIComponent(laravelId)}&per_page=1`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

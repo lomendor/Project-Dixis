@@ -160,7 +160,9 @@ model RateLimit {
   @@index([name, key, bucket])
 }
 
-// CheckoutOrder + PaymentStatus enum DELETED (H1-ORDER-MODEL Phase 1)
+// CheckoutOrder + PaymentStatus enum DELETED (H1-ORDER-MODEL Phase 1) — model
+// was never populated in production. All order data lives in Laravel (SSOT).
+// See docs/PRODUCT/ARCH-AUDIT-2026-02-12.md H1 for plan.
 
 model Waitlist {
   id        String   @id @default(cuid())

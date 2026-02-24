@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy'
 import { getLaravelInternalUrl } from '@/env'
-import { cookies } from 'next/headers'
 
 /**
  * PRODUCER-ONBOARD-01: Approve producer — proxy to Laravel SSOT
- * Replaces previous Prisma-based approve with Laravel admin endpoint
  */
-
-async function getAuthToken(req: NextRequest): Promise<string | null> {
-  const cookieStore = await cookies()
-  return cookieStore.get('auth_token')?.value
-    || cookieStore.get('dixis_session')?.value
-    || req.headers.get('authorization')?.replace('Bearer ', '')
-    || null
-}
 
 export async function POST(
   request: NextRequest,
@@ -22,8 +13,8 @@ export async function POST(
 ) {
   try {
     await requireAdmin()
-  } catch {
-    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  } catch (error) {
+    return handleAdminError(error)
   }
 
   const { id: producerId } = await params
@@ -33,7 +24,7 @@ export async function POST(
   }
 
   try {
-    const token = await getAuthToken(request)
+    const token = await getAdminToken()
     const laravelBase = getLaravelInternalUrl()
     const url = `${laravelBase}/admin/producers/${producerId}/approve`
 

@@ -382,12 +382,12 @@ class CheckoutService
             return 0.0;
         }
 
-        // Calculate total weight from items (default 0.5kg per item)
+        // Calculate total weight from items (weight_per_unit is in grams since migration 2026_02_22_400000)
         $totalWeightKg = 0.0;
         foreach ($items as $item) {
             $product = $item['product'];
             $qty = $item['quantity'] ?? 1;
-            $weightPerUnit = $product->weight_per_unit ?? 0.5; // Default 0.5kg
+            $weightPerUnit = ($product->weight_per_unit ?? 500) / 1000; // grams → kg, default 500g
             $totalWeightKg += $weightPerUnit * $qty;
         }
 
@@ -413,12 +413,12 @@ class CheckoutService
      */
     private function calculateProducerShippingWithDetails(array $items, float $subtotal, array $options, bool $isPickup, ?Producer $producer = null): array
     {
-        // Calculate total weight from items (default 0.5kg per item)
+        // Calculate total weight from items (weight_per_unit is in grams since migration 2026_02_22_400000)
         $totalWeightKg = 0.0;
         foreach ($items as $item) {
             $product = $item['product'];
             $qty = $item['quantity'] ?? 1;
-            $weightPerUnit = $product->weight_per_unit ?? 0.5; // Default 0.5kg
+            $weightPerUnit = ($product->weight_per_unit ?? 500) / 1000; // grams → kg, default 500g
             $totalWeightKg += $weightPerUnit * $qty;
         }
         $weightGrams = (int) round($totalWeightKg * 1000);

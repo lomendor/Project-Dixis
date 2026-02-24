@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from '@/contexts/LocaleContext'
+
 export default function CheckoutError({
   error,
   reset,
@@ -7,13 +9,15 @@ export default function CheckoutError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations()
+
   return (
     <main style={{ padding: 24, textAlign: 'center' }}>
       <h1 style={{ fontSize: 24, fontWeight: 700, color: '#dc2626', marginBottom: 8 }}>
-        Σφάλμα στο Checkout
+        {t('checkoutPage.errorTitle')}
       </h1>
       <p style={{ color: '#666', marginBottom: 16 }}>
-        Παρουσιάστηκε πρόβλημα κατά την ολοκλήρωση της παραγγελίας σας.
+        {t('checkoutPage.errorMessage')}
       </p>
       <button
         onClick={reset}
@@ -27,7 +31,7 @@ export default function CheckoutError({
           fontWeight: 600,
         }}
       >
-        Δοκιμάστε ξανά
+        {t('common.tryAgain')}
       </button>
     </main>
   );

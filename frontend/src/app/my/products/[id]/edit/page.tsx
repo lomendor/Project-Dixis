@@ -69,7 +69,7 @@ function EditProductContent() {
     { value: 'peanuts', label: 'Αράπικα φιστίκια' },
     { value: 'soybeans', label: 'Σόγια' },
     { value: 'milk', label: 'Γάλα' },
-    { value: 'nuts', label: 'Ξηροί καρποί' },
+    { value: 'tree_nuts', label: 'Ξηροί καρποί' },
     { value: 'celery', label: 'Σέλινο' },
     { value: 'mustard', label: 'Μουστάρδα' },
     { value: 'sesame', label: 'Σουσάμι' },
@@ -398,7 +398,8 @@ function EditProductContent() {
                 Αλλεργιογόνα (EU 1169/2011)
               </label>
               <p className="text-xs text-neutral-500 mb-2">
-                Επιλέξτε τα αλλεργιογόνα που περιέχει το προϊόν
+                Επιλέξτε τα αλλεργιογόνα που περιέχει το προϊόν.
+                Αν το προϊόν δεν περιέχει αλλεργιογόνα, αφήστε όλα τα κουτιά κενά.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" data-testid="allergens-grid">
                 {EU_ALLERGENS.map((a) => (

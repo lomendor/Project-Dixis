@@ -1,33 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy'
 import { getLaravelInternalUrl } from '@/env'
-import { cookies } from 'next/headers'
 
 /**
  * PRODUCER-ONBOARD-01: Admin producer list — proxy to Laravel SSOT
- * Replaces previous public-endpoint proxy with admin-authenticated endpoint
  */
-
-async function getAuthToken(req: NextRequest): Promise<string | null> {
-  const cookieStore = await cookies()
-  return cookieStore.get('auth_token')?.value
-    || cookieStore.get('dixis_session')?.value
-    || req.headers.get('authorization')?.replace('Bearer ', '')
-    || null
-}
 
 export async function GET(req: NextRequest) {
   try {
     await requireAdmin()
-  } catch {
-    return NextResponse.json({ error: 'Απαιτείται σύνδεση διαχειριστή' }, { status: 403 })
+  } catch (error) {
+    return handleAdminError(error)
   }
 
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status') || 'all'
 
   try {
-    const token = await getAuthToken(req)
+    const token = await getAdminToken()
     const laravelBase = getLaravelInternalUrl()
     const url = new URL(`${laravelBase}/admin/producers`)
     url.searchParams.set('status', status)

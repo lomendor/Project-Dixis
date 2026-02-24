@@ -3,7 +3,13 @@ import * as React from 'react';
 export default function Thanks(){
   const [order, setOrder] = React.useState<any>(null);
   React.useEffect(()=>{
-    try { const raw = sessionStorage.getItem('dixis:last-order'); if(raw) setOrder(JSON.parse(raw)); } catch {}
+    try {
+      const raw = sessionStorage.getItem('dixis:last-order');
+      if(raw) {
+        setOrder(JSON.parse(raw));
+        sessionStorage.removeItem('dixis:last-order'); // Clear PII after reading
+      }
+    } catch {}
   },[]);
   return (
     <main>

@@ -63,7 +63,7 @@ const REGIONS = [
 
 export default function ProducerOnboardingPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +100,9 @@ export default function ProducerOnboardingPage() {
   const [responsiblePerson, setResponsiblePerson] = useState('');
 
   // Check auth + load existing profile
+  // Wait for auth to finish loading before checking role/redirect
   useEffect(() => {
+    if (authLoading) return; // Auth still initialising — wait
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -110,7 +112,7 @@ export default function ProducerOnboardingPage() {
       return;
     }
     loadProfile();
-  }, [isAuthenticated, user]);
+  }, [authLoading, isAuthenticated, user]);
 
   const loadProfile = async () => {
     try {
@@ -155,8 +157,13 @@ export default function ProducerOnboardingPage() {
         if (p.cpnp_notification_number) setCpnpNumber(p.cpnp_notification_number);
         if (p.responsible_person_name) setResponsiblePerson(p.responsible_person_name);
       }
-    } catch {
-      // No profile yet — show form (expected for new registrations)
+    } catch (err: unknown) {
+      // 404 = no profile yet → show form (expected for new registrations)
+      // Other errors = real API failure → show error message
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status && status !== 404) {
+        setError('Σφάλμα φόρτωσης προφίλ. Παρακαλώ ανανεώστε τη σελίδα.');
+      }
     } finally {
       setLoading(false);
     }
@@ -176,12 +183,10 @@ export default function ProducerOnboardingPage() {
 
   /** Fire-and-forget admin email notification */
   const notifyAdmin = () => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (token) headers['Authorization'] = `Bearer ${token}`;
     fetch('/api/ops/notify-onboarding', {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         business_name: form.business_name,
         phone: form.phone,

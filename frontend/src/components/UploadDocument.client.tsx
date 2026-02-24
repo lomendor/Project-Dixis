@@ -39,17 +39,17 @@ export default function UploadDocument({
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const headers: Record<string, string> = {};
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth_token');
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-      }
-      const r = await fetch('/api/me/uploads', { method: 'POST', body: fd, headers });
-      const j = await r.json();
+      const r = await fetch('/api/me/uploads', {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
+      });
       if (!r.ok) {
-        setErr(j?.error || 'Σφάλμα ανεβάσματος');
+        const j = await r.json().catch((): null => null);
+        setErr(j?.error || (r.status === 401 ? 'Απαιτείται σύνδεση' : 'Σφάλμα ανεβάσματος'));
         return;
       }
+      const j = await r.json();
       onChange(j.url);
     } finally {
       setBusy(false);

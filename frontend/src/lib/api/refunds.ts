@@ -38,9 +38,9 @@ export const refundApi = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Accept': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -58,9 +58,9 @@ export const refundApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Accept': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(refundData),
     });
 
@@ -80,9 +80,9 @@ export const refundApi = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         'Accept': 'application/json',
       },
+      credentials: 'include',
     });
 
     if (!response.ok) {

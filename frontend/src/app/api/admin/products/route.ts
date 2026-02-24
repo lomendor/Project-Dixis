@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin, AdminError } from '@/lib/auth/admin'
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies'
 import { getLaravelInternalUrl } from '@/env'
 import { toStorefrontSlug } from '@/lib/category-map'
 import { z } from 'zod'
@@ -27,7 +28,7 @@ const CreateProductSchema = z.object({
  */
 async function getSessionToken(): Promise<string | null> {
   const cookieStore = await cookies()
-  return cookieStore.get('dixis_session')?.value ?? null
+  return cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null
 }
 
 /**

@@ -6,13 +6,14 @@
 import type { PaymentMethod } from '../validation/checkout';
 
 export const PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: 'cash_on_delivery',
-    type: 'cash_on_delivery',
+  // COD gated by env flag — can be re-enabled with NEXT_PUBLIC_ENABLE_COD=true
+  ...(process.env.NEXT_PUBLIC_ENABLE_COD === 'true' ? [{
+    id: 'cash_on_delivery' as const,
+    type: 'cash_on_delivery' as const,
     name: 'Αντικαταβολή',
     description: 'Πληρωμή κατά την παραλαβή',
     fixed_fee: 2.00,
-  },
+  }] : []),
   {
     id: 'card',
     type: 'card',
@@ -28,7 +29,8 @@ export function getPaymentMethodById(id: string): PaymentMethod | undefined {
 }
 
 export function getDefaultPaymentMethod(): PaymentMethod {
-  return PAYMENT_METHODS[0]; // Default to cash on delivery for compatibility
+  // When COD is disabled, first item is card
+  return PAYMENT_METHODS[0];
 }
 
 export function calculatePaymentFees(paymentMethod: PaymentMethod, subtotal: number): number {

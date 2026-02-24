@@ -1,23 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { requireProducer } from '@/lib/auth/requireProducer';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
 import { cookies } from 'next/headers';
+import { getLaravelInternalUrl } from '@/env';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8001/api/v1';
+/**
+ * Pass PAYOUT-04: Proxy GET /api/producer/settlements → Laravel
+ *
+ * Fixed: Previously read 'auth_token' cookie which is never set by OTP auth.
+ * Now uses requireProducer() + 'dixis_session' cookie (same pattern as /api/me/products).
+ */
+export async function GET() {
+  try {
+    await requireProducer();
 
-async function getToken(req: NextRequest): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  return cookieStore.get('auth_token')?.value || req.headers.get('authorization')?.replace('Bearer ', '') || undefined;
-}
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
+    }
 
-/** Pass PAYOUT-04: Proxy GET /api/producer/settlements → Laravel */
-export async function GET(req: NextRequest) {
-  const token = await getToken(req);
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const res = await fetch(`${getLaravelInternalUrl()}/producer/settlements`, {
+      headers: { Authorization: `Bearer ${sessionToken}`, Accept: 'application/json' },
+      cache: 'no-store',
+    });
 
-  const res = await fetch(`${API_BASE}/producer/settlements`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    cache: 'no-store',
-  });
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    console.error('[producer/settlements] Error:', error);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
