@@ -35,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.optional' => \App\Http\Middleware\OptionalSanctumAuth::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'jwt.admin' => \App\Http\Middleware\VerifyAdminJwt::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
