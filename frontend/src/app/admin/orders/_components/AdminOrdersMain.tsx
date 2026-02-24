@@ -1,19 +1,20 @@
 'use client';
 import React from 'react';
+import Link from 'next/link';
 import { useOrdersFilters } from '../_hooks/useOrdersFilters';
 import StatusChip from '@/components/StatusChip';
 import FilterChips from '@/components/FilterChips';
 
 type Status = 'pending'|'paid'|'shipped'|'cancelled'|'refunded';
-type Row = { id: string; customer: string; total: string; status: Status };
+type Row = { id: string; rawId: string; customer: string; total: string; status: Status };
 
 const LOCAL_DEMO: Row[] = [
-  { id:'A-2001', customer:'Μαρία',   total:'€42.00',  status:'pending'  },
-  { id:'A-2002', customer:'Γιάννης', total:'€99.90',  status:'paid'     },
-  { id:'A-2003', customer:'Ελένη',   total:'€12.00',  status:'refunded' },
-  { id:'A-2004', customer:'Νίκος',   total:'€59.00',  status:'cancelled'},
-  { id:'A-2005', customer:'Άννα',    total:'€19.50',  status:'shipped'  },
-  { id:'A-2006', customer:'Κώστας',  total:'€31.70',  status:'pending'  },
+  { id:'A-2001', rawId:'2001', customer:'Μαρία',   total:'€42.00',  status:'pending'  },
+  { id:'A-2002', rawId:'2002', customer:'Γιάννης', total:'€99.90',  status:'paid'     },
+  { id:'A-2003', rawId:'2003', customer:'Ελένη',   total:'€12.00',  status:'refunded' },
+  { id:'A-2004', rawId:'2004', customer:'Νίκος',   total:'€59.00',  status:'cancelled'},
+  { id:'A-2005', rawId:'2005', customer:'Άννα',    total:'€19.50',  status:'shipped'  },
+  { id:'A-2006', rawId:'2006', customer:'Κώστας',  total:'€31.70',  status:'pending'  },
 ];
 
 export default function AdminOrdersMain() {
@@ -269,6 +270,7 @@ export default function AdminOrdersMain() {
           const orders = json.orders || json.data || [];
           items = orders.map((o: Record<string, unknown>) => ({
             id: `A-${o.id}`,
+            rawId: String(o.id),
             customer: (o.user as Record<string, unknown>)?.name || (o.user as Record<string, unknown>)?.email || 'N/A',
             total: `€${Number(o.total_amount || 0).toFixed(2)}`,
             status: o.status as Status,
@@ -596,7 +598,7 @@ export default function AdminOrdersMain() {
         {rows.map(o=>(
           <div key={o.id} role="row" data-testid={`row-${o.status}`} style={{display:'grid', gridTemplateColumns:'32px 1.2fr 2fr 1fr 1.2fr', gap:12, alignItems:'center', padding:'8px 0', borderTop:'1px solid #eee'}}>
             <div><input type="checkbox" data-testid={`select-${o.id}`} checked={selected.has(o.id)} onChange={()=>toggleSelect(o.id)} aria-label={`Επιλογή ${o.id}`} /></div>
-            <div>{o.id}</div><div>{o.customer}</div><div>{o.total}</div><div><StatusChip status={o.status} /></div>
+            <div><Link href={`/admin/orders/${o.rawId}`} className="text-emerald-700 hover:text-emerald-900 hover:underline font-medium">{o.id}</Link></div><div>{o.customer}</div><div>{o.total}</div><div><StatusChip status={o.status} /></div>
           </div>
         ))}
         {rows.length===0 && <div data-testid="no-results" style={{padding:24, color:'#666', border:'1px dashed #ccc', borderRadius:8}}>Καμία παραγγελία για τα επιλεγμένα φίλτρα.</div>}
