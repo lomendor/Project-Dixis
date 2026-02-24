@@ -7,17 +7,22 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 const MAX = 10 * 1024 * 1024; // 10MB limit (PDFs can be larger)
 
 /**
- * Validate Laravel Sanctum session by forwarding cookies to Laravel /api/v1/user.
+ * Validate Laravel Sanctum session by forwarding cookies to Laravel /api/user.
  * Works for regular users who login via email/password (not OTP).
  * The browser sends laravel_session + XSRF-TOKEN cookies via credentials: 'include'.
+ *
+ * IMPORTANT: Laravel's auth route is /api/user (NOT /api/v1/user).
+ * We call the Laravel backend directly (127.0.0.1:8001), not through the
+ * public URL which would loop back through Next.js.
  */
 async function validateLaravelSession(req: Request): Promise<boolean> {
   const cookieHeader = req.headers.get('cookie');
   if (!cookieHeader) return false;
 
-  const laravelBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.LARAVEL_API_URL || 'http://127.0.0.1:8001/api/v1';
+  // Use internal Laravel URL — NOT NEXT_PUBLIC_API_BASE_URL which points to Next.js itself
+  const laravelOrigin = process.env.LARAVEL_INTERNAL_URL || 'http://127.0.0.1:8001';
   try {
-    const resp = await fetch(`${laravelBase}/user`, {
+    const resp = await fetch(`${laravelOrigin}/api/user`, {
       headers: {
         'Cookie': cookieHeader,
         'Accept': 'application/json',

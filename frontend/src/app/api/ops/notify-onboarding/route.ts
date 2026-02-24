@@ -12,9 +12,10 @@ async function validateLaravelSession(req: Request): Promise<boolean> {
   const cookieHeader = req.headers.get('cookie');
   if (!cookieHeader) return false;
 
-  const laravelBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.LARAVEL_API_URL || 'http://127.0.0.1:8001/api/v1';
+  // Use internal Laravel URL — NOT NEXT_PUBLIC_API_BASE_URL which points to Next.js itself
+  const laravelOrigin = process.env.LARAVEL_INTERNAL_URL || 'http://127.0.0.1:8001';
   try {
-    const resp = await fetch(`${laravelBase}/user`, {
+    const resp = await fetch(`${laravelOrigin}/api/user`, {
       headers: { 'Cookie': cookieHeader, 'Accept': 'application/json' },
     });
     return resp.ok;
