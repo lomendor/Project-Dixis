@@ -63,7 +63,7 @@ const REGIONS = [
 
 export default function ProducerOnboardingPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +100,9 @@ export default function ProducerOnboardingPage() {
   const [responsiblePerson, setResponsiblePerson] = useState('');
 
   // Check auth + load existing profile
+  // Wait for auth to finish loading before checking role/redirect
   useEffect(() => {
+    if (authLoading) return; // Auth still initialising — wait
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -110,7 +112,7 @@ export default function ProducerOnboardingPage() {
       return;
     }
     loadProfile();
-  }, [isAuthenticated, user]);
+  }, [authLoading, isAuthenticated, user]);
 
   const loadProfile = async () => {
     try {
