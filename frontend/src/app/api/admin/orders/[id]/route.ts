@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
 import { getLaravelInternalUrl } from '@/env';
+import { prisma } from '@/lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,13 +91,57 @@ export async function GET(
           });
         }
 
-        return new NextResponse('not found', { status: 404 });
+        // Laravel found no match — try Prisma fallback (dashboard uses cuid IDs)
       }
 
-      return NextResponse.json({ error: 'Unauthorized' }, { status: laravelRes.status });
+      // Laravel returned non-OK or no match — fall through to Prisma
     }
   } catch (err) {
     console.error('[admin/orders/[id]] Laravel proxy error:', err);
+  }
+
+  // Prisma fallback: dashboard links use cuid IDs
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: rawId },
+      include: { items: true },
+    });
+    if (order) {
+      return NextResponse.json({
+        id: order.id,
+        laravelId: null,
+        customer: order.buyerName || order.name || order.email || 'N/A',
+        email: order.email || null,
+        total: `€${Number(order.total || 0).toFixed(2)}`,
+        totalRaw: Number(order.total || 0),
+        subtotal: Number(order.subtotal || 0),
+        shippingCost: Number(order.shipping || 0),
+        codFee: 0,
+        status: order.status,
+        paymentStatus: null,
+        paymentMethod: null,
+        paymentRef: null,
+        shippingMethod: null,
+        shippingAddress: order.shippingLine1 ? {
+          line1: order.shippingLine1,
+          line2: order.shippingLine2,
+          city: order.shippingCity || order.city,
+          postal_code: order.shippingPostal || order.zip,
+        } : null,
+        postalCode: order.shippingPostal || order.zip || null,
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        items: order.items.map((item: { id: string; titleSnap: string | null; qty: number; price: number }) => ({
+          id: item.id,
+          productName: item.titleSnap || 'N/A',
+          quantity: item.qty,
+          unitPrice: Number(item.price || 0),
+          totalPrice: Number(item.price || 0) * item.qty,
+        })),
+      });
+    }
+  } catch (err) {
+    console.error('[admin/orders/[id]] Prisma fallback error:', err);
   }
 
   return new NextResponse('not found', { status: 404 });

@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-22 (Greek readiness audit: i18n fixes, security hardening, onboarding V2, middleware fix)
+**Updated**: 2026-02-24 (Admin session bug fix: cookie rename dixis_session → dixis_jwt)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -88,6 +88,7 @@
 
 ## Recently Done (last 10)
 
+- **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
 - **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
 - **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
 - **ONBOARDING-V2** — Producer onboarding: doc uploads (TAXIS, EFET, HACCP), product categories, bank details (IBAN), conditional fields (honey→beekeeper, cosmetics→CPNP). E2E smoke tests. (PRs #3095 + #3103, deployed 2026-02-22) ✅
