@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-type GuardState = 'loading' | 'active' | 'pending' | 'redirect';
+type GuardState = 'loading' | 'active' | 'pending' | 'redirect' | 'error';
 
 interface Props {
   children: ReactNode;
@@ -60,9 +60,10 @@ export default function ProducerOnboardingGuard({ children }: Props) {
       router.replace('/producer/onboarding');
       setState('redirect');
     } catch {
-      // API error — redirect to onboarding as safest fallback
-      router.replace('/producer/onboarding');
-      setState('redirect');
+      // Pass FIX-ONBOARDING-GUARD-01: Show error + retry instead of blind redirect.
+      // The old catch-all redirect caused a loop: guard → onboarding → same API fails
+      // → blank form (user thinks they lost their data).
+      setState('error');
     }
   };
 
@@ -78,6 +79,30 @@ export default function ProducerOnboardingGuard({ children }: Props) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (state === 'error') {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center p-8 max-w-sm">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p className="text-neutral-700 mb-4">
+            Σφάλμα φόρτωσης. Παρακαλώ δοκιμάστε ξανά.
+          </p>
+          <button
+            onClick={() => { setState('loading'); checkOnboardingStatus(); }}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            data-testid="retry-button"
+          >
+            Δοκιμάστε ξανά
+          </button>
+        </div>
       </div>
     );
   }
