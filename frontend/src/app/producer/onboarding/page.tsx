@@ -157,8 +157,13 @@ export default function ProducerOnboardingPage() {
         if (p.cpnp_notification_number) setCpnpNumber(p.cpnp_notification_number);
         if (p.responsible_person_name) setResponsiblePerson(p.responsible_person_name);
       }
-    } catch {
-      // No profile yet — show form (expected for new registrations)
+    } catch (err: unknown) {
+      // 404 = no profile yet → show form (expected for new registrations)
+      // Other errors = real API failure → show error message
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status && status !== 404) {
+        setError('Σφάλμα φόρτωσης προφίλ. Παρακαλώ ανανεώστε τη σελίδα.');
+      }
     } finally {
       setLoading(false);
     }

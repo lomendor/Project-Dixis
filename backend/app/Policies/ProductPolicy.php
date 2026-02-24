@@ -27,10 +27,17 @@ class ProductPolicy
 
     /**
      * Determine whether the user can create products.
+     * Producers must be approved (status=active) to create products.
      */
     public function create(User $user): bool
     {
-        return $user->role === 'producer' || $user->role === 'admin';
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return $user->role === 'producer'
+            && $user->producer
+            && $user->producer->status === 'active';
     }
 
     /**
