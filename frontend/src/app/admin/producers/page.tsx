@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
 import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
+import { getCategoryBySlug } from '@/data/categories'
 
 interface Producer {
   id: string
@@ -111,6 +112,11 @@ function AdminProducersContent() {
       }
 
       setProducers(items)
+      // Auto-expand first pending producer for immediate review
+      const firstPending = items.find(p => p.approvalStatus === 'pending')
+      if (firstPending && !expandedId) {
+        setExpandedId(firstPending.id)
+      }
     } catch {
       showError('Αποτυχία φόρτωσης παραγωγών')
     } finally {
@@ -263,9 +269,13 @@ function AdminProducersContent() {
                           </button>
                         </div>
                       )}
-                      <span className="text-xs text-gray-400 ml-2">
-                        {expandedId === p.id ? '▲' : '▼'}
-                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setExpandedId(expandedId === p.id ? null : p.id) }}
+                        className="px-2.5 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors ml-2"
+                        data-testid={`detail-btn-${p.id}`}
+                      >
+                        {expandedId === p.id ? 'Κλείσιμο ▲' : 'Λεπτομέρειες ▼'}
+                      </button>
                     </td>
                   </tr>
 
@@ -293,11 +303,14 @@ function AdminProducersContent() {
                             <div className="sm:col-span-2 mt-2">
                               <span className="text-gray-500">Κατηγορίες: </span>
                               <div className="inline-flex flex-wrap gap-1 ml-1">
-                                {p.productCategories.map((cat: string) => (
-                                  <span key={cat} className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                                    {cat}
-                                  </span>
-                                ))}
+                                {p.productCategories.map((slug: string) => {
+                                  const cat = getCategoryBySlug(slug)
+                                  return (
+                                    <span key={slug} className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                      {cat ? cat.labelEl : slug}
+                                    </span>
+                                  )
+                                })}
                               </div>
                             </div>
                           )}
