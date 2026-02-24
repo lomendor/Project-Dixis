@@ -9,11 +9,11 @@ const MAX = 10 * 1024 * 1024; // 10MB limit (PDFs can be larger)
 /**
  * Validate Laravel Sanctum session by forwarding cookies to Laravel /api/user.
  * Works for regular users who login via email/password (not OTP).
- * The browser sends laravel_session + XSRF-TOKEN cookies via credentials: 'include'.
+ * The browser sends dixis_session + XSRF-TOKEN cookies via credentials: 'include'.
  *
- * IMPORTANT: Laravel's auth route is /api/user (NOT /api/v1/user).
- * We call the Laravel backend directly (127.0.0.1:8001), not through the
- * public URL which would loop back through Next.js.
+ * IMPORTANT: We call Laravel directly at 127.0.0.1:8001 (not through nginx/Next.js).
+ * Referer/Origin headers are required so Sanctum treats this as a stateful SPA request
+ * and authenticates via the web session guard (not Bearer token).
  */
 async function validateLaravelSession(req: Request): Promise<boolean> {
   const cookieHeader = req.headers.get('cookie');
@@ -26,6 +26,8 @@ async function validateLaravelSession(req: Request): Promise<boolean> {
       headers: {
         'Cookie': cookieHeader,
         'Accept': 'application/json',
+        'Referer': 'https://dixis.gr/',
+        'Origin': 'https://dixis.gr',
       },
     });
     return resp.ok;
