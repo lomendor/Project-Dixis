@@ -65,13 +65,11 @@ export async function GET(
 
   try {
     const buf = await readFile(filePath);
-    // Convert Buffer to Uint8Array for NextResponse compatibility
-    const data = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-    return new NextResponse(data, {
+    return new Response(buf, {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Content-Length': String(data.length),
+        'Content-Length': String(buf.length),
         'Cache-Control': 'public, max-age=2592000, immutable',
       },
     });
