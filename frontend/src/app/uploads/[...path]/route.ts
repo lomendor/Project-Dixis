@@ -64,7 +64,9 @@ export async function GET(
   const contentType = MIME[ext] || 'application/octet-stream';
 
   try {
-    const data = await readFile(filePath);
+    const buf = await readFile(filePath);
+    // Convert Buffer to Uint8Array for NextResponse compatibility
+    const data = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
     return new NextResponse(data, {
       status: 200,
       headers: {
