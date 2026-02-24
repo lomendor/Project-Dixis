@@ -203,7 +203,11 @@ echo "Deploy metadata written to .deploy-meta.json (post-build)"
 cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 cp -r public .next/standalone/ 2>/dev/null || true
 cp .deploy-meta.json .next/standalone/ 2>/dev/null || true
-echo "Standalone prepared"
+
+# Persistent uploads: symlink so uploaded files survive deploys
+mkdir -p /var/www/dixis/shared/uploads
+ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
+echo "Standalone prepared (uploads symlinked to shared/)"
 
 echo ""
 echo "--- H2) Restore .env symlink (OPS-DEPLOY-GUARD-01) ---"
