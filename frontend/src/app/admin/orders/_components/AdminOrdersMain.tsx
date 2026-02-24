@@ -262,8 +262,11 @@ export default function AdminOrdersMain() {
         // Laravel direct returns { orders, meta: { total } } with raw data
         let items: Row[];
         if (Array.isArray(json.items)) {
-          // Next.js proxy format — items are already transformed
-          items = json.items as Row[];
+          // Next.js proxy format — items are already transformed, but ensure rawId exists
+          items = (json.items as Row[]).map((r: Row) => ({
+            ...r,
+            rawId: r.rawId || (r.id.startsWith('A-') ? r.id.slice(2) : r.id),
+          }));
         } else {
           // Laravel direct format — needs transformation
           const orders = json.orders || json.data || [];
