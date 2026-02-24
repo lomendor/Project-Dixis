@@ -1,32 +1,27 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { requireAdmin } from '@/lib/auth/admin';
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * T0-03: Admin refund proxy — POST creates refund, GET returns refund info.
+ * T0-03: Admin refund proxy -- POST creates refund, GET returns refund info.
  * Proxies to Laravel RefundController endpoints.
  */
-
-async function getToken(req: Request): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get('auth_token')?.value
-    || new Headers(req.headers).get('authorization')?.replace('Bearer ', '')
-    || null;
-}
 
 function getLaravelId(rawId: string): string {
   return rawId.startsWith('A-') ? rawId.slice(2) : rawId;
 }
 
-export async function GET(req: Request, ctx: { params: { id: string } }): Promise<NextResponse> {
-  try { await requireAdmin(); } catch (e) {
-    return NextResponse.json({ error: e instanceof AdminError ? e.message : 'Unauthorized' }, { status: 401 });
+export async function GET(_req: Request, ctx: { params: { id: string } }): Promise<NextResponse> {
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleAdminError(error);
   }
 
   const laravelId = getLaravelId(ctx.params.id);
-  const token = await getToken(req);
+  const token = await getAdminToken();
   if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 });
 
   const apiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
@@ -40,12 +35,14 @@ export async function GET(req: Request, ctx: { params: { id: string } }): Promis
 }
 
 export async function POST(req: Request, ctx: { params: { id: string } }): Promise<NextResponse> {
-  try { await requireAdmin(); } catch (e) {
-    return NextResponse.json({ error: e instanceof AdminError ? e.message : 'Unauthorized' }, { status: 401 });
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return handleAdminError(error);
   }
 
   const laravelId = getLaravelId(ctx.params.id);
-  const token = await getToken(req);
+  const token = await getAdminToken();
   if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 });
 
   const body = await req.json();

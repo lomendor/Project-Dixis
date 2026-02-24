@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth/admin';
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
 
 /**
  * Pass COD-COMPLETE: Confirm COD payment received.
@@ -8,15 +9,17 @@ import { cookies } from 'next/headers';
  * Proxies to Laravel: PATCH /api/v1/admin/orders/:id/payment/confirm
  */
 export async function POST(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get auth token
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value
-      || req.headers.get('authorization')?.replace('Bearer ', '');
+    await requireAdmin();
+  } catch (error) {
+    return handleAdminError(error);
+  }
 
+  try {
+    const token = await getAdminToken();
     if (!token) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }

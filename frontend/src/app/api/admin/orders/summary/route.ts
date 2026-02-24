@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { requireAdmin } from '@/lib/auth/admin';
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,9 +12,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   try {
     await requireAdmin();
-  } catch (e) {
-    if (e instanceof AdminError) return NextResponse.json({ error: e.message }, { status: 401 });
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 
   // Parse filters from query string (same as list endpoint)
@@ -25,9 +24,7 @@ export async function GET(req: Request) {
   const to = url.searchParams.get('to') || url.searchParams.get('toDate') || '';
 
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value
-      || new Headers(req.headers).get('authorization')?.replace('Bearer ', '');
+    const token = await getAdminToken();
 
     if (token) {
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrdersRepo, type OrderStatus, type SortArg } from '@/lib/orders/providers';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/auth/admin';
+import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
 
 /**
  * Pass 61: Admin orders list
@@ -20,8 +21,13 @@ export async function GET(req: NextRequest) {
   // Pass 61: Try Laravel API first (single source of truth)
   if (!forceDemo) {
     try {
-      const cookieStore = await cookies();
-      const token = cookieStore.get('auth_token')?.value || req.headers.get('authorization')?.replace('Bearer ', '');
+      await requireAdmin();
+    } catch (error) {
+      return handleAdminError(error);
+    }
+
+    try {
+      const token = await getAdminToken();
 
       if (token) {
         const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
