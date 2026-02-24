@@ -65,8 +65,8 @@ export async function GET(
 
   try {
     const buf = await readFile(filePath);
-    const blob = new Blob([buf], { type: contentType });
-    return new Response(blob, {
+    const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
+    return new Response(ab, {
       status: 200,
       headers: {
         'Content-Type': contentType,
