@@ -1,6 +1,15 @@
 import type { NextResponse } from 'next/server';
 
 /**
+ * SSOT cookie name for Next.js auth (admin OTP + user JWT sessions).
+ *
+ * IMPORTANT: Must NOT collide with Laravel's session cookie.
+ * Laravel uses `{slug(APP_NAME)}_session` → "dixis_session" by default.
+ * This was the root cause of admin session drops (PR #3166 diagnostic).
+ */
+export const SESSION_COOKIE_NAME = 'dixis_jwt';
+
+/**
  * Ορίζει το session cookie με ασφαλή attributes:
  * - HttpOnly: Προστασία από XSS
  * - SameSite=lax: Προστασία από CSRF
@@ -17,7 +26,7 @@ export function setSessionCookie(
     process.env.DIXIS_ENV === 'production' ||
     process.env.NODE_ENV === 'production';
 
-  res.cookies.set('dixis_session', token, {
+  res.cookies.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
@@ -30,7 +39,7 @@ export function setSessionCookie(
  * Διαγράφει το session cookie με ασφαλή τρόπο
  */
 export function clearSessionCookie(res: NextResponse): void {
-  res.cookies.set('dixis_session', '', {
+  res.cookies.set(SESSION_COOKIE_NAME, '', {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
@@ -46,7 +55,7 @@ export function getSessionToken(req: Request): string | undefined {
   if (!cookieHeader) return undefined;
 
   const cookies = cookieHeader.split(';').map(c => c.trim());
-  const sessionCookie = cookies.find(c => c.startsWith('dixis_session='));
+  const sessionCookie = cookies.find(c => c.startsWith(`${SESSION_COOKIE_NAME}=`));
 
   if (!sessionCookie) return undefined;
 

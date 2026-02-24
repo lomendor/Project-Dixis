@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin, AdminError } from '@/lib/auth/admin'
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies'
 import { logAdminAction, createRejectionContext } from '@/lib/audit/logger'
 import { getLaravelInternalUrl } from '@/env'
 import { cookies } from 'next/headers'
@@ -17,7 +18,7 @@ const RejectSchema = z.object({
 
 async function getSessionToken(): Promise<string | null> {
   const cookieStore = await cookies()
-  return cookieStore.get('dixis_session')?.value ?? null
+  return cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null
 }
 
 export async function POST(

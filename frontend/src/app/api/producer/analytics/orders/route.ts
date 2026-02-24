@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireProducer } from '@/lib/auth/requireProducer';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
 import { cookies } from 'next/headers';
 import { getLaravelInternalUrl } from '@/env';
 
@@ -9,7 +10,7 @@ export async function GET() {
     await requireProducer();
 
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
     if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
     }

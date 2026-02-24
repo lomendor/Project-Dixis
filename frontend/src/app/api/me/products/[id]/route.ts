@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireProducer } from '@/lib/auth/requireProducer';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
 import { cookies } from 'next/headers';
 
 /**
@@ -16,7 +17,7 @@ export async function GET(
     await requireProducer();
 
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
@@ -94,7 +95,7 @@ export async function PUT(
     await requireProducer();
 
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
@@ -187,7 +188,7 @@ export async function DELETE(
     await requireProducer();
 
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('dixis_session')?.value;
+    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });

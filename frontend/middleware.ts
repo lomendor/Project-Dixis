@@ -14,6 +14,8 @@ import type { NextRequest } from 'next/server';
  */
 
 const LOGIN_PATH = '/auth/login'
+// Must match SESSION_COOKIE_NAME in @/lib/auth/cookies.ts
+const SESSION_COOKIE = 'dixis_jwt'
 
 // Public routes that START with /producer but are NOT protected
 const PUBLIC_PRODUCER_PATHS = ['/producers']
@@ -68,7 +70,7 @@ export default function middleware(req: NextRequest) {
   //    Checks for session cookie (Sanctum SPA) or mock cookie (E2E tests).
   //    Does NOT verify token validity — just checks presence for fast redirect.
   if (requiresAuth(pathname)) {
-    const hasSession = req.cookies.has('dixis_session') || req.cookies.has('mock_session')
+    const hasSession = req.cookies.has(SESSION_COOKIE) || req.cookies.has('mock_session')
     if (!hasSession) {
       // In standalone mode behind nginx, both req.url and req.nextUrl contain
       // the internal PM2 URL (http://localhost:3000/...). We must reconstruct
