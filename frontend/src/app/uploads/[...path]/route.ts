@@ -65,7 +65,8 @@ export async function GET(
 
   try {
     const buf = await readFile(filePath);
-    return new Response(buf, {
+    const blob = new Blob([buf], { type: contentType });
+    return new Response(blob, {
       status: 200,
       headers: {
         'Content-Type': contentType,
