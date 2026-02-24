@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | JWT Secret (Admin Proxy Auth)
+    |--------------------------------------------------------------------------
+    |
+    | Shared HS256 secret between Next.js frontend and Laravel backend.
+    | Used by VerifyAdminJwt middleware to verify admin proxy requests.
+    | Must match the JWT_SECRET in the frontend .env.
+    |
+    */
+
+    'jwt_secret' => env('JWT_SECRET'),
+
 ];
