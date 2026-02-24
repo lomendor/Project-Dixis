@@ -7,18 +7,19 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 const MAX = 10 * 1024 * 1024; // 10MB limit (PDFs can be larger)
 
 /**
- * Validate Laravel Sanctum Bearer token by calling Laravel /api/v1/user.
- * Returns true if the token is valid (any authenticated role).
+ * Validate Laravel Sanctum session by forwarding cookies to Laravel /api/v1/user.
+ * Works for regular users who login via email/password (not OTP).
+ * The browser sends laravel_session + XSRF-TOKEN cookies via credentials: 'include'.
  */
-async function validateLaravelToken(req: Request): Promise<boolean> {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return false;
+async function validateLaravelSession(req: Request): Promise<boolean> {
+  const cookieHeader = req.headers.get('cookie');
+  if (!cookieHeader) return false;
 
   const laravelBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.LARAVEL_API_URL || 'http://127.0.0.1:8001/api/v1';
   try {
     const resp = await fetch(`${laravelBase}/user`, {
       headers: {
-        'Authorization': authHeader,
+        'Cookie': cookieHeader,
         'Accept': 'application/json',
       },
     });
@@ -29,12 +30,12 @@ async function validateLaravelToken(req: Request): Promise<boolean> {
 }
 
 export async function POST(req: Request) {
-  // Auth: Support both admin phone-session AND Laravel Sanctum Bearer token
+  // Auth: Support both admin OTP session AND regular user Laravel session
   const phone = await getSessionPhone();
-  const hasLaravelAuth = !phone ? await validateLaravelToken(req) : false;
+  const hasLaravelAuth = !phone ? await validateLaravelSession(req) : false;
 
   if (!phone && !hasLaravelAuth) {
-    return new NextResponse('Auth required', { status: 401 });
+    return NextResponse.json({ error: 'Auth required' }, { status: 401 });
   }
 
   const form = await (req as any).formData().catch((): null => null);

@@ -5,14 +5,31 @@ import { getSessionPhone } from '@/lib/auth/session';
 /**
  * Onboarding V2: Notify admin when a producer submits onboarding.
  * Called fire-and-forget from the onboarding form — failure is non-blocking.
- * Auth: OTP session cookie (dixis_session) or Laravel Sanctum Bearer token.
+ * Auth: OTP session cookie (dixis_session) OR Laravel session cookies.
  */
 
+async function validateLaravelSession(req: Request): Promise<boolean> {
+  const cookieHeader = req.headers.get('cookie');
+  if (!cookieHeader) return false;
+
+  const laravelBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.LARAVEL_API_URL || 'http://127.0.0.1:8001/api/v1';
+  try {
+    const resp = await fetch(`${laravelBase}/user`, {
+      headers: { 'Cookie': cookieHeader, 'Accept': 'application/json' },
+    });
+    return resp.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
-  // Auth check — support both OTP session and Bearer token
+  // Auth check — support both OTP session and Laravel session
   const phone = await getSessionPhone();
-  if (!phone) {
-    return new NextResponse('Auth required', { status: 401 });
+  const hasLaravelAuth = !phone ? await validateLaravelSession(req) : false;
+
+  if (!phone && !hasLaravelAuth) {
+    return NextResponse.json({ error: 'Auth required' }, { status: 401 });
   }
 
   try {
