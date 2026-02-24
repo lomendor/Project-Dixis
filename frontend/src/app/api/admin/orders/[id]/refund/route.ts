@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +25,8 @@ export async function GET(_req: Request, ctx: { params: { id: string } }): Promi
   const token = await getAdminToken();
   if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 });
 
-  const apiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-  const res = await fetch(`${apiBase}/refunds/orders/${laravelId}`, {
+  const laravelBase = getLaravelInternalUrl();
+  const res = await fetch(`${laravelBase}/refunds/orders/${laravelId}`, {
     headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
     cache: 'no-store',
   });
@@ -46,8 +47,8 @@ export async function POST(req: Request, ctx: { params: { id: string } }): Promi
   if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 });
 
   const body = await req.json();
-  const apiBase = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
-  const res = await fetch(`${apiBase}/refunds/orders/${laravelId}`, {
+  const laravelBase = getLaravelInternalUrl();
+  const res = await fetch(`${laravelBase}/refunds/orders/${laravelId}`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,

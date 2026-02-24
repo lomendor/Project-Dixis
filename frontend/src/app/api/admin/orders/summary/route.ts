@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { getAdminToken, handleAdminError } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
     const token = await getAdminToken();
 
     if (token) {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
+      const laravelBase = getLaravelInternalUrl();
       const params = new URLSearchParams();
       if (status) params.set('status', status);
       if (q) params.set('q', q);
@@ -35,7 +36,7 @@ export async function GET(req: Request) {
       if (to) params.set('to_date', to);
       params.set('per_page', '1'); // minimal payload — we only need meta+stats
 
-      const laravelRes = await fetch(`${apiBase}/admin/orders?${params.toString()}`, {
+      const laravelRes = await fetch(`${laravelBase}/admin/orders?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
