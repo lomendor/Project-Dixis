@@ -6,6 +6,15 @@ import { prisma } from '@/lib/db/client';
 
 export const dynamic = 'force-dynamic';
 
+/** Map Laravel status names to Next.js equivalents */
+function normalizeLaravelStatus(s: string): string {
+  const map: Record<string, string> = {
+    processing: 'PACKING',
+    confirmed: 'PAID',
+  };
+  return map[s?.toLowerCase()] || s?.toUpperCase() || 'PENDING';
+}
+
 /**
  * H1-ORDER-MODEL Phase 2: Proxy to Laravel for admin order detail.
  * Laravel doesn't have a dedicated GET /admin/orders/:id endpoint yet,
@@ -72,7 +81,7 @@ export async function GET(
             subtotal: Number(match.subtotal || 0),
             shippingCost: Number(match.shipping_cost || match.shipping_amount || 0),
             codFee: Number(match.cod_fee || 0),
-            status: match.status,
+            status: normalizeLaravelStatus(match.status),
             paymentStatus: match.payment_status,
             paymentMethod: match.payment_method,
             paymentRef: match.payment_reference || null,
