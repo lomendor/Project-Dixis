@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
 import AuthGuard from '@/components/AuthGuard';
-import ProducerOnboardingGuard from '@/components/ProducerOnboardingGuard';
+import ProducerOnboardingGuard, { useProducerStatus } from '@/components/ProducerOnboardingGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslations } from '@/contexts/LocaleContext';
@@ -29,6 +29,8 @@ export default function ProducerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const producerStatus = useProducerStatus();
+  const isPending = producerStatus === 'pending';
 
   useEffect(() => {
     loadDashboardData();
@@ -198,7 +200,9 @@ export default function ProducerDashboard() {
                     </p>
                     <button
                       onClick={() => router.push('/my/products/create')}
-                      className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg"
+                      disabled={isPending}
+                      className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={isPending ? 'Αναμένεται έγκριση λογαριασμού' : undefined}
                     >
                       {t('producerDashboard.addProduct')}
                     </button>
@@ -329,9 +333,11 @@ export default function ProducerDashboard() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <button
-                  onClick={() => router.push('/my/products/create')}
-                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+                  onClick={() => !isPending && router.push('/my/products/create')}
+                  disabled={isPending}
+                  className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                   data-testid="quick-action-add-product"
+                  title={isPending ? 'Αναμένεται έγκριση λογαριασμού' : undefined}
                 >
                   <svg className="w-5 h-5 text-neutral-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
