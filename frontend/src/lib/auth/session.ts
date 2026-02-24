@@ -25,6 +25,25 @@ interface JwtPayload {
 }
 
 /**
+ * Quick structural check: a valid JWT has exactly 3 base64url segments separated by dots.
+ * Returns false for empty strings, truncated tokens, or non-JWT values.
+ */
+function isJwtFormat(value: string): boolean {
+  return value.split('.').length === 3;
+}
+
+/**
+ * Log diagnostic info for a malformed cookie value (no PII — JWT header is not sensitive).
+ */
+function logMalformedCookie(source: string, value: string): void {
+  const dots = value.split('.').length - 1;
+  const preview = value.substring(0, 20);
+  console.warn(
+    `[Session] ${source}: not JWT format | len=${value.length} dots=${dots} preview="${preview}…"`
+  );
+}
+
+/**
  * Extract phone number from JWT session cookie
  *
  * Session token format: JWT (cryptographically signed)
@@ -36,6 +55,12 @@ export async function getSessionPhone(): Promise<string | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get('dixis_session');
   if (!session?.value) return null;
+
+  // Pre-validate JWT structure to avoid cryptic "jwt malformed" errors
+  if (!isJwtFormat(session.value)) {
+    logMalformedCookie('getSessionPhone', session.value);
+    return null;
+  }
 
   try {
     const decoded = jwt.verify(session.value, getJwtSecret(), {
@@ -52,7 +77,7 @@ export async function getSessionPhone(): Promise<string | null> {
     if (error instanceof jwt.TokenExpiredError) {
       console.warn('[Session] JWT expired');
     } else if (error instanceof jwt.JsonWebTokenError) {
-      console.warn('[Session] JWT verification failed:', error.message);
+      console.warn(`[Session] JWT verification failed: ${error.message} | len=${session.value.length}`);
     }
     return null;
   }
@@ -65,6 +90,11 @@ export async function getSessionType(): Promise<'admin' | 'user' | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get('dixis_session');
   if (!session?.value) return null;
+
+  if (!isJwtFormat(session.value)) {
+    logMalformedCookie('getSessionType', session.value);
+    return null;
+  }
 
   try {
     const decoded = jwt.verify(session.value, getJwtSecret(), {
