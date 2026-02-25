@@ -166,7 +166,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 **Immediate** (before first producers go live):
 - ~~Route cleanup: `/my/*` → `/producer/*`~~ ✅ DONE (PR #3185)
 - ~~Producer sidebar navigation~~ ✅ DONE (PR #3184)
-- Image gallery (multiple photos per product)
+- ~~Image gallery (multiple photos per product)~~ ✅ DONE (PR #3187)
 
 **After 5 producers + 10 real orders** (feature backlog resumes):
 - S1-03: Q&A on products

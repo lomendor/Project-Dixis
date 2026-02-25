@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-25 (Route cleanup deployed, all /producer/* routes canonical)
+**Updated**: 2026-02-26 (Image gallery deployed, all "immediate" pre-launch items done)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -89,6 +89,7 @@ _(none)_
 
 ## Recently Done (last 10)
 
+- **IMAGE-GALLERY** — Multi-image upload for producer products: new MultiImageUpload component (upload, reorder, delete, primary badge, max 5), backend syncs `images[]` to `product_images` table, ProductResource includes images, API proxy routes updated. (PR #3187, deployed 2026-02-26) ✅
 - **ROUTE-CLEANUP-MY-TO-PRODUCER** — Moved all product CRUD implementations from `/my/products/*` to `/producer/products/*`. Old routes become redirect stubs. Tests updated. Removed per-page AuthGuard wrappers (layout handles auth). (PR #3185, deployed 2026-02-25) ✅
 - **PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation: ProducerSidebar + ProducerShell components (mirroring AdminShell pattern), layout-level AuthGuard for all `/producer/*` routes (onboarding excluded), removed per-page AuthGuard wrappers from 6 pages. Also created `docs/AGENT/CONTEXT-BOOT.md` agent brain file for cold-start sessions. (PR #3184, deployed 2026-02-25) ✅
 - **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
