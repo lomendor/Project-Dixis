@@ -233,22 +233,24 @@ export default function ShippingLabelManager({
               </div>
               <div>
                 <span className="font-medium text-gray-700">Ζώνη Αποστολής:</span>
-                <p>{getZoneDisplayName(labelData.zone_code)}</p>
+                <p>{labelData.zone_code ? getZoneDisplayName(labelData.zone_code) : 'Μη διαθέσιμο'}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Χρεώσιμο Βάρος:</span>
-                <p>{labelData.billable_weight_kg.toFixed(2)} kg</p>
+                <p>{(labelData.billable_weight_kg ?? 0).toFixed(2)} kg</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Κόστος Αποστολής:</span>
-                <p className="font-medium">{formatCurrency(labelData.shipping_cost_eur)}</p>
+                <p className="font-medium">{formatCurrency(labelData.shipping_cost_eur ?? 0)}</p>
               </div>
               <div>
                 <span className="font-medium text-gray-700">Εκτιμώμενη Παράδοση:</span>
                 <p>
-                  {labelData.estimated_delivery_days === 1
-                    ? '1 εργάσιμη ημέρα'
-                    : `${labelData.estimated_delivery_days} εργάσιμες ημέρες`
+                  {labelData.estimated_delivery_days != null
+                    ? (labelData.estimated_delivery_days === 1
+                        ? '1 εργάσιμη ημέρα'
+                        : `${labelData.estimated_delivery_days} εργάσιμες ημέρες`)
+                    : 'Μη διαθέσιμο'
                   }
                 </p>
               </div>
