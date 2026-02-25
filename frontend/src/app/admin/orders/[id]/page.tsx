@@ -114,15 +114,13 @@ export default function AdminOrderDetail({ params }: { params: { id: string } })
         <div className="mt-4 text-sm text-neutral-500">Φόρτωση…</div>
       ) : (
         <div className="space-y-6">
-          {/* Quick Actions */}
-          {data.status && (
-            <OrderStatusQuickActions
-              orderId={data.id}
-              currentStatus={data.status}
-              paymentMethod={data.paymentMethod ?? (data.codFee != null && Number(data.codFee) > 0 ? 'COD' : null)}
-              paymentStatus={data.paymentStatus}
-            />
-          )}
+          {/* Quick Actions + Admin Override */}
+          <OrderStatusQuickActions
+            orderId={data.id}
+            currentStatus={data.status || 'PENDING'}
+            paymentMethod={data.paymentMethod ?? (data.codFee != null && Number(data.codFee) > 0 ? 'COD' : null)}
+            paymentStatus={data.paymentStatus}
+          />
 
           {/* Shipping Label Manager */}
           {data.status && ['PAID', 'PACKING'].includes(data.status.toUpperCase()) && (
