@@ -112,13 +112,15 @@ class AdminOrderController extends Controller
         $validated = $request->validate([
             'status' => ['required', Rule::in(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])],
             'note' => ['nullable', 'string', 'max:500'],
+            'force' => ['nullable', 'boolean'],
         ]);
 
         $oldStatus = $order->status;
         $newStatus = $validated['status'];
+        $force = $validated['force'] ?? false;
 
-        // Validate status transitions
-        if (!$this->isValidTransition($oldStatus, $newStatus)) {
+        // Validate status transitions (admin override bypasses)
+        if (!$force && !$this->isValidTransition($oldStatus, $newStatus)) {
             return response()->json([
                 'error' => "Invalid status transition from {$oldStatus} to {$newStatus}",
             ], 422);
@@ -154,11 +156,12 @@ class AdminOrderController extends Controller
             'changed_at' => now(),
         ]);
 
-        \Log::info("Order status updated", [
+        \Log::info("Order status updated" . ($force ? " (ADMIN OVERRIDE)" : ""), [
             'order_id' => $order->id,
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
             'admin_id' => $request->user()->id,
+            'force' => $force,
         ]);
 
         // Pass 54: Send status update email notification
