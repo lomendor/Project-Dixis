@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthGuard from '@/components/AuthGuard';
 import { apiClient } from '@/lib/api';
 
 interface SettingsFormData {
@@ -29,11 +28,7 @@ interface SettingsFormData {
 }
 
 export default function ProducerSettingsPage() {
-  return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <ProducerSettingsContent />
-    </AuthGuard>
-  );
+  return <ProducerSettingsContent />;
 }
 
 function ProducerSettingsContent() {

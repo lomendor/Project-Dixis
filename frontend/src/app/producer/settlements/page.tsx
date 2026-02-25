@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import AuthGuard from '@/components/AuthGuard'
 
 /**
  * Pass PAYOUT-04: Producer payout history page.
@@ -30,11 +29,7 @@ const fmtDate = (d: string) => new Date(d).toLocaleDateString('el-GR', { year: '
 const fmtEur = (n: number) => `€${n.toFixed(2)}`
 
 export default function ProducerSettlementsPage() {
-  return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <SettlementsContent />
-    </AuthGuard>
-  )
+  return <SettlementsContent />
 }
 
 function SettlementsContent() {
