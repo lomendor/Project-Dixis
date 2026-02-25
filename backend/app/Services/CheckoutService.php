@@ -418,6 +418,14 @@ class CheckoutService
         foreach ($items as $item) {
             $product = $item['product'];
             $qty = $item['quantity'] ?? 1;
+
+            if ($product->weight_per_unit === null) {
+                Log::warning('Product missing weight_per_unit, using default 500g', [
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                ]);
+            }
+
             $weightPerUnit = ($product->weight_per_unit ?? 500) / 1000; // grams → kg, default 500g
             $totalWeightKg += $weightPerUnit * $qty;
         }

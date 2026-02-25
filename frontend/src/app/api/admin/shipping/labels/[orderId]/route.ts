@@ -4,9 +4,9 @@ import { getLaravelInternalUrl } from '@/env';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
-  const { orderId } = params;
+  const { orderId } = await params;
 
   // Auth: read JWT from dixis_jwt cookie (same as other admin routes)
   const token = await getAdminToken();
