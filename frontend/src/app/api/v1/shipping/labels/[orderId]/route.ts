@@ -19,7 +19,7 @@ export async function POST(
   const backendUrl = getLaravelInternalUrl();
 
   try {
-    const response = await fetch(`${backendUrl}/api/v1/shipping/labels/${laravelId}`, {
+    const response = await fetch(`${backendUrl}/shipping/labels/${laravelId}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
