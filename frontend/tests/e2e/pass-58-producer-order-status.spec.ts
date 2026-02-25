@@ -63,7 +63,7 @@ test.describe('Pass 58: Producer Order Status Updates', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Wait for orders list
     await expect(page.getByTestId('orders-list')).toBeVisible();
@@ -142,7 +142,7 @@ test.describe('Pass 58: Producer Order Status Updates', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Wait for orders list
     await expect(page.getByTestId('orders-list')).toBeVisible();
@@ -205,7 +205,7 @@ test.describe('Pass 58: Producer Order Status Updates', () => {
       });
     });
 
-    await page.goto('/my/orders?tab=delivered');
+    await page.goto('/producer/orders?tab=delivered');
 
     // Wait for orders list
     await expect(page.getByTestId('orders-list')).toBeVisible();
@@ -256,7 +256,7 @@ test.describe('Pass 58: Producer Order Status Updates', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Wait for orders list
     await expect(page.getByTestId('orders-list')).toBeVisible();
