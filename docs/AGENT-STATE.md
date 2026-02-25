@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-24 (Admin session bug fix: cookie rename dixis_session → dixis_jwt)
+**Updated**: 2026-02-25 (Producer sidebar deployed, CONTEXT-BOOT.md created)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -43,7 +43,7 @@
 
 ## WIP (max 1)
 
-**PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation + CONTEXT-BOOT.md agent brain file. Build GREEN. Ready to commit + PR + deploy.
+**ROUTE-CLEANUP-MY-TO-PRODUCER** — Moving product CRUD from `/my/products/*` to `/producer/products/*`. Old routes become redirect stubs. Tests updated.
 
 ---
 
@@ -89,6 +89,7 @@
 
 ## Recently Done (last 10)
 
+- **PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation: ProducerSidebar + ProducerShell components (mirroring AdminShell pattern), layout-level AuthGuard for all `/producer/*` routes (onboarding excluded), removed per-page AuthGuard wrappers from 6 pages. Also created `docs/AGENT/CONTEXT-BOOT.md` agent brain file for cold-start sessions. (PR #3184, deployed 2026-02-25) ✅
 - **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
 - **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
 - **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
@@ -133,7 +134,7 @@
 - **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
 - **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
 - **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva REMOVED.
-- **Producer routes**: `/producer/*` (dashboard, orders), `/my/products/*` (product CRUD)
+- **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are legacy duplicates (cleanup pending)
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
 - **Deploy (manual)**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`

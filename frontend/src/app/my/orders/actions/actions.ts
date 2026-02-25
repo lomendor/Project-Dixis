@@ -68,7 +68,7 @@ export async function setOrderItemStatus(
       buyerPhone: updated.order?.buyerPhone || ''
     });
 
-    revalidatePath('/my/orders');
+    revalidatePath('/producer/orders');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Σφάλμα κατά την ενημέρωση της κατάστασης.' };
