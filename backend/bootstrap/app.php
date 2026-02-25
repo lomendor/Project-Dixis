@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // to Next.js instead of Laravel.
         $middleware->validateCsrfTokens(except: [
             'api/v1/auth/*',
+            'api/shipping/labels/*',   // JWT-authenticated admin route, no CSRF needed
+            'api/admin/*',             // All admin routes use JWT, not CSRF sessions
         ]);
 
         // Register custom middleware aliases
