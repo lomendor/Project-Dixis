@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import UploadImage from '@/components/UploadImage.client';
+import MultiImageUpload from '@/components/MultiImageUpload.client';
 import { apiClient } from '@/lib/api';
 import { greekToSlug } from '@/lib/slugify';
 
@@ -49,7 +49,7 @@ export default function CreateProductPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
@@ -95,7 +95,8 @@ export default function CreateProductPage() {
         unit,
         stock: parseInt(stock),
         description: description || undefined,
-        image_url: imageUrl,
+        image_url: imageUrls[0] || null,
+        images: imageUrls.length > 0 ? imageUrls : undefined,
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : undefined,
         is_seasonal: isSeasonal || undefined,
@@ -485,12 +486,12 @@ export default function CreateProductPage() {
             </div>
 
             <div>
-              <UploadImage
-                value={imageUrl}
-                onChange={setImageUrl}
-                accept="image/*"
+              <MultiImageUpload
+                value={imageUrls}
+                onChange={setImageUrls}
+                max={5}
                 maxMB={5}
-                label="Εικόνα Προϊόντος"
+                label="Εικόνες Προϊόντος"
               />
             </div>
 

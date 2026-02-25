@@ -1296,6 +1296,7 @@ class ApiClient {
     stock: number;
     description?: string;
     image_url?: string | null;
+    images?: string[];
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;
@@ -1325,6 +1326,7 @@ class ApiClient {
     stock?: number;
     description?: string;
     image_url?: string | null;
+    images?: string[];
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;

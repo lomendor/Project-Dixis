@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
       stock: parseInt(body.stock, 10),
       description: body.description || null,
       image_url: body.imageUrl || null,
+      images: body.images || undefined,
       is_active: body.isActive !== undefined ? Boolean(body.isActive) : true,
       // Note: producer_id NOT included - backend auto-sets from auth user
     };

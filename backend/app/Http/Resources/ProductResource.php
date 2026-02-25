@@ -49,6 +49,14 @@ class ProductResource extends JsonResource
                 'city' => $this->producer?->city,
                 'region' => $this->producer?->region,
             ]),
+            'images' => $this->when($this->relationLoaded('images'), function () {
+                return $this->images->map(fn ($img) => [
+                    'id'         => $img->id,
+                    'url'        => $img->url,
+                    'is_primary' => (bool) $img->is_primary,
+                    'sort_order' => $img->sort_order,
+                ]);
+            }),
             // S1-02: Review summary (loaded via withCount/withAvg)
             'reviews_count' => $this->when(isset($this->reviews_count), $this->reviews_count),
             'reviews_avg_rating' => $this->when(isset($this->reviews_avg_rating), function () {
