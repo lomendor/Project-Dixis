@@ -65,6 +65,14 @@ function ProducerProductsContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
+  // Inline stock editing state
+  const [editingStockId, setEditingStockId] = useState<number | null>(null);
+  const [editingStockValue, setEditingStockValue] = useState('');
+  const [savingStockId, setSavingStockId] = useState<number | null>(null);
+
+  // Toggle active state
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+
   // Delete modal state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: number; name: string } | null>(null);
@@ -154,6 +162,35 @@ function ProducerProductsContent() {
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, categoryFilter, producerStatus.isApproved]);
+
+  const handleStockSave = async (productId: number) => {
+    const newStock = parseInt(editingStockValue, 10);
+    if (isNaN(newStock) || newStock < 0) { setEditingStockId(null); return; }
+    setSavingStockId(productId);
+    try {
+      await apiClient.updateProductStock(productId, newStock);
+      setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+      showSuccess('Το απόθεμα ενημερώθηκε');
+    } catch (err: any) {
+      showError(err.message || 'Σφάλμα ενημέρωσης αποθέματος');
+    } finally {
+      setSavingStockId(null);
+      setEditingStockId(null);
+    }
+  };
+
+  const handleToggleActive = async (product: ProducerProduct) => {
+    setTogglingId(product.id);
+    try {
+      await apiClient.updateProducerProduct(product.id, { is_active: !product.is_active });
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_active: !p.is_active } : p));
+      showSuccess(product.is_active ? 'Το προϊόν απενεργοποιήθηκε' : 'Το προϊόν ενεργοποιήθηκε');
+    } catch (err: any) {
+      showError(err.message || 'Σφάλμα αλλαγής κατάστασης');
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleDeleteClick = (product: { id: number; name: string }) => {
     setProductToDelete(product);
@@ -455,14 +492,39 @@ function ProducerProductsContent() {
                           {product.price.toFixed(2)} {product.currency}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900" data-testid={`product-stock-${product.id}`}>
-                          {product.stock}
+                          {editingStockId === product.id ? (
+                            <input
+                              type="number"
+                              min="0"
+                              value={editingStockValue}
+                              onChange={(e) => setEditingStockValue(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === 'Enter') handleStockSave(product.id); if (e.key === 'Escape') setEditingStockId(null); }}
+                              onBlur={() => handleStockSave(product.id)}
+                              autoFocus
+                              className="w-20 px-2 py-1 border border-primary rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                              disabled={savingStockId === product.id}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => { setEditingStockId(product.id); setEditingStockValue(String(product.stock)); }}
+                              className="hover:bg-neutral-100 px-2 py-1 rounded cursor-pointer transition-colors"
+                              title="Κλικ για επεξεργασία"
+                            >
+                              {product.stock} <span className="text-neutral-400 text-xs">✏️</span>
+                            </button>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap" data-testid={`product-status-${product.id}`}>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            product.is_active ? 'bg-primary-pale text-primary' : 'bg-neutral-100 text-neutral-800'
-                          }`}>
+                          <button
+                            onClick={() => handleToggleActive(product)}
+                            disabled={togglingId === product.id}
+                            className={`px-2 py-1 rounded-full text-xs font-medium cursor-pointer transition-all ${
+                              product.is_active ? 'bg-primary-pale text-primary hover:bg-green-200' : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200'
+                            } ${togglingId === product.id ? 'opacity-50' : ''}`}
+                            title={product.is_active ? 'Κλικ για απενεργοποίηση' : 'Κλικ για ενεργοποίηση'}
+                          >
                             {product.is_active ? 'Ενεργό' : 'Ανενεργό'}
-                          </span>
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                           <button
