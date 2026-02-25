@@ -9,8 +9,10 @@ use App\Services\ShippingService;
 use App\Services\Courier\CourierProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ShippingController extends Controller
 {
@@ -110,6 +112,58 @@ class ShippingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Αποτυχία δημιουργίας ετικέτας',
+            ], 500);
+        }
+    }
+
+    /**
+     * Download shipping label PDF for order (Admin only)
+     * GET /api/v1/shipping/labels/{order}/download
+     */
+    public function downloadLabel(Order $order): Response|JsonResponse
+    {
+        $this->authorize('admin-access');
+
+        $shipment = Shipment::where('order_id', $order->id)->first();
+
+        if (!$shipment) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Δεν βρέθηκε αποστολή για αυτή την παραγγελία',
+            ], 404);
+        }
+
+        // If label_url points to a local file, serve it
+        if ($shipment->label_url && Storage::disk('local')->exists(
+            str_replace('storage/', '', $shipment->label_url)
+        )) {
+            $filePath = str_replace('storage/', '', $shipment->label_url);
+            $content = Storage::disk('local')->get($filePath);
+
+            return response($content, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "attachment; filename=\"label-{$order->id}.pdf\"",
+            ]);
+        }
+
+        // Generate a PDF label on the fly using ShippingService
+        try {
+            $order->load(['orderItems.product', 'user']);
+            $pdfContent = $this->shippingService->generateLabelPdfPublic($order, $shipment);
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "attachment; filename=\"label-{$order->id}.pdf\"",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Label PDF generation failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Αποτυχία δημιουργίας PDF ετικέτας',
             ], 500);
         }
     }

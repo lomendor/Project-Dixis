@@ -36,6 +36,10 @@ class Product extends Model
         'rejection_reason',
         'moderated_by',
         'moderated_at',
+        'weight_grams',
+        'length_cm',
+        'width_cm',
+        'height_cm',
     ];
 
     protected $casts = [
@@ -43,6 +47,10 @@ class Product extends Model
         'discount_price' => 'decimal:2',
         'is_active' => 'boolean',
         'is_seasonal' => 'boolean',
+        'weight_grams' => 'decimal:2',
+        'length_cm' => 'decimal:2',
+        'width_cm' => 'decimal:2',
+        'height_cm' => 'decimal:2',
         'allergens' => 'array',
         'moderated_at' => 'datetime',
         'created_at' => 'datetime',

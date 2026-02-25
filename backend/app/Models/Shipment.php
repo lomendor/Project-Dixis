@@ -10,6 +10,16 @@ class Shipment extends Model
 {
     use HasFactory;
 
+    /** Zone → estimated delivery days mapping */
+    public const ZONE_DELIVERY_DAYS = [
+        'GR_ATTICA' => 1,
+        'GR_THESSALONIKI' => 2,
+        'GR_MAINLAND' => 3,
+        'GR_CRETE' => 4,
+        'GR_ISLANDS_LARGE' => 5,
+        'GR_ISLANDS_SMALL' => 7,
+    ];
+
     protected $fillable = [
         'order_id',
         'carrier_code',
@@ -73,16 +83,7 @@ class Shipment extends Model
 
         // Adjust based on zone (if available)
         if ($this->zone_code) {
-            $zoneDays = [
-                'GR_ATTICA' => 1,
-                'GR_THESSALONIKI' => 2,
-                'GR_MAINLAND' => 3,
-                'GR_CRETE' => 4,
-                'GR_ISLANDS_LARGE' => 5,
-                'GR_ISLANDS_SMALL' => 7,
-            ];
-
-            $estimatedDays = $zoneDays[$this->zone_code] ?? 3;
+            $estimatedDays = self::ZONE_DELIVERY_DAYS[$this->zone_code] ?? 3;
         }
 
         return $this->shipped_at->addDays($estimatedDays);

@@ -38,9 +38,14 @@ export const ShippingLabelCreateResponseSchema = z.object({
   success: z.literal(true),
   data: z.object({
     tracking_code: z.string(),
-    label_url: z.string(),
+    label_url: z.string().nullable(),
     carrier_code: z.string(),
-    status: z.enum(['pending', 'labeled', 'in_transit', 'delivered', 'failed'])
+    status: z.enum(['pending', 'labeled', 'in_transit', 'delivered', 'failed']),
+    provider: z.string().optional(),
+    zone_code: z.string().nullable().optional(),
+    billable_weight_kg: z.number().nullable().optional(),
+    shipping_cost_eur: z.number().nullable().optional(),
+    estimated_delivery_days: z.number().nullable().optional(),
   })
 });
 
