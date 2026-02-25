@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import UploadImage from '@/components/UploadImage.client';
+import MultiImageUpload from '@/components/MultiImageUpload.client';
 import { apiClient } from '@/lib/api';
 import { greekToSlug } from '@/lib/slugify';
 
@@ -42,7 +42,7 @@ export default function EditProductPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [discountPrice, setDiscountPrice] = useState('');
   const [weightPerUnit, setWeightPerUnit] = useState('');
@@ -102,7 +102,11 @@ export default function EditProductPage() {
       setDescription(product.description || '');
       setPrice(product.price?.toString() || '');
       setStock(product.stock?.toString() || '');
-      setImageUrl(product.image_url || null);
+      // Load images: prefer images array, fallback to single image_url
+      const imgs = (product.images || [])
+        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((img: any) => img.url);
+      setImageUrls(imgs.length > 0 ? imgs : product.image_url ? [product.image_url] : []);
       setIsActive(product.is_active ?? true);
       setDiscountPrice(product.discount_price ? String(product.discount_price) : '');
       setWeightPerUnit(product.weight_per_unit ? String(product.weight_per_unit) : '');
@@ -136,7 +140,8 @@ export default function EditProductPage() {
         unit,
         stock: parseInt(stock),
         description: description || undefined,
-        image_url: imageUrl,
+        image_url: imageUrls[0] || null,
+        images: imageUrls.length > 0 ? imageUrls : undefined,
         is_active: isActive,
         weight_per_unit: weightPerUnit ? parseFloat(weightPerUnit) : null,
         is_seasonal: isSeasonal,
@@ -537,12 +542,12 @@ export default function EditProductPage() {
             </div>
 
             <div>
-              <UploadImage
-                value={imageUrl}
-                onChange={setImageUrl}
-                accept="image/*"
+              <MultiImageUpload
+                value={imageUrls}
+                onChange={setImageUrls}
+                max={5}
                 maxMB={5}
-                label="Εικόνα Προϊόντος"
+                label="Εικόνες Προϊόντος"
               />
             </div>
 

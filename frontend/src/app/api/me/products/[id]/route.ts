@@ -60,6 +60,12 @@ export async function GET(
       stock: data.data?.stock || 0,
       description: data.data?.description,
       imageUrl: data.data?.image_url || data.data?.imageUrl,
+      images: (data.data?.images || []).map((img: any) => ({
+        id: img.id,
+        url: img.url,
+        isPrimary: !!img.is_primary,
+        sortOrder: img.sort_order ?? 0,
+      })),
       isActive: data.data?.is_active !== false,
       createdAt: data.data?.created_at || data.data?.createdAt,
       updatedAt: data.data?.updated_at || data.data?.updatedAt,
@@ -114,6 +120,7 @@ export async function PUT(
     if (body.stock !== undefined) backendPayload.stock = parseInt(body.stock, 10);
     if (body.description !== undefined) backendPayload.description = body.description;
     if (body.imageUrl !== undefined) backendPayload.image_url = body.imageUrl;
+    if (body.images !== undefined) backendPayload.images = body.images;
     if (body.isActive !== undefined) backendPayload.is_active = Boolean(body.isActive);
 
     // Proxy to backend PATCH /api/v1/products/{id}
