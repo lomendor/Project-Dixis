@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
-import AuthGuard from '@/components/AuthGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
 import { useTranslations } from '@/contexts/LocaleContext';
@@ -200,9 +199,8 @@ export default function ProducerOrdersPage() {
   };
 
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-neutral-50" data-testid="producer-orders-page">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div data-testid="producer-orders-page">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
@@ -307,8 +305,7 @@ export default function ProducerOrdersPage() {
               ))}
             </div>
           )}
-        </main>
+        </div>
       </div>
-    </AuthGuard>
   );
 }

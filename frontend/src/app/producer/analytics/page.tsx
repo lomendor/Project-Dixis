@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import ProducerAnalyticsDashboard from '@/components/producer/ProducerAnalyticsDashboard';
-import AuthGuard from '@/components/AuthGuard';
 
 /**
  * Pass PRODUCER-DASH-FIX-01: Use AuthGuard with requireRole="producer"
@@ -12,9 +11,8 @@ import AuthGuard from '@/components/AuthGuard';
  */
 export default function ProducerAnalytics() {
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-neutral-50">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
+        <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <nav className="flex mb-8" data-testid="breadcrumb">
             <ol className="flex items-center space-x-2 text-sm text-neutral-500">
@@ -70,8 +68,7 @@ export default function ProducerAnalytics() {
               </div>
             </div>
           </div>
-        </main>
+        </div>
       </div>
-    </AuthGuard>
   );
 }

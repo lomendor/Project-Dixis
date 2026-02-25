@@ -10,7 +10,6 @@ interface CommissionData {
   platform_fee_vat: string;
   producer_payout: string;
 }
-import AuthGuard from '@/components/AuthGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
 
@@ -174,9 +173,8 @@ export default function ProducerOrderDetailsPage() {
   };
 
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-neutral-50">
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
+        <div className="max-w-4xl mx-auto">
           {/* Back Link */}
           <Link
             href="/producer/orders"
@@ -490,8 +488,7 @@ export default function ProducerOrderDetailsPage() {
               </div>
             </div>
           ) : null}
-        </main>
+        </div>
       </div>
-    </AuthGuard>
   );
 }
