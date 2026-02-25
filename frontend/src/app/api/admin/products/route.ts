@@ -84,6 +84,17 @@ export async function GET(req: Request) {
           isActive: p.is_active !== false,
           approvalStatus: p.approval_status || 'approved',
           rejectionReason: p.rejection_reason || null,
+          discountPrice: p.discount_price != null ? parseFloat(p.discount_price) : null,
+          weightPerUnit: p.weight_per_unit != null ? parseFloat(p.weight_per_unit) : null,
+          isSeasonal: !!p.is_seasonal,
+          origin: p.origin || null,
+          cultivationType: p.cultivation_type || null,
+          cultivationDescription: p.cultivation_description || null,
+          allergens: Array.isArray(p.allergens) ? p.allergens : [],
+          ingredients: p.ingredients || null,
+          storageInstructions: p.storage_instructions || null,
+          shelfLife: p.shelf_life || null,
+          imageUrl: p.image_url || p.images?.[0]?.url || null,
           producer: p.producer
             ? { id: String(p.producer.id), name: p.producer.name }
             : null,
