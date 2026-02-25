@@ -46,7 +46,7 @@ export default function ShippingLabelManager({
     setError(null);
 
     try {
-      const response = await fetch(`/api/v1/shipping/labels/${orderId}`, {
+      const response = await fetch(`/api/admin/shipping/labels/${orderId}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
