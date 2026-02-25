@@ -1,24 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getAdminToken } from '@/lib/admin/laravelProxy';
+import { getLaravelInternalUrl } from '@/env';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { orderId: string } }
 ) {
   const { orderId } = params;
-  const backendUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8001';
 
-  // Forward auth cookie for admin authentication (Next.js 15 async cookies)
-  const cookieStore = await cookies();
-  const authCookie = cookieStore.get('admin_session')?.value;
+  // Auth: read JWT from dixis_jwt cookie (same as other admin routes)
+  const token = await getAdminToken();
+  if (!token) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Strip "A-" prefix for Laravel (route model binding expects integer ID)
+  const laravelId = orderId.startsWith('A-') ? orderId.slice(2) : orderId;
+  const backendUrl = getLaravelInternalUrl();
 
   try {
-    const response = await fetch(`${backendUrl}/api/shipping/labels/${orderId}`, {
+    const response = await fetch(`${backendUrl}/api/shipping/labels/${laravelId}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        ...(authCookie && { 'Cookie': `admin_session=${authCookie}` }),
+        'Authorization': `Bearer ${token}`,
       },
     });
 
