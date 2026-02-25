@@ -397,6 +397,7 @@
     "status": "Status",
     "inStock": "In Stock",
     "active": "Active",
+    "inactive": "Inactive",
     "noImage": "No Image",
     "quickActions": "Quick Actions",
     "viewOrders": "View Orders",

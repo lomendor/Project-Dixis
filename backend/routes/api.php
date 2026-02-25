@@ -302,6 +302,10 @@ Route::prefix('v1')->group(function () {
         Route::get('labels/{order}/download', [App\Http\Controllers\Api\ShippingController::class, 'downloadLabel'])
             ->middleware(['jwt.admin', 'admin', 'throttle:30,1']);
 
+        // Admin-only label PDF download
+        Route::get('labels/{order}/download', [App\Http\Controllers\Api\ShippingController::class, 'downloadLabel'])
+            ->middleware(['jwt.admin', 'admin', 'throttle:30,1']);
+
         // Public locker search endpoint (feature-flagged)
         Route::get('lockers/search', [App\Http\Controllers\Api\LockerController::class, 'search'])
             ->middleware('throttle:60,1'); // 60 locker search requests per minute
