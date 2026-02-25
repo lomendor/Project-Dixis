@@ -3,6 +3,7 @@
 **Updated**: 2026-02-24 (Admin session bug fix: cookie rename dixis_session → dixis_jwt)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
+> **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
 
 ---
 
@@ -42,7 +43,7 @@
 
 ## WIP (max 1)
 
-**None** — Ready for next task. CI is GREEN.
+**PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation + CONTEXT-BOOT.md agent brain file. Build GREEN. Ready to commit + PR + deploy.
 
 ---
 
@@ -144,6 +145,7 @@
 
 | Doc | Purpose |
 |-----|---------|
+| `docs/AGENT/CONTEXT-BOOT.md` | **Cold start brain** — architecture, deploy, permissions, pitfalls |
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |
