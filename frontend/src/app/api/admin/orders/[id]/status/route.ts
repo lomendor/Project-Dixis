@@ -29,7 +29,9 @@ export async function POST(
     const admin = await requireAdmin();
 
     const id = params.id;
-    const { status: newStatus } = await req.json();
+    const body = await req.json();
+    const newStatus = body.status;
+    const force = body.force === true; // Admin override — bypass transition rules
 
     if (!newStatus) {
       return NextResponse.json({ error: 'missing status' }, { status: 400 });
@@ -61,7 +63,7 @@ export async function POST(
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ status: laravelStatus }),
+          body: JSON.stringify({ status: laravelStatus, ...(force ? { force: true } : {}) }),
         }
       );
 
@@ -74,7 +76,7 @@ export async function POST(
         );
       }
 
-      console.log(`[order] ${id} (Laravel ${laravelId}) status → ${newStatus}`);
+      console.log(`[order] ${id} (Laravel ${laravelId}) status → ${newStatus}${force ? ' (ADMIN OVERRIDE)' : ''}`);
       return NextResponse.json({ ok: true, orderId: id, status: String(newStatus).toUpperCase() });
     }
 
@@ -87,7 +89,7 @@ export async function POST(
     const from = String(order.status || 'PENDING').toUpperCase();
     const to = String(newStatus).toUpperCase();
 
-    if (!canTransition(from, to)) {
+    if (!force && !canTransition(from, to)) {
       return NextResponse.json(
         { error: `invalid_transition ${from}→${to}` },
         { status: 400 }
@@ -119,7 +121,7 @@ export async function POST(
     // Audit log for order status change
     await logAdminAction({
       admin,
-      action: 'ORDER_STATUS_CHANGE',
+      action: force ? 'ORDER_STATUS_OVERRIDE' : 'ORDER_STATUS_CHANGE',
       entityType: 'order',
       entityId: id,
       ...createOrderStatusContext(from, to)
@@ -162,7 +164,7 @@ export async function POST(
       console.warn('[admin status mail] skipped:', (e as Error).message);
     }
 
-    console.log(`[order] ${id} status ${from}→${to}`);
+    console.log(`[order] ${id} status ${from}→${to}${force ? ' (ADMIN OVERRIDE)' : ''}`);
 
     return NextResponse.json({
       ok: true,

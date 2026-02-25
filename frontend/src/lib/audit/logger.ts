@@ -13,6 +13,7 @@ export type AuditAction =
   | 'PRODUCER_APPROVE'
   | 'PRODUCER_REJECT'
   | 'ORDER_STATUS_CHANGE'
+  | 'ORDER_STATUS_OVERRIDE'
   | 'CATEGORY_UPDATE';
 
 export type AuditEntityType = 'product' | 'producer' | 'order' | 'category';
