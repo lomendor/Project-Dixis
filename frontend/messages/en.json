@@ -358,7 +358,10 @@
     "noOrders": "No orders",
     "noOrdersYet": "You haven't received any orders for your products yet.",
     "noOrdersStatus": "No orders with status \"{status}\".",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting...",
+    "exportError": "Failed to export orders"
   },
   "reviews": {
     "title": "Reviews",

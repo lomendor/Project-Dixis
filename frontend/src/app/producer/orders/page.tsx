@@ -52,6 +52,7 @@ export default function ProducerOrdersPage() {
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState(false);
   // Hydration fix: defer date rendering until client-side mount
   const [mounted, setMounted] = useState(false);
 
@@ -76,6 +77,23 @@ export default function ProducerOrdersPage() {
       setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης παραγγελιών');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportCsv = async () => {
+    try {
+      setExportLoading(true);
+      const blob = await apiClient.exportProducerOrdersCsv();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `παραγγελιες-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert(t('producerOrders.exportError'));
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -204,11 +222,26 @@ export default function ProducerOrdersPage() {
       <div className="min-h-screen bg-neutral-50" data-testid="producer-orders-page">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
-            <p className="text-neutral-600 mt-2">
-              {t('producerOrders.subtitle')}
-            </p>
+          <div className="mb-6 flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
+              <p className="text-neutral-600 mt-2">
+                {t('producerOrders.subtitle')}
+              </p>
+            </div>
+            <button
+              onClick={handleExportCsv}
+              disabled={exportLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 text-sm font-medium text-neutral-700 disabled:opacity-50 transition-colors"
+              data-testid="export-csv-btn"
+            >
+              {exportLoading ? (
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              )}
+              {exportLoading ? t('producerOrders.exporting') : t('producerOrders.exportCsv')}
+            </button>
           </div>
 
           {/* Status Filter Tabs */}
