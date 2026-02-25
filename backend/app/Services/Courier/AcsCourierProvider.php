@@ -216,12 +216,12 @@ class AcsCourierProvider implements CourierProviderInterface
                 'phone' => '+30 210 1234567',
             ],
             'recipient' => [
-                'name' => $order->user->name,
-                'address' => $shippingAddress['street'] ?? 'N/A',
+                'name' => $shippingAddress['name'] ?? $order->user->name,
+                'address' => $shippingAddress['line1'] ?? $shippingAddress['street'] ?? $shippingAddress['address'] ?? 'N/A',
                 'city' => $shippingAddress['city'] ?? 'Athens',
                 'postal_code' => $shippingAddress['postal_code'] ?? '10001',
                 'country' => 'GR',
-                'phone' => $order->user->phone ?? '+30 210 0000000',
+                'phone' => $shippingAddress['phone'] ?? $order->user->phone ?? '+30 210 0000000',
             ],
             'items' => $order->orderItems->map(fn($item) => [
                 'description' => $item->product_name,
