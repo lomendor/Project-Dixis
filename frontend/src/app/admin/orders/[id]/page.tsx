@@ -17,6 +17,8 @@ interface ShippingAddress {
   name?: string;
   phone?: string;
   address?: string;
+  line1?: string;
+  line2?: string;
   city?: string;
   postal_code?: string;
   notes?: string;
@@ -159,7 +161,8 @@ export default function AdminOrderDetail({ params }: { params: { id: string } })
               <h3 className="font-semibold mb-3">Διεύθυνση Αποστολής</h3>
               <div className="text-sm space-y-1">
                 {addr.name && <div className="font-medium">{addr.name}</div>}
-                {addr.address && <div>{addr.address}</div>}
+                {(addr.address || addr.line1) && <div>{addr.address || addr.line1}</div>}
+                {addr.line2 && <div>{addr.line2}</div>}
                 {(addr.city || addr.postal_code) && (
                   <div>{[addr.postal_code, addr.city].filter(Boolean).join(', ')}</div>
                 )}
