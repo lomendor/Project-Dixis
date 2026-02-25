@@ -43,7 +43,7 @@ test.describe('Pass 57: Producer Orders CSV Export', () => {
   });
 
   test('export button is visible on producer orders page', async ({ page }) => {
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Verify export button is visible
     const exportButton = page.getByTestId('export-csv-button');
@@ -75,7 +75,7 @@ test.describe('Pass 57: Producer Orders CSV Export', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Click export button
     const exportButton = page.getByTestId('export-csv-button');
@@ -104,7 +104,7 @@ test.describe('Pass 57: Producer Orders CSV Export', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     const exportButton = page.getByTestId('export-csv-button');
 

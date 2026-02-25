@@ -74,7 +74,7 @@ test.describe('Pass 56: Producer Orders Page', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Verify page loaded
     await expect(page.getByRole('heading', { name: /Παραγγελίες/i })).toBeVisible();
@@ -139,7 +139,7 @@ test.describe('Pass 56: Producer Orders Page', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Wait for orders list
     await expect(page.getByTestId('orders-list')).toBeVisible();
@@ -174,7 +174,7 @@ test.describe('Pass 56: Producer Orders Page', () => {
       });
     });
 
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
 
     // Verify empty state is shown
     await expect(page.getByTestId('empty-state')).toBeVisible();
@@ -208,7 +208,7 @@ test.describe('Pass 56: Producer Orders Page', () => {
     });
 
     // Load page (default: pending)
-    await page.goto('/my/orders');
+    await page.goto('/producer/orders');
     await expect(page.getByTestId('orders-list')).toBeVisible();
 
     // Click on "shipped" tab

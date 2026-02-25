@@ -164,8 +164,8 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 **Current milestone**: Launch with first 3 producers → get 20 orders → measure → decide.
 
 **Immediate** (before first producers go live):
-- Route cleanup: `/my/*` → `/producer/*` (architectural inconsistency)
-- Producer sidebar navigation ← IN PROGRESS (this session)
+- ~~Route cleanup: `/my/*` → `/producer/*`~~ ✅ DONE (PR #3185)
+- ~~Producer sidebar navigation~~ ✅ DONE (PR #3184)
 - Image gallery (multiple photos per product)
 
 **After 5 producers + 10 real orders** (feature backlog resumes):
@@ -183,7 +183,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 
 1. **Producer auth is client-side** (Sanctum/useAuth), admin auth is server-side (JWT/requireAdmin). Don't mix patterns.
 2. **Product data SSOT is Laravel**. Frontend only proxies. Never create Prisma product models.
-3. **The `/my/*` routes are legacy duplicates** of `/producer/*`. Both exist but `/producer/*` is canonical.
+3. **The `/my/*` routes are now redirect stubs** to `/producer/*`. All implementations live at `/producer/*`. `/my/*` only exists for backwards compatibility.
 4. **Worktree builds may fail** with Prisma errors — always run `npx prisma generate` first.
 5. **Admin cookie is `dixis_jwt`** (renamed from `dixis_session` to avoid collision).
 6. **Auto-deploy is broken** (SSH key issue). Always deploy manually after merge.

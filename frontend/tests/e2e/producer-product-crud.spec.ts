@@ -66,7 +66,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Verify page title
       await expect(page.getByTestId('page-title')).toContainText('Διαχείριση Προϊόντων');
@@ -91,7 +91,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Verify empty state
       await expect(page.getByTestId('no-products-state')).toBeVisible();
@@ -111,7 +111,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Verify pending notice
       await expect(page.getByTestId('not-approved-notice')).toBeVisible();
@@ -129,7 +129,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Click add product button
       await page.getByTestId('add-product-btn').click();
@@ -243,7 +243,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
       await page.getByTestId('add-product-btn').click();
       await page.getByTestId('cancel-btn').click();
 
@@ -261,7 +261,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Click delete button
       await page.getByTestId('delete-product-1').click();
@@ -281,7 +281,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Open and cancel delete
       await page.getByTestId('delete-product-1').click();
@@ -314,7 +314,7 @@ test.describe('Producer Product CRUD', () => {
         }
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Confirm delete
       await page.getByTestId('delete-product-1').click();
@@ -336,7 +336,7 @@ test.describe('Producer Product CRUD', () => {
         });
       });
 
-      await page.goto('/my/products');
+      await page.goto('/producer/products');
 
       // Click edit button
       await page.getByTestId('edit-product-1').click();
