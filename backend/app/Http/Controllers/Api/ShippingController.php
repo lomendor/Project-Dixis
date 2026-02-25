@@ -77,7 +77,7 @@ class ShippingController extends Controller
      */
     public function createLabel(Order $order): JsonResponse
     {
-        $this->authorize('admin-access'); // Admin only
+        // Auth handled by jwt.admin + admin middleware in routes/api.php
 
         try {
             // Use courier provider factory to get appropriate provider
