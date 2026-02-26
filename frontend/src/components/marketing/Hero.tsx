@@ -1,70 +1,105 @@
 import Link from 'next/link';
+import { Leaf, ArrowRight, Check } from 'lucide-react';
 
 /**
- * Hero Section - Mobile-first homepage hero
+ * Hero Section — Premium homepage hero for Dixis marketplace
  *
- * Features:
- * - Large, readable typography on mobile
- * - Generous whitespace and padding
- * - Dixis brand colors (Cyprus Green)
- * - Clear CTA with touch-friendly button
+ * Design: Split layout (text 60% / visual 40%) on desktop, stacked on mobile.
+ * Warm gradient, generous whitespace, pill-shaped CTA, trust micro-strip.
+ * LCP-safe: H1 is plain text, no JS dependency.
  */
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-b from-accent-cream via-primary-pale/30 to-white">
-      {/* Mobile-first container with generous padding */}
-      <div className="max-w-6xl mx-auto px-4 py-16 sm:px-6 sm:py-20 lg:py-28">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Heading - optimized for mobile readability */}
-          <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-3">Αγορά Παραγωγών</p>
-          <h1 className="text-4xl font-bold text-neutral-900 leading-tight mb-6 sm:text-5xl lg:text-6xl">
-            Αυθεντικά Ελληνικά Προϊόντα
-            <span className="block text-accent-gold mt-2">
-              απευθείας από Έλληνες παραγωγούς
-            </span>
-          </h1>
+    <section className="relative overflow-hidden bg-gradient-to-br from-accent-cream via-[#f7f3eb] to-primary-pale/40">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.7fr] gap-8 lg:gap-16 items-center min-h-[85vh] lg:min-h-[90vh] py-16 sm:py-20 lg:py-0">
 
-          {/* Subheading - generous mobile spacing */}
-          <p className="text-lg text-neutral-600 leading-relaxed mb-8 sm:text-xl sm:mb-10">
-            Ανακαλύψτε ελαιόλαδο, μέλι, βότανα και χειροποίητα προϊόντα
-            απευθείας από Έλληνες παραγωγούς.
-          </p>
+          {/* ── Text column ── */}
+          <div className="animate-fade-in-up">
+            {/* Eyebrow badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-pale/60 border border-primary/10 mb-6">
+              <Leaf className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-semibold tracking-wide text-primary uppercase">
+                Αγορά Τοπικών Παραγωγών
+              </span>
+            </div>
 
-          {/* CTA Button - touch-friendly, minimum 44px height */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center">
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] touch-manipulation"
-            >
-              Δείτε τα Προϊόντα
-            </Link>
-            <Link
-              href="/producers"
-              className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-neutral-50 text-primary font-semibold rounded-lg border-2 border-primary transition-all duration-200 active:scale-[0.98] touch-manipulation"
-            >
-              Γίνε Παραγωγός
-            </Link>
-          </div>
+            {/* H1 — LCP element */}
+            <h1 className="text-[2.5rem] sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold leading-[1.1] tracking-tight text-neutral-900 mb-6">
+              Από τον παραγωγό,
+              <br />
+              <span className="text-primary">στο τραπέζι σας.</span>
+            </h1>
 
-          {/* Trust indicator - subtle, mobile-optimized */}
-          <div className="mt-10 pt-8 border-t border-accent-gold/20">
-            <div className="flex justify-center gap-6 flex-wrap">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-sm text-neutral-600 font-medium">Ποιότητα εγγυημένη</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-accent-gold" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-sm text-neutral-600 font-medium">Παράδοση 24-48h</span>
-              </div>
+            {/* Subtitle */}
+            <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-lg mb-10">
+              Αυθεντικά ελληνικά προϊόντα απευθείας από τοπικούς παραγωγούς.
+              Ελαιόλαδο, μέλι, βότανα, γλυκά και πολλά ακόμη &mdash; στην πόρτα σας.
+            </p>
+
+            {/* CTA row */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-10">
+              <Link
+                href="/products"
+                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-primary hover:bg-primary-light text-white font-semibold text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-[0.97] touch-manipulation"
+              >
+                Εξερευνήστε Προϊόντα
+                <ArrowRight className="w-4.5 h-4.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/producers"
+                className="text-sm font-medium text-neutral-500 hover:text-primary transition-colors duration-200"
+              >
+                ή γνωρίστε τους παραγωγούς μας &rarr;
+              </Link>
+            </div>
+
+            {/* Trust micro-strip */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-neutral-500">
+              {[
+                'Ασφαλείς πληρωμές',
+                'Παράδοση 24-48h',
+                '100% Ελληνικά',
+              ].map((label) => (
+                <span key={label} className="inline-flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-primary/70" />
+                  {label}
+                </span>
+              ))}
             </div>
           </div>
+
+          {/* ── Visual column (desktop only) ── */}
+          <div className="hidden lg:flex flex-col items-center justify-center relative" aria-hidden="true">
+            {/* Decorative floating cards */}
+            <div className="relative w-full max-w-[340px] aspect-square">
+              {/* Background glow */}
+              <div className="absolute inset-0 rounded-full bg-primary-pale/40 blur-3xl scale-125" />
+
+              {/* Floating category cards — scattered organically */}
+              {[
+                { emoji: '\uD83C\uDF6F', label: 'Μέλι', top: '6%', left: '12%', delay: '0s' },
+                { emoji: '\uD83E\uDED2', label: 'Ελαιόλαδο', top: '18%', right: '2%', delay: '0.15s' },
+                { emoji: '\uD83C\uDF3F', label: 'Βότανα', bottom: '28%', left: '0%', delay: '0.3s' },
+                { emoji: '\uD83E\uDD5C', label: 'Ξηροί καρποί', bottom: '6%', right: '14%', delay: '0.45s' },
+              ].map(({ emoji, label, delay, ...pos }) => (
+                <div
+                  key={label}
+                  className="absolute animate-fade-in-up bg-white/90 backdrop-blur-sm rounded-2xl shadow-card px-5 py-4 flex items-center gap-3 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300"
+                  style={{ ...pos, animationDelay: delay }}
+                >
+                  <span className="text-3xl" role="img" aria-hidden="true">{emoji}</span>
+                  <span className="text-sm font-semibold text-neutral-800">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
+
+      {/* Bottom gradient fade into next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
     </section>
   );
 }
