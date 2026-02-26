@@ -1,9 +1,26 @@
 'use client';
 import * as React from 'react';
 
-type Props = { className?: string; height?: number; title?: string };
+type Props = {
+  className?: string;
+  height?: number;
+  title?: string;
+  /** Show "DIXIS" wordmark next to icon */
+  showWordmark?: boolean;
+};
 
-export default function Logo({ className, height = 40, title = "Dixis" }: Props) {
+/**
+ * Logo — Brand icon + optional serif wordmark
+ *
+ * Premium redesign: icon + "DIXIS" in Noto Serif Display
+ * for editorial feel. Wordmark hidden on mobile by default.
+ */
+export default function Logo({
+  className,
+  height = 40,
+  title = "Dixis",
+  showWordmark = false,
+}: Props) {
   const [hasImg, setHasImg] = React.useState(true);
   const src = '/logo.png'; // Dixis icon (512x512, optimized)
 
@@ -11,7 +28,7 @@ export default function Logo({ className, height = 40, title = "Dixis" }: Props)
     <div
       data-testid="logo"
       className={className}
-      style={{ display: 'inline-flex', alignItems: 'center' }}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: showWordmark ? height * 0.25 : 0 }}
     >
       {hasImg ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -39,6 +56,19 @@ export default function Logo({ className, height = 40, title = "Dixis" }: Props)
         >
           {title}
         </div>
+      )}
+      {showWordmark && hasImg && (
+        <span
+          className="font-display"
+          style={{
+            fontSize: height * 0.45,
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            color: 'var(--brand-neutral-900)',
+          }}
+        >
+          DIXIS
+        </span>
       )}
     </div>
   );
