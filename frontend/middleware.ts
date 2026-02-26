@@ -14,8 +14,10 @@ import type { NextRequest } from 'next/server';
  */
 
 const LOGIN_PATH = '/auth/login'
-// Must match SESSION_COOKIE_NAME in @/lib/auth/cookies.ts
+// Must match SESSION_COOKIE_NAME in @/lib/auth/cookies.ts (admin OTP sessions)
 const SESSION_COOKIE = 'dixis_jwt'
+// Laravel Sanctum session cookie (consumer/producer login via email+password)
+const SANCTUM_SESSION_COOKIE = 'dixis_session'
 
 // Public routes that START with /producer but are NOT protected
 const PUBLIC_PRODUCER_PATHS = ['/producers']
@@ -67,10 +69,15 @@ export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // 2. Strategic Fix 2B: Server-side auth for protected pages
-  //    Checks for session cookie (Sanctum SPA) or mock cookie (E2E tests).
-  //    Does NOT verify token validity — just checks presence for fast redirect.
+  //    Checks for session cookie presence (fast redirect, no token validation).
+  //    Three valid session cookies:
+  //    - dixis_jwt: Admin OTP sessions (set by Next.js API routes)
+  //    - dixis_session: Consumer/Producer Sanctum sessions (set by Laravel)
+  //    - mock_session: E2E test sessions
   if (requiresAuth(pathname)) {
-    const hasSession = req.cookies.has(SESSION_COOKIE) || req.cookies.has('mock_session')
+    const hasSession = req.cookies.has(SESSION_COOKIE)
+      || req.cookies.has(SANCTUM_SESSION_COOKIE)
+      || req.cookies.has('mock_session')
     if (!hasSession) {
       // In standalone mode behind nginx, both req.url and req.nextUrl contain
       // the internal PM2 URL (http://localhost:3000/...). We must reconstruct
