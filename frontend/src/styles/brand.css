@@ -5,11 +5,12 @@
 
 :root {
   /* -------------------------------------------------------------------------
-     PRIMARY COLORS - Cyprus Green (agricultural, trust, freshness)
+     PRIMARY COLORS - Warm Olive Green (Mediterranean, premium, heritage)
+     Warmed from cold #0f5c2e to olive #2d6a4f — inspired by Graza/Aesop
      ------------------------------------------------------------------------- */
-  --brand-primary: #0f5c2e;
-  --brand-primary-light: #1a7a3e;
-  --brand-primary-pale: #e8f5ed;
+  --brand-primary: #2d6a4f;
+  --brand-primary-light: #40916c;
+  --brand-primary-pale: #edf6f0;
   --brand-primary-foreground: #ffffff;
 
   /* -------------------------------------------------------------------------
@@ -32,7 +33,7 @@
   --neutral-600: #6b7280;
   --neutral-700: #495057;
   --neutral-800: #343a40;
-  --neutral-900: #1a1a1a;
+  --neutral-900: #1b2a1e;
 
   /* -------------------------------------------------------------------------
      SEMANTIC COLORS - Status indicators
@@ -65,7 +66,7 @@
      ------------------------------------------------------------------------- */
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu,
                Cantarell, 'Noto Sans', Arial, sans-serif;
-  --font-display: var(--font-sans);
+  --font-display: 'Noto Serif Display', Georgia, 'Times New Roman', serif;
 
   --text-display: 3rem;      /* 48px - Hero titles */
   --text-heading: 2rem;      /* 32px - H1 */
@@ -109,7 +110,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 20px rgba(15, 92, 46, 0.15);
+  --shadow-glow: 0 0 20px rgba(45, 106, 79, 0.15);
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.04);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1), 0 12px 24px rgba(0, 0, 0, 0.08);
 

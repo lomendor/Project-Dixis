@@ -40,14 +40,14 @@ const BG_MAP: Record<string, string> = {
 
 export default function HomeCategoryStrip() {
   return (
-    <section className="py-12 sm:py-16 bg-white">
+    <section className="py-14 sm:py-20 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Section header */}
         <div className="text-center mb-8 sm:mb-10">
           <p className="text-xs font-semibold tracking-wider text-primary/60 uppercase mb-2">
             Κατηγορίες
           </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-[2.5rem] font-normal text-neutral-900 tracking-[-0.01em]">
             Εξερευνήστε ανά Κατηγορία
           </h2>
         </div>

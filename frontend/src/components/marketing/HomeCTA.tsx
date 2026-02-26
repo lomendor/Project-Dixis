@@ -2,30 +2,32 @@ import Link from 'next/link';
 import { ArrowRight, Store } from 'lucide-react';
 
 /**
- * HomeCTA — Dark contrast closing section for homepage
+ * HomeCTA — Dark editorial closing section
  *
- * The only dark section on the page — creates a visual anchor before the footer.
- * Two CTAs: browse products (primary audience) and become a producer (growth).
+ * Near-black (#1b2a1e) background — NOT the primary green.
+ * Large serif heading in white. Two pill CTAs.
+ * Inspired by Aesop's dark sections: minimal, editorial, premium.
  */
 export default function HomeCTA() {
   return (
-    <section className="relative py-20 sm:py-24 lg:py-28 bg-primary overflow-hidden">
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
+    <section className="relative py-24 sm:py-28 lg:py-32 bg-[#1b2a1e] overflow-hidden">
+      {/* Subtle dot pattern */}
+      <div className="absolute inset-0 opacity-[0.04]" aria-hidden="true">
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '32px 32px',
+            backgroundSize: '40px 40px',
           }}
         />
       </div>
 
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
-          Ξεκινήστε σήμερα.
+        {/* Serif heading — editorial, large */}
+        <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal text-white leading-[1.05] tracking-[-0.02em] mb-5">
+          Ξεκινήστε <span className="italic">σήμερα.</span>
         </h2>
-        <p className="text-base sm:text-lg text-white/70 max-w-xl mx-auto mb-10">
+        <p className="text-base sm:text-lg text-white/60 max-w-xl mx-auto mb-12">
           Ανακαλύψτε αυθεντικά ελληνικά προϊόντα ή φέρτε τα δικά σας
           στην αγορά μας.
         </p>
@@ -33,16 +35,16 @@ export default function HomeCTA() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/products"
-            className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white text-primary font-semibold text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] touch-manipulation"
+            className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white text-[#1b2a1e] font-semibold text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] touch-manipulation"
           >
             Εξερευνήστε Προϊόντα
-            <ArrowRight className="w-4.5 h-4.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
           <Link
             href="/producer/onboarding"
-            className="group inline-flex items-center gap-2.5 px-8 py-4 bg-transparent text-white font-semibold text-base rounded-full border-2 border-white/30 hover:border-white/60 hover:bg-white/10 transition-all duration-200 active:scale-[0.97] touch-manipulation"
+            className="group inline-flex items-center gap-2.5 px-8 py-4 bg-transparent text-white font-semibold text-base rounded-full border-2 border-white/20 hover:border-white/50 hover:bg-white/5 transition-all duration-200 active:scale-[0.97] touch-manipulation"
           >
-            <Store className="w-4.5 h-4.5" />
+            <Store className="w-4 h-4" />
             Γίνετε Παραγωγός
           </Link>
         </div>

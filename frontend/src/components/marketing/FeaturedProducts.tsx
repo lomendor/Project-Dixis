@@ -76,7 +76,7 @@ export default async function FeaturedProducts() {
 
   return (
     <section
-      className="py-16 sm:py-20 lg:py-24 bg-white"
+      className="py-20 sm:py-24 lg:py-28 bg-[#faf8f3]"
       data-testid="featured-products"
     >
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
@@ -86,7 +86,7 @@ export default async function FeaturedProducts() {
             <p className="text-xs font-semibold tracking-wider text-primary/60 uppercase mb-2">
               Επιλεγμένα για Εσάς
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+            <h2 className="font-display text-2xl sm:text-3xl lg:text-[2.5rem] font-normal text-neutral-900 tracking-[-0.01em]">
               Δοκιμάστε τα Αγαπημένα μας
             </h2>
             <p className="text-base text-neutral-500 mt-1">
