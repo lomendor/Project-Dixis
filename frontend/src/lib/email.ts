@@ -196,6 +196,41 @@ export async function sendOrderStatusUpdate({
 }
 
 /**
+ * Shared email footer with unsubscribe link and website reference.
+ * Used by all outgoing email templates for GDPR compliance.
+ */
+function renderEmailFooter(toEmail?: string): string {
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dixis.gr'
+  const unsubUrl = toEmail
+    ? `${siteUrl}/unsubscribe?email=${encodeURIComponent(toEmail)}`
+    : `${siteUrl}/unsubscribe`
+
+  return `
+    <!-- Footer -->
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
+        Για οποιαδήποτε απορία, απαντήστε σε αυτό το email ή επικοινωνήστε μαζί μας.
+      </p>
+      <p style="margin: 0; color: #6b7280; font-size: 13px;">
+        Ευχαριστούμε,<br>
+        <strong style="color: #374151;">Η ομάδα του Dixis</strong>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Legal Footer -->
+  <div style="text-align: center; margin-top: 20px; padding: 0 20px;">
+    <p style="margin: 0 0 8px 0; color: #9ca3af; font-size: 12px;">
+      <a href="${siteUrl}" style="color: #6b7280; text-decoration: none;">dixis.gr</a> — Φρέσκα τοπικά προϊόντα από παραγωγούς
+    </p>
+    <p style="margin: 0; color: #9ca3af; font-size: 11px;">
+      <a href="${unsubUrl}" style="color: #9ca3af; text-decoration: underline;">Διαγραφή από ενημερωτικά email</a>
+    </p>
+  </div>`
+}
+
+/**
  * Render status update email HTML
  */
 function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string): string {
@@ -268,18 +303,7 @@ function renderStatusUpdateHTML(data: StatusUpdateEmailData, statusLabel: string
     </div>
     ` : ''}
 
-    <!-- Footer -->
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-      <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
-        Για οποιαδήποτε απορία, απαντήστε σε αυτό το email ή επικοινωνήστε μαζί μας.
-      </p>
-      <p style="margin: 0; color: #6b7280; font-size: 13px;">
-        Ευχαριστούμε,<br>
-        <strong style="color: #374151;">Η ομάδα του Dixis</strong>
-      </p>
-    </div>
-
-  </div>
+    ${renderEmailFooter()}
 
 </body>
 </html>
@@ -378,25 +402,7 @@ function renderOrderConfirmationHTML(order: OrderEmailData): string {
       </p>
     </div>
 
-    <!-- Footer -->
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-      <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 13px; line-height: 1.5;">
-        Για οποιαδήποτε απορία, απαντήστε σε αυτό το email ή επικοινωνήστε μαζί μας.
-      </p>
-      <p style="margin: 0; color: #6b7280; font-size: 13px;">
-        Ευχαριστούμε,<br>
-        <strong style="color: #374151;">Η ομάδα του Dixis</strong>
-      </p>
-    </div>
-
-  </div>
-
-  <!-- Legal Footer -->
-  <div style="text-align: center; margin-top: 20px; padding: 0 20px;">
-    <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
-      Αυτό το email στάλθηκε από το Dixis διότι δημιουργήσατε μια παραγγελία στην πλατφόρμα μας.
-    </p>
-  </div>
+    ${renderEmailFooter()}
 
 </body>
 </html>
