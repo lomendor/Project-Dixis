@@ -113,16 +113,17 @@ export default function ProducerOrderDetailsPage() {
         orderId,
         newStatus as 'processing' | 'shipped' | 'delivered'
       );
-      setOrder(response.order);
+      const updatedOrder = response.order;
+      setOrder(updatedOrder);
 
-      // FIX-EMAIL-01: Send email notification with data from Laravel API response
-      const customerEmail = getCustomerEmail(order);
+      // FIX-EMAIL-02: Use fresh response data, not stale state
+      const customerEmail = getCustomerEmail(updatedOrder);
       if (customerEmail) {
         const emailData = {
           status: newStatus as 'processing' | 'shipped' | 'delivered',
-          customerName: order.user?.name || order.shipping_address?.name || 'Πελάτη',
+          customerName: updatedOrder.user?.name || updatedOrder.shipping_address?.name || 'Πελάτη',
           customerEmail,
-          total: order.total,
+          total: updatedOrder.total,
         };
         setLastEmailData(emailData);
         await sendEmailNotification(emailData);
