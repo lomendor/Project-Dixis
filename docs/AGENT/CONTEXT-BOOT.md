@@ -181,7 +181,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 
 ## 8. COMMON PITFALLS (Things I Keep Re-learning)
 
-1. **Producer auth is client-side** (Sanctum/useAuth), admin auth is server-side (JWT/requireAdmin). Don't mix patterns.
+1. **Producer auth is client-side** (Sanctum/useAuth), admin auth is server-side (JWT/requireAdmin). Don't mix patterns. See `docs/AGENT/AUTH-ARCHITECTURE.md` for the full dual-auth reference.
 2. **Product data SSOT is Laravel**. Frontend only proxies. Never create Prisma product models.
 3. **The `/my/*` routes are now redirect stubs** to `/producer/*`. All implementations live at `/producer/*`. `/my/*` only exists for backwards compatibility.
 4. **Worktree builds may fail** with Prisma errors — always run `npx prisma generate` first.
@@ -189,6 +189,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 6. **Auto-deploy is broken** (SSH key issue). Always deploy manually after merge.
 7. **CI uses SQLite**, production uses PostgreSQL. No `mode: 'insensitive'` or other PG-only features.
 8. **Greek locale everywhere**: `el-GR` for dates/currency, Greek UI strings, 5-digit postal codes.
+9. **LARAVEL_INTERNAL_URL already includes `/api/v1`**. Use `laravelUrl('path')` from `@/lib/laravel/url` instead of manual concatenation to avoid double-prefix bugs (PR #3192).
 
 ---
 
