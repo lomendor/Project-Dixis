@@ -132,6 +132,10 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
 
   const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
 
+  // Unit code → Greek label mapping
+  const unitLabels: Record<string, string> = { kg: 'κιλό', g: 'γρ.', L: 'λίτρο', ml: 'ml', 'τεμ': 'τεμ.' };
+  const unitLabel = unitLabels[p.unit] || p.unit;
+
   // JSON-LD Product Schema
   const baseUrl = await getBaseUrl();
   const jsonLd = {
@@ -298,7 +302,10 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
                 {fmt(Number(p.price||0))}
               </span>
             )}
-            <span className="text-lg text-neutral-500">/ {p.unit}</span>
+            <span className="text-lg text-neutral-500">/ {unitLabel}</span>
+            {p.weightPerUnit && (
+              <span className="text-sm text-neutral-400 ml-1">· {p.weightPerUnit >= 1000 ? `${(p.weightPerUnit / 1000).toFixed(1)} kg` : `${p.weightPerUnit} g`}</span>
+            )}
             <span
               className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 Number(p.stock||0) > 0
@@ -402,7 +409,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
           </div>
 
           {/* Add to Cart — Pass CART-UX-FEEDBACK-01: include imageUrl */}
-          <div className="mt-auto">
+          <div className="mt-6">
             <Add
               product={{ ...p, imageUrl: p.imageUrl || null }}
               translations={{
