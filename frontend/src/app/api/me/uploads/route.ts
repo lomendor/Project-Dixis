@@ -62,6 +62,14 @@ export async function POST(req: Request) {
   const result = await putObject(buf, file.type).catch((e: any): { error: string } => ({
     error: e?.message || 'upload failed'
   }));
-  if ((result as any).error) return NextResponse.json(result, { status: 500 });
+  if ('error' in result) return NextResponse.json(result, { status: 500 });
+
+  // FIX-UPLOAD-URL-01: Ensure url is absolute so Laravel 'url' validation passes.
+  // putObjectFs returns relative paths like /uploads/202602/abc.jpg — prepend base URL.
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+  if (result.url.startsWith('/')) {
+    result.url = `${base.replace(/\/+$/, '')}${result.url}`;
+  }
+
   return NextResponse.json(result);
 }
