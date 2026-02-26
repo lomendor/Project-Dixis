@@ -171,10 +171,13 @@ export async function PATCH(
       return NextResponse.json({ success: true, product: { id: productId } })
     }
 
-    // Proxy to Laravel PATCH /v1/products/{id}
+    // FIX-ADMIN-PRODUCT-UPDATE-01: Proxy to Laravel admin route (jwt.admin auth)
+    // The regular PATCH /v1/products/{id} requires auth:sanctum (user/producer token).
+    // Admin OTP JWT is only understood by the jwt.admin middleware, so we use
+    // the admin-specific endpoint at /v1/admin/products/{id}.
     const sessionToken = await getSessionToken()
     const laravelBase = getLaravelInternalUrl()
-    const url = new URL(`${laravelBase}/products/${productId}`)
+    const url = new URL(`${laravelBase}/admin/products/${productId}`)
 
     const headers: Record<string, string> = {
       'Accept': 'application/json',

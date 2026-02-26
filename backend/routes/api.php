@@ -375,6 +375,11 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1'); // 60 requests per minute
         Route::patch('{product}/moderate', [App\Http\Controllers\Api\Admin\AdminProductController::class, 'moderate'])
             ->middleware('throttle:30,1'); // 30 moderation actions per minute
+        // FIX-ADMIN-PRODUCT-UPDATE-01: Admin product update via jwt.admin auth
+        // The regular PATCH /v1/products/{id} requires auth:sanctum (user/producer token).
+        // Admin panel uses OTP JWT which only jwt.admin middleware understands.
+        Route::patch('{product}', [App\Http\Controllers\Api\V1\ProductController::class, 'update'])
+            ->middleware('throttle:30,1'); // 30 updates per minute
     });
 
     // Admin Order Management (Pass 25 + Pass 61) — T2.5-01: added 'admin' middleware
