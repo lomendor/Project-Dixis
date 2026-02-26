@@ -105,107 +105,95 @@ export default async function ProducerProfilePage(
   const productCount = producer.products.length;
 
   return (
-    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Breadcrumbs */}
-        <nav className="mb-6 text-sm" aria-label="Breadcrumb">
-          <ol className="flex items-center gap-2">
-            <li><Link href="/" className="text-primary hover:underline">Αρχική</Link></li>
-            <li className="text-neutral-400">/</li>
-            <li><Link href="/producers" className="text-primary hover:underline">Παραγωγοί</Link></li>
-            <li className="text-neutral-400">/</li>
-            <li className="text-neutral-600">{producer.name}</li>
-          </ol>
-        </nav>
-
-        {/* Producer Hero */}
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden mb-6">
-          <div className="grid md:grid-cols-3 gap-0">
-            {/* Image */}
-            <div className="aspect-[4/3] md:aspect-auto bg-neutral-100 overflow-hidden">
-              {hasImage ? (
-                <Image
-                  src={producer.image_url!}
-                  alt={producer.name}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full min-h-[240px] flex items-center justify-center text-neutral-400">
-                  <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="md:col-span-2 p-6 sm:p-8 flex flex-col justify-center">
-              {producer.category && (
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">
-                  {producer.category}
-                </span>
-              )}
-              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
-                {producer.name}
-              </h1>
-              {producer.region && (
-                <p className="text-sm text-neutral-500 flex items-center gap-1.5 mb-4">
-                  <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {producer.region}
-                </p>
-              )}
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-1.5 text-sm text-neutral-600 bg-neutral-100 px-3 py-1 rounded-full">
-                  <svg className="w-4 h-4 text-primary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                  {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
-                </span>
-                {producer.website && (
-                  <a
-                    href={producer.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                    Website
-                  </a>
-                )}
+    <main className="min-h-screen bg-[#faf8f3]">
+      {/* Full-width hero — magazine style */}
+      <div className="bg-[#f5f0e6]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
+          {/* Image — full bleed */}
+          <div className="relative aspect-[4/3] lg:aspect-auto bg-neutral-100 overflow-hidden">
+            {hasImage ? (
+              <Image
+                src={producer.image_url!}
+                alt={producer.name}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full min-h-[280px] flex items-center justify-center bg-gradient-to-br from-primary-pale to-[#edf6f0] text-primary/20">
+                <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
+            )}
+          </div>
+
+          {/* Content — editorial */}
+          <div className="px-8 py-10 sm:px-12 sm:py-14 lg:px-16 xl:px-20 lg:py-0 flex flex-col justify-center">
+            {/* Breadcrumbs */}
+            <nav className="mb-6 text-xs text-neutral-400" aria-label="Breadcrumb">
+              <ol className="flex items-center gap-1.5">
+                <li><Link href="/" className="hover:text-primary transition-colors">Αρχική</Link></li>
+                <li>/</li>
+                <li><Link href="/producers" className="hover:text-primary transition-colors">Παραγωγοί</Link></li>
+                <li>/</li>
+                <li className="text-neutral-600 truncate max-w-[120px]">{producer.name}</li>
+              </ol>
+            </nav>
+
+            {producer.category && (
+              <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-3">
+                {producer.category}
+              </p>
+            )}
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 mb-3 tracking-[-0.01em]">
+              {producer.name}
+            </h1>
+            {producer.region && (
+              <div className="inline-flex items-center gap-1.5 text-sm text-neutral-500 mb-5">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {producer.region}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 text-sm text-neutral-600 bg-white/60 px-3 py-1.5 rounded-full">
+                {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
+              </span>
+              {producer.website && (
+                <a
+                  href={producer.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                >
+                  Website &rarr;
+                </a>
+              )}
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
 
         {/* Story / Description section */}
         {producer.description && (
-          <div className="bg-primary/5 rounded-xl border border-primary/10 p-6 sm:p-8 mb-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-3 flex items-center gap-2">
-              <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
+          <div className="mb-10">
+            <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900 mb-4">
               Η Ιστορία μας
             </h2>
-            <p className="text-neutral-700 leading-relaxed">{producer.description}</p>
+            <p className="text-neutral-600 leading-relaxed text-[15px] max-w-2xl">{producer.description}</p>
           </div>
         )}
 
         {/* Map section — only if coordinates exist */}
         {producer.latitude && producer.longitude && (
-          <div className="mb-8">
-            <h2 className="text-lg font-bold text-neutral-900 mb-3 flex items-center gap-2">
-              <svg className="w-5 h-5 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+          <div className="mb-10">
+            <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900 mb-4">
               Η Τοποθεσία μας
             </h2>
             <ProducerMap
@@ -220,11 +208,11 @@ export default async function ProducerProfilePage(
         {/* Products Section */}
         {productCount > 0 ? (
           <>
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold text-neutral-900">
+            <div className="flex items-center gap-4 mb-6">
+              <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900">
                 Τα Προϊόντα μας
               </h2>
-              <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-semibold text-primary/70 bg-primary-pale px-2.5 py-1 rounded-full">
                 {productCount}
               </span>
             </div>
@@ -260,9 +248,9 @@ export default async function ProducerProfilePage(
         )}
 
         {/* Back link */}
-        <div className="mt-8">
-          <Link href="/producers" className="inline-flex items-center text-primary hover:underline">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-10 pt-6 border-t border-neutral-200/50">
+          <Link href="/producers" className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Πίσω στους Παραγωγούς

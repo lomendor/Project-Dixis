@@ -44,10 +44,10 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
   const producerUrl = (producerSlug || producerId) ? `/producers/${producerSlug || producerId}` : null
 
   return (
-    <div data-testid="product-card" className="group flex flex-col h-full bg-white border border-neutral-200/80 rounded-xl overflow-hidden shadow-card hover:shadow-card-hover hover:border-accent-gold/30 hover:-translate-y-0.5 transition-all duration-300">
+    <div data-testid="product-card" className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-neutral-100">
       {/* Image — navigates to product page */}
       <Link href={productUrl} className="flex flex-col touch-manipulation active:scale-[0.99]">
-        <div data-testid="product-card-image" className={`relative aspect-square sm:aspect-[4/5] w-full bg-neutral-100 overflow-hidden${isOOS ? ' opacity-50 grayscale' : ''}`}>
+        <div data-testid="product-card-image" className={`relative aspect-square w-full bg-neutral-50 overflow-hidden${isOOS ? ' opacity-50 grayscale' : ''}`}>
           {hasImage ? (
             <Image
               src={image}
@@ -104,28 +104,28 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
       </Link>
 
       {/* Producer name + product title */}
-      <div className="px-2.5 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
+      <div className="px-3 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
         {producerUrl && !hideProducerLink ? (
           <Link
             href={producerUrl}
             data-testid="product-card-producer-link"
-            className="text-sm font-medium text-accent-gold uppercase tracking-wider truncate block hover:underline transition-colors"
+            className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-[0.08em] truncate block hover:text-primary transition-colors"
           >
             {producer || 'Παραγωγός'}
           </Link>
         ) : (
-          <span data-testid="product-card-producer" className="text-sm font-medium text-accent-gold uppercase tracking-wider truncate block">
+          <span data-testid="product-card-producer" className="text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-[0.08em] truncate block">
             {producer || 'Παραγωγός'}
           </span>
         )}
-        <Link href={productUrl} className="block mt-1">
-          <h3 data-testid="product-card-title" className="text-sm sm:text-base font-bold text-neutral-900 line-clamp-2 leading-tight hover:text-primary/80 transition-colors">
+        <Link href={productUrl} className="block mt-1.5">
+          <h3 data-testid="product-card-title" className="font-display text-sm sm:text-base font-normal text-neutral-900 line-clamp-2 leading-snug hover:text-primary transition-colors">
             {title}
           </h3>
         </Link>
         {/* Pass PRODUCT-CARD-RATINGS-01: Show star rating on card */}
         {reviewsAvgRating != null && reviewsAvgRating > 0 && (
-          <div className="mt-1" data-testid="product-card-rating">
+          <div className="mt-1.5" data-testid="product-card-rating">
             <StarRating rating={reviewsAvgRating} count={reviewsCount} size="xs" />
           </div>
         )}
@@ -133,9 +133,9 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
 
       {/* Non-clickable section - price + add to cart button */}
       {/* Pass FIX-MOBILE-CARDS-01: Stack vertically on mobile, row on sm+ */}
-      <div className="px-2.5 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col gap-2 pt-2 border-t border-neutral-100 bg-accent-cream">
+      <div className="px-3 pb-3 sm:px-4 sm:pb-4 mt-auto flex flex-col gap-2 pt-2.5 border-t border-neutral-100/80">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <span data-testid="product-card-price" className={`text-base sm:text-lg font-bold ${hasDiscount ? 'text-red-600' : 'text-neutral-900'}`}>
+          <span data-testid="product-card-price" className={`text-base sm:text-lg font-semibold ${hasDiscount ? 'text-red-600' : 'text-neutral-900'}`}>
             {displayPrice}
             {originalPrice && <span className="ml-1.5 text-xs sm:text-sm font-normal text-neutral-400 line-through">{originalPrice}</span>}
           </span>
@@ -143,7 +143,6 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
             <AddToCartButton id={String(id)} title={title} priceCents={priceCents} imageUrl={image || undefined} producerId={producerId ? String(producerId) : undefined} producerName={producer || undefined} stock={stock} />
           </div>
         </div>
-        <p className="text-[10px] text-primary/50 hidden sm:block">88% στον παραγωγό</p>
       </div>
     </div>
   )
@@ -151,8 +150,8 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
 
 export function ProductCardSkeleton() {
   return (
-    <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white border border-neutral-200/80 rounded-xl overflow-hidden animate-pulse">
-      <div className="aspect-square sm:aspect-[4/5] bg-accent-beige/60 w-full" />
+    <div data-testid="product-card-skeleton" className="flex flex-col h-full bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-pulse">
+      <div className="aspect-square bg-neutral-100/60 w-full" />
       <div className="p-2.5 sm:p-4 flex-grow flex flex-col">
         <div className="h-3 bg-accent-beige/60 w-1/3 mb-3 rounded" />
         <div className="h-5 sm:h-6 bg-accent-beige/60 w-full mb-2 rounded" />
