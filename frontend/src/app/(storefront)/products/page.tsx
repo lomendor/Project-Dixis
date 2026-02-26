@@ -316,20 +316,25 @@ export default async function Page({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1600px] mx-auto">
+    <main className="min-h-screen bg-[#faf8f3] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
         {/* Demo mode banner */}
         {isDemo && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+          <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
             <span className="font-medium">Λειτουργία demo:</span> Περιορισμένα δεδομένα (DB offline).
           </div>
         )}
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
-          {searchQuery
-            ? `Αποτελέσματα για "${searchQuery}"`
-            : 'Αυθεντικά Ελληνικά Προϊόντα'}
-        </h1>
+        <div className="mb-8">
+          <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-2">
+            Αγορά
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 tracking-[-0.01em]">
+            {searchQuery
+              ? `Αποτελέσματα για "${searchQuery}"`
+              : 'Αυθεντικά Ελληνικά Προϊόντα'}
+          </h1>
+        </div>
 
         {/* Category Cards (Wolt-style, standalone above filter) */}
         <div className="mb-4">
@@ -353,7 +358,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {/* Filter area — compact 2-row layout */}
-        <div className="rounded-lg border border-accent-gold/10 bg-white/40 py-2 px-3 mb-4 space-y-2">
+        <div className="rounded-xl border border-neutral-200/60 bg-white/70 backdrop-blur-sm py-3 px-4 mb-8 space-y-2">
           {/* Row 1: Search + Sort */}
           <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="flex-1">
@@ -382,7 +387,7 @@ export default async function Page({ searchParams }: PageProps) {
         </div>
 
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7" data-testid="products-grid">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" data-testid="products-grid">
             {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
             {items.map((p: ApiItem, index: number) => (
               <ProductCard

@@ -86,29 +86,36 @@ export default async function ProducersPage({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <main className="min-h-screen bg-[#faf8f3] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Παραγωγοί</h1>
-            <p className="mt-1 text-sm text-neutral-600">
+            <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-2">
+              Κοινότητα
+            </p>
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 tracking-[-0.01em]">
               {searchQuery
-                ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
-                : `Γνώρισε τους τοπικούς παραγωγούς μας — ${total} συνολικά.`}
+                ? `Αποτελέσματα για "${searchQuery}"`
+                : 'Οι Παραγωγοί μας'}
+            </h1>
+            <p className="mt-2 text-sm text-neutral-500 max-w-md">
+              {searchQuery
+                ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''}`
+                : 'Πίσω από κάθε προϊόν υπάρχει ένας Έλληνας παραγωγός με πάθος και ιστορία.'}
             </p>
           </div>
 
           {/* Search Form */}
-          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100/60 rounded-lg animate-pulse" />}>
             <ProducerSearchForm defaultValue={searchQuery || ''} />
           </Suspense>
         </div>
 
         {/* CTA banner */}
-        <div className="mb-6 p-3 bg-primary-pale border border-primary/20 rounded-lg text-primary text-sm flex items-center justify-between">
-          <span>Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
-          <Link href="/producers/join" className="font-medium underline hover:text-primary-light">
-            Μάθε περισσότερα →
+        <div className="mb-8 p-4 bg-white rounded-xl border border-neutral-200/60 text-sm flex items-center justify-between">
+          <span className="text-neutral-600">Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
+          <Link href="/producers/join" className="font-semibold text-primary hover:text-primary-light transition-colors">
+            Μάθε περισσότερα &rarr;
           </Link>
         </div>
 
@@ -120,7 +127,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
         </Suspense>
 
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
             {filtered.map((p) => (
               <ProducerCard
                 key={p.id}
