@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import Hero from '@/components/marketing/Hero';
+import HomeCategoryStrip from '@/components/marketing/HomeCategoryStrip';
 import FeaturedProducts from '@/components/marketing/FeaturedProducts';
+import ProducerSpotlight from '@/components/marketing/ProducerSpotlight';
+import TrustBar from '@/components/marketing/TrustBar';
+import HomeCTA from '@/components/marketing/HomeCTA';
 
 export const metadata: Metadata = {
   title: 'Dixis — Αυθεντικά Ελληνικά Προϊόντα από Τοπικούς Παραγωγούς',
@@ -11,17 +15,23 @@ export const metadata: Metadata = {
 /**
  * Homepage — Premium landing page for Dixis marketplace
  *
- * Sections rendered here (PR 1 starts with Hero + FeaturedProducts):
+ * 6 sections in visual order:
  * 1. Hero — value prop, CTA, trust signals
- * 2. FeaturedProducts — curated product grid (server component, ISR 1h)
- *
- * Future PRs add: HomeCategoryStrip, ProducerSpotlight, TrustBar, HomeCTA
+ * 2. HomeCategoryStrip — browse by category circles
+ * 3. FeaturedProducts — curated product grid (ISR 1h)
+ * 4. ProducerSpotlight — magazine-style producer feature (ISR 1h)
+ * 5. TrustBar — value props (payments, delivery, Greek, fair trade)
+ * 6. HomeCTA — dark contrast closing section
  */
 export default function HomePage() {
   return (
     <>
       <Hero />
+      <HomeCategoryStrip />
       <FeaturedProducts />
+      <ProducerSpotlight />
+      <TrustBar />
+      <HomeCTA />
     </>
   );
 }
