@@ -156,7 +156,13 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
     <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="thank-you-page">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white border rounded-xl p-8 text-center">
-          <div className="mb-6">
+          {/* Print-only receipt header */}
+          <div className="hidden print:block text-center mb-6 pb-4 border-b">
+            <h1 className="text-2xl font-bold">ΑΠΟΔΕΙΞΗ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
+            <p className="text-sm text-neutral-500 mt-1">dixis.gr — Φρέσκα τοπικά προϊόντα από παραγωγούς</p>
+          </div>
+
+          <div className="mb-6 print:hidden">
             <div className="text-5xl mb-4">✓</div>
             <h1 className="text-3xl font-bold text-primary mb-2">Ευχαριστούμε!</h1>
             <p className="text-neutral-600">Η παραγγελία σας καταχωρήθηκε επιτυχώς.</p>
@@ -278,7 +284,22 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
             )}
           </div>
 
-          <div className="flex gap-3 justify-center">
+          {/* Print-only footer */}
+          <div className="hidden print:block text-center mt-6 pt-4 border-t text-xs text-neutral-500">
+            <p>dixis.gr — Ευχαριστούμε για την παραγγελία σας!</p>
+          </div>
+
+          <div className="flex gap-3 justify-center no-print">
+            <button
+              onClick={() => window.print()}
+              data-testid="print-button"
+              className="inline-flex items-center gap-2 border border-neutral-300 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-50 font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Αποθήκευση / Εκτύπωση
+            </button>
             <a
               href="/products"
               className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-light font-medium"

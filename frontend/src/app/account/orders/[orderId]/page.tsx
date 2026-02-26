@@ -169,9 +169,15 @@ function OrderDetailsPage(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
+        {/* Print-only receipt header */}
+        <div className="hidden print:block text-center mb-6 pb-4 border-b">
+          <h1 className="text-2xl font-bold">ΑΠΟΔΕΙΞΗ ΠΑΡΑΓΓΕΛΙΑΣ</h1>
+          <p className="text-sm text-neutral-500 mt-1">dixis.gr — Φρέσκα τοπικά προϊόντα από παραγωγούς</p>
+        </div>
+
         {/* Header with back navigation */}
         <div className="mb-8">
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-4 no-print">
             <Link
               href="/account/orders"
               data-testid="back-to-orders-link"
@@ -403,8 +409,27 @@ function OrderDetailsPage(): React.JSX.Element {
               </div>
             </div>
 
+            {/* Print / Save Receipt */}
+            <div className="bg-white rounded-lg shadow-sm border border-neutral-200 no-print">
+              <div className="p-6">
+                <button
+                  onClick={() => window.print()}
+                  data-testid="print-button"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-neutral-300 text-sm font-medium rounded-lg text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Αποθήκευση / Εκτύπωση
+                </button>
+                <p className="mt-2 text-xs text-neutral-500 text-center">
+                  Αποθηκεύστε ως PDF ή εκτυπώστε
+                </p>
+              </div>
+            </div>
+
             {/* Pass REORDER-01: Reorder Button */}
-            <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+            <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-neutral-200 no-print">
               <div className="p-6">
                 <button
                   onClick={handleReorder}
