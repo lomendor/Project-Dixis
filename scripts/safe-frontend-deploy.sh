@@ -59,6 +59,12 @@ if [ -d "public" ] && [ ! -d ".next/standalone/public" ]; then
     cp -r public .next/standalone/
 fi
 
+# Persistent uploads: symlink so uploaded files survive deploys
+# (mirrors prod-deploy-clean.sh lines 207-210)
+mkdir -p /var/www/dixis/shared/uploads
+ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
+echo "Uploads symlinked to shared/"
+
 if [ -n "$ERRORS" ]; then
     echo "BUILD VERIFICATION FAILED:"
     echo -e "$ERRORS"
