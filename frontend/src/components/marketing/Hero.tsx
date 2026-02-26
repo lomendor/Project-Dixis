@@ -1,12 +1,13 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Check } from 'lucide-react';
 
 /**
- * Hero Section — Premium editorial homepage hero
+ * Hero Section — Premium editorial homepage hero with photography
  *
  * Design inspired by Graza, Brightland, Aesop:
  * - Serif display font (Noto Serif Display) for H1
- * - Large editorial image on desktop (right column)
+ * - Large editorial photograph on desktop (right column)
  * - Retro offset-shadow CTA button
  * - Warm olive-green palette with generous whitespace
  * - Trust micro-strip below CTA
@@ -15,7 +16,7 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#faf8f3] via-[#f7f3eb] to-[#edf6f0]/40">
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.65fr] gap-8 lg:gap-20 items-center min-h-[88vh] lg:min-h-[92vh] py-20 sm:py-24 lg:py-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-[88vh] lg:min-h-[92vh] py-20 sm:py-24 lg:py-0">
 
           {/* ── Text column ── */}
           <div className="animate-fade-in-up">
@@ -72,47 +73,43 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ── Visual column — abstract premium composition (desktop) ── */}
-          <div className="hidden lg:flex flex-col items-center justify-center relative" aria-hidden="true">
-            <div className="relative w-full max-w-[380px] aspect-square">
-              {/* Layered warm gradient blobs — abstract Mediterranean feel */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#edf6f0] to-[#d4e8da] blur-3xl scale-110 opacity-60" />
-              <div className="absolute top-[10%] right-[5%] w-[55%] aspect-square rounded-full bg-gradient-to-br from-[#c9a227]/15 to-[#c9a227]/5 blur-2xl" />
-              <div className="absolute bottom-[15%] left-[10%] w-[40%] aspect-square rounded-full bg-gradient-to-br from-primary/10 to-transparent blur-2xl" />
+          {/* ── Visual column — editorial product photography ── */}
+          <div className="hidden lg:block relative">
+            <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src="/images/hero-products.jpg"
+                alt="Ελληνικά artisan προϊόντα — ελαιόλαδο, μέλι, βότανα, αμύγδαλα"
+                fill
+                className="object-cover"
+                priority
+                sizes="(min-width: 1024px) 50vw, 0vw"
+              />
+              {/* Subtle warm overlay to blend with page palette */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#faf8f3]/20 via-transparent to-transparent" />
+            </div>
 
-              {/* Floating product cards — editorial composition */}
-              <div className="absolute animate-fade-in-up bg-white rounded-2xl shadow-lg px-6 py-5 flex items-center gap-4" style={{ top: '8%', left: '5%', animationDelay: '0.1s' }}>
-                <span className="w-11 h-11 rounded-full bg-[#e8f5dc] flex items-center justify-center text-xl">🫒</span>
-                <div>
-                  <p className="text-sm font-semibold text-neutral-800">Ελαιόλαδο</p>
-                  <p className="text-xs text-neutral-400">Από τη Μεσσηνία</p>
-                </div>
+            {/* Floating trust card — overlaps the image */}
+            <div className="absolute -bottom-4 -left-6 animate-fade-in-up bg-white rounded-2xl shadow-xl px-6 py-4 flex items-center gap-3 border border-[#c9a227]/15" style={{ animationDelay: '0.4s' }}>
+              <span className="w-10 h-10 rounded-full bg-[#c9a227]/10 flex items-center justify-center text-lg">✦</span>
+              <div>
+                <p className="text-sm font-semibold text-neutral-800">88% στον Παραγωγό</p>
+                <p className="text-xs text-neutral-500">Δίκαιο Εμπόριο</p>
               </div>
+            </div>
+          </div>
 
-              <div className="absolute animate-fade-in-up bg-white rounded-2xl shadow-lg px-6 py-5 flex items-center gap-4" style={{ top: '32%', right: '0%', animationDelay: '0.25s' }}>
-                <span className="w-11 h-11 rounded-full bg-[#fef2c0] flex items-center justify-center text-xl">🍯</span>
-                <div>
-                  <p className="text-sm font-semibold text-neutral-800">Θυμαρίσιο Μέλι</p>
-                  <p className="text-xs text-neutral-400">Από την Κρήτη</p>
-                </div>
-              </div>
-
-              <div className="absolute animate-fade-in-up bg-white rounded-2xl shadow-lg px-6 py-5 flex items-center gap-4" style={{ bottom: '20%', left: '2%', animationDelay: '0.4s' }}>
-                <span className="w-11 h-11 rounded-full bg-[#d4f0e2] flex items-center justify-center text-xl">🌿</span>
-                <div>
-                  <p className="text-sm font-semibold text-neutral-800">Βότανα</p>
-                  <p className="text-xs text-neutral-400">Από τον Ταΰγετο</p>
-                </div>
-              </div>
-
-              {/* Trust accent card at bottom */}
-              <div className="absolute animate-fade-in-up bg-white rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3 border border-[#c9a227]/15" style={{ bottom: '0%', right: '8%', animationDelay: '0.55s' }}>
-                <span className="w-10 h-10 rounded-full bg-[#c9a227]/10 flex items-center justify-center text-lg">✦</span>
-                <div>
-                  <p className="text-sm font-semibold text-neutral-800">88% στον Παραγωγό</p>
-                  <p className="text-xs text-neutral-500">Δίκαιο Εμπόριο</p>
-                </div>
-              </div>
+          {/* Mobile hero image — full-width, shorter */}
+          <div className="block lg:hidden -mx-5 sm:-mx-8">
+            <div className="relative w-full aspect-[16/9] overflow-hidden">
+              <Image
+                src="/images/hero-products.jpg"
+                alt="Ελληνικά artisan προϊόντα — ελαιόλαδο, μέλι, βότανα, αμύγδαλα"
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#faf8f3]/40 via-transparent to-transparent" />
             </div>
           </div>
 

@@ -90,19 +90,13 @@ export default async function ProducerSpotlight() {
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[450px] lg:min-h-[560px]">
         {/* Image column — full bleed */}
         <div className="relative aspect-[4/3] lg:aspect-auto bg-primary-pale/30">
-          {producer.image_url ? (
-            <Image
-              src={producer.image_url}
-              alt={producer.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#edf6f0]">
-              <Users className="w-24 h-24 text-primary/15" />
-            </div>
-          )}
+          <Image
+            src={producer.image_url || '/images/producer-spotlight.jpg'}
+            alt={producer.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
         </div>
 
         {/* Content column — generous padding, editorial tone */}
