@@ -1,19 +1,13 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
 import { getServerApiUrl } from '@/env';
 
 /**
- * Pass FEATURED-PRODUCTS-01: Curated featured products section for homepage.
+ * FeaturedProducts — Curated product grid for the homepage
  *
- * Strategy: fetch all products, sort by rating (best first), then by newest.
- * Shows up to 8 products that have images and stock — creating a curated feel.
- *
- * Features:
- * - Server component for optimal performance
- * - Smart product ranking: rated products first, then newest
- * - Only shows in-stock products with images (curated quality)
- * - Mobile-first grid (2-col mobile, 3-col tablet, 4-col desktop)
- * - CI/test environment fallback
+ * Server component with ISR (1 hour). Fetches top-rated in-stock products
+ * with images, shows max 8 in a responsive grid.
  */
 
 interface ApiProduct {
@@ -81,33 +75,36 @@ export default async function FeaturedProducts() {
   const hasProducts = products.length > 0;
 
   return (
-    <section className="bg-gradient-to-b from-white to-accent-cream/30 py-16 sm:py-20 lg:py-24" data-testid="featured-products">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Section header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 sm:mb-10 gap-4">
+    <section
+      className="py-16 sm:py-20 lg:py-24 bg-white"
+      data-testid="featured-products"
+    >
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+        {/* Section header — eyebrow + title + "See all" */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12">
           <div>
-            <p className="text-sm font-medium text-accent-gold uppercase tracking-wider mb-2">Επιλεγμένα για Εσάς</p>
-            <h2 className="text-3xl font-bold text-neutral-900 mb-2 sm:text-4xl">
-              Προτεινόμενα Προϊόντα
+            <p className="text-xs font-semibold tracking-wider text-primary/60 uppercase mb-2">
+              Επιλεγμένα για Εσάς
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+              Δοκιμάστε τα Αγαπημένα μας
             </h2>
-            <p className="text-lg text-neutral-600">
+            <p className="text-base text-neutral-500 mt-1">
               Τα καλύτερα προϊόντα από τοπικούς παραγωγούς
             </p>
           </div>
           <Link
             href="/products"
-            className="inline-flex items-center justify-center sm:justify-start gap-2 text-primary font-semibold hover:text-primary-light transition-colors min-h-[44px] touch-manipulation"
+            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-light transition-colors"
           >
             Δείτε όλα
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
 
         {/* Products grid */}
         {hasProducts ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
             {products.map((product) => {
               const imageUrl = product.image_url || product.images?.[0]?.url || null;
               return (
@@ -128,20 +125,21 @@ export default async function FeaturedProducts() {
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
             {[...Array(8)].map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
         )}
 
-        {/* CTA */}
-        <div className="text-center mt-10 sm:mt-12">
+        {/* Bottom CTA */}
+        <div className="text-center mt-12">
           <Link
             href="/products"
-            className="inline-flex items-center justify-center min-h-[48px] px-8 py-3 bg-white hover:bg-accent-cream text-accent-gold font-semibold rounded-lg border-2 border-accent-gold transition-all duration-200 active:scale-[0.98] touch-manipulation"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-accent-cream hover:bg-accent-beige text-neutral-800 font-semibold text-sm rounded-full border border-neutral-200 transition-all duration-200 hover:shadow-md active:scale-[0.97] touch-manipulation"
           >
             Εξερευνήστε Περισσότερα Προϊόντα
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
