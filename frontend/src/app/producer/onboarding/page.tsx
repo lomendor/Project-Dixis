@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import UploadDocument from '@/components/UploadDocument.client';
 import { CATEGORIES } from '@/data/categories';
+
+const DRAFT_KEY = 'dixis-onboarding-draft';
 
 /** Categories excluded from MVP (need age verification in checkout) */
 const EXCLUDED_CATEGORIES = ['beverages'];
@@ -98,6 +100,43 @@ export default function ProducerOnboardingPage() {
   const [beekeeperNumber, setBeekeeperNumber] = useState('');
   const [cpnpNumber, setCpnpNumber] = useState('');
   const [responsiblePerson, setResponsiblePerson] = useState('');
+
+  // --- Auto-save draft to localStorage (debounced) ---
+  const draftLoaded = useRef(false);
+
+  // Restore draft on mount (only if no server profile data will override)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft.form) setForm((prev) => ({ ...prev, ...draft.form }));
+        if (draft.selectedCategories?.length) setSelectedCategories(draft.selectedCategories);
+        if (draft.beekeeperNumber) setBeekeeperNumber(draft.beekeeperNumber);
+        if (draft.cpnpNumber) setCpnpNumber(draft.cpnpNumber);
+        if (draft.responsiblePerson) setResponsiblePerson(draft.responsiblePerson);
+        if (draft.haccpAccepted) setHaccpAccepted(true);
+      }
+    } catch { /* corrupt draft — ignore */ }
+    draftLoaded.current = true;
+  }, []);
+
+  // Save draft on form changes (debounced 1s)
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const saveDraft = useCallback(() => {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          form, selectedCategories, beekeeperNumber, cpnpNumber, responsiblePerson, haccpAccepted,
+        }));
+      } catch { /* storage full — ignore */ }
+    }, 1000);
+  }, [form, selectedCategories, beekeeperNumber, cpnpNumber, responsiblePerson, haccpAccepted]);
+
+  useEffect(() => {
+    if (draftLoaded.current) saveDraft();
+  }, [saveDraft]);
 
   // Check auth + load existing profile
   // Wait for auth to finish loading before checking role/redirect
@@ -262,6 +301,8 @@ export default function ProducerOnboardingPage() {
         onboarding_completed_at: new Date().toISOString(),
       });
       setSuccess(true);
+      // Clear draft after successful submit
+      localStorage.removeItem(DRAFT_KEY);
       // Fire-and-forget: notify admin via email
       notifyAdmin();
     } catch (err) {
