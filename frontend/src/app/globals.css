@@ -423,19 +423,7 @@ textarea::placeholder {
   margin-bottom: var(--space-8);
 }
 
-/* Grid layouts */
-.grid {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
-@media (max-width: 1024px) {
-  .grid-4 { grid-template-columns: repeat(3, 1fr); }
-}
+/* Grid column helpers (Tailwind grid + gap utilities preferred) */
 
 @media (max-width: 768px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }

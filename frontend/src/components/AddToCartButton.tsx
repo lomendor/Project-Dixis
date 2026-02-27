@@ -2,14 +2,14 @@
 import { useCart } from '@/lib/cart'
 import { useState } from 'react'
 import { useToast } from '@/contexts/ToastContext'
+import { Plus, Check } from 'lucide-react'
 
 /**
- * AddToCartButton - Multi-producer carts now supported
- * (Pass SHIP-MULTI-PRODUCER-ENABLE-01)
+ * AddToCartButton — Commerce-first design
  *
- * Pass FIX-STOCK-GUARD-01: Added stock awareness
- * - Disables button when stock <= 0
- * - Shows "Εξαντλήθηκε" (Out of Stock) label
+ * Two modes:
+ * - compact: Small "+" icon button for product cards (Skroutz/Instacart pattern)
+ * - default: Full "Προσθήκη" text button for detail pages
  */
 export default function AddToCartButton(props: {
   id: string | number
@@ -19,16 +19,15 @@ export default function AddToCartButton(props: {
   producerId?: string
   producerName?: string
   stock?: number | null
+  compact?: boolean
 }) {
   const add = useCart(s => s.add)
   const [isAdded, setIsAdded] = useState(false)
   const { showSuccess } = useToast()
 
-  // Pass FIX-STOCK-GUARD-01: Check if product is out of stock
   const isOutOfStock = typeof props.stock === 'number' && props.stock <= 0
 
   const handleClick = () => {
-    // Pass FIX-STOCK-GUARD-01: Prevent adding OOS items
     if (isOutOfStock) return
 
     const item = {
@@ -46,11 +45,44 @@ export default function AddToCartButton(props: {
     setTimeout(() => setIsAdded(false), 900)
   }
 
-  // Pass FIX-STOCK-GUARD-01: Show OOS state with distinct styling
+  // Compact mode — small icon button for cards
+  if (props.compact) {
+    if (isOutOfStock) {
+      return (
+        <button
+          className="w-9 h-9 rounded-lg bg-neutral-100 text-neutral-400 cursor-not-allowed flex items-center justify-center"
+          disabled
+          aria-label={`${props.title} - Εξαντλήθηκε`}
+          data-testid="add-to-cart-button"
+          data-oos="true"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      )
+    }
+    return (
+      <button
+        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 active:scale-90 ${
+          isAdded
+            ? 'bg-green-500 text-white'
+            : 'bg-primary text-white hover:bg-primary-light'
+        }`}
+        onClick={handleClick}
+        disabled={isAdded}
+        aria-label={`Προσθήκη ${props.title} στο καλάθι`}
+        aria-live="polite"
+        data-testid="add-to-cart-button"
+      >
+        {isAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+      </button>
+    )
+  }
+
+  // Full mode — text button for detail pages
   if (isOutOfStock) {
     return (
       <button
-        className="h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded-full text-sm bg-red-100 text-red-600 cursor-not-allowed"
+        className="h-11 px-4 w-full sm:w-auto rounded-lg text-sm font-semibold bg-neutral-100 text-neutral-400 cursor-not-allowed"
         disabled
         aria-label={`${props.title} - Εξαντλήθηκε`}
         aria-live="polite"
@@ -64,9 +96,9 @@ export default function AddToCartButton(props: {
 
   return (
     <button
-      className={`h-9 sm:h-11 px-3 sm:px-4 w-full sm:w-auto rounded-full text-sm transition-all duration-200 active:scale-95 ${
+      className={`h-11 px-5 w-full sm:w-auto rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] ${
         isAdded
-          ? 'bg-accent-gold text-white'
+          ? 'bg-green-500 text-white'
           : 'bg-primary text-white hover:bg-primary-light'
       }`}
       onClick={handleClick}
@@ -75,7 +107,7 @@ export default function AddToCartButton(props: {
       aria-live="polite"
       data-testid="add-to-cart-button"
     >
-      {isAdded ? '✓ Προστέθηκε' : 'Προσθήκη'}
+      {isAdded ? '✓ Προστέθηκε' : 'Στο Καλάθι'}
     </button>
   )
 }

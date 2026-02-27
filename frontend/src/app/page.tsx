@@ -14,19 +14,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Homepage — Premium editorial landing page for Dixis marketplace
+ * Homepage — Commerce-first landing page for Dixis marketplace
  *
- * Design system: Noto Serif Display + Inter, warm olive greens, generous whitespace.
- * Each section wrapped in SectionReveal for scroll-triggered fade-in-up animation.
- * Hero is NOT wrapped (it has its own entry animation).
- *
- * Section backgrounds alternate for magazine-like visual rhythm:
- * 1. Hero — warm cream gradient
- * 2. Categories — white
- * 3. Featured — warm cream (#faf8f3)
- * 4. Producer — warm sand (#f5f0e6), full-bleed
- * 5. Trust — white
- * 6. CTA — near-black (#1b2a1e)
+ * Layout: compact hero banner → categories → horizontal scroll products → producers → trust → CTA
+ * User sees products immediately without scrolling past giant hero.
  */
 export default function HomePage() {
   return (

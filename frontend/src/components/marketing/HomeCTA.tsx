@@ -24,8 +24,8 @@ export default function HomeCTA() {
 
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
         {/* Serif heading — editorial, large */}
-        <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal text-white leading-[1.05] tracking-[-0.02em] mb-5">
-          Ξεκινήστε <span className="italic">σήμερα.</span>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.1] tracking-tight mb-5">
+          Ξεκινήστε σήμερα.
         </h2>
         <p className="text-base sm:text-lg text-white/60 max-w-xl mx-auto mb-12">
           Ανακαλύψτε αυθεντικά ελληνικά προϊόντα ή φέρτε τα δικά σας

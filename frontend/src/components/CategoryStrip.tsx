@@ -69,7 +69,7 @@ function getIconForSlug(slug: string): LucideIcon {
 }
 
 function getBgForSlug(slug: string): string {
-  return SLUG_BG_MAP[slug] ?? 'bg-accent-cream';
+  return SLUG_BG_MAP[slug] ?? 'bg-neutral-100';
 }
 
 /* ── Types ── */

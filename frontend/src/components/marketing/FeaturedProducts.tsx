@@ -4,10 +4,11 @@ import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
 import { getServerApiUrl } from '@/env';
 
 /**
- * FeaturedProducts — Curated product grid for the homepage
+ * FeaturedProducts — Horizontal scroll carousel for the homepage
  *
- * Server component with ISR (1 hour). Fetches top-rated in-stock products
- * with images, shows max 8 in a responsive grid.
+ * Wolt/Skroutz pattern: horizontal scrollable row of product cards.
+ * Shows 2.3 cards on mobile (peek effect), 5-6 on desktop.
+ * Scrollbar hidden for clean look, touch-scrollable on mobile.
  */
 
 interface ApiProduct {
@@ -64,7 +65,7 @@ async function getFeaturedProducts(): Promise<ApiProduct[]> {
       return Number(b.id) - Number(a.id);
     });
 
-    return curated.slice(0, 8);
+    return curated.slice(0, 12);
   } catch {
     return [];
   }
@@ -76,72 +77,73 @@ export default async function FeaturedProducts() {
 
   return (
     <section
-      className="py-20 sm:py-24 lg:py-28 bg-[#faf8f3]"
+      className="py-8 sm:py-10 bg-white"
       data-testid="featured-products"
     >
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
-        {/* Section header — eyebrow + title + "See all" */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12">
-          <div>
-            <p className="text-xs font-semibold tracking-wider text-primary/60 uppercase mb-2">
-              Επιλεγμένα για Εσάς
-            </p>
-            <h2 className="font-display text-2xl sm:text-3xl lg:text-[2.5rem] font-normal text-neutral-900 tracking-[-0.01em]">
-              Δοκιμάστε τα Αγαπημένα μας
-            </h2>
-            <p className="text-base text-neutral-500 mt-1">
-              Τα καλύτερα προϊόντα από τοπικούς παραγωγούς
-            </p>
-          </div>
+      {/* Section header — inside container */}
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 mb-4 sm:mb-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
+            Δημοφιλή Προϊόντα
+          </h2>
           <Link
             href="/products"
-            className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-light transition-colors"
+            className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-light transition-colors"
           >
             Δείτε όλα
             <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </Link>
         </div>
+      </div>
 
-        {/* Products grid */}
+      {/* Horizontal scroll container */}
+      <div className="max-w-[1600px] mx-auto pl-5 sm:pl-8 lg:pl-12">
         {hasProducts ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div
+            className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide pb-2"
+            style={{ scrollSnapType: 'x mandatory' }}
+          >
             {products.map((product) => {
               const imageUrl = product.image_url || product.images?.[0]?.url || null;
               return (
-                <ProductCard
+                <div
                   key={product.id}
-                  id={product.id}
-                  title={product.name}
-                  producer={product.producer?.name || null}
-                  producerId={product.producer_id}
-                  producerSlug={product.producer?.slug || null}
-                  priceCents={Math.round(product.price * 100)}
-                  image={imageUrl}
-                  stock={product.stock}
-                  reviewsCount={product.reviews_count}
-                  reviewsAvgRating={product.reviews_avg_rating}
-                />
+                  className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
+                  style={{ scrollSnapAlign: 'start' }}
+                >
+                  <ProductCard
+                    id={product.id}
+                    title={product.name}
+                    producer={product.producer?.name || null}
+                    producerId={product.producer_id}
+                    producerSlug={product.producer?.slug || null}
+                    priceCents={Math.round(product.price * 100)}
+                    image={imageUrl}
+                    stock={product.stock}
+                    reviewsCount={product.reviews_count}
+                    reviewsAvgRating={product.reviews_avg_rating}
+                  />
+                </div>
               );
             })}
+            {/* Right padding spacer */}
+            <div className="flex-none w-5 sm:w-8 lg:w-12" aria-hidden="true" />
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div
+            className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide pb-2"
+          >
             {[...Array(8)].map((_, i) => (
-              <ProductCardSkeleton key={i} />
+              <div
+                key={i}
+                className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
+              >
+                <ProductCardSkeleton />
+              </div>
             ))}
+            <div className="flex-none w-5 sm:w-8 lg:w-12" aria-hidden="true" />
           </div>
         )}
-
-        {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-accent-cream hover:bg-accent-beige text-neutral-800 font-semibold text-sm rounded-full border border-neutral-200 transition-all duration-200 hover:shadow-md active:scale-[0.97] touch-manipulation"
-          >
-            Εξερευνήστε Περισσότερα Προϊόντα
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
       </div>
     </section>
   );
