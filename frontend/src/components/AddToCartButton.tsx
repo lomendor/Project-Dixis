@@ -73,7 +73,7 @@ export default function AddToCartButton(props: {
           data-testid="add-to-cart-button"
           data-oos="true"
         >
-          <Plus className="w-5 h-5" strokeWidth={2.5} />
+          <Plus className="size-5 shrink-0" strokeWidth={2.5} />
         </button>
       )
     }
@@ -91,7 +91,7 @@ export default function AddToCartButton(props: {
             className="w-9 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
             aria-label={qty === 1 ? 'Αφαίρεση από καλάθι' : 'Μείωση ποσότητας'}
           >
-            {qty === 1 ? <Trash2 className="w-4 h-4" strokeWidth={2.5} /> : <Minus className="w-4 h-4" strokeWidth={2.5} />}
+            {qty === 1 ? <Trash2 className="size-4 shrink-0" strokeWidth={2.5} /> : <Minus className="size-4 shrink-0" strokeWidth={2.5} />}
           </button>
           <span className="w-7 text-center text-sm font-bold text-white tabular-nums">
             {qty}
@@ -101,7 +101,7 @@ export default function AddToCartButton(props: {
             className="w-9 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
             aria-label="Αύξηση ποσότητας"
           >
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <Plus className="size-4 shrink-0" strokeWidth={2.5} />
           </button>
         </div>
       )
@@ -121,7 +121,7 @@ export default function AddToCartButton(props: {
         aria-live="polite"
         data-testid="add-to-cart-button"
       >
-        {justAdded ? <Check className="w-5 h-5" strokeWidth={2.5} /> : <Plus className="w-5 h-5" strokeWidth={2.5} />}
+        {justAdded ? <Check className="size-5 shrink-0" strokeWidth={2.5} /> : <Plus className="size-5 shrink-0" strokeWidth={2.5} />}
       </button>
     )
   }
@@ -155,7 +155,7 @@ export default function AddToCartButton(props: {
           className="w-11 h-11 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-95"
           aria-label={qty === 1 ? 'Αφαίρεση από καλάθι' : 'Μείωση ποσότητας'}
         >
-          {qty === 1 ? <Trash2 className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
+          {qty === 1 ? <Trash2 className="size-4 shrink-0" /> : <Minus className="size-4 shrink-0" />}
         </button>
         <span className="w-10 text-center text-base font-bold text-white tabular-nums">
           {qty}
@@ -165,7 +165,7 @@ export default function AddToCartButton(props: {
           className="w-11 h-11 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-95"
           aria-label="Αύξηση ποσότητας"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="size-4 shrink-0" />
         </button>
       </div>
     )
