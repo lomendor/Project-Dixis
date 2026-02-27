@@ -110,10 +110,10 @@ export default function AddToCartButton(props: {
     // Not in cart → show "+" button
     return (
       <button
-        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 active:scale-90 ${
+        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 active:scale-90 text-white ${
           justAdded
-            ? 'bg-green-500 text-white'
-            : 'bg-primary text-white hover:bg-primary-light'
+            ? 'bg-green-500'
+            : 'bg-primary hover:bg-primary-light'
         }`}
         onClick={handleAdd}
         disabled={justAdded}
@@ -173,10 +173,10 @@ export default function AddToCartButton(props: {
 
   return (
     <button
-      className={`h-11 px-5 w-full sm:w-auto rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] ${
+      className={`h-11 px-5 w-full sm:w-auto rounded-lg text-sm font-semibold transition-all duration-200 active:scale-[0.97] text-white ${
         justAdded
-          ? 'bg-green-500 text-white'
-          : 'bg-primary text-white hover:bg-primary-light'
+          ? 'bg-green-500'
+          : 'bg-primary hover:bg-primary-light'
       }`}
       onClick={handleAdd}
       disabled={justAdded}
