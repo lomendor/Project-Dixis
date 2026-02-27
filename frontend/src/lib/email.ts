@@ -168,7 +168,8 @@ export async function sendOrderStatusUpdate({
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-v2`
+        // FIX-EMAIL-AUTH-01: Use date-based key so retries after failures aren't blocked
+        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-${new Date().toISOString().slice(0, 10)}-v3`
       },
       body: JSON.stringify({
         from,
