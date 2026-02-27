@@ -84,6 +84,9 @@ const config: Config = {
         'heading': ['2rem', { lineHeight: '1.2', fontWeight: '600' }],
         'subheading': ['1.25rem', { lineHeight: '1.4', fontWeight: '600' }]
       },
+      fontFamily: {
+        display: ['var(--font-display)', 'Georgia', 'Times New Roman', 'serif'],
+      },
       transitionTimingFunction: {
         'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
       }
