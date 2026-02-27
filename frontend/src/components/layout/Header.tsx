@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/brand/Logo';
 import CartIcon from '@/components/cart/CartIcon';
@@ -10,9 +11,26 @@ import { useTranslations } from '@/contexts/LocaleContext';
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated, isProducer, isAdmin, isHydrated, loading } = useAuth();
   const t = useTranslations();
+  const pathname = usePathname();
+
+  // Transparent header on homepage — becomes solid on scroll
+  const isHome = pathname === '/';
+  const isTransparent = isHome && !scrolled && !mobileMenuOpen;
+
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(false);
+      return undefined;
+    }
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    onScroll(); // check initial position
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
 
   // Pass FIX-HOMEPAGE-HYDRATION-01: Don't render auth-dependent UI until hydration is complete.
   // This prevents hydration mismatch where server renders "guest" but client tries to render "authenticated".
@@ -47,7 +65,11 @@ export default function Header() {
   // Cart visible for all roles (producers can also shop as customers)
 
   return (
-    <header className="border-b border-neutral-200/60 bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 sticky top-0 z-40">
+    <header className={`sticky top-0 z-40 transition-colors duration-300 ${
+      isTransparent
+        ? 'bg-transparent border-b border-white/10'
+        : 'bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 border-b border-neutral-200/60'
+    }`}>
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between">
         {/* Logo — icon + serif wordmark on desktop */}
         <Link
@@ -57,7 +79,7 @@ export default function Header() {
         >
           {/* Desktop: icon + DIXIS wordmark */}
           <span className="hidden md:block">
-            <Logo height={40} title="Dixis" showWordmark />
+            <Logo height={40} title="Dixis" showWordmark light={isTransparent} />
           </span>
           {/* Mobile: icon only */}
           <span className="block md:hidden">
@@ -71,7 +93,11 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[13px] font-medium tracking-wide uppercase text-neutral-500 hover:text-neutral-900 transition-colors duration-200"
+              className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
+                isTransparent
+                  ? 'text-white/80 hover:text-white'
+                  : 'text-neutral-500 hover:text-neutral-900'
+              }`}
             >
               {link.label}
             </Link>
@@ -81,10 +107,10 @@ export default function Header() {
         {/* Desktop Right Side: Search + Cart + Auth */}
         <div className="hidden md:flex items-center gap-2">
           {/* Search - Pass HEADER-SEARCH-01 */}
-          <HeaderSearch />
+          <HeaderSearch light={isTransparent} />
 
           {/* Cart - visible for all roles */}
-          <CartIcon data-testid="header-cart" />
+          <CartIcon data-testid="header-cart" light={isTransparent} />
 
           {/* Auth Section - Pass FIX-HOMEPAGE-HYDRATION-01: Gate until hydrated */}
           {!showAuthUI ? (
@@ -95,7 +121,11 @@ export default function Header() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-neutral-50"
+                className={`flex items-center gap-2 text-sm font-medium transition-colors px-3 py-2 rounded-md ${
+                  isTransparent
+                    ? 'text-white/90 hover:text-white hover:bg-white/10'
+                    : 'text-neutral-600 hover:text-primary hover:bg-neutral-50'
+                }`}
                 data-testid="header-user-menu"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
@@ -186,14 +216,22 @@ export default function Header() {
             <div className="flex items-center gap-2">
               <Link
                 href="/auth/login"
-                className="text-[13px] font-medium text-neutral-500 hover:text-neutral-900 transition-colors px-3 py-2"
+                className={`text-[13px] font-medium transition-colors px-3 py-2 ${
+                  isTransparent
+                    ? 'text-white/80 hover:text-white'
+                    : 'text-neutral-500 hover:text-neutral-900'
+                }`}
                 data-testid="nav-login"
               >
                 {t('nav.login')}
               </Link>
               <Link
                 href="/auth/register"
-                className="text-[13px] font-semibold bg-neutral-900 hover:bg-neutral-800 text-white px-5 py-2.5 rounded-full transition-colors"
+                className={`text-[13px] font-semibold px-5 py-2.5 rounded-full transition-colors ${
+                  isTransparent
+                    ? 'bg-white/20 hover:bg-white/30 text-white border border-white/30'
+                    : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                }`}
                 data-testid="nav-register"
               >
                 {t('nav.signup')}
@@ -210,7 +248,11 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200 transition-colors touch-manipulation"
+            className={`p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-sm transition-colors touch-manipulation ${
+              isTransparent
+                ? 'text-white hover:bg-white/10'
+                : 'text-neutral-700 hover:bg-neutral-100 active:bg-neutral-200'
+            }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}

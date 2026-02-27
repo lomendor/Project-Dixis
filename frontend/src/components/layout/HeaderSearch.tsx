@@ -11,7 +11,7 @@ import { useTranslations } from '@/contexts/LocaleContext';
  * Mobile: Full-width search bar inside the mobile menu.
  * Navigates to /products?search=<query> on Enter.
  */
-export default function HeaderSearch({ isMobile = false }: { isMobile?: boolean }) {
+export default function HeaderSearch({ isMobile = false, light = false }: { isMobile?: boolean; light?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
@@ -124,7 +124,11 @@ export default function HeaderSearch({ isMobile = false }: { isMobile?: boolean 
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="p-2 text-neutral-500 hover:text-primary transition-colors rounded-md hover:bg-neutral-50"
+          className={`p-2 transition-colors rounded-md ${
+            light
+              ? 'text-white/70 hover:text-white hover:bg-white/10'
+              : 'text-neutral-500 hover:text-primary hover:bg-neutral-50'
+          }`}
           aria-label={t('nav.search')}
           data-testid="header-search-toggle"
         >

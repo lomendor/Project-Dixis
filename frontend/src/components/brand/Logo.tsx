@@ -7,6 +7,8 @@ type Props = {
   title?: string;
   /** Show "DIXIS" wordmark next to icon */
   showWordmark?: boolean;
+  /** Light mode — white wordmark for dark/transparent backgrounds */
+  light?: boolean;
 };
 
 /**
@@ -20,6 +22,7 @@ export default function Logo({
   height = 40,
   title = "Dixis",
   showWordmark = false,
+  light = false,
 }: Props) {
   const [hasImg, setHasImg] = React.useState(true);
   const src = '/logo.png'; // Dixis icon (512x512, optimized)
@@ -64,7 +67,8 @@ export default function Logo({
             fontSize: height * 0.50,
             fontWeight: 900,
             letterSpacing: '0.04em',
-            color: '#000000',
+            color: light ? '#ffffff' : '#000000',
+            transition: 'color 0.3s',
           }}
         >
           DIXIS
