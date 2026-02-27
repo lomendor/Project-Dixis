@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
 import { getServerApiUrl } from '@/env';
+import ScrollableRow from '@/components/ui/ScrollableRow';
 
 /**
  * FeaturedProducts — Horizontal scroll carousel for the homepage
@@ -96,53 +97,51 @@ export default async function FeaturedProducts() {
         </div>
       </div>
 
-      {/* Horizontal scroll container */}
-      <div className="max-w-[1600px] mx-auto pl-5 sm:pl-8 lg:pl-12">
+      {/* Horizontal scroll container with arrows */}
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
         {hasProducts ? (
-          <div
-            className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide pb-2"
-            style={{ scrollSnapType: 'x mandatory' }}
-          >
-            {products.map((product) => {
-              const imageUrl = product.image_url || product.images?.[0]?.url || null;
-              return (
-                <div
-                  key={product.id}
-                  className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
-                  style={{ scrollSnapAlign: 'start' }}
-                >
-                  <ProductCard
-                    id={product.id}
-                    title={product.name}
-                    producer={product.producer?.name || null}
-                    producerId={product.producer_id}
-                    producerSlug={product.producer?.slug || null}
-                    priceCents={Math.round(product.price * 100)}
-                    image={imageUrl}
-                    stock={product.stock}
-                    reviewsCount={product.reviews_count}
-                    reviewsAvgRating={product.reviews_avg_rating}
-                  />
-                </div>
-              );
-            })}
-            {/* Right padding spacer */}
-            <div className="flex-none w-5 sm:w-8 lg:w-12" aria-hidden="true" />
-          </div>
+          <ScrollableRow>
+            <div className="flex gap-1 sm:gap-1.5 pb-2">
+              {products.map((product) => {
+                const imageUrl = product.image_url || product.images?.[0]?.url || null;
+                return (
+                  <div
+                    key={product.id}
+                    className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    <ProductCard
+                      id={product.id}
+                      title={product.name}
+                      producer={product.producer?.name || null}
+                      producerId={product.producer_id}
+                      producerSlug={product.producer?.slug || null}
+                      priceCents={Math.round(product.price * 100)}
+                      image={imageUrl}
+                      stock={product.stock}
+                      reviewsCount={product.reviews_count}
+                      reviewsAvgRating={product.reviews_avg_rating}
+                    />
+                  </div>
+                );
+              })}
+              {/* Right padding spacer */}
+              <div className="flex-none w-1" aria-hidden="true" />
+            </div>
+          </ScrollableRow>
         ) : (
-          <div
-            className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide pb-2"
-          >
-            {[...Array(8)].map((_, i) => (
-              <div
-                key={i}
-                className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
-              >
-                <ProductCardSkeleton />
-              </div>
-            ))}
-            <div className="flex-none w-5 sm:w-8 lg:w-12" aria-hidden="true" />
-          </div>
+          <ScrollableRow>
+            <div className="flex gap-1 sm:gap-1.5 pb-2">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
+                >
+                  <ProductCardSkeleton />
+                </div>
+              ))}
+            </div>
+          </ScrollableRow>
         )}
       </div>
     </section>
