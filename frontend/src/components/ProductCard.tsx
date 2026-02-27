@@ -161,7 +161,7 @@ export function ProductCardSkeleton() {
         <div className="h-4 bg-neutral-100 w-2/3 mb-3 rounded" />
         <div className="mt-auto flex items-center justify-between">
           <div className="h-5 bg-neutral-100 w-16 rounded" />
-          <div className="h-9 w-9 bg-neutral-100 rounded-lg" />
+          <div className="h-10 w-10 bg-neutral-100 rounded-lg" />
         </div>
       </div>
     </div>
