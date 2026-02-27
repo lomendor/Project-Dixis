@@ -22,7 +22,7 @@ export default function Hero() {
     <section className="relative -mt-[72px] min-h-[92vh] sm:min-h-[88vh] lg:min-h-[90vh] flex items-end overflow-hidden">
       {/* Background image — edge to edge */}
       <Image
-        src="/images/hero-editorial.jpg"
+        src="/images/hero-honey.jpg"
         alt="Χρυσαφένιο μέλι σε χωριάτικο ψωμί"
         fill
         priority
