@@ -36,7 +36,7 @@ const notoSerifDisplay = Noto_Serif_Display({
 // Rounded geometric sans — matches Dixis logo wordmark
 const nunito = Nunito({
   variable: "--font-logo",
-  subsets: ["latin", "greek"],
+  subsets: ["latin", "latin-ext"],
   weight: ["900"],
   display: "swap",
 });
