@@ -3,91 +3,93 @@ import Link from 'next/link';
 import { Award, Truck, ShieldCheck } from 'lucide-react';
 
 /**
- * Hero Section — Editorial Gastronomy / Full-Bleed Immersive
+ * Hero Section — Light, Warm, Joyful
  *
- * Design direction: High-end food magazine feel.
- * NOT a SaaS template with boxes. Pure visceral culinary emotion.
+ * Design: Bright cream/white background, split layout.
+ * Text on the left, beautiful image on the right.
+ * Brand colors: primary green + cream/beige accents.
+ * NO dark overlays, NO full-bleed dark images.
  *
- * - Full-viewport background image (honey on artisan bread)
- * - Cinematic dark overlay gradient (stronger left for text legibility)
- * - Large serif headline in white/gold
- * - Warm gold CTA button
- * - Minimal line-art trust badges at bottom
- * - Negative margin pulls hero BEHIND the transparent header
- *
- * Ref: Graza, Food52, high-end gastronomy editorials
+ * Mobile: stacked (text on top, image below)
+ * Desktop: side-by-side 55/45 split
  */
 export default function Hero() {
   return (
-    <section className="relative -mt-[72px] min-h-[92vh] sm:min-h-[88vh] lg:min-h-[90vh] flex items-end overflow-hidden">
-      {/* Background image — edge to edge */}
-      <Image
-        src="/images/hero-honey.jpg"
-        alt="Χρυσαφένιο μέλι σε χωριάτικο ψωμί"
-        fill
-        priority
-        className="object-cover object-center"
-        sizes="100vw"
-        quality={85}
-      />
+    <section className="relative bg-accent-cream overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 pt-8 sm:pt-10 lg:pt-12 pb-8 sm:pb-10 lg:pb-12">
 
-      {/* Cinematic overlay — darker left for text, lighter right to show food */}
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/25"
-        aria-hidden="true"
-      />
-      {/* Extra bottom gradient for smooth transition to content below */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/60 to-transparent"
-        aria-hidden="true"
-      />
-
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-20">
-        <div className="max-w-2xl animate-fade-in-up">
-          {/* Headline — bold serif, white with gold accent */}
-          <h1 className="font-display text-[2rem] sm:text-[2.75rem] lg:text-[3.5rem] xl:text-[4rem] font-bold leading-[1.08] tracking-tight text-white mb-5 lg:mb-6 drop-shadow-lg">
-            <span className="text-[#f0d78c]">Η αληθινή Ελλάδα,</span>
-            <br />
-            <span className="text-white/95">στο τραπέζι σου.</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-base sm:text-lg lg:text-xl text-white/75 leading-relaxed mb-8 lg:mb-10 max-w-lg drop-shadow">
-            Απευθείας από τα χέρια μικροπαραγωγών.
-            <br className="hidden sm:block" />
-            Χωρίς μεσάζοντες. Μόνο η κορυφαία ποιότητα.
-          </p>
-
-          {/* CTA Button — warm gold */}
-          <Link
-            href="/products"
-            className="group inline-flex items-center justify-center gap-2.5 bg-[#c9a227] hover:bg-[#b89220] text-white font-semibold px-8 py-4 rounded-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-[0.97] touch-manipulation text-base tracking-wide"
-          >
-            Ανακαλύψτε τις Γεύσεις
-          </Link>
-        </div>
-
-        {/* Trust badges — minimalist line-art */}
-        <div className="mt-12 sm:mt-16 flex flex-wrap items-center gap-8 sm:gap-12">
-          <div className="flex items-center gap-3">
-            <Award className="w-5 h-5 text-white/50 stroke-[1.5]" />
-            <span className="text-[13px] text-white/60 tracking-wide">
-              Επιλεγμένοι Παραγωγοί
+          {/* Left — Text content */}
+          <div className="flex-1 max-w-xl lg:max-w-none animate-fade-in-up">
+            {/* Eyebrow */}
+            <span className="inline-flex items-center gap-2 text-[11px] sm:text-xs uppercase tracking-[0.15em] text-primary font-semibold bg-primary-pale px-4 py-1.5 rounded-full mb-6">
+              <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+              {'\u0391\u03c0\u03cc \u03c4\u03bf\u03bd \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03cc \u03c3\u03c4\u03bf \u03c4\u03c1\u03b1\u03c0\u03ad\u03b6\u03b9 \u03c3\u03bf\u03c5'}
             </span>
+
+            {/* Headline — clean sans-serif, brand colors */}
+            <h1 className="text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem] font-extrabold leading-[1.08] tracking-tight text-neutral-900 mb-5 lg:mb-6">
+              {'\u039a\u03ac\u03b8\u03b5 \u03b3\u03b5\u03cd\u03c3\u03b7,'}
+              <br />
+              <span className="text-primary">{'\u03bc\u03b9\u03b1 \u03b9\u03c3\u03c4\u03bf\u03c1\u03af\u03b1.'}</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg lg:text-xl text-neutral-600 leading-relaxed mb-8 lg:mb-10 max-w-md">
+              {'\u0391\u03c5\u03b8\u03b5\u03bd\u03c4\u03b9\u03ba\u03ac \u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1 \u03b1\u03c0\u03cc \u03bc\u03b9\u03ba\u03c1\u03bf\u03cd\u03c2 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03cd\u03c2'}
+              {' '}
+              {'\u03c0\u03bf\u03c5 \u03b1\u03b3\u03b1\u03c0\u03bf\u03cd\u03bd \u03b1\u03c5\u03c4\u03cc \u03c0\u03bf\u03c5 \u03ba\u03ac\u03bd\u03bf\u03c5\u03bd.'}
+            </p>
+
+            {/* CTA */}
+            <Link
+              href="/products"
+              className="group inline-flex items-center justify-center gap-2.5 bg-primary hover:bg-primary-light text-white font-semibold px-8 py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 active:scale-[0.97] touch-manipulation text-[15px]"
+            >
+              {'\u0391\u03bd\u03b1\u03ba\u03b1\u03bb\u03cd\u03c8\u03c4\u03b5 \u03c4\u03b1 \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1'}
+              <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+
+            {/* Trust badges — simple, clean row */}
+            <div className="mt-10 flex flex-wrap items-center gap-5 sm:gap-6">
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-primary stroke-[2]" />
+                <span className="text-[13px] text-neutral-500 font-medium">
+                  {'\u0395\u03c0\u03b9\u03bb\u03b5\u03b3\u03bc\u03ad\u03bd\u03bf\u03b9 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03af'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-primary stroke-[2]" />
+                <span className="text-[13px] text-neutral-500 font-medium">
+                  {'\u0386\u03bc\u03b5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03ae'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-primary stroke-[2]" />
+                <span className="text-[13px] text-neutral-500 font-medium">
+                  {'\u0391\u03c3\u03c6\u03b1\u03bb\u03b5\u03af\u03c2 \u03c3\u03c5\u03bd\u03b1\u03bb\u03bb\u03b1\u03b3\u03ad\u03c2'}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Truck className="w-5 h-5 text-white/50 stroke-[1.5]" />
-            <span className="text-[13px] text-white/60 tracking-wide">
-              Άμεση Αποστολή
-            </span>
+
+          {/* Right — Image */}
+          <div className="flex-1 w-full lg:w-auto">
+            <div className="relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-[4/5] rounded-2xl lg:rounded-3xl overflow-hidden shadow-lg">
+              <Image
+                src="/images/hero-beekeeper.jpg"
+                alt="Greek beekeeper harvesting golden honeycomb from the hive"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                quality={85}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-white/50 stroke-[1.5]" />
-            <span className="text-[13px] text-white/60 tracking-wide">
-              Ασφαλείς Συναλλαγές
-            </span>
-          </div>
+
         </div>
       </div>
     </section>

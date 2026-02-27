@@ -17,9 +17,9 @@ export default function Header() {
   const t = useTranslations();
   const pathname = usePathname();
 
-  // Transparent header on homepage — becomes solid on scroll
+  // Light background hero — solid header everywhere
   const isHome = pathname === '/';
-  const isTransparent = isHome && !scrolled && !mobileMenuOpen;
+  const isTransparent = false; // Solid header — light hero, no transparency needed
 
   useEffect(() => {
     if (!isHome) {
@@ -65,9 +65,9 @@ export default function Header() {
   // Cart visible for all roles (producers can also shop as customers)
 
   return (
-    <header className={`sticky top-0 z-40 transition-colors duration-300 ${
+    <header className={`sticky top-0 z-40 transition-all duration-300 ${
       isTransparent
-        ? 'bg-transparent border-b border-white/10'
+        ? 'bg-white/15 backdrop-blur-md border-b border-white/20'
         : 'bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 border-b border-neutral-200/60'
     }`}>
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between">
