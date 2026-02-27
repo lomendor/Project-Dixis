@@ -1,34 +1,31 @@
 import { NextResponse } from 'next/server';
-import { requireProducer } from '@/lib/auth/requireProducer';
-import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
-import { cookies } from 'next/headers';
+import { verifySanctumProducer } from '@/lib/auth/verifySanctumProducer';
 import { getLaravelInternalUrl } from '@/env';
 
 /**
  * Pass PAYOUT-04: Proxy GET /api/producer/settlements → Laravel
  *
- * Fixed: Previously read 'auth_token' cookie which is never set by OTP auth.
- * Now uses requireProducer() + 'dixis_session' cookie (same pattern as /api/me/products).
+ * FIX-PRODUCER-AUTH-01: Replaced requireProducer() + Bearer token with Sanctum cookie forwarding.
+ * Producers use Sanctum session cookies (not dixis_jwt), so the old pattern always returned 401.
  */
 export async function GET() {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    await requireProducer();
-
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
     const res = await fetch(`${getLaravelInternalUrl()}/producer/settlements`, {
-      headers: { Authorization: `Bearer ${sessionToken}`, Accept: 'application/json' },
+      headers: {
+        'Accept': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
+      },
       cache: 'no-store',
     });
 
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error) {
-    if (error instanceof Response) return error;
     console.error('[producer/settlements] Error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
