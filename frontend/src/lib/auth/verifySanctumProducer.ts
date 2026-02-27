@@ -10,7 +10,8 @@ import { getLaravelInternalUrl } from '@/env';
  * The old `requireProducer()` reads `dixis_jwt` cookie — which is ONLY set by admin OTP flow.
  * Producers NEVER have `dixis_jwt`, so requireProducer() always returns 401.
  *
- * This helper forwards the browser's Sanctum cookies to Laravel's `/api/v1/user` endpoint
+ * This helper forwards the browser's Sanctum cookies to Laravel's `/api/user` endpoint
+ * (note: NOT /api/v1/user — the Sanctum /user route has no v1 prefix)
  * to verify the producer's identity, then returns the cookie header for subsequent
  * requests to Laravel.
  *
@@ -38,7 +39,9 @@ export async function verifySanctumProducer(): Promise<SanctumResult> {
   }
 
   try {
-    const laravelBase = getLaravelInternalUrl();
+    // FIX-PRODUCER-AUTH-02: Strip /v1 from URL — Laravel's /user route lives at
+    // /api/user (no v1 prefix), but getLaravelInternalUrl() returns .../api/v1
+    const laravelBase = getLaravelInternalUrl().replace(/\/api\/v1\/?$/, '/api');
     const authRes = await fetch(`${laravelBase}/user`, {
       headers: {
         'Accept': 'application/json',
