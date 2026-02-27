@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { CATEGORIES } from '@/data/categories';
 
 /**
- * HomeCategoryStrip — Large category circles, full-width on desktop
+ * HomeCategoryStrip — Full-width category pills
  *
- * 10 categories spread across the full page width on desktop (justify-between).
- * Horizontal scroll on mobile. Big circles with subtle shadow for depth.
+ * - First pill: "Όλες" (all categories) → /products
+ * - All 10 category pills after it
+ * - Horizontal scroll if pills don't fit (never wrap)
+ * - Big circles with big icons, justify-between on wide screens
  */
 
 const IMAGE_MAP: Record<string, string> = {
@@ -37,10 +39,14 @@ const BG_MAP: Record<string, string> = {
   'legumes-grains': 'bg-category-legumes',
 };
 
+/** Shared circle + image sizes — responsive: 80→96→100→120px */
+const CIRCLE = 'w-20 h-20 sm:w-24 sm:h-24 lg:w-24 lg:h-24 2xl:w-[120px] 2xl:h-[120px]';
+const ICON = 'w-14 h-14 sm:w-16 sm:h-16 lg:w-[60px] lg:h-[60px] 2xl:w-20 2xl:h-20 object-contain drop-shadow-sm';
+
 export default function HomeCategoryStrip() {
   return (
     <section className="py-8 sm:py-10 bg-white">
-      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-10">
         {/* Section header */}
         <div className="mb-5 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
@@ -48,40 +54,52 @@ export default function HomeCategoryStrip() {
           </h2>
         </div>
 
-        {/* Category circles — scroll on mobile, full-width spread on desktop */}
+        {/* Category pills — single row, horizontal scroll if needed, extra padding for hover scale */}
         <div
-          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide lg:overflow-visible lg:pb-0 lg:justify-between"
+          className="flex gap-4 sm:gap-5 lg:gap-2 xl:gap-3 2xl:gap-5 overflow-x-auto py-2 -my-2 scrollbar-hide lg:justify-between"
           role="list"
           aria-label="Κατηγορίες προϊόντων"
         >
+          {/* "All categories" pill — first */}
+          <Link
+            href="/products"
+            role="listitem"
+            className="flex flex-col items-center gap-2.5 sm:gap-3 shrink-0 group"
+          >
+            <div className={`${CIRCLE} rounded-full flex items-center justify-center bg-primary/8 border-2 border-primary/15 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:shadow-md group-hover:border-primary/30`}>
+              <Image
+                src="/icons/categories/all-3d.png"
+                alt="Όλες οι κατηγορίες"
+                width={160}
+                height={160}
+                className={ICON}
+              />
+            </div>
+            <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-primary text-center leading-tight max-w-[88px] sm:max-w-[100px] lg:max-w-[120px] transition-colors duration-200">
+              Όλες
+            </span>
+          </Link>
+
+          {/* Category pills */}
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.slug}
               href={`/products?cat=${cat.slug}`}
               role="listitem"
-              className="flex flex-col items-center gap-3 shrink-0 lg:shrink group"
+              className="flex flex-col items-center gap-2.5 sm:gap-3 shrink-0 group"
             >
-              {/* Circle with shadow */}
               <div
-                className={`
-                  w-[96px] h-[96px] sm:w-[112px] sm:h-[112px] lg:w-[120px] lg:h-[120px]
-                  rounded-full flex items-center justify-center
-                  shadow-sm
-                  transition-all duration-200
-                  group-hover:scale-105 group-hover:shadow-md
-                  ${BG_MAP[cat.slug] ?? 'bg-neutral-100'}
-                `}
+                className={`${CIRCLE} rounded-full flex items-center justify-center shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:shadow-md ${BG_MAP[cat.slug] ?? 'bg-neutral-100'}`}
               >
                 <Image
                   src={IMAGE_MAP[cat.slug] ?? '/icons/categories/all-3d.png'}
                   alt={cat.labelEl}
-                  width={112}
-                  height={112}
-                  className="w-[64px] h-[64px] sm:w-[76px] sm:h-[76px] lg:w-[80px] lg:h-[80px] object-contain drop-shadow-sm"
+                  width={160}
+                  height={160}
+                  className={ICON}
                 />
               </div>
-              {/* Label */}
-              <span className="text-xs sm:text-sm font-medium text-neutral-600 group-hover:text-primary text-center leading-tight max-w-[104px] sm:max-w-[120px] transition-colors duration-200">
+              <span className="text-[11px] sm:text-xs lg:text-sm font-medium text-neutral-600 group-hover:text-primary text-center leading-tight max-w-[88px] sm:max-w-[100px] lg:max-w-[120px] transition-colors duration-200">
                 {cat.labelEl}
               </span>
             </Link>
