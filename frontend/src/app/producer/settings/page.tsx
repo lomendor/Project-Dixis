@@ -114,8 +114,8 @@ function ProducerSettingsContent() {
           postal_code: (producer as any).postal_code || '',
           region: (producer as any).region || '',
           location: producer.location || '',
-          latitude: (producer as any).latitude ?? null,
-          longitude: (producer as any).longitude ?? null,
+          latitude: (producer as any).latitude != null ? Number((producer as any).latitude) : null,
+          longitude: (producer as any).longitude != null ? Number((producer as any).longitude) : null,
           tax_id: (producer as any).tax_id || '',
           tax_office: (producer as any).tax_office || '',
           // Pass PAYOUT-01: Banking details
@@ -391,7 +391,7 @@ function ProducerSettingsContent() {
               </p>
               {formData.latitude && formData.longitude && (
                 <div className="mb-4 bg-primary-pale border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
-                  <span>📍</span> Ο χάρτης σας εμφανίζεται στο προφίλ ({formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)})
+                  <span>📍</span> Ο χάρτης σας εμφανίζεται στο προφίλ ({Number(formData.latitude).toFixed(4)}, {Number(formData.longitude).toFixed(4)})
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
