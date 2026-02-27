@@ -38,7 +38,7 @@ export default function ScrollableRow({
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el) return undefined;
 
     checkScroll();
 
