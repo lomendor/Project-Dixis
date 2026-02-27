@@ -26,6 +26,18 @@ use Illuminate\Support\Facades\Mail;
 class OrderEmailService
 {
     /**
+     * Rate-limit counter: spaces queued emails 1s apart to stay under Resend 2/s limit.
+     * Each call to nextDelay() returns 0, 1, 2, ... so the first email sends immediately,
+     * the second after 1s, the third after 2s, etc.
+     */
+    private int $emailDelaySeconds = 0;
+
+    private function nextDelay(): int
+    {
+        return $this->emailDelaySeconds++;
+    }
+
+    /**
      * Pass 54: Send notification when order status changes to shipped/delivered.
      * Called after status update commits.
      */
@@ -68,7 +80,7 @@ class OrderEmailService
                 ? new OrderShipped($order)
                 : new OrderDelivered($order);
 
-            Mail::to($email)->queue($mailable);
+            Mail::to($email)->later(now()->addSeconds($this->nextDelay()), $mailable);
 
             OrderNotification::recordSent(
                 $order->id,
@@ -125,7 +137,7 @@ class OrderEmailService
             }
 
             try {
-                Mail::to($email)->queue(new ProducerOrderShipped($order, $producer, $status));
+                Mail::to($email)->later(now()->addSeconds($this->nextDelay()), new ProducerOrderShipped($order, $producer, $status));
 
                 OrderNotification::recordSent(
                     $order->id,
@@ -198,7 +210,7 @@ class OrderEmailService
         }
 
         try {
-            Mail::to($email)->queue(new ConsumerOrderPlaced($order));
+            Mail::to($email)->later(now()->addSeconds($this->nextDelay()), new ConsumerOrderPlaced($order));
 
             OrderNotification::recordSent(
                 $order->id,
@@ -261,7 +273,7 @@ class OrderEmailService
             }
 
             try {
-                Mail::to($email)->queue(new ProducerNewOrder($order, $producer));
+                Mail::to($email)->later(now()->addSeconds($this->nextDelay()), new ProducerNewOrder($order, $producer));
 
                 OrderNotification::recordSent(
                     $order->id,
@@ -309,7 +321,7 @@ class OrderEmailService
         }
 
         try {
-            Mail::to($email)->queue(new AdminNewOrder($order));
+            Mail::to($email)->later(now()->addSeconds($this->nextDelay()), new AdminNewOrder($order));
 
             OrderNotification::recordSent(
                 $order->id,
