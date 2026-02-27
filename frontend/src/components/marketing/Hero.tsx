@@ -75,9 +75,9 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right — Image */}
-          <div className="flex-1 w-full lg:w-auto">
-            <div className="relative aspect-[4/3] sm:aspect-[3/2] lg:aspect-[4/5] rounded-2xl lg:rounded-3xl overflow-hidden shadow-lg">
+          {/* Right — Image (desktop only) */}
+          <div className="hidden lg:block flex-1">
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-lg">
               <Image
                 src="/images/hero-beekeeper.jpg"
                 alt="Greek beekeeper harvesting golden honeycomb from the hive"
