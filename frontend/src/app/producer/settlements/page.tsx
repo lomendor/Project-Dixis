@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api'
 
 /**
  * Pass PAYOUT-04: Producer payout history page.
@@ -39,7 +40,7 @@ function SettlementsContent() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/producer/settlements')
+    fetch(apiUrl('producer/settlements'), { credentials: 'include' })
       .then(r => r.json())
       .then(d => {
         if (d.success) {
