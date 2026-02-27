@@ -11,6 +11,8 @@ import {
   getStatusColor
 } from './analytics';
 
+import { apiUrl } from '@/lib/api';
+
 // Re-export shared utilities for convenience
 export { formatCurrency, formatPercentage, getStatusColor };
 
@@ -22,15 +24,16 @@ export interface ProducerProductsAnalytics extends ProductsAnalytics {}
 /**
  * Producer analytics API client.
  *
- * Calls local Next.js API route proxies (/api/producer/analytics/*) which
- * handle auth via dixis_session HttpOnly cookie + requireProducer().
- * This replaces the previous broken localStorage.getItem('auth_token') approach.
+ * Calls Laravel backend directly via apiUrl() + credentials: 'include'
+ * (Sanctum cookie-based SPA auth). Previously used Next.js proxy routes
+ * that sent frontend JWT as Bearer token — which Laravel Sanctum rejects.
  */
 export const producerAnalyticsApi = {
   async getSales(period: 'daily' | 'monthly' = 'daily', limit = 30): Promise<ProducerSalesAnalytics> {
     const params = new URLSearchParams({ period, limit: limit.toString() });
-    const response = await fetch(`/api/producer/analytics/sales?${params}`, {
+    const response = await fetch(apiUrl(`producer/analytics/sales?${params}`), {
       credentials: 'include',
+      headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
@@ -46,8 +49,9 @@ export const producerAnalyticsApi = {
   },
 
   async getOrders(): Promise<ProducerOrdersAnalytics> {
-    const response = await fetch('/api/producer/analytics/orders', {
+    const response = await fetch(apiUrl('producer/analytics/orders'), {
       credentials: 'include',
+      headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
@@ -64,8 +68,9 @@ export const producerAnalyticsApi = {
 
   async getProducts(limit = 10): Promise<ProducerProductsAnalytics> {
     const params = new URLSearchParams({ limit: limit.toString() });
-    const response = await fetch(`/api/producer/analytics/products?${params}`, {
+    const response = await fetch(apiUrl(`producer/analytics/products?${params}`), {
       credentials: 'include',
+      headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
