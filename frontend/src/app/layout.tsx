@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono, Noto_Serif_Display } from "next/font/google";
+import { Inter, Geist_Mono, Noto_Serif_Display, Nunito } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
@@ -30,6 +30,14 @@ const notoSerifDisplay = Noto_Serif_Display({
   variable: "--font-display",
   subsets: ["latin", "greek"],
   weight: ["400", "600", "700"],
+  display: "swap",
+});
+
+// Rounded geometric sans — matches Dixis logo wordmark
+const nunito = Nunito({
+  variable: "--font-logo",
+  subsets: ["latin", "greek"],
+  weight: ["900"],
   display: "swap",
 });
 
@@ -121,7 +129,7 @@ export default function RootLayout({
   return (
     <html lang="el-GR" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${geistMono.variable} ${notoSerifDisplay.variable} antialiased`}
+        className={`${inter.variable} ${geistMono.variable} ${notoSerifDisplay.variable} ${nunito.variable} antialiased`}
         suppressHydrationWarning
       >
         <IOSGuard />

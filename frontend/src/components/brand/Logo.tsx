@@ -59,12 +59,12 @@ export default function Logo({
       )}
       {showWordmark && hasImg && (
         <span
-          className="font-display"
           style={{
-            fontSize: height * 0.45,
-            fontWeight: 600,
-            letterSpacing: '0.08em',
-            color: 'var(--brand-neutral-900)',
+            fontFamily: 'var(--font-logo), Nunito, sans-serif',
+            fontSize: height * 0.50,
+            fontWeight: 900,
+            letterSpacing: '0.04em',
+            color: '#000000',
           }}
         >
           DIXIS
