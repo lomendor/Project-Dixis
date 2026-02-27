@@ -17,6 +17,8 @@ interface SettingsFormData {
   postal_code: string;
   region: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   tax_id: string;
   tax_office: string;
   // Pass PAYOUT-01: Banking details for settlements
@@ -25,6 +27,32 @@ interface SettingsFormData {
   social_media: string[];
   // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Per-producer free shipping threshold
   free_shipping_threshold_eur: string; // String for form input, converted on submit
+}
+
+/** Geocode address → lat/lng via OpenStreetMap Nominatim (free, no API key) */
+async function geocodeAddress(address: string, city: string, region: string): Promise<{ lat: number; lng: number } | null> {
+  const query = [address, city, region, 'Ελλάδα'].filter(Boolean).join(', ');
+  if (!query.replace(/,\s*/g, '').trim()) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=gr`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Dixis/1.0 (dixis.gr)' } });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    // Fallback: try with just city + region
+    const fallbackQuery = [city, region, 'Ελλάδα'].filter(Boolean).join(', ');
+    const res2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}&limit=1&countrycodes=gr`, {
+      headers: { 'User-Agent': 'Dixis/1.0 (dixis.gr)' },
+    });
+    const data2 = await res2.json();
+    if (data2 && data2.length > 0) {
+      return { lat: parseFloat(data2[0].lat), lng: parseFloat(data2[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export default function ProducerSettingsPage() {
@@ -52,6 +80,8 @@ function ProducerSettingsContent() {
     postal_code: '',
     region: '',
     location: '',
+    latitude: null,
+    longitude: null,
     tax_id: '',
     tax_office: '',
     iban: '',
@@ -84,6 +114,8 @@ function ProducerSettingsContent() {
           postal_code: (producer as any).postal_code || '',
           region: (producer as any).region || '',
           location: producer.location || '',
+          latitude: (producer as any).latitude ?? null,
+          longitude: (producer as any).longitude ?? null,
           tax_id: (producer as any).tax_id || '',
           tax_office: (producer as any).tax_office || '',
           // Pass PAYOUT-01: Banking details
@@ -112,9 +144,21 @@ function ProducerSettingsContent() {
     setBusy(true);
 
     try {
+      // Auto-geocode address → lat/lng if address/city/region changed and no coordinates yet
+      let { latitude, longitude } = formData;
+      if (formData.city || formData.address || formData.region) {
+        const geo = await geocodeAddress(formData.address, formData.city, formData.region);
+        if (geo) {
+          latitude = geo.lat;
+          longitude = geo.lng;
+        }
+      }
+
       // Filter out empty social media links and convert threshold to number or null
       const cleanedData = {
         ...formData,
+        latitude,
+        longitude,
         social_media: formData.social_media.filter((link) => link.trim() !== ''),
         // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Convert threshold to number or null
         free_shipping_threshold_eur: formData.free_shipping_threshold_eur.trim() !== ''
@@ -342,6 +386,14 @@ function ProducerSettingsContent() {
             {/* Location Details */}
             <div>
               <h2 className="text-lg font-semibold text-neutral-900 mb-4">Στοιχεία Τοποθεσίας</h2>
+              <p className="text-sm text-neutral-500 mb-4">
+                Συμπληρώστε πόλη και περιφέρεια για να εμφανίζεται χάρτης στο προφίλ σας. Οι συντεταγμένες υπολογίζονται αυτόματα κατά την αποθήκευση.
+              </p>
+              {formData.latitude && formData.longitude && (
+                <div className="mb-4 bg-primary-pale border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                  <span>📍</span> Ο χάρτης σας εμφανίζεται στο προφίλ ({formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)})
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
