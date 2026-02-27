@@ -8,6 +8,8 @@ import { useCart, cartCount } from '@/lib/cart';
 interface CartIconProps {
   className?: string;
   isMobile?: boolean;
+  /** Light mode — white icon for dark/transparent backgrounds */
+  light?: boolean;
 }
 
 /**
@@ -22,7 +24,7 @@ interface CartIconProps {
  * Fix React #418: Uses mounted pattern to prevent hydration mismatch
  * when Zustand persist loads cart from localStorage on client.
  */
-export default function CartIcon({ className = '', isMobile = false }: CartIconProps) {
+export default function CartIcon({ className = '', isMobile = false, light = false }: CartIconProps) {
   const { isGuest, isConsumer, isProducer, isAdmin } = useAuth();
   // Fix React #418: Prevent hydration mismatch by waiting for client mount
   const [mounted, setMounted] = useState(false);
@@ -52,7 +54,11 @@ export default function CartIcon({ className = '', isMobile = false }: CartIconP
   return (
     <Link
       href="/cart"
-      className={`relative flex items-center justify-center p-2 text-neutral-600 hover:text-primary transition-colors rounded-md hover:bg-neutral-50 ${className}`}
+      className={`relative flex items-center justify-center p-2 transition-colors rounded-md ${
+        light
+          ? 'text-white/70 hover:text-white hover:bg-white/10'
+          : 'text-neutral-600 hover:text-primary hover:bg-neutral-50'
+      } ${className}`}
       data-testid={getTestId()}
       aria-label={`Καλάθι${cartItemCount > 0 ? ` με ${cartItemCount} προϊόντα` : ''}`}
     >
