@@ -21,7 +21,7 @@ export function ProducerCard({ id, slug, name, region, description, imageUrl, pr
     <Link
       href={href}
       data-testid="producer-card"
-      className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-neutral-100"
+      className="group flex flex-col h-full bg-white rounded-xl overflow-hidden border border-neutral-200/70 hover:border-neutral-300 hover:shadow-md transition-all duration-200"
     >
       <div className="relative aspect-[3/2] w-full bg-neutral-50 overflow-hidden">
         {hasImage ? (
@@ -44,7 +44,7 @@ export function ProducerCard({ id, slug, name, region, description, imageUrl, pr
       </div>
 
       <div className="px-4 pt-4 pb-2 flex-grow flex flex-col">
-        <h2 className="font-display text-lg font-normal text-neutral-900 line-clamp-1 leading-tight">
+        <h2 className="text-base font-semibold text-neutral-900 line-clamp-1 leading-tight">
           {name}
         </h2>
         <p className="text-xs text-neutral-400 mt-1.5 flex items-center gap-1.5">

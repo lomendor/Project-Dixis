@@ -105,9 +105,9 @@ export default async function ProducerProfilePage(
   const productCount = producer.products.length;
 
   return (
-    <main className="min-h-screen bg-[#faf8f3]">
-      {/* Full-width hero — magazine style */}
-      <div className="bg-[#f5f0e6]">
+    <main className="min-h-screen bg-white">
+      {/* Producer hero */}
+      <div className="bg-neutral-50 border-b border-neutral-100">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
           {/* Image — full bleed */}
           <div className="relative aspect-[4/3] lg:aspect-auto bg-neutral-100 overflow-hidden">
@@ -143,11 +143,11 @@ export default async function ProducerProfilePage(
             </nav>
 
             {producer.category && (
-              <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-3">
+              <p className="text-xs font-medium text-primary mb-2">
                 {producer.category}
               </p>
             )}
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 mb-3 tracking-[-0.01em]">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
               {producer.name}
             </h1>
             {producer.region && (
@@ -178,12 +178,12 @@ export default async function ProducerProfilePage(
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-10">
 
         {/* Story / Description section */}
         {producer.description && (
           <div className="mb-10">
-            <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900 mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4">
               Η Ιστορία μας
             </h2>
             <p className="text-neutral-600 leading-relaxed text-[15px] max-w-2xl">{producer.description}</p>
@@ -193,7 +193,7 @@ export default async function ProducerProfilePage(
         {/* Map section — only if coordinates exist */}
         {producer.latitude && producer.longitude && (
           <div className="mb-10">
-            <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900 mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4">
               Η Τοποθεσία μας
             </h2>
             <ProducerMap
@@ -209,14 +209,14 @@ export default async function ProducerProfilePage(
         {productCount > 0 ? (
           <>
             <div className="flex items-center gap-4 mb-6">
-              <h2 className="font-display text-xl sm:text-2xl font-normal text-neutral-900">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
                 Τα Προϊόντα μας
               </h2>
               <span className="text-xs font-semibold text-primary/70 bg-primary-pale px-2.5 py-1 rounded-full">
                 {productCount}
               </span>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {producer.products.map((p) => {
                 const imageUrl = p.image_url || p.images?.[0]?.url || null;
                 const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;

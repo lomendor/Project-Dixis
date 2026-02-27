@@ -58,10 +58,10 @@ export default async function ProducerSpotlight() {
   // Fallback: generic CTA to become a producer
   if (!producer) {
     return (
-      <section className="py-20 sm:py-24 bg-[#f5f0e6]">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
+      <section className="py-16 sm:py-20 bg-neutral-50">
+        <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
           <Users className="w-10 h-10 text-primary/40 mx-auto mb-4" />
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-normal text-neutral-900 mb-3 tracking-[-0.01em]">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
             Γνωρίστε τους Παραγωγούς μας
           </h2>
           <p className="text-base text-neutral-500 max-w-md mx-auto mb-6">
@@ -85,9 +85,8 @@ export default async function ProducerSpotlight() {
       : producer.description;
 
   return (
-    <section className="bg-[#f5f0e6]">
-      {/* Full-width magazine spread — no container max-width, no rounded corners */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[450px] lg:min-h-[560px]">
+    <section className="bg-neutral-50">
+      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
         {/* Image column — full bleed */}
         <div className="relative aspect-[4/3] lg:aspect-auto bg-primary-pale/30">
           <Image
@@ -101,11 +100,11 @@ export default async function ProducerSpotlight() {
 
         {/* Content column — generous padding, editorial tone */}
         <div className="px-8 py-12 sm:px-12 sm:py-16 lg:px-16 xl:px-20 lg:py-0 flex flex-col justify-center">
-          <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-4">
-            Γνωρίστε τον Παραγωγό
+          <p className="text-xs font-medium text-primary mb-3">
+            Παραγωγός στο Προσκήνιο
           </p>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 mb-3 tracking-[-0.01em]">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
             {producer.name}
           </h2>
 

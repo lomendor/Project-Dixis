@@ -33,7 +33,7 @@ const SIGNALS = [
 export default function TrustBar() {
   return (
     <section className="py-14 sm:py-18 bg-white border-y border-neutral-200/50">
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6">
           {SIGNALS.map(({ icon: Icon, title, subtitle }) => (
             <div key={title} className="flex flex-col items-center text-center gap-3">

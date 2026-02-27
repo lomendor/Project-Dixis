@@ -86,23 +86,20 @@ export default async function ProducersPage({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[#faf8f3] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8 gap-4">
+    <main className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-6 gap-4">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-primary/50 uppercase mb-2">
-              Κοινότητα
-            </p>
-            <h1 className="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-normal text-neutral-900 tracking-[-0.01em]">
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">
               {searchQuery
                 ? `Αποτελέσματα για "${searchQuery}"`
                 : 'Οι Παραγωγοί μας'}
             </h1>
-            <p className="mt-2 text-sm text-neutral-500 max-w-md">
-              {searchQuery
-                ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''}`
-                : 'Πίσω από κάθε προϊόν υπάρχει ένας Έλληνας παραγωγός με πάθος και ιστορία.'}
-            </p>
+            {searchQuery ? (
+              <p className="mt-1 text-sm text-neutral-400">{total} αποτέλεσμα{total !== 1 ? 'τα' : ''}</p>
+            ) : (
+              <p className="mt-1 text-sm text-neutral-400">{total} παραγωγοί</p>
+            )}
           </div>
 
           {/* Search Form */}
@@ -112,7 +109,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
         </div>
 
         {/* CTA banner */}
-        <div className="mb-8 p-4 bg-white rounded-xl border border-neutral-200/60 text-sm flex items-center justify-between">
+        <div className="mb-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-sm flex items-center justify-between">
           <span className="text-neutral-600">Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
           <Link href="/producers/join" className="font-semibold text-primary hover:text-primary-light transition-colors">
             Μάθε περισσότερα &rarr;
@@ -127,7 +124,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
         </Suspense>
 
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {filtered.map((p) => (
               <ProducerCard
                 key={p.id}

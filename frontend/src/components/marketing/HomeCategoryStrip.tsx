@@ -5,11 +5,10 @@ import Link from 'next/link';
 import { CATEGORIES } from '@/data/categories';
 
 /**
- * HomeCategoryStrip — Mini category circles for the homepage
+ * HomeCategoryStrip — Large category circles, full-width on desktop
  *
- * Horizontal scrollable row of 10 categories using existing 3D icons + pastel backgrounds.
- * Smaller and simpler than the full CategoryStrip on /products.
- * Links directly to /products?cat={slug}.
+ * 10 categories spread across the full page width on desktop (justify-between).
+ * Horizontal scroll on mobile. Big circles with subtle shadow for depth.
  */
 
 const IMAGE_MAP: Record<string, string> = {
@@ -40,21 +39,18 @@ const BG_MAP: Record<string, string> = {
 
 export default function HomeCategoryStrip() {
   return (
-    <section className="py-14 sm:py-20 bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+    <section className="py-8 sm:py-10 bg-white">
+      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Section header */}
-        <div className="text-center mb-8 sm:mb-10">
-          <p className="text-xs font-semibold tracking-wider text-primary/60 uppercase mb-2">
+        <div className="mb-5 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
             Κατηγορίες
-          </p>
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-[2.5rem] font-normal text-neutral-900 tracking-[-0.01em]">
-            Εξερευνήστε ανά Κατηγορία
           </h2>
         </div>
 
-        {/* Scrollable row */}
+        {/* Category circles — scroll on mobile, full-width spread on desktop */}
         <div
-          className="flex gap-5 sm:gap-6 overflow-x-auto pb-4 scrollbar-hide sm:justify-center sm:flex-wrap sm:overflow-visible sm:pb-0"
+          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide lg:overflow-visible lg:pb-0 lg:justify-between"
           role="list"
           aria-label="Κατηγορίες προϊόντων"
         >
@@ -63,28 +59,29 @@ export default function HomeCategoryStrip() {
               key={cat.slug}
               href={`/products?cat=${cat.slug}`}
               role="listitem"
-              className="flex flex-col items-center gap-2.5 shrink-0 group"
+              className="flex flex-col items-center gap-3 shrink-0 lg:shrink group"
             >
-              {/* Circle icon */}
+              {/* Circle with shadow */}
               <div
                 className={`
-                  w-[72px] h-[72px] sm:w-[88px] sm:h-[88px]
+                  w-[96px] h-[96px] sm:w-[112px] sm:h-[112px] lg:w-[120px] lg:h-[120px]
                   rounded-full flex items-center justify-center
+                  shadow-sm
                   transition-all duration-200
-                  group-hover:scale-110 group-hover:shadow-lg
-                  ${BG_MAP[cat.slug] ?? 'bg-accent-cream'}
+                  group-hover:scale-105 group-hover:shadow-md
+                  ${BG_MAP[cat.slug] ?? 'bg-neutral-100'}
                 `}
               >
                 <Image
                   src={IMAGE_MAP[cat.slug] ?? '/icons/categories/all-3d.png'}
                   alt={cat.labelEl}
-                  width={80}
-                  height={80}
-                  className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] object-contain"
+                  width={112}
+                  height={112}
+                  className="w-[64px] h-[64px] sm:w-[76px] sm:h-[76px] lg:w-[80px] lg:h-[80px] object-contain drop-shadow-sm"
                 />
               </div>
               {/* Label */}
-              <span className="text-[11px] sm:text-xs font-medium text-neutral-600 group-hover:text-primary text-center leading-tight max-w-[80px] sm:max-w-[96px] transition-colors duration-200">
+              <span className="text-xs sm:text-sm font-medium text-neutral-600 group-hover:text-primary text-center leading-tight max-w-[104px] sm:max-w-[120px] transition-colors duration-200">
                 {cat.labelEl}
               </span>
             </Link>
