@@ -1262,6 +1262,8 @@ class ApiClient {
     beekeeper_registry_number?: string | null;
     cpnp_notification_number?: string | null;
     responsible_person_name?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }): Promise<{ producer: Record<string, unknown>; message: string }> {
     return this.request('producer/profile', {
       method: 'PATCH',
