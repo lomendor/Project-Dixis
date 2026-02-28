@@ -71,9 +71,16 @@ export async function GET(request: Request) {
   }
 
   // Deep health check: test DB connectivity (use ?deep=1)
+  // Wrapped with AbortSignal timeout so deploy doesn't hang if Neon is suspended.
   if (deep) {
     try {
-      await prisma.$queryRaw`SELECT 1`;
+      const timeout = 10_000; // 10s — enough for Neon cold-start wake-up
+      await Promise.race([
+        prisma.$queryRaw`SELECT 1`,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('DB ping timeout')), timeout)
+        ),
+      ]);
       response.db = 'connected';
     } catch {
       response.db = 'error';
