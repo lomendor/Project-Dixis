@@ -1,26 +1,25 @@
 # Architecture Debt & Known Issues
 
 > Created: 2026-02-27 after debugging session (PRs #3222-#3225)
-> Updated: 2026-02-28 after architecture improvement pass (PRs #3229-#3234)
+> Updated: 2026-02-28 after architecture improvement pass (PRs #3229-#3235)
 > Purpose: Track architectural problems that keep causing bugs
 
 ---
 
-## 1. ~~Dual Email System~~ — PARTIALLY FIXED (PR #3234)
+## 1. ~~Dual Email System~~ — MOSTLY FIXED (PRs #3234, #3235)
 
-**Status**: Producer status emails now go through Laravel queue (ARCH-FIX-02).
+**Status**: All emails now use SMTP-first transport. Resend API is fallback only.
 
 **What was fixed**:
-- `ProducerOrderController::updateStatus()` now calls `$emailService->sendOrderStatusNotification()`
-- Frontend no longer makes separate Resend API call for status emails
-- All order status emails (admin + producer initiated) use same path
+- PR #3234: `ProducerOrderController::updateStatus()` now calls `$emailService->sendOrderStatusNotification()`
+- PR #3234: Frontend no longer makes separate Resend API call for producer status emails
+- PR #3235: OTP email switched from Resend-only to SMTP-first (same pattern as all other emails)
+- PR #3235: Deleted deprecated `/api/producer/orders/[id]/status` route (dead code after PR #3234)
 
-**What remains**:
-- OTP admin email still uses Next.js `lib/email.ts` → Resend API (needs separate migration)
-- `lib/email.ts` still exists in frontend (delete after OTP migration)
-- Next.js route `/api/producer/orders/[id]/status` still exists (deprecated, no longer called)
-
-**Phase 2**: Move OTP email to Laravel + delete frontend email code.
+**What remains (low priority)**:
+- `lib/email.ts` still exists for: OTP email, admin Prisma order status emails, order confirmation
+- Admin Prisma order emails are legacy (new orders use Laravel) — will become dead code naturally
+- Full elimination of `lib/email.ts` requires migrating OTP to Laravel (adds complexity for low gain)
 
 ---
 
@@ -59,16 +58,15 @@ No additional work needed. The original concern was route-specific, but the cent
 
 ---
 
-## 5. Server Access (OPERATIONAL) — ONGOING
+## 5. ~~Server Access~~ — FIXED (verified 2026-02-28)
 
-**Problem**:
-- SSH access works via `ssh dixis-prod` (alias)
-- GitHub Actions auto-deploy still broken (SSH precheck fails, exit 255)
-- Manual deploy: `ssh dixis-prod` → `git pull` → `npm run build` → `pm2 restart`
+**Status**: Auto-deploy via GitHub Actions is WORKING. Both PRs #3233 and #3234 deployed automatically.
 
-**Recommendation**:
-- Fix GitHub Actions SSH key/config for auto-deploy
-- Add uptime monitoring
+**How it works**: `deploy-frontend.yml` builds standalone bundle on GitHub Actions runner, rsync to VPS, restores .env symlink, starts PM2, runs 20x health proof.
+
+**WARNING**: Do NOT run `git pull` + `npm run build` on VPS manually. The auto-deploy uses `rsync --delete` which replaces the VPS directory with the standalone bundle. Manual `git checkout` files will be deleted on next auto-deploy. If manual deploy is needed, follow standalone pattern or just re-trigger workflow.
+
+**Manual fallback**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend` → use PM2 restart only (not git pull + build).
 
 ---
 
@@ -96,9 +94,9 @@ Only remaining risk: OTP emails have no rate limiting (admin auth, very low volu
 |----------|-------|--------|--------|
 | ~~**P0**~~ | ~~Fix SSH access~~ | — | Works via alias |
 | ~~**P1**~~ | ~~Unify auth~~ | — | ✅ FIXED (PR #3233) |
-| **P1** | Fix auto-deploy (GitHub Actions) | Medium | SSH key issue |
+| ~~**P1**~~ | ~~Fix auto-deploy (GitHub Actions)~~ | — | ✅ WORKING (verified 2026-02-28) |
 | ~~**P2**~~ | ~~Consolidate email system~~ | — | ✅ Phase 1 DONE (PR #3234) |
-| **P2** | Move OTP email to Laravel | Low | Phase 2 |
+| ~~**P2**~~ | ~~OTP email SMTP-first + cleanup~~ | — | ✅ DONE (PR #3235) |
 | ~~**P2**~~ | ~~Fix requireProducer() routes~~ | — | ✅ FIXED (PR #3233) |
 | ~~**P3**~~ | ~~Centralize CSRF handling~~ | — | ✅ Already done |
 | **P3** | Checkout server-side cart validation | Medium | Low priority |

@@ -118,7 +118,7 @@ _(none)_
 - **PR size ≤300 LOC** — May need multiple PRs for large features
 - **Workflow changes only if broken** — `.github/workflows/**` locked unless deploy/CI is failing
 - **Docs inside PR** — No separate docs-only PRs (update AGENT-STATE in same PR)
-- **Deploy**: Auto-deploy via GitHub Actions currently broken (SSH key issue). Manual: `ssh dixis-prod` → SOP below
+- **Deploy**: Auto-deploy via GitHub Actions WORKING (verified 2026-02-28). Manual fallback: `ssh dixis-prod` → PM2 restart only (do NOT git pull + build, rsync --delete will overwrite)
 
 ---
 
@@ -139,8 +139,8 @@ _(none)_
 - **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are redirect stubs only.
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
-- **Deploy (manual)**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`
-- **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, copies `static/`, `public/`, `messages/`, `i18n.ts` into `.next/standalone/`, rsync to VPS. **Currently broken** — SSH precheck fails (exit 255).
+- **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
+- **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
 ---
 

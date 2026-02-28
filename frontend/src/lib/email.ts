@@ -457,17 +457,27 @@ export async function sendOtpEmail({
     return { ok: true, dryRun: true }
   }
 
-  // Validate API key
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.error('[EMAIL] RESEND_API_KEY not configured')
-    return { ok: false, error: 'API key missing' }
-  }
-
-  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+  const subject = `Dixis Admin: Ο κωδικός σας είναι ${code}`
 
   try {
     const html = renderOtpEmailHTML(code, phone)
+
+    // ARCH-FIX-03: Use SMTP-first transport (same as all other emails)
+    const smtpResult = await sendViaSMTP({ to: toEmail, subject, html })
+    if (smtpResult.ok) {
+      console.log('[EMAIL] OTP email sent via SMTP', { messageId: smtpResult.messageId })
+      return { ok: true, messageId: smtpResult.messageId as string }
+    }
+
+    // SMTP not configured or failed — try Resend as fallback
+    console.warn(`[EMAIL] SMTP failed/unavailable (${(smtpResult as any).reason || (smtpResult as any).error}), trying Resend for OTP...`)
+
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      return { ok: false, error: 'Both SMTP and Resend unavailable' }
+    }
+
+    const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -479,7 +489,7 @@ export async function sendOtpEmail({
       body: JSON.stringify({
         from,
         to: toEmail,
-        subject: `Dixis Admin: Ο κωδικός σας είναι ${code}`,
+        subject,
         html
       })
     })
@@ -491,7 +501,7 @@ export async function sendOtpEmail({
     }
 
     const result = await response.json()
-    console.log('[EMAIL] OTP email sent', { messageId: result.id })
+    console.log('[EMAIL] OTP email sent via Resend', { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
