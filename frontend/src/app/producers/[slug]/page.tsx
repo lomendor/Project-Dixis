@@ -215,7 +215,7 @@ export default async function ProducerProfilePage(
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
                 >
-                  Website &rarr;
+                  Ιστοσελίδα &rarr;
                 </a>
               )}
             </div>

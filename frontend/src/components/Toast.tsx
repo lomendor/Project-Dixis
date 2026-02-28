@@ -113,8 +113,8 @@ function ToastItem({ toast }: ToastProps) {
         onClick={() => removeToast(toast.id)}
         className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity rounded-md p-1 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
         data-testid="toast-close"
-        aria-label={`Dismiss ${toast.type} notification`}
-        title="Press Escape or click to dismiss"
+        aria-label="Κλείσιμο ειδοποίησης"
+        title="Πατήστε Escape ή κλικ για κλείσιμο"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
