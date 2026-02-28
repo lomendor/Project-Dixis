@@ -102,16 +102,24 @@ class PaymentCheckoutController extends Controller
             $successUrl = config('payments.stripe.success_url', config('app.frontend_url') . '/thank-you') . '?id=' . $order->id . '&session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = config('payments.stripe.cancel_url', config('app.frontend_url') . '/checkout') . '?cancelled=true&order_id=' . $order->id;
 
+            // Build metadata — include checkout_session_id for multi-producer orders
+            // so the webhook handler routes to handleMultiProducerPaymentSuccess()
+            $metadata = [
+                'order_id' => $order->id,
+                'dixis_env' => config('app.env'),
+            ];
+
+            if ($order->is_child_order && $order->checkout_session_id) {
+                $metadata['checkout_session_id'] = $order->checkout_session_id;
+            }
+
             $session = \Stripe\Checkout\Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => $lineItems,
                 'mode' => 'payment',
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
-                'metadata' => [
-                    'order_id' => $order->id,
-                    'dixis_env' => config('app.env'),
-                ],
+                'metadata' => $metadata,
                 'customer_email' => $order->user->email ?? null,
             ]);
 

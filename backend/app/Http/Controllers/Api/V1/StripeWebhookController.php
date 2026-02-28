@@ -127,13 +127,20 @@ class StripeWebhookController extends Controller
             return;
         }
 
-        // Update order to paid
+        // Multi-producer fallback: if this is a child order, update ALL siblings
+        if ($order->is_child_order && $order->checkout_session_id) {
+            $this->handleMultiProducerPaymentSuccess($order->checkout_session_id, $session);
+            return;
+        }
+
+        // Single order: update to paid + confirmed
         $order->update([
             'payment_status' => 'paid',
+            'status' => 'confirmed',
             'payment_reference' => $session->id,
         ]);
 
-        Log::info('Stripe checkout.session.completed order marked as paid', [
+        Log::info('Stripe checkout.session.completed order marked as paid+confirmed', [
             'order_id' => $orderId,
             'session_id' => $session->id,
             'amount_total' => $session->amount_total,
@@ -178,11 +185,12 @@ class StripeWebhookController extends Controller
                 'stripe_payment_intent_id' => $stripeSession->payment_intent ?? $stripeSession->id,
             ]);
 
-            // Update all child orders to paid
+            // Update all child orders to paid + confirmed
             foreach ($checkoutSession->orders as $order) {
                 if ($order->payment_status !== 'paid') {
                     $order->update([
                         'payment_status' => 'paid',
+                        'status' => 'confirmed',
                         'payment_reference' => $stripeSession->id,
                     ]);
                 }
