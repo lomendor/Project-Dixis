@@ -311,12 +311,17 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:60,1'); // 60 locker search requests per minute
     });
 
-    // FIX-CUSTOMER-ORDERS-01: Authenticated user's own orders
+    // FIX-CUSTOMER-ORDERS-01 + 02: Authenticated user's own orders
     // Previously removed as public endpoint (security fix), now restored as auth-scoped
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('orders', [App\Http\Controllers\Api\V1\OrderController::class, 'myOrders'])
             ->name('api.v1.orders.my')
             ->middleware('throttle:30,1'); // 30 requests per minute
+        // FIX-CUSTOMER-ORDERS-02: Single order detail (ownership-checked)
+        Route::get('orders/{id}', [App\Http\Controllers\Api\V1\OrderController::class, 'myOrder'])
+            ->name('api.v1.orders.my.show')
+            ->where('id', '[0-9]+')
+            ->middleware('throttle:30,1');
     });
 
     // Order shipment details (authenticated users)

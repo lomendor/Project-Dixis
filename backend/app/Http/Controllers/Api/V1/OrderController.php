@@ -101,6 +101,26 @@ class OrderController extends Controller
     }
 
     /**
+     * FIX-CUSTOMER-ORDERS-02: Show a single order for the authenticated user.
+     * Verifies ownership (user_id must match) to prevent IDOR.
+     */
+    public function myOrder(Request $request, int $id): OrderResource
+    {
+        $user = $request->user();
+        if (!$user) {
+            abort(401, 'Unauthenticated');
+        }
+
+        $order = Order::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
+
+        return new OrderResource($order);
+    }
+
+    /**
      * Display the specified order with items.
      */
     public function show(Order $order): OrderResource
