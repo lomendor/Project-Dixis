@@ -51,7 +51,7 @@ check_http() {
 # ── Preflight (local) ──────────────────────────────────────────────────────
 echo "=== PREFLIGHT: prod must be healthy before deploy ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/" "307"
+check_http "homepage" "$PROD_URL/"
 echo ""
 
 # ── Build the SSH command block ─────────────────────────────────────────────
@@ -260,7 +260,7 @@ fi
 echo ""
 echo "=== POSTFLIGHT: public https verification ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/" "307"
+check_http "homepage" "$PROD_URL/"
 check_http "og-products" "$PROD_URL/og-products.jpg"
 check_http "twitter-products" "$PROD_URL/twitter-products.jpg"
 
