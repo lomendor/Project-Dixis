@@ -151,9 +151,7 @@ echo "Wiped node_modules and .next"
 
 echo ""
 echo "--- D) Install dependencies ---"
-# Ensure pnpm allows build scripts for native modules
-pnpm config set onlyBuiltDependencies "[]" >/dev/null 2>&1 || true
-
+# Build scripts allowed via pnpm.onlyBuiltDependencies in package.json
 if [ -f pnpm-lock.yaml ]; then
   echo "Installing from lockfile..."
   pnpm install --frozen-lockfile 2>&1 | tee -a "$LOGFILE" | tail -10
