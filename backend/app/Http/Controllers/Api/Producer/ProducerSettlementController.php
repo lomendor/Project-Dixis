@@ -16,7 +16,7 @@ class ProducerSettlementController extends Controller
     {
         $producer = $request->user()?->producer;
         if (!$producer) {
-            return response()->json(['error' => 'No producer profile'], 403);
+            return response()->json(['message' => 'No producer profile'], 403);
         }
 
         $settlements = CommissionSettlement::where('producer_id', $producer->id)

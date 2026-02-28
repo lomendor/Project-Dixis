@@ -23,7 +23,7 @@ class WebhookController extends Controller
             if (! $signature) {
                 Log::warning('Stripe webhook received without signature');
 
-                return response()->json(['error' => 'No signature provided'], 400);
+                return response()->json(['message' => 'No signature provided'], 400);
             }
 
             // Decode payload to array
@@ -32,7 +32,7 @@ class WebhookController extends Controller
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error('Stripe webhook: Invalid JSON payload');
 
-                return response()->json(['error' => 'Invalid JSON'], 400);
+                return response()->json(['message' => 'Invalid JSON'], 400);
             }
 
             // Get Stripe payment provider

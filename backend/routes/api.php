@@ -459,7 +459,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['jwt.admin', 'admin'])->prefix('admin/settings')->group(function () {
         Route::get('commission-engine', function (Illuminate\Http\Request $request) {
             if ($request->user()?->role !== 'admin') {
-                return response()->json(['error' => 'Forbidden'], 403);
+                return response()->json(['message' => 'Forbidden'], 403);
             }
             return response()->json([
                 'enabled' => \Laravel\Pennant\Feature::active('commission_engine_v1'),
@@ -468,7 +468,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('commission-engine', function (Illuminate\Http\Request $request) {
             if ($request->user()?->role !== 'admin') {
-                return response()->json(['error' => 'Forbidden'], 403);
+                return response()->json(['message' => 'Forbidden'], 403);
             }
             $enabled = (bool) $request->input('enabled', false);
             if ($enabled) {
