@@ -33,11 +33,16 @@ Route::middleware('throttle:10,1')->get('/ops/commission/preview', function (\Il
         $order = \App\Models\Order::find($orderId);
 
         if (!$order) {
-            return response()->json(['error' => 'order not found'], 404);
+            return response()->json(['message' => 'Order not found'], 404);
         }
 
-        $service = app(\App\Services\CommissionService::class);
-        $commission = $service->settleForOrder($order, $channel);
+        try {
+            $service = app(\App\Services\CommissionService::class);
+            $commission = $service->settleForOrder($order, $channel);
+        } catch (\Throwable $e) {
+            \Log::error('Commission preview calculation failed', ['order_id' => $orderId, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Commission calculation failed'], 500);
+        }
 
         return response()->json([
             'orderId' => $orderId,
@@ -77,7 +82,7 @@ Route::middleware('throttle:10,1')->get('/ops/commission/preview', function (\Il
         ]);
     }
 
-    return response()->json(['error' => 'provide orderId or amount'], 400);
+    return response()->json(['message' => 'Provide orderId or amount'], 400);
 });
 
 // Commission preview (read-only; feature-flagged, authenticated)
@@ -101,7 +106,7 @@ Route::get('/admin-user-lookup', function (\Illuminate\Http\Request $request) {
 
     $phone = $request->query('phone');
     if (!$phone) {
-        return response()->json(['error' => 'phone required'], 400);
+        return response()->json(['message' => 'Phone required'], 400);
     }
 
     $admin = DB::table('AdminUser')
