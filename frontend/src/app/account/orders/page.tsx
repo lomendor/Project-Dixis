@@ -49,7 +49,7 @@ function OrdersPage(): React.JSX.Element {
     <div className="min-h-screen bg-neutral-50">
       <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Ιστορικό Παραγγελιών</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2">Ιστορικό Παραγγελιών</h1>
           <p className="text-neutral-600">Παρακολουθήστε και διαχειριστείτε τις παραγγελίες σας</p>
         </div>
 

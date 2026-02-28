@@ -126,7 +126,7 @@ export default function FaqPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <h1 className="text-3xl font-bold mb-2">Συχνές Ερωτήσεις</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-2">Συχνές Ερωτήσεις</h1>
       <p className="text-neutral-600 mb-8">
         Βρείτε απαντήσεις στα πιο συνηθισμένα ερωτήματα σχετικά με το Dixis.
       </p>
