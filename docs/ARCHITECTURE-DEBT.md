@@ -99,6 +99,6 @@ Only remaining risk: OTP emails have no rate limiting (admin auth, very low volu
 | ~~**P2**~~ | ~~OTP email SMTP-first + cleanup~~ | — | ✅ DONE (PR #3235) |
 | ~~**P2**~~ | ~~Fix requireProducer() routes~~ | — | ✅ FIXED (PR #3233) |
 | ~~**P3**~~ | ~~Centralize CSRF handling~~ | — | ✅ Already done |
-| **P3** | Checkout server-side cart validation | Medium | Low priority |
-| **P3** | Standardize error responses (82 routes) | High | DX improvement |
+| ~~**P3**~~ | ~~Checkout server-side cart validation~~ | — | ✅ ALREADY DONE (verified 2026-02-28): backend re-fetches prices from DB, validates stock, recalculates shipping |
+| ~~**P3**~~ | ~~Standardize error responses~~ | — | ✅ Phase 1 DONE (PRs #3239, #3240): all controllers use `message` field, commission preview 500 fixed |
 | ~~**P3**~~ | ~~Split routes/api.php (1200+ lines)~~ | — | ✅ DONE (PRs #3236, #3237): 1228 → 517 lines |
