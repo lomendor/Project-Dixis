@@ -144,9 +144,9 @@ function ProducerSettingsContent() {
     setBusy(true);
 
     try {
-      // Auto-geocode address → lat/lng if address/city/region changed and no coordinates yet
+      // Auto-geocode only if lat/lng are empty — manual values take priority
       let { latitude, longitude } = formData;
-      if (formData.city || formData.address || formData.region) {
+      if (latitude == null && longitude == null && (formData.city || formData.address || formData.region)) {
         const geo = await geocodeAddress(formData.address, formData.city, formData.region);
         if (geo) {
           latitude = geo.lat;
@@ -387,7 +387,7 @@ function ProducerSettingsContent() {
             <div>
               <h2 className="text-lg font-semibold text-neutral-900 mb-4">Στοιχεία Τοποθεσίας</h2>
               <p className="text-sm text-neutral-500 mb-4">
-                Συμπληρώστε πόλη και περιφέρεια για να εμφανίζεται χάρτης στο προφίλ σας. Οι συντεταγμένες υπολογίζονται αυτόματα κατά την αποθήκευση.
+                Συμπληρώστε πόλη και περιφέρεια. Οι συντεταγμένες υπολογίζονται αυτόματα, αλλά μπορείτε να τις διορθώσετε χειροκίνητα.
               </p>
               {formData.latitude && formData.longitude && (
                 <div className="mb-4 bg-primary-pale border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
@@ -449,6 +449,60 @@ function ProducerSettingsContent() {
                     className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="π.χ. Κρήτη, Ελλάδα"
                   />
+                </div>
+              </div>
+
+              {/* Manual Lat/Lng Override */}
+              <div className="mt-4 pt-4 border-t border-neutral-200">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-neutral-700">
+                    Συντεταγμένες (Γεωγραφικό Πλάτος / Μήκος)
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([formData.address, formData.city, formData.region, 'Ελλάδα'].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Βρείτε στο Google Maps →
+                  </a>
+                </div>
+                <p className="text-xs text-neutral-400 mb-3">
+                  Υπολογίζονται αυτόματα από τη διεύθυνση. Αν ο χάρτης δεν δείχνει σωστά, διορθώστε εδώ.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="latitude" className="block text-xs font-medium text-neutral-600 mb-1">
+                      Γεωγραφικό Πλάτος (Latitude)
+                    </label>
+                    <input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      min="-90"
+                      max="90"
+                      value={formData.latitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                      placeholder="π.χ. 37.9838"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="longitude" className="block text-xs font-medium text-neutral-600 mb-1">
+                      Γεωγραφικό Μήκος (Longitude)
+                    </label>
+                    <input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      min="-180"
+                      max="180"
+                      value={formData.longitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                      placeholder="π.χ. 23.7275"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
