@@ -103,9 +103,54 @@ export default async function ProducerProfilePage(
 
   const hasImage = producer.image_url && producer.image_url.length > 0;
   const productCount = producer.products.length;
+  const baseUrl = await getBaseUrl();
+
+  // JSON-LD: LocalBusiness schema for producer
+  const localBusinessJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${baseUrl}/producers/${producer.slug}`,
+    name: producer.name,
+    description: producer.description || `${producer.name} — Τοπικός παραγωγός`,
+    url: `${baseUrl}/producers/${producer.slug}`,
+    ...(producer.image_url ? { image: producer.image_url } : {}),
+    ...(producer.region ? {
+      address: {
+        '@type': 'PostalAddress',
+        addressRegion: producer.region,
+        addressCountry: 'GR',
+      },
+    } : {}),
+    ...(producer.latitude && producer.longitude ? {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: producer.latitude,
+        longitude: producer.longitude,
+      },
+    } : {}),
+  };
+
+  // JSON-LD: BreadcrumbList
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Αρχική', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'Παραγωγοί', item: `${baseUrl}/producers` },
+      { '@type': 'ListItem', position: 3, name: producer.name },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Producer hero */}
       <div className="bg-neutral-50 border-b border-neutral-100">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">

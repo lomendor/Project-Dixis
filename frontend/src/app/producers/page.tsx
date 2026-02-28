@@ -4,7 +4,19 @@ import { ProducerCard } from '@/components/ProducerCard';
 import { FilterStrip } from '@/components/FilterStrip';
 import { getServerApiUrl } from '@/env';
 
-export const metadata = { title: 'Παραγωγοί' };
+export const metadata = {
+  title: 'Παραγωγοί — Τοπικοί Έλληνες Παραγωγοί',
+  description:
+    'Ανακαλύψτε τους τοπικούς Έλληνες παραγωγούς του Dixis. Αυθεντικά προϊόντα απευθείας από τον παραγωγό στο τραπέζι σας.',
+  openGraph: {
+    title: 'Παραγωγοί — Τοπικοί Έλληνες Παραγωγοί | Dixis',
+    description:
+      'Ανακαλύψτε τους τοπικούς Έλληνες παραγωγούς του Dixis. Αυθεντικά προϊόντα απευθείας από τον παραγωγό στο τραπέζι σας.',
+    type: 'website',
+    locale: 'el_GR',
+    siteName: 'Dixis',
+  },
+};
 
 type ApiProducer = {
   id: string | number;
