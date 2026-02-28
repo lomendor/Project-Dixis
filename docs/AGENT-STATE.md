@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-26 (Image gallery deployed, all "immediate" pre-launch items done)
+**Updated**: 2026-02-28 (Architecture debt pass: email, routes, deploy docs)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -89,6 +89,9 @@ _(none)_
 
 ## Recently Done (last 10)
 
+- **ARCH-FIX-04** — Routes split: `api.php` 1228→517 lines. Extracted producer.php (19 routes), ops.php (internal), openapi.php (569-line spec). All P0-P2 arch debt resolved. (PRs #3236-#3237, merged 2026-02-28) ✅
+- **ARCH-FIX-03** — OTP email switched from Resend-only to SMTP-first transport. Deleted dead producer status email route. (PR #3235, merged 2026-02-28) ✅
+- **ARCH-FIX-02** — Customer orders fix: myOrders + myOrder endpoints, producer order management (list, detail, status update, CSV export), deploy docs updated. (PRs #3229-#3234, deployed 2026-02-28) ✅
 - **IMAGE-GALLERY** — Multi-image upload for producer products: new MultiImageUpload component (upload, reorder, delete, primary badge, max 5), backend syncs `images[]` to `product_images` table, ProductResource includes images, API proxy routes updated. (PR #3187, deployed 2026-02-26) ✅
 - **ROUTE-CLEANUP-MY-TO-PRODUCER** — Moved all product CRUD implementations from `/my/products/*` to `/producer/products/*`. Old routes become redirect stubs. Tests updated. Removed per-page AuthGuard wrappers (layout handles auth). (PR #3185, deployed 2026-02-25) ✅
 - **PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation: ProducerSidebar + ProducerShell components (mirroring AdminShell pattern), layout-level AuthGuard for all `/producer/*` routes (onboarding excluded), removed per-page AuthGuard wrappers from 6 pages. Also created `docs/AGENT/CONTEXT-BOOT.md` agent brain file for cold-start sessions. (PR #3184, deployed 2026-02-25) ✅

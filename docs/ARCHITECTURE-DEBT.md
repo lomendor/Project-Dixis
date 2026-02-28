@@ -101,4 +101,4 @@ Only remaining risk: OTP emails have no rate limiting (admin auth, very low volu
 | ~~**P3**~~ | ~~Centralize CSRF handling~~ | — | ✅ Already done |
 | **P3** | Checkout server-side cart validation | Medium | Low priority |
 | **P3** | Standardize error responses (82 routes) | High | DX improvement |
-| **P3** | Split routes/api.php (1200+ lines) | Medium | DX improvement |
+| ~~**P3**~~ | ~~Split routes/api.php (1200+ lines)~~ | — | ✅ DONE (PRs #3236, #3237): 1228 → 517 lines |
