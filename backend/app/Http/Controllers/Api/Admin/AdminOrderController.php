@@ -29,7 +29,7 @@ class AdminOrderController extends Controller
     {
         // Admin check
         if (!$request->user() || $request->user()->role !== 'admin') {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validated = $request->validate([
@@ -191,7 +191,7 @@ class AdminOrderController extends Controller
     {
         // Admin check
         if (!$request->user() || $request->user()->role !== 'admin') {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         // Guard: Only COD orders can be confirmed this way
