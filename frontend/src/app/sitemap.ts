@@ -12,6 +12,11 @@ interface ProductForSitemap {
   is_active: boolean;
 }
 
+interface ProducerForSitemap {
+  slug: string;
+  updated_at?: string;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -95,5 +100,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continue with static pages only - graceful degradation
   }
 
-  return [...staticPages, ...productPages];
+  // Dynamic producer pages from Laravel API
+  let producerPages: MetadataRoute.Sitemap = [];
+
+  try {
+    const response = await fetch(`${API_BASE}/public/producers`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const producers: ProducerForSitemap[] = data.data || [];
+
+      producerPages = producers
+        .filter((p) => p.slug)
+        .map((producer) => {
+          const date = producer.updated_at ? new Date(producer.updated_at) : new Date();
+          const lastModified = isNaN(date.getTime()) ? new Date() : date;
+          return {
+            url: `${BASE_URL}/producers/${producer.slug}`,
+            lastModified,
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+          };
+        });
+    }
+  } catch (error) {
+    console.error('[Sitemap] Error fetching producers from API:', error);
+  }
+
+  return [...staticPages, ...productPages, ...producerPages];
 }

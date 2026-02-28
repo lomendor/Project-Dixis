@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 
 interface FaqItem {
@@ -104,8 +104,28 @@ function AccordionItem({ item }: { item: FaqItem }) {
 }
 
 export default function FaqPage() {
+  // FAQPage JSON-LD for Google rich results
+  const faqJsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: sections.flatMap((s) =>
+      s.items.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.a,
+        },
+      }))
+    ),
+  }), []);
+
   return (
     <main className="container mx-auto px-4 py-8 max-w-3xl">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <h1 className="text-3xl font-bold mb-2">Συχνές Ερωτήσεις</h1>
       <p className="text-neutral-600 mb-8">
         Βρείτε απαντήσεις στα πιο συνηθισμένα ερωτήματα σχετικά με το Dixis.
