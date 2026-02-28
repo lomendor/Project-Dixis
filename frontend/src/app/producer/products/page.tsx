@@ -481,10 +481,13 @@ export default function ProducerProductsPage() {
                           ) : (
                             <button
                               onClick={() => { setEditingStockId(product.id); setEditingStockValue(String(product.stock)); }}
-                              className="hover:bg-neutral-100 px-2 py-1 rounded cursor-pointer transition-colors"
+                              className={`hover:bg-neutral-100 px-2 py-1 rounded cursor-pointer transition-colors ${product.stock === 0 ? 'text-red-600 font-bold' : product.stock <= 5 ? 'text-amber-600 font-semibold' : ''}`}
                               title="Κλικ για επεξεργασία"
                             >
-                              {product.stock} <span className="text-neutral-400 text-xs">✏️</span>
+                              {product.stock}
+                              {product.stock === 0 && <span className="ml-1 text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Εξαντλημένο</span>}
+                              {product.stock > 0 && product.stock <= 5 && <span className="ml-1 text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Χαμηλό</span>}
+                              {product.stock > 5 && <span className="text-neutral-400 text-xs ml-1">✏️</span>}
                             </button>
                           )}
                         </td>

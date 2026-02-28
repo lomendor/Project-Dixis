@@ -625,12 +625,32 @@ function ProducerSettingsContent() {
                       setFormData({ ...formData, iban: cleaned });
                     }}
                     maxLength={34}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono ${
+                      formData.iban && (!formData.iban.startsWith('GR') || formData.iban.length !== 27)
+                        ? 'border-red-300 bg-red-50'
+                        : formData.iban && formData.iban.startsWith('GR') && formData.iban.length === 27
+                          ? 'border-green-300 bg-green-50'
+                          : 'border-neutral-300'
+                    }`}
                     placeholder="GR1601101250000000012300695"
                   />
-                  <p className="mt-1 text-sm text-neutral-500">
-                    Ελληνικό IBAN (27 χαρακτήρες, ξεκινά με GR)
-                  </p>
+                  {formData.iban && !formData.iban.startsWith('GR') ? (
+                    <p className="mt-1 text-sm text-red-600">
+                      Το IBAN πρέπει να ξεκινά με GR
+                    </p>
+                  ) : formData.iban && formData.iban.length > 0 && formData.iban.length !== 27 ? (
+                    <p className="mt-1 text-sm text-amber-600">
+                      Ελληνικό IBAN: 27 χαρακτήρες (τρέχοντες: {formData.iban.length})
+                    </p>
+                  ) : formData.iban && formData.iban.length === 27 ? (
+                    <p className="mt-1 text-sm text-green-600">
+                      ✓ Έγκυρο ελληνικό IBAN
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Ελληνικό IBAN (27 χαρακτήρες, ξεκινά με GR)
+                    </p>
+                  )}
                 </div>
 
                 <div>
