@@ -18,6 +18,9 @@ const statusColors: Record<OrderStatus, string> = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
+/** Statuses that need producer action — highlighted with urgency cue */
+const actionableStatuses: OrderStatus[] = ['confirmed', 'pending'];
+
 interface ShippingAddress {
   name?: string;
   phone?: string;
@@ -50,6 +53,7 @@ export default function ProducerOrdersPage() {
   });
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
   // Hydration fix: defer date rendering until client-side mount
@@ -71,6 +75,18 @@ export default function ProducerOrdersPage() {
       );
       setOrders(response.orders);
       setCounts(response.meta);
+
+      // Smart default: on first load, auto-switch to "Νέες" if there are actionable orders
+      if (initialLoad) {
+        setInitialLoad(false);
+        const actionableCount = (response.meta.confirmed ?? 0) + (response.meta.pending ?? 0);
+        if (actionableCount > 0 && activeFilter === 'all') {
+          // Switch to confirmed tab — will trigger re-fetch via useEffect
+          setActiveFilter('confirmed');
+          return;
+        }
+      }
+
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης παραγγελιών');
@@ -110,29 +126,51 @@ export default function ProducerOrdersPage() {
     count: number;
   }) => {
     const isActive = activeFilter === status;
+    const isActionable = status === 'confirmed' || status === 'pending';
+    const showUrgentBadge = isActionable && count > 0 && !isActive;
     return (
       <button
         onClick={() => setActiveFilter(status)}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
           isActive
             ? 'bg-primary text-white'
-            : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-300'
+            : showUrgentBadge
+              ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
+              : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-300'
         }`}
       >
-        {label} ({count})
+        {label}
+        {showUrgentBadge ? (
+          <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-amber-500 text-white rounded-full">
+            {count}
+          </span>
+        ) : (
+          <span className="ml-1">({count})</span>
+        )}
       </button>
     );
   };
 
   const OrderCard = ({ order }: { order: ProducerOrder }) => {
+    const needsAction = actionableStatuses.includes(order.status);
     return (
       <Link href={`/producer/orders/${order.id}`} className="block">
-        <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
+        <div className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-l-4 ${
+          needsAction ? 'border-l-amber-400' : 'border-l-transparent'
+        }`}>
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-neutral-900">
-              {t('producerOrders.orderNumber').replace('{id}', String(order.id))}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-neutral-900">
+                {t('producerOrders.orderNumber').replace('{id}', String(order.id))}
+              </h3>
+              {needsAction && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                  {t('producerOrders.needsAction')}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-neutral-600 mt-1">
               {order.user?.name || t('producerOrders.guest')}
             </p>
