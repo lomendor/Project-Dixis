@@ -78,7 +78,7 @@ export default function ImageGallery({
         <div
           className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-thin"
           role="list"
-          aria-label="Product images"
+          aria-label="Εικόνες προϊόντος"
           data-testid="image-gallery-thumbs"
         >
           {allImages.map((img, idx) => (
@@ -92,7 +92,7 @@ export default function ImageGallery({
                   ? 'border-primary ring-1 ring-primary/30'
                   : 'border-neutral-200 hover:border-neutral-300'
               }`}
-              aria-label={`Image ${idx + 1}`}
+              aria-label={`Εικόνα ${idx + 1}`}
               aria-current={idx === selectedIdx ? 'true' : undefined}
             >
               <Image
