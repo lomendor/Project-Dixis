@@ -18,6 +18,9 @@ interface ProducerForSitemap {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Skip dynamic fetches when API_BASE is a relative path (CI has no server)
+  const canFetchApi = API_BASE.startsWith('http');
+
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -73,60 +76,71 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic product pages from Laravel API (single source of truth)
   let productPages: MetadataRoute.Sitemap = [];
 
-  try {
-    const response = await fetch(`${API_BASE}/public/products?per_page=100`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
+  if (canFetchApi) {
+    try {
+      const ac = new AbortController();
+      const timer = setTimeout(() => ac.abort(), 10_000);
+      const response = await fetch(`${API_BASE}/public/products?per_page=100`, {
+        next: { revalidate: 3600 },
+        signal: ac.signal,
+      });
+      clearTimeout(timer);
 
-    if (response.ok) {
-      const data = await response.json();
-      const products: ProductForSitemap[] = data.data || [];
+      if (response.ok) {
+        const data = await response.json();
+        const products: ProductForSitemap[] = data.data || [];
 
-      productPages = products
-        .filter((p) => p.is_active)
-        .map((product) => {
-          const date = new Date(product.updated_at);
-          const lastModified = isNaN(date.getTime()) ? new Date() : date;
-          return {
-            url: `${BASE_URL}/products/${product.id}`,
-            lastModified,
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-          };
-        });
+        productPages = products
+          .filter((p) => p.is_active)
+          .map((product) => {
+            const date = new Date(product.updated_at);
+            const lastModified = isNaN(date.getTime()) ? new Date() : date;
+            return {
+              url: `${BASE_URL}/products/${product.id}`,
+              lastModified,
+              changeFrequency: 'weekly' as const,
+              priority: 0.8,
+            };
+          });
+      }
+    } catch (error) {
+      console.error('[Sitemap] Error fetching products from API:', error);
     }
-  } catch (error) {
-    console.error('[Sitemap] Error fetching products from API:', error);
-    // Continue with static pages only - graceful degradation
   }
 
   // Dynamic producer pages from Laravel API
   let producerPages: MetadataRoute.Sitemap = [];
 
-  try {
-    const response = await fetch(`${API_BASE}/public/producers`, {
-      next: { revalidate: 3600 },
-    });
+  if (canFetchApi) {
+    try {
+      const ac = new AbortController();
+      const timer = setTimeout(() => ac.abort(), 10_000);
+      const response = await fetch(`${API_BASE}/public/producers`, {
+        next: { revalidate: 3600 },
+        signal: ac.signal,
+      });
+      clearTimeout(timer);
 
-    if (response.ok) {
-      const data = await response.json();
-      const producers: ProducerForSitemap[] = data.data || [];
+      if (response.ok) {
+        const data = await response.json();
+        const producers: ProducerForSitemap[] = data.data || [];
 
-      producerPages = producers
-        .filter((p) => p.slug)
-        .map((producer) => {
-          const date = producer.updated_at ? new Date(producer.updated_at) : new Date();
-          const lastModified = isNaN(date.getTime()) ? new Date() : date;
-          return {
-            url: `${BASE_URL}/producers/${producer.slug}`,
-            lastModified,
-            changeFrequency: 'weekly' as const,
-            priority: 0.7,
-          };
-        });
+        producerPages = producers
+          .filter((p) => p.slug)
+          .map((producer) => {
+            const date = producer.updated_at ? new Date(producer.updated_at) : new Date();
+            const lastModified = isNaN(date.getTime()) ? new Date() : date;
+            return {
+              url: `${BASE_URL}/producers/${producer.slug}`,
+              lastModified,
+              changeFrequency: 'weekly' as const,
+              priority: 0.7,
+            };
+          });
+      }
+    } catch (error) {
+      console.error('[Sitemap] Error fetching producers from API:', error);
     }
-  } catch (error) {
-    console.error('[Sitemap] Error fetching producers from API:', error);
   }
 
   return [...staticPages, ...productPages, ...producerPages];
