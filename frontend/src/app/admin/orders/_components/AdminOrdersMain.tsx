@@ -135,7 +135,7 @@ export default function AdminOrdersMain() {
   }, [cols]);
 
   const COLS = [
-    { key:'id',       label:'Order',      width:'1.2fr' },
+    { key:'id',       label:'Παραγγελία', width:'1.2fr' },
     { key:'customer', label:'Πελάτης',    width:'2fr'   },
     { key:'total',    label:'Σύνολο',     width:'1fr'   },
     { key:'status',   label:'Κατάσταση',  width:'1.2fr' },

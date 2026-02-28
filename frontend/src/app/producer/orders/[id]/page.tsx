@@ -461,7 +461,7 @@ export default function ProducerOrderDetailsPage() {
                       </div>
                       {parseFloat(commission.platform_fee_vat) > 0 && (
                         <div className="flex justify-between text-xs">
-                          <span className="text-neutral-400 ml-2">incl. ΦΠΑ</span>
+                          <span className="text-neutral-400 ml-2">συμπ. ΦΠΑ</span>
                           <span className="text-neutral-400">{formatCurrency(parseFloat(commission.platform_fee_vat))}</span>
                         </div>
                       )}
