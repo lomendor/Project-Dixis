@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { apiClient, ProducerOrder } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -8,18 +8,6 @@ import { formatCurrency } from '@/env';
 import { useTranslations } from '@/contexts/LocaleContext';
 
 type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-
-const statusColors: Record<OrderStatus, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  confirmed: 'bg-teal-100 text-teal-800',
-  processing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-purple-100 text-purple-800',
-  delivered: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800',
-};
-
-/** Statuses that need producer action — highlighted with urgency cue */
-const actionableStatuses: OrderStatus[] = ['confirmed', 'pending'];
 
 interface ShippingAddress {
   name?: string;
@@ -40,53 +28,74 @@ interface OrderCounts {
   delivered: number;
 }
 
+/** Kanban column definitions — order matters (left→right = workflow) */
+const COLUMNS: {
+  key: string;
+  statuses: OrderStatus[];
+  colorBg: string;
+  colorBorder: string;
+  colorText: string;
+  colorBadge: string;
+  icon: string;
+}[] = [
+  {
+    key: 'new',
+    statuses: ['confirmed', 'pending'],
+    colorBg: 'bg-amber-50',
+    colorBorder: 'border-amber-200',
+    colorText: 'text-amber-800',
+    colorBadge: 'bg-amber-500',
+    icon: '🆕',
+  },
+  {
+    key: 'processing',
+    statuses: ['processing'],
+    colorBg: 'bg-blue-50',
+    colorBorder: 'border-blue-200',
+    colorText: 'text-blue-800',
+    colorBadge: 'bg-blue-500',
+    icon: '⚙️',
+  },
+  {
+    key: 'shipped',
+    statuses: ['shipped'],
+    colorBg: 'bg-purple-50',
+    colorBorder: 'border-purple-200',
+    colorText: 'text-purple-800',
+    colorBadge: 'bg-purple-500',
+    icon: '📦',
+  },
+  {
+    key: 'delivered',
+    statuses: ['delivered'],
+    colorBg: 'bg-green-50',
+    colorBorder: 'border-green-200',
+    colorText: 'text-green-800',
+    colorBadge: 'bg-green-500',
+    icon: '✅',
+  },
+];
+
 export default function ProducerOrdersPage() {
   const t = useTranslations();
   const [orders, setOrders] = useState<ProducerOrder[]>([]);
   const [counts, setCounts] = useState<OrderCounts>({
-    total: 0,
-    pending: 0,
-    confirmed: 0,
-    processing: 0,
-    shipped: 0,
-    delivered: 0,
+    total: 0, pending: 0, confirmed: 0, processing: 0, shipped: 0, delivered: 0,
   });
-  const [activeFilter, setActiveFilter] = useState<OrderStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
-  // Hydration fix: defer date rendering until client-side mount
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    loadOrders();
-  }, [activeFilter]);
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { loadOrders(); }, []);
 
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.getProducerOrders(
-        activeFilter === 'all' ? undefined : activeFilter
-      );
+      const response = await apiClient.getProducerOrders();
       setOrders(response.orders);
       setCounts(response.meta);
-
-      // Smart default: on first load, auto-switch to "Νέες" if there are actionable orders
-      if (initialLoad) {
-        setInitialLoad(false);
-        const actionableCount = (response.meta.confirmed ?? 0) + (response.meta.pending ?? 0);
-        if (actionableCount > 0 && activeFilter === 'all') {
-          // Switch to confirmed tab — will trigger re-fetch via useEffect
-          setActiveFilter('confirmed');
-          return;
-        }
-      }
-
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης παραγγελιών');
@@ -94,6 +103,17 @@ export default function ProducerOrdersPage() {
       setLoading(false);
     }
   };
+
+  /** Group orders by kanban column */
+  const grouped = useMemo(() => {
+    const map = new Map<string, ProducerOrder[]>();
+    for (const col of COLUMNS) map.set(col.key, []);
+    for (const order of orders) {
+      const col = COLUMNS.find(c => c.statuses.includes(order.status));
+      if (col) map.get(col.key)!.push(order);
+    }
+    return map;
+  }, [orders]);
 
   const handleExportCsv = async () => {
     try {
@@ -112,271 +132,191 @@ export default function ProducerOrdersPage() {
     }
   };
 
-  const getStatusLabel = (status: OrderStatus): string => {
-    return t(`producerOrders.${status}`);
-  };
+  const getStatusLabel = (status: OrderStatus): string => t(`producerOrders.${status}`);
 
-  const FilterTab = ({
-    status,
-    label,
-    count,
-  }: {
-    status: OrderStatus | 'all';
-    label: string;
-    count: number;
-  }) => {
-    const isActive = activeFilter === status;
-    const isActionable = status === 'confirmed' || status === 'pending';
-    const showUrgentBadge = isActionable && count > 0 && !isActive;
-    return (
-      <button
-        onClick={() => setActiveFilter(status)}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-          isActive
-            ? 'bg-primary text-white'
-            : showUrgentBadge
-              ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
-              : 'bg-white text-neutral-700 hover:bg-neutral-50 border border-neutral-300'
-        }`}
-      >
-        {label}
-        {showUrgentBadge ? (
-          <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-amber-500 text-white rounded-full">
-            {count}
-          </span>
-        ) : (
-          <span className="ml-1">({count})</span>
-        )}
-      </button>
-    );
-  };
-
+  /** Compact card for kanban column */
   const OrderCard = ({ order }: { order: ProducerOrder }) => {
-    const needsAction = actionableStatuses.includes(order.status);
+    const isNew = order.status === 'confirmed' || order.status === 'pending';
     return (
-      <Link href={`/producer/orders/${order.id}`} className="block">
-        <div className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-l-4 ${
-          needsAction ? 'border-l-amber-400' : 'border-l-transparent'
+      <Link href={`/producer/orders/${order.id}`} className="block group">
+        <div className={`bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer ${
+          isNew ? 'ring-1 ring-amber-300' : ''
         }`}>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-neutral-900">
-                {t('producerOrders.orderNumber').replace('{id}', String(order.id))}
-              </h3>
-              {needsAction && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-medium rounded-full border border-amber-200">
-                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                  {t('producerOrders.needsAction')}
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-neutral-600 mt-1">
-              {order.user?.name || t('producerOrders.guest')}
-            </p>
+          {/* Header: order # + amount */}
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-sm font-bold text-neutral-900">
+              #{order.id}
+            </span>
+            <span className="text-sm font-bold text-neutral-900">
+              {formatCurrency(parseFloat(order.total))}
+            </span>
+          </div>
+
+          {/* Customer */}
+          <p className="text-sm text-neutral-600 mb-1">
+            {order.user?.name || t('producerOrders.guest')}
+          </p>
+
+          {/* Products (compact) */}
+          <div className="space-y-0.5 mb-2">
+            {(order.orderItems ?? []).slice(0, 3).map((item) => (
+              <p key={item.id} className="text-xs text-neutral-500 truncate">
+                {item.quantity}× {item.product_name || item.product?.name}
+              </p>
+            ))}
+            {(order.orderItems ?? []).length > 3 && (
+              <p className="text-xs text-neutral-400">
+                +{(order.orderItems ?? []).length - 3} {t('producerOrders.moreItems')}
+              </p>
+            )}
+          </div>
+
+          {/* Date + status badge */}
+          <div className="flex justify-between items-center pt-2 border-t border-neutral-100">
             <time
               dateTime={order.created_at}
               suppressHydrationWarning
-              className="block text-sm text-neutral-500"
+              className="text-xs text-neutral-400"
             >
               {mounted
-                ? new Date(order.created_at).toLocaleString('el-GR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
+                ? new Date(order.created_at).toLocaleDateString('el-GR', {
+                    day: 'numeric', month: 'short',
                   })
                 : ''}
             </time>
+            {isNew && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-medium rounded-full border border-amber-200">
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                {t('producerOrders.needsAction')}
+              </span>
+            )}
           </div>
-          <div className="text-right">
-            <span
-              className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                statusColors[order.status]
-              }`}
-            >
-              {getStatusLabel(order.status)}
-            </span>
-            <p className="text-xl font-bold text-neutral-900 mt-2">
-              {formatCurrency(parseFloat(order.total))}
-            </p>
-          </div>
-        </div>
 
-        {/* Order Items */}
-        <div className="border-t pt-4">
-          <h4 className="text-sm font-medium text-neutral-700 mb-2">
-            {t('producerOrders.products')} ({(order.orderItems ?? []).length})
-          </h4>
-          <div className="space-y-2">
-            {(order.orderItems ?? []).map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center text-sm"
-              >
-                <span className="text-neutral-700">
-                  {item.product_name || item.product?.name}
-                </span>
-                <span className="text-neutral-600">
-                  {item.quantity} × {formatCurrency(parseFloat(item.unit_price))}
-                  {' = '}
-                  <span className="font-medium text-neutral-900">
-                    {formatCurrency(parseFloat(item.total_price))}
-                  </span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Shipping Address */}
-        {(order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address && (
-          <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
-            <p className="font-medium text-amber-900 mb-1">{t('producerOrders.shippingDetails')}</p>
-            {(() => {
-              const addr = (order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address!;
-              return (
-                <>
-                  {addr.name && <p className="text-amber-800">{addr.name}</p>}
-                  {addr.line1 && <p className="text-amber-800">{addr.line1}</p>}
-                  {(addr.city || addr.postal_code) && (
-                    <p className="text-amber-800">{addr.city} {addr.postal_code}</p>
-                  )}
-                  {addr.phone && <p className="text-amber-800">{addr.phone}</p>}
-                </>
-              );
-            })()}
-          </div>
-        )}
+          {/* Shipping address (if present) */}
+          {(order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address && (
+            <div className="mt-2 p-2 bg-neutral-50 rounded text-xs text-neutral-500">
+              {(() => {
+                const addr = (order as ProducerOrder & { shipping_address?: ShippingAddress }).shipping_address!;
+                return [addr.name, addr.city].filter(Boolean).join(', ');
+              })()}
+            </div>
+          )}
         </div>
       </Link>
     );
   };
 
-  return (
-      <div data-testid="producer-orders-page">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">{t('producerOrders.title')}</h1>
-              <p className="text-neutral-600 mt-2">
-                {t('producerOrders.subtitle')}
-              </p>
-            </div>
-            <button
-              onClick={handleExportCsv}
-              disabled={exportLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 text-sm font-medium text-neutral-700 disabled:opacity-50 transition-colors"
-              data-testid="export-csv-btn"
-            >
-              {exportLoading ? (
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-              ) : (
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              )}
-              {exportLoading ? t('producerOrders.exporting') : t('producerOrders.exportCsv')}
-            </button>
-          </div>
+  /** Single kanban column */
+  const KanbanColumn = ({ colIndex }: { colIndex: number }) => {
+    const col = COLUMNS[colIndex];
+    const columnOrders = grouped.get(col.key) ?? [];
+    const count = columnOrders.length;
 
-          {/* Status Filter Tabs */}
-          <nav className="flex flex-wrap gap-2 mb-6">
-            <FilterTab status="all" label={t('producerOrders.all')} count={counts.total} />
-            <FilterTab
-              status="confirmed"
-              label={t('producerOrders.confirmed')}
-              count={counts.confirmed}
-            />
-            <FilterTab
-              status="pending"
-              label={t('producerOrders.pending')}
-              count={counts.pending}
-            />
-            <FilterTab
-              status="processing"
-              label={t('producerOrders.processing')}
-              count={counts.processing}
-            />
-            <FilterTab
-              status="shipped"
-              label={t('producerOrders.shipped')}
-              count={counts.shipped}
-            />
-            <FilterTab
-              status="delivered"
-              label={t('producerOrders.delivered')}
-              count={counts.delivered}
-            />
-          </nav>
+    return (
+      <div className={`flex flex-col rounded-xl ${col.colorBg} border ${col.colorBorder} min-w-[280px] max-w-[340px] w-full`}>
+        {/* Column header */}
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-neutral-200/50">
+          <span className="text-lg" role="img" aria-hidden="true">{col.icon}</span>
+          <h2 className={`text-sm font-bold ${col.colorText}`}>
+            {t(`producerOrders.col_${col.key}`)}
+          </h2>
+          <span className={`ml-auto inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white rounded-full ${col.colorBadge}`}>
+            {count}
+          </span>
+        </div>
 
-          {/* Loading State */}
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner />
-            </div>
-          ) : error ? (
-            /* Error State */
-            <div className="text-center py-12">
-              <div className="text-red-600 mb-4">
-                <svg
-                  className="mx-auto h-12 w-12"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <p className="text-red-600 mb-4">{error}</p>
-              <button
-                onClick={loadOrders}
-                className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                {t('producerOrders.tryAgain')}
-              </button>
-            </div>
-          ) : orders.length === 0 ? (
-            /* Empty State */
-            <div className="text-center py-12">
-              <div className="text-neutral-400 mb-4">
-                <svg
-                  className="mx-auto h-12 w-12"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-neutral-900 mb-2">
-                {t('producerOrders.noOrders')}
-              </h3>
-              <p className="text-neutral-600">
-                {activeFilter === 'all'
-                  ? t('producerOrders.noOrdersYet')
-                  : t('producerOrders.noOrdersStatus').replace('{status}', getStatusLabel(activeFilter as OrderStatus))}
-              </p>
-            </div>
+        {/* Cards */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ maxHeight: 'calc(100vh - 240px)' }}>
+          {columnOrders.length === 0 ? (
+            <p className="text-xs text-neutral-400 text-center py-6">
+              {t('producerOrders.colEmpty')}
+            </p>
           ) : (
-            /* Order Cards */
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))}
-            </div>
+            columnOrders.map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))
           )}
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div data-testid="producer-orders-page">
+      <div className="max-w-full mx-auto">
+        {/* Header */}
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900" data-testid="producer-orders-title">
+              {t('producerOrders.title')}
+            </h1>
+            <p className="text-neutral-600 mt-1">
+              {t('producerOrders.subtitle')}
+              {counts.total > 0 && (
+                <span className="ml-2 text-sm text-neutral-400">
+                  ({counts.total} {t('producerOrders.totalLabel')})
+                </span>
+              )}
+            </p>
+          </div>
+          <button
+            onClick={handleExportCsv}
+            disabled={exportLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 text-sm font-medium text-neutral-700 disabled:opacity-50 transition-colors"
+            data-testid="export-csv-btn"
+          >
+            {exportLoading ? (
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            )}
+            {exportLoading ? t('producerOrders.exporting') : t('producerOrders.exportCsv')}
+          </button>
+        </div>
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <LoadingSpinner />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="text-red-600 mb-4">
+              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={loadOrders}
+              className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {t('producerOrders.tryAgain')}
+            </button>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-neutral-400 mb-4">
+              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">
+              {t('producerOrders.noOrders')}
+            </h3>
+            <p className="text-neutral-600">
+              {t('producerOrders.noOrdersYet')}
+            </p>
+          </div>
+        ) : (
+          /* Kanban Board */
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+            {COLUMNS.map((_, i) => (
+              <KanbanColumn key={COLUMNS[i].key} colIndex={i} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

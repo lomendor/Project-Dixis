@@ -370,7 +370,14 @@
     "exportCsv": "Εξαγωγή CSV",
     "exporting": "Εξαγωγή...",
     "exportError": "Αποτυχία εξαγωγής παραγγελιών",
-    "needsAction": "Χρειάζεται ενέργεια"
+    "needsAction": "Χρειάζεται ενέργεια",
+    "totalLabel": "συνολικά",
+    "moreItems": "ακόμη",
+    "colEmpty": "Δεν υπάρχουν παραγγελίες",
+    "col_new": "Νέες Παραγγελίες",
+    "col_processing": "Σε Επεξεργασία",
+    "col_shipped": "Στάλθηκε",
+    "col_delivered": "Ολοκληρώθηκε"
   },
   "reviews": {
     "title": "Αξιολογήσεις",

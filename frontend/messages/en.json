@@ -370,7 +370,14 @@
     "exportCsv": "Export CSV",
     "exporting": "Exporting...",
     "exportError": "Failed to export orders",
-    "needsAction": "Needs action"
+    "needsAction": "Needs action",
+    "totalLabel": "total",
+    "moreItems": "more",
+    "colEmpty": "No orders",
+    "col_new": "New Orders",
+    "col_processing": "Processing",
+    "col_shipped": "Shipped",
+    "col_delivered": "Completed"
   },
   "reviews": {
     "title": "Reviews",
