@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-28 (Architecture debt pass: email, routes, deploy docs)
+**Updated**: 2026-02-28 (Architecture debt COMPLETE: all items resolved)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -89,6 +89,8 @@ _(none)_
 
 ## Recently Done (last 10)
 
+- **ARCH-FIX-06** — Error response standardization: all controllers now use `message` field (was mixed `error`/`message`). 8 occurrences in 5 files. Zero frontend changes. (PR #3240, merged 2026-02-28) ✅
+- **ARCH-FIX-05** — Commission preview 500 fix: added missing `settleForOrder()` method to CommissionService, added try-catch in ops route, removed E2E quarantine. (PR #3239, merged 2026-02-28) ✅
 - **ARCH-FIX-04** — Routes split: `api.php` 1228→517 lines. Extracted producer.php (19 routes), ops.php (internal), openapi.php (569-line spec). All P0-P2 arch debt resolved. (PRs #3236-#3237, merged 2026-02-28) ✅
 - **ARCH-FIX-03** — OTP email switched from Resend-only to SMTP-first transport. Deleted dead producer status email route. (PR #3235, merged 2026-02-28) ✅
 - **ARCH-FIX-02** — Customer orders fix: myOrders + myOrder endpoints, producer order management (list, detail, status update, CSV export), deploy docs updated. (PRs #3229-#3234, deployed 2026-02-28) ✅
