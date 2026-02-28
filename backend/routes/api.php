@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OpsDbController;
 
 Route::get('/health', function () {
     try {
@@ -1076,153 +1075,9 @@ Route::get('v1/openapi.json', function () {
     ]);
 });
 
-// Producer API routes
-Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
-    // Producer Profile
-    Route::get('me', [App\Http\Controllers\Api\ProducerController::class, 'me']);
-    Route::patch('profile', [App\Http\Controllers\Api\ProducerController::class, 'updateProfile']);
+// ARCH-FIX-04: Route files extracted for maintainability
+// Producer API routes (19 routes: profile, products, dashboard, analytics, orders, settlements)
+require __DIR__.'/producer.php';
 
-    // Product management
-    Route::get('products', [App\Http\Controllers\Api\ProducerController::class, 'getProducts']);
-    Route::patch('products/{product}/toggle', [App\Http\Controllers\Api\ProducerController::class, 'toggleProduct']);
-    Route::patch('products/{product}/stock', [App\Http\Controllers\Api\ProducerController::class, 'updateStock']);
-
-    // Dashboard
-    Route::get('dashboard/kpi', [App\Http\Controllers\Api\ProducerController::class, 'kpi']);
-    Route::get('dashboard/top-products', [App\Http\Controllers\Api\ProducerController::class, 'topProducts']);
-
-    // Messages
-    Route::patch('messages/{message}/read', [App\Http\Controllers\Api\MessageController::class, 'markAsRead']);
-    Route::post('messages/{message}/replies', [App\Http\Controllers\Api\MessageController::class, 'storeReply']);
-
-    // Producer Analytics
-    Route::prefix('analytics')->group(function () {
-        Route::get('sales', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'sales'])
-            ->middleware('throttle:60,1'); // 60 requests per minute
-        Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'orders'])
-            ->middleware('throttle:60,1'); // 60 requests per minute
-        Route::get('products', [App\Http\Controllers\Api\Producer\ProducerAnalyticsController::class, 'products'])
-            ->middleware('throttle:60,1'); // 60 requests per minute
-    });
-
-    // Pass PAYOUT-04: Producer payout history
-    Route::get('settlements', [App\Http\Controllers\Api\Producer\ProducerSettlementController::class, 'index'])
-        ->middleware('throttle:60,1');
-
-    // Producer Order Management (AG126.1)
-    Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'index'])
-        ->middleware('throttle:60,1'); // 60 requests per minute
-    Route::get('orders/export', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'export'])
-        ->middleware('throttle:10,1'); // 10 exports per minute (Pass 57)
-    Route::get('orders/{id}', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'show'])
-        ->middleware('throttle:60,1'); // 60 requests per minute
-    Route::patch('orders/{id}/status', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'updateStatus'])
-        ->middleware('throttle:30,1'); // 30 status updates per minute
-});
-
-// === OPS: Commission preview (simple JSON) ===
-// Pass CHECKOUT-TOKEN-FIX-01: Added throttle + hash_equals for timing-safe token comparison
-Route::middleware('throttle:10,1')->get('/ops/commission/preview', function (Illuminate\Http\Request $request) {
-    // Timing-safe token auth (prevents timing side-channel attacks)
-    $opsToken = (string) config('payments.ops_token', '');
-    if (empty($opsToken) || !hash_equals($opsToken, (string) $request->header('x-ops-token', ''))) {
-        abort(404);
-    }
-
-    $channel = $request->query('channel', 'b2c') === 'b2b' ? 'b2b' : 'b2c';
-    $producerId = $request->integer('producerId') ?: null;
-    $categoryId = $request->integer('categoryId') ?: null;
-
-    // Option 1: By orderId
-    if ($request->has('orderId')) {
-        $orderId = (int)$request->query('orderId');
-        $order = \App\Models\Order::find($orderId);
-        
-        if (!$order) {
-            return response()->json(['error' => 'order not found'], 404);
-        }
-
-        $service = app(\App\Services\CommissionService::class);
-        $commission = $service->settleForOrder($order, $channel);
-
-        return response()->json([
-            'orderId' => $orderId,
-            'calc' => [
-                'channel' => $commission->channel,
-                'order_gross' => $commission->order_gross,
-                'platform_fee' => $commission->platform_fee,
-                'platform_fee_vat' => $commission->platform_fee_vat,
-                'producer_payout' => $commission->producer_payout,
-                'currency' => $commission->currency,
-            ],
-        ]);
-    }
-
-    // Option 2: By amount
-    if ($request->has('amount')) {
-        $amount = (float)$request->query('amount');
-        
-        $resolver = app(\App\Services\FeeResolver::class);
-        $resolved = $resolver->resolve($producerId, $categoryId, $channel);
-
-        $platformFee = round($amount * (float)$resolved['rate'], 2);
-        $platformFeeVat = round($platformFee * (float)$resolved['fee_vat_rate'], 2);
-        $producerPayout = round($amount - $platformFee - $platformFeeVat, 2);
-
-        return response()->json([
-            'amount' => $amount,
-            'calc' => [
-                'channel' => $channel,
-                'rate' => $resolved['rate'],
-                'fee_vat_rate' => $resolved['fee_vat_rate'],
-                'platform_fee' => $platformFee,
-                'platform_fee_vat' => $platformFeeVat,
-                'producer_payout' => $producerPayout,
-                'source' => $resolved['source'],
-            ],
-        ]);
-    }
-
-    return response()->json(['error' => 'provide orderId or amount'], 400);
-});
-
-// Dixis: Commission preview (read-only; feature-flagged)
-// SECURITY FIX: Added auth middleware — commission data should not be public
-use App\Http\Controllers\Api\OrderCommissionPreviewController;
-Route::get('/orders/{order}/commission-preview', [OrderCommissionPreviewController::class, 'show'])
-    ->middleware('auth:sanctum');
-
-// Ops: DB slow queries endpoint (guarded by X-Ops-Key in production)
-// Pass CHECKOUT-TOKEN-FIX-01: Added throttle to prevent abuse
-Route::get('/ops/db/slow-queries', [OpsDbController::class, 'slow'])
-    ->middleware('throttle:10,1')
-    ->name('ops.db.slow');
-
-// Internal: AdminUser lookup for OTP email delivery (Next.js → Laravel)
-// Only accessible from localhost (internal API call)
-Route::get('/admin-user-lookup', function (Illuminate\Http\Request $request) {
-    // Only allow internal requests (from localhost)
-    $clientIp = $request->ip();
-    if (!in_array($clientIp, ['127.0.0.1', '::1'])) {
-        abort(403, 'Internal only');
-    }
-
-    $phone = $request->query('phone');
-    if (!$phone) {
-        return response()->json(['error' => 'phone required'], 400);
-    }
-
-    $admin = DB::table('AdminUser')
-        ->where('phone', $phone)
-        ->select(['email', 'isActive'])
-        ->first();
-
-    if (!$admin) {
-        return response()->json(null, 404);
-    }
-
-    return response()->json([
-        'email' => $admin->email,
-        'isActive' => (bool) $admin->isActive,
-    ]);
-})->middleware('throttle:30,1');
+// Ops & Internal routes (commission preview, slow queries, admin lookup)
+require __DIR__.'/ops.php';
