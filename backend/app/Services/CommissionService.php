@@ -126,6 +126,37 @@ class CommissionService
         ];
     }
 
+    /**
+     * Settle commission for an order: calculate fee and return a structured DTO.
+     * Used by ops/commission/preview route and dixis:commission-preview CLI.
+     *
+     * @param  \App\Models\Order  $order
+     * @param  string  $channel  'b2c' or 'b2b'
+     * @return object  { channel, order_gross, platform_fee, platform_fee_vat, producer_payout, currency }
+     */
+    public function settleForOrder($order, string $channel = 'b2c'): object
+    {
+        $grossCents = (int) ($order->total_cents ?? round(($order->total_amount ?? 0) * 100));
+        $gross = $grossCents / 100;
+
+        $fee = $this->calculateFee($order);
+        $commissionCents = $fee['commission_cents'];
+        $platformFee = $commissionCents / 100;
+
+        // VAT on platform fee (24% Greek VAT)
+        $platformFeeVat = round($platformFee * 0.24, 2);
+        $producerPayout = round($gross - $platformFee - $platformFeeVat, 2);
+
+        return (object) [
+            'channel' => $channel,
+            'order_gross' => $gross,
+            'platform_fee' => $platformFee,
+            'platform_fee_vat' => $platformFeeVat,
+            'producer_payout' => $producerPayout,
+            'currency' => $order->currency ?? 'EUR',
+        ];
+    }
+
     private function applyVatMode(float $amount, string $vatMode): float
     {
         return match ($vatMode) {
