@@ -3,7 +3,7 @@ export const metadata = { title: 'Για Παραγωγούς' };
 export default function ProducersLanding(){
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold">Γίνε μέλος του Dixis</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold">Γίνε μέλος του Dixis</h1>
       <p className="text-neutral-600 mt-2 max-w-2xl">
         Φέρνουμε τους τοπικούς παραγωγούς πιο κοντά σε καταναλωτές & επιχειρήσεις. Χωρίς αποθήκες — απευθείας από εσένα.
       </p>

@@ -14,7 +14,7 @@ export default async function OrderConfirmation({ params }: { params: Promise<{ 
           </svg>
         </div>
         
-        <h1 className="text-3xl font-bold mb-4" data-testid="order-success-title">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4" data-testid="order-success-title">
           {t('order.success.title')}
         </h1>
         

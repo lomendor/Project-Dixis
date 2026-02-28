@@ -74,7 +74,7 @@ export default async function TrackPage({ params }: { params: { token: string } 
   if (!order) {
     return (
       <div className="min-h-screen bg-neutral-50 py-8 px-4">
-        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
+        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-8 text-center">
           <div className="text-5xl mb-4">🔍</div>
           <h1 className="text-xl font-semibold text-neutral-900 mb-2">Παραγγελία δεν βρέθηκε</h1>
           <p className="text-neutral-600">

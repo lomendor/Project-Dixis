@@ -88,17 +88,17 @@ export default function AddToCartButton(props: {
         >
           <button
             onClick={handleDec}
-            className="w-9 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
+            className="w-10 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
             aria-label={qty === 1 ? 'Αφαίρεση από καλάθι' : 'Μείωση ποσότητας'}
           >
             {qty === 1 ? <Trash2 className="size-4 shrink-0" strokeWidth={2.5} /> : <Minus className="size-4 shrink-0" strokeWidth={2.5} />}
           </button>
-          <span className="w-7 text-center text-sm font-bold text-white tabular-nums">
+          <span className="w-8 text-center text-sm font-bold text-white tabular-nums">
             {qty}
           </span>
           <button
             onClick={handleInc}
-            className="w-9 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
+            className="w-10 h-10 flex items-center justify-center text-white hover:bg-primary-light transition-colors active:scale-90"
             aria-label="Αύξηση ποσότητας"
           >
             <Plus className="size-4 shrink-0" strokeWidth={2.5} />

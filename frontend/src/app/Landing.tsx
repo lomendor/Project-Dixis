@@ -103,8 +103,8 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             {/* Για Παραγωγούς */}
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+            <div className="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+              <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-4">
                 Είσαι παραγωγός;
               </h2>
               <ul className="space-y-3 text-neutral-700 mb-6">
@@ -128,8 +128,8 @@ export default function LandingPage() {
             </div>
 
             {/* Για Αγοραστές */}
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+            <div className="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+              <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-4">
                 Είσαι αγοραστής;
               </h2>
               <ul className="space-y-3 text-neutral-700 mb-6">
@@ -157,8 +157,8 @@ export default function LandingPage() {
 
       {/* Waitlist Form */}
       <section id="waitlist" className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-4 text-center" data-testid="waitlist-heading">
+        <div className="max-w-2xl mx-auto bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+          <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-4 text-center" data-testid="waitlist-heading">
             Εκδήλωση Ενδιαφέροντος
           </h2>
           <p className="text-neutral-600 mb-8 text-center">
