@@ -1,40 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireProducer } from '@/lib/auth/requireProducer';
-import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
-import { cookies } from 'next/headers';
+import { verifySanctumProducer } from '@/lib/auth/verifySanctumProducer';
+import { getLaravelInternalUrl } from '@/env';
 
 /**
  * GET /api/me/products/[id]
  * Get a single product by ID (scoped to producer)
  *
- * Pass 2: Proxies to backend API to enforce ProductPolicy
+ * ARCH-FIX-01: Replaced requireProducer() + Bearer token with verifySanctumProducer()
+ * + Sanctum cookie forwarding. Producers use Sanctum session cookies, not dixis_jwt.
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    await requireProducer();
+    const { id: productId } = await params;
+    const laravelBase = getLaravelInternalUrl();
 
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
-
-    // Proxy to backend GET /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
+    const response = await fetch(`${laravelBase}/products/${productId}`, {
       headers: {
-        'Authorization': `Bearer ${sessionToken}`,
         'Accept': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
       },
       cache: 'no-store',
     });
@@ -50,6 +41,7 @@ export async function GET(
     const data = await response.json();
 
     // Map backend response to frontend format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const product = {
       id: data.data?.id,
       slug: data.data?.slug,
@@ -60,6 +52,7 @@ export async function GET(
       stock: data.data?.stock || 0,
       description: data.data?.description,
       imageUrl: data.data?.image_url || data.data?.imageUrl,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       images: (data.data?.images || []).map((img: any) => ({
         id: img.id,
         url: img.url,
@@ -73,11 +66,7 @@ export async function GET(
 
     return NextResponse.json({ product });
 
-  } catch (error: any) {
-    if (error instanceof Response) {
-      return error;
-    }
-
+  } catch (error) {
     console.error('Get product error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ανάκτηση προϊόντος' },
@@ -90,27 +79,21 @@ export async function GET(
  * PUT /api/me/products/[id]
  * Update a product by ID (scoped to producer)
  *
- * Pass 2: Proxies to backend PATCH /api/v1/products/{id} to enforce ProductPolicy
- * This ensures admin override capability and consistent authorization logic
+ * ARCH-FIX-01: Uses verifySanctumProducer() + cookie forwarding
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    await requireProducer();
-
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
+    const { id: productId } = await params;
     const body = await request.json();
 
     // Map frontend fields to backend API format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const backendPayload: any = {};
     if (body.title !== undefined) backendPayload.name = body.title;
     if (body.slug !== undefined) backendPayload.slug = body.slug;
@@ -123,18 +106,16 @@ export async function PUT(
     if (body.images !== undefined) backendPayload.images = body.images;
     if (body.isActive !== undefined) backendPayload.is_active = Boolean(body.isActive);
 
-    // Proxy to backend PATCH /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
+    const laravelBase = getLaravelInternalUrl();
 
-    const response = await fetch(backendUrl.toString(), {
+    const response = await fetch(`${laravelBase}/products/${productId}`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${sessionToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
       },
       body: JSON.stringify(backendPayload),
     });
@@ -167,11 +148,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true, product });
 
-  } catch (error: any) {
-    if (error instanceof Response) {
-      return error;
-    }
-
+  } catch (error) {
     console.error('Update product error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ενημέρωση προϊόντος' },
@@ -184,36 +161,26 @@ export async function PUT(
  * DELETE /api/me/products/[id]
  * Delete a product by ID (scoped to producer)
  *
- * Pass 2: Proxies to backend DELETE /api/v1/products/{id} to enforce ProductPolicy
- * This ensures admin override capability and consistent authorization logic
+ * ARCH-FIX-01: Uses verifySanctumProducer() + cookie forwarding
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    await requireProducer();
+    const { id: productId } = await params;
+    const laravelBase = getLaravelInternalUrl();
 
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const productId = params.id;
-
-    // Proxy to backend DELETE /api/v1/products/{id}
-    const backendUrl = new URL(
-      `/api/v1/products/${productId}`,
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
-
-    const response = await fetch(backendUrl.toString(), {
+    const response = await fetch(`${laravelBase}/products/${productId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${sessionToken}`,
         'Accept': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
       },
     });
 
@@ -227,11 +194,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, deleted: productId });
 
-  } catch (error: any) {
-    if (error instanceof Response) {
-      return error;
-    }
-
+  } catch (error) {
     console.error('Delete product error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά τη διαγραφή προϊόντος' },
