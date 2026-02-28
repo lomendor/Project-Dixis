@@ -67,6 +67,40 @@ class OrderController extends Controller
     }
 
     /**
+     * FIX-CUSTOMER-ORDERS-01: List orders for the authenticated user only.
+     * Requires auth:sanctum middleware.
+     *
+     * Returns { orders: [...] } format to match frontend apiClient.getOrders() expectation.
+     * (Laravel's default collection returns { data: [...] } which the frontend doesn't read.)
+     */
+    public function myOrders(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            abort(401, 'Unauthenticated');
+        }
+
+        $perPage = min((int) $request->get('per_page', 15), 50);
+
+        $orders = Order::query()
+            ->where('user_id', $user->id)
+            ->with(['orderItems.producer', 'shippingLines'])
+            ->withCount('orderItems')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return response()->json([
+            'orders' => OrderResource::collection($orders)->resolve(),
+            'meta' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'per_page' => $orders->perPage(),
+                'total' => $orders->total(),
+            ],
+        ]);
+    }
+
+    /**
      * Display the specified order with items.
      */
     public function show(Order $order): OrderResource
