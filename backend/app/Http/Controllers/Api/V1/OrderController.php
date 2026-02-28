@@ -103,8 +103,11 @@ class OrderController extends Controller
     /**
      * FIX-CUSTOMER-ORDERS-02: Show a single order for the authenticated user.
      * Verifies ownership (user_id must match) to prevent IDOR.
+     *
+     * Returns flat JSON (not wrapped in { data: ... }) to match frontend
+     * apiClient.getOrder() which expects the order object directly.
      */
-    public function myOrder(Request $request, int $id): OrderResource
+    public function myOrder(Request $request, int $id): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         if (!$user) {
@@ -117,7 +120,7 @@ class OrderController extends Controller
 
         $order->load(['orderItems.producer', 'shippingLines'])->loadCount('orderItems');
 
-        return new OrderResource($order);
+        return response()->json((new OrderResource($order))->resolve());
     }
 
     /**
