@@ -124,6 +124,46 @@ export default function ProducerOrderDetailsPage() {
     return next.length > 0 ? next[0] : null;
   };
 
+  /** Open print-friendly shipping label in a new window */
+  const handlePrintLabel = () => {
+    if (!order?.shipping_address) return;
+    const addr = order.shipping_address;
+    const items = order.orderItems
+      .map((i) => `${i.quantity}× ${i.product_name || i.product?.name}`)
+      .join('<br/>');
+    const html = `<!DOCTYPE html>
+<html lang="el"><head><meta charset="UTF-8"/>
+<title>Ετικέτα Αποστολής #${order.id}</title>
+<style>
+  @page { size: A6 landscape; margin: 10mm; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+  .label { border: 2px solid #000; padding: 20px; max-width: 400px; }
+  .header { font-size: 11px; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; }
+  .recipient { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+  .address { font-size: 15px; line-height: 1.6; margin-bottom: 12px; }
+  .phone { font-size: 14px; margin-bottom: 12px; padding: 6px 0; border-top: 1px dashed #ccc; }
+  .items { font-size: 11px; color: #555; border-top: 1px solid #ccc; padding-top: 8px; }
+  @media print { body { padding: 0; } }
+</style></head><body>
+<div class="label">
+  <div class="header">
+    <span>DIXIS - Παραγγελία #${order.id}</span>
+    <span>${new Date(order.created_at).toLocaleDateString('el-GR')}</span>
+  </div>
+  <div class="recipient">${addr.name || ''}</div>
+  <div class="address">
+    ${addr.line1 || ''}${addr.line2 ? '<br/>' + addr.line2 : ''}<br/>
+    ${addr.city || ''} ${addr.postal_code || ''}
+  </div>
+  ${addr.phone ? `<div class="phone">Τηλ: ${addr.phone}</div>` : ''}
+  <div class="items"><strong>Περιεχόμενα:</strong><br/>${items}</div>
+</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+    const w = window.open('', '_blank', 'width=500,height=400');
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   return (
       <div>
         <div className="max-w-4xl mx-auto">
@@ -322,9 +362,20 @@ export default function ProducerOrderDetailsPage() {
                 {/* Shipping Address Section */}
                 {order.shipping_address && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <h3 className="font-medium text-amber-900 mb-2">
-                      Στοιχεία Αποστολής
-                    </h3>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium text-amber-900">
+                        Στοιχεία Αποστολής
+                      </h3>
+                      <button
+                        onClick={handlePrintLabel}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors print:hidden"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Εκτύπωση Ετικέτας
+                      </button>
+                    </div>
                     <div className="text-sm text-amber-800 space-y-1">
                       {order.shipping_address.name && (
                         <p>{order.shipping_address.name}</p>
