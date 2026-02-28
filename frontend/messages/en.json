@@ -369,7 +369,8 @@
     "tryAgain": "Try Again",
     "exportCsv": "Export CSV",
     "exporting": "Exporting...",
-    "exportError": "Failed to export orders"
+    "exportError": "Failed to export orders",
+    "needsAction": "Needs action"
   },
   "reviews": {
     "title": "Reviews",
