@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Producer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\OrderEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -179,6 +180,26 @@ class ProducerOrderController extends Controller
         $order->status = $newStatus;
         $order->save();
 
+        // ARCH-FIX-02: Send email notification via Laravel queue (unified email path).
+        // Previously, the frontend sent this email separately via Resend API (Path B).
+        // Now all order emails go through OrderEmailService (Path A) for consistent
+        // queuing, idempotency, and rate limiting.
+        $emailSent = false;
+        try {
+            $emailService = app(OrderEmailService::class);
+            $emailService->sendOrderStatusNotification(
+                $order->fresh()->load('user'),
+                $newStatus
+            );
+            $emailSent = true;
+        } catch (\Exception $e) {
+            \Log::error('ARCH-FIX-02: Producer status email failed (status still updated)', [
+                'order_id' => $order->id,
+                'status' => $newStatus,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         // Load relationships for response
         $order->load(['user', 'orderItems' => function ($q) use ($producerId) {
             $q->where('producer_id', $producerId);
@@ -187,6 +208,7 @@ class ProducerOrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Order status updated to '{$newStatus}'",
+            'email_sent' => $emailSent,
             'order' => $order,
         ]);
     }
