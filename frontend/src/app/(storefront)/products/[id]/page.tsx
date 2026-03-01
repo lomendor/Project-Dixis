@@ -341,7 +341,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
                   const labels: Record<string, string> = {
                     gluten: 'Γλουτένη', crustaceans: 'Καρκινοειδή', eggs: 'Αβγά',
                     fish: 'Ψάρια', peanuts: 'Αράπικα φιστίκια', soybeans: 'Σόγια',
-                    milk: 'Γάλα', nuts: 'Ξηροί καρποί', celery: 'Σέλινο',
+                    milk: 'Γάλα', tree_nuts: 'Ξηροί καρποί', celery: 'Σέλινο',
                     mustard: 'Μουστάρδα', sesame: 'Σουσάμι', sulphites: 'Θειώδη',
                     lupin: 'Λούπινα', molluscs: 'Μαλάκια',
                   };
