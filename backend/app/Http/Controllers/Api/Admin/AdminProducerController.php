@@ -80,6 +80,28 @@ class AdminProducerController extends Controller
     }
 
     /**
+     * ADMIN-LATLNG-01: Update producer profile fields (e.g. coordinates)
+     */
+    public function update(Request $request, Producer $producer): JsonResponse
+    {
+        if (! $request->user() || $request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+        ]);
+
+        $producer->update($validated);
+
+        return response()->json([
+            'message' => 'Ενημερώθηκε',
+            'producer' => $producer->fresh(),
+        ]);
+    }
+
+    /**
      * PRODUCER-ONBOARD-01: Reject a producer application
      */
     public function reject(Request $request, Producer $producer): JsonResponse

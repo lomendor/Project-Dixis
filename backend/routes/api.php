@@ -423,6 +423,8 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
         Route::patch('{producer}/reject', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'reject'])
             ->middleware('throttle:30,1');
+        Route::patch('{producer}', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'update'])
+            ->middleware('throttle:30,1');
     });
 
     // Admin Commission Rules CRUD — T2.5-01: added 'admin' middleware

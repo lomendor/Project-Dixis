@@ -37,6 +37,8 @@ interface Producer {
   responsiblePersonName: string | null
   iban: string | null
   bankAccountHolder: string | null
+  latitude: number | null
+  longitude: number | null
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -345,6 +347,17 @@ function AdminProducersContent() {
                               {p.bankAccountHolder && <Detail label="Δικαιούχος" value={p.bankAccountHolder} />}
                             </div>
                           )}
+                          {/* Coordinates */}
+                          <div className="sm:col-span-2 mt-2">
+                            <CoordinateEditor
+                              producer={p}
+                              onSaved={(lat, lng) => {
+                                setProducers(prev => prev.map(pr =>
+                                  pr.id === p.id ? { ...pr, latitude: lat, longitude: lng } : pr
+                                ))
+                              }}
+                            />
+                          </div>
                           {p.rejectionReason && (
                             <div className="sm:col-span-2 mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
                               <span className="text-red-700 font-medium">Λόγος απόρριψης: </span>
@@ -421,6 +434,110 @@ function AdminProducersContent() {
         </div>
       )}
     </main>
+  )
+}
+
+function CoordinateEditor({ producer, onSaved }: { producer: Producer; onSaved: (lat: number | null, lng: number | null) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [lat, setLat] = useState(producer.latitude?.toString() || '')
+  const [lng, setLng] = useState(producer.longitude?.toString() || '')
+  const [saving, setSaving] = useState(false)
+  const { showSuccess, showError } = useToast()
+
+  const hasCoords = producer.latitude != null && producer.longitude != null
+
+  async function handleSave() {
+    const latVal = lat.trim() === '' ? null : parseFloat(lat)
+    const lngVal = lng.trim() === '' ? null : parseFloat(lng)
+
+    if (latVal !== null && (isNaN(latVal) || latVal < -90 || latVal > 90)) {
+      showError('Latitude: -90 έως 90'); return
+    }
+    if (lngVal !== null && (isNaN(lngVal) || lngVal < -180 || lngVal > 180)) {
+      showError('Longitude: -180 έως 180'); return
+    }
+
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/producers/${producer.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude: latVal, longitude: lngVal }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
+      showSuccess('Συντεταγμένες ενημερώθηκαν')
+      onSaved(latVal, lngVal)
+      setEditing(false)
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : 'Σφάλμα αποθήκευσης')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <div className="space-y-2">
+        <p className="text-gray-500 font-medium">📍 Συντεταγμένες:</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            type="number" step="any" placeholder="Latitude" value={lat}
+            onChange={e => setLat(e.target.value)}
+            className="w-32 px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            data-testid={`lat-input-${producer.id}`}
+          />
+          <input
+            type="number" step="any" placeholder="Longitude" value={lng}
+            onChange={e => setLng(e.target.value)}
+            className="w-32 px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            data-testid={`lng-input-${producer.id}`}
+          />
+          <button
+            onClick={handleSave} disabled={saving}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+            data-testid={`coord-save-${producer.id}`}
+          >
+            {saving ? '...' : 'Αποθήκευση'}
+          </button>
+          <button
+            onClick={() => { setEditing(false); setLat(producer.latitude?.toString() || ''); setLng(producer.longitude?.toString() || '') }}
+            className="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-medium rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Ακύρωση
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-medium">📍 Συντεταγμένες: </span>
+        {hasCoords ? (
+          <span className="text-gray-900 text-sm">{producer.latitude}, {producer.longitude}</span>
+        ) : (
+          <span className="text-gray-400 text-sm">Δεν έχει οριστεί</span>
+        )}
+        <button
+          onClick={() => setEditing(true)}
+          className="text-blue-600 hover:text-blue-800 text-xs font-medium ml-1"
+          data-testid={`coord-edit-${producer.id}`}
+        >
+          {hasCoords ? 'Επεξεργασία' : 'Ορισμός'}
+        </button>
+      </div>
+      {hasCoords && (
+        <a
+          href={`https://www.google.com/maps?q=${producer.latitude},${producer.longitude}`}
+          target="_blank" rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 text-xs underline"
+          data-testid={`coord-map-${producer.id}`}
+        >
+          Προβολή στο Google Maps ↗
+        </a>
+      )}
+    </div>
   )
 }
 
