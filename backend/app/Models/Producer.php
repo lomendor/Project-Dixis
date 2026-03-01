@@ -21,6 +21,7 @@ class Producer extends Model
         'iban',
         'bank_account_holder',
         'description',
+        'image_url',
         'location',
         'address',
         'city',

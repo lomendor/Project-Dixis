@@ -91,6 +91,7 @@ class AdminProducerController extends Controller
         $validated = $request->validate([
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
+            'image_url' => 'nullable|string|max:500',
         ]);
 
         $producer->update($validated);
