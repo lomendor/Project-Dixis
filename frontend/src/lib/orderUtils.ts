@@ -202,6 +202,8 @@ export function formatStatus(status: unknown): { text: string; color: string } {
       return { text: 'Πρόχειρο', color: 'bg-gray-100 text-gray-800' };
     case 'pending':
       return { text: 'Εκκρεμεί', color: 'bg-yellow-100 text-yellow-800' };
+    case 'confirmed':
+      return { text: 'Επιβεβαιωμένη', color: 'bg-blue-100 text-blue-800' };
     case 'paid':
       return { text: 'Πληρωμένη', color: 'bg-blue-100 text-blue-800' };
     case 'processing':
