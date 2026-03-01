@@ -74,6 +74,8 @@ export async function GET(req: NextRequest) {
       responsiblePersonName: p.responsible_person_name || null,
       iban: p.iban || null,
       bankAccountHolder: p.bank_account_holder || null,
+      latitude: p.latitude ?? null,
+      longitude: p.longitude ?? null,
     }))
 
     return NextResponse.json({ items, total: json.total || items.length })
