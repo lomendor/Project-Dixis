@@ -194,7 +194,7 @@ export default async function ProducerProfilePage(
             </span>
           )}
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 max-w-2xl text-white">
             {producer.name}
           </h1>
 
