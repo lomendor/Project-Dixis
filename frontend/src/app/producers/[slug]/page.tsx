@@ -223,85 +223,111 @@ export default async function ProducerProfilePage(
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-10">
+      {/* ── Content area ─────────────────────────────────────── */}
+      {(() => {
+        const hasLeftColumn = !!(producer.description || (producer.latitude && producer.longitude));
+        const hasMap = !!(producer.latitude && producer.longitude);
 
-        {/* Story / Description section */}
-        {producer.description && (
-          <div className="mb-10">
-            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4">
-              Η Ιστορία μας
-            </h2>
-            <p className="text-neutral-600 leading-relaxed text-[15px] max-w-2xl">{producer.description}</p>
-          </div>
-        )}
-
-        {/* Map section — only if coordinates exist */}
-        {producer.latitude && producer.longitude && (
-          <div className="mb-10">
-            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-4">
-              Η Τοποθεσία μας
-            </h2>
-            <ProducerMap
-              latitude={producer.latitude}
-              longitude={producer.longitude}
-              name={producer.name}
-              region={producer.region}
-            />
-          </div>
-        )}
-
-        {/* Products Section */}
-        {productCount > 0 ? (
-          <>
-            <div className="flex items-center gap-4 mb-6">
-              <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
-                Τα Προϊόντα μας
-              </h2>
-              <span className="text-xs font-semibold text-primary/70 bg-primary-pale px-2.5 py-1 rounded-full">
-                {productCount}
-              </span>
+        /* Shared product grid renderer */
+        const productGrid = (cols: string) =>
+          productCount > 0 ? (
+            <>
+              <div className="flex items-center gap-3 mb-5">
+                <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
+                  Τα Προϊόντα μας
+                </h2>
+                <span className="text-xs font-semibold text-primary/70 bg-primary-pale px-2.5 py-1 rounded-full">
+                  {productCount}
+                </span>
+              </div>
+              <div className={`grid ${cols} gap-3 sm:gap-4`}>
+                {producer.products.map((p) => {
+                  const imageUrl = p.image_url || p.images?.[0]?.url || null;
+                  const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
+                  return (
+                    <ProductCard
+                      key={p.id}
+                      id={p.id}
+                      title={p.name}
+                      producer={producer.name}
+                      producerId={producer.id}
+                      producerSlug={producer.slug}
+                      priceCents={Math.round(price * 100)}
+                      image={imageUrl}
+                      stock={p.stock}
+                      hideProducerLink
+                      reviewsCount={p.reviews_count}
+                      reviewsAvgRating={p.reviews_avg_rating}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-300">
+              <p className="text-neutral-500 text-lg">
+                Δεν υπάρχουν ακόμα προϊόντα από αυτόν τον παραγωγό.
+              </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-              {producer.products.map((p) => {
-                const imageUrl = p.image_url || p.images?.[0]?.url || null;
-                const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
-                return (
-                  <ProductCard
-                    key={p.id}
-                    id={p.id}
-                    title={p.name}
-                    producer={producer.name}
-                    producerId={producer.id}
-                    producerSlug={producer.slug}
-                    priceCents={Math.round(price * 100)}
-                    image={imageUrl}
-                    stock={p.stock}
-                    hideProducerLink
-                    reviewsCount={p.reviews_count}
-                    reviewsAvgRating={p.reviews_avg_rating}
-                  />
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-300">
-            <p className="text-neutral-500 text-lg">
-              Δεν υπάρχουν ακόμα προϊόντα από αυτόν τον παραγωγό.
-            </p>
-          </div>
-        )}
+          );
 
-        {/* Back link */}
-        <div className="mt-10 pt-6 border-t border-neutral-200/50">
-          <Link href="/producers" className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors">
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Πίσω στους Παραγωγούς
-          </Link>
-        </div>
-      </div>
+        return (
+          <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-10">
+            {hasLeftColumn ? (
+              /* ── 2-column: Story+Map left · Products right ── */
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+                {/* Left column (2/5) — story + compact map */}
+                <div className="lg:col-span-2 space-y-8">
+                  {producer.description && (
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-3">
+                        Η Ιστορία μας
+                      </h2>
+                      <p className="text-neutral-600 leading-relaxed text-[15px]">
+                        {producer.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {hasMap && (
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-3">
+                        Η Τοποθεσία μας
+                      </h2>
+                      <div className="aspect-square max-h-[380px]">
+                        <ProducerMap
+                          latitude={producer.latitude!}
+                          longitude={producer.longitude!}
+                          name={producer.name}
+                          region={producer.region}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right column (3/5) — products */}
+                <div className="lg:col-span-3">
+                  {productGrid('grid-cols-2 lg:grid-cols-3')}
+                </div>
+              </div>
+            ) : (
+              /* ── Full-width fallback (no story/map) ── */
+              productGrid('grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5')
+            )}
+
+            {/* Back link */}
+            <div className="mt-10 pt-6 border-t border-neutral-200/50">
+              <Link href="/producers" className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors">
+                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Πίσω στους Παραγωγούς
+              </Link>
+            </div>
+          </div>
+        );
+      })()}
     </main>
   );
 }
