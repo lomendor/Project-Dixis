@@ -12,11 +12,17 @@ import { normalizeStatus } from '@/lib/tracking/status'
 
 /**
  * Stable date formatter for Server Components (avoids hydration mismatch).
+ * Uses manual formatting to avoid locale-dependent hydration differences.
  */
 function formatDateStable(date: string | Date | null): string {
   if (!date) return '—'
   const d = new Date(date)
-  return d.toISOString().slice(0, 16).replace('T', ' ')
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  const hours = String(d.getHours()).padStart(2, '0')
+  const mins = String(d.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} ${hours}:${mins}`
 }
 
 interface StatusHistoryEntry {
