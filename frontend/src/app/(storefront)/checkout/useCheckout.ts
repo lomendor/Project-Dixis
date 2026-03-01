@@ -271,10 +271,7 @@ export function useCheckout() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (isGuest && paymentMethod === 'card') {
-      setError(t('checkoutPage.cardRequiresLogin'))
-      return
-    }
+    // Guest card payment is allowed — Stripe handles card auth securely
 
     if (!shippingQuote && !cartShippingQuote && !shippingLoading) {
       trackShippingQuoteNull({ postalCode, itemCount: Object.keys(cartItems).length })
