@@ -36,7 +36,7 @@ interface ProducerMapProps {
 
 export default function ProducerMap({ latitude, longitude, name, region }: ProducerMapProps) {
   return (
-    <div className="rounded-xl overflow-hidden border border-neutral-200 shadow-sm">
+    <div className="rounded-xl overflow-hidden border border-neutral-200 shadow-sm h-full">
       <style>{`
         .dixis-map .leaflet-popup-content-wrapper {
           background: #fff;
@@ -58,7 +58,7 @@ export default function ProducerMap({ latitude, longitude, name, region }: Produ
         center={[latitude, longitude]}
         zoom={11}
         scrollWheelZoom={false}
-        className="dixis-map h-72 sm:h-80 w-full"
+        className="dixis-map h-full min-h-[280px] w-full"
         attributionControl={false}
       >
         <TileLayer
