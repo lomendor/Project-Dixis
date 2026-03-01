@@ -82,7 +82,7 @@ export default async function FeaturedProducts() {
       data-testid="featured-products"
     >
       {/* Section header — inside container */}
-      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 mb-4 sm:mb-5">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 mb-4 sm:mb-5">
         <div className="flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
             Δημοφιλή Προϊόντα
@@ -98,7 +98,7 @@ export default async function FeaturedProducts() {
       </div>
 
       {/* Horizontal scroll container with arrows */}
-      <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         {hasProducts ? (
           <ScrollableRow>
             <div className="flex gap-1 sm:gap-1.5 pb-2">

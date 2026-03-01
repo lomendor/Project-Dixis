@@ -59,7 +59,7 @@ export default async function ProducerSpotlight() {
   if (!producer) {
     return (
       <section className="py-16 sm:py-20 bg-neutral-50">
-        <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
+        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
           <Users className="w-10 h-10 text-primary/40 mx-auto mb-4" />
           <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
             Γνωρίστε τους Παραγωγούς μας
@@ -86,7 +86,7 @@ export default async function ProducerSpotlight() {
 
   return (
     <section className="bg-neutral-50">
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 min-h-[400px] lg:min-h-[500px]">
         {/* Image column — full bleed */}
         <div className="relative aspect-[4/3] lg:aspect-auto bg-primary-pale/30">
           <Image
