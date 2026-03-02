@@ -229,11 +229,11 @@ export default function ProducerDashboard() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-neutral-900 truncate">{product.name}</p>
                           <p className="text-sm text-neutral-600">
-                            {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
+                            {formatCurrency(parseFloat(product.price || product.current_price))}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-neutral-500">
-                              {product.stock !== null ? `${product.stock} ${product.unit}` : t('producerDashboard.inStock')}
+                              {product.stock !== null ? `${product.stock} τεμ.` : t('producerDashboard.inStock')}
                             </span>
                             <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${product.is_active !== false ? 'bg-primary-pale text-primary' : 'bg-red-100 text-red-700'}`}>
                               {product.is_active !== false ? t('producerDashboard.active') : t('producerDashboard.inactive')}
@@ -297,13 +297,13 @@ export default function ProducerDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-neutral-900">
-                                {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
+                                {formatCurrency(parseFloat(product.price || product.current_price))}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-neutral-900">
                                 {product.stock !== null ? (
-                                  `${product.stock} ${product.unit}`
+                                  `${product.stock} τεμ.`
                                 ) : (
                                   t('producerDashboard.inStock')
                                 )}
