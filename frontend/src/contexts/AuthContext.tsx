@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, apiClient } from '@/lib/api';
 import { useToast } from './ToastContext';
-import { useCart, CartItem as LocalCartItem } from '@/lib/cart';
+import { useCart, CartItem as LocalCartItem, clearCartStorage } from '@/lib/cart';
 
 interface AuthContextType {
   user: User | null;
@@ -115,22 +115,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await apiClient.login(email, password);
       setUser(response.user);
 
-      // Pass CART-SYNC-01 + FIX-CART-SYNC-RACE-01: Sync cart with race protection.
-      // Snapshot version BEFORE async sync — if user adds items during sync,
-      // mergeServerCart will merge instead of overwriting.
+      // Pass FIX-CART-LEAK-01: Clear localStorage cart on login to prevent cross-user leakage.
+      // Previous user's cart items could remain in localStorage and get synced to the wrong account.
+      // After clearing, we fetch ONLY server-side items (properly scoped by user_id in DB).
       try {
-        const versionBeforeSync = getVersion();
-        const localItems = getItemsForSync();
-        if (localItems.length > 0) {
-          const serverCart = await apiClient.syncCart(localItems);
+        clearCartStorage();
+        const serverCart = await apiClient.getCart();
+        if (serverCart.items.length > 0) {
           const localFormat = serverToLocalCart(serverCart.items);
+          const versionBeforeSync = getVersion();
           mergeServerCart(localFormat, versionBeforeSync);
-        } else {
-          const serverCart = await apiClient.getCart();
-          if (serverCart.items.length > 0) {
-            const localFormat = serverToLocalCart(serverCart.items);
-            mergeServerCart(localFormat, versionBeforeSync);
-          }
         }
       } catch {
         // Non-blocking: cart sync failure doesn't affect login
@@ -235,7 +229,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Ignore logout errors — still clear local state
       showToast('info', 'Αποσυνδεθήκατε');
     }
-    
+
+    // Pass FIX-CART-LEAK-01: Clear cart on logout to prevent leaking to next user
+    clearCartStorage();
     setUser(null);
   };
 
