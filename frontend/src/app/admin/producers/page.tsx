@@ -35,6 +35,8 @@ interface Producer {
   beekeeperRegistryNumber: string | null
   cpnpNotificationNumber: string | null
   responsiblePersonName: string | null
+  website: string | null
+  foodLicenseNumber: string | null
   iban: string | null
   bankAccountHolder: string | null
   latitude: number | null
@@ -308,117 +310,12 @@ function AdminProducersContent() {
                   {expandedId === p.id && (
                     <tr className="bg-blue-50/50" data-testid={`producer-detail-${p.id}`}>
                       <td colSpan={4} className="px-4 py-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                          <Detail label="Email" value={p.email} />
-                          <Detail label="Τηλέφωνο" value={p.phone} />
-                          <Detail label="Πόλη" value={p.city} />
-                          <Detail label="Περιοχή" value={p.region} />
-                          <Detail label="ΑΦΜ" value={p.taxId} />
-                          <Detail label="ΔΟΥ" value={p.taxOffice} />
-                          <Detail label="Διεύθυνση" value={[p.address, p.postalCode].filter(Boolean).join(', ')} />
-                          <Detail label="Εγγραφή" value={p.createdAt ? new Date(p.createdAt).toLocaleDateString('el-GR') : ''} />
-                          {p.description && (
-                            <div className="sm:col-span-2">
-                              <span className="text-gray-500">Περιγραφή: </span>
-                              <span className="text-gray-900">{p.description}</span>
-                            </div>
-                          )}
-                          {/* Product Categories */}
-                          {p.productCategories.length > 0 && (
-                            <div className="sm:col-span-2 mt-2">
-                              <span className="text-gray-500">Κατηγορίες: </span>
-                              <div className="inline-flex flex-wrap gap-1 ml-1">
-                                {p.productCategories.map((slug: string) => {
-                                  const cat = getCategoryBySlug(slug)
-                                  return (
-                                    <span key={slug} className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                                      {cat ? cat.labelEl : slug}
-                                    </span>
-                                  )
-                                })}
-                              </div>
-                            </div>
-                          )}
-                          {/* Documents */}
-                          <div className="sm:col-span-2 mt-2 space-y-1">
-                            <p className="text-gray-500 font-medium">Έγγραφα:</p>
-                            <DocLink label="TAXIS (ΑΦΜ+ΚΑΔ)" url={p.taxRegistrationDocUrl} />
-                            <DocLink label="ΕΦΕΤ / NotifyBusiness" url={p.efetNotificationDocUrl} />
-                            <DocLink label="HACCP" url={p.haccpDeclarationDocUrl} />
-                            <div className="text-xs">
-                              <span className="text-gray-500">HACCP δήλωση: </span>
-                              <span className={p.haccpDeclarationAccepted ? 'text-green-700' : 'text-gray-400'}>
-                                {p.haccpDeclarationAccepted ? '✓ Ναι' : '✗ Όχι'}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Category-specific fields */}
-                          {p.beekeeperRegistryNumber && (
-                            <Detail label="Αρ. Μητρώου Μελισσοκόμου" value={p.beekeeperRegistryNumber} />
-                          )}
-                          {p.cpnpNotificationNumber && (
-                            <Detail label="CPNP" value={p.cpnpNotificationNumber} />
-                          )}
-                          {p.responsiblePersonName && (
-                            <Detail label="Υπεύθυνο Πρόσωπο" value={p.responsiblePersonName} />
-                          )}
-                          {/* Bank details */}
-                          {(p.iban || p.bankAccountHolder) && (
-                            <div className="sm:col-span-2 mt-2 space-y-1">
-                              <p className="text-gray-500 font-medium">Τραπεζικά:</p>
-                              {p.iban && <Detail label="IBAN" value={p.iban} />}
-                              {p.bankAccountHolder && <Detail label="Δικαιούχος" value={p.bankAccountHolder} />}
-                            </div>
-                          )}
-                          {/* Stripe Connect (STRIPE-CONNECT-01) */}
-                          <div className="sm:col-span-2 mt-2 space-y-1">
-                            <p className="text-gray-500 font-medium">💳 Stripe Connect:</p>
-                            {p.stripeConnectId ? (
-                              <>
-                                <Detail label="Account ID" value={p.stripeConnectId} />
-                                <Detail label="Κατάσταση" value={
-                                  p.stripeConnectStatus === 'active' ? 'Ενεργό' :
-                                  p.stripeConnectStatus === 'pending' ? 'Σε εκκρεμότητα' :
-                                  p.stripeConnectStatus === 'restricted' ? 'Περιορισμένο' :
-                                  p.stripeConnectStatus || 'Άγνωστο'
-                                } />
-                                <div className="text-xs flex gap-4">
-                                  <span>
-                                    <span className="text-gray-500">Χρεώσεις: </span>
-                                    <span className={p.stripeChargesEnabled ? 'text-green-700' : 'text-gray-400'}>
-                                      {p.stripeChargesEnabled ? '✓ Ενεργές' : '✗ Ανενεργές'}
-                                    </span>
-                                  </span>
-                                  <span>
-                                    <span className="text-gray-500">Πληρωμές: </span>
-                                    <span className={p.stripePayoutsEnabled ? 'text-green-700' : 'text-gray-400'}>
-                                      {p.stripePayoutsEnabled ? '✓ Ενεργές' : '✗ Ανενεργές'}
-                                    </span>
-                                  </span>
-                                </div>
-                              </>
-                            ) : (
-                              <span className="text-xs text-gray-400">Δεν έχει συνδεθεί</span>
-                            )}
-                          </div>
-                          {/* Coordinates */}
-                          <div className="sm:col-span-2 mt-2">
-                            <CoordinateEditor
-                              producer={p}
-                              onSaved={(lat, lng) => {
-                                setProducers(prev => prev.map(pr =>
-                                  pr.id === p.id ? { ...pr, latitude: lat, longitude: lng } : pr
-                                ))
-                              }}
-                            />
-                          </div>
-                          {p.rejectionReason && (
-                            <div className="sm:col-span-2 mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
-                              <span className="text-red-700 font-medium">Λόγος απόρριψης: </span>
-                              <span className="text-red-800">{p.rejectionReason}</span>
-                            </div>
-                          )}
-                        </div>
+                        <ProducerDetailPanel
+                          producer={p}
+                          onUpdated={(updated) => {
+                            setProducers(prev => prev.map(pr => pr.id === updated.id ? { ...pr, ...updated } : pr))
+                          }}
+                        />
                       </td>
                     </tr>
                   )}
@@ -488,6 +385,250 @@ function AdminProducersContent() {
         </div>
       )}
     </main>
+  )
+}
+
+// ── Editable field definitions (camelCase key → snake_case for API) ──
+const FIELD_GROUPS: { title: string; fields: { key: keyof Producer; label: string; apiKey: string; type?: string }[] }[] = [
+  {
+    title: 'Βασικά',
+    fields: [
+      { key: 'name', label: 'Όνομα', apiKey: 'name' },
+      { key: 'businessName', label: 'Επωνυμία', apiKey: 'business_name' },
+      { key: 'description', label: 'Περιγραφή', apiKey: 'description', type: 'textarea' },
+    ],
+  },
+  {
+    title: 'Επικοινωνία',
+    fields: [
+      { key: 'email', label: 'Email', apiKey: 'email', type: 'email' },
+      { key: 'phone', label: 'Τηλέφωνο', apiKey: 'phone' },
+      { key: 'website', label: 'Website', apiKey: 'website' },
+    ],
+  },
+  {
+    title: 'Τοποθεσία',
+    fields: [
+      { key: 'address', label: 'Διεύθυνση', apiKey: 'address' },
+      { key: 'city', label: 'Πόλη', apiKey: 'city' },
+      { key: 'postalCode', label: 'Τ.Κ.', apiKey: 'postal_code' },
+      { key: 'region', label: 'Περιοχή', apiKey: 'region' },
+    ],
+  },
+  {
+    title: 'Φορολογικά',
+    fields: [
+      { key: 'taxId', label: 'ΑΦΜ', apiKey: 'tax_id' },
+      { key: 'taxOffice', label: 'ΔΟΥ', apiKey: 'tax_office' },
+      { key: 'foodLicenseNumber', label: 'Αρ. Άδειας Τροφίμων', apiKey: 'food_license_number' },
+    ],
+  },
+  {
+    title: 'Τραπεζικά',
+    fields: [
+      { key: 'iban', label: 'IBAN', apiKey: 'iban' },
+      { key: 'bankAccountHolder', label: 'Δικαιούχος', apiKey: 'bank_account_holder' },
+    ],
+  },
+]
+
+function ProducerDetailPanel({ producer, onUpdated }: { producer: Producer; onUpdated: (p: Partial<Producer> & { id: string }) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState<Record<string, string>>({})
+  const { showSuccess, showError } = useToast()
+
+  function startEditing() {
+    // Pre-fill form with current values
+    const initial: Record<string, string> = {}
+    for (const group of FIELD_GROUPS) {
+      for (const f of group.fields) {
+        initial[f.key] = String(producer[f.key] ?? '')
+      }
+    }
+    setForm(initial)
+    setEditing(true)
+  }
+
+  function cancelEditing() {
+    setEditing(false)
+    setForm({})
+  }
+
+  async function handleSave() {
+    // Build payload with only changed fields (snake_case for API)
+    const payload: Record<string, string | null> = {}
+    for (const group of FIELD_GROUPS) {
+      for (const f of group.fields) {
+        const newVal = form[f.key]?.trim() ?? ''
+        const oldVal = String(producer[f.key] ?? '')
+        if (newVal !== oldVal) {
+          payload[f.apiKey] = newVal || null
+        }
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setEditing(false)
+      return
+    }
+
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/admin/producers/${producer.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Αποτυχία αποθήκευσης')
+      }
+
+      // Build camelCase update for local state
+      const updated: Partial<Producer> & { id: string } = { id: producer.id }
+      for (const group of FIELD_GROUPS) {
+        for (const f of group.fields) {
+          if (f.apiKey in payload) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (updated as any)[f.key] = form[f.key]?.trim() || null
+          }
+        }
+      }
+
+      showSuccess('Ενημερώθηκε επιτυχώς')
+      onUpdated(updated)
+      setEditing(false)
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : 'Σφάλμα αποθήκευσης')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Edit / Save / Cancel buttons */}
+      <div className="flex justify-end gap-2">
+        {editing ? (
+          <>
+            <button
+              onClick={cancelEditing}
+              disabled={saving}
+              className="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-medium rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Ακύρωση
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+              data-testid={`save-producer-${producer.id}`}
+            >
+              {saving ? 'Αποθήκευση...' : 'Αποθήκευση'}
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={startEditing}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors"
+            data-testid={`edit-producer-${producer.id}`}
+          >
+            Επεξεργασία
+          </button>
+        )}
+      </div>
+
+      {/* Field groups */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {FIELD_GROUPS.map(group => (
+          <div key={group.title} className="space-y-2">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{group.title}</h4>
+            {group.fields.map(f => {
+              const value = String(producer[f.key] ?? '')
+              if (editing) {
+                return f.type === 'textarea' ? (
+                  <div key={f.key}>
+                    <label className="text-xs text-gray-500">{f.label}</label>
+                    <textarea
+                      value={form[f.key] ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                      rows={2}
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                ) : (
+                  <div key={f.key}>
+                    <label className="text-xs text-gray-500">{f.label}</label>
+                    <input
+                      type={f.type || 'text'}
+                      value={form[f.key] ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                )
+              }
+              return <Detail key={f.key} label={f.label} value={value} />
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Coordinates — keep existing editor */}
+      <div className="pt-2 border-t border-gray-200">
+        <CoordinateEditor
+          producer={producer}
+          onSaved={(lat, lng) => onUpdated({ id: producer.id, latitude: lat, longitude: lng })}
+        />
+      </div>
+
+      {/* Read-only sections */}
+      {(producer.productCategories?.length > 0) && (
+        <div className="pt-2 border-t border-gray-200">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Κατηγορίες</h4>
+          <div className="flex flex-wrap gap-1">
+            {producer.productCategories.map(slug => {
+              const cat = getCategoryBySlug(slug)
+              return (
+                <span key={slug} className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
+                  {cat?.labelEl || slug}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Documents */}
+      <div className="pt-2 border-t border-gray-200">
+        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Έγγραφα</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
+          <DocLink label="TAXIS" url={producer.taxRegistrationDocUrl} />
+          <DocLink label="ΕΦΕΤ" url={producer.efetNotificationDocUrl} />
+          <DocLink label="HACCP" url={producer.haccpDeclarationDocUrl} />
+        </div>
+      </div>
+
+      {/* Stripe Connect */}
+      {producer.stripeConnectId && (
+        <div className="pt-2 border-t border-gray-200">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Stripe Connect</h4>
+          <Detail label="ID" value={producer.stripeConnectId} />
+          <Detail label="Κατάσταση" value={producer.stripeConnectStatus || '—'} />
+          <Detail label="Χρεώσεις" value={producer.stripeChargesEnabled ? 'Ενεργές' : 'Ανενεργές'} />
+          <Detail label="Πληρωμές" value={producer.stripePayoutsEnabled ? 'Ενεργές' : 'Ανενεργές'} />
+        </div>
+      )}
+
+      {/* Rejection reason */}
+      {producer.rejectionReason && (
+        <div className="pt-2 border-t border-gray-200">
+          <h4 className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">Λόγος Απόρριψης</h4>
+          <p className="text-sm text-red-700">{producer.rejectionReason}</p>
+        </div>
+      )}
+    </div>
   )
 }
 
