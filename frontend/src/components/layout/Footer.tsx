@@ -31,7 +31,7 @@ export default function Footer() {
               Αυθεντικά ελληνικά προϊόντα, απευθείας από τοπικούς παραγωγούς στο τραπέζι σας.
             </p>
             <p className="mt-5 text-[11px] text-white/25 tracking-wide uppercase">
-              88% στον Παραγωγό &middot; Δίκαιο Εμπόριο
+              Πάνω από 80% στον Παραγωγό &middot; Δίκαιο Εμπόριο
             </p>
           </div>
 

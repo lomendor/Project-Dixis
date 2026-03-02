@@ -409,8 +409,11 @@ function AdminProductsContent() {
     setEditModalOpen(true)
   }
 
+  const editDiscountTooHigh = editForm.discount_price !== '' && editForm.price !== '' && parseFloat(editForm.discount_price) >= parseFloat(editForm.price)
+
   async function handleEditConfirm() {
     if (!productToEdit || editForm.title.trim().length < 3) return
+    if (editDiscountTooHigh) { showError('Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική τιμή'); return }
     setEditSubmitting(true)
     setProcessingIds(prev => new Set([...prev, productToEdit.id]))
     try {

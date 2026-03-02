@@ -126,8 +126,11 @@ export default function EditProductPage() {
     }
   }
 
+  const discountTooHigh = discountPrice !== '' && price !== '' && parseFloat(discountPrice) >= parseFloat(price);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (discountTooHigh) { setError('Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική τιμή'); return; }
     setError('');
     setBusy(true);
 
@@ -501,7 +504,9 @@ export default function EditProductPage() {
                   placeholder="π.χ. 2.90"
                   data-testid="discount-price-input"
                 />
-                <p className="mt-1 text-xs text-neutral-500">Αφήστε κενό αν δεν υπάρχει έκπτωση</p>
+                {discountTooHigh
+                  ? <p className="mt-1 text-xs text-red-600 font-medium">⚠ Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική τιμή</p>
+                  : <p className="mt-1 text-xs text-neutral-500">Αφήστε κενό αν δεν υπάρχει έκπτωση</p>}
               </div>
             </div>
 
