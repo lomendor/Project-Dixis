@@ -506,7 +506,7 @@ export default function EditProductPage() {
             </div>
 
             {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
-            <PriceBreakdown price={price} discountPrice={discountPrice} />
+            <PriceBreakdown price={price} discountPrice={discountPrice} onPriceChange={discountPrice ? setDiscountPrice : setPrice} />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
