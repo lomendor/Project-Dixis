@@ -139,6 +139,14 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
+        // Sync category to pivot table so public storefront filters work
+        if (! empty($data['category'])) {
+            $cat = \App\Models\Category::where('slug', $data['category'])->first();
+            if ($cat) {
+                $product->categories()->sync([$cat->id]);
+            }
+        }
+
         // Sync product images if provided
         if ($request->has('images')) {
             $this->syncImages($product, $request->input('images', []));
@@ -178,6 +186,14 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+
+        // Sync category to pivot table so public storefront filters work
+        if (isset($data['category'])) {
+            $cat = \App\Models\Category::where('slug', $data['category'])->first();
+            if ($cat) {
+                $product->categories()->sync([$cat->id]);
+            }
+        }
 
         // Sync product images if provided
         if ($request->has('images')) {

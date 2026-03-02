@@ -59,12 +59,19 @@ class ProductController extends Controller
         }
 
         // Category filter (by slug or id)
+        // Check both category_product pivot table AND products.category column,
+        // because the V1 product creation API sets the column but not the pivot.
         if ($category = $request->get('category')) {
-            $query->whereHas('categories', function ($q) use ($category) {
-                if (is_numeric($category)) {
-                    $q->where('categories.id', $category);
-                } else {
-                    $q->where('categories.slug', $category);
+            $query->where(function ($q) use ($category) {
+                $q->whereHas('categories', function ($sub) use ($category) {
+                    if (is_numeric($category)) {
+                        $sub->where('categories.id', $category);
+                    } else {
+                        $sub->where('categories.slug', $category);
+                    }
+                });
+                if (! is_numeric($category)) {
+                    $q->orWhere('products.category', $category);
                 }
             });
         }
@@ -155,6 +162,14 @@ class ProductController extends Controller
                     'slug' => $product->producer->slug,
                     'location' => $product->producer->location,
                 ];
+            }
+
+            // Ensure categories array is populated even if only the column is set
+            if (empty($data['categories']) && $product->category) {
+                $cat = \App\Models\Category::where('slug', $product->category)->first();
+                if ($cat) {
+                    $data['categories'] = [['id' => $cat->id, 'slug' => $cat->slug, 'name' => $cat->name]];
+                }
             }
 
             // Format price consistently

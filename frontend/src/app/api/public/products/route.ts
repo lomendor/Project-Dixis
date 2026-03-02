@@ -60,11 +60,17 @@ export async function GET(req: Request) {
         stock: typeof p.stock === 'number' ? p.stock : 0,
         is_active: p.is_active,
         category: toStorefrontSlug(categories[0]?.slug || p.category),
+        categories: categories,
+        cultivation_type: p.cultivation_type || null,
+        discount_price: p.discount_price || null,
+        is_seasonal: p.is_seasonal || false,
         image_url: primaryImage?.url || p.image_url || null,
         producer_id: p.producer_id || p.producer?.id || null,
         producer: p.producer
           ? { id: p.producer.id, name: p.producer.name, slug: p.producer.slug }
           : null,
+        reviews_count: p.reviews_count ?? 0,
+        reviews_avg_rating: p.reviews_avg_rating ?? null,
       }
     })
 
