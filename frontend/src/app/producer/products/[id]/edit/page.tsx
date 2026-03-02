@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import MultiImageUpload from '@/components/MultiImageUpload.client';
+import PriceBreakdown from '@/components/producer/PriceBreakdown';
 import { apiClient } from '@/lib/api';
 import { greekToSlug } from '@/lib/slugify';
 
@@ -503,6 +504,9 @@ export default function EditProductPage() {
                 <p className="mt-1 text-xs text-neutral-500">Αφήστε κενό αν δεν υπάρχει έκπτωση</p>
               </div>
             </div>
+
+            {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
+            <PriceBreakdown price={price} discountPrice={discountPrice} />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
