@@ -146,6 +146,19 @@ export const useCart = create<State>()(
   )
 )
 
+/**
+ * Clear cart from localStorage.
+ * Used on logout/login to prevent cross-user cart leakage.
+ * (Pass FIX-CART-LEAK-01)
+ */
+export function clearCartStorage() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('dixis:cart:v1')
+  }
+  // Also reset Zustand in-memory state
+  useCart.setState({ items: {}, _version: 0, _lastUpdated: 0 })
+}
+
 export const cartCount = (items: Record<string, CartItem>) =>
   Object.values(items).reduce((n, it) => n + it.qty, 0)
 
