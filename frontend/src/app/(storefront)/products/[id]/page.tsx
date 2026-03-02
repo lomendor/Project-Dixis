@@ -399,7 +399,7 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               </svg>
               <div>
                 <p className="text-sm font-medium text-neutral-900">
-                  88¢ από κάθε €1 πάνε στον παραγωγό
+                  Πάνω από 80¢ ανά €1 πάνε στον παραγωγό
                 </p>
                 <p className="text-xs text-neutral-600 mt-0.5">
                   Ασφαλείς πληρωμές · Υποστήριξη · Ποιοτικός έλεγχος

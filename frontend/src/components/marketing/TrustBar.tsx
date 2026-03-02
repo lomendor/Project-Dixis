@@ -26,7 +26,7 @@ const SIGNALS = [
   {
     icon: HandCoins,
     title: 'Δίκαιο Εμπόριο',
-    subtitle: '88% στον παραγωγό',
+    subtitle: 'Πάνω από 80% στον παραγωγό',
   },
 ];
 
