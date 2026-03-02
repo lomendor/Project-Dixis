@@ -99,7 +99,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1600px] mx-auto">
+      <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-6 gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">

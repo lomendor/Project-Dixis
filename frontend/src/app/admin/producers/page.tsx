@@ -39,6 +39,11 @@ interface Producer {
   bankAccountHolder: string | null
   latitude: number | null
   longitude: number | null
+  // Stripe Connect
+  stripeConnectId: string | null
+  stripeConnectStatus: string | null
+  stripeChargesEnabled: boolean
+  stripePayoutsEnabled: boolean
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -54,6 +59,21 @@ function StatusBadge({ status }: { status: string }) {
       data-testid={`producer-status-${status}`}
     >
       {c.label}
+    </span>
+  )
+}
+
+function StripeStatusBadge({ producer }: { producer: Producer }) {
+  if (!producer.stripeConnectId) return null
+  const isActive = producer.stripeConnectStatus === 'active' && producer.stripeChargesEnabled
+  return (
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ml-1 ${
+        isActive ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-600'
+      }`}
+      title={isActive ? 'Stripe Connect ενεργό' : 'Stripe Connect σε εκκρεμότητα'}
+    >
+      {isActive ? '💳 Stripe' : '💳 Εκκρεμεί'}
     </span>
   )
 }
@@ -249,7 +269,10 @@ function AdminProducersContent() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{p.region || p.city || '—'}</td>
-                    <td className="px-4 py-3"><StatusBadge status={p.approvalStatus} /></td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={p.approvalStatus} />
+                      <StripeStatusBadge producer={p} />
+                    </td>
                     <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                       {p.approvalStatus === 'pending' && (
                         <div className="flex gap-2 justify-end">
@@ -347,6 +370,37 @@ function AdminProducersContent() {
                               {p.bankAccountHolder && <Detail label="Δικαιούχος" value={p.bankAccountHolder} />}
                             </div>
                           )}
+                          {/* Stripe Connect (STRIPE-CONNECT-01) */}
+                          <div className="sm:col-span-2 mt-2 space-y-1">
+                            <p className="text-gray-500 font-medium">💳 Stripe Connect:</p>
+                            {p.stripeConnectId ? (
+                              <>
+                                <Detail label="Account ID" value={p.stripeConnectId} />
+                                <Detail label="Κατάσταση" value={
+                                  p.stripeConnectStatus === 'active' ? 'Ενεργό' :
+                                  p.stripeConnectStatus === 'pending' ? 'Σε εκκρεμότητα' :
+                                  p.stripeConnectStatus === 'restricted' ? 'Περιορισμένο' :
+                                  p.stripeConnectStatus || 'Άγνωστο'
+                                } />
+                                <div className="text-xs flex gap-4">
+                                  <span>
+                                    <span className="text-gray-500">Χρεώσεις: </span>
+                                    <span className={p.stripeChargesEnabled ? 'text-green-700' : 'text-gray-400'}>
+                                      {p.stripeChargesEnabled ? '✓ Ενεργές' : '✗ Ανενεργές'}
+                                    </span>
+                                  </span>
+                                  <span>
+                                    <span className="text-gray-500">Πληρωμές: </span>
+                                    <span className={p.stripePayoutsEnabled ? 'text-green-700' : 'text-gray-400'}>
+                                      {p.stripePayoutsEnabled ? '✓ Ενεργές' : '✗ Ανενεργές'}
+                                    </span>
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <span className="text-xs text-gray-400">Δεν έχει συνδεθεί</span>
+                            )}
+                          </div>
                           {/* Coordinates */}
                           <div className="sm:col-span-2 mt-2">
                             <CoordinateEditor

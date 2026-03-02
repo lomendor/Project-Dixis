@@ -292,7 +292,7 @@ export default async function Page({ searchParams }: PageProps) {
     <main className="min-h-screen bg-white">
       {/* Categories — full-width, light gray bg strip */}
       <div className="bg-neutral-50 border-b border-neutral-100">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
           <Suspense
             fallback={
               <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
@@ -314,7 +314,7 @@ export default async function Page({ searchParams }: PageProps) {
       </div>
 
       {/* Main content */}
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6">
         {/* Demo mode banner */}
         {isDemo && (
           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">

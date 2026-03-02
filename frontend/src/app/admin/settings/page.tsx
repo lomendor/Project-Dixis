@@ -24,6 +24,7 @@ export default async function AdminSettingsPage() {
   // Collect system info (read-only, no secrets exposed)
   const stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
   const stripePk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  const stripeConnectEnabled = process.env.STRIPE_CONNECT_ENABLED === 'true';
   const resendConfigured = !!process.env.RESEND_API_KEY;
   const nodeEnv = process.env.NODE_ENV || 'development';
   const dixisEnv = process.env.DIXIS_ENV || '(not set)';
@@ -65,6 +66,20 @@ export default async function AdminSettingsPage() {
           <ConfigRow label="Publishable Key" value={`${stripePk.slice(0, 12)}...`} />
         )}
         <ConfigRow label="Μέθοδοι" value={stripeConfigured ? 'Κάρτα, Cash on Delivery' : 'Cash on Delivery μόνο'} />
+      </SettingsSection>
+
+      {/* Stripe Connect (STRIPE-CONNECT-01) */}
+      <SettingsSection title="Stripe Connect (PSD2)">
+        <StatusRow label="Stripe Connect" configured={stripeConnectEnabled} />
+        <ConfigRow label="Λειτουργία" value={stripeConnectEnabled
+          ? 'Ενεργό — Μεταφορές μέσω Stripe Connect Express'
+          : 'Ανενεργό — Εκκαθαρίσεις μέσω IBAN'
+        } />
+        <ConfigRow label="Μοντέλο" value="Separate Charges & Transfers" />
+        <ConfigRow label="PSD2 Συμμόρφωση" value={stripeConnectEnabled
+          ? 'Ναι — Stripe Technology Europe (EMI, Ιρλανδία)'
+          : 'Εκκρεμεί — Ενεργοποιήστε το Connect'
+        } />
       </SettingsSection>
 
       {/* Email Notifications */}

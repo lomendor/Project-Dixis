@@ -43,7 +43,7 @@
 
 ## WIP (max 1)
 
-_(none)_
+**STRIPE-CONNECT-01** ✅ CODE COMPLETE — Stripe Connect Express integration (PSD2 compliance). All 4 PRs implemented: migration, StripeConnectService, StripeConnectController, Connect webhook, transfer creation, refund reverse_transfer, producer settings UI, admin visibility. Feature-flagged (STRIPE_CONNECT_ENABLED=false). Needs: deploy (migration + env vars), Stripe Dashboard webhook setup, testing with Stripe CLI.
 
 ---
 

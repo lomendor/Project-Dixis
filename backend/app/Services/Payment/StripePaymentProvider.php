@@ -285,7 +285,7 @@ class StripePaymentProvider implements PaymentProviderInterface
             }
 
             // Create refund in Stripe
-            $refund = $this->stripe->refunds->create([
+            $refundParams = [
                 'payment_intent' => $order->payment_intent_id,
                 'amount' => $refundAmount,
                 'reason' => $reason,
@@ -293,7 +293,14 @@ class StripePaymentProvider implements PaymentProviderInterface
                     'order_id' => $order->id,
                     'refund_reason' => $reason,
                 ],
-            ]);
+            ];
+
+            // Pass STRIPE-CONNECT-01: Reverse transfer if order was paid via Connect
+            if (!empty($order->stripe_transfer_id)) {
+                $refundParams['reverse_transfer'] = true;
+            }
+
+            $refund = $this->stripe->refunds->create($refundParams);
 
             // Update order with refund info
             $currentRefunded = $order->refunded_amount_cents ?? 0;

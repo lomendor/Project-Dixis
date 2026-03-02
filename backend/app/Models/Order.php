@@ -40,6 +40,9 @@ class Order extends Model
         // Commission preview fields
         'total_cents',
         'channel',
+        // Stripe Connect transfers
+        'stripe_transfer_id',
+        'stripe_transfer_status',
     ];
 
     protected $casts = [

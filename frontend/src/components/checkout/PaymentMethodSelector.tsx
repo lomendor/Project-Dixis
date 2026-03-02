@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
 import { useTranslations } from '@/contexts/LocaleContext'
 
 export type PaymentMethod = 'cod' | 'card'
@@ -19,8 +18,7 @@ export default function PaymentMethodSelector({
   disabled = false,
   codFee,
 }: PaymentMethodSelectorProps) {
-  // Card payments gated by build-time env flag AND user authentication
-  const { isAuthenticated, loading: authLoading } = useAuth()
+  // Card payments gated by build-time env flag (guests allowed — Stripe handles auth)
   const t = useTranslations()
   const [cardEnabled, setCardEnabled] = useState(false)
 
@@ -29,20 +27,15 @@ export default function PaymentMethodSelector({
 
   useEffect(() => {
     // NEXT_PUBLIC_* vars are replaced at build time
-    // Card is only available if: flag enabled AND user is logged in
+    // Card is available if flag is enabled (guests can pay via Stripe)
     const flagEnabled = process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true'
-    setCardEnabled(flagEnabled && isAuthenticated)
+    setCardEnabled(flagEnabled)
 
     // Auto-select card when COD is disabled and card is available
-    if (!codEnabled && flagEnabled && isAuthenticated && value === 'cod') {
+    if (!codEnabled && flagEnabled && value === 'cod') {
       onChange('card')
     }
-
-    // If user not authenticated and card was selected, reset to COD (only if COD enabled)
-    if (!isAuthenticated && value === 'card' && codEnabled) {
-      onChange('cod')
-    }
-  }, [isAuthenticated, value, onChange, codEnabled])
+  }, [value, onChange, codEnabled])
 
   return (
     <fieldset className="space-y-3" disabled={disabled} aria-label={t('checkoutPage.paymentMethod')}>
@@ -80,7 +73,7 @@ export default function PaymentMethodSelector({
         </label>
       )}
 
-      {/* Card (Stripe) - Only if feature flag enabled AND user is logged in */}
+      {/* Card (Stripe) - Available for all users when feature flag is enabled */}
       {cardEnabled && (
         <label
           htmlFor="payment-card"
@@ -118,16 +111,7 @@ export default function PaymentMethodSelector({
         </p>
       )}
 
-      {/* Message for guests when card flag is enabled but user not logged in */}
-      {/* Only render after auth loading completes to avoid hydration mismatch */}
-      {!authLoading && !isAuthenticated && process.env.NEXT_PUBLIC_PAYMENTS_CARD_FLAG === 'true' && (
-        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="guest-card-notice">
-          <p className="text-sm text-amber-800">
-            {t('checkoutPage.cardRequiresLogin')}{' '}
-            <a href="/login?redirect=/checkout" className="font-medium text-primary hover:underline">{t('checkoutPage.loginLink')}</a>
-          </p>
-        </div>
-      )}
+      {/* Card payments are now available for both guests and logged-in users */}
     </fieldset>
   )
 }

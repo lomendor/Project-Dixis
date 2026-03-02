@@ -50,6 +50,11 @@ class Producer extends Model
         'beekeeper_registry_number',
         'cpnp_notification_number',
         'responsible_person_name',
+        // Stripe Connect
+        'stripe_connect_id',
+        'stripe_connect_status',
+        'stripe_payouts_enabled',
+        'stripe_charges_enabled',
     ];
 
     protected $casts = [
@@ -67,6 +72,9 @@ class Producer extends Model
         'onboarding_completed_at' => 'datetime',
         'product_categories' => 'array',
         'haccp_declaration_accepted' => 'boolean',
+        // Stripe Connect
+        'stripe_payouts_enabled' => 'boolean',
+        'stripe_charges_enabled' => 'boolean',
     ];
 
     /**
@@ -117,5 +125,14 @@ class Producer extends Model
     public function settlements()
     {
         return $this->hasMany(CommissionSettlement::class);
+    }
+
+    /**
+     * Pass STRIPE-CONNECT-01: Check if producer has a fully active Stripe Connect account.
+     */
+    public function hasActiveStripeConnect(): bool
+    {
+        return !empty($this->stripe_connect_id)
+            && $this->stripe_charges_enabled === true;
     }
 }

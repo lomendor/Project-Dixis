@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\CheckoutSession;
+use App\Models\Commission;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\OrderEmailService;
+use App\Services\Payment\StripeConnectService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -146,6 +149,9 @@ class StripeWebhookController extends Controller
             'amount_total' => $session->amount_total,
         ]);
 
+        // Pass STRIPE-CONNECT-01: Create transfer to producer's connected account
+        $this->createTransfersForOrders([$order], 'order_' . $order->id);
+
         // Pass MP-PAYMENT-EMAIL-TRUTH-01: Send email after payment success
         $this->sendPaymentConfirmationEmails([$order]);
     }
@@ -206,8 +212,84 @@ class StripeWebhookController extends Controller
             'amount_total' => $stripeSession->amount_total,
         ]);
 
+        // Pass STRIPE-CONNECT-01: Create transfers to each producer's connected account
+        $this->createTransfersForOrders($orders->all(), 'checkout_' . $checkoutSessionId);
+
         // Send emails for all orders (outside transaction — email failure shouldn't roll back payment)
         $this->sendPaymentConfirmationEmails($orders->all());
+    }
+
+    /**
+     * Create Stripe Connect transfers for orders after payment.
+     *
+     * Pass STRIPE-CONNECT-01: For each order, find the producer, check if they have
+     * an active Connect account, calculate transfer amount (total - commission),
+     * and create a Transfer. Skips if Connect is disabled or producer not connected.
+     */
+    private function createTransfersForOrders(array $orders, string $transferGroup): void
+    {
+        if (!StripeConnectService::isEnabled()) {
+            return;
+        }
+
+        $connectService = app(StripeConnectService::class);
+
+        foreach ($orders as $order) {
+            try {
+                // Skip if transfer already created (idempotent)
+                if (!empty($order->stripe_transfer_id)) {
+                    continue;
+                }
+
+                // Find producer from order items
+                $producerId = OrderItem::where('order_id', $order->id)
+                    ->whereNotNull('producer_id')
+                    ->value('producer_id');
+
+                if (!$producerId) {
+                    continue;
+                }
+
+                $producer = \App\Models\Producer::find($producerId);
+                if (!$producer || !$connectService->isProducerConnected($producer)) {
+                    Log::info('Stripe Connect: skipping transfer (producer not connected)', [
+                        'order_id' => $order->id,
+                        'producer_id' => $producerId,
+                    ]);
+                    continue;
+                }
+
+                // Calculate transfer amount: order total minus commission
+                $orderTotalCents = (int) round((float) $order->total * 100);
+                $commission = Commission::where('order_id', $order->id)->first();
+                $commissionCents = $commission
+                    ? (int) round((float) $commission->platform_fee * 100)
+                    : 0;
+                $transferAmountCents = $orderTotalCents - $commissionCents;
+
+                if ($transferAmountCents <= 0) {
+                    Log::warning('Stripe Connect: transfer amount is zero or negative', [
+                        'order_id' => $order->id,
+                        'order_total_cents' => $orderTotalCents,
+                        'commission_cents' => $commissionCents,
+                    ]);
+                    continue;
+                }
+
+                $connectService->createTransfer(
+                    $order,
+                    $transferAmountCents,
+                    $producer->stripe_connect_id,
+                    $transferGroup
+                );
+            } catch (\Exception $e) {
+                // Log but don't fail — payment was already successful
+                Log::error('Stripe Connect transfer failed', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     /**
