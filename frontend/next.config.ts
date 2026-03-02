@@ -104,6 +104,16 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Umami analytics proxy — first-party domain avoids ad blockers (ANALYTICS-UMAMI-01)
+  async rewrites() {
+    return [
+      {
+        source: '/u/:path*',
+        destination: 'http://127.0.0.1:3001/:path*',
+      },
+    ];
+  },
+
   // Webpack configuration to handle module resolution
   webpack: (config) => {
     config.resolve.alias = {
