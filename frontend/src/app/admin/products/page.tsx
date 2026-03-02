@@ -662,7 +662,7 @@ function AdminProductsContent() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Τιμή (€) *</label>
-                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" onChange={e => setCreatePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-price-input" />
+                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" value={createPrice} onChange={e => setCreatePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-price-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Απόθεμα</label>
@@ -670,7 +670,7 @@ function AdminProductsContent() {
                 </div>
               </div>
               {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
-              <PriceBreakdown price={createPrice} />
+              <PriceBreakdown price={createPrice} onPriceChange={setCreatePrice} />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Περιγραφή</label>
                 <textarea name="description" rows={3} placeholder="Περιγραφή προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" data-testid="create-description-input" />
@@ -764,7 +764,7 @@ function AdminProductsContent() {
                   </div>
                 </div>
                 {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
-                <PriceBreakdown price={editForm.price} discountPrice={editForm.discount_price} />
+                <PriceBreakdown price={editForm.price} discountPrice={editForm.discount_price} onPriceChange={(v) => editForm.discount_price ? setEditForm(prev => ({ ...prev, discount_price: v })) : setEditForm(prev => ({ ...prev, price: v }))} />
               </fieldset>
 
               {/* Βάρος & Αποστολή */}
