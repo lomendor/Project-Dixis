@@ -43,7 +43,17 @@
 
 ## WIP (max 1)
 
-**STRIPE-CONNECT-01** ✅ CODE COMPLETE — Stripe Connect Express integration (PSD2 compliance). All 4 PRs implemented: migration, StripeConnectService, StripeConnectController, Connect webhook, transfer creation, refund reverse_transfer, producer settings UI, admin visibility. Feature-flagged (STRIPE_CONNECT_ENABLED=false). Needs: deploy (migration + env vars), Stripe Dashboard webhook setup, testing with Stripe CLI.
+**NONE** — Ready for testing phase. All recent features deployed.
+
+### Recently Shipped (2026-03-02)
+- **STRIPE-CONNECT-01** ✅ DEPLOYED — Stripe Connect Express (PSD2 compliance). Feature-flagged OFF.
+- **PRICE-TRANSPARENCY-01** ✅ DEPLOYED — Bidirectional PriceBreakdown in producer + admin forms (set selling price OR desired net amount)
+- **DISCOUNT-VALIDATION** ✅ DEPLOYED — Discount price cannot be >= regular price
+- **88%-FIX** ✅ DEPLOYED — Marketing claims corrected from "88%" to "Πάνω από 80%"
+
+### Next Action: TESTING (not building)
+- Brother creates test producer → products → orders → verify full flow
+- After 10-20 real orders: resume backlog (S1-03 Q&A, S1-04 Wishlist)
 
 ---
 
