@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-28 (Architecture debt COMPLETE: all items resolved)
+**Updated**: 2026-03-03 (Cart fix + Umami analytics deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -14,7 +14,7 @@
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh dixis-prod` (alias, key: `dixis_prod_ed25519_20260115`) |
-| **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
+| **Ports** | 3000 (frontend via PM2), 3001 (Umami analytics via PM2), backend via PHP-FPM unix socket |
 | **Goal** | Real marketplace — real producers, real products, real customers |
 
 ---
@@ -45,9 +45,11 @@
 
 **NONE** — Ready for testing phase. All recent features deployed.
 
-### Recently Shipped (2026-03-02)
+### Recently Shipped (2026-03-03)
+- **FIX-CART-LEAK-01** ✅ DEPLOYED — Cart cross-user leakage fix. Zustand localStorage cleared on login/logout. Login now fetches only server-scoped cart. (PR #3268)
+- **ANALYTICS-UMAMI-01** ✅ DEPLOYED — Self-hosted Umami v3.0.3 analytics. Cookieless (no GDPR consent needed). First-party proxy via `/u/*` rewrite. PM2 on port 3001. (PR #3269)
 - **STRIPE-CONNECT-01** ✅ DEPLOYED — Stripe Connect Express (PSD2 compliance). Feature-flagged OFF.
-- **PRICE-TRANSPARENCY-01** ✅ DEPLOYED — Bidirectional PriceBreakdown in producer + admin forms (set selling price OR desired net amount)
+- **PRICE-TRANSPARENCY-01** ✅ DEPLOYED — Bidirectional PriceBreakdown in producer + admin forms
 - **DISCOUNT-VALIDATION** ✅ DEPLOYED — Discount price cannot be >= regular price
 - **88%-FIX** ✅ DEPLOYED — Marketing claims corrected from "88%" to "Πάνω από 80%"
 
@@ -93,12 +95,15 @@
 | **Stripe (Card Payments)** | ✅ ENABLED (frontend flag + key deployed 2026-02-13) |
 | **COD (Cash on Delivery)** | ✅ ENABLED (+€4.00 fee) |
 | **Resend (Email)** | ✅ ENABLED |
+| **Umami Analytics** | ✅ ENABLED — Self-hosted, cookieless, proxied via `/u/*` |
 | **Viva Wallet** | ❌ REMOVED — All dead code deleted (PR #2971, VIVA-CLEANUP) |
 
 ---
 
 ## Recently Done (last 10)
 
+- **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS (PM2, port 3001). Cookieless, GDPR-compliant, no consent banner needed. Next.js `/u/*` rewrite for first-party proxy (avoids ad blockers). Analytics component + env vars. (PR #3269, deployed 2026-03-02) ✅
+- **FIX-CART-LEAK-01** — Cart cross-user leakage fix. Root cause: static Zustand localStorage key shared by all users. Added `clearCartStorage()` on login/logout. Login now clears localStorage then fetches only server-scoped cart items. (PR #3268, deployed 2026-03-02) ✅
 - **ARCH-FIX-06** — Error response standardization: all controllers now use `message` field (was mixed `error`/`message`). 8 occurrences in 5 files. Zero frontend changes. (PR #3240, merged 2026-02-28) ✅
 - **ARCH-FIX-05** — Commission preview 500 fix: added missing `settleForOrder()` method to CommissionService, added try-catch in ops route, removed E2E quarantine. (PR #3239, merged 2026-02-28) ✅
 - **ARCH-FIX-04** — Routes split: `api.php` 1228→517 lines. Extracted producer.php (19 routes), ops.php (internal), openapi.php (569-line spec). All P0-P2 arch debt resolved. (PRs #3236-#3237, merged 2026-02-28) ✅
@@ -149,12 +154,13 @@
 
 - **Auth**: Email + password (customers/producers), Phone OTP (admin only)
 - **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
-- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
+- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs. `clearCartStorage()` on login/logout prevents cross-user leakage.
 - **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva REMOVED.
 - **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are redirect stubs only.
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
 - **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
+- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Dashboard: SSH tunnel `ssh -L 3001:localhost:3001 dixis-prod` → `http://localhost:3001`. Default credentials: admin/umami (**CHANGE THIS**).
 - **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
 ---
