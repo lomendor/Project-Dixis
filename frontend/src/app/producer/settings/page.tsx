@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { apiClient } from '@/lib/api';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { apiClient, StripeConnectStatus } from '@/lib/api';
 
 interface SettingsFormData {
   name: string;
@@ -56,15 +56,23 @@ async function geocodeAddress(address: string, city: string, region: string): Pr
 }
 
 export default function ProducerSettingsPage() {
-  return <ProducerSettingsContent />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 py-8"><div className="max-w-4xl mx-auto px-4"><div className="animate-pulse h-10 bg-neutral-200 rounded" /></div></div>}>
+      <ProducerSettingsContent />
+    </Suspense>
+  );
 }
 
 function ProducerSettingsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  // Stripe Connect state
+  const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<SettingsFormData>({
@@ -136,6 +144,48 @@ function ProducerSettingsContent() {
         setLoading(false);
       });
   }, []);
+
+  // Load Stripe Connect status
+  useEffect(() => {
+    apiClient.refreshToken();
+    apiClient.stripeConnectStatus()
+      .then(setStripeStatus)
+      .catch(() => {/* Stripe not available — OK */});
+
+    // Handle return from Stripe onboarding
+    if (searchParams.get('stripe') === 'complete') {
+      setSuccess('Η σύνδεση με Stripe ολοκληρώθηκε. Ελέγχουμε την κατάστασή σας...');
+      apiClient.stripeConnectStatus().then(setStripeStatus).catch(() => {});
+    }
+  }, [searchParams]);
+
+  // Stripe Connect handlers
+  const handleStripeOnboard = async () => {
+    setStripeLoading(true);
+    try {
+      apiClient.refreshToken();
+      const result = await apiClient.stripeConnectOnboard();
+      if (result.onboarding_url) {
+        window.location.href = result.onboarding_url;
+      }
+    } catch (err: any) {
+      setError(err.message || 'Σφάλμα σύνδεσης με Stripe');
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
+  const handleStripeDashboard = async () => {
+    try {
+      apiClient.refreshToken();
+      const result = await apiClient.stripeConnectDashboard();
+      if (result.dashboard_url) {
+        window.open(result.dashboard_url, '_blank');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Σφάλμα πρόσβασης στο Stripe Dashboard');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -668,6 +718,74 @@ function ProducerSettingsContent() {
                 </div>
               </div>
             </div>
+
+            {/* Stripe Connect — Pass STRIPE-CONNECT-01 */}
+            {stripeStatus && (
+              <div>
+                <h2 className="text-lg font-semibold text-neutral-900 mb-4">Σύνδεση Stripe (Πληρωμές)</h2>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Απαιτείται για να λαμβάνετε πληρωμές από παραγγελίες με κάρτα. Το Stripe διαχειρίζεται τις πληρωμές με ασφάλεια.
+                </p>
+
+                {stripeStatus.status === 'active' ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-green-800 font-medium">✓ Συνδεδεμένο</p>
+                        <p className="text-sm text-green-600 mt-1">
+                          Μπορείτε να λαμβάνετε πληρωμές με κάρτα
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeDashboard}
+                        className="px-4 py-2 bg-white border border-green-300 text-green-700 rounded-lg hover:bg-green-50 text-sm font-medium"
+                      >
+                        Stripe Dashboard →
+                      </button>
+                    </div>
+                  </div>
+                ) : stripeStatus.status === 'pending' || stripeStatus.status === 'restricted' ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-amber-800 font-medium">⏳ Σε εκκρεμότητα</p>
+                        <p className="text-sm text-amber-600 mt-1">
+                          Ολοκληρώστε τη σύνδεσή σας με Stripe για να λαμβάνετε πληρωμές
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeOnboard}
+                        disabled={stripeLoading}
+                        className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:bg-neutral-400 text-sm font-medium"
+                      >
+                        {stripeLoading ? 'Φόρτωση...' : 'Συνεχίστε τη σύνδεση'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-neutral-800 font-medium">Δεν έχει συνδεθεί</p>
+                        <p className="text-sm text-neutral-500 mt-1">
+                          Συνδέστε τον λογαριασμό σας στο Stripe για να λαμβάνετε πληρωμές
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeOnboard}
+                        disabled={stripeLoading}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light disabled:bg-neutral-400 text-sm font-medium"
+                      >
+                        {stripeLoading ? 'Φόρτωση...' : 'Σύνδεση με Stripe'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Submit Buttons */}
             <div className="flex gap-3 pt-4 border-t border-neutral-200">

@@ -43,7 +43,7 @@
 
 ## WIP (max 1)
 
-_(none)_
+**STRIPE-CONNECT-01** — Stripe Connect Express integration (PSD2 compliance). Backend: migration, StripeConnectService, StripeConnectController, Connect webhook, transfer creation in payment webhook, refund reverse_transfer. Frontend: Stripe Connect section in producer settings. Feature-flagged (STRIPE_CONNECT_ENABLED=false). Needs: admin visibility PR, testing, deploy.
 
 ---
 

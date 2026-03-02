@@ -497,6 +497,8 @@ Route::middleware('auth:sanctum')->prefix('v1/public/payments')->group(function 
 Route::prefix('v1/webhooks')->group(function () {
     // Pass 51: Stripe webhook (signature verified in controller)
     Route::post('stripe', [App\Http\Controllers\Api\V1\StripeWebhookController::class, 'handle']);
+    // Pass STRIPE-CONNECT-01: Connect account events (separate secret)
+    Route::post('stripe-connect', [App\Http\Controllers\Api\V1\StripeConnectWebhookController::class, 'handle']);
 });
 
 // Legacy webhook routes (for backwards compatibility)

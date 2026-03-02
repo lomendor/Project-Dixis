@@ -40,6 +40,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Stripe Connect (Express accounts for producers)
+    |--------------------------------------------------------------------------
+    |
+    | Pass STRIPE-CONNECT-01: PSD2-compliant fund flow via Stripe Connect.
+    | When enabled, producers create Express accounts. After customer payment,
+    | funds are transferred to producer accounts minus commission.
+    |
+    */
+    'stripe_connect' => [
+        'enabled' => env('STRIPE_CONNECT_ENABLED', false),
+        'webhook_secret' => env('STRIPE_CONNECT_WEBHOOK_SECRET', ''),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | COD (Cash on Delivery) - Always enabled
     |--------------------------------------------------------------------------
     |

@@ -43,6 +43,18 @@ Route::middleware('auth:sanctum')->prefix('v1/producer')->group(function () {
     Route::get('settlements', [App\Http\Controllers\Api\Producer\ProducerSettlementController::class, 'index'])
         ->middleware('throttle:60,1');
 
+    // Stripe Connect (STRIPE-CONNECT-01)
+    Route::prefix('stripe')->group(function () {
+        Route::post('onboard', [App\Http\Controllers\Api\Producer\StripeConnectController::class, 'onboard'])
+            ->middleware('throttle:5,1');
+        Route::get('status', [App\Http\Controllers\Api\Producer\StripeConnectController::class, 'status'])
+            ->middleware('throttle:30,1');
+        Route::get('dashboard', [App\Http\Controllers\Api\Producer\StripeConnectController::class, 'dashboard'])
+            ->middleware('throttle:10,1');
+        Route::get('onboard/refresh', [App\Http\Controllers\Api\Producer\StripeConnectController::class, 'refreshOnboarding'])
+            ->middleware('throttle:5,1');
+    });
+
     // Producer Order Management (AG126.1)
     Route::get('orders', [App\Http\Controllers\Api\Producer\ProducerOrderController::class, 'index'])
         ->middleware('throttle:60,1');
