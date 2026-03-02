@@ -4,6 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents, isMultiProducerCart } from '@/lib/cart'
+import { apiClient } from '@/lib/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function CartPage() {
   const router = useRouter()
@@ -11,8 +13,18 @@ export default function CartPage() {
   const inc = useCart(s => s.inc)
   const dec = useCart(s => s.dec)
   const clear = useCart(s => s.clear)
+  const { isAuthenticated } = useAuth()
 
   const totalCents = cartTotalCents(items)
+
+  // Pass FIX-CART-LEAK-02: Clear cart on BOTH client and server
+  const handleClearCart = () => {
+    if (!window.confirm('Είστε σίγουροι ότι θέλετε να αδειάσετε το καλάθι;')) return
+    clear()
+    if (isAuthenticated) {
+      apiClient.clearCart().catch(() => {})
+    }
+  }
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
 
   const list = Object.values(items)
@@ -106,7 +118,7 @@ export default function CartPage() {
               </div>
               <p className="text-xs text-neutral-500 mt-2">Οι τελικές χρεώσεις (μεταφορικά/ΦΠΑ) υπολογίζονται κατά την ολοκλήρωση.</p>
               <button
-                onClick={() => { if (window.confirm('Είστε σίγουροι ότι θέλετε να αδειάσετε το καλάθι;')) clear() }}
+                onClick={handleClearCart}
                 className="mt-2 w-full inline-flex justify-center border border-red-300 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50"
                 data-testid="clear-cart"
               >
