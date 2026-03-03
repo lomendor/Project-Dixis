@@ -189,6 +189,19 @@ class CartController extends Controller
     }
 
     /**
+     * Clear all cart items for authenticated user.
+     * Pass FIX-CART-CLEAR-01
+     */
+    public function clear(Request $request): JsonResponse
+    {
+        CartItem::where('user_id', $request->user()->id)->delete();
+
+        return response()->json([
+            'message' => 'Cart cleared successfully',
+        ]);
+    }
+
+    /**
      * Sync localStorage cart with server cart on login.
      * Merges client items with existing server cart (sums quantities for same product).
      * Returns the authoritative server cart.

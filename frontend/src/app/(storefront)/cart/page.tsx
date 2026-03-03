@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useCart, cartTotalCents, isMultiProducerCart } from '@/lib/cart'
 import { apiClient } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 
 export default function CartPage() {
   const router = useRouter()
@@ -14,15 +15,20 @@ export default function CartPage() {
   const dec = useCart(s => s.dec)
   const clear = useCart(s => s.clear)
   const { isAuthenticated } = useAuth()
+  const { showToast } = useToast()
 
   const totalCents = cartTotalCents(items)
 
-  // Pass FIX-CART-LEAK-02: Clear cart on BOTH client and server
-  const handleClearCart = () => {
+  // Pass FIX-CART-CLEAR-01: Await server clear so items don't reappear on next login
+  const handleClearCart = async () => {
     if (!window.confirm('Είστε σίγουροι ότι θέλετε να αδειάσετε το καλάθι;')) return
-    clear()
+    clear() // optimistic local clear
     if (isAuthenticated) {
-      apiClient.clearCart().catch(() => {})
+      try {
+        await apiClient.clearCart()
+      } catch {
+        showToast('error', 'Η εκκαθάριση στον server απέτυχε. Δοκιμάστε ξανά.')
+      }
     }
   }
   const fmt = new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' })
