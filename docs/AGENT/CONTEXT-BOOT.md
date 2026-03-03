@@ -72,8 +72,10 @@ nginx (dixis.gr VPS: 147.93.126.235)
 | Path | Purpose |
 |------|---------|
 | `/var/www/dixis/current/` | Git repo (frontend/ + backend/) |
-| `/var/www/dixis/shared/frontend.env` | Frontend env (symlinked) |
+| `/var/www/dixis/shared/frontend.env` | Frontend env (symlinked to frontend/.env) |
+| `/var/www/dixis/shared/uploads/` | Persistent uploads dir (symlinked from 2 paths) |
 | PM2 app: `dixis-frontend` | Next.js process |
+| PM2 app: `umami` | Analytics (port 3001) |
 | nginx: `/etc/nginx/sites-enabled/dixis.gr` | Reverse proxy config |
 
 ---
@@ -90,15 +92,25 @@ bash scripts/prod-deploy-clean.sh
 ssh dixis-prod                              # user=deploy, NOT root
 cd /var/www/dixis/current
 git fetch origin main && git reset --hard origin/main
+
+# --- Backend (if Laravel files changed) ---
+cd backend && php artisan config:clear && php artisan cache:clear && php artisan route:clear && cd ..
+
+# --- Frontend ---
 ls -la frontend/.env                        # Must be symlink → shared/frontend.env
 cd frontend
 rm -rf .next node_modules
 pnpm install --frozen-lockfile
 npx prisma generate
 NODE_OPTIONS='--max-old-space-size=2048' pnpm build
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
+
+# --- Post-build: symlinks (CRITICAL) ---
+mkdir -p /var/www/dixis/shared/uploads
+rm -rf public/uploads .next/standalone/public/uploads
+ln -sfn /var/www/dixis/shared/uploads public/uploads
+ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
 ln -sfn /var/www/dixis/shared/frontend.env .next/standalone/.env
+
 pm2 restart dixis-frontend --update-env
 curl -sS http://127.0.0.1:3000/api/healthz  # Must return {"status":"ok"}
 ```
@@ -181,15 +193,30 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 
 ## 8. COMMON PITFALLS (Things I Keep Re-learning)
 
+### Auth & Data
 1. **Producer auth is client-side** (Sanctum/useAuth), admin auth is server-side (JWT/requireAdmin). Don't mix patterns. See `docs/AGENT/AUTH-ARCHITECTURE.md` for the full dual-auth reference.
 2. **Product data SSOT is Laravel**. Frontend only proxies. Never create Prisma product models.
-3. **The `/my/*` routes are now redirect stubs** to `/producer/*`. All implementations live at `/producer/*`. `/my/*` only exists for backwards compatibility.
-4. **Worktree builds may fail** with Prisma errors — always run `npx prisma generate` first.
-5. **Admin cookie is `dixis_jwt`** (renamed from `dixis_session` to avoid collision).
-6. **Auto-deploy is broken** (SSH key issue). Always deploy manually after merge.
-7. **CI uses SQLite**, production uses PostgreSQL. No `mode: 'insensitive'` or other PG-only features.
-8. **Greek locale everywhere**: `el-GR` for dates/currency, Greek UI strings, 5-digit postal codes.
-9. **LARAVEL_INTERNAL_URL already includes `/api/v1`**. Use `laravelUrl('path')` from `@/lib/laravel/url` instead of manual concatenation to avoid double-prefix bugs (PR #3192).
+3. **Admin cookie is `dixis_jwt`** (renamed from `dixis_session` to avoid collision).
+4. **The `/my/*` routes are redirect stubs** to `/producer/*`. Implementations at `/producer/*` only.
+
+### Frontend-Backend Contract
+5. **BEFORE writing `apiClient.something()` in frontend, VERIFY the Laravel route exists** in `backend/routes/api.php`. Past bug: `apiClient.clearCart()` called `DELETE cart/clear` which didn't exist — 404 silently swallowed. Rule: grep routes before coding.
+6. **NEVER `.catch(() => {})` on server API calls** that need to succeed. Always `await` + handle errors. Silent failure = data inconsistency that only surfaces later.
+7. **LARAVEL_INTERNAL_URL already includes `/api/v1`**. Use `laravelUrl('path')` from `@/lib/laravel/url` to avoid double-prefix bugs.
+
+### Deploy
+8. **Deploy = frontend + backend**. After deploying code that touches Laravel (routes, controllers, config), run `php artisan config:clear && cache:clear && route:clear` on VPS.
+9. **Uploads must be symlinked** to `/var/www/dixis/shared/uploads/` in TWO locations: `frontend/public/uploads/` (write path for `putObjectFs`) AND `.next/standalone/public/uploads/` (serve path). Without both symlinks, uploaded images are lost on redeploy.
+10. **.env symlinks break on `git reset --hard`**. Always verify: `ls -la frontend/.env` after reset. Must be `→ /var/www/dixis/shared/frontend.env`.
+11. **Auto-deploy is broken** (SSH key issue). Always deploy manually after merge.
+
+### Build & CI
+12. **Worktree builds may fail** with Prisma errors — always run `npx prisma generate` first.
+13. **CI uses SQLite**, production uses PostgreSQL. No `mode: 'insensitive'` or other PG-only features.
+
+### Locale & UI
+14. **Greek locale everywhere**: `el-GR` for dates/currency, Greek UI strings, 5-digit postal codes.
+15. **CategoryStrip uses ScrollableRow** for horizontal scroll on ALL viewports (no flex-wrap). Adding new categories won't break layout.
 
 ---
 

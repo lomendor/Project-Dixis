@@ -1,6 +1,6 @@
 # SOP: VPS Deploy (dixis.gr)
 
-**Last Updated**: 2026-02-14
+**Last Updated**: 2026-03-03
 
 ## When to use
 After merging PRs to `main` that need to go live on production.
@@ -33,7 +33,7 @@ This handles everything: preflight, hard sync, clean install, build, PM2 restart
 ssh dixis-prod
 ```
 
-### 2. Fetch and hard reset to latest main
+### 2. Fetch and hard reset
 ```bash
 cd /var/www/dixis/current
 git fetch origin main
@@ -42,7 +42,15 @@ git reset --hard origin/main
 
 > **Why `reset --hard`?** Ensures exact match with GitHub. `git pull` can fail on conflicts or leave drift.
 
-### 3. Check .env symlink is intact
+### 3. Backend (if Laravel files changed)
+```bash
+cd backend
+php artisan config:clear && php artisan cache:clear && php artisan route:clear
+cd ..
+```
+> **When?** Any time routes, controllers, config, or migrations are deployed. When in doubt, run it — it's safe and fast (<1 sec).
+
+### 4. Check .env symlink is intact
 ```bash
 ls -la frontend/.env
 # Should show: frontend/.env -> /var/www/dixis/shared/frontend.env
@@ -53,7 +61,7 @@ If missing, restore:
 ln -sfn /var/www/dixis/shared/frontend.env frontend/.env
 ```
 
-### 4. Clean install and build frontend
+### 5. Clean install and build frontend
 ```bash
 cd frontend
 rm -rf .next node_modules
@@ -62,29 +70,26 @@ npx prisma generate
 NODE_OPTIONS='--max-old-space-size=2048' pnpm build
 ```
 
-### 5. Prepare standalone bundle + persistent uploads
+### 6. Persistent uploads symlinks (CRITICAL)
 ```bash
-cp -r .next/static .next/standalone/.next/
-cp -r public .next/standalone/
-
-# CRITICAL: Symlink uploads to shared/ so they survive deploys
 mkdir -p /var/www/dixis/shared/uploads
 rm -rf public/uploads .next/standalone/public/uploads
 ln -sfn /var/www/dixis/shared/uploads public/uploads
 ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
 ```
+> **Why TWO symlinks?** `putObjectFs()` writes to `process.cwd()/public/uploads/` (write path). Standalone serves from `.next/standalone/public/uploads/` (serve path). Both must point to persistent `/var/www/dixis/shared/uploads/`. **Without this, uploaded images are LOST on next deploy.**
 
-### 6. Restore .env in standalone
+### 7. Restore .env in standalone
 ```bash
 ln -sfn /var/www/dixis/shared/frontend.env .next/standalone/.env
 ```
 
-### 7. Restart PM2
+### 8. Restart PM2
 ```bash
 pm2 restart dixis-frontend --update-env
 ```
 
-### 8. Verify
+### 9. Verify
 ```bash
 curl -sS http://127.0.0.1:3000/api/healthz
 ```
@@ -103,6 +108,9 @@ curl -sS http://127.0.0.1:3000/api/healthz
 | PM2 crash loop | Port 3000 in use | `fuser -k 3000/tcp && pm2 restart dixis-frontend` |
 | Public URL unreachable | CloudFlare/DNS issue | Use `curl http://127.0.0.1:3000/api/healthz` from inside VPS |
 | Script preflight fails | Can't reach dixis.gr | Use manual method above |
+| Uploaded images 404 | Upload symlinks missing | Run step 6 above (both symlinks) |
+| Laravel route 404 | Cached routes stale | Run step 3 above (`artisan route:clear`) |
+| Frontend API call silently fails | Backend route missing | Check `php artisan route:list --path=xxx` on VPS |
 
 ---
 
@@ -121,11 +129,14 @@ nginx (proxy_pass)
 | Path | Value |
 |------|-------|
 | Frontend code | `/var/www/dixis/current/frontend/` |
+| Backend code | `/var/www/dixis/current/backend/` |
 | Shared .env | `/var/www/dixis/shared/frontend.env` |
-| PM2 app name | `dixis-frontend` |
+| Persistent uploads | `/var/www/dixis/shared/uploads/` |
+| PM2 app: frontend | `dixis-frontend` (port 3000) |
+| PM2 app: analytics | `umami` (port 3001) |
 | PM2 logs | `pm2 logs dixis-frontend` |
 | nginx config | `/etc/nginx/sites-enabled/dixis.gr` |
 
 ---
 
-_Created: 2026-02-06 | Last updated: 2026-02-14 (deploy user, pnpm, prod-deploy-clean.sh)_
+_Created: 2026-02-06 | Last updated: 2026-03-03 (backend deploy step, upload symlinks, troubleshooting)_

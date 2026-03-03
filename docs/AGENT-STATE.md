@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-03 (Cart fix + Umami analytics deployed)
+**Updated**: 2026-03-03 (Cart clear fix, category strip fix, upload persistence, docs hardened)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -46,12 +46,14 @@
 **NONE** — Ready for testing phase. All recent features deployed.
 
 ### Recently Shipped (2026-03-03)
-- **FIX-CART-LEAK-01** ✅ DEPLOYED — Cart cross-user leakage fix. Zustand localStorage cleared on login/logout. Login now fetches only server-scoped cart. (PR #3268)
-- **ANALYTICS-UMAMI-01** ✅ DEPLOYED — Self-hosted Umami v3.0.3 analytics. Cookieless (no GDPR consent needed). First-party proxy via `/u/*` rewrite. PM2 on port 3001. (PR #3269)
-- **STRIPE-CONNECT-01** ✅ DEPLOYED — Stripe Connect Express (PSD2 compliance). Feature-flagged OFF.
-- **PRICE-TRANSPARENCY-01** ✅ DEPLOYED — Bidirectional PriceBreakdown in producer + admin forms
-- **DISCOUNT-VALIDATION** ✅ DEPLOYED — Discount price cannot be >= regular price
-- **88%-FIX** ✅ DEPLOYED — Marketing claims corrected from "88%" to "Πάνω από 80%"
+- **FIX-CART-CLEAR-01** ✅ DEPLOYED — Cart clear endpoint was missing in Laravel. `DELETE cart/clear` always returned 404 (silently swallowed). Items reappeared on login. Added `CartController::clear()` + route + awaited server call.
+- **FIX-UPLOAD-PERSIST-01** ✅ DEPLOYED — Uploads lost on deploy. `putObjectFs()` writes to `frontend/public/uploads/` which gets wiped by `git reset --hard`. Added persistent symlinks to `/var/www/dixis/shared/uploads/` in both write and serve paths. Deploy script + SOP updated.
+- **FIX-CATEGORY-OVERLAP** ✅ DEPLOYED — Category pills overlapped on desktop due to `xl:flex-1` + `xl:shrink`. Replaced with `ScrollableRow` (horizontal scroll + arrow buttons on all viewports).
+- **FIX-CATEGORY-FILTER** ✅ DEPLOYED — Category filter returned 0 products (SQL checked only pivot table, not `category_id` column). Now checks both.
+- **ADMIN-PRODUCER-EDIT** ✅ DEPLOYED — Admin can edit all producer fields from admin panel.
+- **DOCS-HARDENING** ✅ — Updated CONTEXT-BOOT.md pitfalls, SOP-VPS-DEPLOY.md with backend steps + upload symlinks, MEMORY.md with lessons learned.
+- **FIX-CART-LEAK-01** ✅ DEPLOYED — Cart cross-user leakage fix. Zustand localStorage cleared on login/logout. (PR #3268)
+- **ANALYTICS-UMAMI-01** ✅ DEPLOYED — Self-hosted Umami v3.0.3 analytics. Cookieless. (PR #3269)
 
 ### Next Action: TESTING (not building)
 - Brother creates test producer → products → orders → verify full flow
@@ -154,13 +156,13 @@
 
 - **Auth**: Email + password (customers/producers), Phone OTP (admin only)
 - **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
-- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs. `clearCartStorage()` on login/logout prevents cross-user leakage.
+- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs. `clearCartStorage()` on login/logout prevents cross-user leakage. `apiClient.clearCart()` → `DELETE cart/clear` (must exist in Laravel routes!). NEVER fire-and-forget server API calls.
 - **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva REMOVED.
 - **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are redirect stubs only.
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
 - **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
-- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Dashboard: SSH tunnel `ssh -L 3001:localhost:3001 dixis-prod` → `http://localhost:3001`. Default credentials: admin/umami (**CHANGE THIS**).
+- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Dashboard: SSH tunnel `ssh -L 3001:localhost:3001 dixis-prod` → `http://localhost:3001`. Credentials: admin / D1x1s@Umam1_2026!
 - **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
 ---
