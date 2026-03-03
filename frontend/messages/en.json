@@ -422,6 +422,8 @@
     "viewOrders": "View Orders",
     "settings": "Settings",
     "notifications": "Notifications",
+    "settlements": "Settlements",
+    "analytics": "Analytics",
     "tryAgain": "Try Again"
   }
 }

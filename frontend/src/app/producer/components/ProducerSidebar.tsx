@@ -93,26 +93,27 @@ export function ProducerSidebar({ onClose }: { onClose: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-neutral-200 px-4 py-3 shrink-0 space-y-2">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-2 text-xs text-red-400 hover:text-red-600 transition-colors w-full"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-          </svg>
-          Αποσύνδεση
-        </button>
+      <div className="border-t border-neutral-200 px-2 py-2 shrink-0 space-y-1">
         <Link
           href="/"
-          className="flex items-center gap-2 text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
+          onClick={onClose}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
           Επιστροφή στο site
         </Link>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors w-full"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
+          Αποσύνδεση
+        </button>
       </div>
     </div>
   );
