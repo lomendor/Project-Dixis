@@ -202,10 +202,15 @@ cp -r .next/static .next/standalone/.next/ 2>/dev/null || true
 cp -r public .next/standalone/ 2>/dev/null || true
 cp .deploy-meta.json .next/standalone/ 2>/dev/null || true
 
-# Persistent uploads: symlink so uploaded files survive deploys
+# Persistent uploads: symlink BOTH locations so uploaded files survive deploys
+# putObjectFs writes to CWD/public/uploads/ (CWD = frontend/)
+# standalone serves from .next/standalone/public/uploads/
 mkdir -p /var/www/dixis/shared/uploads
+rm -rf "$FE/public/uploads"
+ln -sfn /var/www/dixis/shared/uploads "$FE/public/uploads"
+rm -rf .next/standalone/public/uploads
 ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
-echo "Standalone prepared (uploads symlinked to shared/)"
+echo "Standalone prepared (uploads symlinked to shared/ in both locations)"
 
 echo ""
 echo "--- H2) Restore .env symlink (OPS-DEPLOY-GUARD-01) ---"

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CATEGORIES } from '@/data/categories';
+import ScrollableRow from '@/components/ui/ScrollableRow';
 
 /* ── Custom image icons (used instead of Lucide for specific categories) ── */
 const SLUG_IMAGE_MAP: Record<string, string> = {
@@ -131,97 +132,98 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
 
   return (
     <div className="w-full" role="group" aria-label="Κατηγορίες προϊόντων">
-      {/* Horizontal scroll mobile, flex-wrap desktop (Wolt-style compact) */}
-      <div className="flex items-start gap-1.5 overflow-x-auto pb-2 xl:pb-0 xl:flex-wrap xl:justify-start xl:gap-x-1 xl:gap-y-2 xl:overflow-visible scrollbar-hide">
-        {/* "Όλα" card */}
-        <button
-          onClick={() => handleCategoryClick(null)}
-          aria-pressed={!currentCat}
-          aria-label="Όλες οι κατηγορίες"
-          className="flex flex-col items-center gap-1.5 w-[104px] xl:w-auto xl:min-w-[100px] xl:max-w-[136px] xl:flex-1 shrink-0 xl:shrink group"
-        >
-          <div
-            className={`
-              w-[96px] h-[96px] xl:w-[128px] xl:h-[128px]
-              rounded-2xl flex items-center justify-center overflow-hidden
-              transition-all duration-200
-              group-hover:scale-105 group-hover:shadow-card
-              ${
-                !currentCat
-                  ? 'ring-2 ring-primary shadow-card scale-[1.02]'
-                  : ''
-              }
-              bg-accent-cream
-            `}
+      <ScrollableRow>
+        <div className="flex items-start gap-3 px-1 pb-2">
+          {/* "Όλα" card */}
+          <button
+            onClick={() => handleCategoryClick(null)}
+            aria-pressed={!currentCat}
+            aria-label="Όλες οι κατηγορίες"
+            className="flex flex-col items-center gap-1.5 w-[104px] shrink-0 group"
           >
-            <Image
-              src="/icons/categories/all-3d.png"
-              alt="Όλα τα προϊόντα"
-              width={128}
-              height={128}
-              className="w-[88px] h-[88px] xl:w-[120px] xl:h-[120px] object-contain"
-            />
-          </div>
-          <span
-            className={`text-[11px] xl:text-xs font-medium text-center leading-tight min-h-[2rem] xl:min-h-[2.25rem] flex items-start justify-center
-              ${!currentCat ? 'text-primary font-semibold' : 'text-neutral-600'}
-            `}
-          >
-            Όλα
-          </span>
-        </button>
-
-        {/* Category cards */}
-        {items.map((item) => {
-          const Icon = item.icon;
-          const isSelected = currentCat === item.slug;
-
-          return (
-            <button
-              key={item.slug}
-              onClick={() => handleCategoryClick(item.slug)}
-              aria-pressed={isSelected}
-              aria-label={`Κατηγορία: ${item.label}`}
-              className="flex flex-col items-center gap-1.5 w-[104px] xl:w-auto xl:min-w-[100px] xl:max-w-[136px] xl:flex-1 shrink-0 xl:shrink group"
+            <div
+              className={`
+                w-[96px] h-[96px]
+                rounded-2xl flex items-center justify-center overflow-hidden
+                transition-all duration-200
+                group-hover:scale-105 group-hover:shadow-card
+                ${
+                  !currentCat
+                    ? 'ring-2 ring-primary shadow-card scale-[1.02]'
+                    : ''
+                }
+                bg-accent-cream
+              `}
             >
-              <div
-                className={`
-                  w-[96px] h-[96px] xl:w-[128px] xl:h-[128px]
-                  rounded-2xl flex items-center justify-center overflow-hidden
-                  transition-all duration-200
-                  group-hover:scale-105 group-hover:shadow-card
-                  ${
-                    isSelected
-                      ? 'ring-2 ring-primary shadow-card scale-[1.02]'
-                      : ''
-                  }
-                  ${item.bg}
-                `}
+              <Image
+                src="/icons/categories/all-3d.png"
+                alt="Όλα τα προϊόντα"
+                width={128}
+                height={128}
+                className="w-[88px] h-[88px] object-contain"
+              />
+            </div>
+            <span
+              className={`text-[11px] xl:text-xs font-medium text-center leading-tight min-h-[2rem] flex items-start justify-center
+                ${!currentCat ? 'text-primary font-semibold' : 'text-neutral-600'}
+              `}
+            >
+              Όλα
+            </span>
+          </button>
+
+          {/* Category cards */}
+          {items.map((item) => {
+            const Icon = item.icon;
+            const isSelected = currentCat === item.slug;
+
+            return (
+              <button
+                key={item.slug}
+                onClick={() => handleCategoryClick(item.slug)}
+                aria-pressed={isSelected}
+                aria-label={`Κατηγορία: ${item.label}`}
+                className="flex flex-col items-center gap-1.5 w-[104px] shrink-0 group"
               >
-                {item.customImage ? (
-                  <Image
-                    src={item.customImage}
-                    alt={item.label}
-                    width={128}
-                    height={128}
-                    className="w-[88px] h-[88px] xl:w-[120px] xl:h-[120px] object-contain"
-                    style={item.imageScale ? { transform: `scale(${item.imageScale})` } : undefined}
-                  />
-                ) : (
-                  <Icon className="w-11 h-11 xl:w-14 xl:h-14 text-neutral-700" />
-                )}
-              </div>
-              <span
-                className={`text-[11px] xl:text-xs font-medium text-center leading-tight max-w-[100px] xl:max-w-[124px] line-clamp-2 min-h-[2rem] xl:min-h-[2.25rem] flex items-start justify-center
-                  ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
-                `}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <div
+                  className={`
+                    w-[96px] h-[96px]
+                    rounded-2xl flex items-center justify-center overflow-hidden
+                    transition-all duration-200
+                    group-hover:scale-105 group-hover:shadow-card
+                    ${
+                      isSelected
+                        ? 'ring-2 ring-primary shadow-card scale-[1.02]'
+                        : ''
+                    }
+                    ${item.bg}
+                  `}
+                >
+                  {item.customImage ? (
+                    <Image
+                      src={item.customImage}
+                      alt={item.label}
+                      width={128}
+                      height={128}
+                      className="w-[88px] h-[88px] object-contain"
+                      style={item.imageScale ? { transform: `scale(${item.imageScale})` } : undefined}
+                    />
+                  ) : (
+                    <Icon className="w-11 h-11 text-neutral-700" />
+                  )}
+                </div>
+                <span
+                  className={`text-[11px] xl:text-xs font-medium text-center leading-tight max-w-[100px] line-clamp-2 min-h-[2rem] flex items-start justify-center
+                    ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
+                  `}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </ScrollableRow>
     </div>
   );
 }

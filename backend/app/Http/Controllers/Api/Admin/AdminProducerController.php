@@ -80,7 +80,7 @@ class AdminProducerController extends Controller
     }
 
     /**
-     * ADMIN-LATLNG-01: Update producer profile fields (e.g. coordinates)
+     * ADMIN-PRODUCER-EDIT: Update producer profile fields
      */
     public function update(Request $request, Producer $producer): JsonResponse
     {
@@ -89,6 +89,21 @@ class AdminProducerController extends Controller
         }
 
         $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'business_name' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'website' => 'nullable|string|max:500',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:10',
+            'region' => 'nullable|string|max:100',
+            'tax_id' => 'nullable|string|max:20',
+            'tax_office' => 'nullable|string|max:100',
+            'iban' => 'nullable|string|max:34',
+            'bank_account_holder' => 'nullable|string|max:255',
+            'food_license_number' => 'nullable|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'image_url' => 'nullable|string|max:500',

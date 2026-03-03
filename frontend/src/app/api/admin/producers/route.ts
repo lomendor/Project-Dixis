@@ -72,6 +72,8 @@ export async function GET(req: NextRequest) {
       beekeeperRegistryNumber: p.beekeeper_registry_number || null,
       cpnpNotificationNumber: p.cpnp_notification_number || null,
       responsiblePersonName: p.responsible_person_name || null,
+      website: p.website || null,
+      foodLicenseNumber: p.food_license_number || null,
       iban: p.iban || null,
       bankAccountHolder: p.bank_account_holder || null,
       latitude: p.latitude ?? null,
