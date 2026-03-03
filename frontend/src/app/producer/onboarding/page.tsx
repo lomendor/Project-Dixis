@@ -61,6 +61,23 @@ const REGIONS = [
   'Κρήτη',
 ];
 
+const DRAFT_KEY = 'dixis_onboarding_draft';
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function saveDraft(data: Record<string, unknown>) {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch {}
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch {}
+}
+
 export default function ProducerOnboardingPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -69,6 +86,7 @@ export default function ProducerOnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [profile, setProfile] = useState<ProducerProfile | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   const [form, setForm] = useState({
     business_name: '',
@@ -166,8 +184,30 @@ export default function ProducerOnboardingPage() {
       }
     } finally {
       setLoading(false);
+      // After loading profile, restore draft if we have one (covers refresh scenario)
+      const draft = loadDraft();
+      if (draft) {
+        setForm((prev) => {
+          const merged = { ...prev };
+          for (const key of Object.keys(merged) as (keyof typeof merged)[]) {
+            if (draft[key] && !prev[key]) merged[key] = draft[key];
+          }
+          return merged;
+        });
+        if (draft.selectedCategories?.length) setSelectedCategories((prev) => prev.length ? prev : draft.selectedCategories);
+        if (draft.beekeeperNumber) setBeekeeperNumber((prev) => prev || draft.beekeeperNumber);
+        if (draft.cpnpNumber) setCpnpNumber((prev) => prev || draft.cpnpNumber);
+        if (draft.responsiblePerson) setResponsiblePerson((prev) => prev || draft.responsiblePerson);
+        setDraftRestored(true);
+      }
     }
   };
+
+  // Auto-save draft to localStorage on every change (debounced by React batching)
+  useEffect(() => {
+    if (loading || success) return;
+    saveDraft({ ...form, selectedCategories, beekeeperNumber, cpnpNumber, responsiblePerson });
+  }, [form, selectedCategories, beekeeperNumber, cpnpNumber, responsiblePerson, loading, success]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -262,6 +302,7 @@ export default function ProducerOnboardingPage() {
         onboarding_completed_at: new Date().toISOString(),
       });
       setSuccess(true);
+      clearDraft(); // Remove saved draft after successful submission
       // Fire-and-forget: notify admin via email
       notifyAdmin();
     } catch (err) {
@@ -393,10 +434,23 @@ export default function ProducerOnboardingPage() {
           <h1 className="text-2xl font-bold text-neutral-900 mb-2" data-testid="page-title">
             Εγγραφή Παραγωγού
           </h1>
-          <p className="text-neutral-600 mb-6">
+          <p className="text-neutral-600 mb-2">
             Συμπληρώστε τα στοιχεία σας και ανεβάστε τα απαραίτητα έγγραφα για να ξεκινήσετε να
             πουλάτε στο Dixis.
           </p>
+          <p className="text-xs text-neutral-400 mb-6 flex items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Τα στοιχεία σας αποθηκεύονται αυτόματα — δεν χάνονται αν κλείσετε τη σελίδα
+          </p>
+          {draftRestored && (
+            <div className="rounded-md bg-blue-50 border border-blue-200 p-3 mb-4">
+              <p className="text-xs text-blue-700">
+                Τα στοιχεία σας φορτώθηκαν από την τελευταία φορά. Συνεχίστε από εκεί που σταματήσατε.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="rounded-md bg-red-50 p-4 mb-6" data-testid="form-error">

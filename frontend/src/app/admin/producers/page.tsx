@@ -277,23 +277,35 @@ function AdminProducersContent() {
                     </td>
                     <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                       {p.approvalStatus === 'pending' && (
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            onClick={() => handleApprove(p.id)}
-                            disabled={processingIds.has(p.id)}
-                            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
-                            data-testid={`approve-btn-${p.id}`}
-                          >
-                            {processingIds.has(p.id) ? '...' : 'Έγκριση'}
-                          </button>
-                          <button
-                            onClick={() => handleRejectClick({ id: p.id, name: p.name })}
-                            disabled={processingIds.has(p.id)}
-                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
-                            data-testid={`reject-btn-${p.id}`}
-                          >
-                            Απόρριψη
-                          </button>
+                        <div className="flex flex-col items-end gap-1.5">
+                          {!p.onboardingCompletedAt && (
+                            <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                              ⚠ Δεν υπέβαλε onboarding
+                            </span>
+                          )}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                if (!p.onboardingCompletedAt) {
+                                  if (!confirm('Ο παραγωγός ΔΕΝ έχει ολοκληρώσει το onboarding (λείπουν στοιχεία/έγγραφα). Θέλετε να τον εγκρίνετε παρόλα αυτά;')) return
+                                }
+                                handleApprove(p.id)
+                              }}
+                              disabled={processingIds.has(p.id)}
+                              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                              data-testid={`approve-btn-${p.id}`}
+                            >
+                              {processingIds.has(p.id) ? '...' : 'Έγκριση'}
+                            </button>
+                            <button
+                              onClick={() => handleRejectClick({ id: p.id, name: p.name })}
+                              disabled={processingIds.has(p.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+                              data-testid={`reject-btn-${p.id}`}
+                            >
+                              Απόρριψη
+                            </button>
+                          </div>
                         </div>
                       )}
                       <button
