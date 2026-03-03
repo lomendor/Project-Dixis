@@ -62,10 +62,16 @@ npx prisma generate
 NODE_OPTIONS='--max-old-space-size=2048' pnpm build
 ```
 
-### 5. Prepare standalone bundle
+### 5. Prepare standalone bundle + persistent uploads
 ```bash
 cp -r .next/static .next/standalone/.next/
 cp -r public .next/standalone/
+
+# CRITICAL: Symlink uploads to shared/ so they survive deploys
+mkdir -p /var/www/dixis/shared/uploads
+rm -rf public/uploads .next/standalone/public/uploads
+ln -sfn /var/www/dixis/shared/uploads public/uploads
+ln -sfn /var/www/dixis/shared/uploads .next/standalone/public/uploads
 ```
 
 ### 6. Restore .env in standalone
