@@ -7,19 +7,23 @@ function yyyymm(d=new Date()){ const y=d.getFullYear(); const m=String(d.getMont
 function extFromMime(m: string){ if(m.includes('jpeg')) return 'jpg'; if(m.includes('png')) return 'png'; if(m.includes('webp')) return 'webp'; if(m.includes('pdf')) return 'pdf'; return 'bin'; }
 function sha16(b: Uint8Array){ const h=createHash('sha256').update(b).digest('hex'); return h.slice(0,16); }
 
-async function maybeProcess(buf: Uint8Array, mime: string): Promise<Uint8Array>{
+/**
+ * Process uploaded images: resize + convert to WebP for optimal size.
+ * A 5MB PNG becomes ~200KB WebP. Always enabled in production.
+ * Returns { buf, outputMime } — outputMime may differ from input (PNG→WebP).
+ */
+async function maybeProcess(buf: Uint8Array, mime: string): Promise<{ buf: Uint8Array; outputMime: string }>{
   // Skip processing for non-image files (PDFs etc.)
-  if (mime.includes('pdf')) return buf;
-  if (String(process.env.ENABLE_IMAGE_PROCESSING || '').toLowerCase() !== 'true') return buf;
+  if (mime.includes('pdf')) return { buf, outputMime: mime };
   try{
     const sharp = (await import('sharp')).default;
-    const ext = extFromMime(mime);
-    return await sharp(buf)
+    const processed = await sharp(buf)
       .rotate()
       .resize({ width:1200, height:1200, fit:'inside', withoutEnlargement:true })
-      .toFormat(ext==='jpg'?'jpeg':ext==='png'?'png':'webp', { quality: 85 })
+      .webp({ quality: 82 })
       .toBuffer();
-  }catch{ return buf; }
+    return { buf: processed, outputMime: 'image/webp' };
+  }catch{ return { buf, outputMime: mime }; }
 }
 
 export async function putObjectFs(data: Buf, mime: string): Promise<PutResult>{
@@ -27,9 +31,9 @@ export async function putObjectFs(data: Buf, mime: string): Promise<PutResult>{
   const { join } = await import('path');
   const { existsSync } = await import('fs');
   const raw = data instanceof Uint8Array ? data : Buffer.from(data as ArrayBuffer);
-  const processed = await maybeProcess(raw, mime);
+  const { buf: processed, outputMime } = await maybeProcess(raw, mime);
   const hash = sha16(processed);
-  const ext = extFromMime(mime);
+  const ext = extFromMime(outputMime);
   const folder = yyyymm();
   const key = `${hash}.${ext}`;
   // Smart path detection: works in dev (repo root or frontend/), standalone mode, or production
@@ -58,9 +62,9 @@ export async function putObjectS3(data: Buf, mime: string): Promise<PutResult>{
   const Bucket = process.env.S3_BUCKET || 'dixis-media';
   const base = process.env.S3_PUBLIC_URL_BASE || process.env.S3_PUBLIC_BASE || (endpoint ? endpoint.replace(/\/+$/,'') : '');
   const raw = data instanceof Uint8Array ? data : Buffer.from(data as ArrayBuffer);
-  const processed = await maybeProcess(raw, mime);
+  const { buf: processed, outputMime } = await maybeProcess(raw, mime);
   const hash = sha16(processed);
-  const ext = extFromMime(mime);
+  const ext = extFromMime(outputMime);
   const folder = yyyymm();
   const Key = `uploads/${folder}/${hash}.${ext}`;
   const accessKeyId = process.env.S3_ACCESS_KEY_ID;
@@ -79,7 +83,7 @@ export async function putObjectS3(data: Buf, mime: string): Promise<PutResult>{
       secretAccessKey: secretAccessKey || 'minioadmin'
     }
   });
-  await client.send(new PutObjectCommand({ Bucket, Key, Body: processed, ContentType: mime, ACL: 'public-read' } as any));
+  await client.send(new PutObjectCommand({ Bucket, Key, Body: processed, ContentType: outputMime, ACL: 'public-read' } as any));
   const url = base ? `${base.replace(/\/+$/,'')}/${Bucket}/${Key}` : `https://${Bucket}.s3.amazonaws.com/${Key}`;
   return { url, key: Key };
 }

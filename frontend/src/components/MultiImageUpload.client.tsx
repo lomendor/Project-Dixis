@@ -60,7 +60,14 @@ export default function MultiImageUpload({
       });
       if (!r.ok) {
         const j = await r.json().catch((): null => null);
-        setErr(j?.error || (r.status === 401 ? 'Απαιτείται σύνδεση' : 'Σφάλμα ανεβάσματος'));
+        const msg = r.status === 401
+          ? 'Απαιτείται σύνδεση για ανέβασμα εικόνων'
+          : r.status === 415
+          ? `Μη αποδεκτός τύπος αρχείου (${file.type || 'άγνωστος'}). Δεκτά: JPG, PNG, WebP`
+          : r.status === 413
+          ? `Η εικόνα είναι πολύ μεγάλη (${(file.size / 1024 / 1024).toFixed(1)}MB). Μέγιστο: 10MB`
+          : j?.error || `Σφάλμα ανεβάσματος (${r.status})`;
+        setErr(msg);
         setItems(items); // revert
         return;
       }
