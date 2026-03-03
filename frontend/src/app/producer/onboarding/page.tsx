@@ -309,28 +309,76 @@ export default function ProducerOnboardingPage() {
   // Success just submitted
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 py-8">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-2xl font-bold text-neutral-900 mb-4" data-testid="page-title">
-              Ολοκλήρωση Εγγραφής
-            </h1>
-            <div
-              className="border rounded-lg p-6 bg-green-50 border-green-200 text-green-800"
-              data-testid="success-banner"
-            >
-              <h3 className="font-semibold text-lg mb-2">Τα στοιχεία σας καταχωρήθηκαν!</h3>
-              <p>
-                Τα στοιχεία σας ελέγχονται. Ετοιμάστε τα προϊόντα σας — θα εμφανιστούν μόλις
-                εγκριθείτε.
-              </p>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-8 px-4">
+        <div className="max-w-md w-full text-center">
+          {/* Dixis Logo */}
+          <div className="mb-6">
+            <img
+              src="/logo.png"
+              alt="Dixis"
+              width={72}
+              height={72}
+              className="mx-auto"
+            />
+          </div>
+
+          {/* Success Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8" data-testid="success-banner">
+            {/* Checkmark */}
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-green-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+
+            <h1 className="text-2xl font-bold text-neutral-900 mb-3" data-testid="page-title">
+              Η αίτησή σας υποβλήθηκε!
+            </h1>
+
+            <p className="text-neutral-600 mb-6 leading-relaxed">
+              Η ομάδα του <strong className="text-primary">Dixis</strong> θα ελέγξει τα στοιχεία σας
+              εντός <strong>1-2 εργάσιμων ημερών</strong>.
+              Θα ενημερωθείτε μέσω email.
+            </p>
+
+            {/* What to do now */}
+            <div className="bg-neutral-50 rounded-xl p-5 mb-6 text-left">
+              <h3 className="text-sm font-semibold text-neutral-800 mb-3 uppercase tracking-wide">
+                Στο μεταξύ μπορείτε να:
+              </h3>
+              <ul className="space-y-2.5">
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-0.5 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                  <span className="text-sm text-neutral-700">
+                    <strong>Ετοιμάσετε τα προϊόντα σας</strong> — ξεκινήστε να τα ανεβάζετε τώρα, θα εμφανιστούν μόλις εγκριθείτε
+                  </span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-0.5 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                  <span className="text-sm text-neutral-700">
+                    <strong>Φωτογραφίστε τα προϊόντα σας</strong> — καλές φωτογραφίες αυξάνουν τις πωλήσεις
+                  </span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="mt-0.5 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                  <span className="text-sm text-neutral-700">
+                    <strong>Γράψτε περιγραφές</strong> — αναφέρετε προέλευση, τρόπο παραγωγής, αλλεργιογόνα
+                  </span>
+                </li>
+              </ul>
+            </div>
+
             <button
               onClick={() => router.push('/producer/dashboard')}
-              className="mt-6 w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-light transition-colors font-medium"
+              className="w-full bg-primary text-white py-3 px-4 rounded-xl hover:bg-primary-dark transition-colors font-semibold text-base"
             >
               Μετάβαση στο Dashboard
             </button>
+
+            <p className="mt-4 text-xs text-neutral-400">
+              Χρειάζεστε βοήθεια;{' '}
+              <a href="mailto:info@dixis.gr" className="text-primary hover:underline">info@dixis.gr</a>
+            </p>
           </div>
         </div>
       </div>

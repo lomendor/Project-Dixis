@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 type GuardState = 'loading' | 'active' | 'pending' | 'redirect' | 'error';
+type ErrorInfo = { message: string; status?: number; detail?: string };
 
 /**
  * Context exposing producer approval status to child components.
@@ -31,6 +32,7 @@ interface Props {
 export default function ProducerOnboardingGuard({ children }: Props) {
   const router = useRouter();
   const [state, setState] = useState<GuardState>('loading');
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
 
   useEffect(() => {
     checkOnboardingStatus();
@@ -69,8 +71,27 @@ export default function ProducerOnboardingGuard({ children }: Props) {
       // Pending but onboarding not completed — redirect to complete it
       router.replace('/producer/onboarding');
       setState('redirect');
-    } catch {
-      // API error — show error state with retry instead of blind redirect
+    } catch (err: unknown) {
+      // Extract useful error info for display
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      const msg = err instanceof Error ? err.message : 'Άγνωστο σφάλμα';
+
+      if (status === 401) {
+        // Not authenticated — redirect to login
+        router.replace('/auth/login?redirect=/producer/dashboard');
+        setState('redirect');
+        return;
+      }
+
+      setErrorInfo({
+        message: status === 403
+          ? 'Δεν έχετε δικαίωμα πρόσβασης σε αυτή τη σελίδα.'
+          : status === 500
+          ? 'Πρόβλημα στον server. Παρακαλώ δοκιμάστε σε λίγο.'
+          : 'Αδυναμία σύνδεσης με τον server.',
+        status,
+        detail: msg,
+      });
       setState('error');
     }
   };
@@ -100,11 +121,20 @@ export default function ProducerOnboardingGuard({ children }: Props) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <p className="text-neutral-700 mb-4">
-            Σφάλμα φόρτωσης. Παρακαλώ δοκιμάστε ξανά.
+          <p className="text-neutral-700 font-medium mb-2">
+            {errorInfo?.message || 'Σφάλμα φόρτωσης'}
           </p>
+          <p className="text-neutral-500 text-sm mb-4">
+            Αν το πρόβλημα συνεχίζεται, επικοινωνήστε μαζί μας στο{' '}
+            <a href="mailto:info@dixis.gr" className="text-primary hover:underline">info@dixis.gr</a>
+          </p>
+          {errorInfo?.status && (
+            <p className="text-neutral-400 text-xs mb-3">
+              Κωδικός: {errorInfo.status}
+            </p>
+          )}
           <button
-            onClick={() => { setState('loading'); checkOnboardingStatus(); }}
+            onClick={() => { setState('loading'); setErrorInfo(null); checkOnboardingStatus(); }}
             className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             data-testid="retry-button"
           >
