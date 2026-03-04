@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-03 (Cart fix + Umami analytics deployed)
+**Updated**: 2026-03-04 (SEO + Skeleton Loaders + Wishlist/Favorites)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -43,19 +43,7 @@
 
 ## WIP (max 1)
 
-**NONE** — Ready for testing phase. All recent features deployed.
-
-### Recently Shipped (2026-03-03)
-- **FIX-CART-LEAK-01** ✅ DEPLOYED — Cart cross-user leakage fix. Zustand localStorage cleared on login/logout. Login now fetches only server-scoped cart. (PR #3268)
-- **ANALYTICS-UMAMI-01** ✅ DEPLOYED — Self-hosted Umami v3.0.3 analytics. Cookieless (no GDPR consent needed). First-party proxy via `/u/*` rewrite. PM2 on port 3001. (PR #3269)
-- **STRIPE-CONNECT-01** ✅ DEPLOYED — Stripe Connect Express (PSD2 compliance). Feature-flagged OFF.
-- **PRICE-TRANSPARENCY-01** ✅ DEPLOYED — Bidirectional PriceBreakdown in producer + admin forms
-- **DISCOUNT-VALIDATION** ✅ DEPLOYED — Discount price cannot be >= regular price
-- **88%-FIX** ✅ DEPLOYED — Marketing claims corrected from "88%" to "Πάνω από 80%"
-
-### Next Action: TESTING (not building)
-- Brother creates test producer → products → orders → verify full flow
-- After 10-20 real orders: resume backlog (S1-03 Q&A, S1-04 Wishlist)
+**NONE** — S1-04 Wishlist complete, ready for next task.
 
 ---
 
@@ -78,9 +66,9 @@
 - Action: Onboard 3 producers → first 20 orders → measure → then decide spend
 - Full analysis: `docs/BUSINESS-REVIEW-2026-02.md`
 
-**Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
-**Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
+**Feature backlog (active):** `docs/BACKLOG.md` — building value while waiting for producers.
+**Next from backlog:** S1-04 (Wishlist — in progress), S2-05 (Mobile audit), S1-03 (Q&A).
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, S3-04 ✅ SEO Foundation, S2-06 ✅ Skeleton Loaders, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
 
 **User-reported issues (for later):**
 - Product renaming (improve Greek product names)
@@ -102,16 +90,9 @@
 
 ## Recently Done (last 10)
 
-- **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS (PM2, port 3001). Cookieless, GDPR-compliant, no consent banner needed. Next.js `/u/*` rewrite for first-party proxy (avoids ad blockers). Analytics component + env vars. (PR #3269, deployed 2026-03-02) ✅
-- **FIX-CART-LEAK-01** — Cart cross-user leakage fix. Root cause: static Zustand localStorage key shared by all users. Added `clearCartStorage()` on login/logout. Login now clears localStorage then fetches only server-scoped cart items. (PR #3268, deployed 2026-03-02) ✅
-- **ARCH-FIX-06** — Error response standardization: all controllers now use `message` field (was mixed `error`/`message`). 8 occurrences in 5 files. Zero frontend changes. (PR #3240, merged 2026-02-28) ✅
-- **ARCH-FIX-05** — Commission preview 500 fix: added missing `settleForOrder()` method to CommissionService, added try-catch in ops route, removed E2E quarantine. (PR #3239, merged 2026-02-28) ✅
-- **ARCH-FIX-04** — Routes split: `api.php` 1228→517 lines. Extracted producer.php (19 routes), ops.php (internal), openapi.php (569-line spec). All P0-P2 arch debt resolved. (PRs #3236-#3237, merged 2026-02-28) ✅
-- **ARCH-FIX-03** — OTP email switched from Resend-only to SMTP-first transport. Deleted dead producer status email route. (PR #3235, merged 2026-02-28) ✅
-- **ARCH-FIX-02** — Customer orders fix: myOrders + myOrder endpoints, producer order management (list, detail, status update, CSV export), deploy docs updated. (PRs #3229-#3234, deployed 2026-02-28) ✅
-- **IMAGE-GALLERY** — Multi-image upload for producer products: new MultiImageUpload component (upload, reorder, delete, primary badge, max 5), backend syncs `images[]` to `product_images` table, ProductResource includes images, API proxy routes updated. (PR #3187, deployed 2026-02-26) ✅
-- **ROUTE-CLEANUP-MY-TO-PRODUCER** — Moved all product CRUD implementations from `/my/products/*` to `/producer/products/*`. Old routes become redirect stubs. Tests updated. Removed per-page AuthGuard wrappers (layout handles auth). (PR #3185, deployed 2026-02-25) ✅
-- **PRODUCER-SIDEBAR-NAV** — Producer sidebar navigation: ProducerSidebar + ProducerShell components (mirroring AdminShell pattern), layout-level AuthGuard for all `/producer/*` routes (onboarding excluded), removed per-page AuthGuard wrappers from 6 pages. Also created `docs/AGENT/CONTEXT-BOOT.md` agent brain file for cold-start sessions. (PR #3184, deployed 2026-02-25) ✅
+- **SEO + SKELETON + WISHLIST** — SEO: meta title shortened, JSON-LD enriched, Contact/FAQ metadata. Skeleton loaders for 5 pages. S1-04 Wishlist: heart toggle, favorites page, nav links. B2B research doc. (PR #3272, 2026-03-04) ✅
+- **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS. Cookieless, GDPR-compliant. First-party proxy `/u/*`. (PR #3269, deployed 2026-03-02) ✅
+- **FIX-CART-LEAK-01** — Cart cross-user leakage fix. `clearCartStorage()` on login/logout. (PR #3268, deployed 2026-03-02) ✅
 - **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
 - **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
 - **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
@@ -178,6 +159,7 @@
 | `docs/BUSINESS-REVIEW-2026-02.md` | Financial plan analysis & realistic projections |
 | `docs/OPS-QUICK-REFERENCE.md` | Daily ops cheat sheet — "τι κάνω ΤΩΡΑ όταν..." |
 | `docs/LAUNCH-CHECKLIST-7DAY.md` | 7-day launch plan with checkboxes |
+| `docs/B2B-READINESS.md` | B2B preparation: invoicing, providers, implementation plan |
 
 ---
 

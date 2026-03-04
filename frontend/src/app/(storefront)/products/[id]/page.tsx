@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from '@/lib/i18n/t';
 import type { Metadata } from 'next';
 import Add from './ui/Add';
+import FavoriteButtonDetail from './ui/FavoriteButtonDetail';
 import ReviewSection from '@/components/product/ReviewSection';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import StarRating from '@/components/StarRating';
@@ -228,9 +229,23 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
             </p>
           )}
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3" data-testid="product-title">
-            {p.title}
-          </h1>
+          <div className="flex items-start gap-2 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 flex-grow" data-testid="product-title">
+              {p.title}
+            </h1>
+            {/* S1-04: Favorite heart button */}
+            <FavoriteButtonDetail
+              item={{
+                id: String(p.id),
+                title: p.title,
+                priceCents: Math.round(Number(p.price || 0) * 100),
+                imageUrl: p.imageUrl || undefined,
+                producer: p.producerName || undefined,
+                producerId: p.producerId ? String(p.producerId) : undefined,
+                producerSlug: p.producerSlug || undefined,
+              }}
+            />
+          </div>
 
           {/* S1-02: Star rating summary */}
           {p.reviewsAvgRating && (

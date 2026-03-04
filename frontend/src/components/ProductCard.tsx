@@ -3,6 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import AddToCartButton from '@/components/AddToCartButton'
+import FavoriteButton from '@/components/FavoriteButton'
 import StarRating from '@/components/StarRating'
 
 /**
@@ -99,6 +100,20 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
                  cultivationType}
               </span>
             )}
+          </div>
+          {/* S1-04: Favorite heart button — top right */}
+          <div className="absolute top-2 right-2 z-10">
+            <FavoriteButton
+              item={{
+                id: String(id),
+                title,
+                priceCents,
+                imageUrl: image || undefined,
+                producer: producer || undefined,
+                producerId: producerId ? String(producerId) : undefined,
+                producerSlug: producerSlug || undefined,
+              }}
+            />
           </div>
         </div>
       </Link>
