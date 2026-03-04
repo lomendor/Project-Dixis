@@ -26,15 +26,21 @@ use Illuminate\Support\Facades\Mail;
 class OrderEmailService
 {
     /**
-     * Rate-limit counter: spaces queued emails 1s apart to stay under Resend 2/s limit.
-     * Each call to nextDelay() returns 0, 1, 2, ... so the first email sends immediately,
-     * the second after 1s, the third after 2s, etc.
+     * Rate-limit counter: spaces queued emails 2s apart to stay under Resend 2/s limit.
+     * Each call to nextDelay() returns 0, 2, 4, ... so the first email sends immediately,
+     * the second after 2s, the third after 4s, etc.
+     *
+     * FIX-RATE-LIMIT-01: Changed from 1s to 2s spacing. Resend free tier = 2 req/s
+     * but Laravel queue processes jobs near-simultaneously, and the 1s delay wasn't
+     * enough buffer when including network latency + queue clock drift.
      */
     private int $emailDelaySeconds = 0;
 
     private function nextDelay(): int
     {
-        return $this->emailDelaySeconds++;
+        $delay = $this->emailDelaySeconds;
+        $this->emailDelaySeconds += 2;
+        return $delay;
     }
 
     /**
