@@ -86,15 +86,18 @@ Before planning what to build, here's what **already works in production**:
 **Effort:** M (3 PRs: models+API, product page UI, producer notification)
 **Status:** `[ ]`
 
-### S1-04: Wishlist / Favorites
+### S1-04: Wishlist / Favorites ✅
 **Why:** Creates return visits. Consumers save products they'll buy later. Quick path to re-purchase.
 **What:**
-- Wishlist model: user_id, product_id
-- Heart icon on product cards (toggle)
-- "My Favorites" page in account area
-- "Add all to cart" button
-**Effort:** S (2 PRs: backend model+API, frontend UI)
-**Status:** `[ ]`
+- ~~Wishlist model: user_id, product_id~~ → Client-only (localStorage) for now
+- Heart icon on product cards (toggle) ✅
+- Heart icon on product detail page ✅
+- "My Favorites" page in account area ✅
+- Nav links in header dropdown + mobile menu ✅
+- "Add all to cart" button — deferred until real usage
+- Server sync — deferred until real users
+**Effort:** S (1 PR: frontend-only, ~250 LOC)
+**Status:** `[x]` ✅ Done — PR on claude/cranky-dubinsky. Zustand store + FavoriteButton + /account/favorites page.
 
 ### S1-05: Product Certifications Display
 **Why:** Builds trust. Shows quality credentials prominently.
