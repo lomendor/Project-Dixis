@@ -163,8 +163,11 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        // Revoke current API token
-        $request->user()->currentAccessToken()->delete();
+        // Revoke current API token (skip for SPA session auth — TransientToken has no delete())
+        $token = $request->user()->currentAccessToken();
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         // Invalidate session cookie (SPA auth) — guard for API tests without session store
         Auth::guard('web')->logout();

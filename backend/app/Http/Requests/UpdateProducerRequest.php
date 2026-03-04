@@ -15,6 +15,20 @@ class UpdateProducerRequest extends FormRequest
     }
 
     /**
+     * Get custom messages for validator errors (Greek).
+     */
+    public function messages(): array
+    {
+        return [
+            'tax_id.unique' => 'Αυτό το ΑΦΜ είναι ήδη καταχωρημένο σε άλλον παραγωγό.',
+            'tax_id.regex' => 'Το ΑΦΜ πρέπει να αποτελείται από 9 ψηφία.',
+            'iban.regex' => 'Μη έγκυρη μορφή IBAN.',
+            'email.email' => 'Μη έγκυρη διεύθυνση email.',
+            'slug.unique' => 'Αυτό το slug χρησιμοποιείται ήδη.',
+        ];
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -31,7 +45,7 @@ class UpdateProducerRequest extends FormRequest
             'name' => 'sometimes|required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:producers,slug,'.$producerId,
             'business_name' => 'nullable|string|max:255',
-            'tax_id' => ['nullable', 'string', 'max:20', 'regex:/^\d{9}$/'],
+            'tax_id' => ['nullable', 'string', 'max:20', 'regex:/^\d{9}$/', 'unique:producers,tax_id,'.$producerId],
             'tax_office' => 'nullable|string|max:255',
             'food_license_number' => 'nullable|string|max:100',
             'agreement_accepted_at' => 'nullable|date',

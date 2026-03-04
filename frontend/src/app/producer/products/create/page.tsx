@@ -465,14 +465,19 @@ export default function CreateProductPage() {
                 <input
                   id="stock"
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="0"
+                  step="1"
                   value={stock}
-                  onChange={(e) => setStock(e.target.value)}
+                  onChange={(e) => setStock(e.target.value.replace(/[^0-9]/g, ''))}
+                  onKeyDown={(e) => { if (['e', 'E', '+', '-', '.', ','].includes(e.key)) e.preventDefault(); }}
                   required
                   className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="π.χ. 25"
                   data-testid="stock-input"
                 />
+                <p className="mt-1 text-xs text-neutral-500">Αριθμός τεμαχίων (βάζα, μπουκάλια, σακουλάκια κλπ.)</p>
               </div>
 
               <div>

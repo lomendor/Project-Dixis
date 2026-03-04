@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProducerSidebar } from './ProducerSidebar';
 
 /**
@@ -8,9 +8,20 @@ import { ProducerSidebar } from './ProducerSidebar';
  *
  * Fixed overlay (z-50) covering public site Header/Footer.
  * Collapsible sidebar on mobile, persistent on desktop.
+ * Body overflow is locked while shell is mounted to prevent double-scroll.
  */
 export function ProducerShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Lock body scroll while producer shell is mounted to prevent double-scroll
+  // The shell is fixed inset-0 but Header/Footer behind it can still cause body scroll
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex bg-neutral-50" data-testid="producer-shell">

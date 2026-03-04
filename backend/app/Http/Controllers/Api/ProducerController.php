@@ -209,7 +209,26 @@ class ProducerController extends Controller
         }
 
         $producer = $user->producer;
-        $producer->update($request->validated());
+
+        try {
+            $producer->update($request->validated());
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Catch unique constraint violations and return user-friendly Greek message
+            if ($e->getCode() === '23505' || str_contains($e->getMessage(), 'Unique violation')) {
+                $field = 'unknown';
+                if (str_contains($e->getMessage(), 'tax_id')) {
+                    $field = 'ΑΦΜ';
+                } elseif (str_contains($e->getMessage(), 'slug')) {
+                    $field = 'slug';
+                } elseif (str_contains($e->getMessage(), 'iban')) {
+                    $field = 'IBAN';
+                }
+                return response()->json([
+                    'message' => "Το πεδίο {$field} χρησιμοποιείται ήδη από άλλον παραγωγό.",
+                ], 422);
+            }
+            throw $e; // Re-throw non-unique errors
+        }
 
         return response()->json([
             'producer' => new \App\Http\Resources\ProducerResource($producer->fresh()),
