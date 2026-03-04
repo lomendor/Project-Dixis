@@ -191,5 +191,15 @@
       "prettier --write"
     ]
   },
-  "ciKey": "2025-09-19a"
+  "ciKey": "2025-09-19a",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "sharp",
+      "@tailwindcss/oxide"
+    ]
+  }
 }

@@ -39,15 +39,20 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
   }
 
-  // Smart path detection — same logic as storage.ts putObjectFs()
+  // Smart path detection — check multiple locations for uploaded files
+  // Production: shared/uploads/, Dev: public/uploads/ or frontend/public/uploads/
   const cwd = process.cwd();
-  let filePath: string;
-  if (existsSync(join(cwd, 'public', 'uploads'))) {
-    filePath = join(cwd, 'public', 'uploads', ...segments);
-  } else if (existsSync(join(cwd, 'frontend', 'public', 'uploads'))) {
-    filePath = join(cwd, 'frontend', 'public', 'uploads', ...segments);
-  } else {
-    filePath = join(cwd, 'public', 'uploads', ...segments);
+  const candidates = [
+    join(cwd, 'public', 'uploads', ...segments),
+    join(cwd, 'frontend', 'public', 'uploads', ...segments),
+    '/var/www/dixis/shared/uploads/' + segments.join('/'),
+  ];
+  let filePath = candidates[0];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      filePath = candidate;
+      break;
+    }
   }
 
   // Verify file exists and is a regular file

@@ -103,7 +103,7 @@ test.describe('Producer Orders Scoping & Multi-Account Security', () => {
 
     // Producer B tries to view /my/orders
     const ctxB = await pwRequest.newContext();
-    const listOrdersB = await ctxB.get(base + '/my/orders', {
+    const listOrdersB = await ctxB.get(base + '/producer/orders', {
       headers: { cookie: `dixis_session=${sessionB}` }
     });
 
@@ -151,7 +151,7 @@ test.describe('Producer Orders Scoping & Multi-Account Security', () => {
     const ctx = await pwRequest.newContext();
 
     // Try to access /my/orders without session
-    const noAuthOrders = await ctx.get(base + '/my/orders');
+    const noAuthOrders = await ctx.get(base + '/producer/orders');
 
     // Should either throw (handled by requireProducer) or redirect
     // Playwright will follow redirects automatically

@@ -23,7 +23,7 @@ test('Status change uses real buyerPhone (not N/A) and masking is applied', asyn
 
   // Προκάλεσε αλλαγή κατάστασης (μέσω UI)
   await page.context().addCookies([{ name:'dixis_session', value:sess, url:base }]);
-  await page.goto(base+'/my/orders?tab=PENDING');
+  await page.goto(base+'/producer/orders?tab=PENDING');
   await page.getByRole('button', { name: 'Αποδοχή' }).first().click();
 
   // Dev outbox — πρέπει να δείχνει masked αριθμό

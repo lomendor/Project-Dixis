@@ -141,7 +141,15 @@
     "description": "Description",
     "addToCart": "Add to cart",
     "notFound": "Product not found.",
-    "backToProducts": "Back to products"
+    "backToProducts": "Back to products",
+    "units": {
+      "kg": "kg",
+      "g": "g",
+      "L": "L",
+      "ml": "ml",
+      "τεμ": "pcs"
+    },
+    "quantity": "Quantity"
   },
   "auth": {
     "login": {
@@ -358,7 +366,18 @@
     "noOrders": "No orders",
     "noOrdersYet": "You haven't received any orders for your products yet.",
     "noOrdersStatus": "No orders with status \"{status}\".",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting...",
+    "exportError": "Failed to export orders",
+    "needsAction": "Needs action",
+    "totalLabel": "total",
+    "moreItems": "more",
+    "colEmpty": "No orders",
+    "col_new": "New Orders",
+    "col_processing": "Processing",
+    "col_shipped": "Shipped",
+    "col_delivered": "Completed"
   },
   "reviews": {
     "title": "Reviews",
@@ -397,6 +416,7 @@
     "status": "Status",
     "inStock": "In Stock",
     "active": "Active",
+    "inactive": "Inactive",
     "noImage": "No Image",
     "quickActions": "Quick Actions",
     "viewOrders": "View Orders",

@@ -5,6 +5,7 @@ namespace App\Services\Courier;
 use App\Contracts\CourierProviderInterface;
 use App\Models\Order;
 use App\Models\Shipment;
+use App\Services\ShippingService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\RequestException;
@@ -63,6 +64,9 @@ class AcsCourierProvider implements CourierProviderInterface
                     'label_url' => $labelData['label_url'],
                 ]
             );
+
+            // Enrich shipment with zone/weight/cost from order data
+            $this->enrichShipmentWithOrderData($shipment, $order);
 
             Log::info('ACS label created (real API)', [
                 'order_id' => $orderId,
@@ -414,6 +418,51 @@ class AcsCourierProvider implements CourierProviderInterface
     }
 
     /**
+     * Enrich shipment with zone, weight, and cost data from the order.
+     * Uses ShippingService to resolve zone from postal code and sums
+     * item weights from order items.
+     */
+    private function enrichShipmentWithOrderData(Shipment $shipment, Order $order): void
+    {
+        try {
+            $shippingAddress = $order->shipping_address ?? [];
+            $postalCode = $shippingAddress['postal_code'] ?? null;
+
+            $zoneCode = null;
+            if ($postalCode) {
+                $shippingService = app(ShippingService::class);
+                $zoneCode = $shippingService->getZoneByPostalCode($postalCode);
+            }
+
+            // Calculate total weight from order items
+            $totalWeightKg = $order->orderItems->sum(function ($item) {
+                return ($item->product->weight_per_unit ?? 0.5) * $item->quantity;
+            });
+
+            // Get shipping cost from order (already calculated at checkout)
+            $shippingCost = (float) ($order->shipping_cost ?? $order->shipping_amount ?? 0);
+
+            $shipment->update([
+                'zone_code' => $zoneCode,
+                'billable_weight_kg' => round($totalWeightKg, 2),
+                'shipping_cost_eur' => $shippingCost,
+            ]);
+
+            Log::info('Shipment enriched with order data', [
+                'shipment_id' => $shipment->id,
+                'zone_code' => $zoneCode,
+                'weight_kg' => round($totalWeightKg, 2),
+                'cost_eur' => $shippingCost,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to enrich shipment with order data', [
+                'shipment_id' => $shipment->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Format label response for consistent API
      */
     private function formatLabelResponse(Shipment $shipment): array
@@ -424,6 +473,12 @@ class AcsCourierProvider implements CourierProviderInterface
             'carrier_code' => $shipment->carrier_code,
             'status' => $shipment->status,
             'provider' => 'acs',
+            'zone_code' => $shipment->zone_code,
+            'billable_weight_kg' => (float) ($shipment->billable_weight_kg ?? 0),
+            'shipping_cost_eur' => (float) ($shipment->shipping_cost_eur ?? 0),
+            'estimated_delivery_days' => $shipment->zone_code
+                ? (Shipment::ZONE_DELIVERY_DAYS[$shipment->zone_code] ?? 3)
+                : null,
         ];
     }
 }

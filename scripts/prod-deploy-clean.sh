@@ -51,7 +51,7 @@ check_http() {
 # ── Preflight (local) ──────────────────────────────────────────────────────
 echo "=== PREFLIGHT: prod must be healthy before deploy ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/" "307"
+check_http "homepage" "$PROD_URL/"
 echo ""
 
 # ── Build the SSH command block ─────────────────────────────────────────────
@@ -151,9 +151,7 @@ echo "Wiped node_modules and .next"
 
 echo ""
 echo "--- D) Install dependencies ---"
-# Ensure pnpm allows build scripts for native modules
-pnpm config set onlyBuiltDependencies "[]" >/dev/null 2>&1 || true
-
+# Build scripts allowed via pnpm.onlyBuiltDependencies in package.json
 if [ -f pnpm-lock.yaml ]; then
   echo "Installing from lockfile..."
   pnpm install --frozen-lockfile 2>&1 | tee -a "$LOGFILE" | tail -10
@@ -262,7 +260,7 @@ fi
 echo ""
 echo "=== POSTFLIGHT: public https verification ==="
 check_http "healthz" "$PROD_URL/api/healthz"
-check_http "homepage" "$PROD_URL/" "307"
+check_http "homepage" "$PROD_URL/"
 check_http "og-products" "$PROD_URL/og-products.jpg"
 check_http "twitter-products" "$PROD_URL/twitter-products.jpg"
 

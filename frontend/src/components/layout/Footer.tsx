@@ -4,6 +4,12 @@ import Logo from '@/components/brand/Logo';
 import { useLocale, useTranslations } from '@/contexts/LocaleContext';
 import { locales, type Locale } from '../../../i18n';
 
+/**
+ * Footer — Clean, polished footer
+ *
+ * Design: dark background (#1b2a1e), proper 4-column grid on desktop,
+ * brand column + 3 link columns. Clean bottom bar with copyright + language.
+ */
 export default function Footer() {
   const { locale, setLocale } = useLocale();
   const t = useTranslations();
@@ -11,93 +17,101 @@ export default function Footer() {
   const handleLocaleChange = (newLocale: Locale) => {
     setLocale(newLocale);
   };
+
   return (
-    <footer className="border-t border-accent-gold/10 bg-accent-cream/50 mt-auto">
-      {/* Mobile-first padding */}
-      <div className="max-w-[1600px] mx-auto px-4 py-8 sm:py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <Logo height={24} title="Dixis" />
-            <p className="mt-3 text-sm text-neutral-600">
-              Σύνδεσε με τοπικούς παραγωγούς. Φρέσκα προϊόντα, απευθείας από το χωράφι στο τραπέζι σου.
+    <footer className="bg-[#1b2a1e] text-white/80 mt-auto">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-16 lg:py-20">
+        {/* Main grid — 4 columns on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+
+          {/* Brand column */}
+          <div className="col-span-2 sm:col-span-2 lg:col-span-4">
+            <Logo height={28} title="Dixis" showWordmark className="[&_span]:!text-white [&_img]:brightness-0 [&_img]:invert" />
+            <p className="mt-4 text-sm leading-relaxed text-white/45 max-w-[280px]">
+              Αυθεντικά ελληνικά προϊόντα, απευθείας από τοπικούς παραγωγούς στο τραπέζι σας.
+            </p>
+            <p className="mt-5 text-[11px] text-white/25 tracking-wide uppercase">
+              Πάνω από 80% στον Παραγωγό &middot; Δίκαιο Εμπόριο
             </p>
           </div>
 
-          {/* Quick Links - touch-friendly spacing */}
-          <div>
-            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Γρήγοροι Σύνδεσμοι</h4>
-            <nav className="flex flex-col gap-1" data-testid="footer-quick-links">
-              <Link href="/products" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+          {/* Navigation */}
+          <div className="lg:col-span-2 lg:col-start-6">
+            <h4 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest mb-4">
+              Πλοήγηση
+            </h4>
+            <nav className="flex flex-col gap-0.5" data-testid="footer-quick-links">
+              <Link href="/products" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Προϊόντα
               </Link>
-              <Link href="/producers" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Παραγωγοί
               </Link>
-              <Link href="/about" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/about" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Σχετικά με εμάς
               </Link>
             </nav>
           </div>
 
-          {/* For Producers - touch-friendly spacing */}
-          <div>
-            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Για Παραγωγούς</h4>
-            <nav className="flex flex-col gap-1">
-              <Link href="/producers" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+          {/* For Producers */}
+          <div className="lg:col-span-2">
+            <h4 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest mb-4">
+              Για Παραγωγούς
+            </h4>
+            <nav className="flex flex-col gap-0.5">
+              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Γίνε Παραγωγός
               </Link>
-              <Link href="/producers/login" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/producers/login" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Σύνδεση Παραγωγού
               </Link>
             </nav>
           </div>
 
-          {/* Legal & Support - touch-friendly spacing */}
-          <div>
-            <h4 className="text-xs font-semibold text-accent-gold uppercase tracking-wider mb-3 sm:mb-4">Υποστήριξη</h4>
-            <nav className="flex flex-col gap-1">
-              <Link href="/faq" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+          {/* Legal & Support */}
+          <div className="lg:col-span-2">
+            <h4 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest mb-4">
+              Υποστήριξη
+            </h4>
+            <nav className="flex flex-col gap-0.5">
+              <Link href="/faq" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Συχνές Ερωτήσεις
               </Link>
-              <Link href="/contact" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
-                Επικοινωνία / Σχόλια
+              <Link href="/contact" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+                Επικοινωνία
               </Link>
-              <Link href="/terms" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
+              <Link href="/terms" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Όροι Χρήσης
               </Link>
-              <Link href="/privacy" className="py-2 text-sm text-neutral-600 hover:text-primary active:text-primary transition-colors touch-manipulation">
-                Πολιτική Απορρήτου
+              <Link href="/privacy" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+                Απόρρητο
               </Link>
             </nav>
           </div>
         </div>
 
-        {/* Bottom Bar - mobile-first spacing */}
-        <div className="mt-8 sm:mt-10 pt-5 sm:pt-6 border-t border-accent-gold/10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-          <p className="text-sm text-neutral-500">
-            © {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
+        {/* Bottom bar */}
+        <div className="mt-12 sm:mt-14 pt-5 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-white/25">
+            &copy; {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
           </p>
-          <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <div className="flex items-center gap-1" data-testid="footer-language-switcher">
-              {locales.map((loc) => (
-                <button
-                  key={loc}
-                  onClick={() => handleLocaleChange(loc)}
-                  className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
-                    locale === loc
-                      ? 'bg-primary text-white'
-                      : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
-                  }`}
-                  data-testid={`footer-lang-${loc}`}
-                  aria-label={t(`language.${loc}`)}
-                >
-                  {loc.toUpperCase()}
-                </button>
-              ))}
-            </div>
-            <span className="text-xs text-neutral-400">Με ελληνικό πάθος</span>
+          {/* Language switcher */}
+          <div className="flex items-center gap-1 bg-white/5 rounded-full p-0.5" data-testid="footer-language-switcher">
+            {locales.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => handleLocaleChange(loc)}
+                className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                  locale === loc
+                    ? 'bg-white/12 text-white'
+                    : 'text-white/35 hover:text-white/60'
+                }`}
+                data-testid={`footer-lang-${loc}`}
+                aria-label={t(`language.${loc}`)}
+              >
+                {loc.toUpperCase()}
+              </button>
+            ))}
           </div>
         </div>
       </div>

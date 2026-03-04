@@ -32,13 +32,6 @@ type ApiItem = {
 
 /**
  * FIX-PRODUCTS-PAGINATION: Fetch ALL products with server-side filtering.
- *
- * Key fixes:
- * - per_page=100 to avoid hiding products (was default 15, hid 2 of 17)
- * - category filter sent server-side via ?category=slug (was client-side only)
- * - Extract dynamic categories from API response (no more stale hardcoded slugs)
- *
- * Pass PERF-PRODUCTS-CACHE-01: 60s revalidation still applies.
  */
 async function getData(
   search?: string,
@@ -47,8 +40,6 @@ async function getData(
   sort?: string,
   dir?: string
 ): Promise<{ items: ApiItem[]; total: number; isDemo: boolean; apiTotal: number }> {
-  // Pass CI-SMOKE-STABILIZE-002: In CI mode, use internal Next.js API
-  // which reads from Prisma DB (seeded with ci:seed) — same pattern as products/[id]/page.tsx
   const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const isServer = typeof window === 'undefined';
   let base: string;
@@ -61,7 +52,6 @@ async function getData(
   }
 
   try {
-    // Build URL with all params — let the backend handle filtering
     const params = new URLSearchParams();
     params.set('per_page', '100');
     if (search?.trim()) {
@@ -103,7 +93,6 @@ async function getData(
       };
     }
 
-    // Map backend format to frontend format
     const items = products.map((p: any) => ({
       id: p.id,
       title: p.name,
@@ -130,13 +119,7 @@ async function getData(
   }
 }
 
-/**
- * Fetch all products (unfiltered) to extract dynamic categories.
- * Only called when NOT filtering by category, to build the strip.
- * Cached at the same 60s interval.
- */
 async function getActiveCategories(): Promise<{ slug: string; name: string; count: number }[]> {
-  // Pass CI-SMOKE-STABILIZE-002: CI fallback (same as getData above)
   const isCI = process.env.CI === 'true' || process.env.NODE_ENV === 'test';
   const isServer = typeof window === 'undefined';
   let base: string;
@@ -159,7 +142,6 @@ async function getActiveCategories(): Promise<{ slug: string; name: string; coun
     const json = await res.json();
     const products = json?.data ?? [];
 
-    // Extract unique categories from products and count them
     const catMap = new Map<string, { slug: string; name: string; count: number }>();
     for (const p of products) {
       const cats = p.categories ?? [];
@@ -175,14 +157,12 @@ async function getActiveCategories(): Promise<{ slug: string; name: string; coun
       }
     }
 
-    // Sort by count descending (most popular categories first)
     return Array.from(catMap.values()).sort((a, b) => b.count - a.count);
   } catch {
     return [];
   }
 }
 
-// Convert demo products to API item format
 function mapDemoToApiItems(demoProducts: typeof DEMO_PRODUCTS): ApiItem[] {
   return demoProducts.map((p) => ({
     id: p.id,
@@ -195,7 +175,6 @@ function mapDemoToApiItems(demoProducts: typeof DEMO_PRODUCTS): ApiItem[] {
   }));
 }
 
-// Filter demo products by search term (client-side fallback)
 function filterDemoBySearch(items: ApiItem[], search: string): ApiItem[] {
   const term = search.toLowerCase().trim();
   if (!term) return items;
@@ -206,7 +185,6 @@ function filterDemoBySearch(items: ApiItem[], search: string): ApiItem[] {
   );
 }
 
-// SEO: Dynamic metadata for filtered product views
 const cultivationLabels: Record<string, string> = {
   organic_certified: 'Βιολογικά',
   biodynamic: 'Βιοδυναμικά',
@@ -228,7 +206,6 @@ export async function generateMetadata({
   if (params.search) parts.push(`"${params.search}"`);
   const suffix = parts.length > 0 ? ` — ${parts.join(', ')}` : '';
 
-  // When no filters: this is the homepage (redirected from /)
   const title = hasFilters
     ? `Προϊόντα${suffix} | Dixis`
     : 'Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς | Dixis';
@@ -274,7 +251,6 @@ export default async function Page({ searchParams }: PageProps) {
   const sortField = params.sort || undefined;
   const sortDir = params.dir || undefined;
 
-  // Fetch products (server-side filtering for category + search + cultivation + rating + sort)
   const { items, isDemo, apiTotal } = await getData(
     searchQuery || undefined,
     categoryFilter || undefined,
@@ -283,7 +259,6 @@ export default async function Page({ searchParams }: PageProps) {
     sortDir
   );
 
-  // Fetch ALL products (without cult filter) to build cultivation counts for the strip
   const allForCounts = cultivationFilter
     ? await getData(searchQuery || undefined, categoryFilter || undefined)
     : { items };
@@ -295,10 +270,8 @@ export default async function Page({ searchParams }: PageProps) {
   }
   const hasCultivationData = Object.keys(cultivationCounts).length > 0;
 
-  // Fetch active categories from real data (for the strip)
   const activeCategories = await getActiveCategories();
 
-  // Determine appropriate message for empty state
   const getEmptyMessage = () => {
     if (searchQuery && categoryFilter) {
       return `Δεν βρέθηκαν προϊόντα για "${searchQuery}" σε αυτή την κατηγορία.`;
@@ -316,30 +289,17 @@ export default async function Page({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-accent-cream via-accent-cream/50 to-white py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1600px] mx-auto">
-        {/* Demo mode banner */}
-        {isDemo && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-            <span className="font-medium">Λειτουργία demo:</span> Περιορισμένα δεδομένα (DB offline).
-          </div>
-        )}
-
-        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
-          {searchQuery
-            ? `Αποτελέσματα για "${searchQuery}"`
-            : 'Αυθεντικά Ελληνικά Προϊόντα'}
-        </h1>
-
-        {/* Category Cards (Wolt-style, standalone above filter) */}
-        <div className="mb-4">
+    <main className="min-h-screen bg-white">
+      {/* Categories — full-width, light gray bg strip */}
+      <div className="bg-neutral-50 border-b border-neutral-100">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
           <Suspense
             fallback={
               <div className="flex gap-3 sm:gap-5 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap sm:overflow-visible">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="flex flex-col items-center gap-2 min-w-[84px] sm:min-w-[108px]">
-                    <div className="w-[76px] h-[76px] sm:w-[100px] sm:h-[100px] rounded-2xl bg-accent-beige/50 animate-pulse" />
-                    <div className="h-3.5 w-14 bg-accent-beige/50 rounded animate-pulse" />
+                    <div className="w-[76px] h-[76px] sm:w-[100px] sm:h-[100px] rounded-2xl bg-neutral-100 animate-pulse" />
+                    <div className="h-3.5 w-14 bg-neutral-100 rounded animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -351,39 +311,61 @@ export default async function Page({ searchParams }: PageProps) {
             />
           </Suspense>
         </div>
+      </div>
 
-        {/* Filter area — compact 2-row layout */}
-        <div className="rounded-lg border border-accent-gold/10 bg-white/40 py-2 px-3 mb-4 space-y-2">
-          {/* Row 1: Search + Sort */}
-          <div className="flex flex-col sm:flex-row gap-2.5">
-            <div className="flex-1">
-              <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
-                <ProductSearchInput />
-              </Suspense>
-            </div>
-            <div className="sm:w-48">
-              <Suspense fallback={<div className="h-10 w-full bg-accent-beige/50 rounded-lg animate-pulse" />}>
+      {/* Main content */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6">
+        {/* Demo mode banner */}
+        {isDemo && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+            <span className="font-medium">Λειτουργία demo:</span> Περιορισμένα δεδομένα (DB offline).
+          </div>
+        )}
+
+        {/* Search heading — only when filtered */}
+        {searchQuery && (
+          <h1 className="text-lg sm:text-xl font-semibold text-neutral-900 mb-4">
+            Αποτελέσματα για &ldquo;{searchQuery}&rdquo;
+            <span className="text-neutral-400 font-normal text-base ml-2">({items.length})</span>
+          </h1>
+        )}
+
+        {/* Filter bar — clean, minimal */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-5">
+          <div className="flex-1">
+            <Suspense fallback={<div className="h-10 w-full bg-neutral-50 rounded-lg animate-pulse" />}>
+              <ProductSearchInput />
+            </Suspense>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="sm:w-44">
+              <Suspense fallback={<div className="h-10 w-full bg-neutral-50 rounded-lg animate-pulse" />}>
                 <ProductSort />
               </Suspense>
             </div>
           </div>
-
-          {/* Row 2: Cultivation pills — scroll on mobile, wrap on desktop */}
-          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-1 sm:pb-0 scrollbar-hide">
-            {hasCultivationData && (
-              <Suspense fallback={null}>
-                <CultivationFilter
-                  selectedCultivation={cultivationFilter}
-                  availableCounts={cultivationCounts}
-                />
-              </Suspense>
-            )}
-          </div>
         </div>
 
+        {/* Cultivation pills */}
+        {hasCultivationData && (
+          <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible pb-2 sm:pb-0 mb-5 scrollbar-hide">
+            <Suspense fallback={null}>
+              <CultivationFilter
+                selectedCultivation={cultivationFilter}
+                availableCounts={cultivationCounts}
+              />
+            </Suspense>
+          </div>
+        )}
+
+        {/* Product count */}
+        {!searchQuery && items.length > 0 && (
+          <p className="text-sm text-neutral-400 mb-4">{items.length} προϊόντα</p>
+        )}
+
+        {/* Product grid — 2 mobile, 3 tablet, 4 laptop, 5 desktop */}
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 sm:gap-7" data-testid="products-grid">
-            {/* Pass FIX-STOCK-GUARD-01: Include stock for OOS check */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[6px] sm:gap-3 lg:gap-4" data-testid="products-grid">
             {items.map((p: ApiItem, index: number) => (
               <ProductCard
                 key={p.id}
@@ -406,7 +388,7 @@ export default async function Page({ searchParams }: PageProps) {
           </div>
         ) : (
           <div
-            className="text-center py-20 bg-white rounded-xl border border-dashed border-neutral-300"
+            className="text-center py-20 bg-neutral-50 rounded-xl border border-dashed border-neutral-200"
             data-testid="no-results"
           >
             <p className="text-neutral-500 text-lg">{getEmptyMessage()}</p>

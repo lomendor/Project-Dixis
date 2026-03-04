@@ -22,13 +22,8 @@ interface ShippingLabelManagerProps {
   className?: string;
 }
 
-// Extend the Zod type with additional fields that might be returned
-type ShippingLabelData = ShippingLabelCreateResponse['data'] & {
-  estimated_delivery_days?: number;
-  zone_code?: string;
-  billable_weight_kg?: number;
-  shipping_cost_eur?: number;
-};
+// Use the Zod-validated type directly (now includes enriched fields)
+type ShippingLabelData = ShippingLabelCreateResponse['data'];
 
 export default function ShippingLabelManager({
   orderId,
@@ -71,15 +66,7 @@ export default function ShippingLabelManager({
       }
 
       if (data.success) {
-        // Extend the validated data with any additional fields from raw response
-        const labelData: ShippingLabelData = {
-          ...data.data,
-          estimated_delivery_days: rawData.data?.estimated_delivery_days,
-          zone_code: rawData.data?.zone_code,
-          billable_weight_kg: rawData.data?.billable_weight_kg,
-          shipping_cost_eur: rawData.data?.shipping_cost_eur
-        };
-        setLabelData(labelData);
+        setLabelData(data.data);
         onLabelCreated?.(data.data);
         showToast('success', 'Η ετικέτα αποστολής δημιουργήθηκε επιτυχώς');
       } else {
@@ -94,9 +81,28 @@ export default function ShippingLabelManager({
     }
   };
 
-  const downloadLabel = () => {
-    if (labelData?.label_url) {
-      window.open(labelData.label_url, '_blank');
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const downloadLabel = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(`/api/admin/shipping/labels/${orderId}/download`);
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `label-${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch {
+      showToast('error', 'Αποτυχία λήψης ετικέτας PDF');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -260,12 +266,13 @@ export default function ShippingLabelManager({
             <div className="flex gap-3 pt-4 border-t">
               <button
                 onClick={downloadLabel}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center justify-center"
+                disabled={isDownloading}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium flex items-center justify-center"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Λήψη Ετικέτας PDF
+                {isDownloading ? 'Λήψη...' : 'Λήψη Ετικέτας PDF'}
               </button>
 
               <button

@@ -1,8 +1,9 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-04 (SEO polish, skeleton loaders, B2B research doc)
+**Updated**: 2026-03-04 (SEO + Skeleton Loaders + Wishlist/Favorites)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
+> **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
 
 ---
 
@@ -13,7 +14,7 @@
 | **Prod URL** | https://dixis.gr |
 | **Health** | `/api/healthz` (200 = OK) |
 | **SSH** | `ssh dixis-prod` (alias, key: `dixis_prod_ed25519_20260115`) |
-| **Ports** | 3000 (frontend via PM2), backend via PHP-FPM unix socket |
+| **Ports** | 3000 (frontend via PM2), 3001 (Umami analytics via PM2), backend via PHP-FPM unix socket |
 | **Goal** | Real marketplace — real producers, real products, real customers |
 
 ---
@@ -42,7 +43,7 @@
 
 ## WIP (max 1)
 
-**S1-04: Wishlist/Favorites** — Heart icon on product cards, "My Favorites" page.
+**NONE** — S1-04 Wishlist complete, ready for next task.
 
 ---
 
@@ -82,13 +83,16 @@
 | **Stripe (Card Payments)** | ✅ ENABLED (frontend flag + key deployed 2026-02-13) |
 | **COD (Cash on Delivery)** | ✅ ENABLED (+€4.00 fee) |
 | **Resend (Email)** | ✅ ENABLED |
+| **Umami Analytics** | ✅ ENABLED — Self-hosted, cookieless, proxied via `/u/*` |
 | **Viva Wallet** | ❌ REMOVED — All dead code deleted (PR #2971, VIVA-CLEANUP) |
 
 ---
 
 ## Recently Done (last 10)
 
-- **SEO-POLISH + SKELETON-LOADERS** — Meta title shortened (62→41 chars), Organization JSON-LD enriched (sameAs, contactPoint, foundingDate), Contact & FAQ pages get metadata via server component extraction, B2B readiness research doc added. 5 skeleton loading.tsx files for cart, checkout, producers, producer detail, orders. (PR #3272, 2026-03-04) ✅
+- **SEO + SKELETON + WISHLIST** — SEO: meta title shortened, JSON-LD enriched, Contact/FAQ metadata. Skeleton loaders for 5 pages. S1-04 Wishlist: heart toggle, favorites page, nav links. B2B research doc. (PR #3272, 2026-03-04) ✅
+- **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS. Cookieless, GDPR-compliant. First-party proxy `/u/*`. (PR #3269, deployed 2026-03-02) ✅
+- **FIX-CART-LEAK-01** — Cart cross-user leakage fix. `clearCartStorage()` on login/logout. (PR #3268, deployed 2026-03-02) ✅
 - **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
 - **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
 - **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
@@ -115,7 +119,7 @@
 - **PR size ≤300 LOC** — May need multiple PRs for large features
 - **Workflow changes only if broken** — `.github/workflows/**` locked unless deploy/CI is failing
 - **Docs inside PR** — No separate docs-only PRs (update AGENT-STATE in same PR)
-- **Deploy**: Auto-deploy via GitHub Actions currently broken (SSH key issue). Manual: `ssh dixis-prod` → SOP below
+- **Deploy**: Auto-deploy via GitHub Actions WORKING (verified 2026-02-28). Manual fallback: `ssh dixis-prod` → PM2 restart only (do NOT git pull + build, rsync --delete will overwrite)
 
 ---
 
@@ -131,13 +135,14 @@
 
 - **Auth**: Email + password (customers/producers), Phone OTP (admin only)
 - **Product SSOT**: Laravel/PostgreSQL — frontend proxies via `apiClient` (`src/lib/api.ts`)
-- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs
+- **Cart**: Zustand store + server sync, keyed by Laravel integer IDs. `clearCartStorage()` on login/logout prevents cross-user leakage.
 - **Payment**: Stripe Checkout Sessions + webhooks. **COD** enabled (+€4 fee, admin confirms). Viva REMOVED.
-- **Producer routes**: `/producer/*` (dashboard, orders), `/my/products/*` (product CRUD)
+- **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are redirect stubs only.
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
-- **Deploy (manual)**: `ssh dixis-prod` → `cd /var/www/dixis/current && git pull origin main && cd frontend && npm run build && pm2 restart dixis-frontend && pm2 save`
-- **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, copies `static/`, `public/`, `messages/`, `i18n.ts` into `.next/standalone/`, rsync to VPS. **Currently broken** — SSH precheck fails (exit 255).
+- **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
+- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Dashboard: SSH tunnel `ssh -L 3001:localhost:3001 dixis-prod` → `http://localhost:3001`. Default credentials: admin/umami (**CHANGE THIS**).
+- **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
 ---
 
@@ -145,6 +150,7 @@
 
 | Doc | Purpose |
 |-----|---------|
+| `docs/AGENT/CONTEXT-BOOT.md` | **Cold start brain** — architecture, deploy, permissions, pitfalls |
 | `docs/OPS/STATE.md` | Detailed pass records |
 | `docs/AGENT/SOPs/` | Standard operating procedures |
 | `docs/PRODUCT/PRD-AUDIT.md` | Feature gap analysis |

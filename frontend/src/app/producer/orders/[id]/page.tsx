@@ -10,7 +10,6 @@ interface CommissionData {
   platform_fee_vat: string;
   producer_payout: string;
 }
-import AuthGuard from '@/components/AuthGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatCurrency } from '@/env';
 
@@ -64,12 +63,6 @@ export default function ProducerOrderDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
   const [emailStatus, setEmailStatus] = useState<EmailStatus>('idle');
-  const [lastEmailData, setLastEmailData] = useState<{
-    status: 'processing' | 'shipped' | 'delivered';
-    customerEmail: string;
-    customerName: string;
-    total: string;
-  } | null>(null);
 
   useEffect(() => {
     if (orderId) {
@@ -95,40 +88,28 @@ export default function ProducerOrderDetailsPage() {
   };
 
   /**
-   * FIX-EMAIL-01: Get customer email from multiple sources.
-   * The order.email field can be null — also check user.email
-   * and shipping_address.email (where Stripe stores it).
+   * ARCH-FIX-02: Simplified status update handler.
+   * Email is now sent server-side by Laravel (unified email path).
+   * No separate frontend email call needed — the backend response includes
+   * `email_sent` flag to indicate if notification was queued.
    */
-  const getCustomerEmail = (o: ProducerOrder): string | null => {
-    return o.user?.email
-      || o.shipping_address?.email
-      || null;
-  };
-
   const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!order || updating) return;
 
     try {
       setUpdating(true);
-      const response = await apiClient.updateProducerOrderStatus(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response: any = await apiClient.updateProducerOrderStatus(
         orderId,
         newStatus as 'processing' | 'shipped' | 'delivered'
       );
       setOrder(response.order);
 
-      // FIX-EMAIL-01: Send email notification with data from Laravel API response
-      const customerEmail = getCustomerEmail(order);
-      if (customerEmail) {
-        const emailData = {
-          status: newStatus as 'processing' | 'shipped' | 'delivered',
-          customerName: order.user?.name || order.shipping_address?.name || 'Πελάτη',
-          customerEmail,
-          total: order.total,
-        };
-        setLastEmailData(emailData);
-        await sendEmailNotification(emailData);
+      // ARCH-FIX-02: Email is sent server-side now — check backend flag
+      if (response.email_sent) {
+        setEmailStatus('sent');
       } else {
-        // No email available — skip silently
+        // Backend couldn't send (no email on file, or email service disabled)
         setEmailStatus('skipped');
       }
     } catch (err) {
@@ -138,45 +119,54 @@ export default function ProducerOrderDetailsPage() {
     }
   };
 
-  const sendEmailNotification = async (data: {
-    status: 'processing' | 'shipped' | 'delivered';
-    customerEmail: string;
-    customerName: string;
-    total: string;
-  }) => {
-    setEmailStatus('sending');
-    try {
-      const res = await fetch(`/api/producer/orders/${orderId}/status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-
-      if (result.success) {
-        setEmailStatus(result.dryRun ? 'skipped' : 'sent');
-      } else {
-        setEmailStatus('failed');
-      }
-    } catch {
-      setEmailStatus('failed');
-    }
-  };
-
-  const handleRetryEmail = async () => {
-    if (!lastEmailData) return;
-    await sendEmailNotification(lastEmailData);
-  };
-
   const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null => {
     const next = validTransitions[currentStatus];
     return next.length > 0 ? next[0] : null;
   };
 
+  /** Open print-friendly shipping label in a new window */
+  const handlePrintLabel = () => {
+    if (!order?.shipping_address) return;
+    const addr = order.shipping_address;
+    const items = order.orderItems
+      .map((i) => `${i.quantity}× ${i.product_name || i.product?.name}`)
+      .join('<br/>');
+    const html = `<!DOCTYPE html>
+<html lang="el"><head><meta charset="UTF-8"/>
+<title>Ετικέτα Αποστολής #${order.id}</title>
+<style>
+  @page { size: A6 landscape; margin: 10mm; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+  .label { border: 2px solid #000; padding: 20px; max-width: 400px; }
+  .header { font-size: 11px; color: #666; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; }
+  .recipient { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+  .address { font-size: 15px; line-height: 1.6; margin-bottom: 12px; }
+  .phone { font-size: 14px; margin-bottom: 12px; padding: 6px 0; border-top: 1px dashed #ccc; }
+  .items { font-size: 11px; color: #555; border-top: 1px solid #ccc; padding-top: 8px; }
+  @media print { body { padding: 0; } }
+</style></head><body>
+<div class="label">
+  <div class="header">
+    <span>DIXIS - Παραγγελία #${order.id}</span>
+    <span>${new Date(order.created_at).toLocaleDateString('el-GR')}</span>
+  </div>
+  <div class="recipient">${addr.name || ''}</div>
+  <div class="address">
+    ${addr.line1 || ''}${addr.line2 ? '<br/>' + addr.line2 : ''}<br/>
+    ${addr.city || ''} ${addr.postal_code || ''}
+  </div>
+  ${addr.phone ? `<div class="phone">Τηλ: ${addr.phone}</div>` : ''}
+  <div class="items"><strong>Περιεχόμενα:</strong><br/>${items}</div>
+</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+    const w = window.open('', '_blank', 'width=500,height=400');
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
-      <div className="min-h-screen bg-neutral-50">
-        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
+        <div className="max-w-4xl mx-auto">
           {/* Back Link */}
           <Link
             href="/producer/orders"
@@ -318,15 +308,6 @@ export default function ProducerOrderDetailsPage() {
                   'bg-blue-50 border border-blue-200'
                 }`}>
                   <div className="flex items-center gap-3">
-                    {emailStatus === 'sending' && (
-                      <>
-                        <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        <span className="text-blue-800 font-medium">Αποστολή email...</span>
-                      </>
-                    )}
                     {emailStatus === 'sent' && (
                       <>
                         <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,14 +333,7 @@ export default function ProducerOrderDetailsPage() {
                       </>
                     )}
                   </div>
-                  {emailStatus === 'failed' && lastEmailData && (
-                    <button
-                      onClick={handleRetryEmail}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Επανάληψη
-                    </button>
-                  )}
+                  {/* ARCH-FIX-02: No retry button needed — emails are sent server-side via Laravel queue */}
                 </div>
               )}
 
@@ -388,9 +362,20 @@ export default function ProducerOrderDetailsPage() {
                 {/* Shipping Address Section */}
                 {order.shipping_address && (
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <h3 className="font-medium text-amber-900 mb-2">
-                      Στοιχεία Αποστολής
-                    </h3>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium text-amber-900">
+                        Στοιχεία Αποστολής
+                      </h3>
+                      <button
+                        onClick={handlePrintLabel}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors print:hidden"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Εκτύπωση Ετικέτας
+                      </button>
+                    </div>
                     <div className="text-sm text-amber-800 space-y-1">
                       {order.shipping_address.name && (
                         <p>{order.shipping_address.name}</p>
@@ -476,7 +461,7 @@ export default function ProducerOrderDetailsPage() {
                       </div>
                       {parseFloat(commission.platform_fee_vat) > 0 && (
                         <div className="flex justify-between text-xs">
-                          <span className="text-neutral-400 ml-2">incl. ΦΠΑ</span>
+                          <span className="text-neutral-400 ml-2">συμπ. ΦΠΑ</span>
                           <span className="text-neutral-400">{formatCurrency(parseFloat(commission.platform_fee_vat))}</span>
                         </div>
                       )}
@@ -490,8 +475,7 @@ export default function ProducerOrderDetailsPage() {
               </div>
             </div>
           ) : null}
-        </main>
+        </div>
       </div>
-    </AuthGuard>
   );
 }

@@ -1,12 +1,18 @@
 /**
  * AG125: Email Notifications Service
  *
- * Sends transactional emails via Resend API with:
- * - Idempotency support (prevents duplicate sends)
+ * Sends transactional emails with SMTP primary / Resend fallback:
+ * - SMTP (nodemailer): Primary transport — uses SMTP_HOST/USER/PASS env vars
+ * - Resend API: Fallback transport — uses RESEND_API_KEY env var
  * - Dry-run mode for CI/dev environments
  * - Graceful error handling (doesn't throw)
  * - Greek-first content
+ *
+ * FIX-EMAIL-SMTP-01: Switched to SMTP-first transport because the SMTP
+ * configuration is proven working (contact form, order notifications, etc.)
+ * while Resend API returns 401 in production (key mismatch or expired).
  */
+import { sendMail as sendViaSMTP } from '@/server/mailer'
 
 export interface OrderEmailData {
   id: string
@@ -74,32 +80,44 @@ export async function sendOrderConfirmation({
     return { ok: true, dryRun: true }
   }
 
-  // Validate API key
+  // FIX-EMAIL-SMTP-01: Resend key is optional — SMTP is now primary
   const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.error('[EMAIL] RESEND_API_KEY not configured')
-    return { ok: false, error: 'API key missing' }
-  }
 
   // Email config
   const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
   const replyTo = process.env.MAIL_REPLY_TO || 'support@dixis.gr'
 
+  const subject = `Η παραγγελία σας #${order.id} στο Dixis`
+
   try {
     const html = renderOrderConfirmationHTML(order)
+
+    // FIX-EMAIL-SMTP-01: Try SMTP first (proven working), fall back to Resend
+    const smtpResult = await sendViaSMTP({ to: toEmail, subject, html })
+    if (smtpResult.ok) {
+      console.log(`[EMAIL] Sent confirmation via SMTP for order ${order.id}`, { messageId: smtpResult.messageId })
+      return { ok: true, messageId: smtpResult.messageId as string }
+    }
+
+    // SMTP not configured or failed — try Resend as fallback
+    console.warn(`[EMAIL] SMTP failed/unavailable (${(smtpResult as any).reason || (smtpResult as any).error}), trying Resend...`)
+
+    if (!apiKey) {
+      return { ok: false, error: 'Both SMTP and Resend unavailable' }
+    }
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `order-${order.id}-confirm-v1` // Prevents duplicate sends
+        'Idempotency-Key': `order-${order.id}-confirm-v1`
       },
       body: JSON.stringify({
         from,
         to: toEmail,
         reply_to: replyTo,
-        subject: `Η παραγγελία σας #${order.id} στο Dixis`,
+        subject,
         html
       })
     })
@@ -111,7 +129,7 @@ export async function sendOrderConfirmation({
     }
 
     const result = await response.json()
-    console.log(`[EMAIL] Sent confirmation for order ${order.id}`, { messageId: result.id })
+    console.log(`[EMAIL] Sent confirmation via Resend for order ${order.id}`, { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
@@ -141,12 +159,8 @@ export async function sendOrderStatusUpdate({
     return { ok: true, dryRun: true }
   }
 
-  // Validate API key
+  // FIX-EMAIL-SMTP-01: Resend key is optional — SMTP is now primary
   const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.error('[EMAIL] RESEND_API_KEY not configured')
-    return { ok: false, error: 'API key missing' }
-  }
 
   // Email config
   const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
@@ -160,21 +174,37 @@ export async function sendOrderStatusUpdate({
     cancelled: 'Ακυρωμένη',
   }
 
+  const subject = `Ενημέρωση παραγγελίας #${data.orderId} - ${statusLabels[data.newStatus]}`
+
   try {
     const html = renderStatusUpdateHTML(data, statusLabels[data.newStatus])
+
+    // FIX-EMAIL-SMTP-01: Try SMTP first (proven working), fall back to Resend
+    const smtpResult = await sendViaSMTP({ to: toEmail, subject, html })
+    if (smtpResult.ok) {
+      console.log(`[EMAIL] Sent status update via SMTP for order ${data.orderId} -> ${data.newStatus}`, { messageId: smtpResult.messageId })
+      return { ok: true, messageId: smtpResult.messageId as string }
+    }
+
+    // SMTP not configured or failed — try Resend as fallback
+    console.warn(`[EMAIL] SMTP failed/unavailable (${(smtpResult as any).reason || (smtpResult as any).error}), trying Resend...`)
+
+    if (!apiKey) {
+      return { ok: false, error: 'Both SMTP and Resend unavailable' }
+    }
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-v2`
+        'Idempotency-Key': `order-${data.orderId}-status-${data.newStatus}-${new Date().toISOString().slice(0, 10)}-v3`
       },
       body: JSON.stringify({
         from,
         to: toEmail,
         reply_to: replyTo,
-        subject: `Ενημέρωση παραγγελίας #${data.orderId} - ${statusLabels[data.newStatus]}`,
+        subject,
         html
       })
     })
@@ -182,11 +212,11 @@ export async function sendOrderStatusUpdate({
     if (!response.ok) {
       const errorBody = await response.text()
       console.error(`[EMAIL] Resend API error ${response.status}:`, errorBody)
-      return { ok: false, error: `HTTP ${response.status}` }
+      return { ok: false, error: `Resend ${response.status}: ${errorBody.slice(0, 200)}` }
     }
 
     const result = await response.json()
-    console.log(`[EMAIL] Sent status update for order ${data.orderId} -> ${data.newStatus}`, { messageId: result.id })
+    console.log(`[EMAIL] Sent status update via Resend for order ${data.orderId} -> ${data.newStatus}`, { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {
@@ -427,17 +457,27 @@ export async function sendOtpEmail({
     return { ok: true, dryRun: true }
   }
 
-  // Validate API key
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    console.error('[EMAIL] RESEND_API_KEY not configured')
-    return { ok: false, error: 'API key missing' }
-  }
-
-  const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
+  const subject = `Dixis Admin: Ο κωδικός σας είναι ${code}`
 
   try {
     const html = renderOtpEmailHTML(code, phone)
+
+    // ARCH-FIX-03: Use SMTP-first transport (same as all other emails)
+    const smtpResult = await sendViaSMTP({ to: toEmail, subject, html })
+    if (smtpResult.ok) {
+      console.log('[EMAIL] OTP email sent via SMTP', { messageId: smtpResult.messageId })
+      return { ok: true, messageId: smtpResult.messageId as string }
+    }
+
+    // SMTP not configured or failed — try Resend as fallback
+    console.warn(`[EMAIL] SMTP failed/unavailable (${(smtpResult as any).reason || (smtpResult as any).error}), trying Resend for OTP...`)
+
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      return { ok: false, error: 'Both SMTP and Resend unavailable' }
+    }
+
+    const from = process.env.MAIL_FROM || 'Dixis <no-reply@dixis.gr>'
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -449,7 +489,7 @@ export async function sendOtpEmail({
       body: JSON.stringify({
         from,
         to: toEmail,
-        subject: `Dixis Admin: Ο κωδικός σας είναι ${code}`,
+        subject,
         html
       })
     })
@@ -461,7 +501,7 @@ export async function sendOtpEmail({
     }
 
     const result = await response.json()
-    console.log('[EMAIL] OTP email sent', { messageId: result.id })
+    console.log('[EMAIL] OTP email sent via Resend', { messageId: result.id })
     return { ok: true, messageId: result.id }
 
   } catch (error) {

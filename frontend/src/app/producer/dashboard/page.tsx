@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, ProducerStats, Product } from '@/lib/api';
-import AuthGuard from '@/components/AuthGuard';
 import ProducerOnboardingGuard, { useProducerStatus } from '@/components/ProducerOnboardingGuard';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -118,10 +117,9 @@ export default function ProducerDashboard() {
   ] : [];
 
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
       <ProducerOnboardingGuard>
-      <div className="min-h-screen bg-neutral-50">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-testid="producer-dashboard">
+      <div data-testid="producer-dashboard">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-neutral-900 mb-2" data-testid="dashboard-title">
@@ -199,7 +197,7 @@ export default function ProducerDashboard() {
                       {t('producerDashboard.startSelling')}
                     </p>
                     <button
-                      onClick={() => router.push('/my/products/create')}
+                      onClick={() => router.push('/producer/products/create')}
                       disabled={isPending}
                       className="bg-primary hover:bg-primary-light text-white px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       title={isPending ? 'Αναμένεται έγκριση λογαριασμού' : undefined}
@@ -217,7 +215,7 @@ export default function ProducerDashboard() {
                           {product.images.length > 0 ? (
                             <Image
                               className="rounded-lg object-cover"
-                              src={product.images[0].image_path}
+                              src={product.images[0].url || product.images[0].image_path}
                               alt={product.images[0].alt_text || product.name}
                               width={48}
                               height={48}
@@ -231,14 +229,14 @@ export default function ProducerDashboard() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-neutral-900 truncate">{product.name}</p>
                           <p className="text-sm text-neutral-600">
-                            {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
+                            {formatCurrency(parseFloat(product.price || product.current_price))}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-neutral-500">
-                              {product.stock !== null ? `${product.stock} ${product.unit}(s)` : t('producerDashboard.inStock')}
+                              {product.stock !== null ? `${product.stock} τεμ.` : t('producerDashboard.inStock')}
                             </span>
-                            <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-primary-pale text-primary">
-                              {t('producerDashboard.active')}
+                            <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full ${product.is_active !== false ? 'bg-primary-pale text-primary' : 'bg-red-100 text-red-700'}`}>
+                              {product.is_active !== false ? t('producerDashboard.active') : t('producerDashboard.inactive')}
                             </span>
                           </div>
                         </div>
@@ -274,7 +272,7 @@ export default function ProducerDashboard() {
                                   {product.images.length > 0 ? (
                                     <Image
                                       className="rounded-lg object-cover"
-                                      src={product.images[0].image_path}
+                                      src={product.images[0].url || product.images[0].image_path}
                                       alt={product.images[0].alt_text || product.name}
                                       width={40}
                                       height={40}
@@ -299,21 +297,21 @@ export default function ProducerDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-neutral-900">
-                                {formatCurrency(parseFloat(product.price || product.current_price))} / {product.unit}
+                                {formatCurrency(parseFloat(product.price || product.current_price))}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-neutral-900">
                                 {product.stock !== null ? (
-                                  `${product.stock} ${product.unit}(s)`
+                                  `${product.stock} τεμ.`
                                 ) : (
                                   t('producerDashboard.inStock')
                                 )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-primary-pale text-primary">
-                                {t('producerDashboard.active')}
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.is_active !== false ? 'bg-primary-pale text-primary' : 'bg-red-100 text-red-700'}`}>
+                                {product.is_active !== false ? t('producerDashboard.active') : t('producerDashboard.inactive')}
                               </span>
                             </td>
                           </tr>
@@ -333,7 +331,7 @@ export default function ProducerDashboard() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <button
-                  onClick={() => !isPending && router.push('/my/products/create')}
+                  onClick={() => !isPending && router.push('/producer/products/create')}
                   disabled={isPending}
                   className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                   data-testid="quick-action-add-product"
@@ -346,7 +344,7 @@ export default function ProducerDashboard() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/my/orders')}
+                  onClick={() => router.push('/producer/orders')}
                   className="flex items-center justify-center px-4 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
                   data-testid="quick-action-view-orders"
                 >
@@ -382,9 +380,8 @@ export default function ProducerDashboard() {
             </div>
           </div>
         )}
-        </main>
+        </div>
       </div>
       </ProducerOnboardingGuard>
-    </AuthGuard>
   );
 }

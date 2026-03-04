@@ -12,11 +12,17 @@ import { normalizeStatus } from '@/lib/tracking/status'
 
 /**
  * Stable date formatter for Server Components (avoids hydration mismatch).
+ * Uses manual formatting to avoid locale-dependent hydration differences.
  */
 function formatDateStable(date: string | Date | null): string {
   if (!date) return '—'
   const d = new Date(date)
-  return d.toISOString().slice(0, 16).replace('T', ' ')
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  const hours = String(d.getHours()).padStart(2, '0')
+  const mins = String(d.getMinutes()).padStart(2, '0')
+  return `${day}/${month}/${year} ${hours}:${mins}`
 }
 
 interface StatusHistoryEntry {
@@ -74,7 +80,7 @@ export default async function TrackPage({ params }: { params: { token: string } 
   if (!order) {
     return (
       <div className="min-h-screen bg-neutral-50 py-8 px-4">
-        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
+        <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-8 text-center">
           <div className="text-5xl mb-4">🔍</div>
           <h1 className="text-xl font-semibold text-neutral-900 mb-2">Παραγγελία δεν βρέθηκε</h1>
           <p className="text-neutral-600">

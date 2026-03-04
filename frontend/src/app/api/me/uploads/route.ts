@@ -14,13 +14,17 @@ const MAX = 10 * 1024 * 1024; // 10MB limit (PDFs can be larger)
  * IMPORTANT: We call Laravel directly at 127.0.0.1:8001 (not through nginx/Next.js).
  * Referer/Origin headers are required so Sanctum treats this as a stateful SPA request
  * and authenticates via the web session guard (not Bearer token).
+ *
+ * FIX-UPLOAD-AUTH-01: LARAVEL_INTERNAL_URL includes /api/v1 suffix, so we strip it
+ * and use the base origin for the /api/user endpoint (no /v1/ prefix).
  */
 async function validateLaravelSession(req: Request): Promise<boolean> {
   const cookieHeader = req.headers.get('cookie');
   if (!cookieHeader) return false;
 
-  // Use internal Laravel URL — NOT NEXT_PUBLIC_API_BASE_URL which points to Next.js itself
-  const laravelOrigin = process.env.LARAVEL_INTERNAL_URL || 'http://127.0.0.1:8001';
+  // Extract base origin from LARAVEL_INTERNAL_URL (strip /api/v1 suffix if present)
+  const rawUrl = process.env.LARAVEL_INTERNAL_URL || 'http://127.0.0.1:8001';
+  const laravelOrigin = rawUrl.replace(/\/api\/v\d+\/?$/, '');
   try {
     const resp = await fetch(`${laravelOrigin}/api/user`, {
       headers: {
@@ -58,6 +62,14 @@ export async function POST(req: Request) {
   const result = await putObject(buf, file.type).catch((e: any): { error: string } => ({
     error: e?.message || 'upload failed'
   }));
-  if ((result as any).error) return NextResponse.json(result, { status: 500 });
+  if ('error' in result) return NextResponse.json(result, { status: 500 });
+
+  // FIX-UPLOAD-URL-01: Ensure url is absolute so Laravel 'url' validation passes.
+  // putObjectFs returns relative paths like /uploads/202602/abc.jpg — prepend base URL.
+  const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+  if (result.url.startsWith('/')) {
+    result.url = `${base.replace(/\/+$/, '')}${result.url}`;
+  }
+
   return NextResponse.json(result);
 }

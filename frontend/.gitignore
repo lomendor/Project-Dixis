@@ -20,6 +20,10 @@
 # production
 /build
 
+# uploaded files (keep directory structure, ignore content)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # misc
 .DS_Store
 *.pem

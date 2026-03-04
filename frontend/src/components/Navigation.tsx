@@ -80,7 +80,7 @@ export default function Navigation() {
   }, [pathname]);
 
   return (
-    <nav className="bg-white shadow-sm border-b" role="navigation" aria-label="Main navigation">
+    <nav className="bg-white shadow-sm border-b" role="navigation" aria-label="Κύρια πλοήγηση">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -159,9 +159,9 @@ export default function Navigation() {
               className="bg-neutral-50 p-2 rounded-md text-neutral-400 hover:text-neutral-500 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors"
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
-              aria-label={mobileMenuOpen ? 'Close main menu' : 'Open main menu'}
+              aria-label={mobileMenuOpen ? 'Κλείσιμο μενού' : 'Άνοιγμα μενού'}
             >
-              <span className="sr-only">{mobileMenuOpen ? 'Close' : 'Open'} main menu</span>
+              <span className="sr-only">{mobileMenuOpen ? 'Κλείσιμο' : 'Άνοιγμα'} μενού</span>
               {mobileMenuOpen ? (
                 <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -235,7 +235,7 @@ export default function Navigation() {
                     onClick={handleLogout}
                     className="ml-auto bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-2 rounded-md text-sm font-medium"
                   >
-                    Logout
+                    Αποσύνδεση
                   </button>
                 </div>
               ) : (
@@ -245,14 +245,14 @@ export default function Navigation() {
                     className="text-neutral-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-login"
                       >
-                    Login
+                    Σύνδεση
                   </Link>
                   <Link
                     href="/auth/register"
                     className="bg-primary hover:bg-primary-light text-white block px-3 py-2 rounded-md text-base font-medium"
                     data-testid="mobile-nav-register"
                       >
-                    Sign Up
+                    Εγγραφή
                   </Link>
                 </div>
               )}

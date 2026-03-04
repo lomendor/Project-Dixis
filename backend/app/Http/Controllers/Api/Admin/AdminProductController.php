@@ -76,6 +76,6 @@ class AdminProductController extends Controller
             ]);
         }
 
-        return response()->json(['error' => 'Invalid action'], 400);
+        return response()->json(['message' => 'Invalid action'], 400);
     }
 }

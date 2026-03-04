@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import AuthGuard from '@/components/AuthGuard';
-import { apiClient } from '@/lib/api';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { apiClient, StripeConnectStatus } from '@/lib/api';
 
 interface SettingsFormData {
   name: string;
@@ -18,6 +17,8 @@ interface SettingsFormData {
   postal_code: string;
   region: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   tax_id: string;
   tax_office: string;
   // Pass PAYOUT-01: Banking details for settlements
@@ -28,20 +29,50 @@ interface SettingsFormData {
   free_shipping_threshold_eur: string; // String for form input, converted on submit
 }
 
+/** Geocode address → lat/lng via OpenStreetMap Nominatim (free, no API key) */
+async function geocodeAddress(address: string, city: string, region: string): Promise<{ lat: number; lng: number } | null> {
+  const query = [address, city, region, 'Ελλάδα'].filter(Boolean).join(', ');
+  if (!query.replace(/,\s*/g, '').trim()) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=gr`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Dixis/1.0 (dixis.gr)' } });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+    // Fallback: try with just city + region
+    const fallbackQuery = [city, region, 'Ελλάδα'].filter(Boolean).join(', ');
+    const res2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}&limit=1&countrycodes=gr`, {
+      headers: { 'User-Agent': 'Dixis/1.0 (dixis.gr)' },
+    });
+    const data2 = await res2.json();
+    if (data2 && data2.length > 0) {
+      return { lat: parseFloat(data2[0].lat), lng: parseFloat(data2[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ProducerSettingsPage() {
   return (
-    <AuthGuard requireAuth={true} requireRole="producer">
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 py-8"><div className="max-w-4xl mx-auto px-4"><div className="animate-pulse h-10 bg-neutral-200 rounded" /></div></div>}>
       <ProducerSettingsContent />
-    </AuthGuard>
+    </Suspense>
   );
 }
 
 function ProducerSettingsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  // Stripe Connect state
+  const [stripeStatus, setStripeStatus] = useState<StripeConnectStatus | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<SettingsFormData>({
@@ -57,6 +88,8 @@ function ProducerSettingsContent() {
     postal_code: '',
     region: '',
     location: '',
+    latitude: null,
+    longitude: null,
     tax_id: '',
     tax_office: '',
     iban: '',
@@ -89,6 +122,8 @@ function ProducerSettingsContent() {
           postal_code: (producer as any).postal_code || '',
           region: (producer as any).region || '',
           location: producer.location || '',
+          latitude: (producer as any).latitude != null ? Number((producer as any).latitude) : null,
+          longitude: (producer as any).longitude != null ? Number((producer as any).longitude) : null,
           tax_id: (producer as any).tax_id || '',
           tax_office: (producer as any).tax_office || '',
           // Pass PAYOUT-01: Banking details
@@ -110,6 +145,48 @@ function ProducerSettingsContent() {
       });
   }, []);
 
+  // Load Stripe Connect status
+  useEffect(() => {
+    apiClient.refreshToken();
+    apiClient.stripeConnectStatus()
+      .then(setStripeStatus)
+      .catch(() => {/* Stripe not available — OK */});
+
+    // Handle return from Stripe onboarding
+    if (searchParams.get('stripe') === 'complete') {
+      setSuccess('Η σύνδεση με Stripe ολοκληρώθηκε. Ελέγχουμε την κατάστασή σας...');
+      apiClient.stripeConnectStatus().then(setStripeStatus).catch(() => {});
+    }
+  }, [searchParams]);
+
+  // Stripe Connect handlers
+  const handleStripeOnboard = async () => {
+    setStripeLoading(true);
+    try {
+      apiClient.refreshToken();
+      const result = await apiClient.stripeConnectOnboard();
+      if (result.onboarding_url) {
+        window.location.href = result.onboarding_url;
+      }
+    } catch (err: any) {
+      setError(err.message || 'Σφάλμα σύνδεσης με Stripe');
+    } finally {
+      setStripeLoading(false);
+    }
+  };
+
+  const handleStripeDashboard = async () => {
+    try {
+      apiClient.refreshToken();
+      const result = await apiClient.stripeConnectDashboard();
+      if (result.dashboard_url) {
+        window.open(result.dashboard_url, '_blank');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Σφάλμα πρόσβασης στο Stripe Dashboard');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -117,9 +194,21 @@ function ProducerSettingsContent() {
     setBusy(true);
 
     try {
+      // Auto-geocode only if lat/lng are empty — manual values take priority
+      let { latitude, longitude } = formData;
+      if (latitude == null && longitude == null && (formData.city || formData.address || formData.region)) {
+        const geo = await geocodeAddress(formData.address, formData.city, formData.region);
+        if (geo) {
+          latitude = geo.lat;
+          longitude = geo.lng;
+        }
+      }
+
       // Filter out empty social media links and convert threshold to number or null
       const cleanedData = {
         ...formData,
+        latitude,
+        longitude,
         social_media: formData.social_media.filter((link) => link.trim() !== ''),
         // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Convert threshold to number or null
         free_shipping_threshold_eur: formData.free_shipping_threshold_eur.trim() !== ''
@@ -347,6 +436,14 @@ function ProducerSettingsContent() {
             {/* Location Details */}
             <div>
               <h2 className="text-lg font-semibold text-neutral-900 mb-4">Στοιχεία Τοποθεσίας</h2>
+              <p className="text-sm text-neutral-500 mb-4">
+                Συμπληρώστε πόλη και περιφέρεια. Οι συντεταγμένες υπολογίζονται αυτόματα, αλλά μπορείτε να τις διορθώσετε χειροκίνητα.
+              </p>
+              {formData.latitude && formData.longitude && (
+                <div className="mb-4 bg-primary-pale border border-primary/20 text-primary px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                  <span>📍</span> Ο χάρτης σας εμφανίζεται στο προφίλ ({Number(formData.latitude).toFixed(4)}, {Number(formData.longitude).toFixed(4)})
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-neutral-700 mb-1">
@@ -402,6 +499,60 @@ function ProducerSettingsContent() {
                     className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="π.χ. Κρήτη, Ελλάδα"
                   />
+                </div>
+              </div>
+
+              {/* Manual Lat/Lng Override */}
+              <div className="mt-4 pt-4 border-t border-neutral-200">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-neutral-700">
+                    Συντεταγμένες (Γεωγραφικό Πλάτος / Μήκος)
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([formData.address, formData.city, formData.region, 'Ελλάδα'].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Βρείτε στο Google Maps →
+                  </a>
+                </div>
+                <p className="text-xs text-neutral-400 mb-3">
+                  Υπολογίζονται αυτόματα από τη διεύθυνση. Αν ο χάρτης δεν δείχνει σωστά, διορθώστε εδώ.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="latitude" className="block text-xs font-medium text-neutral-600 mb-1">
+                      Γεωγραφικό Πλάτος (Latitude)
+                    </label>
+                    <input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      min="-90"
+                      max="90"
+                      value={formData.latitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                      placeholder="π.χ. 37.9838"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="longitude" className="block text-xs font-medium text-neutral-600 mb-1">
+                      Γεωγραφικό Μήκος (Longitude)
+                    </label>
+                    <input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      min="-180"
+                      max="180"
+                      value={formData.longitude ?? ''}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value ? Number(e.target.value) : null })}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                      placeholder="π.χ. 23.7275"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -524,12 +675,32 @@ function ProducerSettingsContent() {
                       setFormData({ ...formData, iban: cleaned });
                     }}
                     maxLength={34}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono ${
+                      formData.iban && (!formData.iban.startsWith('GR') || formData.iban.length !== 27)
+                        ? 'border-red-300 bg-red-50'
+                        : formData.iban && formData.iban.startsWith('GR') && formData.iban.length === 27
+                          ? 'border-green-300 bg-green-50'
+                          : 'border-neutral-300'
+                    }`}
                     placeholder="GR1601101250000000012300695"
                   />
-                  <p className="mt-1 text-sm text-neutral-500">
-                    Ελληνικό IBAN (27 χαρακτήρες, ξεκινά με GR)
-                  </p>
+                  {formData.iban && !formData.iban.startsWith('GR') ? (
+                    <p className="mt-1 text-sm text-red-600">
+                      Το IBAN πρέπει να ξεκινά με GR
+                    </p>
+                  ) : formData.iban && formData.iban.length > 0 && formData.iban.length !== 27 ? (
+                    <p className="mt-1 text-sm text-amber-600">
+                      Ελληνικό IBAN: 27 χαρακτήρες (τρέχοντες: {formData.iban.length})
+                    </p>
+                  ) : formData.iban && formData.iban.length === 27 ? (
+                    <p className="mt-1 text-sm text-green-600">
+                      ✓ Έγκυρο ελληνικό IBAN
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Ελληνικό IBAN (27 χαρακτήρες, ξεκινά με GR)
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -547,6 +718,74 @@ function ProducerSettingsContent() {
                 </div>
               </div>
             </div>
+
+            {/* Stripe Connect — Pass STRIPE-CONNECT-01 */}
+            {stripeStatus && (
+              <div>
+                <h2 className="text-lg font-semibold text-neutral-900 mb-4">Σύνδεση Stripe (Πληρωμές)</h2>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Απαιτείται για να λαμβάνετε πληρωμές από παραγγελίες με κάρτα. Το Stripe διαχειρίζεται τις πληρωμές με ασφάλεια.
+                </p>
+
+                {stripeStatus.status === 'active' ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-green-800 font-medium">✓ Συνδεδεμένο</p>
+                        <p className="text-sm text-green-600 mt-1">
+                          Μπορείτε να λαμβάνετε πληρωμές με κάρτα
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeDashboard}
+                        className="px-4 py-2 bg-white border border-green-300 text-green-700 rounded-lg hover:bg-green-50 text-sm font-medium"
+                      >
+                        Stripe Dashboard →
+                      </button>
+                    </div>
+                  </div>
+                ) : stripeStatus.status === 'pending' || stripeStatus.status === 'restricted' ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-amber-800 font-medium">⏳ Σε εκκρεμότητα</p>
+                        <p className="text-sm text-amber-600 mt-1">
+                          Ολοκληρώστε τη σύνδεσή σας με Stripe για να λαμβάνετε πληρωμές
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeOnboard}
+                        disabled={stripeLoading}
+                        className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:bg-neutral-400 text-sm font-medium"
+                      >
+                        {stripeLoading ? 'Φόρτωση...' : 'Συνεχίστε τη σύνδεση'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-neutral-800 font-medium">Δεν έχει συνδεθεί</p>
+                        <p className="text-sm text-neutral-500 mt-1">
+                          Συνδέστε τον λογαριασμό σας στο Stripe για να λαμβάνετε πληρωμές
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStripeOnboard}
+                        disabled={stripeLoading}
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light disabled:bg-neutral-400 text-sm font-medium"
+                      >
+                        {stripeLoading ? 'Φόρτωση...' : 'Σύνδεση με Stripe'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Submit Buttons */}
             <div className="flex gap-3 pt-4 border-t border-neutral-200">

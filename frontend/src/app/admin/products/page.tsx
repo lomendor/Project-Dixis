@@ -7,6 +7,8 @@ import { useToast } from '@/contexts/ToastContext'
 import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 import { CATEGORIES } from '@/data/categories'
+import UploadImage from '@/components/UploadImage.client'
+import PriceBreakdown from '@/components/producer/PriceBreakdown'
 
 interface Product {
   id: string
@@ -19,11 +21,49 @@ interface Product {
   isActive: boolean
   approvalStatus: string
   rejectionReason: string | null
+  discountPrice?: number | null
+  weightPerUnit?: number | null
+  isSeasonal?: boolean
+  origin?: string | null
+  cultivationType?: string | null
+  cultivationDescription?: string | null
+  allergens?: string[] | null
+  ingredients?: string | null
+  storageInstructions?: string | null
+  shelfLife?: string | null
+  imageUrl?: string | null
   producer?: {
     id: string
     name: string
   }
 }
+
+const EU_ALLERGENS = [
+  { value: 'gluten', label: 'Γλουτένη' },
+  { value: 'crustaceans', label: 'Καρκινοειδή' },
+  { value: 'eggs', label: 'Αβγά' },
+  { value: 'fish', label: 'Ψάρια' },
+  { value: 'peanuts', label: 'Αράπικα φιστίκια' },
+  { value: 'soybeans', label: 'Σόγια' },
+  { value: 'milk', label: 'Γάλα' },
+  { value: 'tree_nuts', label: 'Ξηροί καρποί' },
+  { value: 'celery', label: 'Σέλινο' },
+  { value: 'mustard', label: 'Μουστάρδα' },
+  { value: 'sesame', label: 'Σουσάμι' },
+  { value: 'sulphites', label: 'Θειώδη' },
+  { value: 'lupin', label: 'Λούπινα' },
+  { value: 'molluscs', label: 'Μαλάκια' },
+]
+
+const CULTIVATION_TYPES = [
+  { value: '', label: 'Επιλέξτε...' },
+  { value: 'conventional', label: 'Συμβατική' },
+  { value: 'organic_certified', label: 'Βιολογική (πιστοποιημένη)' },
+  { value: 'organic_transitional', label: 'Βιολογική (μεταβατική)' },
+  { value: 'biodynamic', label: 'Βιοδυναμική' },
+  { value: 'traditional_natural', label: 'Παραδοσιακή / Φυσική' },
+  { value: 'other', label: 'Άλλο' },
+]
 
 function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { bg: string; text: string; label: string }> = {
@@ -156,11 +196,18 @@ function AdminProductsContent() {
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
-  const [editForm, setEditForm] = useState({ title: '', description: '', category: '', unit: '' })
+  const [editForm, setEditForm] = useState({
+    title: '', description: '', category: '', unit: '',
+    price: '', discount_price: '', stock: '', weight_per_unit: '',
+    is_seasonal: false, origin: '', cultivation_type: '', cultivation_description: '',
+    allergens: [] as string[], ingredients: '', storage_instructions: '', shelf_life: '',
+    image_url: ''
+  })
   const [editSubmitting, setEditSubmitting] = useState(false)
 
   // Create modal state
   const [createOpen, setCreateOpen] = useState(false)
+  const [createPrice, setCreatePrice] = useState('')
   const [creating, setCreating] = useState(false)
   const [producers, setProducers] = useState<{ id: string; name: string }[]>([])
 
@@ -344,20 +391,44 @@ function AdminProductsContent() {
       title: product.title,
       description: product.description || '',
       category: product.category,
-      unit: product.unit
+      unit: product.unit,
+      price: product.price != null ? String(product.price) : '',
+      discount_price: product.discountPrice != null ? String(product.discountPrice) : '',
+      stock: product.stock != null ? String(product.stock) : '',
+      weight_per_unit: product.weightPerUnit != null ? String(product.weightPerUnit) : '',
+      is_seasonal: product.isSeasonal || false,
+      origin: product.origin || '',
+      cultivation_type: product.cultivationType || '',
+      cultivation_description: product.cultivationDescription || '',
+      allergens: Array.isArray(product.allergens) ? product.allergens : [],
+      ingredients: product.ingredients || '',
+      storage_instructions: product.storageInstructions || '',
+      shelf_life: product.shelfLife || '',
+      image_url: product.imageUrl || ''
     })
     setEditModalOpen(true)
   }
 
+  const editDiscountTooHigh = editForm.discount_price !== '' && editForm.price !== '' && parseFloat(editForm.discount_price) >= parseFloat(editForm.price)
+
   async function handleEditConfirm() {
     if (!productToEdit || editForm.title.trim().length < 3) return
+    if (editDiscountTooHigh) { showError('Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική τιμή'); return }
     setEditSubmitting(true)
     setProcessingIds(prev => new Set([...prev, productToEdit.id]))
     try {
+      const payload = {
+        ...editForm,
+        price: editForm.price !== '' ? parseFloat(editForm.price) : undefined,
+        discount_price: editForm.discount_price !== '' ? parseFloat(editForm.discount_price) : null,
+        stock: editForm.stock !== '' ? parseInt(editForm.stock, 10) : undefined,
+        weight_per_unit: editForm.weight_per_unit !== '' ? parseFloat(editForm.weight_per_unit) : null,
+        image_url: editForm.image_url || null,
+      }
       const res = await fetch(`/api/admin/products/${productToEdit.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm)
+        body: JSON.stringify(payload)
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Αποτυχία')
       showSuccess('Το προϊόν ενημερώθηκε επιτυχώς')
@@ -594,13 +665,15 @@ function AdminProductsContent() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Τιμή (€) *</label>
-                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-price-input" />
+                  <input name="price" type="number" step="0.01" min="0" required placeholder="0.00" value={createPrice} onChange={e => setCreatePrice(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-price-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Απόθεμα</label>
                   <input name="stock" type="number" min="0" defaultValue="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="create-stock-input" />
                 </div>
               </div>
+              {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
+              <PriceBreakdown price={createPrice} onPriceChange={setCreatePrice} />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Περιγραφή</label>
                 <textarea name="description" rows={3} placeholder="Περιγραφή προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" data-testid="create-description-input" />
@@ -626,7 +699,7 @@ function AdminProductsContent() {
           data-testid="edit-modal"
         >
           <div
-            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold text-gray-900 mb-4" data-testid="edit-modal-title">
@@ -637,67 +710,147 @@ function AdminProductsContent() {
             </p>
 
             <div className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Τίτλος *
-                </label>
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={e => setEditForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Τίτλος προϊόντος..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  data-testid="edit-title-input"
+              {/* Εικόνα Προϊόντος */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Εικόνα Προϊόντος</legend>
+                <UploadImage
+                  value={editForm.image_url || null}
+                  onChange={(url) => setEditForm(prev => ({ ...prev, image_url: url || '' }))}
+                  label="Κύρια Εικόνα"
                 />
-                {editForm.title.length > 0 && editForm.title.length < 3 && (
-                  <p className="text-red-600 text-xs mt-1">Τουλάχιστον 3 χαρακτήρες</p>
-                )}
-              </div>
+              </fieldset>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Περιγραφή
-                </label>
-                <textarea
-                  value={editForm.description}
-                  onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  rows={4}
-                  placeholder="Περιγραφή προϊόντος..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y"
-                  data-testid="edit-description-input"
-                />
-              </div>
+              {/* Βασικά Στοιχεία */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Βασικά Στοιχεία</legend>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Τίτλος *</label>
+                    <input type="text" value={editForm.title} onChange={e => setEditForm(prev => ({ ...prev, title: e.target.value }))} placeholder="Τίτλος προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="edit-title-input" />
+                    {editForm.title.length > 0 && editForm.title.length < 3 && <p className="text-red-600 text-xs mt-1">Τουλάχιστον 3 χαρακτήρες</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Περιγραφή</label>
+                    <textarea value={editForm.description} onChange={e => setEditForm(prev => ({ ...prev, description: e.target.value }))} rows={3} placeholder="Περιγραφή προϊόντος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" data-testid="edit-description-input" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Κατηγορία *</label>
+                      <select value={editForm.category} onChange={e => setEditForm(prev => ({ ...prev, category: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="edit-category-input">
+                        <option value="">Επιλέξτε κατηγορία...</option>
+                        {CATEGORIES.map((cat) => <option key={cat.id} value={cat.slug}>{cat.labelEl}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Μονάδα Μέτρησης *</label>
+                      <input type="text" value={editForm.unit} onChange={e => setEditForm(prev => ({ ...prev, unit: e.target.value }))} placeholder="π.χ. κιλό, τεμάχιο..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" data-testid="edit-unit-input" />
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Κατηγορία *
-                </label>
-                <select
-                  value={editForm.category}
-                  onChange={e => setEditForm(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  data-testid="edit-category-input"
-                >
-                  <option value="">Επιλέξτε κατηγορία...</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.slug}>{cat.labelEl}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Τιμολόγηση & Απόθεμα */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Τιμολόγηση & Απόθεμα</legend>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Τιμή (€)</label>
+                    <input type="number" step="0.01" min="0" value={editForm.price} onChange={e => setEditForm(prev => ({ ...prev, price: e.target.value }))} placeholder="0.00" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Τιμή Έκπτωσης (€)</label>
+                    <input type="number" step="0.01" min="0" value={editForm.discount_price} onChange={e => setEditForm(prev => ({ ...prev, discount_price: e.target.value }))} placeholder="—" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Απόθεμα</label>
+                    <input type="number" min="0" value={editForm.stock} onChange={e => setEditForm(prev => ({ ...prev, stock: e.target.value }))} placeholder="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                  </div>
+                </div>
+                {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
+                <PriceBreakdown price={editForm.price} discountPrice={editForm.discount_price} onPriceChange={(v) => editForm.discount_price ? setEditForm(prev => ({ ...prev, discount_price: v })) : setEditForm(prev => ({ ...prev, price: v }))} />
+              </fieldset>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Μονάδα Μέτρησης *
-                </label>
-                <input
-                  type="text"
-                  value={editForm.unit}
-                  onChange={e => setEditForm(prev => ({ ...prev, unit: e.target.value }))}
-                  placeholder="π.χ. κιλό, τεμάχιο..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                  data-testid="edit-unit-input"
-                />
-              </div>
+              {/* Βάρος & Αποστολή */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Βάρος & Αποστολή</legend>
+                <div className="grid grid-cols-2 gap-3 items-end">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Βάρος ανά μονάδα (γρ.)</label>
+                    <input type="number" step="1" min="0" value={editForm.weight_per_unit} onChange={e => setEditForm(prev => ({ ...prev, weight_per_unit: e.target.value }))} placeholder="π.χ. 500" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                  </div>
+                  <div className="flex items-center gap-2 pb-2">
+                    <input type="checkbox" id="edit-seasonal" checked={editForm.is_seasonal} onChange={e => setEditForm(prev => ({ ...prev, is_seasonal: e.target.checked }))} className="h-4 w-4 rounded border-gray-300" />
+                    <label htmlFor="edit-seasonal" className="text-sm font-medium text-gray-700">Εποχιακό προϊόν</label>
+                  </div>
+                </div>
+              </fieldset>
+
+              {/* Προέλευση & Καλλιέργεια */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Προέλευση & Καλλιέργεια</legend>
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Προέλευση</label>
+                      <input type="text" value={editForm.origin} onChange={e => setEditForm(prev => ({ ...prev, origin: e.target.value }))} placeholder="π.χ. Κρήτη, Λέσβος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Τρόπος Καλλιέργειας</label>
+                      <select value={editForm.cultivation_type} onChange={e => setEditForm(prev => ({ ...prev, cultivation_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        {CULTIVATION_TYPES.map(ct => <option key={ct.value} value={ct.value}>{ct.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  {editForm.cultivation_type && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Περιγραφή Καλλιέργειας</label>
+                      <textarea value={editForm.cultivation_description} onChange={e => setEditForm(prev => ({ ...prev, cultivation_description: e.target.value }))} rows={2} placeholder="Περιγράψτε τον τρόπο καλλιέργειας..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" />
+                    </div>
+                  )}
+                </div>
+              </fieldset>
+
+              {/* Διατροφικά Στοιχεία */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Διατροφικά Στοιχεία</legend>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Συστατικά</label>
+                    <textarea value={editForm.ingredients} onChange={e => setEditForm(prev => ({ ...prev, ingredients: e.target.value }))} rows={2} placeholder="Λίστα συστατικών..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Αλλεργιογόνα (EU 1169/2011)</label>
+                    <div className="grid grid-cols-2 gap-1">
+                      {EU_ALLERGENS.map(a => (
+                        <label key={a.value} className="flex items-center gap-2 text-sm py-0.5">
+                          <input type="checkbox" checked={editForm.allergens.includes(a.value)} onChange={e => {
+                            setEditForm(prev => ({
+                              ...prev,
+                              allergens: e.target.checked ? [...prev.allergens, a.value] : prev.allergens.filter(v => v !== a.value)
+                            }))
+                          }} className="h-3.5 w-3.5 rounded border-gray-300" />
+                          {a.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+              {/* Αποθήκευση & Διάρκεια */}
+              <fieldset className="border border-gray-200 rounded-lg p-4">
+                <legend className="text-sm font-semibold text-gray-600 px-2">Αποθήκευση & Διάρκεια</legend>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Οδηγίες Αποθήκευσης</label>
+                    <textarea value={editForm.storage_instructions} onChange={e => setEditForm(prev => ({ ...prev, storage_instructions: e.target.value }))} rows={2} placeholder="π.χ. Σε δροσερό μέρος..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Διάρκεια Ζωής</label>
+                    <input type="text" value={editForm.shelf_life} onChange={e => setEditForm(prev => ({ ...prev, shelf_life: e.target.value }))} placeholder="π.χ. 12 μήνες" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                  </div>
+                </div>
+              </fieldset>
             </div>
 
             <div className="flex gap-3 justify-end mt-5">

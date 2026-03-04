@@ -1,6 +1,6 @@
 # MONITOR-01: Production Uptime Monitor
 #
-# Runs every 10 minutes to check production health.
+# Runs every 15 minutes to check production health.
 # Creates GitHub Issue on failure for fast signal.
 #
 # Endpoints checked:
@@ -12,8 +12,8 @@ name: uptime-monitor
 
 on:
   schedule:
-    # Every 10 minutes
-    - cron: '*/10 * * * *'
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono, Noto_Serif_Display, Nunito } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
@@ -22,6 +22,23 @@ const inter = Inter({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Premium serif display font — for hero H1s and section headings
+// Full Greek character support for Greek marketplace
+const notoSerifDisplay = Noto_Serif_Display({
+  variable: "--font-display",
+  subsets: ["latin", "greek"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
+
+// Rounded geometric sans — matches Dixis logo wordmark
+const nunito = Nunito({
+  variable: "--font-logo",
+  subsets: ["latin", "latin-ext"],
+  weight: ["900"],
+  display: "swap",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dixis.gr";
@@ -107,7 +124,7 @@ export default function RootLayout({
   return (
     <html lang="el-GR" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${geistMono.variable} ${notoSerifDisplay.variable} ${nunito.variable} antialiased`}
         suppressHydrationWarning
       >
         <IOSGuard />

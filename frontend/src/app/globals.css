@@ -24,6 +24,7 @@
   --color-primary-foreground: var(--brand-primary-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 
   /* Category pastel backgrounds — 10 unified categories */
   --color-category-olive: #e8f5dc;
@@ -422,19 +423,7 @@ textarea::placeholder {
   margin-bottom: var(--space-8);
 }
 
-/* Grid layouts */
-.grid {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
-@media (max-width: 1024px) {
-  .grid-4 { grid-template-columns: repeat(3, 1fr); }
-}
+/* Grid column helpers (Tailwind grid + gap utilities preferred) */
 
 @media (max-width: 768px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -534,6 +523,77 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* =============================================================================
+   HOMEPAGE ANIMATIONS
+   ============================================================================= */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out both;
+}
+
+/* =============================================================================
+   PREMIUM BUTTON STYLES — Retro offset shadow (Graza/Fishwife pattern)
+   ============================================================================= */
+
+.btn-hero {
+  position: relative;
+  border-radius: 9999px;
+  padding: 1rem 2.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 200ms ease;
+  box-shadow: 3px 3px 0px 0px var(--brand-primary-light);
+}
+
+.btn-hero:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px var(--brand-primary-light);
+}
+
+.btn-hero:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px var(--brand-primary-light);
+}
+
+/* =============================================================================
+   SCROLL-REVEAL ANIMATION — Intersection Observer triggered
+   ============================================================================= */
+
+.section-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.section-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children for product grids */
+.stagger-child { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+.stagger-child.visible { opacity: 1; transform: translateY(0); }
+.stagger-child:nth-child(1) { transition-delay: 0ms; }
+.stagger-child:nth-child(2) { transition-delay: 70ms; }
+.stagger-child:nth-child(3) { transition-delay: 140ms; }
+.stagger-child:nth-child(4) { transition-delay: 210ms; }
+.stagger-child:nth-child(5) { transition-delay: 280ms; }
+.stagger-child:nth-child(6) { transition-delay: 350ms; }
+.stagger-child:nth-child(7) { transition-delay: 420ms; }
+.stagger-child:nth-child(8) { transition-delay: 490ms; }
 
 /* =============================================================================
    PRINT STYLES

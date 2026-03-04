@@ -4,7 +4,19 @@ import { ProducerCard } from '@/components/ProducerCard';
 import { FilterStrip } from '@/components/FilterStrip';
 import { getServerApiUrl } from '@/env';
 
-export const metadata = { title: 'Παραγωγοί' };
+export const metadata = {
+  title: 'Παραγωγοί — Τοπικοί Έλληνες Παραγωγοί',
+  description:
+    'Ανακαλύψτε τους τοπικούς Έλληνες παραγωγούς του Dixis. Αυθεντικά προϊόντα απευθείας από τον παραγωγό στο τραπέζι σας.',
+  openGraph: {
+    title: 'Παραγωγοί — Τοπικοί Έλληνες Παραγωγοί | Dixis',
+    description:
+      'Ανακαλύψτε τους τοπικούς Έλληνες παραγωγούς του Dixis. Αυθεντικά προϊόντα απευθείας από τον παραγωγό στο τραπέζι σας.',
+    type: 'website',
+    locale: 'el_GR',
+    siteName: 'Dixis',
+  },
+};
 
 type ApiProducer = {
   id: string | number;
@@ -86,29 +98,33 @@ export default async function ProducersPage({ searchParams }: PageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <main className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Παραγωγοί</h1>
-            <p className="mt-1 text-sm text-neutral-600">
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">
               {searchQuery
-                ? `${total} αποτέλεσμα${total !== 1 ? 'τα' : ''} για "${searchQuery}"`
-                : `Γνώρισε τους τοπικούς παραγωγούς μας — ${total} συνολικά.`}
-            </p>
+                ? `Αποτελέσματα για "${searchQuery}"`
+                : 'Οι Παραγωγοί μας'}
+            </h1>
+            {searchQuery ? (
+              <p className="mt-1 text-sm text-neutral-400">{total} αποτέλεσμα{total !== 1 ? 'τα' : ''}</p>
+            ) : (
+              <p className="mt-1 text-sm text-neutral-400">{total} παραγωγοί</p>
+            )}
           </div>
 
           {/* Search Form */}
-          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="h-10 w-full max-w-md bg-neutral-100/60 rounded-lg animate-pulse" />}>
             <ProducerSearchForm defaultValue={searchQuery || ''} />
           </Suspense>
         </div>
 
         {/* CTA banner */}
-        <div className="mb-6 p-3 bg-primary-pale border border-primary/20 rounded-lg text-primary text-sm flex items-center justify-between">
-          <span>Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
-          <Link href="/producers/join" className="font-medium underline hover:text-primary-light">
-            Μάθε περισσότερα →
+        <div className="mb-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200 text-sm flex items-center justify-between">
+          <span className="text-neutral-600">Είσαι παραγωγός; Γίνε μέλος του Dixis!</span>
+          <Link href="/producers/join" className="font-semibold text-primary hover:text-primary-light transition-colors">
+            Μάθε περισσότερα &rarr;
           </Link>
         </div>
 
@@ -120,7 +136,7 @@ export default async function ProducersPage({ searchParams }: PageProps) {
         </Suspense>
 
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {filtered.map((p) => (
               <ProducerCard
                 key={p.id}

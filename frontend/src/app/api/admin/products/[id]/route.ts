@@ -19,7 +19,7 @@ async function getSessionToken(): Promise<string | null> {
 /**
  * PATCH /api/admin/products/[id]
  * Update product properties via Laravel (admin only)
- * Supports: isActive, price, stock, title, description, category, unit
+ * Supports all product fields: basic info, pricing, weight, origin, allergens, etc.
  */
 export async function PATCH(
   request: NextRequest,
@@ -34,7 +34,13 @@ export async function PATCH(
     }
 
     const body = await request.json().catch(() => ({}))
-    const { isActive, price, stock, title, description, category, unit } = body
+    const {
+      isActive, price, stock, title, description, category, unit,
+      discount_price, weight_per_unit, is_seasonal, origin,
+      cultivation_type, cultivation_description,
+      allergens, ingredients, storage_instructions, shelf_life,
+      image_url
+    } = body
 
     // Build Laravel update payload (snake_case for Laravel)
     const laravelPayload: Record<string, unknown> = {}
@@ -112,14 +118,66 @@ export async function PATCH(
       newValue.unit = trimmedUnit
     }
 
+    // Pass-through fields that Laravel validates directly
+    if (discount_price !== undefined) {
+      const dp = discount_price === '' || discount_price === null ? null : parseFloat(String(discount_price))
+      if (dp !== null && (isNaN(dp) || dp < 0)) {
+        return NextResponse.json({ error: 'Μη έγκυρη τιμή έκπτωσης' }, { status: 400 })
+      }
+      laravelPayload.discount_price = dp
+      newValue.discount_price = dp ?? 0
+    }
+    if (weight_per_unit !== undefined) {
+      const w = weight_per_unit === '' || weight_per_unit === null ? null : parseFloat(String(weight_per_unit))
+      if (w !== null && (isNaN(w) || w < 0)) {
+        return NextResponse.json({ error: 'Μη έγκυρο βάρος' }, { status: 400 })
+      }
+      laravelPayload.weight_per_unit = w
+      newValue.weight_per_unit = w ?? 0
+    }
+    if (is_seasonal !== undefined) {
+      laravelPayload.is_seasonal = !!is_seasonal
+      newValue.is_seasonal = !!is_seasonal
+    }
+    if (origin !== undefined) {
+      laravelPayload.origin = typeof origin === 'string' ? origin.trim() || null : null
+      newValue.origin = laravelPayload.origin as string ?? ''
+    }
+    if (cultivation_type !== undefined) {
+      laravelPayload.cultivation_type = typeof cultivation_type === 'string' ? cultivation_type.trim() || null : null
+      newValue.cultivation_type = laravelPayload.cultivation_type as string ?? ''
+    }
+    if (cultivation_description !== undefined) {
+      laravelPayload.cultivation_description = typeof cultivation_description === 'string' ? cultivation_description.trim() || null : null
+    }
+    if (allergens !== undefined) {
+      laravelPayload.allergens = Array.isArray(allergens) ? allergens : []
+    }
+    if (ingredients !== undefined) {
+      laravelPayload.ingredients = typeof ingredients === 'string' ? ingredients.trim() || null : null
+    }
+    if (storage_instructions !== undefined) {
+      laravelPayload.storage_instructions = typeof storage_instructions === 'string' ? storage_instructions.trim() || null : null
+    }
+    if (shelf_life !== undefined) {
+      laravelPayload.shelf_life = typeof shelf_life === 'string' ? shelf_life.trim() || null : null
+    }
+
+    if (image_url !== undefined) {
+      laravelPayload.image_url = typeof image_url === 'string' && image_url.trim() ? image_url.trim() : null
+    }
+
     if (Object.keys(laravelPayload).length === 0) {
       return NextResponse.json({ success: true, product: { id: productId } })
     }
 
-    // Proxy to Laravel PATCH /v1/products/{id}
+    // FIX-ADMIN-PRODUCT-UPDATE-01: Proxy to Laravel admin route (jwt.admin auth)
+    // The regular PATCH /v1/products/{id} requires auth:sanctum (user/producer token).
+    // Admin OTP JWT is only understood by the jwt.admin middleware, so we use
+    // the admin-specific endpoint at /v1/admin/products/{id}.
     const sessionToken = await getSessionToken()
     const laravelBase = getLaravelInternalUrl()
-    const url = new URL(`${laravelBase}/products/${productId}`)
+    const url = new URL(`${laravelBase}/admin/products/${productId}`)
 
     const headers: Record<string, string> = {
       'Accept': 'application/json',

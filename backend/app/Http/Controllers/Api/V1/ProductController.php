@@ -138,7 +138,13 @@ class ProductController extends Controller
         }
 
         $product = Product::create($data);
-        $product->load('producer');
+
+        // Sync product images if provided
+        if ($request->has('images')) {
+            $this->syncImages($product, $request->input('images', []));
+        }
+
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
     }
@@ -151,8 +157,8 @@ class ProductController extends Controller
         // Only show active products
         abort_if(! $product->is_active, 404);
 
-        // Eager load producer
-        $product->load('producer');
+        // Eager load producer + images
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
     }
@@ -172,9 +178,44 @@ class ProductController extends Controller
         }
 
         $product->update($data);
-        $product->load('producer');
+
+        // Sync product images if provided
+        if ($request->has('images')) {
+            $this->syncImages($product, $request->input('images', []));
+        }
+
+        $product->load(['producer', 'images']);
 
         return new ProductResource($product);
+    }
+
+    /**
+     * Sync product images: delete old, insert new with sort_order.
+     * First image is automatically marked as primary.
+     * Also updates product.image_url to match primary image for backwards compatibility.
+     */
+    private function syncImages(Product $product, array $images): void
+    {
+        // Delete existing images
+        $product->images()->delete();
+
+        // Insert new images
+        foreach ($images as $i => $img) {
+            $url = is_string($img) ? $img : ($img['url'] ?? null);
+            if (!$url) continue;
+
+            $product->images()->create([
+                'url'        => $url,
+                'is_primary' => $i === 0,
+                'sort_order' => $i,
+            ]);
+        }
+
+        // Sync primary image to product.image_url for backwards compat
+        $primaryUrl = count($images) > 0
+            ? (is_string($images[0]) ? $images[0] : ($images[0]['url'] ?? null))
+            : null;
+        $product->update(['image_url' => $primaryUrl]);
     }
 
     /**

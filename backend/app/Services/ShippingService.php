@@ -110,6 +110,14 @@ class ShippingService
             throw new \Exception("Unknown shipping zone: {$zoneCode}");
         }
 
+        // Enforce maximum weight per zone (defined in rates.gr.json)
+        $maxWeightKg = $rateTable['max_weight_kg'] ?? 30;
+        if ($billableWeightKg > $maxWeightKg) {
+            throw new \Exception(
+                "Το βάρος παραγγελίας ({$billableWeightKg}kg) υπερβαίνει το μέγιστο επιτρεπτό ({$maxWeightKg}kg) για τη ζώνη {$zoneCode}"
+            );
+        }
+
         $cost = 0;
         $baseRate = 0;
         $extraCost = 0;
@@ -193,27 +201,29 @@ class ShippingService
     {
         $order = Order::with('orderItems.product')->findOrFail($orderId);
 
-        // Calculate total weight and dimensions
+        // Calculate total weight from items (weight_per_unit is in grams since migration 2026_02_22_400000)
         $totalWeight = 0;
-        $totalVolume = 0;
+        $hasAllDimensions = true;
+        $totalVolumeCm3 = 0;
 
         foreach ($order->orderItems as $item) {
             $product = $item->product;
-            $itemWeight = (($product->weight_per_unit ?? 500) / 1000) * $item->quantity; // weight_per_unit is grams (migration 2026_02_22_400000), convert to kg
+            $itemWeight = (($product->weight_per_unit ?? 500) / 1000) * $item->quantity; // grams → kg, default 500g
             $totalWeight += $itemWeight;
 
-            // Estimate dimensions if not provided (fallback)
-            $estimatedVolume = $itemWeight * 1000; // 1 liter per kg assumption
-            $totalVolume += $estimatedVolume;
+            // Use real dimensions if ALL products have them
+            if ($product->length_cm && $product->width_cm && $product->height_cm) {
+                $totalVolumeCm3 += ($product->length_cm * $product->width_cm * $product->height_cm) * $item->quantity;
+            } else {
+                $hasAllDimensions = false;
+            }
         }
 
-        // Calculate volumetric weight (assuming cubic packaging)
-        $estimatedDimension = pow($totalVolume, 1 / 3); // Cube root for cubic package
-        $volumetricWeight = $this->computeVolumetricWeight(
-            $estimatedDimension,
-            $estimatedDimension,
-            $estimatedDimension
-        );
+        // Compute volumetric weight only if ALL items have real dimensions
+        $volumetricWeight = 0.0;
+        if ($hasAllDimensions && $totalVolumeCm3 > 0) {
+            $volumetricWeight = $totalVolumeCm3 / ($this->rateTables['volumetric_divisor'] ?? 5000);
+        }
 
         $billableWeight = $this->computeBillableWeight($totalWeight, $volumetricWeight);
 
@@ -376,6 +386,14 @@ class ShippingService
         $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
 
         return $prefix.$timestamp.$random;
+    }
+
+    /**
+     * Public accessor for label PDF generation (used by download endpoint)
+     */
+    public function generateLabelPdfPublic(Order $order, Shipment $shipment): string
+    {
+        return $this->generateLabelPdf($order, $shipment);
     }
 
     /**

@@ -81,9 +81,9 @@ function CheckoutContent() {
           <CheckoutStepper currentStep={3} />
 
           <div className="bg-white border rounded-xl p-6 mb-6">
-            <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment') || 'Card Payment'}</h2>
+            <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment')}</h2>
             <p className="text-sm text-neutral-600 mb-4">
-              {t('checkoutPage.securePayment') || 'Complete your payment securely with Stripe.'}
+              {t('checkoutPage.securePayment')}
             </p>
 
             <StripeProvider clientSecret={stripeClientSecret}>
@@ -106,7 +106,7 @@ function CheckoutContent() {
               onClick={handleCancelPayment}
               className="mt-4 w-full h-10 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50"
             >
-              {t('checkoutPage.cancelPayment') || 'Cancel and go back'}
+              {t('checkoutPage.cancelPayment')}
             </button>
           </div>
         </div>

@@ -61,10 +61,20 @@ class FakePaymentProvider implements PaymentProviderInterface
 
         // Default to success
         // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
-        $order->update([
-            'payment_status' => 'paid',
-            'status' => 'confirmed',
-        ]);
+        // Multi-producer: update ALL sibling orders in the same checkout session
+        if ($order->is_child_order && $order->checkout_session_id) {
+            Order::where('checkout_session_id', $order->checkout_session_id)
+                ->where('payment_status', '!=', 'paid')
+                ->update([
+                    'payment_status' => 'paid',
+                    'status' => 'confirmed',
+                ]);
+        } else {
+            $order->update([
+                'payment_status' => 'paid',
+                'status' => 'confirmed',
+            ]);
+        }
 
         return [
             'success' => true,

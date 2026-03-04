@@ -155,10 +155,10 @@ export default function ThankYouPage({ searchParams }: { searchParams?: Record<s
   return (
     <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="thank-you-page">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white border rounded-xl p-8 text-center">
+        <div className="bg-white border rounded-xl p-4 sm:p-8 text-center">
           <div className="mb-6">
             <div className="text-5xl mb-4">✓</div>
-            <h1 className="text-3xl font-bold text-primary mb-2">Ευχαριστούμε!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-2">Ευχαριστούμε!</h1>
             <p className="text-neutral-600">Η παραγγελία σας καταχωρήθηκε επιτυχώς.</p>
           </div>
 

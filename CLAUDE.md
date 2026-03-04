@@ -1,6 +1,7 @@
 # PROJECT-DIXIS — Agent Instructions
 
 > **Entry Point**: `docs/AGENT-STATE.md` — Read this first every session.
+> **Then**: `docs/AGENT/CONTEXT-BOOT.md` — Architecture, deploy, permissions, pitfalls. Eliminates cold-start warmup.
 
 ---
 

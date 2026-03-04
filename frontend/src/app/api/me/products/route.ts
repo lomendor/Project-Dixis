@@ -1,50 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireProducer } from '@/lib/auth/requireProducer';
-import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
-import { cookies } from 'next/headers';
+import { verifySanctumProducer } from '@/lib/auth/verifySanctumProducer';
+import { getLaravelInternalUrl } from '@/env';
 
 /**
  * GET /api/me/products
  * Returns products for the authenticated producer (scoped to producer_id)
  * Query params: ?q=searchterm&category=xyz&status=active|inactive|all
  *
- * Pass 2: Proxies to backend scoped endpoint instead of using Prisma directly
+ * ARCH-FIX-01: Replaced requireProducer() + Bearer token with verifySanctumProducer()
+ * + Sanctum cookie forwarding. Producers use Sanctum session cookies, not dixis_jwt.
  */
 export async function GET(request: NextRequest) {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    // Get authenticated producer (throws if not auth'd)
-    await requireProducer();
-
-    // Get auth token from cookies
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
     // Parse query params for search/filter
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q')?.trim() || '';
     const category = searchParams.get('category')?.trim() || '';
     const status = searchParams.get('status')?.trim() || 'all';
 
-    // Build backend API URL
-    const backendUrl = new URL(
-      '/api/v1/producer/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
+    // Build backend API URL (getLaravelInternalUrl returns .../api/v1)
+    const laravelBase = getLaravelInternalUrl();
+    const backendUrl = new URL(`${laravelBase}/producer/products`);
 
     // Add query params
     if (q) backendUrl.searchParams.set('search', q);
     if (category) backendUrl.searchParams.set('category', category);
     if (status) backendUrl.searchParams.set('status', status);
 
-    // Call backend scoped endpoint with session token
+    // Call backend with Sanctum cookies (not Bearer token)
     const response = await fetch(backendUrl.toString(), {
       headers: {
-        'Authorization': `Bearer ${sessionToken}`,
         'Accept': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
       },
       cache: 'no-store',
     });
@@ -60,6 +52,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     // Map backend response to frontend format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const products = (data.data || []).map((p: any) => ({
       id: p.id,
       title: p.name || p.title,
@@ -85,12 +78,7 @@ export async function GET(request: NextRequest) {
       total: products.length,
     });
 
-  } catch (error: any) {
-    // requireProducer throws Response objects for 401/403
-    if (error instanceof Response) {
-      return error;
-    }
-
+  } catch (error) {
     console.error('Producer products error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά την ανάκτηση προϊόντων' },
@@ -103,19 +91,13 @@ export async function GET(request: NextRequest) {
  * POST /api/me/products
  * Create a new product for the authenticated producer
  *
- * Pass 2: Proxies to backend API (producer_id auto-set server-side)
+ * ARCH-FIX-01: Uses verifySanctumProducer() + cookie forwarding
  */
 export async function POST(request: NextRequest) {
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
   try {
-    await requireProducer();
-
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
     const body = await request.json();
 
     // Map frontend fields to backend API format
@@ -128,22 +110,23 @@ export async function POST(request: NextRequest) {
       stock: parseInt(body.stock, 10),
       description: body.description || null,
       image_url: body.imageUrl || null,
+      images: body.images || undefined,
       is_active: body.isActive !== undefined ? Boolean(body.isActive) : true,
       // Note: producer_id NOT included - backend auto-sets from auth user
     };
 
-    // Call backend API
-    const backendUrl = new URL(
-      '/api/v1/products',
-      process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
-    );
+    // Call backend API with Sanctum cookies
+    const laravelBase = getLaravelInternalUrl();
+    const backendUrl = `${laravelBase}/products`;
 
-    const response = await fetch(backendUrl.toString(), {
+    const response = await fetch(backendUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${sessionToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Cookie': auth.cookieHeader,
+        'Referer': 'https://dixis.gr',
+        'Origin': 'https://dixis.gr',
       },
       body: JSON.stringify(backendPayload),
     });
@@ -160,11 +143,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, product: data.data }, { status: 201 });
 
-  } catch (error: any) {
-    if (error instanceof Response) {
-      return error;
-    }
-
+  } catch (error) {
     console.error('Create product error:', error);
     return NextResponse.json(
       { error: 'Σφάλμα κατά τη δημιουργία προϊόντος' },

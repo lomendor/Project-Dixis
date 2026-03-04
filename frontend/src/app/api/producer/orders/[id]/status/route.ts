@@ -1,94 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { sendOrderStatusUpdate } from '@/lib/email'
-import { requireProducer } from '@/lib/auth/requireProducer'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifySanctumProducer } from '@/lib/auth/verifySanctumProducer';
+import { getLaravelInternalUrl } from '@/env';
 
 /**
- * POST /api/producer/orders/[id]/status
+ * Proxy POST /api/producer/orders/:id/status -> Laravel
  *
- * Sends email notification for order status change.
- *
- * FIX-EMAIL-01: Removed Prisma dependency.
- * Orders live in Laravel/PostgreSQL — Prisma has no access to them.
- * Instead, the client passes order data from the Laravel API response.
- *
- * SECURITY:
- * - Requires authenticated producer session (cookie-based JWT)
- * - Producer auth verified via requireProducer()
- * - The status update itself is done via Laravel API (not here)
- *   This route ONLY sends the email notification
+ * P0-SEC-01: This route MUST exist in Next.js so that unauthenticated
+ * requests return 401 JSON (not 404 HTML). The deploy security smoke
+ * test verifies this endpoint returns 401, confirming nginx routes
+ * /api/producer/* to Next.js (not Laravel directly).
  */
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  // Auth check: require producer session
-  try {
-    await requireProducer();
-  } catch (response) {
-    if (response instanceof Response) {
-      return response;
-    }
-    return NextResponse.json(
-      { success: false, message: 'Απαιτείται είσοδος' },
-      { status: 401 }
-    );
-  }
+  const auth = await verifySanctumProducer();
+  if (auth.ok === false) return auth.response;
+
+  const { id } = await params;
 
   try {
-    const { id: orderId } = await params;
-
-    // Validate order ID format
-    if (!orderId || typeof orderId !== 'string' || orderId.length < 1) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid order ID' },
-        { status: 400 }
-      );
-    }
-
-    // Parse request body — data comes from the page component
-    // which already fetched it from the Laravel API
-    const body = await request.json();
-    const { status, customerEmail, customerName, total } = body;
-
-    if (!status || !['processing', 'shipped', 'delivered'].includes(status)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid status' },
-        { status: 400 }
-      );
-    }
-
-    if (!customerEmail) {
-      return NextResponse.json(
-        { success: false, message: 'Δεν βρέθηκε email πελάτη' },
-        { status: 400 }
-      );
-    }
-
-    // Send email notification via Resend
-    const emailResult = await sendOrderStatusUpdate({
-      data: {
-        orderId,
-        customerName: customerName || 'Πελάτη',
-        newStatus: status,
-        total: typeof total === 'string' ? parseFloat(total) : (total || 0),
+    const body = await req.text();
+    const res = await fetch(
+      `${getLaravelInternalUrl()}/producer/orders/${id}/status`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cookie': auth.cookieHeader,
+          'Referer': 'https://dixis.gr',
+          'Origin': 'https://dixis.gr',
+        },
+        body,
+        cache: 'no-store',
       },
-      toEmail: customerEmail,
-    });
+    );
 
-    return NextResponse.json({
-      success: emailResult.ok,
-      dryRun: emailResult.dryRun,
-      error: emailResult.error,
-      message: emailResult.ok
-        ? (emailResult.dryRun ? 'Email skipped (dry-run mode)' : 'Email sent successfully')
-        : 'Email failed to send',
+    const data = await res.text();
+    return new NextResponse(data, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json' },
     });
-
-  } catch (error) {
-    console.error('[API] Email notification error:', error);
+  } catch {
     return NextResponse.json(
-      { success: false, message: 'Failed to send email notification' },
-      { status: 500 }
+      { message: 'Backend unreachable' },
+      { status: 502 },
     );
   }
 }

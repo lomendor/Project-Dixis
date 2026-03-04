@@ -60,6 +60,7 @@ export function useCheckout() {
   const idempotencyKeyRef = useRef<string>(crypto.randomUUID())
   const shippingAbortRef = useRef<AbortController | null>(null)
   const postalCodeRef = useRef(postalCode)
+  const paymentMethodMountRef = useRef(true) // Tracks initial mount for payment method effect
   const isGuest = !isAuthenticated
 
   // --- Derived ---
@@ -144,7 +145,9 @@ export function useCheckout() {
         source: 'cart_quote',
       })
     } catch (err: any) {
-      // Silently ignore aborted requests (user typed a new postal code)
+      // Silently ignore aborted requests (user typed a new postal code, or duplicate effect fired)
+      // Check both DOMException (raw fetch) and controller.signal (ApiClient wraps AbortError as ApiError)
+      if (controller.signal.aborted) return
       if (err instanceof DOMException && err.name === 'AbortError') return
 
       if (err?.code === 'ZONE_UNAVAILABLE') {
@@ -171,6 +174,7 @@ export function useCheckout() {
             source: legacyQuote.source,
           })
         } catch (fallbackErr: any) {
+          if (controller.signal.aborted) return
           if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return
           trackShippingQuoteFailed({ postalCode: postal, errorCode: fallbackErr?.code ?? err?.code, fallbackUsed: false })
           setShippingQuote(null)
@@ -202,7 +206,12 @@ export function useCheckout() {
   }, [postalCode, savedAddress, shippingQuote, shippingLoading])
 
   // Re-fetch when payment method changes (COD fee differs)
+  // Skip initial mount — the auto-fetch effect above already handles the first call
   useEffect(() => {
+    if (paymentMethodMountRef.current) {
+      paymentMethodMountRef.current = false
+      return
+    }
     if (postalCode && postalCode.length === 5) {
       fetchShippingRef.current(postalCode, paymentMethod)
     }
@@ -262,10 +271,7 @@ export function useCheckout() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    if (isGuest && paymentMethod === 'card') {
-      setError(t('checkoutPage.cardRequiresLogin'))
-      return
-    }
+    // Guest card payment is allowed — Stripe handles card auth securely
 
     if (!shippingQuote && !cartShippingQuote && !shippingLoading) {
       trackShippingQuoteNull({ postalCode, itemCount: Object.keys(cartItems).length })

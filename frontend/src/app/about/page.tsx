@@ -93,8 +93,8 @@ export default function AboutPage() {
                 με διαφανή κοστολόγηση σε κάθε βήμα.
               </p>
             </div>
-            <div className="bg-primary-pale rounded-2xl p-8 flex flex-col items-center justify-center">
-              <div className="grid grid-cols-3 gap-6 w-full">
+            <div className="bg-primary-pale rounded-2xl p-4 sm:p-8 flex flex-col items-center justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 w-full">
                 {stats.map((stat) => (
                   <div key={stat.label} className="text-center">
                     <div className="text-2xl sm:text-3xl font-bold text-primary">

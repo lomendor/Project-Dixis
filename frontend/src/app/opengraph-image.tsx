@@ -105,7 +105,7 @@ export default async function Image() {
           {[
             { value: '100%', label: 'Ελληνικά' },
             { value: '0', label: 'Μεσάζοντες' },
-            { value: '88%', label: 'Στον Παραγωγό' },
+            { value: '>80%', label: 'Στον Παραγωγό' },
           ].map((stat) => (
             <div
               key={stat.label}

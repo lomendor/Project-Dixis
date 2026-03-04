@@ -111,10 +111,21 @@ class StripePaymentProvider implements PaymentProviderInterface
             if ($paymentIntent->status === 'succeeded') {
                 // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
                 // which allows: pending|confirmed|processing|shipped|completed|delivered|cancelled
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => 'confirmed',
-                ]);
+
+                // Multi-producer: update ALL sibling orders in the same checkout session
+                if ($order->is_child_order && $order->checkout_session_id) {
+                    Order::where('checkout_session_id', $order->checkout_session_id)
+                        ->where('payment_status', '!=', 'paid')
+                        ->update([
+                            'payment_status' => 'paid',
+                            'status' => 'confirmed',
+                        ]);
+                } else {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'status' => 'confirmed',
+                    ]);
+                }
 
                 return [
                     'success' => true,
@@ -274,7 +285,7 @@ class StripePaymentProvider implements PaymentProviderInterface
             }
 
             // Create refund in Stripe
-            $refund = $this->stripe->refunds->create([
+            $refundParams = [
                 'payment_intent' => $order->payment_intent_id,
                 'amount' => $refundAmount,
                 'reason' => $reason,
@@ -282,7 +293,14 @@ class StripePaymentProvider implements PaymentProviderInterface
                     'order_id' => $order->id,
                     'refund_reason' => $reason,
                 ],
-            ]);
+            ];
+
+            // Pass STRIPE-CONNECT-01: Reverse transfer if order was paid via Connect
+            if (!empty($order->stripe_transfer_id)) {
+                $refundParams['reverse_transfer'] = true;
+            }
+
+            $refund = $this->stripe->refunds->create($refundParams);
 
             // Update order with refund info
             $currentRefunded = $order->refunded_amount_cents ?? 0;
@@ -408,13 +426,26 @@ class StripePaymentProvider implements PaymentProviderInterface
         if ($orderId) {
             $order = Order::find($orderId);
             if ($order && $order->payment_status !== 'paid') {
-                // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
-                $order->update([
-                    'payment_status' => 'paid',
-                    'status' => 'confirmed',
-                ]);
-
-                Log::info('Order payment confirmed via webhook', ['order_id' => $orderId]);
+                // Multi-producer: update ALL sibling orders in the same checkout session
+                if ($order->is_child_order && $order->checkout_session_id) {
+                    Order::where('checkout_session_id', $order->checkout_session_id)
+                        ->where('payment_status', '!=', 'paid')
+                        ->update([
+                            'payment_status' => 'paid',
+                            'status' => 'confirmed',
+                        ]);
+                    Log::info('Multi-producer payment confirmed via webhook', [
+                        'order_id' => $orderId,
+                        'checkout_session_id' => $order->checkout_session_id,
+                    ]);
+                } else {
+                    // Note: status='confirmed' (not 'paid') to satisfy orders_status_check constraint
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'status' => 'confirmed',
+                    ]);
+                    Log::info('Order payment confirmed via webhook', ['order_id' => $orderId]);
+                }
             }
         }
 

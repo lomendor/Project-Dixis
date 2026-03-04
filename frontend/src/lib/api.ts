@@ -91,6 +91,22 @@ export interface Producer {
   bank_account_holder?: string;
 }
 
+// Pass STRIPE-CONNECT-01: Producer Stripe Connect status
+export interface StripeConnectStatus {
+  connected: boolean;
+  status: 'pending' | 'active' | 'restricted' | 'not_connected' | 'unknown';
+  charges_enabled: boolean;
+  payouts_enabled: boolean;
+  requirements?: {
+    currently_due: string[];
+    eventually_due: string[];
+    past_due: string[];
+    disabled_reason: string | null;
+  };
+  onboarding_url?: string;
+  dashboard_url?: string;
+}
+
 export interface CartItem {
   id: number;
   quantity: number;
@@ -1262,6 +1278,8 @@ class ApiClient {
     beekeeper_registry_number?: string | null;
     cpnp_notification_number?: string | null;
     responsible_person_name?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   }): Promise<{ producer: Record<string, unknown>; message: string }> {
     return this.request('producer/profile', {
       method: 'PATCH',
@@ -1296,6 +1314,7 @@ class ApiClient {
     stock: number;
     description?: string;
     image_url?: string | null;
+    images?: string[];
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;
@@ -1325,6 +1344,7 @@ class ApiClient {
     stock?: number;
     description?: string;
     image_url?: string | null;
+    images?: string[];
     is_active?: boolean;
     cultivation_type?: string;
     cultivation_description?: string;
@@ -1341,6 +1361,23 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  }
+
+  // Pass STRIPE-CONNECT-01: Stripe Connect producer endpoints
+  async stripeConnectOnboard(): Promise<{ onboarding_url: string; account_id: string }> {
+    return this.request('producer/stripe/onboard', { method: 'POST' });
+  }
+
+  async stripeConnectStatus(): Promise<StripeConnectStatus> {
+    return this.request('producer/stripe/status');
+  }
+
+  async stripeConnectDashboard(): Promise<{ dashboard_url: string }> {
+    return this.request('producer/stripe/dashboard');
+  }
+
+  async stripeConnectRefreshOnboarding(): Promise<{ onboarding_url: string }> {
+    return this.request('producer/stripe/onboard/refresh');
   }
 }
 

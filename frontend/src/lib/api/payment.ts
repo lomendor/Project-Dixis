@@ -65,6 +65,16 @@ import { API_BASE_URL } from '@/env';
 class PaymentApiClient {
   private static readonly TIMEOUT_MS = 30_000; // 30s timeout for payment APIs
 
+  /**
+   * Read XSRF-TOKEN from cookie (set by Sanctum csrf-cookie endpoint).
+   * Required for all POST requests to Laravel (419 CSRF mismatch otherwise).
+   */
+  private getXsrfToken(): string | null {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -74,13 +84,24 @@ class PaymentApiClient {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), PaymentApiClient.TIMEOUT_MS);
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    // XSRF token from Sanctum cookie — required for Laravel CSRF protection
+    const xsrf = this.getXsrfToken();
+    if (xsrf) {
+      headers['X-XSRF-TOKEN'] = xsrf;
+    }
+
     try {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          ...headers,
           ...options.headers,
         },
       });

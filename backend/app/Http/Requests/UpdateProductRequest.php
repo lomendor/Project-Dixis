@@ -43,6 +43,8 @@ class UpdateProductRequest extends FormRequest
             'storage_instructions' => 'nullable|string|max:500',
             'shelf_life' => 'nullable|string|max:255',
             'image_url' => 'nullable|url|max:500',
+            'images'   => 'nullable|array|max:5',
+            'images.*' => 'string|max:500',
             'status' => 'nullable|string|in:available,unavailable,discontinued',
             'is_active' => 'nullable|boolean',
             'producer_id' => 'nullable|exists:producers,id',

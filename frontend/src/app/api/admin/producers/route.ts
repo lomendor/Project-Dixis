@@ -74,6 +74,13 @@ export async function GET(req: NextRequest) {
       responsiblePersonName: p.responsible_person_name || null,
       iban: p.iban || null,
       bankAccountHolder: p.bank_account_holder || null,
+      latitude: p.latitude ?? null,
+      longitude: p.longitude ?? null,
+      // Stripe Connect (STRIPE-CONNECT-01)
+      stripeConnectId: p.stripe_connect_id || null,
+      stripeConnectStatus: p.stripe_connect_status || null,
+      stripeChargesEnabled: p.stripe_charges_enabled || false,
+      stripePayoutsEnabled: p.stripe_payouts_enabled || false,
     }))
 
     return NextResponse.json({ items, total: json.total || items.length })
