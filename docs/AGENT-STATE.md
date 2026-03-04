@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-02-24 (Admin session bug fix: cookie rename dixis_session → dixis_jwt)
+**Updated**: 2026-03-04 (SEO polish, skeleton loaders, B2B research doc)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 
@@ -42,7 +42,7 @@
 
 ## WIP (max 1)
 
-**None** — Ready for next task. CI is GREEN.
+**S1-04: Wishlist/Favorites** — Heart icon on product cards, "My Favorites" page.
 
 ---
 
@@ -65,9 +65,9 @@
 - Action: Onboard 3 producers → first 20 orders → measure → then decide spend
 - Full analysis: `docs/BUSINESS-REVIEW-2026-02.md`
 
-**Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
-**Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
+**Feature backlog (active):** `docs/BACKLOG.md` — building value while waiting for producers.
+**Next from backlog:** S1-04 (Wishlist — in progress), S2-05 (Mobile audit), S1-03 (Q&A).
+**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, S3-04 ✅ SEO Foundation, S2-06 ✅ Skeleton Loaders, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
 
 **User-reported issues (for later):**
 - Product renaming (improve Greek product names)
@@ -88,6 +88,7 @@
 
 ## Recently Done (last 10)
 
+- **SEO-POLISH + SKELETON-LOADERS** — Meta title shortened (62→41 chars), Organization JSON-LD enriched (sameAs, contactPoint, foundingDate), Contact & FAQ pages get metadata via server component extraction, B2B readiness research doc added. 5 skeleton loading.tsx files for cart, checkout, producers, producer detail, orders. (PR #3272, 2026-03-04) ✅
 - **ADMIN-SESSION-FIX** — Fixed admin session dropping after 2-3 pages ("jwt malformed"). Root cause: Laravel session cookie `dixis_session` collided with Next.js JWT cookie of same name. Cookie renamed to `dixis_jwt` across 14 files. Also: unified `getLaravelInternalUrl()` in 12 admin routes, added admin logout button + diagnostic logging. Live verified 12/12 admin pages with zero drops. (PRs #3165-#3167, deployed 2026-02-24) ✅
 - **GREEK-READINESS-AUDIT** — Full Greek market readiness: 25 English string leaks fixed across 15 files (auth, storefront, account, producer, admin). Currency ✅ (`el-GR` Intl format), postal codes ✅ (5-digit + city cross-validation), AFM ✅ (9-digit), IBAN ✅ (GR prefix). VAT 24% mainland ✅, island 13% deferred to post-MVP. (PR #3104, deployed 2026-02-22) ✅
 - **SECURITY-HARDENING** — crypto OTP (not Math.random), open redirect fix, S3 path guard, JWT secret validation, checkout endpoint hardening, cart quantity limits, payment provider validation. (PRs #3098-#3099, deployed 2026-02-22) ✅
@@ -152,6 +153,7 @@
 | `docs/BUSINESS-REVIEW-2026-02.md` | Financial plan analysis & realistic projections |
 | `docs/OPS-QUICK-REFERENCE.md` | Daily ops cheat sheet — "τι κάνω ΤΩΡΑ όταν..." |
 | `docs/LAUNCH-CHECKLIST-7DAY.md` | 7-day launch plan with checkboxes |
+| `docs/B2B-READINESS.md` | B2B preparation: invoicing, providers, implementation plan |
 
 ---
 

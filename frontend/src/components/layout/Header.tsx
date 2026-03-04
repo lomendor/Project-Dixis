@@ -136,6 +136,16 @@ export default function Header() {
                     </Link>
                   )}
 
+                  {/* S1-04: Favorites link — visible for all roles */}
+                  <Link
+                    href="/account/favorites"
+                    className="flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    onClick={() => setUserMenuOpen(false)}
+                    data-testid="user-menu-favorites"
+                  >
+                    ♥ Αγαπημένα
+                  </Link>
+
                   {/* Producer: Dashboard + Orders */}
                   {isProducer && (
                     <>
@@ -270,6 +280,15 @@ export default function Header() {
                       {t('nav.myOrders')}
                     </Link>
                   )}
+                  {/* S1-04: Favorites link */}
+                  <Link
+                    href="/account/favorites"
+                    className="flex items-center min-h-[48px] py-3 text-base font-medium text-neutral-700 hover:text-primary active:bg-primary-pale -mx-4 px-4 transition-colors touch-manipulation"
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-testid="mobile-nav-favorites"
+                  >
+                    ♥ Αγαπημένα
+                  </Link>
                   {isProducer && (
                     <>
                       <Link
