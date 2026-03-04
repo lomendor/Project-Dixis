@@ -223,8 +223,9 @@ Before planning what to build, here's what **already works in production**:
 - Meta title/description templates per page type
 - Open Graph / Twitter Card tags
 - Producer page structured data
+- Organization JSON-LD with sameAs (LinkedIn, Instagram)
 **Effort:** M (2 PRs)
-**Status:** `[ ]`
+**Status:** `[x]` ✅ Done — Majority already built across multiple sessions. PR #3272 (2026-03-04): shortened meta title, enriched Organization JSON-LD (sameAs, contactPoint, foundingDate), added metadata to Contact/FAQ pages. Previously: sitemap.ts, robots.ts, OG images, Product/BreadcrumbList/ItemList schemas, per-page metadata all implemented.
 
 ### S3-05: Enhanced Search & Discovery
 **Why:** Users must find what they want quickly. Better search = more sales.
@@ -417,7 +418,7 @@ Before planning what to build, here's what **already works in production**:
 | S3-01 | Cost Transparency | Critical | S | 3 | ✅ Done |
 | S3-02 | Seasonal Calendar | High | M | 3 |
 | S3-03 | Cart Abandonment Emails | High | M | 3 |
-| S3-04 | SEO Foundation | High | M | 3 |
+| S3-04 | SEO Foundation | High | M | 3 | ✅ Done |
 | S3-05 | Enhanced Search | Medium | M | 3 |
 | S3-06 | Email Marketing | Medium | M | 3 |
 | S4-01 | Virtual Tours | Medium | S-M | 4 |
