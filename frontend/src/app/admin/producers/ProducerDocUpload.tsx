@@ -46,39 +46,58 @@ export default function ProducerDocUpload({ producerId, label, fieldName, curren
     }
   }
 
+  const isImage = fieldName === 'producer_image'
+  const acceptTypes = isImage ? '.jpg,.jpeg,.png,.webp' : '.pdf,.jpg,.jpeg,.png'
+
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="text-gray-500 min-w-[140px]">{label}:</span>
-      {currentUrl ? (
-        <a
-          href={currentUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Προβολή
-        </a>
-      ) : (
-        <span className="text-gray-400">Δεν ανέβηκε</span>
+    <div className="text-xs">
+      <div className="flex items-center gap-2">
+        <span className="text-gray-500 min-w-[140px]">{label}:</span>
+        {currentUrl ? (
+          isImage ? (
+            <span className="text-green-600">Ανεβασμένη</span>
+          ) : (
+            <a
+              href={currentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Προβολή
+            </a>
+          )
+        ) : (
+          <span className="text-gray-400">Δεν ανέβηκε</span>
+        )}
+        <label className={`ml-auto px-2 py-0.5 rounded text-xs font-medium cursor-pointer transition-colors ${
+          uploading
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+        }`}>
+          {uploading ? 'Ανέβασμα...' : currentUrl ? 'Αντικατάσταση' : 'Ανέβασμα'}
+          <input
+            ref={fileRef}
+            type="file"
+            accept={acceptTypes}
+            className="hidden"
+            disabled={uploading}
+            onChange={e => {
+              const file = e.target.files?.[0]
+              if (file) handleUpload(file)
+            }}
+          />
+        </label>
+      </div>
+      {isImage && currentUrl && (
+        <div className="mt-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={currentUrl}
+            alt="Εικόνα παραγωγού"
+            className="w-24 h-24 rounded-lg object-cover border"
+          />
+        </div>
       )}
-      <label className={`ml-auto px-2 py-0.5 rounded text-xs font-medium cursor-pointer transition-colors ${
-        uploading
-          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-      }`}>
-        {uploading ? 'Ανέβασμα...' : currentUrl ? 'Αντικατάσταση' : 'Ανέβασμα'}
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          className="hidden"
-          disabled={uploading}
-          onChange={e => {
-            const file = e.target.files?.[0]
-            if (file) handleUpload(file)
-          }}
-        />
-      </label>
     </div>
   )
 }
