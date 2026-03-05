@@ -1,9 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+
 export const metadata: Metadata = {
   title: 'Πολιτική Απορρήτου',
   description: 'Πολιτική απορρήτου και προστασίας δεδομένων (GDPR) της πλατφόρμας Dixis.',
+  alternates: { canonical: '/legal/privacy' },
+  openGraph: {
+    title: 'Πολιτική Απορρήτου | Dixis',
+    description: 'Πολιτική απορρήτου και προστασίας δεδομένων (GDPR) της πλατφόρμας Dixis.',
+    url: `${siteUrl}/legal/privacy`,
+  },
 };
 
 /**

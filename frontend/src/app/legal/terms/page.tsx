@@ -1,9 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+
 export const metadata: Metadata = {
   title: 'Όροι Χρήσης',
   description: 'Όροι χρήσης της πλατφόρμας Dixis — ηλεκτρονική αγορά τοπικών προϊόντων.',
+  alternates: { canonical: '/legal/terms' },
+  openGraph: {
+    title: 'Όροι Χρήσης | Dixis',
+    description: 'Όροι χρήσης της πλατφόρμας Dixis — ηλεκτρονική αγορά τοπικών προϊόντων.',
+    url: `${siteUrl}/legal/terms`,
+  },
 };
 
 /**
