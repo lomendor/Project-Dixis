@@ -1,37 +1,28 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
-import { logAdminAction, createOrderStatusContext } from '@/lib/audit/logger';
+import { getLaravelInternalUrl } from '@/env';
+import { cookies } from 'next/headers';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/cookies';
 
-function canTransition(from: string, to: string): boolean {
-  const flow: Record<string, string[]> = {
-    PENDING: ['PACKING', 'CANCELLED'],
-    PAID: ['PACKING', 'CANCELLED'],
-    PACKING: ['SHIPPED', 'CANCELLED'],
-    SHIPPED: ['DELIVERED'],
-    DELIVERED: [],
-    CANCELLED: []
-  };
-  const F = (from || 'PENDING').toUpperCase();
-  const T = (to || '').toUpperCase();
-  return (flow[F] || []).includes(T);
-}
-
-const VALID_STATUSES = ['PACKING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+const VALID_STATUSES = ['confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 /**
  * POST /api/admin/orders/bulk/status
- * Bulk update order statuses with transition validation, audit logging, and email.
+ *
+ * FIX-STALE-PRISMA-01: Now sends updates to Laravel (SSOT) instead of Prisma/Neon.
+ *
+ * Calls Laravel PUT /admin/orders/{id}/status for each order.
+ * Laravel handles: validation, transition rules, stock restore, status history, emails.
  */
 export async function POST(req: Request) {
   try {
-    const admin = await requireAdmin();
+    await requireAdmin();
     const { orderIds, status } = await req.json();
 
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
       return NextResponse.json({ error: 'missing orderIds' }, { status: 400 });
     }
-    const to = String(status || '').toUpperCase();
+    const to = String(status || '').toLowerCase();
     if (!VALID_STATUSES.includes(to)) {
       return NextResponse.json({ error: `invalid status: ${to}` }, { status: 400 });
     }
@@ -39,68 +30,35 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'max 50 orders per batch' }, { status: 400 });
     }
 
-    const results: { id: string; ok: boolean; error?: string }[] = [];
+    const base = getLaravelInternalUrl();
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    const results: { id: string | number; ok: boolean; error?: string }[] = [];
 
     for (const orderId of orderIds) {
       try {
-        const order = await prisma.order.findUnique({ where: { id: orderId } });
-        if (!order) {
-          results.push({ id: orderId, ok: false, error: 'not_found' });
-          continue;
-        }
-
-        const from = String(order.status || 'PENDING').toUpperCase();
-        if (!canTransition(from, to)) {
-          results.push({ id: orderId, ok: false, error: `invalid_transition ${from}→${to}` });
-          continue;
-        }
-
-        const updated = await prisma.order.update({
-          where: { id: orderId },
-          data: { status: to }
+        const res = await fetch(`${base}/admin/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: to }),
+          signal: AbortSignal.timeout(10000),
         });
 
-        // Audit log
-        try {
-          await logAdminAction({
-            admin,
-            action: 'ORDER_STATUS_CHANGE',
-            entityType: 'order',
-            entityId: orderId,
-            ...createOrderStatusContext(from, to)
-          });
-        } catch (auditErr) {
-          console.error('[Admin] Bulk audit log failed:', auditErr);
+        if (res.ok) {
+          results.push({ id: orderId, ok: true });
+        } else {
+          const body = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          results.push({ id: orderId, ok: false, error: body.error || `HTTP ${res.status}` });
         }
-
-        // Send status email
-        try {
-          const fresh = await prisma.order.findUnique({
-            where: { id: updated.id },
-            select: { email: true, name: true, buyerName: true, publicToken: true, total: true }
-          });
-          const customerEmail = fresh?.email;
-          if (customerEmail) {
-            const { sendOrderStatusUpdate, normalizeOrderStatus } = await import('@/lib/email');
-            const emailStatus = normalizeOrderStatus(to);
-            if (emailStatus) {
-              const customerName = fresh.name || fresh.buyerName || 'Πελάτη';
-              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
-              const trackUrl = fresh.publicToken
-                ? `${siteUrl.replace(/\/$/, '')}/track/${fresh.publicToken}`
-                : undefined;
-              await sendOrderStatusUpdate({
-                data: { orderId, customerName, newStatus: emailStatus, total: fresh.total ?? 0, trackUrl },
-                toEmail: customerEmail,
-              });
-            }
-          }
-        } catch (emailErr) {
-          console.warn('[admin bulk] email skipped for %s:', String(orderId).replace(/[\n\r]/g, ''), (emailErr as Error).message);
-        }
-
-        results.push({ id: orderId, ok: true });
-        console.log('[order bulk] %s status %s→%s', String(orderId).replace(/[\n\r]/g, ''), from, to);
       } catch (err) {
         results.push({ id: orderId, ok: false, error: (err as Error).message });
       }

@@ -103,3 +103,43 @@ export async function fetchProductsAnalytics(limit = 10): Promise<ProductsAnalyt
   )
   return data?.analytics ?? null
 }
+
+// FIX-STALE-PRISMA-01: Fetch all orders from Laravel for customer aggregation
+export interface LaravelOrder {
+  id: number
+  status: string
+  total_amount: string
+  payment_method: string
+  payment_status: string
+  created_at: string
+  user?: {
+    id: number
+    name: string | null
+    email: string | null
+    phone: string | null
+  } | null
+}
+
+export async function fetchAllOrders(): Promise<LaravelOrder[]> {
+  const data = await fetchLaravelAdmin<{
+    success: boolean
+    orders: LaravelOrder[]
+    meta: { total: number; last_page: number }
+  }>('/admin/orders?per_page=100&sort=-created_at')
+
+  if (!data?.orders) return []
+
+  // If more than 100 orders, fetch remaining pages
+  const orders = [...data.orders]
+  if (data.meta.last_page > 1) {
+    for (let page = 2; page <= data.meta.last_page; page++) {
+      const pageData = await fetchLaravelAdmin<{
+        success: boolean
+        orders: LaravelOrder[]
+      }>(`/admin/orders?per_page=100&sort=-created_at&page=${page}`)
+      if (pageData?.orders) orders.push(...pageData.orders)
+    }
+  }
+
+  return orders
+}
