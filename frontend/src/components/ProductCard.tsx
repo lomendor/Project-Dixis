@@ -101,8 +101,8 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
               </span>
             )}
           </div>
-          {/* S1-04: Favorite heart button — top right */}
-          <div className="absolute top-2 right-2 z-10">
+          {/* S1-04: Favorite heart button — top right, subtle on hover (desktop) */}
+          <div className="absolute top-1.5 right-1.5 z-10 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
             <FavoriteButton
               item={{
                 id: String(id),
@@ -113,6 +113,7 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
                 producerId: producerId ? String(producerId) : undefined,
                 producerSlug: producerSlug || undefined,
               }}
+              size="xs"
             />
           </div>
         </div>
