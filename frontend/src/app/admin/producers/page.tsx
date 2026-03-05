@@ -8,6 +8,7 @@ import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 import { getCategoryBySlug } from '@/data/categories'
 import ProducerEditForm from './ProducerEditForm'
+import ProducerDocUpload from './ProducerDocUpload'
 
 interface Producer {
   id: string
@@ -364,12 +365,36 @@ function AdminProducersContent() {
                               </div>
                             </div>
                           )}
-                          {/* Documents */}
+                          {/* Documents with upload */}
                           <div className="sm:col-span-2 mt-2 space-y-1">
                             <p className="text-gray-500 font-medium">Έγγραφα:</p>
-                            <DocLink label="TAXIS (ΑΦΜ+ΚΑΔ)" url={p.taxRegistrationDocUrl} />
-                            <DocLink label="ΕΦΕΤ / NotifyBusiness" url={p.efetNotificationDocUrl} />
-                            <DocLink label="HACCP" url={p.haccpDeclarationDocUrl} />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="TAXIS (ΑΦΜ+ΚΑΔ)"
+                              fieldName="tax_registration_doc"
+                              currentUrl={p.taxRegistrationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, taxRegistrationDocUrl: url } : pr
+                              ))}
+                            />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="ΕΦΕΤ / NotifyBusiness"
+                              fieldName="efet_notification_doc"
+                              currentUrl={p.efetNotificationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, efetNotificationDocUrl: url } : pr
+                              ))}
+                            />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="HACCP"
+                              fieldName="haccp_declaration_doc"
+                              currentUrl={p.haccpDeclarationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, haccpDeclarationDocUrl: url } : pr
+                              ))}
+                            />
                             <div className="text-xs">
                               <span className="text-gray-500">HACCP δήλωση: </span>
                               <span className={p.haccpDeclarationAccepted ? 'text-green-700' : 'text-gray-400'}>
