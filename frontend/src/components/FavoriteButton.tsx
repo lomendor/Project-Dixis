@@ -34,7 +34,7 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
   }
 
   const btnSize = size === 'lg' ? 'w-10 h-10' : size === 'xs' ? 'w-7 h-7' : 'w-8 h-8'
-  const iconSize = size === 'lg' ? 'w-6 h-6' : size === 'xs' ? 'w-[18px] h-[18px]' : 'w-5 h-5'
+  const iconSize = size === 'lg' ? 'w-6 h-6' : size === 'xs' ? 'w-4 h-4' : 'w-5 h-5'
 
   return (
     <button
