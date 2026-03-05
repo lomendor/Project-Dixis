@@ -6,7 +6,7 @@ import { useToast } from '@/contexts/ToastContext'
 interface Props {
   producerId: string
   label: string
-  fieldName: 'tax_registration_doc' | 'efet_notification_doc' | 'haccp_declaration_doc'
+  fieldName: 'tax_registration_doc' | 'efet_notification_doc' | 'haccp_declaration_doc' | 'producer_image'
   currentUrl: string | null
   onUploaded: (newUrl: string) => void
 }
@@ -34,7 +34,7 @@ export default function ProducerDocUpload({ producerId, label, fieldName, curren
 
       const data = await res.json()
       // Find the uploaded URL from the returned producer
-      const urlField = fieldName + '_url' // e.g. tax_registration_doc_url
+      const urlField = fieldName === 'producer_image' ? 'image_url' : fieldName + '_url'
       const newUrl = data.producer?.[urlField] || currentUrl
       showSuccess(`${label}: Ανέβηκε`)
       onUploaded(newUrl)

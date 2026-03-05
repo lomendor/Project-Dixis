@@ -81,6 +81,7 @@ export async function GET(req: NextRequest) {
       stripeConnectStatus: p.stripe_connect_status || null,
       stripeChargesEnabled: p.stripe_charges_enabled || false,
       stripePayoutsEnabled: p.stripe_payouts_enabled || false,
+      imageUrl: p.image_url || null,
     }))
 
     return NextResponse.json({ items, total: json.total || items.length })

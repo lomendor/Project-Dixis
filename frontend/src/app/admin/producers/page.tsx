@@ -47,6 +47,7 @@ interface Producer {
   stripeConnectStatus: string | null
   stripeChargesEnabled: boolean
   stripePayoutsEnabled: boolean
+  imageUrl: string | null
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -386,6 +387,19 @@ function AdminProducersContent() {
                               </div>
                             </div>
                           )}
+                          {/* Producer image */}
+                          <div className="sm:col-span-2 mt-2 space-y-1">
+                            <p className="text-gray-500 font-medium">Φωτογραφία παραγωγού:</p>
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="Εικόνα"
+                              fieldName="producer_image"
+                              currentUrl={p.imageUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, imageUrl: url } : pr
+                              ))}
+                            />
+                          </div>
                           {/* Documents with upload */}
                           <div className="sm:col-span-2 mt-2 space-y-1">
                             <p className="text-gray-500 font-medium">Έγγραφα:</p>
