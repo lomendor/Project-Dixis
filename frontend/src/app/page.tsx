@@ -16,28 +16,24 @@ export const metadata: Metadata = {
 /**
  * Homepage — Commerce-first landing page for Dixis marketplace
  *
- * Layout: compact hero banner → categories → horizontal scroll products → producers → trust → CTA
- * User sees products immediately without scrolling past giant hero.
+ * Layout: compact hero → categories → products → producer → trust → CTA
+ *
+ * Categories + Products render immediately (no SectionReveal) so the page
+ * never looks empty below the fold. Deeper sections animate in on scroll.
  */
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <SectionReveal>
-        <HomeCategoryStrip />
-      </SectionReveal>
-      <SectionReveal>
-        <FeaturedProducts />
-      </SectionReveal>
+      <HomeCategoryStrip />
+      <FeaturedProducts />
       <SectionReveal>
         <ProducerSpotlight />
       </SectionReveal>
       <SectionReveal>
         <TrustBar />
       </SectionReveal>
-      <SectionReveal>
-        <HomeCTA />
-      </SectionReveal>
+      <HomeCTA />
     </>
   );
 }

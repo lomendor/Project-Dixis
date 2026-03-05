@@ -78,7 +78,7 @@ export default async function FeaturedProducts() {
 
   return (
     <section
-      className="py-8 sm:py-10 bg-white"
+      className="py-6 sm:py-8 bg-white"
       data-testid="featured-products"
     >
       {/* Section header — inside container */}

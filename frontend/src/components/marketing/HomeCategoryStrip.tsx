@@ -46,7 +46,7 @@ const ICON = 'w-14 h-14 sm:w-16 sm:h-16 lg:w-14 lg:h-14 2xl:w-[72px] 2xl:h-[72px
 
 export default function HomeCategoryStrip() {
   return (
-    <section className="py-8 sm:py-10 bg-white">
+    <section className="py-6 sm:py-8 bg-white">
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Section header */}
         <div className="mb-5 sm:mb-6">
