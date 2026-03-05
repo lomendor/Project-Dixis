@@ -89,3 +89,51 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Σφάλμα διακομιστή' }, { status: 500 })
   }
 }
+
+/**
+ * ADMIN-CREATE-PRODUCER-01: Create a new producer — proxy to Laravel
+ */
+export async function POST(req: NextRequest) {
+  try {
+    await requireAdmin()
+  } catch (error) {
+    return handleAdminError(error)
+  }
+
+  try {
+    const body = await req.json()
+    const token = await getAdminToken()
+    const laravelBase = getLaravelInternalUrl()
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+    const res = await fetch(`${laravelBase}/admin/producers`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      cache: 'no-store',
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      return NextResponse.json(
+        { error: errorData.message || 'Σφάλμα δημιουργίας παραγωγού' },
+        { status: res.status }
+      )
+    }
+
+    const data = await res.json()
+    return NextResponse.json({
+      success: true,
+      message: data.message || 'Δημιουργήθηκε',
+      producer: data.producer,
+    }, { status: 201 })
+  } catch (error) {
+    console.error('[Admin] Producer create proxy error:', error)
+    return NextResponse.json({ error: 'Σφάλμα διακομιστή' }, { status: 500 })
+  }
+}

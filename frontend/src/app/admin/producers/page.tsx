@@ -9,6 +9,7 @@ import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 import { getCategoryBySlug } from '@/data/categories'
 import ProducerEditForm from './ProducerEditForm'
 import ProducerDocUpload from './ProducerDocUpload'
+import CreateProducerForm from './CreateProducerForm'
 
 interface Producer {
   id: string
@@ -98,6 +99,7 @@ function AdminProducersContent() {
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
   // Rejection modal state
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
@@ -210,13 +212,32 @@ function AdminProducersContent() {
           <h1 className="text-2xl font-bold text-gray-900">Παραγωγοί</h1>
           <p className="text-sm text-gray-500 mt-1">Διαχείριση αιτήσεων και εγκρίσεων παραγωγών</p>
         </div>
-        {pendingCount > 0 && statusFilter === 'all' && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            {pendingCount} σε αναμονή
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {pendingCount > 0 && statusFilter === 'all' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              {pendingCount} σε αναμονή
+            </span>
+          )}
+          <button
+            onClick={() => setShowCreateForm(v => !v)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {showCreateForm ? 'Ακύρωση' : '+ Νέος Παραγωγός'}
+          </button>
+        </div>
       </div>
+
+      {/* Create producer form */}
+      {showCreateForm && (
+        <CreateProducerForm
+          onCreated={() => {
+            setShowCreateForm(false)
+            loadProducers()
+          }}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
