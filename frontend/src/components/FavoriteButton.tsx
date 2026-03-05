@@ -33,13 +33,8 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
     }
   }
 
-  const sizeClasses = size === 'lg'
-    ? 'w-10 h-10'
-    : size === 'xs'
-    ? 'w-7 h-7'
-    : 'w-8 h-8'
-
-  const iconSize = size === 'lg' ? 'w-5 h-5' : size === 'xs' ? 'w-4 h-4' : 'w-4 h-4'
+  const btnSize = size === 'lg' ? 'w-10 h-10' : size === 'xs' ? 'w-7 h-7' : 'w-8 h-8'
+  const iconSize = size === 'lg' ? 'w-6 h-6' : size === 'xs' ? 'w-[18px] h-[18px]' : 'w-5 h-5'
 
   return (
     <button
@@ -52,16 +47,16 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
         inline-flex items-center justify-center rounded-full
         transition-all duration-200
         ${isFav
-          ? 'bg-red-50 text-red-500 hover:bg-red-100'
-          : 'bg-white/90 text-neutral-400 hover:text-red-400 hover:bg-white'
+          ? 'text-red-500 hover:text-red-600 hover:scale-110'
+          : 'text-white hover:text-red-400 hover:scale-110'
         }
-        ${sizeClasses}
-        shadow-sm backdrop-blur-sm
+        ${btnSize}
         ${className}
       `}
+      style={{ filter: isFav ? 'none' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
     >
       <svg
-        className={`${iconSize} transition-transform ${isFav ? 'scale-110' : ''}`}
+        className={`${iconSize} transition-transform`}
         viewBox="0 0 24 24"
         fill={isFav ? 'currentColor' : 'none'}
         stroke="currentColor"
