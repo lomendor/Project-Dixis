@@ -55,6 +55,10 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
       style={{
         width: btnPx,
         height: btnPx,
+        padding: 0,
+        minHeight: 0,
+        border: 'none',
+        background: 'none',
         filter: isFav ? 'none' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))',
       }}
     >
