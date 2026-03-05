@@ -1,8 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
-import { prisma } from '@/lib/db/client';
 import { fetchProductCounts } from '@/lib/laravel/counts';
+import { fetchDashboardSummary } from '@/lib/laravel/dashboard';
 import CommissionToggle from './CommissionToggle';
 
 /**
@@ -31,18 +31,18 @@ export default async function AdminSettingsPage() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1';
   const lowStockThreshold = process.env.LOW_STOCK_THRESHOLD || '3';
 
-  // DB check (orders stay in Prisma; products from Laravel SSOT)
+  // FIX-STALE-PRISMA-01: All counts from Laravel (SSOT) instead of stale Prisma/Neon
   let dbStatus = 'unknown';
   let orderCount = 0;
   let productCount = 0;
   try {
-    const [oc, pc] = await Promise.all([
-      prisma.order.count(),
+    const [summary, pc] = await Promise.all([
+      fetchDashboardSummary(),
       fetchProductCounts(),
     ]);
-    orderCount = oc;
+    orderCount = summary?.month.orders ?? 0;
     productCount = pc.total;
-    dbStatus = 'connected';
+    dbStatus = summary ? 'connected' : 'error';
   } catch {
     dbStatus = 'error';
   }
@@ -108,8 +108,8 @@ export default async function AdminSettingsPage() {
           <StatusDot ok={dbStatus === 'connected'} />
           <span className="text-sm text-neutral-700">{dbStatus}</span>
         </div>
-        <ConfigRow label="Παραγγελίες (DB)" value={String(orderCount)} />
-        <ConfigRow label="Προϊόντα (DB)" value={String(productCount)} />
+        <ConfigRow label="Παραγγελίες (μήνα)" value={String(orderCount)} />
+        <ConfigRow label="Προϊόντα (Laravel)" value={String(productCount)} />
         <ConfigRow label="Node.js" value={process.version} />
         <ConfigRow label="Next.js" value="15.5.0" />
       </SettingsSection>
