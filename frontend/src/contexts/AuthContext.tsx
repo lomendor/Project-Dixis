@@ -230,6 +230,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       showToast('info', 'Αποσυνδεθήκατε');
     }
 
+    // FIX-ADMIN-AUTH-01: Also clear admin JWT cookie to prevent cross-session issues.
+    // If user was admin and switched to consumer, the stale dixis_jwt can cause conflicts.
+    try {
+      await fetch('/api/auth/admin-logout', { method: 'POST' });
+    } catch {
+      // Non-critical — cookie will expire naturally
+    }
+
     // Pass FIX-CART-LEAK-01: Clear cart on logout to prevent leaking to next user
     clearCartStorage();
     setUser(null);

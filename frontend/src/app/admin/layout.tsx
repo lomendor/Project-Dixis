@@ -3,6 +3,13 @@ import { requireAdmin, AdminError } from '@/lib/auth/admin';
 import { AdminShell } from './components/AdminShell';
 
 /**
+ * FIX-ADMIN-AUTH-01: force-dynamic prevents Next.js from caching the auth
+ * check result. Without this, a cached "redirect to login" response would
+ * persist even after a successful OTP login, locking the admin out.
+ */
+export const dynamic = 'force-dynamic';
+
+/**
  * Pass ADMIN-LAYOUT-01: Admin layout with sidebar navigation.
  *
  * - Server Component handles auth (requireAdmin)
