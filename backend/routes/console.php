@@ -62,6 +62,22 @@ Schedule::call(function () {
 
 /*
 |--------------------------------------------------------------------------
+| FIX-ORDER-ESCALATION-01: Check Unaccepted Orders
+|--------------------------------------------------------------------------
+|
+| Runs every minute. If an order is still "pending" after 2 minutes,
+| sends an alert email to admin with the producer's phone number.
+| Idempotent — won't alert twice for the same order+producer.
+|
+*/
+Schedule::command('orders:check-unaccepted --minutes=2')
+    ->everyMinute()
+    ->timezone('Europe/Athens')
+    ->withoutOverlapping()
+    ->runInBackground();
+
+/*
+|--------------------------------------------------------------------------
 | T4: Prune Expired Sanctum Tokens
 |--------------------------------------------------------------------------
 */
