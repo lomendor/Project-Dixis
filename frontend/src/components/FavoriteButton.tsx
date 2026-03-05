@@ -36,10 +36,10 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
   const sizeClasses = size === 'lg'
     ? 'w-10 h-10'
     : size === 'xs'
-    ? 'w-6 h-6'
+    ? 'w-7 h-7'
     : 'w-8 h-8'
 
-  const iconSize = size === 'lg' ? 'w-5 h-5' : size === 'xs' ? 'w-3.5 h-3.5' : 'w-4 h-4'
+  const iconSize = size === 'lg' ? 'w-5 h-5' : size === 'xs' ? 'w-4 h-4' : 'w-4 h-4'
 
   return (
     <button
@@ -53,12 +53,10 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
         transition-all duration-200
         ${isFav
           ? 'bg-red-50 text-red-500 hover:bg-red-100'
-          : size === 'xs'
-          ? 'bg-white/60 text-neutral-400 hover:text-red-400 hover:bg-white/90'
-          : 'bg-white/80 text-neutral-400 hover:text-red-400 hover:bg-white'
+          : 'bg-white/90 text-neutral-400 hover:text-red-400 hover:bg-white'
         }
         ${sizeClasses}
-        ${size === 'xs' ? 'shadow-none' : 'shadow-sm'} backdrop-blur-sm
+        shadow-sm backdrop-blur-sm
         ${className}
       `}
     >
