@@ -3,6 +3,14 @@ import { getLaravelInternalUrl } from '@/env'
 
 export const dynamic = 'force-dynamic'
 
+/** Convert relative /storage/ paths to full URLs (defensive fallback) */
+function ensureFullUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  if (url.startsWith('/storage/')) return `https://dixis.gr${url}`
+  return url
+}
+
 /**
  * STOREFRONT-LARAVEL-01: Public Producers Listing API
  * Proxies to Laravel PublicProducerController instead of querying Prisma.
@@ -50,7 +58,7 @@ export async function GET(req: Request) {
       // Laravel producers don't have a single category field; use empty string
       category: p.category || '',
       description: p.description,
-      image_url: p.image_url || null,
+      image_url: ensureFullUrl(p.image_url),
       products_count: p.products_count ?? 0,
     }))
 
