@@ -33,8 +33,8 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
     }
   }
 
-  const btnSize = size === 'lg' ? 'w-10 h-10' : size === 'xs' ? 'w-7 h-7' : 'w-8 h-8'
-  const iconSize = size === 'lg' ? 'w-6 h-6' : size === 'xs' ? 'w-4 h-4' : 'w-5 h-5'
+  const btnPx = size === 'lg' ? 40 : size === 'xs' ? 28 : 32
+  const iconPx = size === 'lg' ? 24 : size === 'xs' ? 16 : 20
 
   return (
     <button
@@ -50,13 +50,18 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
           ? 'text-red-500 hover:text-red-600 hover:scale-110'
           : 'text-white hover:text-red-400 hover:scale-110'
         }
-        ${btnSize}
         ${className}
       `}
-      style={{ filter: isFav ? 'none' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
+      style={{
+        width: btnPx,
+        height: btnPx,
+        filter: isFav ? 'none' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))',
+      }}
     >
       <svg
-        className={`${iconSize} transition-transform`}
+        width={iconPx}
+        height={iconPx}
+        className="transition-transform"
         viewBox="0 0 24 24"
         fill={isFav ? 'currentColor' : 'none'}
         stroke="currentColor"
