@@ -25,11 +25,11 @@ export default function HomeCTA() {
       <div className="relative max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 text-center">
         {/* Serif heading — editorial, large */}
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.1] tracking-tight mb-5">
-          Ξεκινήστε σήμερα.
+          Δοκιμάστε τη γεύση.
         </h2>
         <p className="text-base sm:text-lg text-white/60 max-w-xl mx-auto mb-12">
-          Ανακαλύψτε αυθεντικά ελληνικά προϊόντα ή φέρτε τα δικά σας
-          στην αγορά μας.
+          Ελαιόλαδο, μέλι, βότανα — απευθείας από Έλληνες παραγωγούς
+          που αγαπούν αυτό που κάνουν.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

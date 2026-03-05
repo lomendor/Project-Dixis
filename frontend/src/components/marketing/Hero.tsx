@@ -29,9 +29,9 @@ export default function Hero() {
 
             {/* Headline — clean sans-serif, brand colors */}
             <h1 className="text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem] font-extrabold leading-[1.08] tracking-tight text-neutral-900 mb-5 lg:mb-6">
-              {'\u039a\u03ac\u03b8\u03b5 \u03b3\u03b5\u03cd\u03c3\u03b7,'}
+              {'\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1,'}
               <br />
-              <span className="text-primary">{'\u03bc\u03b9\u03b1 \u03b9\u03c3\u03c4\u03bf\u03c1\u03af\u03b1.'}</span>
+              <span className="text-primary">{'\u03b1\u03c0\u03b5\u03c5\u03b8\u03b5\u03af\u03b1\u03c2 \u03b1\u03c0\u03cc \u03c4\u03bf\u03bd \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03cc.'}</span>
             </h1>
 
             {/* Subtitle */}

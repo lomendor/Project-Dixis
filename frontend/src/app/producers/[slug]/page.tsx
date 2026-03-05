@@ -176,7 +176,7 @@ export default async function ProducerProfilePage(
         )}
 
         {/* Content overlay */}
-        <div className="relative max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-16 sm:py-20 lg:py-28">
+        <div className="relative max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20 lg:py-28">
           {/* Breadcrumbs */}
           <nav className="mb-8 text-xs text-white/40" aria-label="Breadcrumb">
             <ol className="flex items-center gap-1.5">
@@ -234,7 +234,7 @@ export default async function ProducerProfilePage(
       </section>
 
       {/* ── Main content ──────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-16 py-10 sm:py-14">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-14">
         {hasLeftColumn ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
             {/* Left column (2/5) — story + map */}
