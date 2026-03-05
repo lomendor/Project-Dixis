@@ -7,6 +7,7 @@ import { useToast } from '@/contexts/ToastContext'
 import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 import { getCategoryBySlug } from '@/data/categories'
+import ProducerEditForm from './ProducerEditForm'
 
 interface Producer {
   id: string
@@ -95,6 +96,7 @@ function AdminProducersContent() {
   const [loading, setLoading] = useState(true)
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Rejection modal state
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
@@ -308,7 +310,30 @@ function AdminProducersContent() {
                   {expandedId === p.id && (
                     <tr className="bg-blue-50/50" data-testid={`producer-detail-${p.id}`}>
                       <td colSpan={4} className="px-4 py-4">
+                        {/* Edit mode */}
+                        {editingId === p.id ? (
+                          <ProducerEditForm
+                            producer={p}
+                            onSaved={(updated) => {
+                              setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, ...updated } : pr
+                              ))
+                              setEditingId(null)
+                            }}
+                            onCancel={() => setEditingId(null)}
+                          />
+                        ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                          {/* Edit button */}
+                          <div className="sm:col-span-2 flex justify-end mb-2">
+                            <button
+                              onClick={() => setEditingId(p.id)}
+                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                              data-testid={`edit-btn-${p.id}`}
+                            >
+                              ✏️ Επεξεργασία
+                            </button>
+                          </div>
                           <Detail label="Email" value={p.email} />
                           <Detail label="Τηλέφωνο" value={p.phone} />
                           <Detail label="Πόλη" value={p.city} />
@@ -419,6 +444,7 @@ function AdminProducersContent() {
                             </div>
                           )}
                         </div>
+                        )}
                       </td>
                     </tr>
                   )}
