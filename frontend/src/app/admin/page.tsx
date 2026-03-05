@@ -1,46 +1,25 @@
 export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { fetchDashboardSummary, fetchOrdersAnalytics, fetchProductsAnalytics } from '@/lib/laravel/dashboard';
 import { fetchProductCounts } from '@/lib/laravel/counts';
 import Link from 'next/link';
 
 /**
- * Pass FIX-ADMIN-DASHBOARD-418-01: Deterministic date formatter for Server Components.
- * Using toISOString() slice avoids hydration mismatch from locale-dependent formatting.
+ * FIX-ADMIN-DASHBOARD-DATA-01: Dashboard now reads from Laravel (SSOT).
+ *
+ * Previously this page queried Prisma/Neon directly, which only had stale
+ * data from before the Laravel migration. Now all data comes from the
+ * Laravel AnalyticsService via authenticated admin API endpoints.
  */
-function formatDateStable(date: Date | string): string {
+
+function formatDateStable(date: string): string {
   const d = new Date(date);
   return d.toISOString().slice(0, 16).replace('T', ' ');
 }
 
-interface OrderSummary {
-  id: string;
-  total: number | null;
-}
-
-interface RecentOrder {
-  id: string;
-  createdAt: Date;
-  buyerName: string | null;
-  total: number | null;
-  status: string | null;
-}
-
-interface TopProduct {
-  titleSnap: string | null;
-  _sum: { qty: number | null };
-}
-
 function thr() { return Number.parseInt(process.env.LOW_STOCK_THRESHOLD || '3') || 3; }
-const T7 = 1000 * 60 * 60 * 24 * 7;
-const T30 = 1000 * 60 * 60 * 24 * 30;
 
-/**
- * Pass ADMIN-DASHBOARD-POLISH-01: Tailwind rewrite with quick actions.
- *
- * Same data queries as before — only presentation changed.
- */
 export default async function Page() {
   try {
     await requireAdmin();
@@ -51,51 +30,37 @@ export default async function Page() {
     throw e;
   }
 
-  const now = new Date();
-  const from7 = new Date(now.getTime() - T7);
-  const from30 = new Date(now.getTime() - T30);
-  const from90 = new Date(now.getTime() - T30 * 3);
-
-  const [orders7, pendingCount, productCounts, latest, topItems, orders30, orders90] = await Promise.all([
-    prisma.order.findMany({ where: { createdAt: { gte: from7 } }, select: { id: true, total: true } }),
-    prisma.order.count({ where: { status: 'PENDING' } }),
+  // Fetch all data from Laravel (SSOT) in parallel
+  const [summary, ordersData, productsData, productCounts] = await Promise.all([
+    fetchDashboardSummary(),
+    fetchOrdersAnalytics(),
+    fetchProductsAnalytics(10),
     fetchProductCounts(thr()),
-    prisma.order.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      select: { id: true, createdAt: true, buyerName: true, total: true, status: true },
-    }),
-    prisma.orderItem.groupBy({
-      by: ['titleSnap'],
-      where: { createdAt: { gte: from30 } },
-      _sum: { qty: true },
-      orderBy: { _sum: { qty: 'desc' } },
-      take: 10,
-    }).catch((): TopProduct[] => []),
-    // T2-06: Revenue breakdown queries (excludes cancelled)
-    prisma.order.findMany({
-      where: { createdAt: { gte: from30 }, status: { not: 'CANCELLED' } },
-      select: { id: true, total: true },
-    }),
-    prisma.order.findMany({
-      where: { createdAt: { gte: from90 }, status: { not: 'CANCELLED' } },
-      select: { id: true, total: true },
-    }),
   ]);
+
   const lowStockCount = productCounts.lowStock;
 
-  const revenue7 = orders7.reduce((s: number, o: OrderSummary) => s + Number(o.total ?? 0), 0);
-  const orders7Count = orders7.length;
-  const fmtMoney = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
+  // KPI values from Laravel
+  const monthOrders = summary?.month.orders ?? 0;
+  const monthRevenue = summary?.month.sales ? Number(summary.month.sales) : 0;
+  const pendingCount = ordersData?.summary.pending_orders ?? 0;
 
-  // T2-06: Revenue calculations
-  function calcRevenue(ords: { id: string; total: number | null }[]) {
-    const total = ords.reduce((s, o) => s + Number(o.total ?? 0), 0);
-    const avg = ords.length > 0 ? total / ords.length : 0;
-    return { total, count: ords.length, avg };
-  }
-  const rev30 = calcRevenue(orders30);
-  const rev90 = calcRevenue(orders90);
+  // Revenue breakdown
+  const rev30 = {
+    total: monthRevenue,
+    count: monthOrders,
+    avg: summary?.month.average_order_value ?? 0,
+    growth: summary?.month.sales_growth ?? 0,
+  };
+  const lifetimeRevenue = summary?.totals.lifetime_revenue ? Number(summary.totals.lifetime_revenue) : 0;
+
+  // Recent orders
+  const latest = ordersData?.recent_orders ?? [];
+
+  // Top products
+  const topItems = productsData?.top_products ?? [];
+
+  const fmtMoney = (n: number) => new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
 
   return (
     <div className="space-y-6" data-testid="admin-dashboard">
@@ -105,16 +70,56 @@ export default async function Page() {
 
       {/* KPI Cards */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Παραγγελίες (7ημ)" value={String(orders7Count)} />
-        <KpiCard label="Έσοδα (7ημ)" value={fmtMoney(revenue7)} />
+        <KpiCard label="Παραγγελίες (μήνα)" value={String(monthOrders)} />
+        <KpiCard label="Έσοδα (μήνα)" value={fmtMoney(monthRevenue)} />
         <KpiCard label="Εκκρεμείς" value={String(pendingCount)} accent={pendingCount > 0} />
         <KpiCard label={`Χαμηλό απόθεμα (\u2264 ${thr()})`} value={String(lowStockCount)} accent={lowStockCount > 0} />
       </section>
 
-      {/* T2-06: Revenue Insights */}
+      {/* Revenue Insights */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="revenue-insights">
-        <RevenueCard title="30 ημέρες" data={rev30} fmtMoney={fmtMoney} />
-        <RevenueCard title="90 ημέρες" data={rev90} fmtMoney={fmtMoney} />
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+            Έσοδα · Τρέχων Μήνας
+          </h3>
+          <div className="text-2xl font-bold text-neutral-900 mb-1">{fmtMoney(rev30.total)}</div>
+          {rev30.growth !== 0 && (
+            <div className={`text-sm font-medium ${rev30.growth > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {rev30.growth > 0 ? '▲' : '▼'} {Math.abs(rev30.growth).toFixed(1)}% vs προηγ. μήνα
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="bg-neutral-50 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-neutral-900">{rev30.count}</div>
+              <div className="text-xs text-neutral-500">Παραγγελίες</div>
+            </div>
+            <div className="bg-neutral-50 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-neutral-900">{fmtMoney(rev30.avg)}</div>
+              <div className="text-xs text-neutral-500">Μ.Ο. παραγγελίας</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+            Συνολικά
+          </h3>
+          <div className="text-2xl font-bold text-neutral-900 mb-1">{fmtMoney(lifetimeRevenue)}</div>
+          <div className="grid grid-cols-3 gap-3 mt-3">
+            <div className="bg-neutral-50 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-neutral-900">{summary?.totals.products ?? 0}</div>
+              <div className="text-xs text-neutral-500">Προϊόντα</div>
+            </div>
+            <div className="bg-neutral-50 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-neutral-900">{summary?.totals.producers ?? 0}</div>
+              <div className="text-xs text-neutral-500">Παραγωγοί</div>
+            </div>
+            <div className="bg-neutral-50 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-neutral-900">{summary?.totals.users ?? 0}</div>
+              <div className="text-xs text-neutral-500">Χρήστες</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Quick Actions */}
@@ -159,18 +164,18 @@ export default async function Page() {
                   </td>
                 </tr>
               ) : (
-                latest.map((o: RecentOrder) => (
+                latest.map((o) => (
                   <tr key={o.id} className="hover:bg-neutral-50 transition-colors">
                     <td className="px-4 py-3 text-sm">
                       <Link href={`/admin/orders/${o.id}`} className="text-emerald-700 hover:text-emerald-900 font-medium">
                         #{o.id}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-sm text-neutral-500">{formatDateStable(o.createdAt)}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-700">{o.buyerName || '—'}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-900 text-right font-medium">{fmtMoney(Number(o.total || 0))}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-500">{formatDateStable(o.created_at)}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-700">{o.user_email || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-900 text-right font-medium">{fmtMoney(Number(o.total_amount || 0))}</td>
                     <td className="px-4 py-3 text-sm">
-                      <StatusBadge status={String(o.status)} />
+                      <StatusBadge status={o.status} />
                     </td>
                   </tr>
                 ))
@@ -183,7 +188,7 @@ export default async function Page() {
       {/* Top Products Table */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-neutral-900">Top προϊόντα (30ημ)</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">Top προϊόντα (πληρωμένα)</h2>
           <Link href="/admin/products" className="text-sm text-emerald-700 hover:text-emerald-900 font-medium">
             Όλα &rarr;
           </Link>
@@ -194,20 +199,22 @@ export default async function Page() {
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Προϊόν</th>
                 <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Τεμάχια</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Έσοδα</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {(!Array.isArray(topItems) || topItems.length === 0) ? (
+              {topItems.length === 0 ? (
                 <tr>
-                  <td colSpan={2} className="px-4 py-8 text-center text-neutral-400 text-sm">
+                  <td colSpan={3} className="px-4 py-8 text-center text-neutral-400 text-sm">
                     Δεν υπάρχουν δεδομένα.
                   </td>
                 </tr>
               ) : (
-                topItems.map((t: TopProduct, i: number) => (
-                  <tr key={i} className="hover:bg-neutral-50 transition-colors">
-                    <td className="px-4 py-3 text-sm text-neutral-700">{String(t.titleSnap || '—')}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-900 text-right font-medium">{Number(t._sum?.qty || 0)}</td>
+                topItems.map((t) => (
+                  <tr key={t.id} className="hover:bg-neutral-50 transition-colors">
+                    <td className="px-4 py-3 text-sm text-neutral-700">{t.name}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-900 text-right font-medium">{t.total_quantity_sold}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-900 text-right font-medium">{fmtMoney(t.total_revenue)}</td>
                   </tr>
                 ))
               )}
@@ -244,45 +251,22 @@ function QuickAction({ href, icon, label }: { href: string; icon: string; label:
   );
 }
 
-interface RevData {
-  total: number; count: number; avg: number;
-}
-
-function RevenueCard({ title, data, fmtMoney }: { title: string; data: RevData; fmtMoney: (n: number) => string }) {
-  return (
-    <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3">
-        Έσοδα · {title}
-      </h3>
-      <div className="text-2xl font-bold text-neutral-900 mb-1">{fmtMoney(data.total)}</div>
-      <div className="grid grid-cols-2 gap-3 mt-3">
-        <div className="bg-neutral-50 rounded-lg p-3 text-center">
-          <div className="text-lg font-bold text-neutral-900">{data.count}</div>
-          <div className="text-xs text-neutral-500">Παραγγελίες</div>
-        </div>
-        <div className="bg-neutral-50 rounded-lg p-3 text-center">
-          <div className="text-lg font-bold text-neutral-900">{fmtMoney(data.avg)}</div>
-          <div className="text-xs text-neutral-500">Μ.Ο. παραγγελίας</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    PENDING: 'bg-amber-100 text-amber-800',
-    CONFIRMED: 'bg-blue-100 text-blue-800',
-    SHIPPED: 'bg-purple-100 text-purple-800',
-    DELIVERED: 'bg-emerald-100 text-emerald-800',
-    CANCELLED: 'bg-red-100 text-red-800',
+    pending: 'bg-amber-100 text-amber-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    processing: 'bg-indigo-100 text-indigo-800',
+    shipped: 'bg-purple-100 text-purple-800',
+    delivered: 'bg-emerald-100 text-emerald-800',
+    cancelled: 'bg-red-100 text-red-800',
   };
   const labels: Record<string, string> = {
-    PENDING: 'Εκκρεμής',
-    CONFIRMED: 'Επιβεβαιωμένη',
-    SHIPPED: 'Απεσταλμένη',
-    DELIVERED: 'Παραδοθείσα',
-    CANCELLED: 'Ακυρωθείσα',
+    pending: 'Εκκρεμής',
+    confirmed: 'Επιβεβαιωμένη',
+    processing: 'Σε επεξεργασία',
+    shipped: 'Απεσταλμένη',
+    delivered: 'Παραδοθείσα',
+    cancelled: 'Ακυρωθείσα',
   };
   const cls = colors[status] || 'bg-neutral-100 text-neutral-700';
 
