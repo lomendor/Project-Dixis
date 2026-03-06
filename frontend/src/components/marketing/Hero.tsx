@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-/* Icons replaced with emoji for richer visual weight */
+/* 3D trust icons from /icons/trust/ */
 
 /**
  * Hero Section — Light, Warm, Joyful
@@ -52,22 +52,22 @@ export default function Hero() {
               </svg>
             </Link>
 
-            {/* Trust badges — emoji icons for visual richness */}
+            {/* Trust badges — 3D icons for visual richness */}
             <div className="mt-10 flex flex-wrap items-center gap-4 sm:gap-5">
-              <div className="flex items-center gap-2">
-                <span className="text-lg" role="img" aria-label="medal">🏅</span>
+              <div className="flex items-center gap-2.5">
+                <Image src="/icons/trust/medal-3d.png" alt="" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
                 <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0395\u03c0\u03b9\u03bb\u03b5\u03b3\u03bc\u03ad\u03bd\u03bf\u03b9 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03af'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg" role="img" aria-label="package">📦</span>
+              <div className="flex items-center gap-2.5">
+                <Image src="/icons/trust/delivery-3d.png" alt="" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
                 <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0386\u03bc\u03b5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03ae'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg" role="img" aria-label="lock">🔒</span>
+              <div className="flex items-center gap-2.5">
+                <Image src="/icons/trust/shield-lock-3d.png" alt="" width={32} height={32} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
                 <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0391\u03c3\u03c6\u03b1\u03bb\u03b5\u03af\u03c2 \u03c3\u03c5\u03bd\u03b1\u03bb\u03bb\u03b1\u03b3\u03ad\u03c2'}
                 </span>
