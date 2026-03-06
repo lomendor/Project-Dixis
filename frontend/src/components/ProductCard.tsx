@@ -121,19 +121,21 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-3 sm:p-3.5">
-        {/* Producer */}
-        {producerUrl && !hideProducerLink ? (
-          <Link
-            href={producerUrl}
-            data-testid="product-card-producer-link"
-            className="text-[11px] sm:text-xs text-neutral-400 truncate block hover:text-primary transition-colors mb-1"
-          >
-            {producer || 'Παραγωγός'}
-          </Link>
-        ) : (
-          <span data-testid="product-card-producer" className="text-[11px] sm:text-xs text-neutral-400 truncate block mb-1">
-            {producer || 'Παραγωγός'}
-          </span>
+        {/* Producer — hidden entirely when hideProducerLink (e.g. on producer's own page) */}
+        {!hideProducerLink && (
+          producerUrl ? (
+            <Link
+              href={producerUrl}
+              data-testid="product-card-producer-link"
+              className="text-[11px] sm:text-xs text-neutral-400 truncate block hover:text-primary transition-colors mb-1"
+            >
+              {producer || 'Παραγωγός'}
+            </Link>
+          ) : (
+            <span data-testid="product-card-producer" className="text-[11px] sm:text-xs text-neutral-400 truncate block mb-1">
+              {producer || 'Παραγωγός'}
+            </span>
+          )
         )}
 
         {/* Title */}
