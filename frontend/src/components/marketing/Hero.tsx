@@ -77,10 +77,10 @@ export default function Hero() {
 
           {/* Right — Image (desktop only) */}
           <div className="hidden lg:block flex-1">
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[3/2] rounded-3xl overflow-hidden shadow-lg">
               <Image
-                src="/images/hero-beekeeper.jpg"
-                alt="Greek beekeeper harvesting golden honeycomb from the hive"
+                src="/images/hero-products.jpg"
+                alt="Ελληνικό ελαιόλαδο και μέλι — αυθεντικά προϊόντα από τοπικούς παραγωγούς"
                 fill
                 priority
                 className="object-cover"
