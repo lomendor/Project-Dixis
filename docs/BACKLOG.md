@@ -46,6 +46,83 @@ Before planning what to build, here's what **already works in production**:
 
 ---
 
+## Stage 0 — Legal & Business Foundation
+
+> **Goal:** Protect the business legally before onboarding real producers or processing real orders.
+> **Timeline:** ASAP — before any real producer goes live
+> **Theme:** "We are legally protected and compliant."
+> **Reference:** `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` (full legal research)
+
+### S0-01: IKE Formation
+**Why:** Limited liability protection for food marketplace. Personal assets at risk without it.
+**What:**
+- Form ΙΚΕ (Private Limited Company) with accountant
+- Register with tax authority, GEMI
+- Update all platform legal references to company entity
+**Effort:** External (accountant + lawyer)
+**Status:** `[ ]` — **DECIDED: Going with IKE** (2026-03-07)
+
+### S0-02: Producer Agreement (Contract)
+**Why:** Legal protection — indemnification clause, FBO declaration, document requirements.
+**What:**
+- Draft producer agreement with lawyer (~€100-200)
+- Include: indemnification clause, HACCP requirement, EFET registration, accurate labeling obligation
+- Include: recall cooperation, termination for food safety violations
+- All producers must sign before listing
+**Effort:** External (lawyer)
+**Status:** `[ ]`
+
+### S0-03: Terms of Service Update
+**Why:** Clear intermediary status protects Dixis from product liability claims.
+**What:**
+- Update ToS with clear "marketplace intermediary" declaration
+- Add allergen warnings, complaint handling procedure
+- Add right-of-withdrawal exclusions for perishable food
+- Lawyer review (~€100-200)
+**Effort:** S (1 PR for website implementation after lawyer drafts)
+**Status:** `[ ]`
+
+### S0-04: EFET Clarification
+**Why:** Must know if Dixis needs to register with EFET as food marketplace intermediary.
+**What:**
+- Contact EFET (info@efet.gr / 213 2145800)
+- Ask: does a marketplace that never handles food need to register?
+- Get answer in writing (email)
+**Effort:** External (phone call + email)
+**Status:** `[ ]`
+
+### S0-05: Producer Onboarding Checklist
+**Why:** DSA KYBC compliance + food safety verification before listing any producer.
+**What:**
+- Collect: EFET registration, HACCP docs, AFM, identity, business license
+- Collect: signed Producer Agreement + self-certification
+- Review: sample product labels for Reg 1169/2011 compliance
+- Verify: information against VIES/GEMI databases
+**Effort:** S (1 PR — admin checklist UI + document storage)
+**Status:** `[ ]`
+
+### S0-06: Product Page Legal Compliance
+**Why:** Every product listing must identify the producer (EU PLD 2024/2853 + Greek Law 2251/1994).
+**What:**
+- Add producer legal name + location on every product page
+- Add "Παράγεται και πωλείται από [Παραγωγό]. Η Dixis διαμεσολαβεί." disclaimer
+- Add allergen warning for consumers with food allergies
+- Add intermediary disclaimer on checkout page
+**Effort:** S (1 PR — UI additions)
+**Status:** `[ ]`
+
+### S0-07: Professional Liability Insurance
+**Why:** Even as intermediary, legal defense costs from a single food claim can be devastating.
+**What:**
+- Get quotes from 2-3 Greek insurance brokers
+- Professional liability + general liability
+- Budget: €1,000-2,000/year (~€85-165/month)
+- Minimum coverage: €100,000 per claim
+**Effort:** External (insurance broker)
+**Status:** `[ ]`
+
+---
+
 ## Stage 1 — Trust & Core Commerce
 
 > **Goal:** Make customers confident enough to buy. Add the features that any serious marketplace must have.
@@ -161,9 +238,9 @@ Before planning what to build, here's what **already works in production**:
 - [x] Split hero layout with large image (done 2026-03-06)
 - [x] Meta pills: region + product count (done 2026-03-06)
 - [x] Quote-style description with border accent (done 2026-03-06)
-- [ ] `S2-03m` Truncate long descriptions (3 lines + "Περισσότερα...")
-- [ ] `S2-03n` CTA button "Δείτε τα προϊόντα ↓" with smooth scroll
-- [ ] `S2-03o` Better product grid section header + transition from hero
+- [x] `S2-03m` Truncate long descriptions (3 lines + "Περισσότερα...") — done 2026-03-06
+- [x] `S2-03n` CTA button "Δείτε τα προϊόντα ↓" with smooth scroll — done 2026-03-06
+- [x] `S2-03o` Better product grid section header + transition from hero — done 2026-03-06
 
 **Effort:** L (Phase A: 3-4 Laravel PRs, Phase B: 3-4 frontend PRs, Quick wins: 1 PR)
 **Status:** `[~]` In progress — hero layout done, data enrichment pending

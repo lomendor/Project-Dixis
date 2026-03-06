@@ -16,8 +16,9 @@
 | **Comms (SMS/OTP)** | ~€10 | ~€10 | Phone + SMS |
 | **Λογιστής** | €150 | €400 | Ατομική vs ΙΚΕ |
 | **Δικηγόρος** | ~€25 | ~€25 | Per case (~€100/case, ~3x/yr) |
+| **Ασφάλεια** | — | ~€85-165 | Professional + general liability |
 | **Payments** | Variable | Variable | Stripe ~2.9% + €0.25/txn |
-| **TOTAL (fixed)** | **~€397-412** | **~€647-662** | |
+| **TOTAL (fixed)** | **~€397-412** | **~€732-827** | |
 
 ---
 
@@ -217,7 +218,8 @@
 |------|----------|---------|
 | 2026-03-06 | Δικηγόρος = per case | ~€100/case, ~2-4x/year |
 | 2026-03-06 | Λογιστής: €150 ατομική, €400 ΙΚΕ | Confirmed by accountant |
-| TBD | **Ατομική vs ΙΚΕ** | CTO recommends ΙΚΕ (ευθύνη + τρόφιμα + B2B) |
+| 2026-03-07 | **ΙΚΕ confirmed** | Decision made — going with IKE for liability protection |
+| 2026-03-07 | Insurance needed | Professional liability ~€85-165/mo, budget from quotes |
 
 ---
 
@@ -225,7 +227,8 @@
 
 - [x] ~~Clarify lawyer frequency~~ → Per case (~€100/case)
 - [x] ~~Confirm accountant cost~~ → €150 ατομική, €400 ΙΚΕ
-- [ ] **DECISION NEEDED**: Ατομική ή ΙΚΕ; (€250/mo διαφορά, αλλά ΙΚΕ recommended)
+- [x] ~~Ατομική ή ΙΚΕ~~ → **ΙΚΕ confirmed** (2026-03-07)
+- [ ] **NEW**: Get insurance quotes (professional liability + general liability, ~€85-165/mo)
 - [ ] **Research**: Elorus pricing + features needed
 - [ ] **Research**: Courier API costs (ACS, Speedex, ELTA Courier)
 - [ ] **Panagiotis**: "Και το αλλο για τα τιμολογια" — which invoicing tool besides Elorus?
