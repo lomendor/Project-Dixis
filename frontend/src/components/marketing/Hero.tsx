@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-/* 3D trust icons from /icons/trust/ */
 
 /**
  * Hero Section — Light, Warm, Joyful
@@ -52,27 +51,6 @@ export default function Hero() {
               </svg>
             </Link>
 
-            {/* Trust badges — icons-only on mobile, icon+label on sm+ */}
-            <div className="mt-5 sm:mt-8 flex items-center gap-3 sm:gap-5">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Image src="/icons/trust/medal-3d.png" alt="Επιλεγμένοι παραγωγοί" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
-                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
-                  {'\u0395\u03c0\u03b9\u03bb\u03b5\u03b3\u03bc\u03ad\u03bd\u03bf\u03b9 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03af'}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Image src="/icons/trust/delivery-3d.png" alt="Άμεση αποστολή" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
-                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
-                  {'\u0386\u03bc\u03b5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03ae'}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <Image src="/icons/trust/shield-lock-3d.png" alt="Ασφαλείς συναλλαγές" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
-                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
-                  {'\u0391\u03c3\u03c6\u03b1\u03bb\u03b5\u03af\u03c2 \u03c3\u03c5\u03bd\u03b1\u03bb\u03bb\u03b1\u03b3\u03ad\u03c2'}
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Right — Image (visible on all screens) */}
