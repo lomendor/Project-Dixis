@@ -36,13 +36,13 @@ export default function TrustBar() {
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6">
           {SIGNALS.map(({ icon, title, subtitle }) => (
-            <div key={title} className="flex flex-col items-center text-center gap-3">
+            <div key={title} className="flex flex-col items-center text-center gap-4">
               <Image
                 src={icon}
                 alt={title}
-                width={56}
-                height={56}
-                className="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow-sm"
+                width={72}
+                height={72}
+                className="w-16 h-16 sm:w-[72px] sm:h-[72px] object-contain drop-shadow-sm"
               />
               <div>
                 <p className="text-sm font-semibold text-neutral-800">{title}</p>
