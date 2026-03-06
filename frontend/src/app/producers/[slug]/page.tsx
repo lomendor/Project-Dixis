@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/ProductCard';
 import ProducerMap from '@/components/ProducerMapWrapper';
+import { ExpandableDescription, ScrollToProductsCTA } from '@/components/ProducerProfileClient';
 import { getServerApiUrl } from '@/env';
 import { getBaseUrl } from '@/lib/site';
 
@@ -232,13 +233,14 @@ export default async function ProducerProfilePage(
                 )}
               </div>
 
-              {/* Description — warm, personal */}
+              {/* Description — expandable if long */}
               {producer.description && (
-                <div className="border-l-[3px] border-primary/25 pl-5 py-1">
-                  <p className="text-base sm:text-lg text-neutral-600 leading-relaxed italic">
-                    {producer.description}
-                  </p>
-                </div>
+                <ExpandableDescription text={producer.description} />
+              )}
+
+              {/* CTA — scroll to products */}
+              {productCount > 0 && (
+                <ScrollToProductsCTA count={productCount} />
               )}
 
               {/* Map preview — compact, inline with info on desktop */}
@@ -260,12 +262,13 @@ export default async function ProducerProfilePage(
       </section>
 
       {/* ── Products — Primary Content ─────────────────────── */}
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-12">
+      <section id="producer-products" className="scroll-mt-4">
+        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-12">
         {productCount > 0 ? (
           <>
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-lg font-bold text-neutral-900">
-                Προϊόντα
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">
+                Τα προϊόντα {producer.name.split(' ')[0].length <= 15 ? `του ${producer.name.split(' ')[0]}` : ''}
               </h2>
               <span className="text-xs font-bold text-primary bg-primary-pale px-2.5 py-1 rounded-full">
                 {productCount}
@@ -316,7 +319,8 @@ export default async function ProducerProfilePage(
             Όλοι οι Παραγωγοί
           </Link>
         </div>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
