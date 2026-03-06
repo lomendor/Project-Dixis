@@ -28,14 +28,14 @@ export default function Hero() {
             </span>
 
             {/* Headline — clean sans-serif, brand colors */}
-            <h1 className="text-[2.25rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem] font-extrabold leading-[1.08] tracking-tight text-neutral-900 mb-5 lg:mb-6">
+            <h1 className="text-[1.75rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem] font-extrabold leading-[1.12] sm:leading-[1.08] tracking-tight text-neutral-900 mb-4 lg:mb-6">
               {'\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1,'}
               <br />
               <span className="text-primary">{'\u03b1\u03c0\u03b5\u03c5\u03b8\u03b5\u03af\u03b1\u03c2 \u03b1\u03c0\u03cc \u03c4\u03bf\u03bd \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03cc.'}</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-base sm:text-lg lg:text-xl text-neutral-600 leading-relaxed mb-8 lg:mb-10 max-w-md">
+            <p className="text-sm sm:text-lg lg:text-xl text-neutral-600 leading-relaxed mb-6 lg:mb-10 max-w-md">
               {'\u0391\u03c5\u03b8\u03b5\u03bd\u03c4\u03b9\u03ba\u03ac \u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1 \u03b1\u03c0\u03cc \u03bc\u03b9\u03ba\u03c1\u03bf\u03cd\u03c2 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03cd\u03c2'}
               {' '}
               {'\u03c0\u03bf\u03c5 \u03b1\u03b3\u03b1\u03c0\u03bf\u03cd\u03bd \u03b1\u03c5\u03c4\u03cc \u03c0\u03bf\u03c5 \u03ba\u03ac\u03bd\u03bf\u03c5\u03bd.'}
@@ -44,7 +44,7 @@ export default function Hero() {
             {/* CTA */}
             <Link
               href="/products"
-              className="group inline-flex items-center justify-center gap-2.5 bg-primary hover:bg-primary-light text-white font-semibold px-8 py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 active:scale-[0.97] touch-manipulation text-[15px]"
+              className="group inline-flex items-center justify-center gap-2 sm:gap-2.5 bg-primary hover:bg-primary-light text-white font-semibold px-6 py-3 sm:px-8 sm:py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 active:scale-[0.97] touch-manipulation text-sm sm:text-[15px]"
             >
               {'\u0391\u03bd\u03b1\u03ba\u03b1\u03bb\u03cd\u03c8\u03c4\u03b5 \u03c4\u03b1 \u03c0\u03c1\u03bf\u03ca\u03cc\u03bd\u03c4\u03b1'}
               <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -52,32 +52,32 @@ export default function Hero() {
               </svg>
             </Link>
 
-            {/* Trust badges — 3D icons, sized to show detail */}
-            <div className="mt-10 flex flex-wrap items-center gap-5 sm:gap-6">
-              <div className="flex items-center gap-3">
-                <Image src="/icons/trust/medal-3d.png" alt="" width={40} height={40} className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-sm" />
-                <span className="text-[13px] sm:text-sm text-neutral-700 font-semibold">
+            {/* Trust badges — icons-only on mobile, icon+label on sm+ */}
+            <div className="mt-5 sm:mt-8 flex items-center gap-3 sm:gap-5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Image src="/icons/trust/medal-3d.png" alt="Επιλεγμένοι παραγωγοί" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
+                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
                   {'\u0395\u03c0\u03b9\u03bb\u03b5\u03b3\u03bc\u03ad\u03bd\u03bf\u03b9 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03af'}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <Image src="/icons/trust/delivery-3d.png" alt="" width={40} height={40} className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-sm" />
-                <span className="text-[13px] sm:text-sm text-neutral-700 font-semibold">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Image src="/icons/trust/delivery-3d.png" alt="Άμεση αποστολή" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
+                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
                   {'\u0386\u03bc\u03b5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03ae'}
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <Image src="/icons/trust/shield-lock-3d.png" alt="" width={40} height={40} className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow-sm" />
-                <span className="text-[13px] sm:text-sm text-neutral-700 font-semibold">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Image src="/icons/trust/shield-lock-3d.png" alt="Ασφαλείς συναλλαγές" width={28} height={28} className="w-5 h-5 sm:w-7 sm:h-7 object-contain" />
+                <span className="hidden sm:inline text-[13px] text-neutral-600 font-medium">
                   {'\u0391\u03c3\u03c6\u03b1\u03bb\u03b5\u03af\u03c2 \u03c3\u03c5\u03bd\u03b1\u03bb\u03bb\u03b1\u03b3\u03ad\u03c2'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Right — Image (desktop only) */}
-          <div className="hidden lg:block flex-1">
-            <div className="relative aspect-[3/2] rounded-3xl overflow-hidden shadow-lg">
+          {/* Right — Image (visible on all screens) */}
+          <div className="w-full lg:flex-1">
+            <div className="relative aspect-[16/9] sm:aspect-[3/2] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md lg:shadow-lg">
               <Image
                 src="/images/hero-products.jpg"
                 alt="Ελληνικό ελαιόλαδο και μέλι — αυθεντικά προϊόντα από τοπικούς παραγωγούς"

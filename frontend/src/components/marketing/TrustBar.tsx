@@ -32,21 +32,21 @@ const SIGNALS = [
 
 export default function TrustBar() {
   return (
-    <section className="py-14 sm:py-18 bg-white border-y border-neutral-200/50">
+    <section className="py-10 sm:py-14 bg-white border-y border-neutral-200/50">
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-6">
           {SIGNALS.map(({ icon, title, subtitle }) => (
-            <div key={title} className="flex flex-col items-center text-center gap-4">
+            <div key={title} className="flex flex-col items-center text-center gap-2.5 sm:gap-4">
               <Image
                 src={icon}
                 alt={title}
                 width={72}
                 height={72}
-                className="w-16 h-16 sm:w-[72px] sm:h-[72px] object-contain drop-shadow-sm"
+                className="w-12 h-12 sm:w-16 sm:h-16 lg:w-[72px] lg:h-[72px] object-contain drop-shadow-sm"
               />
               <div>
-                <p className="text-sm font-semibold text-neutral-800">{title}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{subtitle}</p>
+                <p className="text-xs sm:text-sm font-semibold text-neutral-800">{title}</p>
+                <p className="text-[11px] sm:text-xs text-neutral-500 mt-0.5">{subtitle}</p>
               </div>
             </div>
           ))}
