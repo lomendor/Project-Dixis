@@ -2,6 +2,7 @@
 
 **Last Updated:** 2026-03-06
 **Purpose:** Full breakdown of recurring costs to run the platform
+**Source:** Confirmed by Panagiotis (2026-03-06)
 
 ---
 
@@ -9,13 +10,13 @@
 
 | Category | Monthly | Annual | Notes |
 |----------|---------|--------|-------|
-| **Infrastructure** | ~€13 | ~€156 | VPS + DB + Domain |
-| **SaaS / Tools** | ~€9 | ~€108 | Email + Analytics |
-| **AI / Dev Tools** | ~€40 | ~€480 | Claude + GPT + Gemini |
-| **Comms (SMS/OTP)** | ~€5-15 | ~€60-180 | Depends on volume |
-| **Professional** | ~€150 | ~€1,800 | Accountant + lawyer |
+| **Infrastructure** | €21.5 | €258 | VPS + DB + Domain |
+| **AI / Dev Tools** | €190 | €2,280 | Claude + GPT + Gemini |
+| **Business Tools** | €0-15 | €0-180 | Elorus (invoicing) + courier API |
+| **Comms (SMS/OTP)** | ~€10 | ~€120 | Phone + SMS |
+| **Professional** | €450-500 | €5,400-6,000 | Accountant (IKE) + Lawyer |
 | **Payments** | Variable | Variable | Stripe ~2.9% + €0.25/txn |
-| **TOTAL (fixed)** | **~€217-227** | **~€2,604-2,724** | |
+| **TOTAL (fixed)** | **~€672-737** | **~€8,058-8,838** | |
 
 ---
 
@@ -23,62 +24,58 @@
 
 | Service | What | Cost | Billing | Status |
 |---------|------|------|---------|--------|
-| **Hostinger VPS** | KVM 2 (2 vCPU, 8GB RAM, 100GB NVMe) — hosts Next.js + Umami + nginx | ~€8-10/mo | Annual prepaid | ✅ Active |
-| **Neon PostgreSQL** | Free tier → Pro if needed — production DB | €0 (free tier) | — | ✅ Active |
-| **Domain (dixis.gr)** | .gr domain registration | ~€15-20/yr (~€1.5/mo) | Annual | ✅ Active |
+| **Hostinger VPS** | KVM 2 (2 vCPU, 8GB RAM, 100GB NVMe) — hosts Next.js + Umami + nginx | **€20/mo** | Annual prepaid | ✅ Active |
+| **Neon PostgreSQL** | Free tier — production DB | €0 (free tier) | — | ✅ Active |
+| **Domain (dixis.gr)** | .gr domain registration | **€1.50/mo** (~€18/yr) | Annual | ✅ Active |
 | **SSL Certificate** | Let's Encrypt via certbot | €0 | Auto-renew | ✅ Active |
 | **GitHub** | Free tier — repo, CI/CD, issues | €0 | — | ✅ Active |
 
-**Subtotal: ~€13/mo**
+**Subtotal: €21.50/mo**
 
 ---
 
-## 2. SaaS / Tools
+## 2. AI / Development Tools
 
 | Service | What | Cost | Billing | Status |
 |---------|------|------|---------|--------|
-| **Resend** | Transactional email (order confirmations, OTP, etc.) | €0 (free tier: 3,000 emails/mo) | — | ✅ Active |
-| **Umami Analytics** | Self-hosted on VPS — cookieless, GDPR compliant | €0 (self-hosted) | — | ✅ Active |
-| **Stripe** | Payment processing (cards) | 2.9% + €0.25 per transaction | Per transaction | ✅ Active |
+| **Claude (Anthropic)** | AI coding assistant — primary dev tool (Max/Team plan) | **€160/mo** | Monthly | ✅ Active |
+| **ChatGPT (OpenAI)** | GPT-4 for research, mockups, brainstorming | **€22/mo** | Monthly | ✅ Active |
+| **Gemini (Google)** | Google AI — research, alternative perspective | **€8/mo** | Monthly | ✅ Active |
 
-> **Note:** Plausible was considered but we went with self-hosted Umami (free). If email volume exceeds 3K/month, Resend Pro is ~$20/mo.
+> **Note:** Claude is by far the biggest AI expense at €160/mo. Worth reviewing usage — if dev velocity drops (e.g., after launch stabilizes), could downgrade to Pro (€20/mo) and save €140/mo.
 
-**Subtotal: ~€0/mo (until scale)**
+**Subtotal: €190/mo**
 
 ---
 
-## 3. AI / Development Tools
+## 3. Business Tools
 
 | Service | What | Cost | Billing | Status |
 |---------|------|------|---------|--------|
-| **Claude (Anthropic)** | AI coding assistant — primary dev tool | ~€20/mo (Pro plan) | Monthly | ✅ Active |
-| **ChatGPT (OpenAI)** | GPT-4 for research, mockups, brainstorming | ~€20/mo (Plus plan) | Monthly | ✅ Active |
-| **Gemini (Google)** | Google AI — research, alternative perspective | ~€0-20/mo | Monthly | ❓ Verify with Panagiotis |
+| **Elorus** | Invoicing / billing platform (Greek) | ❓ TBD | Monthly | ❓ Research needed |
+| **Courier/Shipping API** | API for tracking shipments (ACS, ELTA, Speedex, etc.) | ❓ TBD | Per-use or monthly | ❓ Future need |
+| **Resend** | Transactional email (order confirmations, OTP) | €0 (free: 3K emails/mo) | — | ✅ Active |
+| **Umami Analytics** | Self-hosted on VPS — cookieless, GDPR | €0 (self-hosted) | — | ✅ Active |
+| **Stripe** | Payment processing (cards) | 2.9% + €0.25/txn | Per transaction | ✅ Active |
 
-> **Question for Panagiotis:** Ποια ακριβώς συνδρομή Gemini έχεις; Google One AI Premium (~€22/mo) ή κάτι άλλο;
+> **Action items:**
+> - Research Elorus pricing (free tier? paid plan?)
+> - Research courier API costs (ACS has API, most Greek couriers do)
+> - Panagiotis mentioned "και το αλλο για τα τιμολογια" — another invoicing tool? Clarify.
 
-**Subtotal: ~€40-60/mo**
+**Subtotal: ~€0-15/mo (TBD after research)**
 
 ---
 
-## 4. Communications (SMS / Phone OTP)
+## 4. Communications (Phone / SMS)
 
-**Current state:** Admin login uses phone OTP (6 digits). Built in Laravel, but **no SMS provider connected yet** — OTP works only via logs/email for now.
+| Service | What | Cost | Status |
+|---------|------|------|--------|
+| **Phone + SMS** | Admin OTP, customer notifications | **~€10/mo** | ✅ Active (per Panagiotis) |
 
-**Options researched:**
+> **Note:** SMS provider not yet connected to platform (OTP works via logs/email). Provider options: Twilio, Telnyx, Yuboto. Decision pending.
 
-| Provider | Cost per SMS (GR) | Monthly minimum | Notes |
-|----------|-------------------|-----------------|-------|
-| **Twilio** | ~€0.04-0.07/SMS | Pay-as-you-go | Most popular, reliable, expensive |
-| **Telnyx** | ~€0.02-0.04/SMS | Pay-as-you-go | Cheaper, good EU coverage |
-| **Vonage (Nexmo)** | ~€0.03-0.06/SMS | Pay-as-you-go | Solid alternative |
-| **Yuboto** | ~€0.03/SMS | Greek company, local support | 🇬🇷 Greek provider |
-
-> **Decision needed:** Choose provider. For admin-only OTP (very low volume — maybe 5-10 SMS/month), cost is negligible (~€0.50/mo). If we add consumer phone verification later, volume increases.
->
-> **Panagiotis mentioned:** Twilio or another provider — needs final decision.
-
-**Subtotal: ~€5-15/mo estimate (low volume)**
+**Subtotal: ~€10/mo**
 
 ---
 
@@ -86,12 +83,14 @@
 
 | Service | What | Cost | Billing | Status |
 |---------|------|------|---------|--------|
-| **Λογιστής** | Monthly accounting, tax filings, VAT | ~€100-150/mo | Monthly | ✅ Active |
-| **Δικηγόρος** | Legal — terms, contracts, compliance (as needed) | ~€9/mo (retainer?) or per-case | ❓ | ❓ Verify |
+| **Λογιστής** | Monthly accounting, tax filings, VAT — **IKE setup** | **€350-400/mo** | Monthly | ✅ Active |
+| **Δικηγόρος** | Legal — terms, contracts, compliance | **€100/mo** | ❓ Frequency unclear | ✅ Active |
 
-> **Question for Panagiotis:** Τι arrangement έχεις με δικηγόρο; €9/μήνα retainer ή πληρώνεις per case;
+> **Important:** Accountant cost is €350-400/mo **IF we form an IKE** (company). This is the biggest single monthly expense.
+>
+> **Lawyer:** Panagiotis pays €100 but isn't sure if this is monthly or per-case. Need to clarify.
 
-**Subtotal: ~€109-159/mo**
+**Subtotal: €450-500/mo**
 
 ---
 
@@ -114,8 +113,8 @@
 | **Hotjar / PostHog** | Heatmaps, session recording | €0-39/mo | After 50+ daily visitors |
 | **Resend Pro** | Email beyond 3K/mo | ~€20/mo | After ~100 orders/month |
 | **Neon Pro** | DB beyond free tier (0.5GB) | ~€19/mo | After ~1000 products |
-| **Sentry** | Error monitoring | €0 (free tier) → €26/mo | When team grows |
-| **Marketing ads** | Google/Meta/Instagram | €50-200/mo | After first €500 commission earned |
+| **Sentry** | Error monitoring | €0 (free) → €26/mo | When team grows |
+| **Marketing ads** | Google/Meta/Instagram | €50-200/mo | After first €500 commission |
 | **Hetzner / bigger VPS** | If traffic exceeds current VPS | €20-40/mo | After 500+ daily visitors |
 
 ---
@@ -123,50 +122,83 @@
 ## Cost Scenarios
 
 ### Scenario A: Now (pre-revenue, 0 orders)
+
 | | Monthly |
 |---|---|
-| Infrastructure | €13 |
-| AI tools | €40-60 |
-| Professional | €109-159 |
-| SMS | €0 (not connected) |
-| **TOTAL** | **€162-232** |
+| Infrastructure | €21.50 |
+| AI tools | €190 |
+| Business tools | €0 |
+| Professional | €450-500 |
+| SMS/Phone | €10 |
+| **TOTAL** | **€671.50-721.50** |
 
 ### Scenario B: Early traction (20-30 orders/mo)
+
 | | Monthly |
 |---|---|
-| Infrastructure | €13 |
-| AI tools | €40-60 |
-| Professional | €109-159 |
-| SMS | €5 |
+| Infrastructure | €21.50 |
+| AI tools | €190 |
+| Business tools | €15 (Elorus) |
+| Professional | €450-500 |
+| SMS/Phone | €10 |
 | Stripe fees | €25 |
-| **TOTAL** | **€192-262** |
+| **TOTAL** | **€711.50-761.50** |
 | Commission revenue (12% of €1,000) | +€120 |
-| **Net burn** | **€72-142** |
+| **Net burn** | **€591.50-641.50** |
 
 ### Scenario C: Growing (50-80 orders/mo)
+
 | | Monthly |
 |---|---|
-| Infrastructure | €13 |
-| AI tools | €40-60 |
-| Professional | €109-159 |
-| SMS | €10 |
+| Infrastructure | €21.50 |
+| AI tools | €190 |
+| Business tools | €15 |
+| Professional | €450-500 |
+| SMS/Phone | €10 |
 | Stripe fees | €63 |
 | Marketing | €50-100 |
-| **TOTAL** | **€285-405** |
+| **TOTAL** | **€799.50-899.50** |
 | Commission revenue (12% of €2,500) | +€300 |
-| **Net burn** | **-€15 to +€105 → BREAKEVEN ZONE** |
+| **Net burn** | **€499.50-599.50** |
+
+### Scenario D: Breakeven target
+
+| | Needed |
+|---|---|
+| Monthly fixed costs | ~€700 |
+| Breakeven GMV at 12% commission | **~€5,833/mo** |
+| That's roughly | **~145 orders x €40 AOV** |
+| Or | **~97 orders x €60 AOV** |
+
+> **Reality check:** With €5K capital and ~€700/mo burn, runway is **~7 months** (not 25 as previously estimated). This is tight. Revenue needs to start within 3-4 months.
+
+---
+
+## Biggest Cost Drivers (ranked)
+
+1. **Λογιστής (IKE)** — €350-400/mo — 52% of total
+2. **Claude AI** — €160/mo — 23% of total
+3. **Δικηγόρος** — €100/mo — 14% of total
+4. **Everything else** — €61.50/mo — 9% of total
+
+> **CTO observation:** Accountant + lawyer = €550/mo, which is 77% of the total burn. These are non-negotiable for a legal business. The only flexible costs are AI tools (€190/mo). If things get tight, downgrading Claude to Pro saves €140/mo immediately.
 
 ---
 
 ## Action Items
 
-- [ ] **Panagiotis**: Confirm exact Gemini subscription cost
-- [ ] **Panagiotis**: Confirm lawyer arrangement (retainer vs per-case)
-- [ ] **Decide**: SMS/OTP provider for admin login (Twilio vs Telnyx vs Yuboto)
-- [ ] **Decide**: When to upgrade Neon from free tier (monitor DB size)
+- [ ] **Panagiotis**: Clarify lawyer frequency (€100/mo fixed or per-case?)
+- [ ] **Panagiotis**: Confirm accountant cost — is €350-400 only if IKE? What if ατομική?
+- [ ] **Research**: Elorus pricing + features needed
+- [ ] **Research**: Courier API costs (ACS, Speedex, ELTA Courier)
+- [ ] **Panagiotis**: "Και το αλλο για τα τιμολογια" — which other invoicing tool?
+- [ ] **Panagiotis**: List any other costs you remember (you said "ξεχναω πολλα")
+- [ ] **Decide**: SMS/OTP provider (Twilio vs Telnyx vs Yuboto)
+- [ ] **Consider**: Downgrading Claude if dev velocity stabilizes (saves €140/mo)
 - [ ] Review this doc monthly — update after first real orders
 
 ---
 
-_Runway with €5K capital and ~€200/mo burn: **~25 months**_
-_Runway improves as commission revenue starts_
+_Runway with €5K capital and ~€700/mo burn: **~7 months**_
+_Breakeven needs ~€5,800/mo GMV at 12% commission_
+_Critical: Must onboard producers + start revenue within 3-4 months_
