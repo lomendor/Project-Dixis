@@ -8,15 +8,16 @@
 
 ## Summary
 
-| Category | Monthly | Annual | Notes |
-|----------|---------|--------|-------|
-| **Infrastructure** | €21.5 | €258 | VPS + DB + Domain |
-| **AI / Dev Tools** | €190 | €2,280 | Claude + GPT + Gemini |
-| **Business Tools** | €0-15 | €0-180 | Elorus (invoicing) + courier API |
-| **Comms (SMS/OTP)** | ~€10 | ~€120 | Phone + SMS |
-| **Professional** | €450-500 | €5,400-6,000 | Accountant (IKE) + Lawyer |
+| Category | Ατομική | ΙΚΕ | Notes |
+|----------|---------|-----|-------|
+| **Infrastructure** | €21.50 | €21.50 | VPS + DB + Domain |
+| **AI / Dev Tools** | €190 | €190 | Claude + GPT + Gemini |
+| **Business Tools** | €0-15 | €0-15 | Elorus (invoicing) + courier API |
+| **Comms (SMS/OTP)** | ~€10 | ~€10 | Phone + SMS |
+| **Λογιστής** | €150 | €400 | Ατομική vs ΙΚΕ |
+| **Δικηγόρος** | ~€25 | ~€25 | Per case (~€100/case, ~3x/yr) |
 | **Payments** | Variable | Variable | Stripe ~2.9% + €0.25/txn |
-| **TOTAL (fixed)** | **~€672-737** | **~€8,058-8,838** | |
+| **TOTAL (fixed)** | **~€397-412** | **~€647-662** | |
 
 ---
 
@@ -81,16 +82,27 @@
 
 ## 5. Professional Services
 
-| Service | What | Cost | Billing | Status |
-|---------|------|------|---------|--------|
-| **Λογιστής** | Monthly accounting, tax filings, VAT — **IKE setup** | **€350-400/mo** | Monthly | ✅ Active |
-| **Δικηγόρος** | Legal — terms, contracts, compliance | **€100/mo** | ❓ Frequency unclear | ✅ Active |
+| Service | What | Ατομική | ΙΚΕ | Billing | Status |
+|---------|------|--------|-----|---------|--------|
+| **Λογιστής** | Accounting, tax filings, VAT | **€150/mo** | **€400/mo** | Monthly | ✅ Active |
+| **Δικηγόρος** | Legal — terms, contracts, compliance | **€100/case** | **€100/case** | Per case | ✅ Available |
 
-> **Important:** Accountant cost is €350-400/mo **IF we form an IKE** (company). This is the biggest single monthly expense.
+> **IKE vs Ατομική — the big decision:**
 >
-> **Lawyer:** Panagiotis pays €100 but isn't sure if this is monthly or per-case. Need to clarify.
+> | | Ατομική | ΙΚΕ |
+> |---|---|---|
+> | Λογιστής | €150/mo | €400/mo |
+> | Ευθύνη | Απεριόριστη προσωπική | Περιορισμένη (μόνο κεφάλαιο εταιρείας) |
+> | Τιμολόγια τροφίμων | Πιο περίπλοκο | Πιο εύκολο/ασφαλές |
+> | Αξιοπιστία B2B | Χαμηλότερη | Υψηλότερη |
+> | Extra κόστος | — | €250/mo παραπάνω |
+>
+> **CTO recommendation:** ΙΚΕ. Τα τρόφιμα έχουν θέμα ευθύνης (υγειονομικό ρίσκο). Με ατομική, αν γίνει πρόβλημα, χάνεις τα πάντα προσωπικά. Με ΙΚΕ, χάνεις μόνο ό,τι έχει η εταιρεία. Τα €250/mo extra αξίζουν τη μείωση ρίσκου. Επίσης, B2B πελάτες (εστιατόρια, ξενοδοχεία) προτιμούν να συνεργάζονται με ΙΚΕ.
+>
+> **Δικηγόρος:** Per case (~€100/case). Εκτίμηση 2-4 φορές/χρόνο = ~€200-400/yr = ~€25/mo amortized.
 
-**Subtotal: €450-500/mo**
+**Subtotal (Ατομική): ~€175/mo**
+**Subtotal (ΙΚΕ): ~€425/mo**
 
 ---
 
@@ -121,84 +133,109 @@
 
 ## Cost Scenarios
 
+> All scenarios shown for both entity types. **Recommended: ΙΚΕ** (see Section 5).
+
 ### Scenario A: Now (pre-revenue, 0 orders)
 
-| | Monthly |
-|---|---|
-| Infrastructure | €21.50 |
-| AI tools | €190 |
-| Business tools | €0 |
-| Professional | €450-500 |
-| SMS/Phone | €10 |
-| **TOTAL** | **€671.50-721.50** |
+| | Ατομική | ΙΚΕ |
+|---|---|---|
+| Infrastructure | €21.50 | €21.50 |
+| AI tools | €190 | €190 |
+| Business tools | €0 | €0 |
+| Professional | €175 | €425 |
+| SMS/Phone | €10 | €10 |
+| **TOTAL** | **€396.50** | **€646.50** |
 
 ### Scenario B: Early traction (20-30 orders/mo)
 
-| | Monthly |
-|---|---|
-| Infrastructure | €21.50 |
-| AI tools | €190 |
-| Business tools | €15 (Elorus) |
-| Professional | €450-500 |
-| SMS/Phone | €10 |
-| Stripe fees | €25 |
-| **TOTAL** | **€711.50-761.50** |
-| Commission revenue (12% of €1,000) | +€120 |
-| **Net burn** | **€591.50-641.50** |
+| | Ατομική | ΙΚΕ |
+|---|---|---|
+| Infrastructure | €21.50 | €21.50 |
+| AI tools | €190 | €190 |
+| Business tools | €15 | €15 |
+| Professional | €175 | €425 |
+| SMS/Phone | €10 | €10 |
+| Stripe fees | €25 | €25 |
+| **TOTAL** | **€436.50** | **€686.50** |
+| Commission (12% of €1,000) | +€120 | +€120 |
+| **Net burn** | **€316.50** | **€566.50** |
 
 ### Scenario C: Growing (50-80 orders/mo)
 
-| | Monthly |
-|---|---|
-| Infrastructure | €21.50 |
-| AI tools | €190 |
-| Business tools | €15 |
-| Professional | €450-500 |
-| SMS/Phone | €10 |
-| Stripe fees | €63 |
-| Marketing | €50-100 |
-| **TOTAL** | **€799.50-899.50** |
-| Commission revenue (12% of €2,500) | +€300 |
-| **Net burn** | **€499.50-599.50** |
+| | Ατομική | ΙΚΕ |
+|---|---|---|
+| Infrastructure | €21.50 | €21.50 |
+| AI tools | €190 | €190 |
+| Business tools | €15 | €15 |
+| Professional | €175 | €425 |
+| SMS/Phone | €10 | €10 |
+| Stripe fees | €63 | €63 |
+| Marketing | €50-100 | €50-100 |
+| **TOTAL** | **€524.50-574.50** | **€774.50-824.50** |
+| Commission (12% of €2,500) | +€300 | +€300 |
+| **Net burn** | **€224.50-274.50** | **€474.50-524.50** |
 
-### Scenario D: Breakeven target
+### Breakeven targets
 
-| | Needed |
-|---|---|
-| Monthly fixed costs | ~€700 |
-| Breakeven GMV at 12% commission | **~€5,833/mo** |
-| That's roughly | **~145 orders x €40 AOV** |
-| Or | **~97 orders x €60 AOV** |
+| | Ατομική | ΙΚΕ |
+|---|---|---|
+| Monthly fixed costs | ~€400 | ~€650 |
+| Breakeven GMV at 12% | **~€3,333/mo** | **~€5,417/mo** |
+| Orders needed (€40 AOV) | **~83 orders** | **~135 orders** |
+| Orders needed (€60 AOV) | **~56 orders** | **~90 orders** |
 
-> **Reality check:** With €5K capital and ~€700/mo burn, runway is **~7 months** (not 25 as previously estimated). This is tight. Revenue needs to start within 3-4 months.
+### Runway analysis (€5K capital)
+
+| | Ατομική | ΙΚΕ |
+|---|---|---|
+| Monthly burn | ~€400 | ~€650 |
+| Runway (0 revenue) | **~12.5 months** | **~7.5 months** |
+| With €120/mo revenue | ~14.5 months | ~9 months |
+
+> **Reality check (ΙΚΕ):** Runway ~7.5 μήνες. Revenue πρέπει να ξεκινήσει εντός 3-4 μηνών.
+> **Reality check (Ατομική):** Runway ~12.5 μήνες. Πιο αναπνοή, αλλά μεγαλύτερο νομικό ρίσκο στα τρόφιμα.
 
 ---
 
-## Biggest Cost Drivers (ranked)
+## Biggest Cost Drivers (ranked, ΙΚΕ scenario)
 
-1. **Λογιστής (IKE)** — €350-400/mo — 52% of total
-2. **Claude AI** — €160/mo — 23% of total
-3. **Δικηγόρος** — €100/mo — 14% of total
-4. **Everything else** — €61.50/mo — 9% of total
+1. **Λογιστής (ΙΚΕ)** — €400/mo — 62% of total
+2. **Claude AI** — €160/mo — 25% of total
+3. **GPT + Gemini** — €30/mo — 5% of total
+4. **Everything else** — €56.50/mo — 8% of total
 
-> **CTO observation:** Accountant + lawyer = €550/mo, which is 77% of the total burn. These are non-negotiable for a legal business. The only flexible costs are AI tools (€190/mo). If things get tight, downgrading Claude to Pro saves €140/mo immediately.
+> **CTO observation:** Ο λογιστής + Claude = €560/mo, δηλαδή 86% του burn. Αν χρειαστεί cut:
+> - **Μεγαλύτερο save:** Ατομική αντί ΙΚΕ → -€250/mo (αλλά μεγαλύτερο ρίσκο)
+> - **Δεύτερο save:** Claude Pro αντί Max → -€140/mo
+> - **Μαζί:** -€390/mo → burn πέφτει στα ~€260/mo → runway 19 μήνες
+
+---
+
+## Decision Log
+
+| Date | Decision | Details |
+|------|----------|---------|
+| 2026-03-06 | Δικηγόρος = per case | ~€100/case, ~2-4x/year |
+| 2026-03-06 | Λογιστής: €150 ατομική, €400 ΙΚΕ | Confirmed by accountant |
+| TBD | **Ατομική vs ΙΚΕ** | CTO recommends ΙΚΕ (ευθύνη + τρόφιμα + B2B) |
 
 ---
 
 ## Action Items
 
-- [ ] **Panagiotis**: Clarify lawyer frequency (€100/mo fixed or per-case?)
-- [ ] **Panagiotis**: Confirm accountant cost — is €350-400 only if IKE? What if ατομική?
+- [x] ~~Clarify lawyer frequency~~ → Per case (~€100/case)
+- [x] ~~Confirm accountant cost~~ → €150 ατομική, €400 ΙΚΕ
+- [ ] **DECISION NEEDED**: Ατομική ή ΙΚΕ; (€250/mo διαφορά, αλλά ΙΚΕ recommended)
 - [ ] **Research**: Elorus pricing + features needed
 - [ ] **Research**: Courier API costs (ACS, Speedex, ELTA Courier)
-- [ ] **Panagiotis**: "Και το αλλο για τα τιμολογια" — which other invoicing tool?
-- [ ] **Panagiotis**: List any other costs you remember (you said "ξεχναω πολλα")
+- [ ] **Panagiotis**: "Και το αλλο για τα τιμολογια" — which invoicing tool besides Elorus?
+- [ ] **Panagiotis**: List any other costs you remember
 - [ ] **Decide**: SMS/OTP provider (Twilio vs Telnyx vs Yuboto)
-- [ ] **Consider**: Downgrading Claude if dev velocity stabilizes (saves €140/mo)
+- [ ] **Consider**: Downgrading Claude Max → Pro if dev velocity stabilizes (saves €140/mo)
 - [ ] Review this doc monthly — update after first real orders
 
 ---
 
-_Runway with €5K capital and ~€700/mo burn: **~7 months**_
-_Breakeven needs ~€5,800/mo GMV at 12% commission_
-_Critical: Must onboard producers + start revenue within 3-4 months_
+_**ΙΚΕ path:** €5K capital / €650 burn = ~7.5 months runway. Need revenue within 3-4 months._
+_**Ατομική path:** €5K capital / €400 burn = ~12.5 months runway. More time, more personal risk._
+_**Emergency mode:** Ατομική + Claude Pro = ~€260/mo = 19 months runway._
