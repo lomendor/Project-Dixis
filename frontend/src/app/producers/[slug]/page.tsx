@@ -151,11 +151,10 @@ export default async function ProducerProfilePage(
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      {/* ── Producer Header — Light, Warm ───────────────────── */}
-      <section className="bg-white border-b border-neutral-200/60">
+      {/* ── Breadcrumbs ───────────────────────────────────── */}
+      <div className="bg-white border-b border-neutral-200/40">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
-          {/* Breadcrumbs */}
-          <nav className="pt-5 pb-0 text-xs text-neutral-400" aria-label="Breadcrumb">
+          <nav className="py-4 text-xs text-neutral-400" aria-label="Breadcrumb">
             <ol className="flex items-center gap-1.5">
               <li><Link href="/" className="hover:text-primary transition-colors">Αρχική</Link></li>
               <li className="text-neutral-300">/</li>
@@ -164,46 +163,56 @@ export default async function ProducerProfilePage(
               <li className="text-neutral-600 truncate max-w-[200px]">{producer.name}</li>
             </ol>
           </nav>
+        </div>
+      </div>
 
-          {/* Producer info row */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8 py-8 sm:py-10">
-            {/* Avatar / Photo */}
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-primary-pale flex-shrink-0 shadow-sm">
-              {hasImage ? (
-                <Image
-                  src={producer.image_url!}
-                  alt={producer.name}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="96px"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-3xl sm:text-4xl font-bold text-primary/40">
-                    {producer.name.charAt(0)}
-                  </span>
-                </div>
-              )}
+      {/* ── Producer Hero — Split layout ───────────────────── */}
+      <section className="bg-white">
+        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-14">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+            {/* Large image — left side */}
+            <div className="w-full lg:w-[420px] xl:w-[480px] flex-shrink-0">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-primary-pale shadow-sm">
+                {hasImage ? (
+                  <Image
+                    src={producer.image_url!}
+                    alt={producer.name}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 480px"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-pale to-accent-cream">
+                    <span className="text-7xl sm:text-8xl font-bold text-primary/20">
+                      {producer.name.charAt(0)}
+                    </span>
+                    <span className="text-sm text-primary/30 mt-2 font-medium">
+                      {producer.region || 'Τοπικός Παραγωγός'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Name + meta */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-bold tracking-tight text-neutral-900 mb-2">
+            {/* Info — right side */}
+            <div className="flex-1 min-w-0 lg:py-2">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-neutral-900 leading-[1.1] mb-4">
                 {producer.name}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-neutral-500">
+              {/* Meta pills */}
+              <div className="flex flex-wrap items-center gap-2.5 mb-6">
                 {producer.region && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-pale text-sm font-medium text-primary">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"/>
                     </svg>
                     {producer.region}
                   </span>
                 )}
-                <span className="inline-flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm font-medium text-neutral-600">
+                  <svg className="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   {productCount} {productCount === 1 ? 'προϊόν' : 'προϊόντα'}
@@ -213,7 +222,7 @@ export default async function ProducerProfilePage(
                     href={producer.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-primary hover:text-primary-light transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-sm font-medium text-primary hover:bg-primary-pale transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -223,11 +232,27 @@ export default async function ProducerProfilePage(
                 )}
               </div>
 
-              {/* Description inline — no pretentious section header */}
+              {/* Description — warm, personal */}
               {producer.description && (
-                <p className="mt-4 text-[15px] text-neutral-600 leading-relaxed max-w-2xl">
-                  {producer.description}
-                </p>
+                <div className="border-l-[3px] border-primary/25 pl-5 py-1">
+                  <p className="text-base sm:text-lg text-neutral-600 leading-relaxed italic">
+                    {producer.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Map preview — compact, inline with info on desktop */}
+              {hasMap && (
+                <div className="mt-8 rounded-xl overflow-hidden border border-neutral-200/60 shadow-sm">
+                  <div className="aspect-[16/7] max-h-[200px]">
+                    <ProducerMap
+                      latitude={producer.latitude!}
+                      longitude={producer.longitude!}
+                      name={producer.name}
+                      region={producer.region}
+                    />
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -279,31 +304,6 @@ export default async function ProducerProfilePage(
             <p className="text-neutral-400 text-sm">
               Δεν υπάρχουν ακόμα προϊόντα.
             </p>
-          </div>
-        )}
-
-        {/* ── Map — Compact below products ────────────────── */}
-        {hasMap && (
-          <div className="mt-10 sm:mt-14">
-            <div className="flex items-center gap-2.5 mb-4">
-              <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <h2 className="text-lg font-bold text-neutral-900">
-                Τοποθεσία
-              </h2>
-            </div>
-            <div className="rounded-xl overflow-hidden border border-neutral-200/60 shadow-sm max-w-3xl">
-              <div className="aspect-[16/9] sm:aspect-[2/1] max-h-[320px]">
-                <ProducerMap
-                  latitude={producer.latitude!}
-                  longitude={producer.longitude!}
-                  name={producer.name}
-                  region={producer.region}
-                />
-              </div>
-            </div>
           </div>
         )}
 
