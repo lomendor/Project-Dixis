@@ -1,6 +1,6 @@
 # Dixis — Master Backlog & Roadmap
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-03-06
 **Source PRD:** `PRD Dixis Teliko (2).md` (owner's original vision document)
 **Current State:** Functional MVP+ in production
 
@@ -139,15 +139,34 @@ Before planning what to build, here's what **already works in production**:
 
 ### S2-03: Producer Profile Page Polish
 **Why:** Storytelling is Dixis's identity. Producer pages must be compelling.
-**What:**
-- Beautiful header with cover image
-- Bio/story section with rich formatting
-- Product grid
-- Location map
-- Certifications display
-- Contact/Q&A section
-**Effort:** M (2 PRs)
-**Status:** `[ ]`
+**Current state (2026-03-06):** Split hero layout deployed (large image left, info right, meta pills, quote-style description). But the page still feels thin because the API only returns: name, region, description, image_url (single), products. No gallery, story, coordinates, certifications, or social links.
+
+**Phase A — Backend data enrichment (Laravel):**
+- [ ] `S2-03a` **Gallery**: Add `producer_images` table (multi-photo upload, 5-8 images). Return in API.
+- [ ] `S2-03b` **Story/Bio**: Add `story` text field to producers (longer narrative, separate from short `description`). Return in API.
+- [ ] `S2-03c` **Coordinates**: Ensure `latitude`/`longitude` are populated for producers. Map already renders when data exists.
+- [ ] `S2-03d` **Certifications**: Add `producer_certifications` relation (reuse S1-05 badge system). Return in API.
+- [ ] `S2-03e` **Social links**: Add `instagram`, `facebook`, `youtube` fields to producers. Return in API.
+- [ ] `S2-03f` **Category**: Ensure producer `category` field is populated (currently empty string in API).
+
+**Phase B — Frontend presentation (after data exists):**
+- [ ] `S2-03g` **Photo gallery**: Swipeable image carousel in hero area (use gallery data from S2-03a)
+- [ ] `S2-03h` **"Η Ιστορία μας" section**: Rich story display below hero (use story from S2-03b)
+- [ ] `S2-03i` **Certification badges**: Visible on profile + product cards (use S2-03d)
+- [ ] `S2-03j` **Social links row**: Instagram/Facebook/YouTube icons in meta area (use S2-03e)
+- [ ] `S2-03k` **Map polish**: Larger map, better pin, maybe satellite view toggle (coordinates from S2-03c)
+- [ ] `S2-03l` **"Επικοινωνία" section**: Contact/message form or link to producer
+
+**Quick wins (frontend-only, no backend needed):**
+- [x] Split hero layout with large image (done 2026-03-06)
+- [x] Meta pills: region + product count (done 2026-03-06)
+- [x] Quote-style description with border accent (done 2026-03-06)
+- [ ] `S2-03m` Truncate long descriptions (3 lines + "Περισσότερα...")
+- [ ] `S2-03n` CTA button "Δείτε τα προϊόντα ↓" with smooth scroll
+- [ ] `S2-03o` Better product grid section header + transition from hero
+
+**Effort:** L (Phase A: 3-4 Laravel PRs, Phase B: 3-4 frontend PRs, Quick wins: 1 PR)
+**Status:** `[~]` In progress — hero layout done, data enrichment pending
 
 ### S2-04: Checkout Flow Polish
 **Why:** Reduce cart abandonment. Clear, fast, confidence-building checkout.
@@ -263,10 +282,10 @@ Before planning what to build, here's what **already works in production**:
 **Why:** Emotional connection between consumer and producer. See the farm, the process.
 **What:**
 - Producer embeds YouTube/Vimeo video on their profile
-- Photo gallery of production process
-- "Farm Story" rich text section
+- Photo gallery of production process → **Note: gallery infra built in S2-03a/S2-03g**
+- "Farm Story" rich text section → **Note: story field built in S2-03b/S2-03h**
 - Video thumbnails on product pages linking to producer tour
-**Effort:** S-M (2 PRs for basic version)
+**Effort:** S-M (2 PRs for basic version — reduced if S2-03 gallery/story already exist)
 **Status:** `[ ]`
 
 ### S4-02: Adopt a Tree / "Noikazo Dentro"
@@ -414,7 +433,7 @@ Before planning what to build, here's what **already works in production**:
 | S1-05 | Certifications Display | Medium | S | 1 |
 | S2-01 | Homepage Redesign | High | M | 2 |
 | S2-02 | Product Card Polish | High | M | 2 |
-| S2-03 | Producer Profile Polish | Medium | M | 2 |
+| S2-03 | Producer Profile Polish | High | L | 2 | [~] Hero done, data pending |
 | S2-04 | Checkout Polish | High | M | 2 |
 | S2-05 | Mobile Audit | High | M | 2 |
 | S2-06 | Loading States | Medium | S | 2 |
