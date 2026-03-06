@@ -17,6 +17,7 @@
 7. [IKE vs Atomiki for Food Marketplace](#7-ike-vs-atomiki-for-food-marketplace)
 8. [Risk Matrix](#8-risk-matrix)
 9. [Sources](#9-sources)
+10. [PSD2 Payment Flow Compliance (CRITICAL)](#10-psd2-payment-flow-compliance-critical)
 
 ---
 
@@ -473,6 +474,29 @@ Before listing ANY producer on Dixis:
 2. Increase coverage limits
 3. Consider D&O insurance (if IKE)
 
+### 6.6 Return/Refund Policy Framework
+
+Based on EU consumer protection law and Greek implementation:
+
+**Perishable food products (honey, cheese, olive oil, etc.):**
+- NO returns for change of mind (perishable goods exempted from 14-day withdrawal right)
+- Returns accepted ONLY for: defective product, wrong item shipped, expired product
+- Consumer must report within **48 hours** of delivery
+- Consumer must provide **photographic evidence** of the issue
+- If producer's fault → producer covers return shipping
+- If consumer changed mind (non-perishable only) → consumer covers return shipping
+
+**Non-perishable products:**
+- Standard 14-day withdrawal right applies
+- Product must be unused and in original packaging
+- Return shipping costs: consumer pays (unless defective)
+
+**Key implementation notes:**
+- Terms of Service must clearly state perishable exemptions
+- Producer Agreement must define who pays for defective product returns
+- Platform needs a simple complaint form (DSA requirement)
+- Monthly settlement reports should track returns per producer
+
 ---
 
 ## 7. IKE vs Atomiki for Food Marketplace
@@ -614,18 +638,76 @@ The question is not whether the extra EUR 250/month is affordable. The question 
 
 ---
 
+## 10. PSD2 Payment Flow Compliance (CRITICAL)
+
+**Added: 2026-03-07** — Identified from additional research documents.
+
+### The Risk
+
+Under PSD2 (Payment Services Directive 2, EU Directive 2015/2366), if a platform:
+1. Receives customer payments into its own account
+2. Then distributes funds to sellers/producers
+
+...it may be classified as providing **payment services**, which requires a license from the national central bank (Bank of Greece / Τράπεζα της Ελλάδος).
+
+Operating as an unlicensed payment service provider is a **serious regulatory violation** with potential fines and criminal liability.
+
+### Current Dixis Status: ✅ ALREADY MITIGATED
+
+Good news: **Dixis has already implemented Stripe Connect** (Express accounts). The code exists in:
+- `backend/app/Services/Payment/StripeConnectService.php` — Full implementation
+- `backend/app/Http/Controllers/Api/Producer/StripeConnectController.php` — API endpoints
+- `backend/database/migrations/2026_03_02_100000_add_stripe_connect_fields.php` — DB schema
+
+The payment model uses **"Separate Charges & Transfers"**:
+- Customer pays Dixis (via Stripe) → Payment goes to Dixis's Stripe platform account
+- Webhook triggers Transfer to producer's connected Stripe Express account
+- Commission is retained automatically (the transfer amount = order total minus commission)
+
+**However**, the Stripe Connect feature is behind a **feature flag** (`STRIPE_CONNECT_ENABLED=false` by default). This means:
+- Currently, payments go to Dixis's Stripe account but transfers to producers are NOT automatic
+- Producers are paid manually (bank transfer or other means)
+
+### Required Actions
+
+1. **Enable Stripe Connect before going live with real producers** — Set `STRIPE_CONNECT_ENABLED=true`
+2. **Onboard each producer onto Stripe Express** — They must complete Stripe's KYC/identity verification
+3. **Never manually hold and redistribute customer funds** — Always use Stripe Connect transfers
+4. **Document the payment flow** — Show your lawyer that funds flow: Customer → Stripe → Producer (minus commission to Dixis)
+
+### Why Stripe Connect Solves PSD2
+
+Stripe is a licensed Payment Service Provider (PSP) in the EU. When using Stripe Connect:
+- Dixis operates under Stripe's license (as a "marketplace" on Stripe's platform)
+- Dixis never directly holds customer funds — Stripe does
+- Transfers to producers are handled by Stripe, a licensed entity
+- This is the standard PSD2-compliant model used by Etsy, Deliveroo, and similar EU marketplaces
+
+### Stripe Connect Additional Benefits for DSA/KYBC
+
+Stripe Express accounts automatically collect:
+- Producer identity (passport/ID)
+- Tax ID (AFM)
+- Bank account (IBAN)
+- Address verification
+
+This data satisfies a significant portion of the DSA Article 30 KYBC requirements.
+
+---
+
 ## Appendix: Priority Actions (Ordered)
 
-1. **DECIDE: IKE vs Atomiki** -- This is the foundational decision. Everything else builds on this. (CTO recommends IKE.)
-2. **Contact EFET** -- Ask about registration requirements for food marketplace intermediary. Get answer in writing.
-3. **Draft Producer Agreement** -- Have lawyer review. Include indemnification, FBO declaration, document requirements.
-4. **Draft/Update Terms of Service** -- Clear intermediary status, allergen warnings, complaint handling.
-5. **Implement Producer Onboarding Checklist** -- Collect all required documents before listing any producer.
-6. **Add Product Page Disclaimers** -- Producer identification, intermediary status on every listing.
-7. **Get Insurance Quotes** -- Professional liability + general liability. Budget EUR 1,000-2,000/year.
-8. **Implement DSA Compliance** -- KYBC verification, notice-and-action mechanism, transparency.
-9. **Set Up Recall/Complaint Procedure** -- How to handle food safety incidents.
-10. **Annual Review** -- Review legal compliance annually, update contracts as regulations change (especially PLD 2024/2853 transposition by Dec 2026).
+1. **DECIDED: IKE** ✅ — Limited liability protection for food marketplace. (Decision: 2026-03-07)
+2. **CRITICAL: Enable Stripe Connect** — Turn on `STRIPE_CONNECT_ENABLED=true` and onboard producers before processing real payments. PSD2 compliance.
+3. **Contact EFET** — Ask about registration requirements for food marketplace intermediary. Get answer in writing.
+4. **Draft Producer Agreement** — Have lawyer review. Include indemnification, FBO declaration, document requirements.
+5. **Draft/Update Terms of Service** — Clear intermediary status, allergen warnings, complaint handling.
+6. **Implement Producer Onboarding Checklist** — Collect all required documents before listing any producer.
+7. **Add Product Page Disclaimers** — Producer identification, intermediary status on every listing.
+8. **Get Insurance Quotes** -- Professional liability + general liability. Budget EUR 1,000-2,000/year.
+9. **Implement DSA Compliance** — KYBC verification, notice-and-action mechanism, transparency.
+10. **Set Up Recall/Complaint Procedure** — How to handle food safety incidents.
+11. **Annual Review** — Review legal compliance annually, update contracts as regulations change (especially PLD 2024/2853 transposition by Dec 2026).
 
 ---
 

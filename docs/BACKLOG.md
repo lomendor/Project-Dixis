@@ -121,6 +121,18 @@ Before planning what to build, here's what **already works in production**:
 **Effort:** External (insurance broker)
 **Status:** `[ ]`
 
+### S0-08: Enable Stripe Connect for PSD2 Compliance ⚠️
+**Why:** Processing payments without Stripe Connect could be classified as unlicensed payment services under PSD2 — serious regulatory risk.
+**What:**
+- Enable `STRIPE_CONNECT_ENABLED=true` in production `.env`
+- Ensure all producers complete Stripe Express onboarding before going live
+- Verify transfer webhook fires correctly after payment
+- Document payment flow for lawyer review
+**Code Status:** ✅ Already built (StripeConnectService.php, migrations, controllers). Just needs activation + testing.
+**Effort:** S (1 PR — env config + integration test)
+**Status:** `[ ]` — **Must be done before first real producer goes live**
+**Reference:** `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` Section 10
+
 ---
 
 ## Stage 1 — Trust & Core Commerce
