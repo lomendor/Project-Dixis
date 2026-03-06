@@ -52,23 +52,29 @@ export default function Hero() {
               </svg>
             </Link>
 
-            {/* Trust badges — simple, clean row */}
-            <div className="mt-10 flex flex-wrap items-center gap-5 sm:gap-6">
-              <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-primary stroke-[2]" />
-                <span className="text-[13px] text-neutral-500 font-medium">
+            {/* Trust badges — icon circles + labels */}
+            <div className="mt-10 flex flex-wrap items-center gap-4 sm:gap-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Award className="w-[18px] h-[18px] text-primary stroke-[2]" />
+                </div>
+                <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0395\u03c0\u03b9\u03bb\u03b5\u03b3\u03bc\u03ad\u03bd\u03bf\u03b9 \u03c0\u03b1\u03c1\u03b1\u03b3\u03c9\u03b3\u03bf\u03af'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-primary stroke-[2]" />
-                <span className="text-[13px] text-neutral-500 font-medium">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <Truck className="w-[18px] h-[18px] text-amber-600 stroke-[2]" />
+                </div>
+                <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0386\u03bc\u03b5\u03c3\u03b7 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03ae'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-primary stroke-[2]" />
-                <span className="text-[13px] text-neutral-500 font-medium">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <ShieldCheck className="w-[18px] h-[18px] text-blue-600 stroke-[2]" />
+                </div>
+                <span className="text-[13px] text-neutral-700 font-semibold">
                   {'\u0391\u03c3\u03c6\u03b1\u03bb\u03b5\u03af\u03c2 \u03c3\u03c5\u03bd\u03b1\u03bb\u03bb\u03b1\u03b3\u03ad\u03c2'}
                 </span>
               </div>
