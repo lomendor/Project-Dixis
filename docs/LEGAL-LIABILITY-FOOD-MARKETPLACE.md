@@ -908,7 +908,41 @@ Dixis has **3 distinct revenue streams**, each with potentially different ΚΑΔ
 | B2B Commission | Producer | 7% of sale | ΤΠΥ to producer | 24% |
 | B2B Subscription | B2B buyer | €80-1000/yr | ΤΠΥ to buyer | 24% (?) |
 
-**Critical question for accountant:** Do all 3 streams fall under the same ΚΑΔ, or do we need multiple ΚΑΔ codes? Does IKE formation need to account for all 3 from day one?
+### L. Producer Services (Revenue Stream #4)
+
+Dixis will offer professional services to producers: branding/rebranding, product photography, consulting on packaging/product redesign, marketing consulting.
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| L1 | How to invoice producer services? | Dixis issues ΤΠΥ to producer for each service. VAT 24% (professional services). Same as commission invoicing but different line item. | 🟡 MEDIUM |
+| L2 | Additional ΚΑΔ needed? | Professional/consulting services likely need separate ΚΑΔ from marketplace intermediation. **Need accountant.** | 🔴 LOW |
+| L3 | Service delivery by third parties? | If Dixis subcontracts photography/design to freelancers, Dixis receives invoice from freelancer and issues ΤΠΥ to producer. Margin on service = Dixis revenue. | 🟡 MEDIUM |
+| L4 | Service bundling with subscriptions? | If Pro/Premium subscription includes some free services, how to account for bundled value? | 🔴 LOW |
+
+### M. Premium Promotion / Advertising (Revenue Stream #5)
+
+Dixis will sell promoted/featured product placements on the platform and in newsletters.
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| M1 | How to invoice promoted placements? | Dixis issues ΤΠΥ to producer for advertising/promotion service. VAT 24%. | 🟡 MEDIUM |
+| M2 | Is this advertising income? | Promoted placements = advertising revenue. May need specific ΚΑΔ for advertising services. **Need accountant.** | 🔴 LOW |
+| M3 | Pricing model tax treatment? | Per-click vs per-impression vs fixed-fee — does pricing model affect tax treatment? | 🔴 LOW |
+| M4 | Newsletter promotion? | If producers pay for newsletter placement, same treatment as platform promotion? | 🟡 MEDIUM |
+
+### N. Complete Revenue Model Summary (UPDATED)
+
+Dixis has **5 distinct revenue streams**, each with potentially different ΚΑΔ, invoicing, and tax treatment:
+
+| # | Stream | Who pays Dixis | Rate/Price | Invoice type | VAT |
+|---|--------|---------------|------------|-------------|-----|
+| 1 | B2C Commission | Producer | 12% of sale | ΤΠΥ to producer | 24% |
+| 2 | B2B Commission | Producer | 7% of sale | ΤΠΥ to producer | 24% |
+| 3 | B2B Subscription | B2B buyer | €80-1000/yr | ΤΠΥ to buyer | 24% (?) |
+| 4 | Producer Services | Producer | Per-service pricing | ΤΠΥ to producer | 24% |
+| 5 | Premium Promotion | Producer | Per-placement pricing | ΤΠΥ to producer | 24% |
+
+**Critical question for accountant:** Do all 5 streams fall under the same ΚΑΔ, or do we need multiple ΚΑΔ codes? Likely candidates: marketplace intermediation, SaaS/subscriptions, professional consulting, advertising. Does IKE formation need to account for all 5 from day one, or can we add ΚΑΔ codes later?
 
 ---
 
@@ -920,10 +954,11 @@ Dixis has **3 distinct revenue streams**, each with potentially different ΚΑΔ
 - Dixis issues ΤΠΥ for commission at 24% VAT ✅
 - Producer onboarding checklist from day 1 (DSA/KYBC) ✅
 - Stripe Connect is correct direction ✅
-- 3 revenue streams identified (B2C commission, B2B commission, subscriptions) ✅
+- 5 revenue streams identified ✅
 
 **NEED ACCOUNTANT:**
-- ΚΑΔ codes — how many, covering which revenue streams?
+- ΚΑΔ codes — how many, covering which of the 5 revenue streams?
+- Can we add ΚΑΔ codes later or must all be in from IKE formation?
 - Exact Stripe charge type (Direct vs Separate)
 - Shipping VAT in mixed baskets
 - COD cash flow
@@ -934,7 +969,8 @@ Dixis has **3 distinct revenue streams**, each with potentially different ΚΑΔ
 - myDATA/e-invoicing setup
 - Subscription tax treatment + revenue recognition
 - B2B payment terms (net-30) accounting
-- Multiple revenue streams → single or multiple ΚΑΔ?
+- Producer services invoicing (subcontractor model)
+- Advertising/promotion income ΚΑΔ
 
 **NEED EFET:**
 - Written confirmation of FBO status
