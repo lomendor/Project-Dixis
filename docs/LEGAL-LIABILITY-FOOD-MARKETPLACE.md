@@ -18,6 +18,7 @@
 8. [Risk Matrix](#8-risk-matrix)
 9. [Sources](#9-sources)
 10. [PSD2 Payment Flow Compliance (CRITICAL)](#10-psd2-payment-flow-compliance-critical)
+11. [Additional Findings](#11-additional-findings-2026-03-07) — DAC7, COD trap, Courier contract, Stripe charge type, Omnibus, PSD2 exemption
 
 ---
 
@@ -695,19 +696,103 @@ This data satisfies a significant portion of the DSA Article 30 KYBC requirement
 
 ---
 
+## 11. Additional Findings (2026-03-07)
+
+New compliance issues identified from cross-referencing multiple AI legal analyses (Gemini, GPT-4). These need verification with a marketplace-specialized accountant.
+
+### 11.1 DAC7 — Platform Seller Reporting (Ν. 5047/2023)
+
+**What:** EU Directive DAC7, transposed into Greek law as Ν. 5047/2023, requires digital platforms (marketplaces) to:
+- Collect tax identification details from all sellers (producers)
+- Report annually to AADE (Greek tax authority) how much each seller earned through the platform
+- Suspend sellers who refuse to provide their tax details
+
+**Why it matters:** Significant fines for non-compliance. This is NOT optional — it's a legal obligation for any marketplace operating in the EU.
+
+**Status:** NOT YET ADDRESSED. Must ask marketplace accountant how to implement this reporting.
+
+**Action:** Ask accountant: "What exactly does DAC7 require from us? How do we report seller earnings to AADE?"
+
+### 11.2 Cash on Delivery (Antikatavoli) — PSD2 Trap
+
+**What:** Stripe Connect solves PSD2 for card payments. But COD creates the SAME problem:
+- Customer pays cash to courier
+- Courier deposits to a bank account
+- **If that account is Dixis's** → Dixis is handling third-party funds → PSD2 violation
+- **If that account is the producer's** → How does Dixis collect its 12% commission?
+
+**Current status:** COD is enabled in Dixis (`payments.cod_enabled = true`).
+
+**This is an unsolved problem.** Common marketplace solutions:
+1. Courier deposits to producer → Dixis invoices producer monthly for commission (risk: producer doesn't pay)
+2. Courier deposits to Dixis → but then needs PSD2 compliance or commercial agent exemption
+3. Disable COD entirely (lose ~50-60% of Greek e-commerce customers)
+
+**Action:** Ask marketplace accountant: "How do Skroutz/e-food handle COD deposits and commission collection?"
+
+### 11.3 Courier Contract — Who Signs?
+
+**What:** The choice of who holds the courier contract affects invoicing:
+- **Option A: Each producer has own courier contract** — Clean legally (producer invoices shipping), but loses bulk rate discounts
+- **Option B: Dixis signs master courier contract** — Better rates (e.g., €3/package vs €5), but courier invoices Dixis → creates invoicing complexity (who re-invoices shipping to customer?)
+
+**Current implementation:** Dixis has ACS integration built into the platform. The practical question of contract ownership is unresolved.
+
+**Action:** Ask accountant: "If the courier contract is in Dixis's name, how do we handle the shipping invoicing chain?"
+
+### 11.4 Stripe Charge Type — Legal Implications
+
+**What:** Dixis uses "Separate Charges & Transfers" model (confirmed in code). This means:
+- Customer payment lands on Dixis's Stripe platform account FIRST
+- Then a Transfer is created to the producer's connected account
+- **Disputes and refunds hit Dixis's platform account**, not the producer's
+
+**Why it matters:** With this model, Dixis IS in the payment flow — it's NOT the same as "never touching money." The statement descriptor on the customer's bank statement likely shows "Dixis" (not the producer name), which undermines the "pure intermediary" argument.
+
+Alternative: **Direct charges** would make the charge happen on the producer's connected account directly. Customer sees producer name. Disputes hit producer. Dixis only gets application_fee. This is "cleaner" for the intermediary narrative, BUT has practical downsides (producer needs fully onboarded Stripe account).
+
+**Current code location:** `StripePaymentProvider.php` line 87 — `$this->stripe->paymentIntents->create(...)` creates charge on platform account.
+
+**Action:** Ask accountant AND potentially Stripe support: "For a food marketplace, which charge model is legally cleanest? Separate charges & transfers, or direct charges?"
+
+### 11.5 Omnibus Directive — Ranking Transparency
+
+**What:** The EU Omnibus Directive (transposed to Greek law) requires marketplaces to:
+- Clearly state whether the seller is a professional or individual (for Dixis: all are professionals)
+- **Explain in Terms of Service how product/search ranking works** — Why does Producer A appear before Producer B?
+
+**Current status:** Our product listing/search does not have documented ranking criteria.
+
+**Action:** Add ranking methodology explanation to Terms of Service (e.g., "Products are ranked by [date added / relevance / sales volume / alphabetical]").
+
+### 11.6 PSD2 Commercial Agent Exemption — Weaker Than Expected
+
+**What:** The EBA (European Banking Authority) has clarified that the "commercial agent" exemption from PSD2 only applies if the platform acts as agent for ONE side (typically the seller). If the platform represents BOTH buyer AND seller (which a marketplace arguably does — it handles disputes, refunds, customer support), the exemption is weaker.
+
+**Why it matters:** Even with Stripe Connect, if Dixis's Terms of Service, UX, support flow, and refund handling make it look like Dixis represents both parties, a regulator could argue it's providing payment services.
+
+**Mitigation:** Ensure all customer-facing materials consistently position the producer as the seller and Dixis as the facilitator. Refund flows should go through the producer, not be initiated unilaterally by Dixis.
+
+---
+
 ## Appendix: Priority Actions (Ordered)
 
 1. **DECIDED: IKE** ✅ — Limited liability protection for food marketplace. (Decision: 2026-03-07)
-2. **CRITICAL: Enable Stripe Connect** — Turn on `STRIPE_CONNECT_ENABLED=true` and onboard producers before processing real payments. PSD2 compliance.
-3. **Contact EFET** — Ask about registration requirements for food marketplace intermediary. Get answer in writing.
-4. **Draft Producer Agreement** — Have lawyer review. Include indemnification, FBO declaration, document requirements.
-5. **Draft/Update Terms of Service** — Clear intermediary status, allergen warnings, complaint handling.
-6. **Implement Producer Onboarding Checklist** — Collect all required documents before listing any producer.
-7. **Add Product Page Disclaimers** — Producer identification, intermediary status on every listing.
-8. **Get Insurance Quotes** -- Professional liability + general liability. Budget EUR 1,000-2,000/year.
-9. **Implement DSA Compliance** — KYBC verification, notice-and-action mechanism, transparency.
-10. **Set Up Recall/Complaint Procedure** — How to handle food safety incidents.
-11. **Annual Review** — Review legal compliance annually, update contracts as regulations change (especially PLD 2024/2853 transposition by Dec 2026).
+2. **CRITICAL: Find marketplace-specialized accountant** — Most legal/tax questions below need this person. Priority #1.
+3. **CRITICAL: Enable Stripe Connect** — Turn on `STRIPE_CONNECT_ENABLED=true` and onboard producers before processing real payments. PSD2 compliance.
+4. **CRITICAL: Resolve COD PSD2 trap** — Who receives cash? How does Dixis get commission? Ask accountant. (Section 11.2)
+5. **CRITICAL: Evaluate Stripe charge model** — Separate charges vs direct charges. Which is legally cleanest? Ask accountant + Stripe. (Section 11.4)
+6. **Contact EFET** — Ask about registration requirements for food marketplace intermediary. Get answer IN WRITING.
+7. **Draft Producer Agreement** — Have lawyer review. Include indemnification, FBO declaration, document requirements.
+8. **Draft/Update Terms of Service** — Clear intermediary status, allergen warnings, complaint handling, ranking transparency (Omnibus).
+9. **Implement DAC7 reporting** — Annual seller earnings report to AADE. Ask accountant for exact requirements. (Section 11.1)
+10. **Resolve courier contract ownership** — Who signs with ACS? Invoicing implications. Ask accountant. (Section 11.3)
+11. **Implement Producer Onboarding Checklist** — Collect all required documents before listing any producer.
+12. **Add Product Page Disclaimers** — Producer identification, intermediary status on every listing.
+13. **Get Insurance Quotes** — Professional liability + general liability. Budget EUR 1,000-2,000/year.
+14. **Implement DSA Compliance** — KYBC verification, notice-and-action mechanism, transparency.
+15. **Set Up Recall/Complaint Procedure** — How to handle food safety incidents.
+16. **Annual Review** — Review legal compliance annually, update contracts as regulations change (especially PLD 2024/2853 transposition by Dec 2026).
 
 ---
 
