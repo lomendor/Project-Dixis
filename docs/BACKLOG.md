@@ -1,6 +1,6 @@
 # Dixis — Master Backlog & Roadmap
 
-**Last Updated:** 2026-03-06
+**Last Updated:** 2026-03-07
 **Source PRD:** `PRD Dixis Teliko (2).md` (owner's original vision document)
 **Current State:** Functional MVP+ in production
 
@@ -132,6 +132,52 @@ Before planning what to build, here's what **already works in production**:
 **Effort:** S (1 PR — env config + integration test)
 **Status:** `[ ]` — **Must be done before first real producer goes live**
 **Reference:** `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` Section 10
+
+### S0-09: Stripe Flow Change — SCT → Direct Charges ⚠️
+**Why:** Current "Separate Charges & Transfers" makes Dixis the merchant of record. PSD2 risk — EBA says commercial agent exemption only works for one side. Direct Charges make producer the merchant.
+**What:**
+- Wait for accountant/lawyer confirmation on target flow
+- Refactor StripePaymentProvider: add `on_behalf_of` + `application_fee_amount`
+- Remove Transfer API calls from webhook
+- Handle multi-producer checkout (multiple PaymentIntents or Destination Charges)
+- Update statement descriptors, refund flow, dispute handling
+**Code Status:** Current code works (SCT), needs refactor to Direct. ~2-3 days.
+**Effort:** M (2-3 PRs — payment provider + webhook + checkout)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation**
+**Reference:** `docs/STRIPE-FLOW-NOTE.md`
+
+### S0-10: Product VAT Rate Field
+**Why:** Products have no `vat_rate` field. Can't calculate VAT breakdown, can't generate compliant invoices, can't handle mixed-basket shipping VAT.
+**What:**
+- Add `vat_rate` field to products table (decimal, nullable)
+- Seed default rates per category (food 13%, cosmetics 24%, etc.)
+- Update order total calculation with VAT breakdown
+- Handle shipping VAT (ancillary vs separate — per accountant answer)
+**Effort:** M (2 PRs — migration+model, checkout recalculation)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation of rates**
+**Reference:** `docs/SHIPPING-VAT-MATRIX.md`
+
+### S0-11: DAC7/DSA Onboarding Fields
+**Why:** DAC7 requires annual seller reporting to AADE. DSA Art. 30 says no listings without complete trader info. 4 fields missing, others not enforced.
+**What:**
+- Add missing fields: `date_of_birth`, `gemi_number`, `vat_number`, `country`
+- Add DSA field: `id_document_url` (upload)
+- Add DSA compliance checkbox
+- Make critical fields REQUIRED in backend validation (not just frontend)
+**Effort:** M (2 PRs — migration+validation, frontend form update)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation of required set**
+**Reference:** `docs/DAC7-DSA-FIELD-AUDIT.md`
+
+### S0-12: Accountant Meeting ⭐
+**Why:** All S0-09, S0-10, S0-11 are blocked on this. Nothing else moves until we have answers.
+**What:**
+- Send briefing package: `Dixis-Logistis-FINAL.pdf` (28 ερωτήσεις, 12 κατηγορίες)
+- Send Stripe flow note: `docs/STRIPE-FLOW-NOTE.md`
+- Send shipping/VAT matrix: `docs/SHIPPING-VAT-MATRIX.md`
+- Get written answers to all questions
+- Update all docs + unblock S0-09, S0-10, S0-11
+**Effort:** External (accountant meeting)
+**Status:** `[ ]` — **CRITICAL PATH: blocks everything**
 
 ---
 
