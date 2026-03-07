@@ -19,6 +19,7 @@
 9. [Sources](#9-sources)
 10. [PSD2 Payment Flow Compliance (CRITICAL)](#10-psd2-payment-flow-compliance-critical)
 11. [Additional Findings](#11-additional-findings-2026-03-07) — DAC7, COD trap, Courier contract, Stripe charge type, Omnibus, PSD2 exemption
+12. [Working Answers for Accountant Meeting](#12-working-answers-for-accountant-meeting-2026-03-07) — Confidence-rated answers for all key questions
 
 ---
 
@@ -795,6 +796,104 @@ Alternative: **Direct charges** would make the charge happen on the producer's c
 14. **Implement DSA Compliance** — KYBC verification, notice-and-action mechanism, transparency.
 15. **Set Up Recall/Complaint Procedure** — How to handle food safety incidents.
 16. **Annual Review** — Review legal compliance annually, update contracts as regulations change (especially PLD 2024/2853 transposition by Dec 2026).
+
+---
+
+## 12. Working Answers for Accountant Meeting (2026-03-07)
+
+These are our best-effort answers based on legal research, AI analysis (GPT-4, Gemini, Claude), and code review. **ALL need accountant confirmation.** The approach: present these as "this is what we believe — tell us if you disagree and exactly why."
+
+### Confidence Levels
+- 🟢 **HIGH** = Strong legal basis, multiple sources agree
+- 🟡 **MEDIUM** = Logical but needs professional confirmation
+- 🔴 **LOW** = Grey area, could go either way
+
+---
+
+### A. Operating Model
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| A1 | Is Dixis a marketplace or seller? | **Marketplace/intermediary.** Producer sells, customer buys from producer, Dixis facilitates. But this must be consistent everywhere: checkout, invoices, emails, refunds, Stripe flow, Terms of Service. | 🟢 HIGH |
+| A2 | How should Stripe Connect be configured? | Currently using "Separate Charges & Transfers" — charge hits Dixis platform, then Transfer to producer. **Direct Charges may be legally cleaner** (charge hits producer directly, Dixis gets application_fee only). Need accountant input on which is better. | 🟡 MEDIUM |
+| A3 | How to avoid being seen as the merchant? | Producer name on all product pages. "Dixis facilitates" disclaimer. Producer issues customer invoice. Refund flow goes through producer. Statement descriptor should ideally show producer name (requires Direct Charges). | 🟢 HIGH |
+
+### B. Invoicing
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| B1 | Who invoices the customer? | **The producer.** Producer issues receipt/invoice to customer for products (+ shipping). Producer puts it in the package. | 🟢 HIGH |
+| B2 | What does Dixis invoice? | **ΤΠΥ (Invoice for Services) to the producer** for 12% commission + 24% VAT on that commission. | 🟢 HIGH |
+| B3 | Is commission VAT 24%? | **Yes, 24%.** It's a platform/intermediation service, not food. Standard VAT rate applies. Example: Product €40, Commission = €4.80 net + €1.15 VAT = €5.95 total ΤΠΥ. | 🟢 HIGH |
+| B4 | Multi-producer checkout? | Each producer issues separate invoice to customer for their portion. Dixis issues separate ΤΠΥ to each producer for their respective commission. | 🟡 MEDIUM |
+
+### C. Shipping
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| C1 | Who charges customer for shipping? | **The producer** (as ancillary cost on their invoice). This is cleanest for marketplace model. | 🟡 MEDIUM |
+| C2 | Shipping VAT rate? | Follows the main product's VAT rate as ancillary expense (παρεπόμενο έξοδο). If honey = 13% VAT, shipping on that order = 13%. BUT: mixed baskets with different VAT rates → **need accountant for exact handling.** | 🟡 MEDIUM |
+| C3 | Mixed basket shipping VAT? | **UNSOLVED.** If one order has 13% and 24% products, what VAT applies to shipping? Need accountant. | 🔴 LOW |
+| C4 | Free shipping promotions? | If Dixis subsidizes shipping → how is it treated? Marketing expense? Discount? **Need accountant.** | 🔴 LOW |
+
+### D. Payments / Stripe / PSD2
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| D1 | PSD2 risk with Stripe Connect? | **Risk exists but is mitigated** by using Stripe (a licensed PSP). However, our current "Separate Charges & Transfers" model means Dixis IS in the payment flow technically. "Direct Charges" would be cleaner. Must ask accountant which model to use. | 🟡 MEDIUM |
+| D2 | Best Stripe flow for marketplace? | **Direct Charges** = cleanest legally (charge on producer's account, Dixis gets application_fee). **Separate Charges** = more platform control but Dixis appears as merchant. Currently we have Separate. **Key question for accountant.** | 🟡 MEDIUM |
+| D3 | Refund/chargeback handling? | With current Separate Charges model: disputes/refunds hit Dixis platform account. With Direct Charges: they'd hit producer. Indemnification clause in Producer Agreement should cover this regardless. | 🟡 MEDIUM |
+| D4 | Stripe reports for accounting? | Stripe provides monthly reports. Dixis needs: per-producer settlement report (sales, refunds, commission, net transfer). We already have monthly settlement logic planned. | 🟢 HIGH |
+
+### E. Tax / VAT
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| E1 | Different product VAT rates? | Food = 13% (most Dixis products), cosmetics = 24%. This affects **only the producer's invoice**, not Dixis's commission (which is always 24% as service). | 🟢 HIGH |
+| E2 | Special VAT regime producers? | Some small producers may be in special VAT regimes. **This shouldn't affect Dixis** — we invoice our service at 24% regardless. But need accountant confirmation. | 🟡 MEDIUM |
+| E3 | DAC7 obligations? | **Likely applies.** Dixis must collect seller tax data and report earnings to AADE annually. Must implement from day 1. Need accountant for exact reporting requirements and deadlines. | 🟡 MEDIUM |
+
+### F. Legal Structure
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| F1 | IKE correct choice? | **Yes.** Limited liability essential for food marketplace. Personal assets protected. Cost: ~€400/mo accountant. **DECIDED.** | 🟢 HIGH |
+| F2 | What ΚΑΔ codes? | Need accountant to specify exact codes. Likely: online marketplace/intermediation + food-related commerce. | 🔴 LOW |
+
+### G. COD (Antikatavoli) — UNSOLVED
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| G1 | Who receives COD cash? | **UNSOLVED.** If courier deposits to Dixis = PSD2 risk. If to producer = commission collection problem. Need accountant to tell us how Skroutz/e-food handle this. | 🔴 LOW |
+
+### H. EFET
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| H1 | Is Dixis an FBO? | **Probably not** (no food handling/storage/transport). But must get EFET written confirmation. | 🟡 MEDIUM |
+
+---
+
+### Summary: What We Know vs What We Need
+
+**CONFIDENT (can proceed):**
+- IKE formation ✅
+- Producer issues customer invoice ✅
+- Dixis issues ΤΠΥ for commission at 24% VAT ✅
+- Producer onboarding checklist from day 1 (DSA/KYBC) ✅
+- Stripe Connect is correct direction ✅
+
+**NEED ACCOUNTANT:**
+- Exact Stripe charge type (Direct vs Separate)
+- Shipping VAT in mixed baskets
+- COD cash flow
+- DAC7 exact reporting requirements
+- ΚΑΔ codes for IKE
+- Courier contract ownership implications
+- Free shipping tax treatment
+
+**NEED EFET:**
+- Written confirmation of FBO status
 
 ---
 
