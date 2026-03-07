@@ -1,6 +1,6 @@
 # Dixis — Master Backlog & Roadmap
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-03-07
 **Source PRD:** `PRD Dixis Teliko (2).md` (owner's original vision document)
 **Current State:** Functional MVP+ in production
 
@@ -43,6 +43,141 @@ Before planning what to build, here's what **already works in production**:
 - `is_seasonal` (boolean) — exists in DB and API, no calendar UI
 - `discount_price` — exists, no promo UI
 - `is_featured` — exists, no featured section on homepage
+
+---
+
+## Stage 0 — Legal & Business Foundation
+
+> **Goal:** Protect the business legally before onboarding real producers or processing real orders.
+> **Timeline:** ASAP — before any real producer goes live
+> **Theme:** "We are legally protected and compliant."
+> **Reference:** `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` (full legal research)
+
+### S0-01: IKE Formation
+**Why:** Limited liability protection for food marketplace. Personal assets at risk without it.
+**What:**
+- Form ΙΚΕ (Private Limited Company) with accountant
+- Register with tax authority, GEMI
+- Update all platform legal references to company entity
+**Effort:** External (accountant + lawyer)
+**Status:** `[ ]` — **DECIDED: Going with IKE** (2026-03-07)
+
+### S0-02: Producer Agreement (Contract)
+**Why:** Legal protection — indemnification clause, FBO declaration, document requirements.
+**What:**
+- Draft producer agreement with lawyer (~€100-200)
+- Include: indemnification clause, HACCP requirement, EFET registration, accurate labeling obligation
+- Include: recall cooperation, termination for food safety violations
+- All producers must sign before listing
+**Effort:** External (lawyer)
+**Status:** `[ ]`
+
+### S0-03: Terms of Service Update
+**Why:** Clear intermediary status protects Dixis from product liability claims.
+**What:**
+- Update ToS with clear "marketplace intermediary" declaration
+- Add allergen warnings, complaint handling procedure
+- Add right-of-withdrawal exclusions for perishable food
+- Lawyer review (~€100-200)
+**Effort:** S (1 PR for website implementation after lawyer drafts)
+**Status:** `[ ]`
+
+### S0-04: EFET Clarification
+**Why:** Must know if Dixis needs to register with EFET as food marketplace intermediary.
+**What:**
+- Contact EFET (info@efet.gr / 213 2145800)
+- Ask: does a marketplace that never handles food need to register?
+- Get answer in writing (email)
+**Effort:** External (phone call + email)
+**Status:** `[ ]`
+
+### S0-05: Producer Onboarding Checklist
+**Why:** DSA KYBC compliance + food safety verification before listing any producer.
+**What:**
+- Collect: EFET registration, HACCP docs, AFM, identity, business license
+- Collect: signed Producer Agreement + self-certification
+- Review: sample product labels for Reg 1169/2011 compliance
+- Verify: information against VIES/GEMI databases
+**Effort:** S (1 PR — admin checklist UI + document storage)
+**Status:** `[ ]`
+
+### S0-06: Product Page Legal Compliance
+**Why:** Every product listing must identify the producer (EU PLD 2024/2853 + Greek Law 2251/1994).
+**What:**
+- Add producer legal name + location on every product page
+- Add "Παράγεται και πωλείται από [Παραγωγό]. Η Dixis διαμεσολαβεί." disclaimer
+- Add allergen warning for consumers with food allergies
+- Add intermediary disclaimer on checkout page
+**Effort:** S (1 PR — UI additions)
+**Status:** `[ ]`
+
+### S0-07: Professional Liability Insurance
+**Why:** Even as intermediary, legal defense costs from a single food claim can be devastating.
+**What:**
+- Get quotes from 2-3 Greek insurance brokers
+- Professional liability + general liability
+- Budget: €1,000-2,000/year (~€85-165/month)
+- Minimum coverage: €100,000 per claim
+**Effort:** External (insurance broker)
+**Status:** `[ ]`
+
+### S0-08: Enable Stripe Connect for PSD2 Compliance ⚠️
+**Why:** Processing payments without Stripe Connect could be classified as unlicensed payment services under PSD2 — serious regulatory risk.
+**What:**
+- Enable `STRIPE_CONNECT_ENABLED=true` in production `.env`
+- Ensure all producers complete Stripe Express onboarding before going live
+- Verify transfer webhook fires correctly after payment
+- Document payment flow for lawyer review
+**Code Status:** ✅ Already built (StripeConnectService.php, migrations, controllers). Just needs activation + testing.
+**Effort:** S (1 PR — env config + integration test)
+**Status:** `[ ]` — **Must be done before first real producer goes live**
+**Reference:** `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` Section 10
+
+### S0-09: Stripe Flow Change — SCT → Direct Charges ⚠️
+**Why:** Current "Separate Charges & Transfers" makes Dixis the merchant of record. PSD2 risk — EBA says commercial agent exemption only works for one side. Direct Charges make producer the merchant.
+**What:**
+- Wait for accountant/lawyer confirmation on target flow
+- Refactor StripePaymentProvider: add `on_behalf_of` + `application_fee_amount`
+- Remove Transfer API calls from webhook
+- Handle multi-producer checkout (multiple PaymentIntents or Destination Charges)
+- Update statement descriptors, refund flow, dispute handling
+**Code Status:** Current code works (SCT), needs refactor to Direct. ~2-3 days.
+**Effort:** M (2-3 PRs — payment provider + webhook + checkout)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation**
+**Reference:** `docs/STRIPE-FLOW-NOTE.md`
+
+### S0-10: Product VAT Rate Field
+**Why:** Products have no `vat_rate` field. Can't calculate VAT breakdown, can't generate compliant invoices, can't handle mixed-basket shipping VAT.
+**What:**
+- Add `vat_rate` field to products table (decimal, nullable)
+- Seed default rates per category (food 13%, cosmetics 24%, etc.)
+- Update order total calculation with VAT breakdown
+- Handle shipping VAT (ancillary vs separate — per accountant answer)
+**Effort:** M (2 PRs — migration+model, checkout recalculation)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation of rates**
+**Reference:** `docs/SHIPPING-VAT-MATRIX.md`
+
+### S0-11: DAC7/DSA Onboarding Fields
+**Why:** DAC7 requires annual seller reporting to AADE. DSA Art. 30 says no listings without complete trader info. 4 fields missing, others not enforced.
+**What:**
+- Add missing fields: `date_of_birth`, `gemi_number`, `vat_number`, `country`
+- Add DSA field: `id_document_url` (upload)
+- Add DSA compliance checkbox
+- Make critical fields REQUIRED in backend validation (not just frontend)
+**Effort:** M (2 PRs — migration+validation, frontend form update)
+**Status:** `[ ]` — **BLOCKED on accountant confirmation of required set**
+**Reference:** `docs/DAC7-DSA-FIELD-AUDIT.md`
+
+### S0-12: Accountant Meeting ⭐
+**Why:** All S0-09, S0-10, S0-11 are blocked on this. Nothing else moves until we have answers.
+**What:**
+- Send briefing package: `Dixis-Logistis-FINAL.pdf` (28 ερωτήσεις, 12 κατηγορίες)
+- Send Stripe flow note: `docs/STRIPE-FLOW-NOTE.md`
+- Send shipping/VAT matrix: `docs/SHIPPING-VAT-MATRIX.md`
+- Get written answers to all questions
+- Update all docs + unblock S0-09, S0-10, S0-11
+**Effort:** External (accountant meeting)
+**Status:** `[ ]` — **CRITICAL PATH: blocks everything**
 
 ---
 
@@ -139,15 +274,34 @@ Before planning what to build, here's what **already works in production**:
 
 ### S2-03: Producer Profile Page Polish
 **Why:** Storytelling is Dixis's identity. Producer pages must be compelling.
-**What:**
-- Beautiful header with cover image
-- Bio/story section with rich formatting
-- Product grid
-- Location map
-- Certifications display
-- Contact/Q&A section
-**Effort:** M (2 PRs)
-**Status:** `[ ]`
+**Current state (2026-03-06):** Split hero layout deployed (large image left, info right, meta pills, quote-style description). But the page still feels thin because the API only returns: name, region, description, image_url (single), products. No gallery, story, coordinates, certifications, or social links.
+
+**Phase A — Backend data enrichment (Laravel):**
+- [ ] `S2-03a` **Gallery**: Add `producer_images` table (multi-photo upload, 5-8 images). Return in API.
+- [ ] `S2-03b` **Story/Bio**: Add `story` text field to producers (longer narrative, separate from short `description`). Return in API.
+- [ ] `S2-03c` **Coordinates**: Ensure `latitude`/`longitude` are populated for producers. Map already renders when data exists.
+- [ ] `S2-03d` **Certifications**: Add `producer_certifications` relation (reuse S1-05 badge system). Return in API.
+- [ ] `S2-03e` **Social links**: Add `instagram`, `facebook`, `youtube` fields to producers. Return in API.
+- [ ] `S2-03f` **Category**: Ensure producer `category` field is populated (currently empty string in API).
+
+**Phase B — Frontend presentation (after data exists):**
+- [ ] `S2-03g` **Photo gallery**: Swipeable image carousel in hero area (use gallery data from S2-03a)
+- [ ] `S2-03h` **"Η Ιστορία μας" section**: Rich story display below hero (use story from S2-03b)
+- [ ] `S2-03i` **Certification badges**: Visible on profile + product cards (use S2-03d)
+- [ ] `S2-03j` **Social links row**: Instagram/Facebook/YouTube icons in meta area (use S2-03e)
+- [ ] `S2-03k` **Map polish**: Larger map, better pin, maybe satellite view toggle (coordinates from S2-03c)
+- [ ] `S2-03l` **"Επικοινωνία" section**: Contact/message form or link to producer
+
+**Quick wins (frontend-only, no backend needed):**
+- [x] Split hero layout with large image (done 2026-03-06)
+- [x] Meta pills: region + product count (done 2026-03-06)
+- [x] Quote-style description with border accent (done 2026-03-06)
+- [x] `S2-03m` Truncate long descriptions (3 lines + "Περισσότερα...") — done 2026-03-06
+- [x] `S2-03n` CTA button "Δείτε τα προϊόντα ↓" with smooth scroll — done 2026-03-06
+- [x] `S2-03o` Better product grid section header + transition from hero — done 2026-03-06
+
+**Effort:** L (Phase A: 3-4 Laravel PRs, Phase B: 3-4 frontend PRs, Quick wins: 1 PR)
+**Status:** `[~]` In progress — hero layout done, data enrichment pending
 
 ### S2-04: Checkout Flow Polish
 **Why:** Reduce cart abandonment. Clear, fast, confidence-building checkout.
@@ -263,10 +417,10 @@ Before planning what to build, here's what **already works in production**:
 **Why:** Emotional connection between consumer and producer. See the farm, the process.
 **What:**
 - Producer embeds YouTube/Vimeo video on their profile
-- Photo gallery of production process
-- "Farm Story" rich text section
+- Photo gallery of production process → **Note: gallery infra built in S2-03a/S2-03g**
+- "Farm Story" rich text section → **Note: story field built in S2-03b/S2-03h**
 - Video thumbnails on product pages linking to producer tour
-**Effort:** S-M (2 PRs for basic version)
+**Effort:** S-M (2 PRs for basic version — reduced if S2-03 gallery/story already exist)
 **Status:** `[ ]`
 
 ### S4-02: Adopt a Tree / "Noikazo Dentro"
@@ -414,7 +568,7 @@ Before planning what to build, here's what **already works in production**:
 | S1-05 | Certifications Display | Medium | S | 1 |
 | S2-01 | Homepage Redesign | High | M | 2 |
 | S2-02 | Product Card Polish | High | M | 2 |
-| S2-03 | Producer Profile Polish | Medium | M | 2 |
+| S2-03 | Producer Profile Polish | High | L | 2 | [~] Hero done, data pending |
 | S2-04 | Checkout Polish | High | M | 2 |
 | S2-05 | Mobile Audit | High | M | 2 |
 | S2-06 | Loading States | Medium | S | 2 |
