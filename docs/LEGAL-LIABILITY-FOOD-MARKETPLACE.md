@@ -872,6 +872,44 @@ These are our best-effort answers based on legal research, AI analysis (GPT-4, G
 |---|----------|----------------|------------|
 | H1 | Is Dixis an FBO? | **Probably not** (no food handling/storage/transport). But must get EFET written confirmation. | 🟡 MEDIUM |
 
+### I. B2B / Wholesale (Revenue Stream #2)
+
+Dixis will offer B2B access to restaurants, hotels, caterers. Lower commission (7%), business invoicing required.
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| I1 | Additional ΚΑΔ for B2B/wholesale? | B2C marketplace ΚΑΔ may not cover wholesale intermediation. **Need accountant to confirm if separate ΚΑΔ needed** for B2B channel, or if the same marketplace ΚΑΔ covers both. | 🔴 LOW |
+| I2 | B2B invoicing obligations? | B2B buyers need proper τιμολόγιο (not απόδειξη). **Who issues it?** If producer → producer needs to know buyer's ΑΦΜ/ΔΟΥ. If Dixis intermediates invoicing → may need invoicing provider (Elorus). | 🟡 MEDIUM |
+| I3 | myDATA / e-invoicing? | Mandatory e-invoicing for all businesses by Oct 2026 (Ν. 4947/2022). Dixis needs to submit ΤΠΥ electronically. Need accountant for exact setup — certified provider (Elorus+Fuse ~€23/mo) vs direct ΑΑΔΕ API. | 🟡 MEDIUM |
+| I4 | B2B commission invoicing model? | Same as B2C: Dixis issues ΤΠΥ to producer for 7% + 24% VAT. But does the lower B2B rate change anything legally? | 🟡 MEDIUM |
+| I5 | B2B payment terms? | B2B often expects net-30 payment. If Dixis offers credit terms → accounting treatment? Cash flow risk? | 🔴 LOW |
+| I6 | Volume pricing VAT? | If B2B gets quantity discounts, does this affect VAT calculation or require different invoice format? | 🔴 LOW |
+
+### J. Subscriptions (Revenue Stream #3)
+
+Dixis plans to charge B2B buyers subscription fees: Basic (€80-120/yr), Pro (€200-300/yr), Premium (€500-1000/yr).
+
+| # | Question | Working Answer | Confidence |
+|---|----------|----------------|------------|
+| J1 | Subscription VAT rate? | **24%** — it's a digital/platform service, not food. Same as commission. But need accountant confirmation. | 🟡 MEDIUM |
+| J2 | Subscription invoicing? | Dixis issues recurring ΤΠΥ to subscriber (B2B buyer). Monthly or annual. Needs to go through myDATA. | 🟡 MEDIUM |
+| J3 | Additional ΚΑΔ for subscriptions? | SaaS/subscription revenue may need different ΚΑΔ than marketplace commission. **Need accountant.** | 🔴 LOW |
+| J4 | Subscription + commission interaction? | If Premium subscriber gets 0% commission, does Dixis still issue ΤΠΥ to producer for €0? Or is the model different? | 🔴 LOW |
+| J5 | Stripe Billing for subscriptions? | Stripe handles recurring billing. Revenue recognition: when is subscription income booked — at payment or over the period? | 🟡 MEDIUM |
+| J6 | Refund/cancellation policy? | If subscriber cancels mid-year, pro-rata refund? Tax treatment of refunded subscription? | 🔴 LOW |
+
+### K. Complete Revenue Model Summary
+
+Dixis has **3 distinct revenue streams**, each with potentially different ΚΑΔ, invoicing, and tax treatment:
+
+| Stream | Who pays Dixis | Rate | Invoice type | VAT |
+|--------|---------------|------|-------------|-----|
+| B2C Commission | Producer | 12% of sale | ΤΠΥ to producer | 24% |
+| B2B Commission | Producer | 7% of sale | ΤΠΥ to producer | 24% |
+| B2B Subscription | B2B buyer | €80-1000/yr | ΤΠΥ to buyer | 24% (?) |
+
+**Critical question for accountant:** Do all 3 streams fall under the same ΚΑΔ, or do we need multiple ΚΑΔ codes? Does IKE formation need to account for all 3 from day one?
+
 ---
 
 ### Summary: What We Know vs What We Need
@@ -882,15 +920,21 @@ These are our best-effort answers based on legal research, AI analysis (GPT-4, G
 - Dixis issues ΤΠΥ for commission at 24% VAT ✅
 - Producer onboarding checklist from day 1 (DSA/KYBC) ✅
 - Stripe Connect is correct direction ✅
+- 3 revenue streams identified (B2C commission, B2B commission, subscriptions) ✅
 
 **NEED ACCOUNTANT:**
+- ΚΑΔ codes — how many, covering which revenue streams?
 - Exact Stripe charge type (Direct vs Separate)
 - Shipping VAT in mixed baskets
 - COD cash flow
 - DAC7 exact reporting requirements
-- ΚΑΔ codes for IKE
 - Courier contract ownership implications
 - Free shipping tax treatment
+- B2B invoicing model (who issues to B2B buyer?)
+- myDATA/e-invoicing setup
+- Subscription tax treatment + revenue recognition
+- B2B payment terms (net-30) accounting
+- Multiple revenue streams → single or multiple ΚΑΔ?
 
 **NEED EFET:**
 - Written confirmation of FBO status
