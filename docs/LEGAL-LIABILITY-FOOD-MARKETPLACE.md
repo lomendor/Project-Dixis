@@ -479,8 +479,10 @@ Before listing ANY producer on Dixis:
 
 Based on EU consumer protection law and Greek implementation:
 
-**Perishable food products (honey, cheese, olive oil, etc.):**
-- NO returns for change of mind (perishable goods exempted from 14-day withdrawal right)
+**Shelf-stable food products (honey, olive oil, jams, herbs, nuts, etc.):**
+- Note: Dixis sells ONLY shelf-stable, locker-compatible products (NO cheese, NO dairy, NO refrigerated items)
+- These are still classified as "food products" for return purposes — exempted from 14-day withdrawal right once opened/unsealed
+- NO returns for change of mind once product seal is broken
 - Returns accepted ONLY for: defective product, wrong item shipped, expired product
 - Consumer must report within **48 hours** of delivery
 - Consumer must provide **photographic evidence** of the issue
