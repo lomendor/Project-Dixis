@@ -147,31 +147,33 @@ Before planning what to build, here's what **already works in production**:
 - See `docs/MONTHLY-COSTS.md` for financial impact
 - First orders can run with commission=0% (no IKE needed yet)
 
-### S0-L09: Stripe Connect — Separate → Destination Charges (PSD2)
-**Why:** Current flow = "Separate Charges & Transfers" — Dixis collects ALL money, then transfers to producer. Under PSD2, Dixis appears as merchant/money collector = high regulatory risk. Must migrate to **Destination Charges** where payment flows to producer's connected account with `application_fee` for Dixis.
+### S0-L09: Stripe Connect — Separate → Direct Charges (PSD2)
+**Why:** Current flow = "Separate Charges & Transfers" — Dixis collects ALL money, then transfers to producer. Under PSD2, Dixis appears as merchant/money collector = high regulatory risk. Must migrate to **Direct Charges** where payment goes directly to producer's connected account with `application_fee` for Dixis.
+**Decision rationale (2026-03-08):**
+- Direct Charges = cleanest PSD2 model. Producer is unambiguously the merchant/seller of record
+- Destination Charges considered but rejected: same multi-producer trade-off (multiple PaymentIntents) but dirtier seller-of-record position — no UX benefit to justify the compliance compromise
+- Separate Charges & Transfers (current) = worst PSD2 position — Dixis looks like merchant/collector
 **Current state (code audit 2026-03-08):**
 - Stripe Connect **already partially built**: Express account creation, transfer logic, webhook, feature flag
 - Flag `STRIPE_CONNECT_ENABLED=false` — transfers are skipped
-- Checkout uses Stripe Checkout Sessions (NOT PaymentIntent modal)
+- Checkout uses Stripe Checkout Sessions (redirect, NOT PaymentIntent modal)
 - Refund with `reverse_transfer: true` already implemented
 **What needs to change:**
-- Checkout Session creation: add `payment_intent_data.transfer_data.destination` = producer's connected account
-- Add `payment_intent_data.application_fee_amount` = Dixis commission in cents
-- Multi-producer carts: split into **separate Checkout Sessions per producer** (Destination = 1 per PaymentIntent)
-- Statement descriptor: show producer name, not Dixis
-- Producer onboarding: add Stripe Connect Express KYC step (UI exists, needs wiring)
+- Checkout Session: create `on_behalf_of` = producer's connected account + `application_fee_amount` = Dixis commission
+- Multi-producer carts: split into **separate Checkout Sessions per producer** (1 PaymentIntent per producer)
+- Statement descriptor: producer name appears on customer card statement
+- Producer onboarding: add Stripe Connect Express KYC step (backend code exists, needs frontend wiring)
+- Refunds: handled by producer's connected account (Dixis as platform can still initiate)
 - Settlement becomes mostly automatic (Stripe pays producer directly)
-**Effort:** M (3-4 PRs: checkout refactor is main work, rest is wiring)
+**Effort:** M (3-4 PRs: checkout refactor, multi-producer split, producer onboarding UI, settlement update)
 **Status:** `[ ]` (REQUIRED before commission flag ON)
-**Dependencies:** S0-L08 (need IKE before platform Stripe Connect)
+**Dependencies:** S0-L08 (need IKE before platform Stripe Connect activation)
 **Timeline:** Before turning on 12% commission
 **Notes:**
-- Why Destination over Direct: Direct Charges = cleanest PSD2, but customer sees producer as merchant (may confuse). Destination = good PSD2 + platform controls experience
-- Why NOT Separate (current): Dixis looks like merchant/collector = highest PSD2 risk
-- Multi-producer trade-off: customer sees 2 charges for 2-producer cart. Acceptable — most orders single-producer
-- Stripe Connect Express already chosen (correct for Dixis)
+- Multi-producer cart: customer sees 2 charges for 2-producer order. Acceptable — most Dixis orders will be single-producer
+- Stripe Connect Express already chosen (producer gets Stripe-hosted onboarding, Dixis manages payouts)
 - Stripe Connect fee: same as regular (~1.5% + €0.25) + ~0.25% platform fee
-- **Accountant must confirm:** invoicing model (producer ΑΛΠ to customer, Dixis ΤΠΥ to producer)
+- **Accountant must confirm:** invoicing model (producer ΑΛΠ to customer, Dixis ΤΠΥ to producer for commission)
 
 ### S0-L10: Shipping Model Maturity (Post-Validation)
 **Why:** Long-term, producers shouldn't manage shipping themselves. Reduces friction, prevents producer churn.
