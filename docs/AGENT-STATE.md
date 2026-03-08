@@ -65,9 +65,24 @@
 - Action: Onboard 3 producers → first 20 orders → measure → then decide spend
 - Full analysis: `docs/BUSINESS-REVIEW-2026-02.md`
 
-**Feature backlog (paused):** `docs/BACKLOG.md` — resumes after 5 real producers + 10 real orders.
+**Stage 0 (Launch Readiness):** `docs/BACKLOG.md` — S0-L01 through S0-L08. Operational tasks, not code.
+**Critical path:** Producer onboarding (S0-L02) → Shipping model (S0-L04) → First orders (S0-L03) → Rate calibration (S0-L05)
+**Feature backlog (paused):** resumes after 5 real producers + 10 real orders.
 **Next from backlog:** S1-03 (Q&A), S1-04 (Wishlist), S1-05 (Certifications).
 **Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
+
+**Shipping audit findings (2026-03-07):**
+- Rates ~10-15% below real courier prices (€1-2 loss per shipment possible)
+- Remote surcharge (€3) may be too low for truly remote islands
+- Product weight defaults to 500g if not set → wrong shipping quotes
+- No courier contract yet → paying catalog prices
+- Shipping model undecided: producer ships vs Dixis ships
+- All tracked in Stage 0 (S0-L04, S0-L05, S0-L06, S0-L07)
+
+**Producer audit findings (2026-03-07):**
+- Producer flow is ~90% complete, no showstoppers
+- Nice-to-haves (NOT blocking): draft products, messaging, bulk edit, low-stock alerts, CSV export
+- `/my/` and `/producer/` route duplication (consolidate later)
 
 **User-reported issues (for later):**
 - Product renaming (improve Greek product names)

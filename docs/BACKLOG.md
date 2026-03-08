@@ -1,6 +1,6 @@
 # Dixis — Master Backlog & Roadmap
 
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-03-07
 **Source PRD:** `PRD Dixis Teliko (2).md` (owner's original vision document)
 **Current State:** Functional MVP+ in production
 
@@ -8,7 +8,8 @@
 
 ## How to Read This Document
 
-- **Stages** go in order (1 → 2 → 3 → 4 → 5). Complete one before starting the next.
+- **Stage 0** = launch readiness (operational, not code). Must complete before feature work.
+- **Stages 1-5** go in order. Complete one before starting the next.
 - Each stage has **tickets** with IDs (e.g. `S1-01`). Work items within a stage can be done in any order unless noted.
 - **Effort** = S (1 PR, ~50 LOC), M (2-3 PRs, ~150 LOC), L (4-6 PRs, ~300+ LOC), XL (7+ PRs)
 - **Status**: `[ ]` = not started, `[~]` = in progress, `[x]` = done, `[-]` = cut/deferred
@@ -43,6 +44,126 @@ Before planning what to build, here's what **already works in production**:
 - `is_seasonal` (boolean) — exists in DB and API, no calendar UI
 - `discount_price` — exists, no promo UI
 - `is_featured` — exists, no featured section on homepage
+
+---
+
+## Stage 0 — Launch Readiness (Pre-Revenue)
+
+> **Goal:** Everything needed to accept the FIRST real order. No features — just operational readiness.
+> **Timeline:** 1-2 weeks
+> **Theme:** "We can take real money and deliver real products."
+> **Added:** 2026-03-07 (post-audit session)
+
+### S0-L01: Stripe Live Keys
+**Why:** Currently running TEST keys — no real payments possible.
+**What:**
+- Complete Stripe onboarding (identity, bank account, business description)
+- Get `pk_live_*` + `sk_live_*` keys
+- Deploy to production `.env` (backend + frontend)
+- Verify with €1 test purchase → refund
+**Effort:** S (config change, 0 LOC)
+**Status:** `[ ]`
+**Owner:** Panagiotis (Stripe account setup) + Agent (deploy keys)
+
+### S0-L02: First Producer Onboarding (Manual)
+**Why:** 0 real producers on platform. Need at least 1 with 3-5 products.
+**What:**
+- Call 1 trusted producer by phone
+- Sit together (or videocall): create account, upload docs, add 3-5 products
+- Verify: correct weights, prices, photos, descriptions
+- Record pain points: what confused the producer, what was hard to find
+**Effort:** S (0 LOC — operational task)
+**Status:** `[ ]`
+**Owner:** Panagiotis
+
+### S0-L03: First 10 Test Orders (Friends & Family)
+**Why:** Validate end-to-end flow with real humans. Real payments, real deliveries.
+**What:**
+- Send link to 10 friends/family
+- Ask them to buy something (COD or card)
+- Track: what confused them, where they dropped off, what they asked
+- Document findings for product improvements
+**Effort:** S (0 LOC — operational task)
+**Status:** `[ ]`
+**Owner:** Panagiotis
+
+### S0-L04: Shipping Model Decision
+**Why:** Who sends the package? Producer or Dixis? Not decided yet.
+**What:**
+- Decide model: Producer ships (recommended for start)
+- If producer ships: agree on process (producer goes to ACS/Speedex, pays, sends tracking number)
+- Document: how producer enters tracking, who pays courier, how Dixis collects difference
+- Track real shipping costs vs Dixis quoted costs (first 10-20 orders)
+**Effort:** S (0 LOC — operational decision)
+**Status:** `[ ]`
+**Owner:** Panagiotis (negotiate with producer)
+**Notes:**
+- Current rates are ~10-15% below real courier prices (worst case: €1-2 loss per shipment)
+- After 15-20 orders, recalibrate `rates.gr.json` with real data
+
+### S0-L05: Shipping Rate Calibration (Post-Data)
+**Why:** Current rates are theoretical estimates. Need real courier invoices to calibrate.
+**What:**
+- After 10-15 real shipments: collect actual courier receipts
+- Compare: Dixis quoted price vs actual courier cost per zone
+- Update `backend/config/shipping/rates.gr.json` with real numbers
+- Special attention: remote areas (GR_REMOTE surcharge may be too low at €3)
+**Effort:** S (1 PR, ~20 LOC — config update)
+**Status:** `[ ]` (blocked by S0-L03)
+**Dependencies:** S0-L03
+
+### S0-L06: Product Weight Verification
+**Why:** If `weight_per_unit` is wrong or missing (default=500g), shipping cost is wrong.
+**What:**
+- During S0-L02 (producer onboarding): verify every product has correct weight WITH packaging
+- Products without weight default to 500g — produces wrong shipping quotes
+- Ensure producer understands: "βάρος = με τη συσκευασία, σε γραμμάρια"
+**Effort:** S (0 LOC — part of onboarding)
+**Status:** `[ ]` (part of S0-L02)
+
+### S0-L07: Courier Partnership (Future)
+**Why:** Without a contract, you pay catalog prices. With contract (5-10 shipments/mo): negotiated rates.
+**What:**
+- After 20-30 orders: approach ACS or Speedex for a business contract
+- Compare rates with current `rates.gr.json`
+- Consider: courier API integration for auto-tracking
+**Effort:** M (0 LOC initially — business negotiation)
+**Status:** `[ ]` (blocked by S0-L03)
+**Dependencies:** S0-L03 (need order volume to negotiate)
+
+### S0-L08: IKE Formation + Stripe Company Account
+**Why:** Before turning on commission (12%), need legal entity + company Stripe.
+**What:**
+- Form Monoprosopi IKE (via e-YMS, €18 fee)
+- Get exact e-ΕΦΚΑ number from accountant (parallel insurance with salaried job)
+- Transfer Stripe to company account
+- Open company bank account
+- Switch commission flag ON
+**Effort:** L (0 LOC — legal/financial, multi-week)
+**Status:** `[ ]` (NOT blocking first orders — commission starts at 0%)
+**Owner:** Panagiotis + accountant
+**Notes:**
+- See `docs/IKE-FORMATION-CHECKLIST.md` for details
+- See `docs/MONTHLY-COSTS.md` for financial impact
+- First orders can run with commission=0% (no IKE needed yet)
+
+---
+
+### Stage 0 Status Summary
+
+| Ticket | What | Blocks first order? | LOC |
+|--------|------|---------------------|-----|
+| S0-L01 | Stripe live keys | ❌ (COD works) | 0 |
+| S0-L02 | First producer | ✅ YES | 0 |
+| S0-L03 | First 10 orders | ✅ YES | 0 |
+| S0-L04 | Shipping model | ⚠️ Before 1st shipment | 0 |
+| S0-L05 | Rate calibration | ❌ (after data) | ~20 |
+| S0-L06 | Weight check | ⚠️ During onboarding | 0 |
+| S0-L07 | Courier contract | ❌ (after volume) | 0 |
+| S0-L08 | IKE + Stripe company | ❌ (after validation) | 0 |
+
+> **Critical path:** S0-L02 (producer) → S0-L04 (shipping model) → S0-L03 (first orders) → S0-L05 (calibrate)
+> **Can start TODAY with COD only:** S0-L02 doesn't need Stripe live.
 
 ---
 
