@@ -147,6 +147,41 @@ Before planning what to build, here's what **already works in production**:
 - See `docs/MONTHLY-COSTS.md` for financial impact
 - First orders can run with commission=0% (no IKE needed yet)
 
+### S0-L09: Stripe Connect Migration (PSD2 Compliance)
+**Why:** Current flow collects ALL money into Dixis Stripe → manual payout to producers. Under PSD2, collecting money on behalf of third parties without a Payment Institution license is illegal. Stripe Connect solves this.
+**What:**
+- Migrate from simple Stripe account to **Stripe Connect Platform**
+- Each producer gets a **Connected Account** (Standard or Express)
+- Checkout creates **PaymentIntent with transfer_data** — Stripe auto-splits:
+  - Producer receives (100% - commission) directly to their connected Stripe
+  - Dixis receives commission (application_fee_amount)
+- Producer onboarding includes Stripe Connect onboarding (KYC by Stripe)
+- Settlement system becomes automatic (Stripe pays producers, not Dixis)
+- Existing manual settlement code remains as fallback/reporting
+**Effort:** L (4-5 PRs: backend Stripe Connect setup, checkout refactor, producer onboarding Stripe step, settlement integration, frontend updates)
+**Status:** `[ ]` (REQUIRED before commission flag ON)
+**Dependencies:** S0-L08 (need IKE before platform Stripe Connect)
+**Timeline:** Before turning on 12% commission
+**Notes:**
+- Trial orders (0% commission) can use current simple Stripe — grey area but de minimis
+- Stripe Connect types: Standard (producer manages own Stripe) vs Express (Dixis manages). Recommend **Express** for simpler producer UX
+- Stripe Connect fee: same as regular (~1.5% + €0.25) + 0.25% platform fee
+- This ALSO solves the shipping cost problem long-term: can include courier fees in the split
+
+### S0-L10: Shipping Model Maturity (Post-Validation)
+**Why:** Long-term, producers shouldn't manage shipping themselves. Reduces friction, prevents producer churn.
+**What:**
+- Phase A (now): Producer ships, Dixis reimburses via settlement
+- Phase B (20-50 orders): Dixis negotiates courier contract, courier picks up from producer
+- Phase C (50+ orders): Full integration — Dixis creates voucher, courier API auto-generates label
+- Each phase requires: courier contract, rate renegotiation, tracking integration
+**Effort:** M-L per phase (Phase A = 0 LOC, Phase B = business negotiation, Phase C = courier API integration ~300 LOC)
+**Status:** `[ ]` (Phase A = current default)
+**Dependencies:** S0-L03 (need order volume first)
+**Notes:**
+- Greek courier APIs: ACS has REST API, Speedex has API, ELTA Courier has SOAP API
+- Cost savings from contract: typically 20-40% vs catalog prices
+
 ---
 
 ### Stage 0 Status Summary
@@ -161,8 +196,11 @@ Before planning what to build, here's what **already works in production**:
 | S0-L06 | Weight check | ⚠️ During onboarding | 0 |
 | S0-L07 | Courier contract | ❌ (after volume) | 0 |
 | S0-L08 | IKE + Stripe company | ❌ (after validation) | 0 |
+| S0-L09 | **Stripe Connect (PSD2)** | ❌ (before commission ON) | ~400 |
+| S0-L10 | Shipping model maturity | ❌ (after validation) | 0→300 |
 
 > **Critical path:** S0-L02 (producer) → S0-L04 (shipping model) → S0-L03 (first orders) → S0-L05 (calibrate)
+> **Before commission ON:** S0-L08 (IKE) → S0-L09 (Stripe Connect) → commission flag ON
 > **Can start TODAY with COD only:** S0-L02 doesn't need Stripe live.
 
 ---
