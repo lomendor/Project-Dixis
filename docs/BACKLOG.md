@@ -147,26 +147,31 @@ Before planning what to build, here's what **already works in production**:
 - See `docs/MONTHLY-COSTS.md` for financial impact
 - First orders can run with commission=0% (no IKE needed yet)
 
-### S0-L09: Stripe Connect Migration (PSD2 Compliance)
-**Why:** Current flow collects ALL money into Dixis Stripe → manual payout to producers. Under PSD2, collecting money on behalf of third parties without a Payment Institution license is illegal. Stripe Connect solves this.
-**What:**
-- Migrate from simple Stripe account to **Stripe Connect Platform**
-- Each producer gets a **Connected Account** (Standard or Express)
-- Checkout creates **PaymentIntent with transfer_data** — Stripe auto-splits:
-  - Producer receives (100% - commission) directly to their connected Stripe
-  - Dixis receives commission (application_fee_amount)
-- Producer onboarding includes Stripe Connect onboarding (KYC by Stripe)
-- Settlement system becomes automatic (Stripe pays producers, not Dixis)
-- Existing manual settlement code remains as fallback/reporting
-**Effort:** L (4-5 PRs: backend Stripe Connect setup, checkout refactor, producer onboarding Stripe step, settlement integration, frontend updates)
+### S0-L09: Stripe Connect — Separate → Destination Charges (PSD2)
+**Why:** Current flow = "Separate Charges & Transfers" — Dixis collects ALL money, then transfers to producer. Under PSD2, Dixis appears as merchant/money collector = high regulatory risk. Must migrate to **Destination Charges** where payment flows to producer's connected account with `application_fee` for Dixis.
+**Current state (code audit 2026-03-08):**
+- Stripe Connect **already partially built**: Express account creation, transfer logic, webhook, feature flag
+- Flag `STRIPE_CONNECT_ENABLED=false` — transfers are skipped
+- Checkout uses Stripe Checkout Sessions (NOT PaymentIntent modal)
+- Refund with `reverse_transfer: true` already implemented
+**What needs to change:**
+- Checkout Session creation: add `payment_intent_data.transfer_data.destination` = producer's connected account
+- Add `payment_intent_data.application_fee_amount` = Dixis commission in cents
+- Multi-producer carts: split into **separate Checkout Sessions per producer** (Destination = 1 per PaymentIntent)
+- Statement descriptor: show producer name, not Dixis
+- Producer onboarding: add Stripe Connect Express KYC step (UI exists, needs wiring)
+- Settlement becomes mostly automatic (Stripe pays producer directly)
+**Effort:** M (3-4 PRs: checkout refactor is main work, rest is wiring)
 **Status:** `[ ]` (REQUIRED before commission flag ON)
 **Dependencies:** S0-L08 (need IKE before platform Stripe Connect)
 **Timeline:** Before turning on 12% commission
 **Notes:**
-- Trial orders (0% commission) can use current simple Stripe — grey area but de minimis
-- Stripe Connect types: Standard (producer manages own Stripe) vs Express (Dixis manages). Recommend **Express** for simpler producer UX
-- Stripe Connect fee: same as regular (~1.5% + €0.25) + 0.25% platform fee
-- This ALSO solves the shipping cost problem long-term: can include courier fees in the split
+- Why Destination over Direct: Direct Charges = cleanest PSD2, but customer sees producer as merchant (may confuse). Destination = good PSD2 + platform controls experience
+- Why NOT Separate (current): Dixis looks like merchant/collector = highest PSD2 risk
+- Multi-producer trade-off: customer sees 2 charges for 2-producer cart. Acceptable — most orders single-producer
+- Stripe Connect Express already chosen (correct for Dixis)
+- Stripe Connect fee: same as regular (~1.5% + €0.25) + ~0.25% platform fee
+- **Accountant must confirm:** invoicing model (producer ΑΛΠ to customer, Dixis ΤΠΥ to producer)
 
 ### S0-L10: Shipping Model Maturity (Post-Validation)
 **Why:** Long-term, producers shouldn't manage shipping themselves. Reduces friction, prevents producer churn.
