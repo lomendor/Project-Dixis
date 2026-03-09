@@ -1,11 +1,55 @@
 # OPS STATE
 
-**Last Updated**: 2026-02-21 (MONITORING-CLEANUP)
+**Last Updated**: 2026-03-09 (B2B-WHOLESALE-SYSTEM)
 
 > **Archive Policy**: Keep last ~10 passes (~2 days). Older entries auto-archived to `STATE-ARCHIVE/`.
-> **Current size**: ~45 lines (target ≤350). ✅ Under limit.
+> **Current size**: ~80 lines (target ≤350). ✅ Under limit.
 >
 > **Key Docs**: [DEPLOY SOP](DEPLOY.md) | [STATE Archive](STATE-ARCHIVE/)
+
+---
+
+## 2026-03-09 — B2B-WHOLESALE-SYSTEM: Full-Stack Wholesale Buyer System
+
+**Status**: ✅ DONE (merged + deployed)
+
+**What was done**:
+- **Business role**: New `business` user role, `businesses` table with admin approval workflow (pending → approved → rejected)
+- **Subscription**: Stripe Checkout Sessions (€120/yr, one-time annual), `subscriptions` table, SubscriptionService with active check
+- **Commission wiring**: B2B subscribers get 0% commission, non-subscribers 7%. Channel auto-detected from user role
+- **B2B products**: `is_b2b_only` flag on products, "Χονδρική" badge in storefront, filtered for business users
+- **Frontend**: Business dashboard + subscription page, admin businesses CRUD page, AuthGuard + useAuth support for business role
+- **Backend**: AdminBusinessController, SubscriptionController, Business model, 5 migrations
+- **Stats**: 9 commits, 40 files, ~1,330 LOC across 8 logical PRs (squash-merged as 1)
+
+**PR**: #3277 (merged 2026-03-09)
+**Production**: healthz 200 OK, /business/* pages 200, subscription API 401 (auth required), 5 migrations applied
+
+---
+
+## 2026-03-04 — SEO + SKELETON + WISHLIST
+
+**Status**: ✅ DONE (merged + deployed)
+
+**What was done**:
+- SEO: meta title shortened, JSON-LD enriched, Contact/FAQ metadata
+- Skeleton loaders for 5 pages
+- S1-04 Wishlist: heart toggle, favorites page, nav links
+- B2B research doc
+
+**PR**: #3272 (merged 2026-03-04)
+
+---
+
+## 2026-03-02 — ANALYTICS-UMAMI-01 + FIX-CART-LEAK-01
+
+**Status**: ✅ DONE (merged + deployed)
+
+**What was done**:
+- Self-hosted Umami v3.0.3 analytics on VPS. Cookieless, GDPR-compliant. First-party proxy `/u/*`
+- Cart cross-user leakage fix. `clearCartStorage()` on login/logout
+
+**PRs**: #3269, #3268 (deployed 2026-03-02)
 
 ---
 

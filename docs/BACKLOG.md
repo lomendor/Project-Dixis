@@ -1,6 +1,6 @@
 # Dixis — Master Backlog & Roadmap
 
-**Last Updated:** 2026-03-07
+**Last Updated:** 2026-03-09
 **Source PRD:** `PRD Dixis Teliko (2).md` (owner's original vision document)
 **Current State:** Functional MVP+ in production
 
@@ -37,6 +37,7 @@ Before planning what to build, here's what **already works in production**:
 | In-App Notifications | Bell icon, unread count, mark-as-read | ✅ |
 | Tax Calculation | VAT per order | ✅ |
 | Tracking | Public order tracking by token, shipment tracking | ✅ |
+| B2B Wholesale | Business registration + admin approval, subscription (€120/yr), commission wiring (0%/7%) | ✅ |
 
 **Database fields that exist but are not fully used in the UI:**
 - `is_organic` (boolean) — exists in DB and API, partially shown
@@ -465,24 +466,24 @@ Before planning what to build, here's what **already works in production**:
 > **Timeline:** 4-8 weeks
 > **Theme:** "Dixis is not just B2C — it's the wholesale platform for Greek food."
 
-### S5-01: B2B Registration
+### S5-01: B2B Registration ✅
 **Why:** Restaurants, hotels, caterers want direct access to producers. Recurring revenue.
 **What:**
 - Business registration form: company name, VAT (AFM), tax office (DOY), business type
-- Admin verification of business documents
-- Business profile with delivery points
+- Admin verification of business documents (approve/reject workflow)
+- Business dashboard with pending-approval waiting screen
 **Effort:** M (2-3 PRs)
-**Status:** `[ ]`
+**Status:** `[x]` — PR #3277, deployed 2026-03-09
 
-### S5-02: Subscription Plans
-**Why:** Recurring revenue: Basic (€80-120/yr), Pro (€200-300/yr), Premium (€500-1000/yr).
+### S5-02: Subscription Plans ✅
+**Why:** Recurring revenue. Simplified to single tier: €120/yr.
 **What:**
-- 3 subscription tiers with different commission rates
-- Stripe subscription billing (monthly/annual)
-- Subscription management page
-- Auto-renewal and cancellation flow
-**Effort:** L (4-5 PRs)
-**Status:** `[ ]`
+- Single subscription tier (€120/yr annual via Stripe Checkout)
+- 0% commission for subscribers, 7% for non-subscribers
+- Subscription page in business dashboard
+- Admin-configurable price via DixisSetting
+**Effort:** L (8 PRs squash-merged as 1)
+**Status:** `[x]` — PR #3277, deployed 2026-03-09
 
 ### S5-03: Bulk Orders & Recurring Orders
 **Why:** B2B customers order in volume and on schedule.
@@ -582,8 +583,8 @@ Before planning what to build, here's what **already works in production**:
 | S4-02 | Adopt a Tree | Critical* | XL | 4 |
 | S4-03 | Pre-Order Campaigns | High | L | 4 |
 | S4-04 | Limited Edition | Medium | S | 4 |
-| S5-01 | B2B Registration | High | M | 5 |
-| S5-02 | Subscription Plans | High | L | 5 |
+| S5-01 | B2B Registration ✅ | High | M | 5 |
+| S5-02 | Subscription Plans ✅ | High | L | 5 |
 | S5-03 | Bulk Orders | Medium | L | 5 |
 | S5-04 | B2B Analytics | Medium | M | 5 |
 
