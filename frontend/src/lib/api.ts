@@ -1388,6 +1388,19 @@ class ApiClient {
   async stripeConnectRefreshOnboarding(): Promise<{ onboarding_url: string }> {
     return this.request('producer/stripe/onboard/refresh');
   }
+
+  // B2B PIVOT: Subscription endpoints
+  async getSubscriptionStatus(): Promise<{
+    has_active_subscription: boolean;
+    price_cents: number;
+    subscription?: { id: number; status: string; starts_at: string; expires_at: string };
+  }> {
+    return this.request('subscription/status');
+  }
+
+  async createSubscriptionCheckout(): Promise<{ checkout_url: string; subscription_id: number }> {
+    return this.request('subscription/checkout', { method: 'POST' });
+  }
 }
 
 export const apiClient = new ApiClient();
