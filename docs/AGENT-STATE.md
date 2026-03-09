@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-04 (SEO + Skeleton Loaders + Wishlist/Favorites)
+**Updated**: 2026-03-09 (B2B Wholesale System deployed)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -30,6 +30,7 @@
 - **Commission System**: Configurable rules (B2C/B2B, per-producer, per-category, amount tiers), wired to checkout, admin CRUD + preview calculator, producer sees breakdown on orders, feature flag toggle in admin settings. **Flag OFF in production** — ready to activate. ✅
 - **Payout Infrastructure**: IBAN field on producer profile, monthly settlement generation command (14-day hold, €20 minimum), admin settlement dashboard (view/pay/cancel), producer payout history page, CSV export for bank transfers. **Ready to use when commission flag is activated.** ✅
 - **Categories**: 10 definitive locker-compatible categories, unified backend + frontend, Wolt-style cards with custom 3D icons ✅
+- **B2B Wholesale**: Business role + registration (admin approval required), annual subscription (Stripe Checkout, €120/yr), commission wiring (0% subscriber / 7% non-subscriber), B2B-only product visibility, business dashboard + subscription page, admin businesses CRUD. **Deployed, ready for first business signup.** ✅
 
 ### What is BROKEN or MISSING
 - **Producer Registration**: ✅ FIXED (PRODUCER-ONBOARD-01)
@@ -43,7 +44,7 @@
 
 ## WIP (max 1)
 
-**NONE** — S1-04 Wishlist complete, ready for next task.
+**None** — B2B system deployed. Ready for next task. CI is GREEN.
 
 ---
 
@@ -59,20 +60,16 @@
 **Business context (reviewed 2026-02-21):**
 - Capital: ~€5K (budget very tight, old plans of €40K/€81.5K are OUTDATED)
 - 3 producers already interested (trial, 0% commission initially)
-- Strategy: B2C first → B2B after validation. No B2B features needed yet
+- Strategy: B2C live + B2B infrastructure deployed. Onboard producers → validate → activate
 - Fixed costs: ~€150/month (accountant only). Marketing starts at €0 (organic)
-- Realistic Year 1: 10-15 producers, €2.5-4K commission revenue
 - First target: €150/mo commission (covers accountant) = ~€1,500/mo GMV at 10%
 - Action: Onboard 3 producers → first 20 orders → measure → then decide spend
-- Full analysis: `docs/BUSINESS-REVIEW-2026-02.md`
 
-**Feature backlog (active):** `docs/BACKLOG.md` — building value while waiting for producers.
-**Next from backlog:** S1-04 (Wishlist — in progress), S2-05 (Mobile audit), S1-03 (Q&A).
-**Completed from backlog:** S1-01 ✅ Cultivation Type, S1-02 ✅ Reviews & Ratings, S3-01 ✅ Cost Transparency, S3-04 ✅ SEO Foundation, S2-06 ✅ Skeleton Loaders, HOUSEKEEPING ✅ SEO + TODO cleanup + a11y, HARDENING-5PR ✅ Security + dead code + resilience.
+**Feature backlog (active):** `docs/BACKLOG.md`
+**Next from backlog:** S2-05 (Mobile audit), S1-03 (Q&A), S5-03 (Bulk orders).
+**Completed:** S1-01 ✅ S1-02 ✅ S1-04 ✅ S3-01 ✅ S3-04 ✅ S2-06 ✅ S5-01 ✅ S5-02 ✅ + housekeeping + hardening.
 
-**User-reported issues (for later):**
-- Product renaming (improve Greek product names)
-- ~~Photo mismatch~~ ✅ FIXED (PR #3056, migration syncs image_url from product_images)
+**User-reported issues:** Product renaming (improve Greek product names)
 
 ---
 
@@ -90,6 +87,7 @@
 
 ## Recently Done (last 10)
 
+- **B2B-WHOLESALE-SYSTEM** — Full-stack B2B wholesale buyer system: business role + model, admin approval workflow, subscription infrastructure (Stripe Checkout, €120/yr), commission wiring (0% subscriber / 7% non-subscriber), B2B product visibility (is_b2b_only + "Χονδρική" badge), business dashboard + subscription page, admin businesses CRUD. 9 commits, 40 files, ~1,330 LOC. (PR #3277, deployed 2026-03-09) ✅
 - **SEO + SKELETON + WISHLIST** — SEO: meta title shortened, JSON-LD enriched, Contact/FAQ metadata. Skeleton loaders for 5 pages. S1-04 Wishlist: heart toggle, favorites page, nav links. B2B research doc. (PR #3272, 2026-03-04) ✅
 - **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS. Cookieless, GDPR-compliant. First-party proxy `/u/*`. (PR #3269, deployed 2026-03-02) ✅
 - **FIX-CART-LEAK-01** — Cart cross-user leakage fix. `clearCartStorage()` on login/logout. (PR #3268, deployed 2026-03-02) ✅
@@ -99,17 +97,7 @@
 - **ONBOARDING-V2** — Producer onboarding: doc uploads (TAXIS, EFET, HACCP), product categories, bank details (IBAN), conditional fields (honey→beekeeper, cosmetics→CPNP). E2E smoke tests. (PRs #3095 + #3103, deployed 2026-02-22) ✅
 - **MIDDLEWARE-REDIRECT-FIX** — Auth redirect in standalone mode behind nginx was sending users to localhost:3000. Fixed via Host header override. (PRs #3101-#3102, deployed 2026-02-22) ✅
 - **EU-MARKETPLACE-READINESS** — EU 1169/2011 allergens/ingredients, IBAN field, shipping threshold fix. (PR #3097, deployed 2026-02-22) ✅
-- **EU-FOOD-COMPLIANCE** — EU 1169/2011 allergens (14 mandatory) + ingredients on products. Producer EFET food license number + agreement acceptance fields. (PR #3090, deployed 2026-02-22) ✅
-- **BUSINESS-POLICIES** — About page claims fixed (no more "χαμηλότερη"), 5 policy docs created (Producer Agreement, Return/Refund, Content Guidelines, Delivery Confirmation, Post-Payout Refund), 3 financial safeguards added. Financial plan reviewed — old plans outdated, realistic model agreed. (PR #3087, deployed 2026-02-21) ✅
-- **TECH-DEBT-CLEANUP** — Deploy workflow fix (`cp -r i18n` → `cp i18n.ts`), 36 stale issues closed (50→14), 100+ stale branch refs pruned, STATE.md archived (1024→48 lines). E2E stabilized: `networkidle` → `domcontentloaded`, `goto('/')` ERR_ABORTED fixed in payment tests, auth hydration timing fix. (PRs #3075-#3080, merged 2026-02-21) ✅
-- **MONITORING-CLEANUP** — Fixed false alarm epidemic: production-smoke 307 redirect bug, uptime-ping dedup, disabled 10 redundant legacy cron workflows, closed 14 stale auto-generated P0/P1 issues. (PR #3075, merged 2026-02-21) ✅
-- **IMAGE-SYNC-FIX** — Fixed photo mismatch bug: 7/17 products showed different image on card vs detail. Migration syncs `products.image_url` from `product_images`. (PR #3056, deployed 2026-02-19) ✅
-- **CATEGORY-UNIFY-10** — Unified 14 backend + 9 frontend categories into exactly 10 definitive locker-compatible categories. (PRs #3052-#3054, deployed 2026-02-19) ✅
-- **UI-REDESIGN-10PHASES** — Premium marketplace visual overhaul (17 PRs): cream backgrounds, gold accents, Wolt-style category cards, custom 3D icons. (PRs #3038-#3050, deployed 2026-02-17–19) ✅
-- **HARDENING-5PR** — Production hardening: Viva dead code removed, dead stubs deleted, robots.txt expanded, cart TTL. (PRs #2971-#2977, deployed 2026-02-17) ✅
-- **CI-E2E-GREEN** — Fixed E2E from 100% fail → 100% pass (96 tests). SSR fetch fallback, glob pattern fix, checkout skip in CI. (PRs #2962-#2963, deployed 2026-02-17) ✅
-- **S3-01: COST-TRANSPARENCY** — Green trust badge on product detail: "88% στον παραγωγό / 12% πλατφόρμα". (PR #2960, deployed 2026-02-16) ✅
-- **PAYOUT-INFRASTRUCTURE** — Complete payout: IBAN field, settlement generation, admin dashboard, producer history, CSV export. (PRs #2952-#2958, deployed 2026-02-16) ✅
+_(Older entries archived — see `docs/OPS/STATE.md`)_
 
 ---
 
@@ -163,4 +151,4 @@
 
 ---
 
-_Lines: ~130 | Target: ≤150_
+_Lines: ~154 | Target: ≤150_
