@@ -487,6 +487,14 @@ Route::prefix('v1')->group(function () {
 
 });
 
+// B2B PIVOT: Subscription endpoints (approved businesses only)
+Route::middleware('auth:sanctum')->prefix('v1/subscription')->group(function () {
+    Route::get('status', [App\Http\Controllers\Api\SubscriptionController::class, 'status'])
+        ->middleware('throttle:30,1');
+    Route::post('checkout', [App\Http\Controllers\Api\SubscriptionController::class, 'checkout'])
+        ->middleware('throttle:5,1');
+});
+
 // Pass 51: Card payment checkout (authenticated)
 Route::middleware('auth:sanctum')->prefix('v1/public/payments')->group(function () {
     Route::post('checkout', [App\Http\Controllers\Api\V1\PaymentCheckoutController::class, 'createCheckoutSession'])
