@@ -37,6 +37,19 @@ class ProductController extends Controller
         $query = Product::query()
             ->with('producer');
 
+        // B2B PIVOT: Hide wholesale-only products from non-business users.
+        // Approved business users, admins, and producers see all products.
+        // Consumers and guests only see B2C products.
+        $user = $request->user();
+        $canSeeB2B = $user && (
+            ($user->role === 'business' && $user->isApprovedBusiness()) ||
+            $user->role === 'admin' ||
+            $user->role === 'producer'
+        );
+        if (! $canSeeB2B) {
+            $query->where('is_b2b_only', false);
+        }
+
         // Filter by active status (default: only active products)
         $isActive = $request->get('is_active', true);
         if ($isActive !== null) {

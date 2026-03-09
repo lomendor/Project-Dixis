@@ -38,6 +38,7 @@ class ProductResource extends JsonResource
             'image_url' => $this->image_url,
             'status' => $this->status,
             'is_active' => $this->is_active,
+            'is_b2b_only' => (bool) $this->is_b2b_only,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'producer' => $this->when($this->relationLoaded('producer') && $this->producer, [
