@@ -351,10 +351,17 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'consumer' | 'producer' | 'admin';
+  role: 'consumer' | 'producer' | 'admin' | 'business';
   address?: string;
   created_at: string;
   updated_at: string;
+  // B2B PIVOT: present only for role='business'
+  business_status?: 'pending' | 'active' | 'inactive' | 'rejected';
+  business?: {
+    company_name: string;
+    business_type: string;
+    status: string;
+  };
 }
 
 export interface AuthResponse {

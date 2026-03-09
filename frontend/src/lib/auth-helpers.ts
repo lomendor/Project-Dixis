@@ -5,7 +5,7 @@
 
 import { User, ProducerProfile } from './models';
 
-export type UserRole = 'consumer' | 'producer' | 'admin';
+export type UserRole = 'consumer' | 'producer' | 'admin' | 'business';
 
 /**
  * Check if user has the specified role or higher privileges
@@ -15,14 +15,23 @@ export function hasRole(user: User | null, requiredRole: UserRole): boolean {
 
   const roleHierarchy: Record<UserRole, number> = {
     consumer: 1,
-    producer: 2,
-    admin: 3,
+    business: 2,  // B2B PIVOT: business buyers
+    producer: 3,
+    admin: 4,
   };
 
   const userRoleLevel = roleHierarchy[user.role] || 0;
   const requiredLevel = roleHierarchy[requiredRole] || 0;
 
   return userRoleLevel >= requiredLevel;
+}
+
+/**
+ * B2B PIVOT: Check if user is an approved business buyer.
+ */
+export function isApprovedBusiness(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'business' && user.business_status === 'active';
 }
 
 /**
@@ -94,6 +103,15 @@ export function getRedirectPath(
     } else {
       return '/producer/onboarding';
     }
+  }
+
+  // B2B PIVOT: Business buyer role
+  if (user.role === 'business') {
+    if (user.business_status === 'active') {
+      return intendedPath || '/';
+    }
+    // Pending or rejected — show homepage with info
+    return '/';
   }
 
   // Consumer role

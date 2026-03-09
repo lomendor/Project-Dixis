@@ -20,12 +20,20 @@ interface AuthContextType {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer' | 'admin';
+    role: 'consumer' | 'producer' | 'business';
+    // B2B PIVOT: business registration fields
+    company_name?: string;
+    business_type?: string;
+    tax_id?: string;
+    tax_office?: string;
+    phone?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isProducer: boolean;
   isAdmin: boolean;
+  isBusiness: boolean;
+  isApprovedBusiness: boolean;
   setIntendedDestination?: (destination: string) => void;
   getIntendedDestination?: () => string | null;
   clearIntendedDestination?: () => void;
@@ -165,7 +173,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer' | 'admin';
+    role: 'consumer' | 'producer' | 'business';
+    company_name?: string;
+    business_type?: string;
+    tax_id?: string;
+    tax_office?: string;
+    phone?: string;
   }) => {
     try {
       setRegisterLoading(true);
@@ -173,8 +186,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response.user);
 
       // Greek success message based on role
-      const accountType = data.role === 'producer' ? 'Παραγωγού' : 'Καταναλωτή';
-      showToast('success', `Καλώς ήρθατε στο Dixis, ${response.user.name}! Ο λογαριασμός ${accountType} δημιουργήθηκε με επιτυχία.`);
+      const accountTypeMap: Record<string, string> = {
+        producer: 'Παραγωγού',
+        business: 'Επιχείρησης',
+        consumer: 'Καταναλωτή',
+      };
+      const accountType = accountTypeMap[data.role] || 'Καταναλωτή';
+      const extraMsg = data.role === 'business' ? ' Η αίτησή σας θα εγκριθεί σύντομα.' : '';
+      showToast('success', `Καλώς ήρθατε στο Dixis, ${response.user.name}! Ο λογαριασμός ${accountType} δημιουργήθηκε με επιτυχία.${extraMsg}`);
     } catch (error: any) {
       // Greek error messages based on error type
       let message = 'Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.';
@@ -258,6 +277,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated,
     isProducer: user?.role === 'producer',
     isAdmin: user?.role === 'admin',
+    isBusiness: user?.role === 'business',
+    isApprovedBusiness: user?.role === 'business' && user?.business_status === 'active',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
