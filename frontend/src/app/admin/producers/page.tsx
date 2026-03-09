@@ -7,6 +7,9 @@ import { useToast } from '@/contexts/ToastContext'
 import AdminLoading from '@/app/admin/components/AdminLoading'
 import AdminEmptyState from '@/app/admin/components/AdminEmptyState'
 import { getCategoryBySlug } from '@/data/categories'
+import ProducerEditForm from './ProducerEditForm'
+import ProducerDocUpload from './ProducerDocUpload'
+import CreateProducerForm from './CreateProducerForm'
 
 interface Producer {
   id: string
@@ -44,6 +47,7 @@ interface Producer {
   stripeConnectStatus: string | null
   stripeChargesEnabled: boolean
   stripePayoutsEnabled: boolean
+  imageUrl: string | null
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -95,6 +99,8 @@ function AdminProducersContent() {
   const [loading, setLoading] = useState(true)
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
   // Rejection modal state
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
@@ -207,13 +213,32 @@ function AdminProducersContent() {
           <h1 className="text-2xl font-bold text-gray-900">Παραγωγοί</h1>
           <p className="text-sm text-gray-500 mt-1">Διαχείριση αιτήσεων και εγκρίσεων παραγωγών</p>
         </div>
-        {pendingCount > 0 && statusFilter === 'all' && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            {pendingCount} σε αναμονή
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {pendingCount > 0 && statusFilter === 'all' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-sm font-medium">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              {pendingCount} σε αναμονή
+            </span>
+          )}
+          <button
+            onClick={() => setShowCreateForm(v => !v)}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            {showCreateForm ? 'Ακύρωση' : '+ Νέος Παραγωγός'}
+          </button>
+        </div>
       </div>
+
+      {/* Create producer form */}
+      {showCreateForm && (
+        <CreateProducerForm
+          onCreated={() => {
+            setShowCreateForm(false)
+            loadProducers()
+          }}
+          onCancel={() => setShowCreateForm(false)}
+        />
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
@@ -308,7 +333,30 @@ function AdminProducersContent() {
                   {expandedId === p.id && (
                     <tr className="bg-blue-50/50" data-testid={`producer-detail-${p.id}`}>
                       <td colSpan={4} className="px-4 py-4">
+                        {/* Edit mode */}
+                        {editingId === p.id ? (
+                          <ProducerEditForm
+                            producer={p}
+                            onSaved={(updated) => {
+                              setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, ...updated } : pr
+                              ))
+                              setEditingId(null)
+                            }}
+                            onCancel={() => setEditingId(null)}
+                          />
+                        ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                          {/* Edit button */}
+                          <div className="sm:col-span-2 flex justify-end mb-2">
+                            <button
+                              onClick={() => setEditingId(p.id)}
+                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+                              data-testid={`edit-btn-${p.id}`}
+                            >
+                              ✏️ Επεξεργασία
+                            </button>
+                          </div>
                           <Detail label="Email" value={p.email} />
                           <Detail label="Τηλέφωνο" value={p.phone} />
                           <Detail label="Πόλη" value={p.city} />
@@ -339,12 +387,49 @@ function AdminProducersContent() {
                               </div>
                             </div>
                           )}
-                          {/* Documents */}
+                          {/* Producer image */}
+                          <div className="sm:col-span-2 mt-2 space-y-1">
+                            <p className="text-gray-500 font-medium">Φωτογραφία παραγωγού:</p>
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="Εικόνα"
+                              fieldName="producer_image"
+                              currentUrl={p.imageUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, imageUrl: url } : pr
+                              ))}
+                            />
+                          </div>
+                          {/* Documents with upload */}
                           <div className="sm:col-span-2 mt-2 space-y-1">
                             <p className="text-gray-500 font-medium">Έγγραφα:</p>
-                            <DocLink label="TAXIS (ΑΦΜ+ΚΑΔ)" url={p.taxRegistrationDocUrl} />
-                            <DocLink label="ΕΦΕΤ / NotifyBusiness" url={p.efetNotificationDocUrl} />
-                            <DocLink label="HACCP" url={p.haccpDeclarationDocUrl} />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="TAXIS (ΑΦΜ+ΚΑΔ)"
+                              fieldName="tax_registration_doc"
+                              currentUrl={p.taxRegistrationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, taxRegistrationDocUrl: url } : pr
+                              ))}
+                            />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="ΕΦΕΤ / NotifyBusiness"
+                              fieldName="efet_notification_doc"
+                              currentUrl={p.efetNotificationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, efetNotificationDocUrl: url } : pr
+                              ))}
+                            />
+                            <ProducerDocUpload
+                              producerId={p.id}
+                              label="HACCP"
+                              fieldName="haccp_declaration_doc"
+                              currentUrl={p.haccpDeclarationDocUrl}
+                              onUploaded={(url) => setProducers(prev => prev.map(pr =>
+                                pr.id === p.id ? { ...pr, haccpDeclarationDocUrl: url } : pr
+                              ))}
+                            />
                             <div className="text-xs">
                               <span className="text-gray-500">HACCP δήλωση: </span>
                               <span className={p.haccpDeclarationAccepted ? 'text-green-700' : 'text-gray-400'}>
@@ -419,6 +504,7 @@ function AdminProducersContent() {
                             </div>
                           )}
                         </div>
+                        )}
                       </td>
                     </tr>
                   )}

@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderShippingLine;
 use App\Models\Producer;
+use App\Models\Business;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\ShippingChangedException;
@@ -492,6 +494,24 @@ class CheckoutService
     }
 
     /**
+     * B2B PIVOT: Detect order channel based on buyer's role.
+     * Business buyers → 'B2B', everyone else → 'B2C'.
+     */
+    private function detectChannel(Order $order): string
+    {
+        if (! $order->user_id) {
+            return 'B2C'; // Guest checkout = consumer
+        }
+
+        $user = User::find($order->user_id);
+        if ($user && $user->role === 'business') {
+            return 'B2B';
+        }
+
+        return 'B2C';
+    }
+
+    /**
      * Calculate and store commission for an order.
      * Pass COMM-ENGINE-WIRE-01: Commission record creation after order.
      *
@@ -507,11 +527,21 @@ class CheckoutService
     {
         // Set commission context fields on the order (total_cents + channel are in fillable)
         $order->total_cents = (int) round((float) $order->total * 100);
-        $order->channel = 'B2C';
+
+        // B2B PIVOT: Detect channel from buyer role.
+        $order->channel = $this->detectChannel($order);
         $order->save();
 
+        // B2B PIVOT: Subscribers pay 0% commission — skip calculation entirely.
+        if ($order->channel === 'B2B' && $order->user_id) {
+            $business = Business::where('user_id', $order->user_id)->first();
+            if ($business && app(SubscriptionService::class)->hasActiveSubscription($business)) {
+                Log::info('B2B subscriber — 0% commission', ['order_id' => $order->id]);
+                return null;
+            }
+        }
+
         // Set producer_id as transient attribute AFTER save (not a DB column on orders)
-        // CommissionService reads it via data_get($order, 'producer_id')
         $order->setAttribute('producer_id', $producerId);
 
         // Calculate commission (returns 0 when flag is OFF)

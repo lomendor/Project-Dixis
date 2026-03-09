@@ -47,6 +47,8 @@ class UpdateProductRequest extends FormRequest
             'images.*' => 'string|max:500',
             'status' => 'nullable|string|in:available,unavailable,discontinued',
             'is_active' => 'nullable|boolean',
+            // B2B PIVOT: wholesale-only visibility flag
+            'is_b2b_only' => 'nullable|boolean',
             'producer_id' => 'nullable|exists:producers,id',
         ];
     }

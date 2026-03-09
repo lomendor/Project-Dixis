@@ -12,8 +12,8 @@ import { useToast } from '@/contexts/ToastContext'
  */
 interface Props {
   item: FavoriteItem
-  /** 'sm' for cards (default), 'lg' for product detail */
-  size?: 'sm' | 'lg'
+  /** 'xs' for compact cards, 'sm' for cards (default), 'lg' for product detail */
+  size?: 'xs' | 'sm' | 'lg'
   className?: string
 }
 
@@ -33,11 +33,8 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
     }
   }
 
-  const sizeClasses = size === 'lg'
-    ? 'w-10 h-10'
-    : 'w-8 h-8'
-
-  const iconSize = size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+  const btnPx = size === 'lg' ? 40 : size === 'xs' ? 28 : 32
+  const iconPx = size === 'lg' ? 24 : size === 'xs' ? 16 : 20
 
   return (
     <button
@@ -50,16 +47,25 @@ export default function FavoriteButton({ item, size = 'sm', className = '' }: Pr
         inline-flex items-center justify-center rounded-full
         transition-all duration-200
         ${isFav
-          ? 'bg-red-50 text-red-500 hover:bg-red-100'
-          : 'bg-white/80 text-neutral-400 hover:text-red-400 hover:bg-white'
+          ? 'text-red-500 hover:text-red-600 hover:scale-110'
+          : 'text-white hover:text-red-400 hover:scale-110'
         }
-        ${sizeClasses}
-        shadow-sm backdrop-blur-sm
         ${className}
       `}
+      style={{
+        width: btnPx,
+        height: btnPx,
+        padding: 0,
+        minHeight: 0,
+        border: 'none',
+        background: 'none',
+        filter: isFav ? 'none' : 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))',
+      }}
     >
       <svg
-        className={`${iconSize} transition-transform ${isFav ? 'scale-110' : ''}`}
+        width={iconPx}
+        height={iconPx}
+        className="transition-transform"
         viewBox="0 0 24 24"
         fill={isFav ? 'currentColor' : 'none'}
         stroke="currentColor"

@@ -48,6 +48,8 @@ class StoreProductRequest extends FormRequest
             'images.*' => 'string|max:500',
             'status' => 'nullable|string|in:available,unavailable,discontinued',
             'is_active' => 'nullable|boolean',
+            // B2B PIVOT: wholesale-only visibility flag
+            'is_b2b_only' => 'nullable|boolean',
             // producer_id: required for admin (can assign to any producer)
             // optional for producer (auto-set server-side to auth user's producer_id)
             'producer_id' => $user && $user->role === 'admin'

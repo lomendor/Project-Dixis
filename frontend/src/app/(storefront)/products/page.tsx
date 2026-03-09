@@ -28,6 +28,7 @@ type ApiItem = {
   reviewsAvgRating?: number | null;
   discountPriceCents?: number | null;
   isSeasonal?: boolean;
+  isB2bOnly?: boolean;
 };
 
 /**
@@ -109,6 +110,7 @@ async function getData(
       reviewsAvgRating: p.reviews_avg_rating ?? null,
       discountPriceCents: p.discount_price ? Math.round(parseFloat(p.discount_price) * 100) : null,
       isSeasonal: !!p.is_seasonal,
+      isB2bOnly: !!p.is_b2b_only,
     }));
 
     return { items, total: items.length, isDemo: false, apiTotal };
@@ -207,8 +209,8 @@ export async function generateMetadata({
   const suffix = parts.length > 0 ? ` — ${parts.join(', ')}` : '';
 
   const title = hasFilters
-    ? `Προϊόντα${suffix} | Dixis`
-    : 'Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς | Dixis';
+    ? `Προϊόντα${suffix}`
+    : 'Αυθεντικά Ελληνικά Προϊόντα από Έλληνες παραγωγούς';
   const description = hasFilters
     ? `Ανακαλύψτε τοπικά ελληνικά προϊόντα${suffix} απευθείας από Έλληνες παραγωγούς.`
     : 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από Έλληνες παραγωγούς. Ελαιόλαδο, μέλι, βότανα και χειροποίητα προϊόντα — από τον παραγωγό στην πόρτα σας.';
@@ -382,6 +384,7 @@ export default async function Page({ searchParams }: PageProps) {
                 discountPriceCents={p.discountPriceCents}
                 isSeasonal={p.isSeasonal}
                 cultivationType={p.cultivationType}
+                isB2bOnly={p.isB2bOnly}
                 priority={index < 4}
               />
             ))}

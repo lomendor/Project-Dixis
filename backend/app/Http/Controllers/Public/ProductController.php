@@ -35,6 +35,18 @@ class ProductController extends Controller
         // Default to active products only
         $query->where('is_active', true);
 
+        // B2B PIVOT: Hide wholesale-only products from non-business users.
+        // Public endpoint — check auth optionally (guests see B2C only).
+        $user = $request->user();
+        $canSeeB2B = $user && (
+            ($user->role === 'business' && $user->isApprovedBusiness()) ||
+            $user->role === 'admin' ||
+            $user->role === 'producer'
+        );
+        if (! $canSeeB2B) {
+            $query->where('is_b2b_only', false);
+        }
+
         // Search filter with FTS ranking on PostgreSQL, ILIKE fallback otherwise
         if ($search) {
             if (DB::getDriverName() === 'pgsql') {
@@ -182,7 +194,7 @@ class ProductController extends Controller
      * STOREFRONT-LARAVEL-01: Accept both numeric ID and string slug
      * so the Next.js storefront can look up products by slug.
      */
-    public function show($id): JsonResponse
+    public function show(Request $request, $id): JsonResponse
     {
         $query = Product::with(['categories', 'images' => function ($query) {
             $query->orderBy('is_primary', 'desc')->orderBy('sort_order');
@@ -194,6 +206,17 @@ class ProductController extends Controller
                 $q->where('is_approved', true);
             }], 'rating')
             ->where('is_active', true);
+
+        // B2B PIVOT: Block direct access to B2B products for non-business users
+        $user = $request->user();
+        $canSeeB2B = $user && (
+            ($user->role === 'business' && $user->isApprovedBusiness()) ||
+            $user->role === 'admin' ||
+            $user->role === 'producer'
+        );
+        if (! $canSeeB2B) {
+            $query->where('is_b2b_only', false);
+        }
 
         // Validate ID format: must be positive integer or valid slug string
         if (is_numeric($id)) {

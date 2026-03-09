@@ -8,10 +8,12 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'consumer' | 'producer' | 'admin';
+  role: 'consumer' | 'producer' | 'admin' | 'business';
   email_verified_at?: string;
   created_at: string;
   updated_at: string;
+  // B2B PIVOT: present only for role='business'
+  business_status?: 'pending' | 'active' | 'inactive' | 'rejected';
 }
 
 // ProducerProfile model - matches Laravel producers table
@@ -81,6 +83,8 @@ export interface Product {
   cultivation_description?: string | null;
   discount_price?: number;
   is_seasonal: boolean;
+  // B2B PIVOT: wholesale-only visibility
+  is_b2b_only?: boolean;
   status: 'available' | 'unavailable' | 'seasonal';
   created_at: string;
   updated_at: string;

@@ -30,9 +30,12 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('admin-access', fn ($user) => $user->role === 'admin');
         Gate::define('producer-access', fn ($user) => $user->role === 'producer' || $user->role === 'admin');
         Gate::define('consumer-access', fn ($user) => $user->role === 'consumer' || $user->role === 'admin');
+        // B2B PIVOT: Business buyer access (approved businesses only)
+        Gate::define('business-access', fn ($user) => $user->isApprovedBusiness() || $user->role === 'admin');
 
         // Specific action gates
         Gate::define('create-products', fn ($user) => $user->role === 'producer' || $user->role === 'admin');
-        Gate::define('create-orders', fn ($user) => $user->role === 'consumer' || $user->role === 'admin');
+        // B2B PIVOT: Business users can also create orders (wholesale purchases)
+        Gate::define('create-orders', fn ($user) => in_array($user->role, ['consumer', 'business']) || $user->role === 'admin');
     }
 }

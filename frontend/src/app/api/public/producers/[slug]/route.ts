@@ -4,6 +4,14 @@ import { toStorefrontSlug } from '@/lib/category-map'
 
 export const dynamic = 'force-dynamic'
 
+/** Convert relative /storage/ paths to full URLs (defensive fallback) */
+function ensureFullUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  if (url.startsWith('/storage/')) return `https://dixis.gr${url}`
+  return url
+}
+
 /**
  * STOREFRONT-LARAVEL-01: Public Producer Detail API
  * Proxies to Laravel PublicProducerController@show instead of querying Prisma.
@@ -59,7 +67,7 @@ export async function GET(
       region: p.location || p.region || '',
       category: p.category || '',
       description: p.description,
-      image_url: p.image_url || null,
+      image_url: ensureFullUrl(p.image_url),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       products: products.map((prod: any) => {
         const categories = prod.categories || []

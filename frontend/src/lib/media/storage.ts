@@ -32,21 +32,32 @@ export async function putObjectFs(data: Buf, mime: string): Promise<PutResult>{
   const ext = extFromMime(mime);
   const folder = yyyymm();
   const key = `${hash}.${ext}`;
-  // Smart path detection: works in dev (repo root or frontend/), standalone mode, or production
-  const cwd = process.cwd();
-  let publicDir: string;
-  if (existsSync(join(cwd, 'public'))) {
-    // CWD has public/ — use it directly (standalone mode, or frontend/ cwd)
-    publicDir = join(cwd, 'public', 'uploads', folder);
-  } else if (existsSync(join(cwd, 'frontend', 'public'))) {
-    // Repo root — prefix with frontend/
-    publicDir = join(cwd, 'frontend', 'public', 'uploads', folder);
+
+  // FIX-UPLOAD-PERSIST-01: Write to persistent shared directory, NOT public/.
+  // Next.js `next start` only serves files from public/ that existed at build time.
+  // Files written to public/ after build are invisible AND get wiped on redeploy.
+  // In production, UPLOAD_DIR points to /var/www/dixis/shared/uploads (nginx serves directly).
+  // In dev, falls back to public/uploads (works because `next dev` serves live).
+  const uploadRoot = process.env.UPLOAD_DIR;
+  let uploadDir: string;
+
+  if (uploadRoot) {
+    // Production: use dedicated persistent directory (served by nginx)
+    uploadDir = join(uploadRoot, folder);
   } else {
-    // Fallback — try cwd/public anyway
-    publicDir = join(cwd, 'public', 'uploads', folder);
+    // Dev fallback: write to public/uploads (next dev serves these live)
+    const cwd = process.cwd();
+    if (existsSync(join(cwd, 'public'))) {
+      uploadDir = join(cwd, 'public', 'uploads', folder);
+    } else if (existsSync(join(cwd, 'frontend', 'public'))) {
+      uploadDir = join(cwd, 'frontend', 'public', 'uploads', folder);
+    } else {
+      uploadDir = join(cwd, 'public', 'uploads', folder);
+    }
   }
-  await mkdir(publicDir, { recursive: true });
-  await writeFile(join(publicDir, key), processed);
+
+  await mkdir(uploadDir, { recursive: true });
+  await writeFile(join(uploadDir, key), processed);
   return { url: `/uploads/${folder}/${key}`, key: `uploads/${folder}/${key}` };
 }
 

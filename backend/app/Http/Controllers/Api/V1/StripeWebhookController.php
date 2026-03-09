@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\OrderEmailService;
 use App\Services\Payment\StripeConnectService;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -95,6 +96,13 @@ class StripeWebhookController extends Controller
      */
     private function handleCheckoutSessionCompleted($session): void
     {
+        // B2B PIVOT: Handle subscription payments (metadata.type = 'b2b_subscription')
+        $type = $session->metadata->type ?? null;
+        if ($type === 'b2b_subscription') {
+            $this->handleSubscriptionPayment($session);
+            return;
+        }
+
         $orderId = $session->metadata->order_id ?? null;
         $checkoutSessionId = $session->metadata->checkout_session_id ?? null;
 
@@ -316,6 +324,32 @@ class StripeWebhookController extends Controller
                 'error' => $e->getMessage(),
             ]);
             // Don't fail the webhook - payment was successful
+        }
+    }
+
+    /**
+     * B2B PIVOT: Handle subscription payment via Stripe Checkout.
+     * IDEMPOTENT: SubscriptionService skips if already active.
+     */
+    private function handleSubscriptionPayment($session): void
+    {
+        $paymentIntentId = $session->payment_intent ?? null;
+
+        try {
+            app(SubscriptionService::class)->activateFromWebhook(
+                $session->id,
+                $paymentIntentId
+            );
+
+            Log::info('B2B subscription activated via webhook', [
+                'stripe_session_id' => $session->id,
+                'business_id' => $session->metadata->business_id ?? null,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('B2B subscription activation failed', [
+                'stripe_session_id' => $session->id,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 

@@ -23,6 +23,10 @@ class StripePaymentProvider implements PaymentProviderInterface
 
     /**
      * Initialize a payment for the given order.
+     *
+     * FIX-MP-PAYMENT-01: For multi-producer checkouts, charge the FULL session total
+     * (not just the first order's total) and include checkout_session_id in metadata
+     * so webhooks can update ALL sibling orders.
      */
     public function initPayment(Order $order, array $options = []): array
     {
@@ -39,6 +43,33 @@ class StripePaymentProvider implements PaymentProviderInterface
                 $customerData['firstName'] = $order->shipping_address['name'] ?? $order->user?->name ?? '';
             }
 
+            // FIX-MP-PAYMENT-01: Calculate correct amount for multi-producer checkouts
+            $paymentAmountCents = (int) round($order->total_amount * 100);
+            $description = "Order #{$order->id} - Project Dixis";
+            $metadata = [
+                'order_id' => $order->id,
+                'user_id' => $order->user_id,
+            ];
+
+            if ($order->is_child_order && $order->checkout_session_id) {
+                // Multi-producer: charge the FULL checkout session total
+                $siblingOrders = Order::where('checkout_session_id', $order->checkout_session_id)->get();
+                $sessionTotalCents = (int) $siblingOrders->sum(function ($o) {
+                    return round($o->total_amount * 100);
+                });
+                $paymentAmountCents = $sessionTotalCents;
+                $description = "Checkout #{$order->checkout_session_id} ({$siblingOrders->count()} orders) - Project Dixis";
+                $metadata['checkout_session_id'] = $order->checkout_session_id;
+
+                Log::info('FIX-MP-PAYMENT-01: Multi-producer payment init', [
+                    'order_id' => $order->id,
+                    'checkout_session_id' => $order->checkout_session_id,
+                    'single_order_cents' => (int) round($order->total_amount * 100),
+                    'session_total_cents' => $sessionTotalCents,
+                    'sibling_count' => $siblingOrders->count(),
+                ]);
+            }
+
             // Create or retrieve Stripe customer
             $customer = null;
             if (! empty($customerData['email'])) {
@@ -52,26 +83,31 @@ class StripePaymentProvider implements PaymentProviderInterface
                 ]);
             }
 
-            // Create payment intent
+            // Create payment intent with correct amount
             $paymentIntent = $this->stripe->paymentIntents->create([
-                'amount' => (int) round($order->total_amount * 100), // Convert to cents
+                'amount' => $paymentAmountCents,
                 'currency' => 'eur',
                 'customer' => $customer?->id,
-                'description' => "Order #{$order->id} - Project Dixis",
-                'metadata' => [
-                    'order_id' => $order->id,
-                    'user_id' => $order->user_id,
-                ],
+                'description' => $description,
+                'metadata' => $metadata,
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
             ]);
 
-            // Store payment intent ID in order
+            // Store payment intent ID in order + mark as stripe
             $order->update([
                 'payment_intent_id' => $paymentIntent->id,
                 'payment_method' => 'stripe',
             ]);
+
+            // FIX-MP-PAYMENT-01: Mark ALL sibling orders as stripe too
+            // so confirmPayment/webhook can find and update them
+            if ($order->is_child_order && $order->checkout_session_id) {
+                Order::where('checkout_session_id', $order->checkout_session_id)
+                    ->where('id', '!=', $order->id)
+                    ->update(['payment_method' => 'stripe']);
+            }
 
             return [
                 'success' => true,

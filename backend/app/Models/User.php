@@ -59,6 +59,24 @@ class User extends Authenticatable
     }
 
     /**
+     * B2B PIVOT: Get the business profile associated with the user.
+     */
+    public function business()
+    {
+        return $this->hasOne(Business::class);
+    }
+
+    /**
+     * B2B PIVOT: Check if user is an approved business buyer.
+     */
+    public function isApprovedBusiness(): bool
+    {
+        return $this->role === 'business'
+            && $this->business
+            && $this->business->isActive();
+    }
+
+    /**
      * Get the orders for the user.
      */
     public function orders()

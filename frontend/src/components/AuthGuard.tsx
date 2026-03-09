@@ -8,7 +8,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 interface AuthGuardProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  requireRole?: 'consumer' | 'producer' | 'admin';
+  requireRole?: 'consumer' | 'producer' | 'admin' | 'business';
   redirectTo?: string;
 }
 
@@ -35,7 +35,8 @@ export default function AuthGuard({
     // If specific role is required but user doesn't have it
     if (requireRole && user && user.role !== requireRole) {
       // Redirect based on user's actual role
-      const destination = user.role === 'producer' ? '/producer/dashboard' : '/';
+      const roleHome: Record<string, string> = { producer: '/producer/dashboard', business: '/business/dashboard' };
+      const destination = roleHome[user.role] || '/';
       router.push(destination);
       return;
     }

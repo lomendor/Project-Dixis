@@ -469,10 +469,13 @@ export default function ProducerProductsPage() {
                           {editingStockId === product.id ? (
                             <input
                               type="number"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               min="0"
+                              step="1"
                               value={editingStockValue}
-                              onChange={(e) => setEditingStockValue(e.target.value)}
-                              onKeyDown={(e) => { if (e.key === 'Enter') handleStockSave(product.id); if (e.key === 'Escape') setEditingStockId(null); }}
+                              onChange={(e) => setEditingStockValue(e.target.value.replace(/[^0-9]/g, ''))}
+                              onKeyDown={(e) => { if (['e', 'E', '+', '-', '.', ','].includes(e.key)) { e.preventDefault(); return; } if (e.key === 'Enter') handleStockSave(product.id); if (e.key === 'Escape') setEditingStockId(null); }}
                               onBlur={() => handleStockSave(product.id)}
                               autoFocus
                               className="w-20 px-2 py-1 border border-primary rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"

@@ -58,6 +58,8 @@ export interface Product {
   discount_price?: string | null;
   weight_per_unit?: number | null;
   is_seasonal?: boolean;
+  // B2B PIVOT: wholesale-only visibility
+  is_b2b_only?: boolean;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
@@ -351,10 +353,17 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'consumer' | 'producer' | 'admin';
+  role: 'consumer' | 'producer' | 'admin' | 'business';
   address?: string;
   created_at: string;
   updated_at: string;
+  // B2B PIVOT: present only for role='business'
+  business_status?: 'pending' | 'active' | 'inactive' | 'rejected';
+  business?: {
+    company_name: string;
+    business_type: string;
+    status: string;
+  };
 }
 
 export interface AuthResponse {
@@ -732,7 +741,7 @@ class ApiClient {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer' | 'admin';
+    role: 'consumer' | 'producer' | 'admin' | 'business';
   }): Promise<AuthResponse> {
     // Best-effort CSRF cookie fetch — auth endpoints are CSRF-exempt on backend.
     try { await this.fetchCsrfCookie(); } catch { /* non-blocking: auth is CSRF-exempt */ }
@@ -1326,6 +1335,7 @@ class ApiClient {
     discount_price?: number | null;
     weight_per_unit?: number | null;
     is_seasonal?: boolean;
+    is_b2b_only?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
       method: 'POST',
@@ -1356,6 +1366,7 @@ class ApiClient {
     discount_price?: number | null;
     weight_per_unit?: number | null;
     is_seasonal?: boolean;
+    is_b2b_only?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {
       method: 'PATCH',
@@ -1378,6 +1389,19 @@ class ApiClient {
 
   async stripeConnectRefreshOnboarding(): Promise<{ onboarding_url: string }> {
     return this.request('producer/stripe/onboard/refresh');
+  }
+
+  // B2B PIVOT: Subscription endpoints
+  async getSubscriptionStatus(): Promise<{
+    has_active_subscription: boolean;
+    price_cents: number;
+    subscription?: { id: number; status: string; starts_at: string; expires_at: string };
+  }> {
+    return this.request('subscription/status');
+  }
+
+  async createSubscriptionCheckout(): Promise<{ checkout_url: string; subscription_id: number }> {
+    return this.request('subscription/checkout', { method: 'POST' });
   }
 }
 

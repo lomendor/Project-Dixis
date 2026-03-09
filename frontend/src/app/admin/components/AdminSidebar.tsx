@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/admin/products', label: 'Προϊόντα', icon: '🏷️' },
   { href: '/admin/products/moderation', label: 'Έγκριση', icon: '🛡️' },
   { href: '/admin/producers', label: 'Παραγωγοί', icon: '🧑‍🌾' },
+  { href: '/admin/businesses', label: 'Επιχειρήσεις', icon: '🏢' },
   { href: '/admin/producers/images', label: 'Εικόνες', icon: '🖼️' },
   { href: '/admin/categories', label: 'Κατηγορίες', icon: '📂' },
   { href: '/admin/analytics', label: 'Αναλυτικά', icon: '📈' },

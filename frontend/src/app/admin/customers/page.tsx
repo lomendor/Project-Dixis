@@ -1,13 +1,15 @@
 export const dynamic = 'force-dynamic';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/db/client';
 import { requireAdmin, AdminError } from '@/lib/auth/admin';
+import { fetchAllOrders, type LaravelOrder } from '@/lib/laravel/dashboard';
 
 /**
  * Pass ADMIN-CUSTOMERS-01: Customer management page.
  *
- * Aggregates customer data from orders — no separate customers table needed.
- * Groups by email, shows order count, total spent, last order date.
+ * FIX-STALE-PRISMA-01: Now reads orders from Laravel (SSOT) instead of
+ * stale Prisma/Neon. Aggregates customer data from orders — no separate
+ * customers table needed. Groups by email, shows order count, total spent,
+ * last order date.
  */
 
 interface CustomerRow {
@@ -16,7 +18,7 @@ interface CustomerRow {
   phone: string;
   orderCount: number;
   totalSpent: number;
-  lastOrderAt: Date;
+  lastOrderAt: string;
 }
 
 export default async function AdminCustomersPage() {
@@ -29,45 +31,35 @@ export default async function AdminCustomersPage() {
     throw e;
   }
 
-  // Aggregate customer data from orders
-  const orders = await prisma.order.findMany({
-    select: {
-      email: true,
-      name: true,
-      buyerName: true,
-      phone: true,
-      buyerPhone: true,
-      total: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  // Fetch all orders from Laravel (SSOT)
+  const orders = await fetchAllOrders();
 
   // Group by email (primary) or phone (fallback)
   const customerMap = new Map<string, CustomerRow>();
 
   for (const order of orders) {
-    const key = order.email || order.phone || order.buyerPhone || 'unknown';
+    const email = order.user?.email || '';
+    const phone = order.user?.phone || '';
+    const key = email || phone || 'unknown';
     if (key === 'unknown') continue;
 
-    const existing = customerMap.get(key);
-    const orderName = order.name || order.buyerName || '';
-    const orderPhone = order.phone || order.buyerPhone || '';
+    const orderName = order.user?.name || '';
+    const total = parseFloat(order.total_amount) || 0;
 
+    const existing = customerMap.get(key);
     if (existing) {
       existing.orderCount += 1;
-      existing.totalSpent += Number(order.total ?? 0);
-      // Keep the most recent name/phone
+      existing.totalSpent += total;
       if (!existing.name && orderName) existing.name = orderName;
-      if (!existing.phone && orderPhone) existing.phone = orderPhone;
+      if (!existing.phone && phone) existing.phone = phone;
     } else {
       customerMap.set(key, {
-        email: order.email || '',
+        email,
         name: orderName,
-        phone: orderPhone,
+        phone,
         orderCount: 1,
-        totalSpent: Number(order.total ?? 0),
-        lastOrderAt: order.createdAt,
+        totalSpent: total,
+        lastOrderAt: order.created_at,
       });
     }
   }
@@ -78,7 +70,7 @@ export default async function AdminCustomersPage() {
   const fmtMoney = (n: number) =>
     new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' }).format(n);
 
-  const fmtDate = (d: Date) => d.toISOString().slice(0, 10);
+  const fmtDate = (d: string) => d.slice(0, 10);
 
   return (
     <div className="space-y-6" data-testid="admin-customers-page">

@@ -55,6 +55,8 @@ export default function EditProductPage() {
   const [ingredients, setIngredients] = useState('');
   const [storageInstructions, setStorageInstructions] = useState('');
   const [shelfLife, setShelfLife] = useState('');
+  // B2B PIVOT: wholesale-only visibility
+  const [isB2bOnly, setIsB2bOnly] = useState(false);
 
   // EU 1169/2011 — 14 allergens
   const EU_ALLERGENS = [
@@ -119,6 +121,7 @@ export default function EditProductPage() {
       setIngredients(product.ingredients || '');
       setStorageInstructions(product.storage_instructions || '');
       setShelfLife(product.shelf_life || '');
+      setIsB2bOnly(!!product.is_b2b_only);
     } catch (err: any) {
       setError(err.message || 'Σφάλμα φόρτωσης προϊόντος');
     } finally {
@@ -156,6 +159,7 @@ export default function EditProductPage() {
         ingredients: ingredients || undefined,
         storage_instructions: storageInstructions || undefined,
         shelf_life: shelfLife || undefined,
+        is_b2b_only: isB2bOnly,
       });
 
       router.push('/producer/products');
@@ -184,25 +188,37 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-neutral-200">
-            <h1 className="text-2xl font-bold text-neutral-900" data-testid="page-title">
-              Επεξεργασία Προϊόντος
-            </h1>
-            <p className="mt-1 text-neutral-600">
-              Ενημερώστε τα στοιχεία του προϊόντος σας
-            </p>
+    <div className="pb-8">
+      <div className="max-w-3xl mx-auto">
+        {/* Page header */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-sm text-neutral-500 hover:text-neutral-700 mb-2 inline-flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            Πίσω στα προϊόντα
+          </button>
+          <h1 className="text-2xl font-bold text-neutral-900" data-testid="page-title">
+            Επεξεργασία Προϊόντος
+          </h1>
+        </div>
+
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" data-testid="error-message">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="mx-6 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg" data-testid="error-message">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* ─── Section 1: Basic Info ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Βασικά Στοιχεία
+            </h2>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
                 Τίτλος Προϊόντος *
@@ -258,7 +274,7 @@ export default function EditProductPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="category" className="block text-sm font-medium text-neutral-700 mb-1">
                   Κατηγορία *
@@ -319,158 +335,16 @@ export default function EditProductPage() {
                 data-testid="description-textarea"
               />
             </div>
+          </div>
 
-            <div>
-              <label htmlFor="origin" className="block text-sm font-medium text-neutral-700 mb-1">
-                Τόπος Προέλευσης
-              </label>
-              <input
-                id="origin"
-                type="text"
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="π.χ. Κρήτη, Μεσσηνία, Ικαρία"
-                data-testid="origin-input"
-              />
-              <p className="mt-1 text-xs text-neutral-500">Από πού προέρχεται το προϊόν</p>
-            </div>
+          {/* ─── Section 2: Pricing & Stock ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>
+              Τιμολόγηση & Απόθεμα
+            </h2>
 
-            <div className="flex flex-wrap gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isSeasonal}
-                  onChange={(e) => setIsSeasonal(e.target.checked)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
-                  data-testid="seasonal-checkbox"
-                />
-                <span className="text-sm text-neutral-700">🍊 Εποχιακό προϊόν</span>
-              </label>
-            </div>
-
-            <div>
-              <label htmlFor="cultivation_type" className="block text-sm font-medium text-neutral-700 mb-1">
-                Τρόπος Καλλιέργειας
-              </label>
-              <select
-                id="cultivation_type"
-                value={cultivationType}
-                onChange={(e) => setCultivationType(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                data-testid="cultivation-type-select"
-              >
-                <option value="">Επιλέξτε τρόπο καλλιέργειας</option>
-                <option value="conventional">Συμβατική</option>
-                <option value="organic_certified">Βιολογική (Πιστοποιημένη)</option>
-                <option value="organic_transitional">Βιολογική (Μεταβατική)</option>
-                <option value="biodynamic">Βιοδυναμική</option>
-                <option value="traditional_natural">Παραδοσιακή / Φυσική</option>
-                <option value="other">Άλλο</option>
-              </select>
-              <p className="mt-1 text-sm text-neutral-500">
-                Πώς παράχθηκε το προϊόν;
-              </p>
-            </div>
-
-            {cultivationType && (
-              <div>
-                <label htmlFor="cultivation_description" className="block text-sm font-medium text-neutral-700 mb-1">
-                  Περιγραφή Καλλιέργειας
-                </label>
-                <textarea
-                  id="cultivation_description"
-                  rows={2}
-                  value={cultivationDescription}
-                  onChange={(e) => setCultivationDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="π.χ. Βιολογική καλλιέργεια χωρίς φυτοφάρμακα, πιστοποιημένη από ΔΗΩ..."
-                  data-testid="cultivation-description-textarea"
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Αλλεργιογόνα (EU 1169/2011)
-              </label>
-              <p className="text-xs text-neutral-500 mb-2">
-                Επιλέξτε τα αλλεργιογόνα που περιέχει το προϊόν.
-                Αν το προϊόν δεν περιέχει αλλεργιογόνα, αφήστε όλα τα κουτιά κενά.
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" data-testid="allergens-grid">
-                {EU_ALLERGENS.map((a) => (
-                  <label key={a.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={allergens.includes(a.value)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setAllergens([...allergens, a.value]);
-                        } else {
-                          setAllergens(allergens.filter((v) => v !== a.value));
-                        }
-                      }}
-                      className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
-                    />
-                    <span className="text-neutral-700">{a.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="ingredients" className="block text-sm font-medium text-neutral-700 mb-1">
-                Συστατικά
-              </label>
-              <textarea
-                id="ingredients"
-                rows={3}
-                value={ingredients}
-                onChange={(e) => setIngredients(e.target.value)}
-                maxLength={2000}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="π.χ. Ελαιόλαδο εξαιρετικό παρθένο, θυμάρι, ρίγανη..."
-                data-testid="ingredients-textarea"
-              />
-              <p className="mt-1 text-xs text-neutral-500">
-                {ingredients.length}/2000 χαρακτήρες
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="storage_instructions" className="block text-sm font-medium text-neutral-700 mb-1">
-                  Οδηγίες Αποθήκευσης
-                </label>
-                <input
-                  id="storage_instructions"
-                  type="text"
-                  value={storageInstructions}
-                  onChange={(e) => setStorageInstructions(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="π.χ. Σε σκιερό, δροσερό μέρος"
-                  data-testid="storage-input"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="shelf_life" className="block text-sm font-medium text-neutral-700 mb-1">
-                  Διάρκεια Ζωής
-                </label>
-                <input
-                  id="shelf_life"
-                  type="text"
-                  value={shelfLife}
-                  onChange={(e) => setShelfLife(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="π.χ. 18 μήνες"
-                  data-testid="shelf-life-input"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-neutral-700 mb-1">
                   Τιμή (€) *
@@ -505,7 +379,7 @@ export default function EditProductPage() {
                   data-testid="discount-price-input"
                 />
                 {discountTooHigh
-                  ? <p className="mt-1 text-xs text-red-600 font-medium">⚠ Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική τιμή</p>
+                  ? <p className="mt-1 text-xs text-red-600 font-medium">Η τιμή προσφοράς πρέπει να είναι μικρότερη από την αρχική</p>
                   : <p className="mt-1 text-xs text-neutral-500">Αφήστε κενό αν δεν υπάρχει έκπτωση</p>}
               </div>
             </div>
@@ -513,7 +387,7 @@ export default function EditProductPage() {
             {/* Price Breakdown — PRICE-TRANSPARENCY-01 */}
             <PriceBreakdown price={price} discountPrice={discountPrice} onPriceChange={discountPrice ? setDiscountPrice : setPrice} />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="stock" className="block text-sm font-medium text-neutral-700 mb-1">
                   Απόθεμα *
@@ -521,14 +395,19 @@ export default function EditProductPage() {
                 <input
                   id="stock"
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min="0"
+                  step="1"
                   value={stock}
-                  onChange={(e) => setStock(e.target.value)}
+                  onChange={(e) => setStock(e.target.value.replace(/[^0-9]/g, ''))}
+                  onKeyDown={(e) => { if (['e', 'E', '+', '-', '.', ','].includes(e.key)) e.preventDefault(); }}
                   required
                   className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="π.χ. 25"
                   data-testid="stock-input"
                 />
+                <p className="mt-1 text-xs text-neutral-500">Αριθμός τεμαχίων (βάζα, μπουκάλια, σακουλάκια κλπ.)</p>
               </div>
 
               <div>
@@ -549,52 +428,237 @@ export default function EditProductPage() {
                 <p className="mt-1 text-xs text-neutral-500">Καθαρό βάρος σε γραμμάρια ή ml</p>
               </div>
             </div>
+          </div>
 
-            <div>
-              <MultiImageUpload
-                value={imageUrls}
-                onChange={setImageUrls}
-                max={5}
-                maxMB={5}
-                label="Εικόνες Προϊόντος"
-              />
+          {/* ─── Section 3: Images ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Φωτογραφίες
+            </h2>
+            <MultiImageUpload
+              value={imageUrls}
+              onChange={setImageUrls}
+              max={5}
+              maxMB={5}
+              label="Εικόνες Προϊόντος"
+            />
+          </div>
+
+          {/* ─── Section 4: Origin & Cultivation ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Προέλευση & Καλλιέργεια
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="origin" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Τόπος Προέλευσης
+                </label>
+                <input
+                  id="origin"
+                  type="text"
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. Κρήτη, Μεσσηνία"
+                  data-testid="origin-input"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="cultivation_type" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Τρόπος Καλλιέργειας
+                </label>
+                <select
+                  id="cultivation_type"
+                  value={cultivationType}
+                  onChange={(e) => setCultivationType(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  data-testid="cultivation-type-select"
+                >
+                  <option value="">Επιλέξτε...</option>
+                  <option value="conventional">Συμβατική</option>
+                  <option value="organic_certified">Βιολογική (Πιστοποιημένη)</option>
+                  <option value="organic_transitional">Βιολογική (Μεταβατική)</option>
+                  <option value="biodynamic">Βιοδυναμική</option>
+                  <option value="traditional_natural">Παραδοσιακή / Φυσική</option>
+                  <option value="other">Άλλο</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex items-center">
+            {cultivationType && (
+              <div>
+                <label htmlFor="cultivation_description" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Περιγραφή Καλλιέργειας
+                </label>
+                <textarea
+                  id="cultivation_description"
+                  rows={2}
+                  value={cultivationDescription}
+                  onChange={(e) => setCultivationDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. Βιολογική καλλιέργεια χωρίς φυτοφάρμακα, πιστοποιημένη από ΔΗΩ..."
+                  data-testid="cultivation-description-textarea"
+                />
+              </div>
+            )}
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSeasonal}
+                onChange={(e) => setIsSeasonal(e.target.checked)}
+                className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                data-testid="seasonal-checkbox"
+              />
+              <span className="text-sm text-neutral-700">Εποχιακό προϊόν</span>
+            </label>
+          </div>
+
+          {/* ─── Section 5: Compliance (EU 1169/2011) ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-2">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              Συστατικά & Αλλεργιογόνα
+            </h2>
+
+            <div>
+              <label htmlFor="ingredients" className="block text-sm font-medium text-neutral-700 mb-1">
+                Συστατικά
+              </label>
+              <textarea
+                id="ingredients"
+                rows={3}
+                value={ingredients}
+                onChange={(e) => setIngredients(e.target.value)}
+                maxLength={2000}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="π.χ. Ελαιόλαδο εξαιρετικό παρθένο, θυμάρι, ρίγανη..."
+                data-testid="ingredients-textarea"
+              />
+              <p className="mt-1 text-xs text-neutral-500">
+                {ingredients.length}/2000 χαρακτήρες
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                Αλλεργιογόνα (EU 1169/2011)
+              </label>
+              <p className="text-xs text-neutral-500 mb-2">
+                Επιλέξτε τα αλλεργιογόνα που περιέχει. Αφήστε κενό αν δεν περιέχει.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" data-testid="allergens-grid">
+                {EU_ALLERGENS.map((a) => (
+                  <label key={a.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={allergens.includes(a.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAllergens([...allergens, a.value]);
+                        } else {
+                          setAllergens(allergens.filter((v) => v !== a.value));
+                        }
+                      }}
+                      className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                    />
+                    <span className="text-neutral-700">{a.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="storage_instructions" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Οδηγίες Αποθήκευσης
+                </label>
+                <input
+                  id="storage_instructions"
+                  type="text"
+                  value={storageInstructions}
+                  onChange={(e) => setStorageInstructions(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. Σε σκιερό, δροσερό μέρος"
+                  data-testid="storage-input"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="shelf_life" className="block text-sm font-medium text-neutral-700 mb-1">
+                  Διάρκεια Ζωής
+                </label>
+                <input
+                  id="shelf_life"
+                  type="text"
+                  value={shelfLife}
+                  onChange={(e) => setShelfLife(e.target.value)}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="π.χ. 18 μήνες"
+                  data-testid="shelf-life-input"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ─── Visibility Toggles ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 id="is_active"
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                className="h-5 w-5 text-primary focus:ring-primary border-neutral-300 rounded"
                 data-testid="active-checkbox"
               />
-              <label htmlFor="is_active" className="ml-2 block text-sm text-neutral-700">
-                Ενεργό προϊόν (ορατό στους πελάτες)
-              </label>
-            </div>
+              <div>
+                <span className="text-sm font-medium text-neutral-800">Ενεργό προϊόν</span>
+                <p className="text-xs text-neutral-500">Ορατό στους πελάτες στο κατάστημα</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                id="is_b2b_only"
+                type="checkbox"
+                checked={isB2bOnly}
+                onChange={(e) => setIsB2bOnly(e.target.checked)}
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+                data-testid="b2b-only-checkbox"
+              />
+              <div>
+                <span className="text-sm font-medium text-neutral-800">Μόνο χονδρική</span>
+                <p className="text-xs text-neutral-500">Ορατό μόνο σε εγκεκριμένες επιχειρήσεις</p>
+              </div>
+            </label>
+          </div>
 
-            <div className="flex gap-3 pt-4 border-t border-neutral-200">
-              <button
-                type="submit"
-                disabled={busy}
-                className="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
-                data-testid="submit-btn"
-              >
-                {busy ? 'Ενημέρωση...' : 'Ενημέρωση Προϊόντος'}
-              </button>
-              <button
-                type="button"
-                onClick={() => router.back()}
-                disabled={busy}
-                className="flex-1 bg-neutral-100 text-neutral-700 py-2 px-4 rounded-lg hover:bg-neutral-200 disabled:bg-neutral-50 disabled:cursor-not-allowed transition-colors"
-                data-testid="cancel-btn"
-              >
-                Ακύρωση
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* ─── Submit Actions ─── */}
+          <div className="flex gap-3 sticky bottom-0 bg-neutral-50 pt-3 pb-2 -mx-4 px-4 lg:-mx-6 lg:px-6 border-t border-neutral-200">
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex-1 bg-primary text-white py-2.5 px-4 rounded-lg hover:bg-primary-light disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors font-medium"
+              data-testid="submit-btn"
+            >
+              {busy ? 'Ενημέρωση...' : 'Ενημέρωση Προϊόντος'}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              disabled={busy}
+              className="bg-neutral-100 text-neutral-700 py-2.5 px-6 rounded-lg hover:bg-neutral-200 disabled:bg-neutral-50 disabled:cursor-not-allowed transition-colors font-medium"
+              data-testid="cancel-btn"
+            >
+              Ακύρωση
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

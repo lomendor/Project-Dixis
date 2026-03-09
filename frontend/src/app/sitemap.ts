@@ -8,6 +8,7 @@ const API_BASE = getServerApiUrl();
 
 interface ProductForSitemap {
   id: number;
+  slug: string;
   updated_at: string;
   is_active: boolean;
 }
@@ -96,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             const date = new Date(product.updated_at);
             const lastModified = isNaN(date.getTime()) ? new Date() : date;
             return {
-              url: `${BASE_URL}/products/${product.id}`,
+              url: `${BASE_URL}/products/${product.slug || product.id}`,
               lastModified,
               changeFrequency: 'weekly' as const,
               priority: 0.8,
