@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyEmailMail;
+use App\Models\Business;
 use App\Models\Producer;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +27,13 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|in:consumer,producer,admin',
+            'role' => 'required|string|in:consumer,producer,business',
+            // B2B PIVOT: business registration fields (required when role=business)
+            'company_name' => 'required_if:role,business|string|max:255',
+            'business_type' => 'nullable|string|in:restaurant,hotel,deli,catering,other',
+            'tax_id' => 'nullable|string|size:9',
+            'tax_office' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -62,6 +69,22 @@ class AuthController extends Controller
                 ]);
             }
 
+            // B2B PIVOT: Auto-create Business profile for business registrations
+            // Status starts as 'pending' — admin must approve before B2B access
+            if ($request->role === 'business') {
+                Business::create([
+                    'user_id' => $user->id,
+                    'company_name' => $request->company_name,
+                    'tax_id' => $request->tax_id,
+                    'tax_office' => $request->tax_office,
+                    'business_type' => $request->business_type ?? 'restaurant',
+                    'contact_person' => $request->name,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'status' => Business::STATUS_PENDING,
+                ]);
+            }
+
             return $user;
         });
 
@@ -91,17 +114,23 @@ class AuthController extends Controller
             ? 'User registered successfully. Please check your email to verify your account.'
             : 'User registered successfully';
 
+        // B2B PIVOT: Include business profile data in registration response
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'email_verified_at' => $user->email_verified_at,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
+        if ($user->role === 'business') {
+            $userData['business_status'] = $user->business?->status ?? 'pending';
+        }
+
         return response()->json([
             'message' => $message,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'email_verified_at' => $user->email_verified_at,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ],
+            'user' => $userData,
             'token' => $authToken,
             'token_type' => 'Bearer',
             'verification_sent' => $verificationSent,
@@ -142,17 +171,23 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
         Auth::login($user);
 
+        // B2B PIVOT: Include business status in login response
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'email_verified_at' => $user->email_verified_at,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
+        if ($user->role === 'business') {
+            $userData['business_status'] = $user->business?->status ?? 'pending';
+        }
+
         return response()->json([
             'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'email_verified_at' => $user->email_verified_at,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ],
+            'user' => $userData,
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -207,16 +242,27 @@ class AuthController extends Controller
             ->orWhere('type', 'default')
             ->first();
 
+        // B2B PIVOT: Include business profile data
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'email_verified_at' => $user->email_verified_at,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+        ];
+        if ($user->role === 'business') {
+            $userData['business_status'] = $user->business?->status ?? 'pending';
+            $userData['business'] = $user->business ? [
+                'company_name' => $user->business->company_name,
+                'business_type' => $user->business->business_type,
+                'status' => $user->business->status,
+            ] : null;
+        }
+
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'email_verified_at' => $user->email_verified_at,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ],
+            'user' => $userData,
             // Pass PRODUCER-THRESHOLD-POSTALCODE-01: Default shipping address for checkout
             'shipping_address' => $defaultAddress ? [
                 'name' => $defaultAddress->name,
