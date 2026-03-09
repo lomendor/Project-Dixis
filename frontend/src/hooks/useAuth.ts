@@ -38,7 +38,7 @@ export function useAuth() {
   /**
    * Get current user role with type safety
    */
-  const getUserRole = (): 'guest' | 'consumer' | 'producer' | 'admin' => {
+  const getUserRole = (): 'guest' | 'consumer' | 'producer' | 'admin' | 'business' => {
     if (isGuest) return 'guest';
     return context.user?.role || 'guest';
   };
@@ -46,10 +46,10 @@ export function useAuth() {
   /**
    * Check if user has specific role or higher privileges
    */
-  const hasRole = (requiredRole: 'consumer' | 'producer' | 'admin'): boolean => {
+  const hasRole = (requiredRole: 'consumer' | 'producer' | 'admin' | 'business'): boolean => {
     if (!context.isAuthenticated) return false;
 
-    const roleHierarchy = { consumer: 1, producer: 2, admin: 3 };
+    const roleHierarchy: Record<string, number> = { consumer: 1, business: 2, producer: 2, admin: 3 };
     const userRoleLevel = roleHierarchy[context.user?.role || 'consumer'] || 0;
     const requiredLevel = roleHierarchy[requiredRole] || 0;
 

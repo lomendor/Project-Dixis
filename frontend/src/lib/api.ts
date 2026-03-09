@@ -741,7 +741,7 @@ class ApiClient {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'consumer' | 'producer' | 'admin';
+    role: 'consumer' | 'producer' | 'admin' | 'business';
   }): Promise<AuthResponse> {
     // Best-effort CSRF cookie fetch — auth endpoints are CSRF-exempt on backend.
     try { await this.fetchCsrfCookie(); } catch { /* non-blocking: auth is CSRF-exempt */ }
@@ -1335,6 +1335,7 @@ class ApiClient {
     discount_price?: number | null;
     weight_per_unit?: number | null;
     is_seasonal?: boolean;
+    is_b2b_only?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>('products', {
       method: 'POST',
@@ -1365,6 +1366,7 @@ class ApiClient {
     discount_price?: number | null;
     weight_per_unit?: number | null;
     is_seasonal?: boolean;
+    is_b2b_only?: boolean;
   }): Promise<{ data: Product }> {
     return this.request<{ data: Product }>(`products/${productId}`, {
       method: 'PATCH',
