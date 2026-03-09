@@ -83,6 +83,8 @@ export interface Product {
   cultivation_description?: string | null;
   discount_price?: number;
   is_seasonal: boolean;
+  // B2B PIVOT: wholesale-only visibility
+  is_b2b_only?: boolean;
   status: 'available' | 'unavailable' | 'seasonal';
   created_at: string;
   updated_at: string;

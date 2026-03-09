@@ -62,6 +62,8 @@ export default function CreateProductPage() {
   const [ingredients, setIngredients] = useState('');
   const [storageInstructions, setStorageInstructions] = useState('');
   const [shelfLife, setShelfLife] = useState('');
+  // B2B PIVOT: wholesale-only visibility
+  const [isB2bOnly, setIsB2bOnly] = useState(false);
 
   // EU 1169/2011 — 14 allergens
   const EU_ALLERGENS = [
@@ -111,6 +113,7 @@ export default function CreateProductPage() {
         ingredients: ingredients || undefined,
         storage_instructions: storageInstructions || undefined,
         shelf_life: shelfLife || undefined,
+        is_b2b_only: isB2bOnly || undefined,
       });
 
       router.push('/producer/products');
@@ -509,18 +512,33 @@ export default function CreateProductPage() {
               />
             </div>
 
-            <div className="flex items-center">
-              <input
-                id="is_active"
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
-                data-testid="active-checkbox"
-              />
-              <label htmlFor="is_active" className="ml-2 block text-sm text-neutral-700">
-                Ενεργό προϊόν (ορατό στους πελάτες)
-              </label>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <input
+                  id="is_active"
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                  data-testid="active-checkbox"
+                />
+                <label htmlFor="is_active" className="ml-2 block text-sm text-neutral-700">
+                  Ενεργό προϊόν (ορατό στους πελάτες)
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  id="is_b2b_only"
+                  type="checkbox"
+                  checked={isB2bOnly}
+                  onChange={(e) => setIsB2bOnly(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+                  data-testid="b2b-only-checkbox"
+                />
+                <label htmlFor="is_b2b_only" className="ml-2 block text-sm text-neutral-700">
+                  Μόνο χονδρική (ορατό μόνο σε εγκεκριμένες επιχειρήσεις)
+                </label>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4 border-t border-neutral-200">

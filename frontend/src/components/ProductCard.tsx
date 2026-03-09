@@ -33,11 +33,13 @@ type Props = {
   reviewsAvgRating?: number | null
   cultivationType?: string | null
   priority?: boolean
+  // B2B PIVOT: show "Χονδρική" badge for wholesale-only products
+  isB2bOnly?: boolean
 }
 
 const fmtEUR = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
 
-export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, cultivationType, priority }: Props) {
+export function ProductCard({ id, title, producer, producerId, producerSlug, priceCents, discountPriceCents, image, stock, isSeasonal, hideProducerLink, reviewsCount, reviewsAvgRating, cultivationType, priority, isB2bOnly }: Props) {
   const hasDiscount = discountPriceCents != null && discountPriceCents < priceCents
   const isOOS = typeof stock === 'number' && stock <= 0
   const displayPrice = hasDiscount ? fmtEUR.format(discountPriceCents / 100) : (typeof priceCents === 'number' ? fmtEUR.format(priceCents / 100) : '—')
@@ -98,6 +100,11 @@ export function ProductCard({ id, title, producer, producerId, producerSlug, pri
                  cultivationType === 'biodynamic' ? 'Βιοδυναμικό' :
                  cultivationType === 'traditional_natural' ? 'Παραδοσιακό' :
                  cultivationType}
+              </span>
+            )}
+            {isB2bOnly && (
+              <span data-testid="badge-b2b" className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold bg-blue-600 text-white">
+                Χονδρική
               </span>
             )}
           </div>

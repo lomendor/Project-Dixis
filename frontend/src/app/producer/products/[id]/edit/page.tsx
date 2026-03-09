@@ -55,6 +55,8 @@ export default function EditProductPage() {
   const [ingredients, setIngredients] = useState('');
   const [storageInstructions, setStorageInstructions] = useState('');
   const [shelfLife, setShelfLife] = useState('');
+  // B2B PIVOT: wholesale-only visibility
+  const [isB2bOnly, setIsB2bOnly] = useState(false);
 
   // EU 1169/2011 — 14 allergens
   const EU_ALLERGENS = [
@@ -119,6 +121,7 @@ export default function EditProductPage() {
       setIngredients(product.ingredients || '');
       setStorageInstructions(product.storage_instructions || '');
       setShelfLife(product.shelf_life || '');
+      setIsB2bOnly(!!product.is_b2b_only);
     } catch (err: any) {
       setError(err.message || 'Σφάλμα φόρτωσης προϊόντος');
     } finally {
@@ -156,6 +159,7 @@ export default function EditProductPage() {
         ingredients: ingredients || undefined,
         storage_instructions: storageInstructions || undefined,
         shelf_life: shelfLife || undefined,
+        is_b2b_only: isB2bOnly,
       });
 
       router.push('/producer/products');
@@ -602,8 +606,8 @@ export default function EditProductPage() {
             </div>
           </div>
 
-          {/* ─── Visibility Toggle ─── */}
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5">
+          {/* ─── Visibility Toggles ─── */}
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 id="is_active"
@@ -616,6 +620,20 @@ export default function EditProductPage() {
               <div>
                 <span className="text-sm font-medium text-neutral-800">Ενεργό προϊόν</span>
                 <p className="text-xs text-neutral-500">Ορατό στους πελάτες στο κατάστημα</p>
+              </div>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                id="is_b2b_only"
+                type="checkbox"
+                checked={isB2bOnly}
+                onChange={(e) => setIsB2bOnly(e.target.checked)}
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+                data-testid="b2b-only-checkbox"
+              />
+              <div>
+                <span className="text-sm font-medium text-neutral-800">Μόνο χονδρική</span>
+                <p className="text-xs text-neutral-500">Ορατό μόνο σε εγκεκριμένες επιχειρήσεις</p>
               </div>
             </label>
           </div>

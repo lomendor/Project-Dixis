@@ -58,6 +58,8 @@ export interface Product {
   discount_price?: string | null;
   weight_per_unit?: number | null;
   is_seasonal?: boolean;
+  // B2B PIVOT: wholesale-only visibility
+  is_b2b_only?: boolean;
   categories: Category[];
   images: ProductImage[];
   producer: Producer;
