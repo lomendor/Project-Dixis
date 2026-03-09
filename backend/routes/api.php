@@ -427,6 +427,18 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
     });
 
+    // B2B PIVOT: Admin Business Management
+    Route::middleware(['jwt.admin', 'admin'])->prefix('admin/businesses')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\Admin\AdminBusinessController::class, 'index'])
+            ->middleware('throttle:60,1');
+        Route::get('{business}', [App\Http\Controllers\Api\Admin\AdminBusinessController::class, 'show'])
+            ->middleware('throttle:60,1');
+        Route::patch('{business}/approve', [App\Http\Controllers\Api\Admin\AdminBusinessController::class, 'approve'])
+            ->middleware('throttle:30,1');
+        Route::patch('{business}/reject', [App\Http\Controllers\Api\Admin\AdminBusinessController::class, 'reject'])
+            ->middleware('throttle:30,1');
+    });
+
     // Admin Commission Rules CRUD — T2.5-01: added 'admin' middleware
     Route::middleware(['jwt.admin', 'admin'])->prefix('admin/commission-rules')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Admin\AdminCommissionController::class, 'index'])
