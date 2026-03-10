@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-09 (B2B Wholesale System deployed)
+**Updated**: 2026-03-10 (Action plan locked)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -44,7 +44,49 @@
 
 ## WIP (max 1)
 
-**None** — B2B system deployed. Ready for next task. CI is GREEN.
+**Mobile polish + Legal disclaimers** — while founder handles business steps (see Action Plan below).
+
+---
+
+## ACTION PLAN — LOCKED 2026-03-10
+
+> **This plan does NOT change between sessions.** Every new chat reads this and continues, not restarts.
+> **Status updates**: Mark items ✅ as completed. Do NOT reorganize or reprioritize.
+
+### FOUNDER (Panagiotis) — Business steps:
+
+| # | Action | Status | Notes |
+|---|--------|--------|-------|
+| F1 | Send 4 PDFs to accountant, request meeting | ⏳ | PDFs: ~/Desktop/Dixis/Logistis/ |
+| F2 | Send 2 PDFs to lawyer, request meeting | ⏳ | PDFs: ~/Desktop/Dixis/Dikigoros/ |
+| F3 | Call 1st producer — register at dixis.gr/producer/register | ⏳ | Admin approve after signup |
+| F4 | Call 2nd producer | ⏳ | After F3 works |
+| F5 | Call 3rd producer | ⏳ | After F3 works |
+| F6 | Accountant meeting → answers to PENDING-EXTERNAL.md | ⏳ | Unblocks IKE + invoicing |
+| F7 | Lawyer meeting → producer contract + ToS | ⏳ | Unblocks legal launch |
+| F8 | IKE formation (after accountant guidance) | ⏳ | Unblocks real revenue |
+| F9 | 5 test orders (friends/family) | ⏳ | After 1st producer live |
+
+### CTO (Agent) — Technical steps (parallel):
+
+| # | Action | Status | Depends on |
+|---|--------|--------|-----------|
+| T1 | S0-06: Legal disclaimers on product pages | ⏳ | Nothing |
+| T2 | S2-05: Mobile audit + fixes | ⏳ | Nothing |
+| T3 | S0-09: Direct Charges code prep (build, don't deploy) | ⏳ | Nothing |
+| T4 | S0-11: DAC7 fields code prep (build, don't deploy) | ⏳ | F6 confirms fields |
+| T5 | Deploy Direct Charges | ⏳ | F6 + F7 confirm flow |
+| T6 | Deploy DAC7 fields | ⏳ | F6 confirms requirements |
+| T7 | Activate commission flag | ⏳ | F8 (IKE formed) |
+
+### Milestones:
+
+| Milestone | What it means | Blocked by |
+|-----------|--------------|------------|
+| **M1: First producer live** | Real products on dixis.gr | F3 |
+| **M2: First test order** | End-to-end flow proven with real money | M1 + F9 |
+| **M3: Legal clearance** | IKE + contract + ToS | F6 + F7 + F8 |
+| **M4: Real launch** | Commission ON, production mode | M1 + M2 + M3 |
 
 ---
 
