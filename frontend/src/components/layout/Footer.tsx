@@ -41,13 +41,13 @@ export default function Footer() {
               Πλοήγηση
             </h4>
             <nav className="flex flex-col gap-0.5" data-testid="footer-quick-links">
-              <Link href="/products" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/products" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Προϊόντα
               </Link>
-              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/producers" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Παραγωγοί
               </Link>
-              <Link href="/about" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/about" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Σχετικά με εμάς
               </Link>
             </nav>
@@ -59,10 +59,10 @@ export default function Footer() {
               Για Παραγωγούς
             </h4>
             <nav className="flex flex-col gap-0.5">
-              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/producers" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Γίνε Παραγωγός
               </Link>
-              <Link href="/producers/login" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/producers/login" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Σύνδεση Παραγωγού
               </Link>
             </nav>
@@ -74,16 +74,16 @@ export default function Footer() {
               Υποστήριξη
             </h4>
             <nav className="flex flex-col gap-0.5">
-              <Link href="/faq" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/faq" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Συχνές Ερωτήσεις
               </Link>
-              <Link href="/contact" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/contact" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Επικοινωνία
               </Link>
-              <Link href="/terms" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/terms" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Όροι Χρήσης
               </Link>
-              <Link href="/privacy" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link href="/privacy" className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
                 Απόρρητο
               </Link>
             </nav>
