@@ -9,7 +9,7 @@ export default function ContactForm() {
     setState("sending");
     const fd = new FormData(e.currentTarget);
     const payload = Object.fromEntries(fd.entries());
-    const res = await fetch("/api/contact", {
+    const res = await fetch("/api/ops/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
