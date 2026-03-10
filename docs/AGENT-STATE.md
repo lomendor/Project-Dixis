@@ -71,8 +71,8 @@
 
 | # | Action | Status | Depends on |
 |---|--------|--------|-----------|
-| T1 | S0-06: Legal disclaimers on product pages | ⏳ | Nothing |
-| T2 | S2-05: Mobile audit + fixes | ⏳ | Nothing |
+| T1 | S0-06: Legal disclaimers on product pages | ✅ | Nothing |
+| T2 | S2-05: Mobile audit + fixes | ✅ | Nothing |
 | T3 | S0-09: Direct Charges code prep (build, don't deploy) | ⏳ | Nothing |
 | T4 | S0-11: DAC7 fields code prep (build, don't deploy) | ⏳ | F6 confirms fields |
 | T5 | Deploy Direct Charges | ⏳ | F6 + F7 confirm flow |
