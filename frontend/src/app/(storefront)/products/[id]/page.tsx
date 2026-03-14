@@ -433,6 +433,16 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
               }}
             />
           </div>
+
+          {/* S0-06: Marketplace intermediary disclaimer (EU PLD 2024/2853 + Greek Law 2251/1994) */}
+          {p.producer?.name && (
+            <p className="mt-3 text-xs text-neutral-400 leading-relaxed" data-testid="intermediary-disclaimer">
+              Παράγεται και πωλείται από{' '}
+              <span className="font-medium text-neutral-500">{p.producer.name}</span>
+              {p.producer.city ? `, ${p.producer.city}` : ''}.
+              Η Dixis διαμεσολαβεί στη συναλλαγή.
+            </p>
+          )}
         </div>
       </div>
 

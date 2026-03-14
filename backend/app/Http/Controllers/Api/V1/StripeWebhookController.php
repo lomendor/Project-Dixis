@@ -244,6 +244,22 @@ class StripeWebhookController extends Controller
 
         foreach ($orders as $order) {
             try {
+                // S0-09: Skip transfer for Direct Charge orders (funds already on producer's account)
+                if ($order->payment_intent_id) {
+                    try {
+                        $stripe = new \Stripe\StripeClient(config('payments.stripe.secret_key'));
+                        $pi = $stripe->paymentIntents->retrieve($order->payment_intent_id);
+                        if (!empty($pi->metadata['charge_model']) && $pi->metadata['charge_model'] === 'direct') {
+                            Log::info('S0-09: Skipping transfer for Direct Charge order', [
+                                'order_id' => $order->id,
+                            ]);
+                            continue;
+                        }
+                    } catch (\Exception $e) {
+                        // If we can't retrieve the PI, fall through to SCT logic
+                    }
+                }
+
                 // Skip if transfer already created (idempotent)
                 if (!empty($order->stripe_transfer_id)) {
                     continue;

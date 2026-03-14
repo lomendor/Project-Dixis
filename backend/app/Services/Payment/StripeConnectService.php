@@ -11,8 +11,11 @@ use Stripe\StripeClient;
  * Pass STRIPE-CONNECT-01: Stripe Connect Express service.
  *
  * Manages connected accounts for producers, transfers after payment,
- * and Express Dashboard access. Uses "Separate Charges & Transfers" model:
- * customer pays Dixis → webhook creates Transfer to producer's connected account.
+ * and Express Dashboard access.
+ *
+ * Charge models (S0-09):
+ * - Direct Charges (preferred): single-producer orders use on_behalf_of + application_fee
+ * - SCT fallback: multi-producer orders use Separate Charges & Transfers
  */
 class StripeConnectService
 {

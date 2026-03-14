@@ -367,7 +367,7 @@ export default async function Page({ searchParams }: PageProps) {
 
         {/* Product grid — 2 mobile, 3 tablet, 4 laptop, 5 desktop */}
         {items.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[6px] sm:gap-3 lg:gap-4" data-testid="products-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4" data-testid="products-grid">
             {items.map((p: ApiItem, index: number) => (
               <ProductCard
                 key={p.id}

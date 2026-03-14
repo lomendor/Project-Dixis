@@ -43,9 +43,10 @@ return [
     | Stripe Connect (Express accounts for producers)
     |--------------------------------------------------------------------------
     |
-    | Pass STRIPE-CONNECT-01: PSD2-compliant fund flow via Stripe Connect.
-    | When enabled, producers create Express accounts. After customer payment,
-    | funds are transferred to producer accounts minus commission.
+    | Pass STRIPE-CONNECT-01 + S0-09: PSD2-compliant fund flow via Stripe Connect.
+    | Charge models (auto-selected):
+    |   - Direct Charges: single-producer orders → on_behalf_of + application_fee
+    |   - SCT fallback: multi-producer orders → Separate Charges & Transfers
     |
     */
     'stripe_connect' => [
