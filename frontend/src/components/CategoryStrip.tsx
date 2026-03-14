@@ -129,20 +129,28 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
         imageScale: SLUG_SCALE_MAP[cat.slug],
       }));
 
+  /* Shared card classes per breakpoint:
+     mobile:  88×88 icon, 104px col  — horizontal scroll
+     tablet:  96×96 icon, 112px col  — horizontal scroll
+     desktop: 76×76 icon, 100px col  — flex-wrap, all visible in 1 row */
+  const iconBoxClass = 'w-[88px] h-[88px] sm:w-[96px] sm:h-[96px] lg:w-[76px] lg:h-[76px]';
+  const imgClass = 'w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] lg:w-[64px] lg:h-[64px] object-contain';
+  const colClass = 'flex flex-col items-center gap-1.5 w-[104px] sm:w-[112px] lg:w-[100px] shrink-0 lg:shrink group';
+
   return (
     <div className="w-full" role="group" aria-label="Κατηγορίες προϊόντων">
-      {/* Horizontal scroll at every viewport — prevents pill overlap (Wolt-style) */}
-      <div className="flex items-start gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
+      {/* Mobile/tablet: horizontal scroll — Desktop: flex-wrap so all categories visible */}
+      <div className="flex items-start gap-2 sm:gap-3 lg:gap-2 overflow-x-auto lg:overflow-visible lg:flex-wrap pb-2 lg:pb-0 scrollbar-hide">
         {/* "Όλα" card */}
         <button
           onClick={() => handleCategoryClick(null)}
           aria-pressed={!currentCat}
           aria-label="Όλες οι κατηγορίες"
-          className="flex flex-col items-center gap-1.5 w-[104px] sm:w-[120px] shrink-0 group"
+          className={colClass}
         >
           <div
             className={`
-              w-[88px] h-[88px] sm:w-[104px] sm:h-[104px]
+              ${iconBoxClass}
               rounded-2xl flex items-center justify-center overflow-hidden
               transition-all duration-200
               group-hover:scale-105 group-hover:shadow-card
@@ -159,7 +167,7 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               alt="Όλα τα προϊόντα"
               width={128}
               height={128}
-              className="w-[76px] h-[76px] sm:w-[92px] sm:h-[92px] object-contain"
+              className={imgClass}
             />
           </div>
           <span
@@ -182,11 +190,11 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
               onClick={() => handleCategoryClick(item.slug)}
               aria-pressed={isSelected}
               aria-label={`Κατηγορία: ${item.label}`}
-              className="flex flex-col items-center gap-1.5 w-[104px] sm:w-[120px] shrink-0 group"
+              className={colClass}
             >
               <div
                 className={`
-                  w-[88px] h-[88px] sm:w-[104px] sm:h-[104px]
+                  ${iconBoxClass}
                   rounded-2xl flex items-center justify-center overflow-hidden
                   transition-all duration-200
                   group-hover:scale-105 group-hover:shadow-card
@@ -204,15 +212,15 @@ export function CategoryStrip({ selectedCategory, dynamicCategories }: CategoryS
                     alt={item.label}
                     width={128}
                     height={128}
-                    className="w-[76px] h-[76px] sm:w-[92px] sm:h-[92px] object-contain"
+                    className={imgClass}
                     style={item.imageScale ? { transform: `scale(${item.imageScale})` } : undefined}
                   />
                 ) : (
-                  <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-neutral-700" />
+                  <Icon className="w-10 h-10 sm:w-11 sm:h-11 lg:w-9 lg:h-9 text-neutral-700" />
                 )}
               </div>
               <span
-                className={`text-[11px] sm:text-xs font-medium text-center leading-tight max-w-[100px] sm:max-w-[112px] line-clamp-2 min-h-[2rem] sm:min-h-[2.25rem] flex items-start justify-center
+                className={`text-[11px] sm:text-xs font-medium text-center leading-tight max-w-[100px] sm:max-w-[108px] lg:max-w-[104px] line-clamp-2 min-h-[2rem] sm:min-h-[2.25rem] flex items-start justify-center
                   ${isSelected ? 'text-primary font-semibold' : 'text-neutral-600'}
                 `}
               >
