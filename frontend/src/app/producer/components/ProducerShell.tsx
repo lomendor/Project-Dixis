@@ -24,7 +24,10 @@ export function ProducerShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-neutral-50" data-testid="producer-shell">
+    <div
+      className="fixed inset-0 z-50 flex bg-neutral-50"
+      data-testid="producer-shell"
+    >
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -47,7 +50,7 @@ export function ProducerShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Top bar */}
         <header className="h-14 border-b border-neutral-200 bg-white flex items-center px-4 lg:px-6 shrink-0">
           {/* Hamburger button (mobile only) */}
@@ -57,8 +60,18 @@ export function ProducerShell({ children }: { children: React.ReactNode }) {
             onClick={() => setSidebarOpen(true)}
             aria-label="Άνοιγμα μενού"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+              />
             </svg>
           </button>
 
@@ -68,7 +81,7 @@ export function ProducerShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 min-h-0 overflow-y-auto p-4 lg:p-6">
           {children}
         </main>
       </div>
