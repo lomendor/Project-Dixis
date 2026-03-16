@@ -38,7 +38,7 @@ I am the **CTO/lead engineer** of Dixis. I have:
 - Realistic Year 1: 10-15 producers, €2.5-4K commission
 - First target: €150/mo commission = covers accountant = breakeven
 
-**Strategy**: B2C first → prove model → B2B later. No premature features.
+**Strategy**: B2B-first pivot (restaurants, hotels, deli, catering). D2C stays as-is.
 
 ---
 

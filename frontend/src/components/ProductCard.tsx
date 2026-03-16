@@ -224,7 +224,7 @@ export function ProductCard({
         <Link href={productUrl} className="block mb-1.5">
           <h3
             data-testid="product-card-title"
-            className="text-sm sm:text-[15px] font-medium text-neutral-800 line-clamp-2 leading-snug hover:text-primary transition-colors"
+            className="text-[15px] sm:text-base font-medium text-neutral-800 line-clamp-2 leading-snug hover:text-primary transition-colors"
           >
             {title}
           </h3>

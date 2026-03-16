@@ -23,12 +23,17 @@ export default function Footer() {
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-16 lg:py-20">
         {/* Main grid — 4 columns on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
-
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-4">
-            <Logo height={28} title="Dixis" showWordmark className="[&_span]:!text-white [&_img]:brightness-0 [&_img]:invert" />
+            <Logo
+              height={28}
+              title="Dixis"
+              showWordmark
+              className="[&_span]:!text-white [&_img]:brightness-0 [&_img]:invert"
+            />
             <p className="mt-4 text-sm leading-relaxed text-white/45 max-w-[280px]">
-              Αυθεντικά ελληνικά προϊόντα, απευθείας από τοπικούς παραγωγούς στο τραπέζι σας.
+              Αυθεντικά ελληνικά προϊόντα, απευθείας από τοπικούς παραγωγούς στο
+              τραπέζι σας.
             </p>
             <p className="mt-5 text-[11px] text-white/25 tracking-wide uppercase">
               Πάνω από 80% στον Παραγωγό &middot; Δίκαιο Εμπόριο
@@ -40,14 +45,26 @@ export default function Footer() {
             <h4 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest mb-4">
               Πλοήγηση
             </h4>
-            <nav className="flex flex-col gap-0.5" data-testid="footer-quick-links">
-              <Link href="/products" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+            <nav
+              className="flex flex-col gap-0.5"
+              data-testid="footer-quick-links"
+            >
+              <Link
+                href="/products"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Προϊόντα
               </Link>
-              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/producers"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Παραγωγοί
               </Link>
-              <Link href="/about" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/about"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Σχετικά με εμάς
               </Link>
             </nav>
@@ -59,10 +76,16 @@ export default function Footer() {
               Για Παραγωγούς
             </h4>
             <nav className="flex flex-col gap-0.5">
-              <Link href="/producers" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/producers"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Γίνε Παραγωγός
               </Link>
-              <Link href="/producers/login" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/producers/login"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Σύνδεση Παραγωγού
               </Link>
             </nav>
@@ -74,16 +97,28 @@ export default function Footer() {
               Υποστήριξη
             </h4>
             <nav className="flex flex-col gap-0.5">
-              <Link href="/faq" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/faq"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Συχνές Ερωτήσεις
               </Link>
-              <Link href="/contact" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/contact"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Επικοινωνία
               </Link>
-              <Link href="/terms" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/terms"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Όροι Χρήσης
               </Link>
-              <Link href="/privacy" className="py-1.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation">
+              <Link
+                href="/privacy"
+                className="py-2.5 text-sm text-white/55 hover:text-white transition-colors touch-manipulation"
+              >
                 Απόρρητο
               </Link>
             </nav>
@@ -93,11 +128,15 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 sm:mt-14 pt-5 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/25">
-            &copy; {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς παραγωγούς.
+            &copy; {new Date().getFullYear()} Dixis. Με αγάπη για τους τοπικούς
+            παραγωγούς.
           </p>
           {/* Language switcher */}
-          <div className="flex items-center gap-1 bg-white/5 rounded-full p-0.5" data-testid="footer-language-switcher">
-            {locales.map((loc) => (
+          <div
+            className="flex items-center gap-1 bg-white/5 rounded-full p-0.5"
+            data-testid="footer-language-switcher"
+          >
+            {locales.map(loc => (
               <button
                 key={loc}
                 onClick={() => handleLocaleChange(loc)}

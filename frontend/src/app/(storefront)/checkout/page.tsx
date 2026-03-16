@@ -1,16 +1,17 @@
-'use client'
+'use client';
 
-import { Suspense } from 'react'
-import LoadingSpinner from '@/components/LoadingSpinner'
-import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector'
-import { useTranslations } from '@/contexts/LocaleContext'
-import StripeProvider from '@/components/payment/StripeProvider'
-import StripePaymentForm from '@/components/payment/StripePaymentForm'
-import ShippingChangedModal from '@/components/checkout/ShippingChangedModal'
-import CheckoutStepper from '@/components/checkout/CheckoutStepper'
-import OrderSummary from './OrderSummary'
-import CustomerDetailsForm from './CustomerDetailsForm'
-import { useCheckout } from './useCheckout'
+import { Suspense } from 'react';
+import Link from 'next/link';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
+import { useTranslations } from '@/contexts/LocaleContext';
+import StripeProvider from '@/components/payment/StripeProvider';
+import StripePaymentForm from '@/components/payment/StripePaymentForm';
+import ShippingChangedModal from '@/components/checkout/ShippingChangedModal';
+import CheckoutStepper from '@/components/checkout/CheckoutStepper';
+import OrderSummary from './OrderSummary';
+import CustomerDetailsForm from './CustomerDetailsForm';
+import { useCheckout } from './useCheckout';
 
 function CheckoutContent() {
   const {
@@ -45,7 +46,7 @@ function CheckoutContent() {
     fetchCartShippingQuote,
     clearShippingState,
     t,
-  } = useCheckout()
+  } = useCheckout();
 
   // SSR/hydration loading
   if (!isMounted) {
@@ -55,7 +56,7 @@ function CheckoutContent() {
           <LoadingSpinner text={t('checkoutPage.loading')} />
         </div>
       </main>
-    )
+    );
   }
 
   // Empty cart
@@ -64,24 +65,34 @@ function CheckoutContent() {
       <main className="min-h-screen bg-neutral-50 py-8 px-4">
         <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
           <p className="text-neutral-600 mb-4">{t('checkoutPage.emptyCart')}</p>
-          <a href="/products" className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation">
+          <Link
+            href="/products"
+            className="inline-block bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light active:opacity-90 touch-manipulation"
+          >
             {t('checkoutPage.viewProducts')}
-          </a>
+          </Link>
         </div>
       </main>
-    )
+    );
   }
 
   // Stripe payment view
   if (stripeClientSecret && pendingOrderId) {
     return (
-      <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
+      <main
+        className="min-h-screen bg-neutral-50 py-8 px-4"
+        data-testid="checkout-page"
+      >
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-xl sm:text-2xl font-bold mb-6">{t('checkout.title')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-6">
+            {t('checkout.title')}
+          </h1>
           <CheckoutStepper currentStep={3} />
 
           <div className="bg-white border rounded-xl p-6 mb-6">
-            <h2 className="font-semibold mb-4">{t('checkoutPage.cardPayment')}</h2>
+            <h2 className="font-semibold mb-4">
+              {t('checkoutPage.cardPayment')}
+            </h2>
             <p className="text-sm text-neutral-600 mb-4">
               {t('checkoutPage.securePayment')}
             </p>
@@ -96,7 +107,10 @@ function CheckoutContent() {
             </StripeProvider>
 
             {error && (
-              <div className="mt-4 text-red-600 text-sm" data-testid="payment-error">
+              <div
+                className="mt-4 text-red-600 text-sm"
+                data-testid="payment-error"
+              >
                 {error}
               </div>
             )}
@@ -111,14 +125,22 @@ function CheckoutContent() {
           </div>
         </div>
       </main>
-    )
+    );
   }
 
   // Main checkout view
   return (
-    <main className="min-h-screen bg-neutral-50 py-8 px-4" data-testid="checkout-page">
+    <main
+      className="min-h-screen bg-neutral-50 py-8 px-4"
+      data-testid="checkout-page"
+    >
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6" data-testid="checkout-title">{t('checkout.title')}</h1>
+        <h1
+          className="text-xl sm:text-2xl font-bold mb-6"
+          data-testid="checkout-title"
+        >
+          {t('checkout.title')}
+        </h1>
         <CheckoutStepper currentStep={1} />
 
         <OrderSummary
@@ -131,8 +153,14 @@ function CheckoutContent() {
           cartShippingError={cartShippingError}
         />
 
-        <form onSubmit={handleSubmit} className="bg-white border rounded-xl p-6" data-testid="checkout-form">
-          <h2 className="font-semibold mb-4">{t('checkoutPage.shippingDetails')}</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border rounded-xl p-6"
+          data-testid="checkout-form"
+        >
+          <h2 className="font-semibold mb-4">
+            {t('checkoutPage.shippingDetails')}
+          </h2>
 
           <CustomerDetailsForm
             isGuest={isGuest}
@@ -156,14 +184,20 @@ function CheckoutContent() {
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm mt-4" data-testid="checkout-error">
+            <div
+              className="text-red-600 text-sm mt-4"
+              data-testid="checkout-error"
+            >
               {error}
             </div>
           )}
 
           {/* Shipping error with retry — prevents silent disabled button */}
           {cartShippingError && !shippingLoading && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center justify-between gap-2" data-testid="shipping-error">
+            <div
+              className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center justify-between gap-2"
+              data-testid="shipping-error"
+            >
               <span>{cartShippingError}</span>
               <button
                 type="button"
@@ -177,7 +211,13 @@ function CheckoutContent() {
 
           <button
             type="submit"
-            disabled={loading || cardProcessing || !!cartShippingError || shippingLoading || (!shippingQuote && !cartShippingQuote)}
+            disabled={
+              loading ||
+              cardProcessing ||
+              !!cartShippingError ||
+              shippingLoading ||
+              (!shippingQuote && !cartShippingQuote)
+            }
             className="w-full h-12 mt-4 bg-primary hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg text-base touch-manipulation active:opacity-90"
             data-testid="checkout-submit"
           >
@@ -190,12 +230,32 @@ function CheckoutContent() {
                   : t('checkoutPage.completeOrder')}
           </button>
 
-          {/* T3-02: Trust signals for Greek market */}
-          <div className="mt-3 flex items-center justify-center gap-2 text-xs text-neutral-500">
-            <svg className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <span>{t('checkoutPage.securePaymentTrust')}</span>
+          {/* S0-06: Intermediary disclaimer + trust signals */}
+          <div className="mt-3 space-y-1.5 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs text-neutral-500">
+              <svg
+                className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              <span>{t('checkoutPage.securePaymentTrust')}</span>
+            </div>
+            <p
+              className="text-[11px] text-neutral-400 leading-relaxed"
+              data-testid="checkout-intermediary-disclaimer"
+            >
+              {
+                'Η Dixis διαμεσολαβεί μεταξύ παραγωγών και αγοραστών. Κάθε προϊόν αποστέλλεται απευθείας από τον παραγωγό.'
+              }
+            </p>
           </div>
         </form>
       </div>
@@ -208,20 +268,22 @@ function CheckoutContent() {
         onCancel={handleShippingCancel}
       />
     </main>
-  )
+  );
 }
 
 export default function CheckoutPage() {
-  const t = useTranslations()
+  const t = useTranslations();
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-neutral-50 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
-          <LoadingSpinner text={t('checkoutPage.loading')} />
-        </div>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-neutral-50 py-8 px-4">
+          <div className="max-w-2xl mx-auto bg-white border rounded-xl p-6 sm:p-10 text-center">
+            <LoadingSpinner text={t('checkoutPage.loading')} />
+          </div>
+        </main>
+      }
+    >
       <CheckoutContent />
     </Suspense>
-  )
+  );
 }

@@ -4,6 +4,8 @@ namespace App\Services\Payment;
 
 use App\Contracts\PaymentProviderInterface;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Services\CommissionService;
 use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\StripeClient;
@@ -19,6 +21,58 @@ class StripePaymentProvider implements PaymentProviderInterface
     {
         $this->stripe = new StripeClient(config('services.stripe.secret_key'));
         $this->webhookSecret = config('services.stripe.webhook_secret');
+    }
+
+    /**
+     * S0-09: Resolve Direct Charge params for single-producer orders.
+     *
+     * Returns ['connected_account_id' => 'acct_xxx', 'application_fee_cents' => int]
+     * or null if Direct Charges don't apply (multi-producer, Connect disabled, producer not connected).
+     *
+     * Decision: Direct Charges (not SCT, not Destination) — locked 2026-03.
+     */
+    private function resolveDirectChargeParams(Order $order, int $totalCents): ?array
+    {
+        // Gate: Stripe Connect must be enabled
+        if (!StripeConnectService::isEnabled()) {
+            return null;
+        }
+
+        // Gate: multi-producer orders stay on SCT
+        if ($order->is_child_order && $order->checkout_session_id) {
+            return null;
+        }
+
+        // Find the single producer for this order
+        $producerIds = OrderItem::where('order_id', $order->id)
+            ->whereNotNull('producer_id')
+            ->distinct()
+            ->pluck('producer_id');
+
+        if ($producerIds->count() !== 1) {
+            return null; // 0 or multiple producers → SCT fallback
+        }
+
+        $producer = \App\Models\Producer::find($producerIds->first());
+        if (!$producer) {
+            return null;
+        }
+
+        // Producer must have active Connect account
+        $connectService = app(StripeConnectService::class);
+        if (!$connectService->isProducerConnected($producer)) {
+            return null;
+        }
+
+        // Calculate application fee (Dixis commission) via CommissionService
+        $commissionService = app(CommissionService::class);
+        $fee = $commissionService->calculateFee($order);
+        $applicationFeeCents = max(0, $fee['commission_cents']);
+
+        return [
+            'connected_account_id' => $producer->stripe_connect_id,
+            'application_fee_cents' => $applicationFeeCents,
+        ];
     }
 
     /**
@@ -83,8 +137,14 @@ class StripePaymentProvider implements PaymentProviderInterface
                 ]);
             }
 
+            // S0-09: Direct Charges for single-producer orders
+            // When Connect is enabled and order has exactly one producer with active account,
+            // charge directly on their connected account with application_fee for Dixis.
+            // Multi-producer orders fall back to Separate Charges & Transfers (SCT).
+            $directChargeParams = $this->resolveDirectChargeParams($order, $paymentAmountCents);
+
             // Create payment intent with correct amount
-            $paymentIntent = $this->stripe->paymentIntents->create([
+            $piParams = [
                 'amount' => $paymentAmountCents,
                 'currency' => 'eur',
                 'customer' => $customer?->id,
@@ -93,7 +153,29 @@ class StripePaymentProvider implements PaymentProviderInterface
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
-            ]);
+            ];
+
+            // Apply Direct Charges params (on_behalf_of + application_fee_amount)
+            if ($directChargeParams) {
+                $piParams['on_behalf_of'] = $directChargeParams['connected_account_id'];
+                $piParams['application_fee_amount'] = $directChargeParams['application_fee_cents'];
+                $metadata['charge_model'] = 'direct';
+                $metadata['connected_account_id'] = $directChargeParams['connected_account_id'];
+                $metadata['application_fee_cents'] = $directChargeParams['application_fee_cents'];
+                $piParams['metadata'] = $metadata;
+
+                Log::info('S0-09: Direct Charge payment init', [
+                    'order_id' => $order->id,
+                    'connected_account' => $directChargeParams['connected_account_id'],
+                    'application_fee_cents' => $directChargeParams['application_fee_cents'],
+                    'total_cents' => $paymentAmountCents,
+                ]);
+            } else {
+                $metadata['charge_model'] = 'sct';
+                $piParams['metadata'] = $metadata;
+            }
+
+            $paymentIntent = $this->stripe->paymentIntents->create($piParams);
 
             // Store payment intent ID in order + mark as stripe
             $order->update([
