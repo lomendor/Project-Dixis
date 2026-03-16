@@ -11,6 +11,7 @@ import ImageGallery from '@/components/product/ImageGallery';
 import { getBaseUrl } from '@/lib/site';
 import { getServerApiUrl } from '@/env';
 import { getCategoryBySlug } from '@/data/categories';
+import { FarmingMethodIcon } from '@/components/FarmingMethodIcon';
 
 // T3-01: ISR — regenerate every 5 minutes (was force-dynamic + revalidate=0)
 export const revalidate = 300;
@@ -38,7 +39,9 @@ async function getProductById(id: string) {
   }
 
   try {
-    const res = await fetch(`${base}/public/products/${id}`, { next: { revalidate: 300 } });
+    const res = await fetch(`${base}/public/products/${id}`, {
+      next: { revalidate: 300 },
+    });
     if (!res.ok) return null;
     const json = await res.json();
     const raw = json?.data ?? json;
@@ -55,13 +58,27 @@ async function getProductById(id: string) {
       isActive: raw.is_active !== false,
       category: raw.category,
       imageUrl: raw.image_url || raw.images?.[0]?.url || null,
-      images: (raw.images || []).map((img: any) => ({
-        id: img.id,
-        url: img.url || img.image_path,
-        altText: img.alt_text || null,
-        isPrimary: !!img.is_primary,
-      })),
-      producer: raw.producer ? { name: raw.producer.name, city: raw.producer.city || null, region: raw.producer.region || null } : null,
+      images: (raw.images || []).map(
+        (img: {
+          id: number;
+          url?: string;
+          image_path?: string;
+          alt_text?: string;
+          is_primary?: boolean;
+        }) => ({
+          id: img.id,
+          url: img.url || img.image_path,
+          altText: img.alt_text || null,
+          isPrimary: !!img.is_primary,
+        })
+      ),
+      producer: raw.producer
+        ? {
+            name: raw.producer.name,
+            city: raw.producer.city || null,
+            region: raw.producer.region || null,
+          }
+        : null,
       // Pass HOTFIX-MP-CHECKOUT-GUARD-01: Include producer_id for multi-producer cart detection
       producerId: raw.producer_id || raw.producer?.id || null,
       producerSlug: raw.producer?.slug || null,
@@ -81,14 +98,20 @@ async function getProductById(id: string) {
       origin: raw.origin || null,
       storageInstructions: raw.storage_instructions || null,
       shelfLife: raw.shelf_life || null,
-      weightPerUnit: raw.weight_per_unit ? parseFloat(raw.weight_per_unit) : null,
+      weightPerUnit: raw.weight_per_unit
+        ? parseFloat(raw.weight_per_unit)
+        : null,
     };
   } catch {
     return null;
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   const p = await getProductById(String(id || ''));
 
@@ -102,39 +125,56 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   return {
     title: p.title,
-    description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+    description:
+      p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
     alternates: {
-      canonical: url
+      canonical: url,
     },
     openGraph: {
       title: p.title,
-      description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+      description:
+        p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
       url,
       siteName: 'Dixis',
       images: [{ url: imageUrl, width: 1200, height: 630, alt: p.title }],
       locale: 'el_GR',
-      type: 'website'
+      type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: p.title,
-      description: p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
-      images: [imageUrl]
-    }
+      description:
+        p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+      images: [imageUrl],
+    },
   };
 }
 
-export default async function Page({ params }:{ params: Promise<{ id:string }> }){
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const t = await getTranslations();
   const { id } = await params;
   const p = await getProductById(String(id || ''));
 
-  if(!p || !p.isActive) return notFound();
+  if (!p || !p.isActive) return notFound();
 
-  const fmt=(n:number)=> new Intl.NumberFormat('el-GR',{style:'currency',currency:'EUR'}).format(n);
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('el-GR', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(n);
 
   // Unit code → Greek label mapping
-  const unitLabels: Record<string, string> = { kg: 'κιλό', g: 'γρ.', L: 'λίτρο', ml: 'ml', 'τεμ': 'τεμ.' };
+  const unitLabels: Record<string, string> = {
+    kg: 'κιλό',
+    g: 'γρ.',
+    L: 'λίτρο',
+    ml: 'ml',
+    τεμ: 'τεμ.',
+  };
   const unitLabel = unitLabels[p.unit] || p.unit;
 
   // JSON-LD Product Schema
@@ -142,25 +182,31 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    'name': p.title,
-    'description': p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
-    'image': p.imageUrl || `${baseUrl}/og-default.png`,
-    'url': `${baseUrl}/products/${id}`,
-    'offers': {
+    name: p.title,
+    description:
+      p.description || `${p.title} - Τοπικά προϊόντα από Έλληνες παραγωγούς`,
+    image: p.imageUrl || `${baseUrl}/og-default.png`,
+    url: `${baseUrl}/products/${id}`,
+    offers: {
       '@type': 'Offer',
-      'price': Number(p.price || 0),
-      'priceCurrency': 'EUR',
-      'availability': Number(p.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      'url': `${baseUrl}/products/${id}`
+      price: Number(p.price || 0),
+      priceCurrency: 'EUR',
+      availability:
+        Number(p.stock || 0) > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      url: `${baseUrl}/products/${id}`,
     },
     // S1-02 SEO: Show star ratings in Google search results
-    ...(p.reviewsAvgRating ? {
-      'aggregateRating': {
-        '@type': 'AggregateRating',
-        'ratingValue': p.reviewsAvgRating,
-        'reviewCount': p.reviewsCount || 1
-      }
-    } : {})
+    ...(p.reviewsAvgRating
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: p.reviewsAvgRating,
+            reviewCount: p.reviewsCount || 1,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -172,290 +218,444 @@ export default async function Page({ params }:{ params: Promise<{ id:string }> }
       {/* T3-03: BreadcrumbList JSON-LD for Google rich results */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          'itemListElement': [
-            { '@type': 'ListItem', 'position': 1, 'name': 'Αρχική', 'item': baseUrl },
-            { '@type': 'ListItem', 'position': 2, 'name': 'Προϊόντα', 'item': `${baseUrl}/products` },
-            { '@type': 'ListItem', 'position': 3, 'name': p.title, 'item': `${baseUrl}/products/${id}` },
-          ],
-        }) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Αρχική',
+                item: baseUrl,
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Προϊόντα',
+                item: `${baseUrl}/products`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: p.title,
+                item: `${baseUrl}/products/${id}`,
+              },
+            ],
+          }),
+        }}
       />
       <main className="min-h-screen bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1200px] mx-auto">
-      {/* Breadcrumb */}
-      <nav className="mb-6 text-sm" aria-label="Breadcrumb">
-        <ol className="flex items-center gap-1.5 text-neutral-500">
-          <li>
-            <Link href="/" className="hover:text-primary transition-colors">
-              {t('nav.home')}
-            </Link>
-          </li>
-          <li aria-hidden="true">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </li>
-          <li>
-            <Link href="/products" className="hover:text-primary transition-colors">
-              {t('products.title')}
-            </Link>
-          </li>
-          <li aria-hidden="true">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </li>
-          <li className="text-neutral-900 font-medium truncate max-w-[200px]">{p.title}</li>
-        </ol>
-      </nav>
-
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Product Image Gallery — Pass IMAGE-GALLERY-01 */}
-        <ImageGallery images={p.images} fallbackUrl={p.imageUrl} alt={p.title} />
-
-        {/* Product Info */}
-        <div className="flex flex-col">
-          {/* Producer ABOVE title (provenance-first, Natoora pattern) */}
-          {p.producer?.name && (
-            <p className="text-xs text-neutral-400 mb-2" data-testid="product-producer">
-              {(p.producerSlug || p.producerId) ? (
-                <Link href={`/producers/${p.producerSlug || p.producerId}`} className="hover:text-primary transition-colors">
-                  {p.producer.name}
+        <div className="max-w-[1200px] mx-auto">
+          {/* Breadcrumb */}
+          <nav className="mb-6 text-sm" aria-label="Breadcrumb">
+            <ol className="flex items-center gap-1.5 text-neutral-500">
+              <li>
+                <Link href="/" className="hover:text-primary transition-colors">
+                  {t('nav.home')}
                 </Link>
-              ) : (
-                <span>{p.producer.name}</span>
-              )}
-              {p.producer.city && (
-                <span className="text-neutral-400 font-normal normal-case tracking-normal"> · {p.producer.city}{p.producer.region ? `, ${p.producer.region}` : ''}</span>
-              )}
-            </p>
-          )}
+              </li>
+              <li aria-hidden="true">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </li>
+              <li>
+                <Link
+                  href="/products"
+                  className="hover:text-primary transition-colors"
+                >
+                  {t('products.title')}
+                </Link>
+              </li>
+              <li aria-hidden="true">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </li>
+              <li className="text-neutral-900 font-medium truncate max-w-[200px]">
+                {p.title}
+              </li>
+            </ol>
+          </nav>
 
-          <div className="flex items-start gap-2 mb-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 flex-grow" data-testid="product-title">
-              {p.title}
-            </h1>
-            {/* S1-04: Favorite heart button */}
-            <FavoriteButtonDetail
-              item={{
-                id: String(p.id),
-                title: p.title,
-                priceCents: Math.round(Number(p.price || 0) * 100),
-                imageUrl: p.imageUrl || undefined,
-                producer: p.producerName || undefined,
-                producerId: p.producerId ? String(p.producerId) : undefined,
-                producerSlug: p.producerSlug || undefined,
-              }}
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Product Image Gallery — Pass IMAGE-GALLERY-01 */}
+            <ImageGallery
+              images={p.images}
+              fallbackUrl={p.imageUrl}
+              alt={p.title}
             />
-          </div>
 
-          {/* S1-02: Star rating summary */}
-          {p.reviewsAvgRating && (
-            <div className="mb-1">
-              <StarRating rating={p.reviewsAvgRating} count={p.reviewsCount} size="sm" />
-            </div>
-          )}
-
-          {/* Category + Origin */}
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            {p.category && (
-              <span className="text-sm text-neutral-500">{getCategoryBySlug(p.category)?.labelEl || p.category}</span>
-            )}
-            {p.origin && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200" data-testid="origin-badge">
-                📍 {p.origin}
-              </span>
-            )}
-          </div>
-
-          {/* S1-01: Cultivation Type Badge (single source of truth — no separate organic badge) */}
-          {p.cultivationType && (
-            <div className="mb-4" data-testid="cultivation-badge">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                p.cultivationType === 'organic_certified' ? 'bg-green-100 text-green-800' :
-                p.cultivationType === 'organic_transitional' ? 'bg-lime-100 text-lime-800' :
-                p.cultivationType === 'biodynamic' ? 'bg-purple-100 text-purple-800' :
-                p.cultivationType === 'traditional_natural' ? 'bg-amber-100 text-amber-800' :
-                p.cultivationType === 'conventional' ? 'bg-neutral-100 text-neutral-700' :
-                'bg-neutral-100 text-neutral-600'
-              }`}>
-                <span>{
-                  p.cultivationType === 'organic_certified' ? '🌿 Βιολογική (Πιστοποιημένη)' :
-                  p.cultivationType === 'organic_transitional' ? '🌱 Βιολογική (Μεταβατική)' :
-                  p.cultivationType === 'biodynamic' ? '✨ Βιοδυναμική' :
-                  p.cultivationType === 'traditional_natural' ? '🌾 Παραδοσιακή / Φυσική' :
-                  p.cultivationType === 'conventional' ? 'Συμβατική' :
-                  'Άλλο'
-                }</span>
-              </span>
-              {p.cultivationDescription && (
-                <p className="mt-1 text-xs text-neutral-500">{p.cultivationDescription}</p>
-              )}
-            </div>
-          )}
-
-          {/* Pass SEASONAL-DISCOUNT-01: Seasonal badge on detail page */}
-          {p.isSeasonal && (
-            <div className="mb-3" data-testid="seasonal-badge">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                🍊 Εποχιακό Προϊόν
-              </span>
-            </div>
-          )}
-
-          {/* Price + Stock */}
-          <div className="mb-6 flex items-baseline gap-3">
-            {p.discountPrice != null && p.discountPrice < Number(p.price || 0) ? (
-              <>
-                <span className="text-3xl font-bold text-red-600" data-testid="product-price">
-                  {fmt(p.discountPrice)}
-                </span>
-                <span className="text-lg text-neutral-400 line-through" data-testid="product-original-price">
-                  {fmt(Number(p.price || 0))}
-                </span>
-              </>
-            ) : (
-              <span className="text-3xl font-bold text-neutral-900" data-testid="product-price">
-                {fmt(Number(p.price||0))}
-              </span>
-            )}
-            <span className="text-lg text-neutral-500">/ {unitLabel}</span>
-            {p.weightPerUnit && (
-              <span className="text-sm text-neutral-400 ml-1">· {p.weightPerUnit >= 1000 ? `${(p.weightPerUnit / 1000).toFixed(1)} kg` : `${p.weightPerUnit} g`}</span>
-            )}
-            <span
-              className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                Number(p.stock||0) > 0
-                  ? 'bg-primary-pale text-primary'
-                  : 'bg-red-100 text-red-600'
-              }`}
-              data-testid="product-stock"
-            >
-              {Number(p.stock||0) > 0 ? t('product.inStock') : t('product.outOfStock')}
-            </span>
-          </div>
-
-          {/* Description */}
-          {p.description && (
-            <div className="mb-6">
-              <h2 className="text-sm font-semibold text-neutral-900 mb-2">
-                {t('product.description')}
-              </h2>
-              <p className="text-neutral-600 leading-relaxed whitespace-pre-line text-[15px]">
-                {p.description}
-              </p>
-            </div>
-          )}
-
-          {/* EU 1169/2011: Allergens display */}
-          {p.allergens && p.allergens.length > 0 && (
-            <div className="mb-6" data-testid="allergens-section">
-              <h2 className="text-base font-semibold text-neutral-900 mb-2">
-                Αλλεργιογόνα
-              </h2>
-              <div className="flex flex-wrap gap-1.5">
-                {p.allergens.map((a: string) => {
-                  const labels: Record<string, string> = {
-                    gluten: 'Γλουτένη', crustaceans: 'Καρκινοειδή', eggs: 'Αβγά',
-                    fish: 'Ψάρια', peanuts: 'Αράπικα φιστίκια', soybeans: 'Σόγια',
-                    milk: 'Γάλα', tree_nuts: 'Ξηροί καρποί', celery: 'Σέλινο',
-                    mustard: 'Μουστάρδα', sesame: 'Σουσάμι', sulphites: 'Θειώδη',
-                    lupin: 'Λούπινα', molluscs: 'Μαλάκια',
-                  };
-                  return (
-                    <span key={a} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
-                      {labels[a] || a}
+            {/* Product Info */}
+            <div className="flex flex-col">
+              {/* Producer ABOVE title (provenance-first, Natoora pattern) */}
+              {p.producer?.name && (
+                <p
+                  className="text-xs text-neutral-400 mb-2"
+                  data-testid="product-producer"
+                >
+                  {p.producerSlug || p.producerId ? (
+                    <Link
+                      href={`/producers/${p.producerSlug || p.producerId}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {p.producer.name}
+                    </Link>
+                  ) : (
+                    <span>{p.producer.name}</span>
+                  )}
+                  {p.producer.city && (
+                    <span className="text-neutral-400 font-normal normal-case tracking-normal">
+                      {' '}
+                      · {p.producer.city}
+                      {p.producer.region ? `, ${p.producer.region}` : ''}
                     </span>
-                  );
-                })}
+                  )}
+                </p>
+              )}
+
+              <div className="flex items-start gap-2 mb-2">
+                <h1
+                  className="text-2xl sm:text-3xl font-bold text-neutral-900 flex-grow"
+                  data-testid="product-title"
+                >
+                  {p.title}
+                </h1>
+                {/* S1-04: Favorite heart button */}
+                <FavoriteButtonDetail
+                  item={{
+                    id: String(p.id),
+                    title: p.title,
+                    priceCents: Math.round(Number(p.price || 0) * 100),
+                    imageUrl: p.imageUrl || undefined,
+                    producer: p.producerName || undefined,
+                    producerId: p.producerId ? String(p.producerId) : undefined,
+                    producerSlug: p.producerSlug || undefined,
+                  }}
+                />
               </div>
-            </div>
-          )}
 
-          {/* Ingredients display */}
-          {p.ingredients && (
-            <div className="mb-6" data-testid="ingredients-section">
-              <h2 className="text-base font-semibold text-neutral-900 mb-2">
-                Συστατικά
-              </h2>
-              <p className="text-neutral-600 text-sm leading-relaxed whitespace-pre-line">
-                {p.ingredients}
-              </p>
-            </div>
-          )}
-
-          {/* Product details: weight, storage, shelf life */}
-          {(p.weightPerUnit || p.storageInstructions || p.shelfLife) && (
-            <div className="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 space-y-2" data-testid="product-details-section">
-              {p.weightPerUnit && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-neutral-500 w-36">Καθαρό βάρος:</span>
-                  <span className="text-neutral-800 font-medium">{p.weightPerUnit >= 1000 ? `${(p.weightPerUnit / 1000).toFixed(1)} kg` : `${p.weightPerUnit} g`}</span>
+              {/* S1-02: Star rating summary */}
+              {p.reviewsAvgRating && (
+                <div className="mb-1">
+                  <StarRating
+                    rating={p.reviewsAvgRating}
+                    count={p.reviewsCount}
+                    size="sm"
+                  />
                 </div>
               )}
-              {p.storageInstructions && (
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="text-neutral-500 w-36 flex-shrink-0">Αποθήκευση:</span>
-                  <span className="text-neutral-800">{p.storageInstructions}</span>
-                </div>
-              )}
-              {p.shelfLife && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-neutral-500 w-36">Διάρκεια ζωής:</span>
-                  <span className="text-neutral-800">{p.shelfLife}</span>
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* S3-01: Cost Transparency — show where the money goes */}
-          <div className="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-3" data-testid="cost-transparency">
-            <div className="flex items-start gap-2">
-              <svg className="w-4 h-4 mt-0.5 text-accent-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">
-                  Πάνω από 80¢ ανά €1 πάνε στον παραγωγό
-                </p>
-                <p className="text-xs text-neutral-600 mt-0.5">
-                  Ασφαλείς πληρωμές · Υποστήριξη · Ποιοτικός έλεγχος
-                </p>
+              {/* Category + Origin */}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                {p.category && (
+                  <span className="text-sm text-neutral-500">
+                    {getCategoryBySlug(p.category)?.labelEl || p.category}
+                  </span>
+                )}
+                {p.origin && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200"
+                    data-testid="origin-badge"
+                  >
+                    📍 {p.origin}
+                  </span>
+                )}
+              </div>
+
+              {/* S1-01: Cultivation Type Badge (single source of truth — no separate organic badge) */}
+              {p.cultivationType && (
+                <div className="mb-4" data-testid="cultivation-badge">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                      p.cultivationType === 'organic_certified'
+                        ? 'bg-green-100 text-green-800'
+                        : p.cultivationType === 'organic_transitional'
+                          ? 'bg-lime-100 text-lime-800'
+                          : p.cultivationType === 'biodynamic'
+                            ? 'bg-purple-100 text-purple-800'
+                            : p.cultivationType === 'traditional_natural'
+                              ? 'bg-amber-100 text-amber-800'
+                              : p.cultivationType === 'conventional'
+                                ? 'bg-neutral-100 text-neutral-700'
+                                : 'bg-neutral-100 text-neutral-600'
+                    }`}
+                  >
+                    <FarmingMethodIcon method={p.cultivationType} size={16} />
+                    <span>
+                      {p.cultivationType === 'organic_certified'
+                        ? 'Βιολογική (Πιστοποιημένη)'
+                        : p.cultivationType === 'organic_transitional'
+                          ? 'Βιολογική (Μεταβατική)'
+                          : p.cultivationType === 'biodynamic'
+                            ? 'Βιοδυναμική'
+                            : p.cultivationType === 'traditional_natural'
+                              ? 'Παραδοσιακή / Φυσική'
+                              : p.cultivationType === 'conventional'
+                                ? 'Συμβατική'
+                                : 'Άλλο'}
+                    </span>
+                  </span>
+                  {p.cultivationDescription && (
+                    <p className="mt-1 text-xs text-neutral-500">
+                      {p.cultivationDescription}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Pass SEASONAL-DISCOUNT-01: Seasonal badge on detail page */}
+              {p.isSeasonal && (
+                <div className="mb-3" data-testid="seasonal-badge">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                    🍊 Εποχιακό Προϊόν
+                  </span>
+                </div>
+              )}
+
+              {/* Price + Stock */}
+              <div className="mb-6 flex items-baseline gap-3">
+                {p.discountPrice != null &&
+                p.discountPrice < Number(p.price || 0) ? (
+                  <>
+                    <span
+                      className="text-3xl font-bold text-red-600"
+                      data-testid="product-price"
+                    >
+                      {fmt(p.discountPrice)}
+                    </span>
+                    <span
+                      className="text-lg text-neutral-400 line-through"
+                      data-testid="product-original-price"
+                    >
+                      {fmt(Number(p.price || 0))}
+                    </span>
+                  </>
+                ) : (
+                  <span
+                    className="text-3xl font-bold text-neutral-900"
+                    data-testid="product-price"
+                  >
+                    {fmt(Number(p.price || 0))}
+                  </span>
+                )}
+                <span className="text-lg text-neutral-500">/ {unitLabel}</span>
+                {p.weightPerUnit && (
+                  <span className="text-sm text-neutral-400 ml-1">
+                    ·{' '}
+                    {p.weightPerUnit >= 1000
+                      ? `${(p.weightPerUnit / 1000).toFixed(1)} kg`
+                      : `${p.weightPerUnit} g`}
+                  </span>
+                )}
+                <span
+                  className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    Number(p.stock || 0) > 0
+                      ? 'bg-primary-pale text-primary'
+                      : 'bg-red-100 text-red-600'
+                  }`}
+                  data-testid="product-stock"
+                >
+                  {Number(p.stock || 0) > 0
+                    ? t('product.inStock')
+                    : t('product.outOfStock')}
+                </span>
+              </div>
+
+              {/* Description */}
+              {p.description && (
+                <div className="mb-6">
+                  <h2 className="text-sm font-semibold text-neutral-900 mb-2">
+                    {t('product.description')}
+                  </h2>
+                  <p className="text-neutral-600 leading-relaxed whitespace-pre-line text-[15px]">
+                    {p.description}
+                  </p>
+                </div>
+              )}
+
+              {/* EU 1169/2011: Allergens display */}
+              {p.allergens && p.allergens.length > 0 && (
+                <div className="mb-6" data-testid="allergens-section">
+                  <h2 className="text-base font-semibold text-neutral-900 mb-2">
+                    Αλλεργιογόνα
+                  </h2>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.allergens.map((a: string) => {
+                      const labels: Record<string, string> = {
+                        gluten: 'Γλουτένη',
+                        crustaceans: 'Καρκινοειδή',
+                        eggs: 'Αβγά',
+                        fish: 'Ψάρια',
+                        peanuts: 'Αράπικα φιστίκια',
+                        soybeans: 'Σόγια',
+                        milk: 'Γάλα',
+                        tree_nuts: 'Ξηροί καρποί',
+                        celery: 'Σέλινο',
+                        mustard: 'Μουστάρδα',
+                        sesame: 'Σουσάμι',
+                        sulphites: 'Θειώδη',
+                        lupin: 'Λούπινα',
+                        molluscs: 'Μαλάκια',
+                      };
+                      return (
+                        <span
+                          key={a}
+                          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200"
+                        >
+                          {labels[a] || a}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Ingredients display */}
+              {p.ingredients && (
+                <div className="mb-6" data-testid="ingredients-section">
+                  <h2 className="text-base font-semibold text-neutral-900 mb-2">
+                    Συστατικά
+                  </h2>
+                  <p className="text-neutral-600 text-sm leading-relaxed whitespace-pre-line">
+                    {p.ingredients}
+                  </p>
+                </div>
+              )}
+
+              {/* Product details: weight, storage, shelf life */}
+              {(p.weightPerUnit || p.storageInstructions || p.shelfLife) && (
+                <div
+                  className="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-4 space-y-2"
+                  data-testid="product-details-section"
+                >
+                  {p.weightPerUnit && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-neutral-500 w-36">
+                        Καθαρό βάρος:
+                      </span>
+                      <span className="text-neutral-800 font-medium">
+                        {p.weightPerUnit >= 1000
+                          ? `${(p.weightPerUnit / 1000).toFixed(1)} kg`
+                          : `${p.weightPerUnit} g`}
+                      </span>
+                    </div>
+                  )}
+                  {p.storageInstructions && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <span className="text-neutral-500 w-36 flex-shrink-0">
+                        Αποθήκευση:
+                      </span>
+                      <span className="text-neutral-800">
+                        {p.storageInstructions}
+                      </span>
+                    </div>
+                  )}
+                  {p.shelfLife && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-neutral-500 w-36">
+                        Διάρκεια ζωής:
+                      </span>
+                      <span className="text-neutral-800">{p.shelfLife}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* S3-01: Cost Transparency — show where the money goes */}
+              <div
+                className="mb-6 rounded-lg border border-neutral-200 bg-neutral-50 p-3"
+                data-testid="cost-transparency"
+              >
+                <div className="flex items-start gap-2">
+                  <svg
+                    className="w-4 h-4 mt-0.5 text-accent-gold flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-neutral-900">
+                      Πάνω από 80¢ ανά €1 πάνε στον παραγωγό
+                    </p>
+                    <p className="text-xs text-neutral-600 mt-0.5">
+                      Ασφαλείς πληρωμές · Υποστήριξη · Ποιοτικός έλεγχος
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add to Cart — Pass CART-UX-FEEDBACK-01: include imageUrl */}
+              <div className="mt-6">
+                <Add
+                  product={{ ...p, imageUrl: p.imageUrl || null }}
+                  translations={{
+                    addToCart: t('product.addToCart'),
+                    cartAdded: t('cart.added'),
+                  }}
+                />
               </div>
             </div>
           </div>
 
-          {/* Add to Cart — Pass CART-UX-FEEDBACK-01: include imageUrl */}
-          <div className="mt-6">
-            <Add
-              product={{ ...p, imageUrl: p.imageUrl || null }}
-              translations={{
-                addToCart: t('product.addToCart'),
-                cartAdded: t('cart.added')
-              }}
-            />
+          {/* S1-02: Reviews Section */}
+          <ReviewSection productId={p.id} />
+
+          {/* RELATED-PRODUCTS-01: "You might also like" section */}
+          <RelatedProducts productId={p.id} producerId={p.producerId} />
+
+          {/* Back to Products */}
+          <div className="mt-10 pt-6 border-t border-neutral-100">
+            <Link
+              href="/products"
+              className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors"
+            >
+              <svg
+                className="w-4 h-4 mr-1.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              {t('product.backToProducts')}
+            </Link>
           </div>
         </div>
-      </div>
-
-      {/* S1-02: Reviews Section */}
-      <ReviewSection productId={p.id} />
-
-      {/* RELATED-PRODUCTS-01: "You might also like" section */}
-      <RelatedProducts productId={p.id} producerId={p.producerId} />
-
-      {/* Back to Products */}
-      <div className="mt-10 pt-6 border-t border-neutral-100">
-        <Link
-          href="/products"
-          className="inline-flex items-center text-sm text-neutral-500 hover:text-primary transition-colors"
-        >
-          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {t('product.backToProducts')}
-        </Link>
-      </div>
-      </div>
-    </main>
+      </main>
     </>
   );
 }
