@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import '../styles/brand.css';
 
 /* =============================================================================
@@ -44,69 +44,67 @@
    ============================================================================= */
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-* {
-  box-sizing: border-box;
-}
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* =============================================================================
+  /* =============================================================================
    TYPOGRAPHY
    ============================================================================= */
 
-h1 {
-  font-size: var(--text-heading);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-  color: var(--neutral-900);
-  margin: var(--space-6) 0 var(--space-4);
-}
+  h1 {
+    font-size: var(--text-heading);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+    color: var(--neutral-900);
+    margin: var(--space-6) 0 var(--space-4);
+  }
 
-h2 {
-  font-size: var(--text-subheading);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.3;
-  color: var(--neutral-900);
-  margin: var(--space-5) 0 var(--space-3);
-}
+  h2 {
+    font-size: var(--text-subheading);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+    color: var(--neutral-900);
+    margin: var(--space-5) 0 var(--space-3);
+  }
 
-h3 {
-  font-size: var(--text-title);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.4;
-  color: var(--neutral-800);
-  margin: var(--space-4) 0 var(--space-2);
-}
+  h3 {
+    font-size: var(--text-title);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.4;
+    color: var(--neutral-800);
+    margin: var(--space-4) 0 var(--space-2);
+  }
 
-p {
-  margin-bottom: var(--space-4);
-  color: var(--neutral-700);
-}
+  p {
+    margin-bottom: var(--space-4);
+    color: var(--neutral-700);
+  }
 
-a {
-  color: var(--brand-primary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
+  a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
 
-a:hover {
-  color: var(--brand-primary-light);
-}
-
+  a:hover {
+    color: var(--brand-primary-light);
+  }
 } /* end @layer base */
 
 /* =============================================================================
@@ -310,16 +308,36 @@ textarea::placeholder {
 }
 
 /* Category background colors — 10 unified categories */
-.category-olive { background: var(--category-olive); }
-.category-honey { background: var(--category-honey); }
-.category-nuts { background: var(--category-nuts); }
-.category-cosmetics { background: var(--category-cosmetics); }
-.category-beverages { background: var(--category-beverages); }
-.category-sweets { background: var(--category-sweets); }
-.category-pasta { background: var(--category-pasta); }
-.category-herbs { background: var(--category-herbs); }
-.category-sauces { background: var(--category-sauces); }
-.category-legumes { background: var(--category-legumes); }
+.category-olive {
+  background: var(--category-olive);
+}
+.category-honey {
+  background: var(--category-honey);
+}
+.category-nuts {
+  background: var(--category-nuts);
+}
+.category-cosmetics {
+  background: var(--category-cosmetics);
+}
+.category-beverages {
+  background: var(--category-beverages);
+}
+.category-sweets {
+  background: var(--category-sweets);
+}
+.category-pasta {
+  background: var(--category-pasta);
+}
+.category-herbs {
+  background: var(--category-herbs);
+}
+.category-sauces {
+  background: var(--category-sauces);
+}
+.category-legumes {
+  background: var(--category-legumes);
+}
 
 /* =============================================================================
    PRODUCT CARDS
@@ -426,11 +444,19 @@ textarea::placeholder {
 /* Grid column helpers (Tailwind grid + gap utilities preferred) */
 
 @media (max-width: 768px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* =============================================================================
@@ -482,14 +508,21 @@ textarea::placeholder {
    ============================================================================= */
 
 @supports (height: 100svh) {
-  main, .min-h-screen { min-height: 100svh !important; }
+  #main-content,
+  .min-h-screen {
+    min-height: 100svh !important;
+  }
 }
 
 @supports not (height: 100svh) {
-  main, .min-h-screen { min-height: -webkit-fill-available !important; }
+  #main-content,
+  .min-h-screen {
+    min-height: -webkit-fill-available !important;
+  }
 }
 
-html, body {
+html,
+body {
   height: 100%;
   height: -webkit-fill-available;
 }
@@ -499,7 +532,10 @@ body {
 }
 
 @supports (height: 100dvh) {
-  main, .min-h-screen { min-height: 100dvh !important; }
+  #main-content,
+  .min-h-screen {
+    min-height: 100dvh !important;
+  }
 }
 
 .ios-products-safe {
@@ -508,7 +544,9 @@ body {
 }
 
 @supports (-webkit-touch-callout: none) {
-  .ios-products-safe { position: relative; }
+  .ios-products-safe {
+    position: relative;
+  }
 }
 
 /* =============================================================================
@@ -574,8 +612,9 @@ body {
 .section-reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .section-reveal.visible {
@@ -584,23 +623,50 @@ body {
 }
 
 /* Stagger children for product grids */
-.stagger-child { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
-.stagger-child.visible { opacity: 1; transform: translateY(0); }
-.stagger-child:nth-child(1) { transition-delay: 0ms; }
-.stagger-child:nth-child(2) { transition-delay: 70ms; }
-.stagger-child:nth-child(3) { transition-delay: 140ms; }
-.stagger-child:nth-child(4) { transition-delay: 210ms; }
-.stagger-child:nth-child(5) { transition-delay: 280ms; }
-.stagger-child:nth-child(6) { transition-delay: 350ms; }
-.stagger-child:nth-child(7) { transition-delay: 420ms; }
-.stagger-child:nth-child(8) { transition-delay: 490ms; }
+.stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+.stagger-child.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stagger-child:nth-child(1) {
+  transition-delay: 0ms;
+}
+.stagger-child:nth-child(2) {
+  transition-delay: 70ms;
+}
+.stagger-child:nth-child(3) {
+  transition-delay: 140ms;
+}
+.stagger-child:nth-child(4) {
+  transition-delay: 210ms;
+}
+.stagger-child:nth-child(5) {
+  transition-delay: 280ms;
+}
+.stagger-child:nth-child(6) {
+  transition-delay: 350ms;
+}
+.stagger-child:nth-child(7) {
+  transition-delay: 420ms;
+}
+.stagger-child:nth-child(8) {
+  transition-delay: 490ms;
+}
 
 /* =============================================================================
    PRINT STYLES
    ============================================================================= */
 
 @media print {
-  .no-print, nav, [data-testid="print-button"] {
+  .no-print,
+  nav,
+  [data-testid='print-button'] {
     display: none !important;
   }
 
