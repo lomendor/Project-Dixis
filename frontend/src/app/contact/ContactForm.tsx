@@ -1,47 +1,57 @@
-"use client";
-import { useState } from "react";
+'use client';
+import { useState } from 'react';
 
 export default function ContactForm() {
-  const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [state, setState] = useState<'idle' | 'sending' | 'ok' | 'error'>(
+    'idle'
+  );
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setState("sending");
+    setState('sending');
     const fd = new FormData(e.currentTarget);
     const payload = Object.fromEntries(fd.entries());
-    const res = await fetch("/api/ops/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/ops/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    setState(res.ok ? "ok" : "error");
+    setState(res.ok ? 'ok' : 'error');
   };
 
   return (
     <main className="min-h-screen bg-neutral-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-xl">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Επικοινωνία</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">
+            Επικοινωνία
+          </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Έχετε ερωτήσεις ή σχόλια; Συμπληρώστε τη φόρμα και θα σας απαντήσουμε σύντομα.
+            Έχετε ερωτήσεις ή σχόλια; Συμπληρώστε τη φόρμα και θα σας
+            απαντήσουμε σύντομα.
           </p>
         </div>
 
-        {state === "ok" && (
+        {state === 'ok' && (
           <div className="mb-6 p-4 rounded-lg bg-primary-pale border border-primary/20 text-primary text-sm">
-            <span className="font-medium">Ευχαριστούμε!</span> Θα επικοινωνήσουμε σύντομα.
+            <span className="font-medium">Ευχαριστούμε!</span> Θα
+            επικοινωνήσουμε σύντομα.
           </div>
         )}
-        {state === "error" && (
+        {state === 'error' && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
-            <span className="font-medium">Κάτι πήγε στραβά.</span> Δοκιμάστε ξανά ή στείλτε email στο info@dixis.gr.
+            <span className="font-medium">Κάτι πήγε στραβά.</span> Δοκιμάστε
+            ξανά ή στείλτε email στο info@dixis.gr.
           </div>
         )}
 
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sm:p-8">
           <form onSubmit={onSubmit} className="space-y-5">
             <div>
-              <label htmlFor="contact-name" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label
+                htmlFor="contact-name"
+                className="block text-sm font-medium text-neutral-700 mb-1"
+              >
                 Ονοματεπώνυμο
               </label>
               <input
@@ -55,7 +65,10 @@ export default function ContactForm() {
             </div>
 
             <div>
-              <label htmlFor="contact-email" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label
+                htmlFor="contact-email"
+                className="block text-sm font-medium text-neutral-700 mb-1"
+              >
                 Email
               </label>
               <input
@@ -69,7 +82,10 @@ export default function ContactForm() {
             </div>
 
             <div>
-              <label htmlFor="contact-message" className="block text-sm font-medium text-neutral-700 mb-1">
+              <label
+                htmlFor="contact-message"
+                className="block text-sm font-medium text-neutral-700 mb-1"
+              >
                 Μήνυμα
               </label>
               <textarea
@@ -84,14 +100,19 @@ export default function ContactForm() {
             </div>
 
             {/* Honeypot for bots */}
-            <input name="hp" className="hidden" tabIndex={-1} autoComplete="off" />
+            <input
+              name="hp"
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+            />
 
             <button
               type="submit"
-              disabled={state === "sending"}
+              disabled={state === 'sending'}
               className="w-full rounded-lg bg-primary hover:bg-primary-light text-white font-medium px-6 py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {state === "sending" ? "Αποστολή..." : "Αποστολή"}
+              {state === 'sending' ? 'Αποστολή...' : 'Αποστολή'}
             </button>
           </form>
         </div>

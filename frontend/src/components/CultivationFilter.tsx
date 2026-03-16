@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LayoutGrid } from 'lucide-react';
+import { FarmingMethodIcon } from './FarmingMethodIcon';
 
 export type CultivationType =
   | 'conventional'
@@ -21,11 +21,41 @@ interface CultivationOption {
 }
 
 const CULTIVATION_OPTIONS: CultivationOption[] = [
-  { value: 'organic_certified', label: 'Βιολογική', emoji: '🌿', pillBg: 'bg-green-50 border-green-200', pillText: 'text-green-800' },
-  { value: 'organic_transitional', label: 'Μεταβατική', emoji: '🌱', pillBg: 'bg-lime-50 border-lime-200', pillText: 'text-lime-800' },
-  { value: 'biodynamic', label: 'Βιοδυναμική', emoji: '✨', pillBg: 'bg-purple-50 border-purple-200', pillText: 'text-purple-800' },
-  { value: 'traditional_natural', label: 'Παραδοσιακή', emoji: '🌾', pillBg: 'bg-amber-50 border-amber-200', pillText: 'text-amber-800' },
-  { value: 'conventional', label: 'Συμβατική', emoji: '', pillBg: 'bg-neutral-50 border-neutral-200', pillText: 'text-neutral-700' },
+  {
+    value: 'organic_certified',
+    label: 'Βιολογική',
+    emoji: '🌿',
+    pillBg: 'bg-green-50 border-green-200',
+    pillText: 'text-green-800',
+  },
+  {
+    value: 'organic_transitional',
+    label: 'Μεταβατική',
+    emoji: '🌱',
+    pillBg: 'bg-lime-50 border-lime-200',
+    pillText: 'text-lime-800',
+  },
+  {
+    value: 'biodynamic',
+    label: 'Βιοδυναμική',
+    emoji: '✨',
+    pillBg: 'bg-purple-50 border-purple-200',
+    pillText: 'text-purple-800',
+  },
+  {
+    value: 'traditional_natural',
+    label: 'Παραδοσιακή',
+    emoji: '🌾',
+    pillBg: 'bg-amber-50 border-amber-200',
+    pillText: 'text-amber-800',
+  },
+  {
+    value: 'conventional',
+    label: 'Συμβατική',
+    emoji: '',
+    pillBg: 'bg-neutral-50 border-neutral-200',
+    pillText: 'text-neutral-700',
+  },
 ];
 
 interface CultivationFilterProps {
@@ -44,7 +74,7 @@ export function CultivationFilter({
 
   // Only show options that have at least 1 product
   const visibleOptions = availableCounts
-    ? CULTIVATION_OPTIONS.filter((opt) => (availableCounts[opt.value] || 0) > 0)
+    ? CULTIVATION_OPTIONS.filter(opt => (availableCounts[opt.value] || 0) > 0)
     : CULTIVATION_OPTIONS;
 
   // If no products have cultivation_type at all, don't render the filter
@@ -63,11 +93,11 @@ export function CultivationFilter({
   return (
     <>
       {/* "All" option */}
-        <button
-          onClick={() => handleClick(null)}
-          aria-pressed={!current}
-          aria-label="Όλοι οι τρόποι καλλιέργειας"
-          className={`
+      <button
+        onClick={() => handleClick(null)}
+        aria-pressed={!current}
+        aria-label="Όλοι οι τρόποι καλλιέργειας"
+        className={`
             flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0
             transition-all duration-200
             ${
@@ -76,22 +106,22 @@ export function CultivationFilter({
                 : 'bg-white text-neutral-700 border border-accent-gold/20 hover:border-accent-gold/50 hover:bg-accent-cream'
             }
           `}
-        >
-          <LayoutGrid className="w-4 h-4" />
-          <span>Όλοι</span>
-        </button>
+      >
+        <FarmingMethodIcon method="all" size={20} />
+        <span>Όλοι</span>
+      </button>
 
-        {visibleOptions.map((opt) => {
-          const isSelected = current === opt.value;
-          const count = availableCounts?.[opt.value] || 0;
+      {visibleOptions.map(opt => {
+        const isSelected = current === opt.value;
+        const count = availableCounts?.[opt.value] || 0;
 
-          return (
-            <button
-              key={opt.value}
-              onClick={() => handleClick(opt.value)}
-              aria-pressed={isSelected}
-              aria-label={`Καλλιέργεια: ${opt.label}`}
-              className={`
+        return (
+          <button
+            key={opt.value}
+            onClick={() => handleClick(opt.value)}
+            aria-pressed={isSelected}
+            aria-label={`Καλλιέργεια: ${opt.label}`}
+            className={`
                 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap shrink-0
                 transition-all duration-200 border
                 ${
@@ -100,21 +130,21 @@ export function CultivationFilter({
                     : `${opt.pillBg} ${opt.pillText} hover:shadow-sm`
                 }
               `}
-            >
-              {opt.emoji && <span className="text-base leading-none">{opt.emoji}</span>}
-              <span>{opt.label}</span>
-              {count > 0 && (
-                <span
-                  className={`ml-0.5 text-xs ${
-                    isSelected ? 'opacity-80' : 'opacity-60'
-                  }`}
-                >
-                  ({count})
-                </span>
-              )}
-            </button>
-          );
-        })}
+          >
+            <FarmingMethodIcon method={opt.value} size={20} />
+            <span>{opt.label}</span>
+            {count > 0 && (
+              <span
+                className={`ml-0.5 text-xs ${
+                  isSelected ? 'opacity-80' : 'opacity-60'
+                }`}
+              >
+                ({count})
+              </span>
+            )}
+          </button>
+        );
+      })}
     </>
   );
 }
