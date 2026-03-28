@@ -42,6 +42,9 @@ class ConsumerOrderPlaced extends Mailable
                 'subtotal' => number_format($this->order->subtotal, 2),
                 'shippingCost' => number_format($this->order->shipping_cost ?? 0, 2),
                 'total' => number_format($this->order->total, 2),
+                'trackingUrl' => $this->order->public_token
+                    ? rtrim(config('app.frontend_url', 'https://dixis.gr'), '/') . '/track/' . $this->order->public_token
+                    : null,
             ],
         );
     }
