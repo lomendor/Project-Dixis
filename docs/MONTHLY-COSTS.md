@@ -27,7 +27,7 @@
 | Service | What | Cost | Billing | Status |
 |---------|------|------|---------|--------|
 | **Hostinger VPS** | KVM 2 (2 vCPU, 8GB RAM, 100GB NVMe) — hosts Next.js + Umami + nginx | **€20/mo** | Annual prepaid | ✅ Active |
-| **Neon PostgreSQL** | Free tier — production DB | €0 (free tier) | — | ✅ Active |
+| **Neon PostgreSQL** | Free tier — production DB (100 CU-hrs/mo). Umami on separate Neon project (free). VPS cron at */30 → DB active ~17% (~30 CU-hrs/mo). | €0 (free tier) | — | ✅ Active |
 | **Domain (dixis.gr)** | .gr domain registration | **€1.50/mo** (~€18/yr) | Annual | ✅ Active |
 | **SSL Certificate** | Let's Encrypt via certbot | €0 | Auto-renew | ✅ Active |
 | **GitHub** | Free tier — repo, CI/CD, issues | €0 | — | ✅ Active |
@@ -220,6 +220,9 @@
 | 2026-03-06 | Λογιστής: €150 ατομική, €400 ΙΚΕ | Confirmed by accountant |
 | 2026-03-07 | **ΙΚΕ confirmed** | Decision made — going with IKE for liability protection |
 | 2026-03-07 | Insurance needed | Professional liability ~€85-165/mo, budget from quotes |
+| 2026-03-20 | Neon optimization | Umami moved to separate Neon project (free). Cron from */1→*/10. |
+| 2026-03-20 | Umami subdomain | umami.dixis.gr (nginx proxy to port 3001). DB on separate Neon free project. |
+| 2026-04-10 | Neon cron → */30 | */10 + 5-min suspend = DB active 50% (~3 CU-hrs/day, ~90/mo). */30 → active 17% (~1 CU-hr/day, ~30/mo). Revert to */10 when orders start. |
 
 ---
 

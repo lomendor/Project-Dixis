@@ -1,0 +1,30 @@
+# Dixis.gr — robots.txt
+# Allow search engines, block aggressive AI crawlers that waste DB compute
+
+User-agent: *
+Allow: /
+
+# Block AI training crawlers (save Neon compute hours)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# Sitemap
+Sitemap: https://dixis.gr/sitemap.xml
