@@ -171,7 +171,7 @@ _(Older entries archived — see `docs/OPS/STATE.md`)_
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
 - **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
-- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Public dashboard: `https://umami.dixis.gr` (nginx reverse proxy, SSL via Let's Encrypt). Admin password: rotated 2026-05-05 — credentials in `~/.dixis-secrets/umami-admin.txt` (founder's local machine, NOT in repo).
+- **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Public dashboard: `https://umami.dixis.gr` (nginx reverse proxy, SSL via Let's Encrypt). Admin password: rotated 2026-05-05 — credentials in `~/.dixis-secrets/umami-admin.txt` (founder's local machine, NOT in repo). **Self-heal**: cron `*/2` runs `/var/www/dixis/ensure-umami.sh` (source: `scripts/ops/ensure-umami.sh`) to recover Umami after frontend deploys, which `pm2 delete all` + `pm2 kill` the entire daemon. Workflow file is locked per project rules, so we patch around it.
 - **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
 ---
