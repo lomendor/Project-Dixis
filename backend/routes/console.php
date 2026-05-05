@@ -69,8 +69,8 @@ Schedule::call(function () {
 | VPS cron runs every 30 min to conserve Neon free-tier compute hours.
 | Idempotent — won't alert twice for the same order+producer.
 |
-| When real orders start flowing, switch VPS cron back to */10 or */5
-| and adjust --minutes accordingly.
+| When real orders start flowing, switch VPS cron back to every 5-10
+| minutes and adjust --minutes accordingly.
 |
 */
 Schedule::command('orders:check-unaccepted --minutes=30')
