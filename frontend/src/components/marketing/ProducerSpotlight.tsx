@@ -34,20 +34,29 @@ async function getSpotlightProducer(): Promise<Producer | null> {
   }
 
   try {
+    // FIX-HOMEPAGE-CACHE-01: 8s timeout for Neon cold-start, 2min revalidate to avoid
+    // poisoning the ISR cache for an hour when a single fetch fails.
     const res = await fetch(`${base}/public/producers?per_page=100`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 120 },
+      signal: AbortSignal.timeout(8000),
       headers: { 'Content-Type': 'application/json' },
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(
+        `[ProducerSpotlight] HTTP ${res.status} from ${base}/public/producers`
+      );
+      return null;
+    }
 
     const json = await res.json();
     const producers: Producer[] = json?.data ?? [];
 
-    const withImage = producers.find((p) => p.description && p.image_url);
-    const withDescription = producers.find((p) => p.description);
+    const withImage = producers.find(p => p.description && p.image_url);
+    const withDescription = producers.find(p => p.description);
     return withImage ?? withDescription ?? producers[0] ?? null;
-  } catch {
+  } catch (err) {
+    console.error('[ProducerSpotlight] fetch failed:', err);
     return null;
   }
 }
@@ -65,7 +74,8 @@ export default async function ProducerSpotlight() {
             Γνωρίστε τους Παραγωγούς μας
           </h2>
           <p className="text-base text-neutral-500 max-w-md mx-auto mb-6">
-            Πίσω από κάθε προϊόν υπάρχει ένας Έλληνας παραγωγός με πάθος και ιστορία.
+            Πίσω από κάθε προϊόν υπάρχει ένας Έλληνας παραγωγός με πάθος και
+            ιστορία.
           </p>
           <Link
             href="/producers"
@@ -130,7 +140,8 @@ export default async function ProducerSpotlight() {
             </Link>
             {producer.products_count > 0 && (
               <span className="text-sm text-neutral-400">
-                {producer.products_count} προϊόντ{producer.products_count === 1 ? 'ο' : 'α'}
+                {producer.products_count} προϊόντ
+                {producer.products_count === 1 ? 'ο' : 'α'}
               </span>
             )}
           </div>

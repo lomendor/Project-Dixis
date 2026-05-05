@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { ProductCard, ProductCardSkeleton } from '@/components/ProductCard';
+import { ArrowRight, Package } from 'lucide-react';
+import { ProductCard } from '@/components/ProductCard';
 import { getServerApiUrl } from '@/env';
 import ScrollableRow from '@/components/ui/ScrollableRow';
 
@@ -42,18 +42,28 @@ async function getFeaturedProducts(): Promise<ApiProduct[]> {
   }
 
   try {
+    // FIX-HOMEPAGE-CACHE-01: 8s timeout (gives Neon ~5min auto-suspend headroom for cold start),
+    // and short revalidate window (2min) so a failed fetch doesn't poison the ISR cache for an hour.
+    // Previous behavior: fetch with no timeout + revalidate:3600 meant a single Neon cold-start
+    // failure cached the empty array for 60 minutes, breaking the homepage for everyone.
     const res = await fetch(`${base}/public/products?per_page=50`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 120 },
+      signal: AbortSignal.timeout(8000),
       headers: { 'Content-Type': 'application/json' },
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(
+        `[FeaturedProducts] HTTP ${res.status} from ${base}/public/products`
+      );
+      return [];
+    }
 
     const json = await res.json();
     const all: ApiProduct[] = json?.data ?? [];
 
     // Curate: only products with stock and an image
-    const curated = all.filter((p) => {
+    const curated = all.filter(p => {
       const hasImage = p.image_url || (p.images && p.images.length > 0);
       return p.stock > 0 && hasImage;
     });
@@ -67,7 +77,8 @@ async function getFeaturedProducts(): Promise<ApiProduct[]> {
     });
 
     return curated.slice(0, 12);
-  } catch {
+  } catch (err) {
+    console.error('[FeaturedProducts] fetch failed:', err);
     return [];
   }
 }
@@ -77,10 +88,7 @@ export default async function FeaturedProducts() {
   const hasProducts = products.length > 0;
 
   return (
-    <section
-      className="py-6 sm:py-8 bg-white"
-      data-testid="featured-products"
-    >
+    <section className="py-6 sm:py-8 bg-white" data-testid="featured-products">
       {/* Section header — inside container */}
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 mb-4 sm:mb-5">
         <div className="flex items-center justify-between">
@@ -102,8 +110,9 @@ export default async function FeaturedProducts() {
         {hasProducts ? (
           <ScrollableRow>
             <div className="flex gap-1 sm:gap-1.5 pb-2">
-              {products.map((product) => {
-                const imageUrl = product.image_url || product.images?.[0]?.url || null;
+              {products.map(product => {
+                const imageUrl =
+                  product.image_url || product.images?.[0]?.url || null;
                 return (
                   <div
                     key={product.id}
@@ -130,18 +139,22 @@ export default async function FeaturedProducts() {
             </div>
           </ScrollableRow>
         ) : (
-          <ScrollableRow>
-            <div className="flex gap-1 sm:gap-1.5 pb-2">
-              {[...Array(8)].map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-none w-[48vw] sm:w-[30vw] md:w-[22vw] lg:w-[18vw] xl:w-[15vw]"
-                >
-                  <ProductCardSkeleton />
-                </div>
-              ))}
-            </div>
-          </ScrollableRow>
+          // FIX-HOMEPAGE-CACHE-01: Real empty state instead of permanent skeletons.
+          // Previously the skeleton was used as both loading AND empty state, so when
+          // the fetch failed users saw infinite skeletons and assumed the site was broken.
+          <div className="text-center py-10 sm:py-14">
+            <Package className="w-10 h-10 text-primary/40 mx-auto mb-4" />
+            <p className="text-base text-neutral-600 mb-5 max-w-sm mx-auto">
+              Σύντομα νέα προϊόντα από Έλληνες παραγωγούς.
+            </p>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-light text-white font-semibold text-sm rounded-full transition-all duration-200"
+            >
+              Εξερευνήστε τον κατάλογο
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         )}
       </div>
     </section>

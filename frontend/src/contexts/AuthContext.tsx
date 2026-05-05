@@ -3,7 +3,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, apiClient } from '@/lib/api';
 import { useToast } from './ToastContext';
-import { useCart, CartItem as LocalCartItem, clearCartStorage } from '@/lib/cart';
+import {
+  useCart,
+  CartItem as LocalCartItem,
+  clearCartStorage,
+} from '@/lib/cart';
+import { useFavorites } from '@/lib/favorites';
 
 interface AuthContextType {
   user: User | null;
@@ -45,13 +50,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * Convert server cart items to local cart format
  * Pass CART-SYNC-01: Used after sync to update localStorage
  */
-function serverToLocalCart(serverItems: { id: number; quantity: number; product: { id: number; name: string; price: string; producer?: { id: number; name: string } }; }[]): LocalCartItem[] {
+function serverToLocalCart(
+  serverItems: {
+    id: number;
+    quantity: number;
+    product: {
+      id: number;
+      name: string;
+      price: string;
+      producer?: { id: number; name: string };
+    };
+  }[]
+): LocalCartItem[] {
   return serverItems.map(item => ({
     id: String(item.product.id),
     title: item.product.name,
     priceCents: Math.round(parseFloat(item.product.price) * 100),
     qty: item.quantity,
-    producerId: item.product.producer?.id ? String(item.product.producer.id) : undefined,
+    producerId: item.product.producer?.id
+      ? String(item.product.producer.id)
+      : undefined,
     producerName: item.product.producer?.name,
   }));
 }
@@ -82,16 +100,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initAuth = async () => {
       // MSW Bridge: Short-circuit authentication in MSW mode for smoke tests
-      if (typeof window !== 'undefined' && localStorage.getItem('auth_token') === 'mock_token') {
+      if (
+        typeof window !== 'undefined' &&
+        localStorage.getItem('auth_token') === 'mock_token'
+      ) {
         try {
-          const role = (localStorage.getItem('user_role') || 'consumer') as 'consumer' | 'producer';
+          const role = (localStorage.getItem('user_role') || 'consumer') as
+            | 'consumer'
+            | 'producer';
           setUser({
             id: 1,
             name: 'Test User',
             email: 'test@dixis.local',
             role,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           });
           setLoading(false);
           return; // Skip real /auth/me API call
@@ -126,6 +149,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Pass FIX-CART-LEAK-01: Clear localStorage cart on login to prevent cross-user leakage.
       // Previous user's cart items could remain in localStorage and get synced to the wrong account.
       // After clearing, we fetch ONLY server-side items (properly scoped by user_id in DB).
+      // FIX-FAVORITES-LEAK-01: Same applies to favorites — clear on auth boundary.
+      useFavorites.getState().clear();
       try {
         clearCartStorage();
         const serverCart = await apiClient.getCart();
@@ -149,13 +174,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         message = 'Λάθος email ή κωδικός πρόσβασης. Παρακαλώ δοκιμάστε ξανά.';
       } else if (error.response?.status === 429) {
         // Too many login attempts
-        message = 'Πάρα πολλές προσπάθειες σύνδεσης. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
+        message =
+          'Πάρα πολλές προσπάθειες σύνδεσης. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
       } else if (error.response?.status === 500) {
         // Server error
-        message = 'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
-      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response) {
+        message =
+          'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
+      } else if (
+        error.code === 'ECONNABORTED' ||
+        error.code === 'ERR_NETWORK' ||
+        !error.response
+      ) {
         // Network timeout or connection error
-        message = 'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
+        message =
+          'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
       }
 
       // For E2E tests that expect "invalid" keyword, add it in English as well
@@ -192,8 +224,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         consumer: 'Καταναλωτή',
       };
       const accountType = accountTypeMap[data.role] || 'Καταναλωτή';
-      const extraMsg = data.role === 'business' ? ' Η αίτησή σας θα εγκριθεί σύντομα.' : '';
-      showToast('success', `Καλώς ήρθατε στο Dixis, ${response.user.name}! Ο λογαριασμός ${accountType} δημιουργήθηκε με επιτυχία.${extraMsg}`);
+      const extraMsg =
+        data.role === 'business' ? ' Η αίτησή σας θα εγκριθεί σύντομα.' : '';
+      showToast(
+        'success',
+        `Καλώς ήρθατε στο Dixis, ${response.user.name}! Ο λογαριασμός ${accountType} δημιουργήθηκε με επιτυχία.${extraMsg}`
+      );
     } catch (error: any) {
       // Greek error messages based on error type
       let message = 'Κάτι πήγε στραβά. Παρακαλώ δοκιμάστε ξανά.';
@@ -209,7 +245,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Map common Laravel validation messages to Greek
             const errorMsg = String(firstError[0]).toLowerCase();
             if (errorMsg.includes('email') && errorMsg.includes('taken')) {
-              message = 'Το email χρησιμοποιείται ήδη. Δοκιμάστε να συνδεθείτε ή χρησιμοποιήστε άλλο email.';
+              message =
+                'Το email χρησιμοποιείται ήδη. Δοκιμάστε να συνδεθείτε ή χρησιμοποιήστε άλλο email.';
             } else if (errorMsg.includes('password')) {
               message = 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.';
             } else {
@@ -224,13 +261,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         message = 'Το email υπάρχει ήδη. Δοκιμάστε να συνδεθείτε.';
       } else if (error.response?.status === 500) {
         // Server error
-        message = 'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
-      } else if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response) {
+        message =
+          'Παρουσιάστηκε πρόβλημα με τον διακομιστή. Παρακαλώ δοκιμάστε ξανά σε λίγο.';
+      } else if (
+        error.code === 'ECONNABORTED' ||
+        error.code === 'ERR_NETWORK' ||
+        !error.response
+      ) {
         // Network timeout or connection error
-        message = 'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
+        message =
+          'Η σύνδεση διήρκεσε πολύ. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.';
       } else if (error.response?.status === 429) {
         // Too many requests
-        message = 'Πάρα πολλές προσπάθειες. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
+        message =
+          'Πάρα πολλές προσπάθειες. Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.';
       }
 
       showToast('error', message);
@@ -259,6 +303,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Pass FIX-CART-LEAK-01: Clear cart on logout to prevent leaking to next user
     clearCartStorage();
+    // FIX-FAVORITES-LEAK-01: Clear client-only favorites store so heart icons don't
+    // persist across logout (privacy leak — next user/guest would see prior user's favorites).
+    useFavorites.getState().clear();
     setUser(null);
   };
 
@@ -278,7 +325,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isProducer: user?.role === 'producer',
     isAdmin: user?.role === 'admin',
     isBusiness: user?.role === 'business',
-    isApprovedBusiness: user?.role === 'business' && user?.business_status === 'active',
+    isApprovedBusiness:
+      user?.role === 'business' && user?.business_status === 'active',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
