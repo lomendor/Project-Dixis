@@ -65,13 +65,16 @@ Schedule::call(function () {
 | FIX-ORDER-ESCALATION-01: Check Unaccepted Orders
 |--------------------------------------------------------------------------
 |
-| Runs every minute. If an order is still "pending" after 2 minutes,
-| sends an alert email to admin with the producer's phone number.
+| Checks for "pending" orders older than 30 minutes and alerts admin.
+| VPS cron runs every 30 min to conserve Neon free-tier compute hours.
 | Idempotent — won't alert twice for the same order+producer.
 |
+| When real orders start flowing, switch VPS cron back to every 5-10
+| minutes and adjust --minutes accordingly.
+|
 */
-Schedule::command('orders:check-unaccepted --minutes=2')
-    ->everyMinute()
+Schedule::command('orders:check-unaccepted --minutes=30')
+    ->everyThirtyMinutes()
     ->timezone('Europe/Athens')
     ->withoutOverlapping()
     ->runInBackground();
