@@ -12,6 +12,8 @@ export type AuditAction =
   | 'PRODUCT_UPDATE'
   | 'PRODUCER_APPROVE'
   | 'PRODUCER_REJECT'
+  | 'PRODUCER_DELETE_HARD'
+  | 'PRODUCER_DELETE_SOFT'
   | 'ORDER_STATUS_CHANGE'
   | 'ORDER_STATUS_OVERRIDE'
   | 'CATEGORY_UPDATE';
@@ -42,7 +44,8 @@ export interface AuditLogInput {
  * @returns Created audit log record
  */
 export async function logAdminAction(input: AuditLogInput) {
-  const { admin, action, entityType, entityId, oldValue, newValue, details } = input;
+  const { admin, action, entityType, entityId, oldValue, newValue, details } =
+    input;
 
   return prisma.adminAuditLog.create({
     data: {
@@ -55,8 +58,8 @@ export async function logAdminAction(input: AuditLogInput) {
       newValue: newValue ?? null,
       details: details ?? null,
       ipAddress: admin.ipAddress,
-      userAgent: admin.userAgent
-    }
+      userAgent: admin.userAgent,
+    },
   });
 }
 
@@ -74,12 +77,12 @@ export function createApprovalContext(entity: {
   return {
     oldValue: {
       approvalStatus: entity.approvalStatus ?? 'pending',
-      isActive: entity.isActive ?? true
+      isActive: entity.isActive ?? true,
     },
     newValue: {
       approvalStatus: 'approved',
-      isActive: true
-    }
+      isActive: true,
+    },
   };
 }
 
@@ -93,13 +96,13 @@ export function createRejectionContext(
   return {
     oldValue: {
       approvalStatus: entity.approvalStatus ?? 'pending',
-      isActive: entity.isActive ?? true
+      isActive: entity.isActive ?? true,
     },
     newValue: {
       approvalStatus: 'rejected',
-      isActive: false
+      isActive: false,
     },
-    details: rejectionReason
+    details: rejectionReason,
   };
 }
 
@@ -109,6 +112,6 @@ export function createRejectionContext(
 export function createOrderStatusContext(oldStatus: string, newStatus: string) {
   return {
     oldValue: { status: oldStatus },
-    newValue: { status: newStatus }
+    newValue: { status: newStatus },
   };
 }
