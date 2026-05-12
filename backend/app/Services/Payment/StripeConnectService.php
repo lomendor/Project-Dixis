@@ -213,4 +213,46 @@ class StripeConnectService
             && !empty($producer->stripe_connect_id)
             && $producer->stripe_charges_enabled;
     }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: Best-effort disconnect of a producer's
+     * Stripe Express account on account deletion.
+     *
+     * Stripe `accounts.delete()` is allowed for Custom/Express accounts that
+     * have no balance and no pending transfers. On failure we DO NOT throw —
+     * the admin delete operation must not be blocked by Stripe state; the
+     * orphan account is flagged in logs for manual cleanup.
+     *
+     * Returns true when Stripe confirms deletion or when nothing was connected.
+     */
+    public function disconnectProducer(Producer $producer): bool
+    {
+        if (empty($producer->stripe_connect_id)) {
+            return true;
+        }
+
+        if (! self::isEnabled()) {
+            Log::warning('[StripeConnect] disconnect skipped — feature disabled', [
+                'producer_id' => $producer->id,
+                'account_id' => $producer->stripe_connect_id,
+            ]);
+            return false;
+        }
+
+        try {
+            $this->stripe->accounts->delete($producer->stripe_connect_id);
+            Log::info('[StripeConnect] account deleted', [
+                'producer_id' => $producer->id,
+                'account_id' => $producer->stripe_connect_id,
+            ]);
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('[StripeConnect] disconnect failed — manual cleanup required', [
+                'producer_id' => $producer->id,
+                'account_id' => $producer->stripe_connect_id,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
 }
