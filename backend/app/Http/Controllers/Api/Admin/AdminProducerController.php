@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\ProducerApproved;
 use App\Mail\ProducerRejected;
 use App\Models\Producer;
+use App\Services\Admin\ProducerDeletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -129,6 +130,61 @@ class AdminProducerController extends Controller
         return response()->json([
             'message' => 'Producer rejected',
             'producer' => $producer->fresh(),
+        ]);
+    }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: Deletion preview.
+     *
+     * Returns the mode that DELETE will pick + reference counts + cleanup
+     * targets. UI fetches this on modal open so the admin sees what will
+     * happen BEFORE typing the confirmation phrase.
+     */
+    public function previewDeletion(Request $request, Producer $producer, ProducerDeletionService $service): JsonResponse
+    {
+        if (! $request->user() || $request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        if ($producer->isAnonymized()) {
+            return response()->json([
+                'message' => 'Ο παραγωγός έχει ήδη ανωνυμοποιηθεί',
+                'already_anonymized_at' => $producer->anonymized_at?->toIso8601String(),
+            ], 409);
+        }
+        return response()->json($service->previewDeletion($producer));
+    }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: Execute deletion (auto-mode hard or soft).
+     *
+     * Response always includes:
+     *  - mode             : which path ran
+     *  - references       : activity counts that drove the mode
+     *  - doc_urls_to_clean: S3 cleanup targets for the Next.js proxy
+     *  - snapshot         : PII-safe audit snapshot for AdminAuditLog
+     *  - stripe_disconnect_ok: best-effort Stripe result
+     */
+    public function destroy(Request $request, Producer $producer, ProducerDeletionService $service): JsonResponse
+    {
+        if (! $request->user() || $request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        if ($producer->isAnonymized()) {
+            return response()->json([
+                'message' => 'Ο παραγωγός έχει ήδη ανωνυμοποιηθεί',
+            ], 409);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $result = $service->executeDeletion($producer, $validated['reason'] ?? null);
+
+        return response()->json($result + [
+            'message' => $result['mode'] === 'hard'
+                ? 'Ο παραγωγός διαγράφηκε οριστικά'
+                : 'Ο παραγωγός ανωνυμοποιήθηκε (διατηρείται για ιστορικότητα παραγγελιών)',
         ]);
     }
 }
