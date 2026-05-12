@@ -122,6 +122,33 @@ function AdminProducersContent() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // ADMIN-PRODUCER-DELETE-01: Delete modal state (preview-driven)
+  type DeletionPreview = {
+    mode: 'hard' | 'soft';
+    references: {
+      order_items: number;
+      order_shipping_lines: number;
+      commission_settlements: number;
+    };
+    user_will_be_deleted: boolean;
+    has_stripe_connect: boolean;
+    doc_urls: string[];
+  };
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [producerToDelete, setProducerToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [deletePreview, setDeletePreview] = useState<DeletionPreview | null>(
+    null
+  );
+  const [deletePreviewError, setDeletePreviewError] = useState<string | null>(
+    null
+  );
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
   // Filters
   const statusFilter = searchParams.get('status') || 'all';
   const q = searchParams.get('q') || '';
@@ -224,6 +251,77 @@ function AdminProducersContent() {
         setProcessingIds(prev => {
           const s = new Set(prev);
           s.delete(producerToReject.id);
+          return s;
+        });
+      }
+    }
+  }
+
+  // ADMIN-PRODUCER-DELETE-01: open the delete modal and fetch the preview
+  // BEFORE asking the admin to type ΔΙΑΓΡΑΦΗ. The mode (hard vs soft) and
+  // the side-effect summary come from Laravel so the warning text is
+  // accurate before any destructive call.
+  async function handleDeleteClick(producer: { id: string; name: string }) {
+    setProducerToDelete(producer);
+    setDeletePreview(null);
+    setDeletePreviewError(null);
+    setDeleteConfirmText('');
+    setDeleteReason('');
+    setDeleteModalOpen(true);
+    try {
+      const res = await fetch(`/api/admin/producers/${producer.id}`, {
+        method: 'GET',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDeletePreviewError(
+          data?.message || data?.error || 'Αδυναμία προεπισκόπησης διαγραφής'
+        );
+        return;
+      }
+      setDeletePreview(data as DeletionPreview);
+    } catch {
+      setDeletePreviewError('Σφάλμα δικτύου κατά την προεπισκόπηση');
+    }
+  }
+
+  async function handleDeleteConfirm() {
+    if (!producerToDelete || deleteConfirmText !== 'ΔΙΑΓΡΑΦΗ' || !deletePreview)
+      return;
+    setDeleting(true);
+    setProcessingIds(prev => new Set([...prev, producerToDelete.id]));
+    try {
+      const res = await fetch(`/api/admin/producers/${producerToDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          deleteReason.trim() ? { reason: deleteReason.trim() } : {}
+        ),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok)
+        throw new Error(data?.error || data?.message || 'Αποτυχία διαγραφής');
+
+      const mode: 'hard' | 'soft' = data?.mode === 'soft' ? 'soft' : 'hard';
+      showSuccess(
+        mode === 'hard'
+          ? 'Ο παραγωγός διαγράφηκε οριστικά'
+          : 'Ο παραγωγός ανωνυμοποιήθηκε (διατηρείται για ιστορικότητα παραγγελιών)'
+      );
+      setDeleteModalOpen(false);
+      setProducerToDelete(null);
+      setDeletePreview(null);
+      await loadProducers();
+    } catch (err: unknown) {
+      showError(
+        err instanceof Error ? err.message : 'Αποτυχία διαγραφής παραγωγού'
+      );
+    } finally {
+      setDeleting(false);
+      if (producerToDelete) {
+        setProcessingIds(prev => {
+          const s = new Set(prev);
+          s.delete(producerToDelete.id);
           return s;
         });
       }
@@ -380,6 +478,18 @@ function AdminProducersContent() {
                           </button>
                         </div>
                       )}
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDeleteClick({ id: p.id, name: p.name });
+                        }}
+                        disabled={processingIds.has(p.id)}
+                        className="px-2.5 py-1 text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors ml-2 disabled:opacity-50"
+                        data-testid={`delete-btn-${p.id}`}
+                        title="Διαγραφή λογαριασμού (auto-mode hard/soft)"
+                      >
+                        🗑️ Διαγραφή
+                      </button>
                       <button
                         onClick={e => {
                           e.stopPropagation();
@@ -717,6 +827,161 @@ function AdminProducersContent() {
           ← Επιστροφή στο Admin
         </Link>
       </div>
+
+      {/* ADMIN-PRODUCER-DELETE-01: Delete modal — preview-driven */}
+      {deleteModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={() => !deleting && setDeleteModalOpen(false)}
+          data-testid="delete-modal"
+        >
+          <div
+            className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-gray-900 mb-1">
+              Διαγραφή Παραγωγού
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Παραγωγός: <strong>{producerToDelete?.name}</strong>
+            </p>
+
+            {!deletePreview && !deletePreviewError && (
+              <div className="rounded-md bg-gray-50 p-4 mb-4 text-sm text-gray-600">
+                Φόρτωση προεπισκόπησης…
+              </div>
+            )}
+            {deletePreviewError && (
+              <div
+                className="rounded-md bg-red-50 p-4 mb-4 text-sm text-red-700"
+                role="alert"
+              >
+                {deletePreviewError}
+              </div>
+            )}
+            {deletePreview && (
+              <>
+                <div
+                  className={`rounded-md p-4 mb-4 text-sm ${
+                    deletePreview.mode === 'hard'
+                      ? 'bg-red-50 text-red-800 border border-red-200'
+                      : 'bg-amber-50 text-amber-900 border border-amber-200'
+                  }`}
+                >
+                  <div className="font-semibold mb-2">
+                    {deletePreview.mode === 'hard'
+                      ? '🗑️ Hard delete (οριστική διαγραφή)'
+                      : '🛡️ Soft delete + ανωνυμοποίηση'}
+                  </div>
+                  {deletePreview.mode === 'hard' ? (
+                    <ul className="list-disc ml-5 space-y-1">
+                      <li>
+                        Διαγραφή της εγγραφής παραγωγού και των προϊόντων του.
+                      </li>
+                      <li>
+                        {deletePreview.user_will_be_deleted
+                          ? 'Διαγραφή του λογαριασμού χρήστη.'
+                          : 'Ο λογαριασμός χρήστη ανωνυμοποιείται (έχει παραγγελίες πελάτη — δεν διαγράφεται για να μη χαθεί ιστορικό).'}
+                      </li>
+                      {deletePreview.has_stripe_connect && (
+                        <li>Best-effort αποσύνδεση Stripe Connect account.</li>
+                      )}
+                      {deletePreview.doc_urls.length > 0 && (
+                        <li>
+                          Καθαρισμός {deletePreview.doc_urls.length} εγγράφ
+                          {deletePreview.doc_urls.length === 1
+                            ? 'ου'
+                            : 'ων'}{' '}
+                          από το cloud storage.
+                        </li>
+                      )}
+                    </ul>
+                  ) : (
+                    <>
+                      <p className="mb-2">
+                        Ο παραγωγός έχει εμπορική δραστηριότητα — η εγγραφή{' '}
+                        <strong>διατηρείται</strong> ώστε τα ιστορικά
+                        παραγγελιών (DAC7/DSA traceability) να παραμένουν
+                        αναφέρσιμα. Τα προσωπικά στοιχεία καθαρίζονται.
+                      </p>
+                      <ul className="list-disc ml-5 space-y-1">
+                        <li>
+                          Order items: {deletePreview.references.order_items}
+                        </li>
+                        <li>
+                          Shipping lines:{' '}
+                          {deletePreview.references.order_shipping_lines}
+                        </li>
+                        <li>
+                          Commission settlements:{' '}
+                          {deletePreview.references.commission_settlements}
+                        </li>
+                      </ul>
+                    </>
+                  )}
+                </div>
+
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Λόγος (προαιρετικά, για audit log)
+                </label>
+                <textarea
+                  value={deleteReason}
+                  onChange={e => setDeleteReason(e.target.value.slice(0, 500))}
+                  rows={2}
+                  placeholder="π.χ. αίτημα GDPR, παύση δραστηριότητας…"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-y text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-4"
+                  data-testid="delete-reason-input"
+                />
+
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Για επιβεβαίωση πληκτρολόγησε{' '}
+                  <code className="px-1.5 py-0.5 bg-gray-100 rounded text-red-700 font-mono text-xs">
+                    ΔΙΑΓΡΑΦΗ
+                  </code>
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="ΔΙΑΓΡΑΦΗ"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  data-testid="delete-confirm-input"
+                  autoFocus
+                />
+              </>
+            )}
+
+            <div className="flex gap-3 justify-end mt-5">
+              <button
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setDeleteConfirmText('');
+                  setDeleteReason('');
+                }}
+                disabled={deleting}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+                data-testid="delete-modal-cancel"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={
+                  deleting || !deletePreview || deleteConfirmText !== 'ΔΙΑΓΡΑΦΗ'
+                }
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                data-testid="delete-modal-confirm"
+              >
+                {deleting
+                  ? 'Επεξεργασία…'
+                  : deletePreview?.mode === 'hard'
+                    ? 'Οριστική Διαγραφή'
+                    : 'Ανωνυμοποίηση'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Rejection Modal */}
       {rejectModalOpen && (
