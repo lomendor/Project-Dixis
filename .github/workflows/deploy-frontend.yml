@@ -19,6 +19,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # OPS-DB-URL-GUARD-01: fail fast if DATABASE_URL_PROD secret is malformed.
+      # On 2026-05-12 the secret was found to contain only the Neon password
+      # (npg_xxx) instead of a full postgresql:// URL, which silently broke
+      # admin login twice in a row because the .env file was overwritten on
+      # every deploy. This guard prevents a repeat: any deploy that would
+      # write a non-postgresql URL into the runtime .env aborts here.
+      - name: Validate DATABASE_URL secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL_PROD secret is empty. Refusing to deploy."
+            exit 1
+          fi
+          case "$DATABASE_URL" in
+            postgresql://*|postgres://*)
+              echo "✓ DATABASE_URL secret has valid postgresql:// prefix"
+              # Don't echo the URL — even the host has PII. Just confirm shape.
+              if ! printf '%s' "$DATABASE_URL" | grep -qE '^postgres(ql)?://[^:]+:[^@]+@[^/]+/[^?]+'; then
+                echo "::error::DATABASE_URL has wrong structure (need user:password@host/db)"
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::DATABASE_URL_PROD does not start with postgresql:// or postgres://"
+              echo "::error::Found prefix: $(printf '%s' "$DATABASE_URL" | head -c 12)..."
+              echo "::error::Refusing to deploy. Fix the secret with: gh secret set DATABASE_URL_PROD"
+              exit 1
+              ;;
+          esac
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
