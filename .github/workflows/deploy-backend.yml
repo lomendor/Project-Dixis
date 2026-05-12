@@ -37,6 +37,33 @@ jobs:
       - name: Checkout (for SSH key setup)
         uses: actions/checkout@v4
 
+      # OPS-DB-URL-GUARD-01: mirror of the frontend deploy guard. Even though
+      # this workflow only SSHes and pulls — it doesn't write DATABASE_URL to
+      # disk itself — failing fast keeps both deploys symmetric: if the
+      # secret is broken, nothing rolls forward.
+      - name: Validate DATABASE_URL secret
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL_PROD secret is empty. Refusing to deploy."
+            exit 1
+          fi
+          case "$DATABASE_URL" in
+            postgresql://*|postgres://*)
+              if ! printf '%s' "$DATABASE_URL" | grep -qE '^postgres(ql)?://[^:]+:[^@]+@[^/]+/[^?]+'; then
+                echo "::error::DATABASE_URL has wrong structure (need user:password@host/db)"
+                exit 1
+              fi
+              echo "✓ DATABASE_URL secret shape is valid"
+              ;;
+            *)
+              echo "::error::DATABASE_URL_PROD does not start with postgresql:// or postgres://"
+              echo "::error::Refusing to deploy. Fix the secret with: gh secret set DATABASE_URL_PROD"
+              exit 1
+              ;;
+          esac
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
