@@ -129,6 +129,7 @@
 
 ## Recently Done (last 10)
 
+- **ADMIN-PRODUCER-DELETE-01** — Admin can remove a producer account with auto-mode hard/soft delete. Hard when there is no commerce activity (deletes producer + cascades; user row anonymized instead of deleted when the same user has customer orders). Soft + anonymize when any order_items / shipping_lines / commission_settlements exist, so DAC7/DSA traceability survives. Preview endpoint shows the chosen mode before confirm; admin UI uses a typed-phrase modal. Stripe Connect disconnect and S3 doc cleanup run best-effort post-DB. Audit log via existing `AdminAuditLog` (two new actions). 7 PHPUnit feature tests. (PR #3288, 2026-05-12) ✅
 - **B2B-WHOLESALE-SYSTEM** — Full-stack B2B wholesale buyer system: business role + model, admin approval workflow, subscription infrastructure (Stripe Checkout, €120/yr), commission wiring (0% subscriber / 7% non-subscriber), B2B product visibility (is_b2b_only + "Χονδρική" badge), business dashboard + subscription page, admin businesses CRUD. 9 commits, 40 files, ~1,330 LOC. (PR #3277, deployed 2026-03-09) ✅
 - **SEO + SKELETON + WISHLIST** — SEO: meta title shortened, JSON-LD enriched, Contact/FAQ metadata. Skeleton loaders for 5 pages. S1-04 Wishlist: heart toggle, favorites page, nav links. B2B research doc. (PR #3272, 2026-03-04) ✅
 - **ANALYTICS-UMAMI-01** — Self-hosted Umami v3.0.3 analytics on VPS. Cookieless, GDPR-compliant. First-party proxy `/u/*`. (PR #3269, deployed 2026-03-02) ✅

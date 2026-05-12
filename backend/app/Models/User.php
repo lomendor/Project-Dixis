@@ -47,7 +47,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_seed' => 'boolean',
+            // ADMIN-PRODUCER-DELETE-01
+            'anonymized_at' => 'datetime',
         ];
+    }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: True when the user has been anonymized
+     * (personal data scrubbed, but row kept for FK integrity on historical orders).
+     */
+    public function isAnonymized(): bool
+    {
+        return $this->anonymized_at !== null;
     }
 
     /**

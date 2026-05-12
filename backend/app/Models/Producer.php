@@ -55,6 +55,9 @@ class Producer extends Model
         'stripe_connect_status',
         'stripe_payouts_enabled',
         'stripe_charges_enabled',
+        // ADMIN-PRODUCER-DELETE-01
+        'anonymized_at',
+        'deletion_reason',
     ];
 
     protected $casts = [
@@ -75,6 +78,8 @@ class Producer extends Model
         // Stripe Connect
         'stripe_payouts_enabled' => 'boolean',
         'stripe_charges_enabled' => 'boolean',
+        // ADMIN-PRODUCER-DELETE-01
+        'anonymized_at' => 'datetime',
     ];
 
     /**
@@ -134,5 +139,22 @@ class Producer extends Model
     {
         return !empty($this->stripe_connect_id)
             && $this->stripe_charges_enabled === true;
+    }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: Scope to exclude anonymized (soft-deleted) producers
+     * from public-facing queries. Storefront + non-admin listings must use this.
+     */
+    public function scopeVisible($query)
+    {
+        return $query->whereNull('anonymized_at');
+    }
+
+    /**
+     * ADMIN-PRODUCER-DELETE-01: True when the producer has been soft-deleted.
+     */
+    public function isAnonymized(): bool
+    {
+        return $this->anonymized_at !== null;
     }
 }

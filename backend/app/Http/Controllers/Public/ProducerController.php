@@ -25,6 +25,7 @@ class ProducerController extends Controller
         $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
 
         $query = Producer::query()
+            ->visible() // ADMIN-PRODUCER-DELETE-01: hide anonymized
             ->with(['user:id,name,email'])
             ->where('is_active', true);
 
@@ -74,6 +75,7 @@ class ProducerController extends Controller
     public function show(string $id): JsonResponse
     {
         $producer = Producer::with(['user:id,name,email'])
+            ->visible() // ADMIN-PRODUCER-DELETE-01: hide anonymized
             ->where('is_active', true)
             ->where(function ($q) use ($id) {
                 $q->where('id', is_numeric($id) ? (int) $id : 0)

@@ -425,6 +425,11 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:30,1');
         Route::patch('{producer}', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'update'])
             ->middleware('throttle:30,1');
+        // ADMIN-PRODUCER-DELETE-01
+        Route::get('{producer}/deletion-preview', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'previewDeletion'])
+            ->middleware('throttle:60,1');
+        Route::delete('{producer}', [App\Http\Controllers\Api\Admin\AdminProducerController::class, 'destroy'])
+            ->middleware('throttle:30,1');
     });
 
     // B2B PIVOT: Admin Business Management
