@@ -23,14 +23,11 @@ jobs:
         with:
           fetch-depth: 0  # Full history for proper diffs
 
-      # setup-node@v5 auto-detects packageManager field and provisions pnpm.
-      # Without corepack enabled first, the pnpm shim isn't available and
-      # setup-node fails with "Unable to locate executable file: pnpm".
-      - name: Enable corepack
-        run: corepack enable
-
+      # setup-node@v4 — v5 auto-detects the packageManager field and would
+      # try to provision pnpm + locate its lockfile, which this workflow
+      # doesn't need (it installs danger via npm).
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 

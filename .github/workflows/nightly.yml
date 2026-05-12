@@ -34,14 +34,10 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer
 
-      # setup-node@v5 auto-detects packageManager field and provisions pnpm.
-      # Without corepack enabled first, setup-node fails with
-      # "Unable to locate executable file: pnpm".
-      - name: Enable corepack
-        run: corepack enable
-
+      # setup-node@v4 — v5 auto-detects the packageManager field (pnpm) and
+      # interferes with the npm-cached path this job actually wants.
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
