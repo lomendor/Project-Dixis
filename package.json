@@ -5,6 +5,7 @@
   "engines": {
     "node": ">=20"
   },
+  "packageManager": "pnpm@10.33.4",
   "scripts": {
     "danger": "danger ci",
     "lint:ci": "eslint . -c .eslintrc.ci.json --max-warnings=0"

@@ -34,8 +34,10 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, mbstring, xml, ctype, json, tokenizer
 
+      # setup-node@v4 — v5 auto-detects the packageManager field (pnpm) and
+      # interferes with the npm-cached path this job actually wants.
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
