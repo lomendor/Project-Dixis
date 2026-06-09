@@ -70,7 +70,7 @@ export default function Header() {
         ? 'bg-white/15 backdrop-blur-md border-b border-white/20'
         : 'bg-white/95 backdrop-blur-sm supports-[backdrop-filter]:bg-white/80 border-b border-neutral-200/60'
     }`}>
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between">
+      <div className="max-w-[1800px] mx-auto px-5 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between">
         {/* Logo — icon + serif wordmark on desktop */}
         <Link
           href="/"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -48,7 +48,7 @@ const CIRCLE = 'w-20 h-20 sm:w-24 sm:h-24';
 const ICON_MOBILE = 'w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-sm';
 
 /** Reusable desktop category card */
-function CategoryCard({ slug, label, isAll }: { slug?: string; label: string; isAll?: boolean }) {
+function CategoryCard({ slug, label, isAll, style }: { slug?: string; label: string; isAll?: boolean; style?: React.CSSProperties }) {
   const href = isAll ? '/products' : `/products?cat=${slug}`;
   const bg = isAll ? 'bg-primary/8' : (slug ? BG_MAP[slug] ?? 'bg-neutral-100' : 'bg-neutral-100');
   const icon = isAll ? '/icons/categories/all-3d.png' : (slug ? IMAGE_MAP[slug] ?? '/icons/categories/all-3d.png' : '/icons/categories/all-3d.png');
@@ -57,6 +57,7 @@ function CategoryCard({ slug, label, isAll }: { slug?: string; label: string; is
     <Link
       href={href}
       role="listitem"
+      style={style}
       className={`
         group flex flex-col items-center
         px-4 pt-5 pb-4 xl:pt-6 xl:pb-5
@@ -85,13 +86,44 @@ function CategoryCard({ slug, label, isAll }: { slug?: string; label: string; is
 
 export default function HomeCategoryStrip() {
   const [expanded, setExpanded] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setRevealed(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -10% 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  /** Staggered enter style by item index */
+  const revealStyle = (i: number): React.CSSProperties => ({
+    opacity: revealed ? 1 : 0,
+    transform: revealed ? 'none' : 'translateY(28px) scale(0.94)',
+    transition:
+      'opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1)',
+    transitionDelay: `${i * 75}ms`,
+  });
 
   const firstRow = CATEGORIES.slice(0, VISIBLE_COUNT);
   const restRows = CATEGORIES.slice(VISIBLE_COUNT);
 
   return (
-    <section className="py-6 sm:py-8 lg:py-10 bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12">
+    <section ref={sectionRef} className="py-6 sm:py-8 lg:py-10 bg-white">
+      <div className="max-w-[1800px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Section header — expand button next to title on desktop */}
         <div className="mb-5 sm:mb-6 lg:mb-7 flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
@@ -125,6 +157,7 @@ export default function HomeCategoryStrip() {
               <Link
                 href="/products"
                 role="listitem"
+                style={revealStyle(0)}
                 className="flex flex-col items-center gap-2.5 sm:gap-3 shrink-0 group"
               >
                 <div className={`${CIRCLE} rounded-full flex items-center justify-center bg-primary/8 border-2 border-primary/15 shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:shadow-md group-hover:border-primary/30`}>
@@ -135,11 +168,12 @@ export default function HomeCategoryStrip() {
                 </span>
               </Link>
 
-              {CATEGORIES.map((cat) => (
+              {CATEGORIES.map((cat, i) => (
                 <Link
                   key={cat.slug}
                   href={`/products?cat=${cat.slug}`}
                   role="listitem"
+                  style={revealStyle(i + 1)}
                   className="flex flex-col items-center gap-2.5 sm:gap-3 shrink-0 group"
                 >
                   <div className={`${CIRCLE} rounded-full flex items-center justify-center shadow-sm transition-all duration-200 group-hover:scale-105 group-hover:shadow-md ${BG_MAP[cat.slug] ?? 'bg-neutral-100'}`}>
@@ -158,9 +192,9 @@ export default function HomeCategoryStrip() {
         <div className="hidden lg:block" role="list" aria-label="Κατηγορίες προϊόντων">
           {/* First row: "Όλα" + first 4 categories */}
           <div className="grid grid-cols-5 gap-4 xl:gap-5">
-            <CategoryCard isAll label="Όλα τα Προϊόντα" />
-            {firstRow.map((cat) => (
-              <CategoryCard key={cat.slug} slug={cat.slug} label={cat.labelEl} />
+            <CategoryCard isAll label="Όλα τα Προϊόντα" style={revealStyle(0)} />
+            {firstRow.map((cat, i) => (
+              <CategoryCard key={cat.slug} slug={cat.slug} label={cat.labelEl} style={revealStyle(i + 1)} />
             ))}
           </div>
 
