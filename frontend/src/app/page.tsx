@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Hero from '@/components/marketing/Hero';
 import HomeCategoryStrip from '@/components/marketing/HomeCategoryStrip';
 import FeaturedProducts from '@/components/marketing/FeaturedProducts';
-import ProducerSpotlight from '@/components/marketing/ProducerSpotlight';
+import StorySpotlight from '@/components/marketing/StorySpotlight';
 import TrustBar from '@/components/marketing/TrustBar';
 import HomeCTA from '@/components/marketing/HomeCTA';
 import SectionReveal from '@/components/marketing/SectionReveal';
@@ -27,9 +27,7 @@ export default function HomePage() {
       <Hero />
       <HomeCategoryStrip />
       <FeaturedProducts />
-      <SectionReveal>
-        <ProducerSpotlight />
-      </SectionReveal>
+      <StorySpotlight />
       <SectionReveal>
         <TrustBar />
       </SectionReveal>

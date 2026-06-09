@@ -20,7 +20,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#1b2a1e] text-white/80 mt-auto">
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-16 lg:py-20">
+      <div className="max-w-[1800px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-16 lg:py-20">
         {/* Main grid — 4 columns on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Brand column */}
