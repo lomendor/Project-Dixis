@@ -52,7 +52,13 @@
 |-------|-------|-----|-----|
 | `external-provider` | 10 (ShippingProviderIntegration) | Need ACS courier credentials | Keep excluded in CI |
 
-Honest baseline 2026-06-11: full suite was 48 failed / 513 passed (PR gate ran ~5 scoping tests only; nightly ran `--group mvp` only). After CI-HONEST-GATES (#3292/#3293) + weight-unit fixes + admin-JWT fix: **0 failed**. Nightly e2e-full still red 5/5 nights (824 specs vs 10-min global timeout) — separate TEST-INFRA pass needed.
+Honest baseline 2026-06-11: full suite was 48 failed / 513 passed (PR gate ran ~5 scoping tests only; nightly ran `--group mvp` only). After CI-HONEST-GATES (#3292/#3293) + weight-unit fixes + admin-JWT fix: **0 failed**.
+
+### E2E status (TEST-INFRA, 2026-06-11)
+
+- **prod-health.yml** (NEW): nightly read-only full-stack smoke vs https://dixis.gr — homepage renders real products, products API, PDP, nav, healthz. Real Laravel backend → green = whole chain up. `tests/smoke/prod-health.spec.ts` + `playwright.config.prod-health.ts`, `pnpm test:prod-health`. Verified 5/5 green locally vs prod (×3).
+- **e2e-full.yml**: schedule DISABLED (manual-only). The 824 specs were authored for a full stack but CI boots only Next.js with mocked auth and NO Laravel — every data/login flow ERR_CONNECTION_REFUSED, always times out (2 pass/27 fail). Gated nothing, went red nightly = noise.
+- **To revive e2e-full**: provision Postgres + Laravel in CI (mirror backend-ci.yml), point frontend at it, then dedupe the ~824 specs (huge redundancy: ~40 overlapping cart/products smoke specs, 12 playwright configs). Inverted pyramid: 271 E2E vs ~69 frontend unit.
 
 ---
 

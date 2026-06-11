@@ -1,11 +1,21 @@
-# Pass TEST-UNSKIP-03: Full E2E suite (nightly + manual)
-# Runs ALL tests without grep filter - catches issues missed by PR smoke gate
+# Full E2E suite (manual only — schedule disabled, see below).
+#
+# KNOWN BROKEN (TEST-INFRA pass, 2026-06-11): these 824 specs were authored
+# for a full stack but CI only boots Next.js with mocked auth and NO Laravel
+# backend, so every data/login flow fails with ERR_CONNECTION_REFUSED and the
+# run always times out (~2 pass / 27 fail in the 10-min budget). It gated
+# nothing yet went red every night — pure noise.
+#
+# The nightly "is the live site healthy?" signal now comes from
+# prod-health.yml (real full stack, read-only, against dixis.gr).
+#
+# To make THIS suite meaningful, a future pass must provision Postgres +
+# Laravel (mirror backend-ci.yml) and point the frontend at it, then prune
+# the ~824 specs to a runnable, deduplicated set. Until then: manual only.
 
-name: E2E Full (nightly & manual)
+name: E2E Full (manual — pending backend provisioning)
 
 on:
-  schedule:
-    - cron: "0 2 * * *"  # 2 AM UTC daily
   workflow_dispatch:
     inputs:
       grep_filter:
