@@ -13,19 +13,42 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller
 {
     /**
+     * Order-access guard for payment operations. Returns a 404 JsonResponse
+     * to deny, or null to allow.
+     *
+     * - Owned order: only the owner may act.
+     * - Guest order (user_id = null): the integer order id is sequential and
+     *   guessable, so id alone is not authorization. The caller must also
+     *   present the order's public_token (UUID) via `order_token`. Without
+     *   it, any authenticated user could pay/cancel another guest's order.
+     */
+    private function denyOrderAccess(Request $request, Order $order): ?JsonResponse
+    {
+        if ($order->user_id !== null) {
+            return $order->user_id === $request->user()?->id
+                ? null
+                : response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $providedToken = $request->input('order_token') ?? $request->query('order_token');
+        if (! $providedToken || ! hash_equals((string) $order->public_token, (string) $providedToken)) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        return null;
+    }
+
+    /**
      * Initialize payment for an order.
      *
-     * Authorization rules (Pass PAY-INIT-404-01):
-     * - Guest orders (user_id = null): Allow if order exists and not paid
-     * - Authenticated orders: Only owner can init payment
+     * Authorization (Pass PAY-GUEST-TOKEN-01):
+     * - Guest orders (user_id = null): require matching order_token (public_token)
+     * - Authenticated orders: only owner can init payment
      */
     public function initPayment(Request $request, Order $order): JsonResponse
     {
-        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
-        // Guest orders (user_id = null) can be paid by anyone with the order ID
-        // Authenticated orders require the owner to init payment
-        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if ($deny = $this->denyOrderAccess($request, $order)) {
+            return $deny;
         }
 
         // Validate that order can have payment initialized
@@ -103,9 +126,8 @@ class PaymentController extends Controller
      */
     public function confirmPayment(Request $request, Order $order): JsonResponse
     {
-        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
-        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if ($deny = $this->denyOrderAccess($request, $order)) {
+            return $deny;
         }
 
         $request->validate([
@@ -200,9 +222,8 @@ class PaymentController extends Controller
      */
     public function cancelPayment(Request $request, Order $order): JsonResponse
     {
-        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
-        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if ($deny = $this->denyOrderAccess($request, $order)) {
+            return $deny;
         }
 
         if (! $order->payment_intent_id) {
@@ -256,9 +277,8 @@ class PaymentController extends Controller
      */
     public function getPaymentStatus(Request $request, Order $order): JsonResponse
     {
-        // Pass PAY-INIT-404-01: Allow guest orders OR orders owned by the user
-        if ($order->user_id !== null && $order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if ($deny = $this->denyOrderAccess($request, $order)) {
+            return $deny;
         }
 
         if (! $order->payment_intent_id) {
