@@ -81,24 +81,30 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate
         working-directory: backend
-      - name: Configure DB for testing
-        run: |
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=project_dixis_test" >> .env
-          echo "DB_USERNAME=postgres" >> .env
-          echo "DB_PASSWORD=postgres" >> .env
-
-          # Create .env.testing for --env=testing flag (Laravel loads this instead of .env)
-          cp .env .env.testing
-        working-directory: backend
+      # NOTE: do NOT overwrite the committed backend/.env.testing — it holds the
+      # test APP_KEY/JWT config the suite needs (admin JWT tests 401 without it).
+      # Real env vars below override its local-machine DB values (same pattern
+      # as backend-ci.yml, which runs this exact suite green nightly).
       - name: Migrate database
         run: php artisan migrate:fresh --seed --env=testing
         working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: '5432'
+          DB_DATABASE: project_dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
       - name: Run backend test suite
         run: php artisan test --env=testing
         working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: '5432'
+          DB_DATABASE: project_dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
 
   heavy-checks:
     if: >
