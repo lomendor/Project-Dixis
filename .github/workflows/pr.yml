@@ -50,6 +50,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
+      - name: Unit tests (Vitest)
+        run: pnpm test:unit
+        working-directory: frontend
       - name: Build
         run: pnpm build
         working-directory: frontend
@@ -93,8 +96,8 @@ jobs:
       - name: Migrate database
         run: php artisan migrate:fresh --seed --env=testing
         working-directory: backend
-      - name: Run backend scoping tests (ownership guardrail)
-        run: php artisan test --filter=AuthorizationTest --group=scoping --stop-on-failure --env=testing
+      - name: Run backend test suite
+        run: php artisan test --env=testing
         working-directory: backend
 
   heavy-checks:
@@ -116,13 +119,29 @@ jobs:
       - name: Install
         run: pnpm i --no-frozen-lockfile
         working-directory: frontend
-      - name: Generate Prisma Client
-        run: pnpm db:gen
-        working-directory: frontend
-      - name: Storybook build (non-block if missing)
-        run: npx -y storybook@latest build || echo "SB skipped"
-        working-directory: frontend
-      - name: Playwright (smoke only)
+      # Honest boot smoke (hard gate): build the PR's code, start it, prove
+      # the server boots and key pages render 200. Replaces the previous
+      # Playwright step which ran from the wrong directory, never executed a
+      # single test, and was soft-failed ("|| echo") since introduction.
+      # Real Playwright smoke gating is tracked as a separate pass (TEST-INFRA).
+      - name: Prisma setup (CI schema)
         run: |
-          npx -y playwright install --with-deps || true
-          pnpm exec playwright test -c frontend/playwright.smoke.config.ts --reporter=list || echo "smoke skipped/soft-fail"
+          pnpm run ci:gen
+          pnpm run ci:migrate
+          pnpm run ci:seed
+        working-directory: frontend
+      - name: Build (production profile)
+        run: pnpm run build:ci
+        working-directory: frontend
+      - name: Boot smoke — server starts, key pages render 200
+        run: |
+          pnpm run start:ci &
+          npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
+          fail=0
+          for path in /api/healthz / /products; do
+            code=$(curl -s --max-time 60 -o /dev/null -w '%{http_code}' "http://127.0.0.1:3001$path")
+            echo "GET $path -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
+        working-directory: frontend
