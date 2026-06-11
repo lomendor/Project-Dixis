@@ -5,7 +5,6 @@
 backend/ @lomendor
 
 # Frontend Next.js code  
-backend/frontend/ @lomendor
 
 # CI/CD workflows
 .github/workflows/ @lomendor

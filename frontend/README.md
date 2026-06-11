@@ -53,7 +53,7 @@ frontend/
 
 1. **Navigate to frontend directory**:
    ```bash
-   cd backend/frontend
+   cd frontend
    ```
 
 2. **Install dependencies**:
@@ -138,7 +138,7 @@ The frontend integrates with the Laravel backend API using a centralized API cli
 
 The frontend includes GitHub Actions CI pipeline (`.github/workflows/frontend-ci.yml`) that:
 
-- Runs on changes to `backend/frontend/**` paths
+- Runs on changes to `frontend/**` paths
 - Sets up Node.js 20 with npm caching
 - Installs dependencies with `npm ci`
 - Runs ESLint for code quality

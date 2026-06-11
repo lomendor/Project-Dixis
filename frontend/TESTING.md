@@ -13,7 +13,7 @@ Unit tests use **MSW (Mock Service Worker)** for API mocking with realistic resp
 cd backend && php artisan serve --host=127.0.0.1 --port=8001
 
 # Ensure frontend is running on port 3001  
-cd backend/frontend && NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
+cd frontend && NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8001/api/v1" npm run dev -- -p 3001
 ```
 
 ### Test Suites
