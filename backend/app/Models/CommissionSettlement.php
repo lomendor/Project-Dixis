@@ -86,6 +86,14 @@ class CommissionSettlement extends Model
 
     public function markAsPaid(?string $notes = null): void
     {
+        // Model-level guard, independent of controller checks: paying a
+        // settlement twice would overwrite paid_at and corrupt payout records.
+        if ($this->status !== self::STATUS_PENDING) {
+            throw new \DomainException(
+                "Cannot mark settlement {$this->id} as paid: status is {$this->status}, expected PENDING"
+            );
+        }
+
         $this->update([
             'status' => self::STATUS_PAID,
             'paid_at' => now(),
@@ -95,6 +103,12 @@ class CommissionSettlement extends Model
 
     public function markAsCancelled(?string $notes = null): void
     {
+        if ($this->status !== self::STATUS_PENDING) {
+            throw new \DomainException(
+                "Cannot cancel settlement {$this->id}: status is {$this->status}, expected PENDING"
+            );
+        }
+
         $this->update([
             'status' => self::STATUS_CANCELLED,
             'notes' => $notes,
