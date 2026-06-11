@@ -44,7 +44,16 @@
 
 ## WIP (max 1)
 
-**Mobile polish + Legal disclaimers** — while founder handles business steps (see Action Plan below).
+**CI-HONEST-GATES (2026-06-11)** — PR gate made real: full backend suite + vitest + boot smoke now hard-gate PRs (PR #3292 merged, #3293).
+
+### Test quarantine (excluded from PR gate via --exclude-group)
+
+| Group | Tests | Why | Fix |
+|-------|-------|-----|-----|
+| `admin-jwt-rework` | ~30 (AdminOrderStatus, AdminProducerDestroy, AdminProductModeration, Analytics, Refund, OfflineRateTables, 2× ShippingEngineV1 label) | Written for Sanctum `actingAs()`; admin routes moved to JWT (ADMIN-SESSION-FIX 2026-02). Broken since, invisible — CI only ran `--group mvp`. | **Next pass**: JWT test helper (mint HS256 token w/ `config('app.jwt_secret')`), un-tag file by file |
+| `external-provider` | 10 (ShippingProviderIntegration) | Need ACS courier credentials | Keep excluded in CI |
+
+Honest baseline 2026-06-11: full suite 48 failed / 513 passed → after weight-unit test fixes + quarantine: **0 failed / 492 passed**. Nightly e2e-full also red 5/5 nights (824 specs vs 10-min global timeout) — separate TEST-INFRA pass needed.
 
 ---
 

@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('admin-jwt-rework')]
 class AdminProductModerationTest extends TestCase
 {
     use RefreshDatabase;

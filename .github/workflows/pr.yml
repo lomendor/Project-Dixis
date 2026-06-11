@@ -50,6 +50,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
+      - name: Unit tests (Vitest)
+        run: pnpm test:unit
+        working-directory: frontend
       - name: Build
         run: pnpm build
         working-directory: frontend
@@ -78,24 +81,37 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate
         working-directory: backend
-      - name: Configure DB for testing
-        run: |
-          echo "DB_CONNECTION=pgsql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_DATABASE=project_dixis_test" >> .env
-          echo "DB_USERNAME=postgres" >> .env
-          echo "DB_PASSWORD=postgres" >> .env
-
-          # Create .env.testing for --env=testing flag (Laravel loads this instead of .env)
-          cp .env .env.testing
-        working-directory: backend
+      # NOTE: do NOT overwrite the committed backend/.env.testing — it holds the
+      # test APP_KEY/JWT config the suite needs (admin JWT tests 401 without it).
+      # Real env vars below override its local-machine DB values (same pattern
+      # as backend-ci.yml, which runs this exact suite green nightly).
       - name: Migrate database
         run: php artisan migrate:fresh --seed --env=testing
         working-directory: backend
-      - name: Run backend scoping tests (ownership guardrail)
-        run: php artisan test --filter=AuthorizationTest --group=scoping --stop-on-failure --env=testing
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: '5432'
+          DB_DATABASE: project_dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+      # Excluded groups (quarantine, see AGENT-STATE "Test quarantine"):
+      # - admin-jwt-rework: ~30 tests written for Sanctum actingAs() before
+      #   admin routes moved to JWT (ADMIN-SESSION-FIX, 2026-02). Broken since;
+      #   invisible until now because CI only ran the mvp group. Fix pass pending.
+      # - external-provider: ACS courier integration tests, need provider creds.
+      - name: Run backend test suite
+        # (separate --exclude-group flags: comma form is a PHPUnit runner
+        # warning, which artisan test converts to exit 1 even with 0 failures)
+        run: php artisan test --env=testing --exclude-group=admin-jwt-rework --exclude-group=external-provider
         working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: '5432'
+          DB_DATABASE: project_dixis_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
 
   heavy-checks:
     if: >
@@ -116,13 +132,29 @@ jobs:
       - name: Install
         run: pnpm i --no-frozen-lockfile
         working-directory: frontend
-      - name: Generate Prisma Client
-        run: pnpm db:gen
-        working-directory: frontend
-      - name: Storybook build (non-block if missing)
-        run: npx -y storybook@latest build || echo "SB skipped"
-        working-directory: frontend
-      - name: Playwright (smoke only)
+      # Honest boot smoke (hard gate): build the PR's code, start it, prove
+      # the server boots and key pages render 200. Replaces the previous
+      # Playwright step which ran from the wrong directory, never executed a
+      # single test, and was soft-failed ("|| echo") since introduction.
+      # Real Playwright smoke gating is tracked as a separate pass (TEST-INFRA).
+      - name: Prisma setup (CI schema)
         run: |
-          npx -y playwright install --with-deps || true
-          pnpm exec playwright test -c frontend/playwright.smoke.config.ts --reporter=list || echo "smoke skipped/soft-fail"
+          pnpm run ci:gen
+          pnpm run ci:migrate
+          pnpm run ci:seed
+        working-directory: frontend
+      - name: Build (production profile)
+        run: pnpm run build:ci
+        working-directory: frontend
+      - name: Boot smoke — server starts, key pages render 200
+        run: |
+          pnpm run start:ci &
+          npx wait-on http://127.0.0.1:3001/api/healthz --timeout 120000
+          fail=0
+          for path in /api/healthz / /products; do
+            code=$(curl -s --max-time 60 -o /dev/null -w '%{http_code}' "http://127.0.0.1:3001$path")
+            echo "GET $path -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          exit $fail
+        working-directory: frontend
