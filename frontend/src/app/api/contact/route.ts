@@ -55,7 +55,11 @@ export async function POST(req: NextRequest) {
       "Λάβαμε το μήνυμά σας — Dixis",
       "<p>Σε ευχαριστούμε για την επικοινωνία! Θα απαντήσουμε σύντομα.</p>"
     );
-  } catch {}
+  } catch (e) {
+    // Autoreply is non-critical (admin notification already sent), but a
+    // silent failure hides a misconfigured mailer — log it.
+    console.error('[contact] autoreply send failed:', e);
+  }
 
   return NextResponse.json(res);
 }
