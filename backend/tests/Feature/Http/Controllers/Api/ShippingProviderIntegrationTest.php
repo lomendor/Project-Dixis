@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('external-provider')]
 class ShippingProviderIntegrationTest extends TestCase
 {
     use RefreshDatabase;

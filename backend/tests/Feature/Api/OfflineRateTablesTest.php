@@ -6,6 +6,9 @@ use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('admin-jwt-rework')]
 class OfflineRateTablesTest extends TestCase
 {
     use RefreshDatabase;

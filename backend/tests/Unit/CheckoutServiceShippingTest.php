@@ -51,7 +51,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 20.00, // Below €35 threshold
             'stock' => 10,
-            'weight_per_unit' => 0.5, // Explicit weight for deterministic calc
+            'weight_per_unit' => 500, // Explicit weight for deterministic calc
         ]);
 
         $productData = [
@@ -94,7 +94,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 35.00, // Exactly at €35 threshold
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         $productData = [
@@ -133,7 +133,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 50.00, // Above €35 threshold
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         $productData = [
@@ -174,13 +174,13 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 20.00, // Below €35
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
             'price' => 15.00, // Below €35
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         $productData = [
@@ -239,13 +239,13 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer1->id,
             'price' => 40.00, // Above €35 - FREE shipping
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
         $product2 = Product::factory()->create([
             'producer_id' => $producer2->id,
             'price' => 20.00, // Below €35 - charges shipping
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         $productData = [
@@ -300,7 +300,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 10.00, // Way below threshold
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         $productData = [
@@ -341,7 +341,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 20.00, // Below threshold
             'stock' => 10,
-            'weight_per_unit' => 0.5,
+            'weight_per_unit' => 500,
         ]);
 
         // Heavy product: 5kg
@@ -349,7 +349,7 @@ class CheckoutServiceShippingTest extends TestCase
             'producer_id' => $producer->id,
             'price' => 20.00, // Same price, below threshold
             'stock' => 10,
-            'weight_per_unit' => 5.0,
+            'weight_per_unit' => 5000,
         ]);
 
         // Order with light product

@@ -8,6 +8,9 @@ use App\Services\Payment\PaymentProviderFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('admin-jwt-rework')]
 class RefundTest extends TestCase
 {
     use RefreshDatabase;

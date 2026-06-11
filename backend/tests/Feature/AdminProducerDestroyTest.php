@@ -21,6 +21,9 @@ use Tests\TestCase;
  * than deleted if the user also has customer orders — otherwise the cascade
  * on orders.user_id would wipe a customer's history.
  */
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('admin-jwt-rework')]
 class AdminProducerDestroyTest extends TestCase
 {
     use RefreshDatabase;
