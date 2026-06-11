@@ -25,11 +25,3 @@ export {
   type ProducerStats,
   type TopProduct,
 } from '../api';
-
-// Core checkout API client with validation
-export {
-  CheckoutApiClient,
-  checkoutApi,
-  type ValidatedApiResponse,
-  type CheckoutApiError,
-} from './checkout';
