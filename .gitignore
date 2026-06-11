@@ -158,8 +158,6 @@ backend/yarn-error.log
 playwright-report/
 e2e-artifacts/
 test-results/
-/backend/frontend/test-results/
-/backend/frontend/playwright-report/
 traces/
 *.trace.zip
 *.webm
@@ -172,7 +170,6 @@ traces/
 !frontend/public/*.png
 
 # Keep test files accessible
-!/backend/frontend/tests/**
 backend/.env.testing.bak
 *.bak
 *.tmp
@@ -210,3 +207,6 @@ docs/PROD-*.md
 docs/PR*-REPORT.md
 docs/PR*-VERIFICATION-REPORT.md
 # NOTE: Pass summaries ARE committed for repo continuity (removed ignore rule)
+
+# Claude Code local worktrees
+.claude/worktrees/

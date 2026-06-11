@@ -44,7 +44,7 @@ php artisan serve
 
 ### 2. Frontend Setup
 ```bash
-cd backend/frontend/
+cd frontend/
 npm install
 npm run build
 npm start
@@ -52,7 +52,7 @@ npm start
 
 ### 3. Run E2E Tests
 ```bash
-cd backend/frontend/
+cd frontend/
 npm run e2e
 ```
 
@@ -114,7 +114,7 @@ npm run e2e
 #### Frontend Deployment
 1. **Build and Deploy**
    ```bash
-   cd backend/frontend
+   cd frontend
    npm install
    npm run build
    
@@ -155,14 +155,14 @@ For frontend-only deployment to Vercel:
      "version": 2,
      "builds": [
        {
-         "src": "backend/frontend/package.json",
+         "src": "frontend/package.json",
          "use": "@vercel/next"
        }
      ],
      "routes": [
        {
          "src": "/(.*)",
-         "dest": "backend/frontend/$1"
+         "dest": "frontend/$1"
        }
      ],
      "env": {
@@ -215,7 +215,7 @@ services:
 
   frontend:
     build:
-      context: ./backend/frontend
+      context: ./frontend
       dockerfile: Dockerfile
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -260,7 +260,7 @@ CMD php artisan serve --host=0.0.0.0 --port=8000
 
 #### Frontend Dockerfile  
 ```dockerfile
-# backend/frontend/Dockerfile
+# frontend/Dockerfile
 FROM node:20-alpine
 
 WORKDIR /app

@@ -10,7 +10,7 @@ cd backend && php artisan migrate:fresh --seed
 php artisan serve --host=127.0.0.1 --port=8001 &
 
 # Frontend (dev mode for hot reload)
-cd backend/frontend && npm run dev -- -p 3001 &
+cd frontend && npm run dev -- -p 3001 &
 
 # Production-like Testing
 npm run build

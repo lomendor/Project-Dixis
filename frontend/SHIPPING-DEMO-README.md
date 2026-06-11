@@ -25,7 +25,7 @@ The test demonstrates that the shipping integration is working correctly by:
 
 ```bash
 # Navigate to the frontend directory
-cd /path/to/Project-Dixis/backend/frontend
+cd /path/to/Project-Dixis/frontend
 
 # Run the comprehensive demo
 node run-shipping-demo-final.js
