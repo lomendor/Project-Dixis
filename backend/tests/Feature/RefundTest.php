@@ -8,9 +8,6 @@ use App\Services\Payment\PaymentProviderFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class RefundTest extends TestCase
 {
     use RefreshDatabase;
@@ -103,7 +100,7 @@ class RefundTest extends TestCase
             'total_amount' => 45.50,
         ]);
 
-        $response = $this->actingAs($admin, 'sanctum')
+        $response = $this->actingAs($admin)->withHeaders($this->adminJwtHeaders())
             ->postJson("/api/v1/refunds/orders/{$order->id}", [
                 'amount_cents' => 2000,
                 'reason' => 'customer_request',
@@ -143,7 +140,7 @@ class RefundTest extends TestCase
             'refunded_at' => now(),
         ]);
 
-        $response = $this->actingAs($admin, 'sanctum')
+        $response = $this->actingAs($admin)->withHeaders($this->adminJwtHeaders())
             ->getJson("/api/v1/refunds/orders/{$order->id}");
 
         $response->assertStatus(200)

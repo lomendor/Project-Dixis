@@ -263,11 +263,10 @@ class ShippingEngineV1Test extends TestCase
             ->assertJsonValidationErrors(['items.0.product_id']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('admin-jwt-rework')]
     public function test_api_create_label_endpoint()
     {
         $adminUser = User::factory()->create(['role' => 'admin']);
-        $this->actingAs($adminUser);
+        $this->actingAs($adminUser)->withHeaders($this->adminJwtHeaders());
 
         $order = $this->createTestOrder(2.0);
 
@@ -290,7 +289,6 @@ class ShippingEngineV1Test extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('admin-jwt-rework')]
     public function test_api_create_label_authorization()
     {
         // Regular user should not be able to create labels
@@ -299,7 +297,7 @@ class ShippingEngineV1Test extends TestCase
         $order = $this->createTestOrder(2.0);
 
         $response = $this->postJson("/api/v1/shipping/labels/{$order->id}");
-        $response->assertStatus(403); // Forbidden
+        $response->assertStatus(401); // jwt.admin: no admin JWT bearer → 401
     }
 
     public function test_api_tracking_endpoint()

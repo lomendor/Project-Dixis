@@ -95,15 +95,11 @@ jobs:
           DB_DATABASE: project_dixis_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
-      # Excluded groups (quarantine, see AGENT-STATE "Test quarantine"):
-      # - admin-jwt-rework: ~30 tests written for Sanctum actingAs() before
-      #   admin routes moved to JWT (ADMIN-SESSION-FIX, 2026-02). Broken since;
-      #   invisible until now because CI only ran the mvp group. Fix pass pending.
+      # Excluded group (see AGENT-STATE "Test quarantine"):
       # - external-provider: ACS courier integration tests, need provider creds.
+      # (admin-jwt-rework was fixed and un-quarantined — TEST-FIX-ADMIN-JWT pass)
       - name: Run backend test suite
-        # (separate --exclude-group flags: comma form is a PHPUnit runner
-        # warning, which artisan test converts to exit 1 even with 0 failures)
-        run: php artisan test --env=testing --exclude-group=admin-jwt-rework --exclude-group=external-provider
+        run: php artisan test --env=testing --exclude-group=external-provider
         working-directory: backend
         env:
           DB_CONNECTION: pgsql

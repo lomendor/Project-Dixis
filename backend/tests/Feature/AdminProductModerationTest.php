@@ -8,9 +8,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class AdminProductModerationTest extends TestCase
 {
     use RefreshDatabase;
@@ -50,7 +47,7 @@ class AdminProductModerationTest extends TestCase
             'approval_status' => 'approved',
         ]);
 
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/products/pending');
 
         $response->assertStatus(200)
@@ -74,18 +71,18 @@ class AdminProductModerationTest extends TestCase
         $response = $this->actingAs($this->producer)
             ->getJson('/api/v1/admin/products/pending');
 
-        $response->assertStatus(403);
+        $response->assertStatus(401);
 
         $response = $this->actingAs($this->consumer)
             ->getJson('/api/v1/admin/products/pending');
 
-        $response->assertStatus(403);
+        $response->assertStatus(401);
     }
 
     /** @test */
     public function admin_can_approve_product()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/products/{$this->pendingProduct->id}/moderate", [
                 'action' => 'approve',
             ]);
@@ -115,7 +112,7 @@ class AdminProductModerationTest extends TestCase
     {
         $reason = 'Product images do not meet quality standards. Please upload higher resolution photos.';
 
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/products/{$this->pendingProduct->id}/moderate", [
                 'action' => 'reject',
                 'reason' => $reason,
@@ -144,7 +141,7 @@ class AdminProductModerationTest extends TestCase
     /** @test */
     public function reject_action_requires_reason()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/products/{$this->pendingProduct->id}/moderate", [
                 'action' => 'reject',
             ]);
@@ -156,7 +153,7 @@ class AdminProductModerationTest extends TestCase
     /** @test */
     public function reject_reason_must_be_at_least_10_characters()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/products/{$this->pendingProduct->id}/moderate", [
                 'action' => 'reject',
                 'reason' => 'Too short',
@@ -175,7 +172,7 @@ class AdminProductModerationTest extends TestCase
                 'action' => 'approve',
             ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(401);
 
         // Consumer attempt
         $response = $this->actingAs($this->consumer)
@@ -183,13 +180,13 @@ class AdminProductModerationTest extends TestCase
                 'action' => 'approve',
             ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(401);
     }
 
     /** @test */
     public function moderation_action_must_be_valid()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/products/{$this->pendingProduct->id}/moderate", [
                 'action' => 'invalid_action',
             ]);
