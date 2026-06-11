@@ -46,5 +46,11 @@ jobs:
         run: pnpm i --no-frozen-lockfile
       - name: Install Playwright chromium
         run: pnpm exec playwright install chromium --with-deps
+      # Whole-suite retry: a real prod outage fails both attempts (correctly
+      # red); a transient network blip from the runner (observed once) passes
+      # on the second. Combined with per-test retries:2 in the config, this
+      # keeps the monitor trustworthy instead of crying wolf.
       - name: Run production health smoke
-        run: pnpm exec playwright test --config=playwright.config.prod-health.ts --reporter=line
+        run: |
+          run_smoke() { pnpm exec playwright test --config=playwright.config.prod-health.ts --reporter=line; }
+          run_smoke || { echo "::warning::first attempt failed — retrying after 20s"; sleep 20; run_smoke; }

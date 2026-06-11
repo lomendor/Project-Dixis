@@ -12,7 +12,7 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   fullyParallel: true,
   workers: 2,
-  retries: 1, // tolerate a single transient network blip against prod
+  retries: 2, // tolerate transient network blips against prod (per test)
   reporter: 'line',
   webServer: undefined,
   use: {
