@@ -38,6 +38,9 @@ export function useCheckout() {
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
   const [pendingOrderId, setPendingOrderId] = useState<number | null>(null)
   const [pendingThankYouId, setPendingThankYouId] = useState<string | number | null>(null)
+  // public_token (UUID) of the pending order — required by the backend to
+  // confirm/cancel guest orders (user_id = null); ignored for owned orders.
+  const [pendingOrderToken, setPendingOrderToken] = useState<string | undefined>(undefined)
   const [orderTotal, setOrderTotal] = useState<number>(0)
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
   const [shippingLoading, setShippingLoading] = useState(false)
@@ -236,7 +239,7 @@ export function useCheckout() {
     }
 
     try {
-      await paymentApi.confirmPayment(pendingOrderId, paymentIntentId)
+      await paymentApi.confirmPayment(pendingOrderId, paymentIntentId, pendingOrderToken)
       trackCheckoutCompleted({
         itemCount: Object.keys(cartItems).length,
         subtotalCents,
@@ -342,6 +345,7 @@ export function useCheckout() {
 
       const paymentOrderId = order.payment_order_id ?? order.id
       const thankYouToken = order.public_token || order.id
+      const orderToken = order.public_token || undefined
 
       sessionStorage.setItem('dixis:last-order', JSON.stringify(body.customer))
 
@@ -356,10 +360,12 @@ export function useCheckout() {
               lastName: body.customer.name.split(' ').slice(1).join(' ') || undefined,
             },
             return_url: `${window.location.origin}/thank-you?token=${thankYouToken}`,
+            order_token: orderToken,
           })
 
           setPendingOrderId(paymentOrderId)
           setPendingThankYouId(thankYouToken)
+          setPendingOrderToken(orderToken)
           setOrderTotal(paymentInit.payment.amount / 100)
           setStripeClientSecret(paymentInit.payment.client_secret)
           setLoading(false)

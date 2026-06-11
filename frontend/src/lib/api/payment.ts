@@ -135,6 +135,9 @@ class PaymentApiClient {
         lastName?: string;
       };
       return_url?: string;
+      // public_token (UUID): required by the backend for guest orders
+      // (user_id = null), ignored for owned orders.
+      order_token?: string;
     } = {}
   ): Promise<PaymentIntentResponse> {
     return this.request<PaymentIntentResponse>(`/payments/orders/${orderId}/init`, {
@@ -145,22 +148,25 @@ class PaymentApiClient {
 
   async confirmPayment(
     orderId: number,
-    paymentIntentId: string
+    paymentIntentId: string,
+    orderToken?: string
   ): Promise<PaymentConfirmationResponse> {
     return this.request<PaymentConfirmationResponse>(`/payments/orders/${orderId}/confirm`, {
       method: 'POST',
-      body: JSON.stringify({ payment_intent_id: paymentIntentId }),
+      body: JSON.stringify({ payment_intent_id: paymentIntentId, order_token: orderToken }),
     });
   }
 
-  async cancelPayment(orderId: number): Promise<{ message: string }> {
+  async cancelPayment(orderId: number, orderToken?: string): Promise<{ message: string }> {
     return this.request<{ message: string }>(`/payments/orders/${orderId}/cancel`, {
       method: 'POST',
+      body: JSON.stringify({ order_token: orderToken }),
     });
   }
 
-  async getPaymentStatus(orderId: number): Promise<PaymentStatusResponse> {
-    return this.request<PaymentStatusResponse>(`/payments/orders/${orderId}/status`);
+  async getPaymentStatus(orderId: number, orderToken?: string): Promise<PaymentStatusResponse> {
+    const qs = orderToken ? `?order_token=${encodeURIComponent(orderToken)}` : '';
+    return this.request<PaymentStatusResponse>(`/payments/orders/${orderId}/status${qs}`);
   }
 }
 

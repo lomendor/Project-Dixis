@@ -67,9 +67,10 @@ class PaymentInitAuthorizationTest extends TestCase
     }
 
     /** @test */
-    public function authenticated_user_can_init_payment_for_guest_order(): void
+    public function guest_order_payment_requires_matching_token(): void
     {
-        // Guest order has user_id = null
+        // Pass PAY-GUEST-TOKEN-01: guest order (user_id = null) is accessible
+        // only with the order's public_token, not by id alone.
         $order = Order::factory()->create([
             'user_id' => null,
             'payment_status' => 'pending',
@@ -79,10 +80,37 @@ class PaymentInitAuthorizationTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)
-            ->postJson("/api/v1/payments/orders/{$order->id}/init");
+            ->postJson("/api/v1/payments/orders/{$order->id}/init", [
+                'order_token' => $order->public_token,
+            ]);
 
-        // Should not return 404 - guest orders can be paid by anyone
-        $this->assertNotEquals(404, $response->status(), 'Guest orders should be accessible');
+        // With the correct token, not a 404 (may 400/500 on Stripe config)
+        $this->assertNotEquals(404, $response->status(), 'Guest order should be accessible with token');
+    }
+
+    /** @test */
+    public function guest_order_payment_rejected_without_matching_token(): void
+    {
+        // The integer order id is sequential and guessable; without the
+        // public_token any authenticated user could pay/cancel a stranger's
+        // guest order. Must 404.
+        $order = Order::factory()->create([
+            'user_id' => null,
+            'payment_status' => 'pending',
+            'payment_method' => 'CARD',
+            'subtotal' => 30.00,
+            'total' => 33.50,
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/v1/payments/orders/{$order->id}/init")
+            ->assertStatus(404);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/v1/payments/orders/{$order->id}/init", [
+                'order_token' => 'wrong-token',
+            ])
+            ->assertStatus(404);
     }
 
     /** @test */
