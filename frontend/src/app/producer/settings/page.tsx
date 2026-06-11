@@ -155,7 +155,11 @@ function ProducerSettingsContent() {
     // Handle return from Stripe onboarding
     if (searchParams.get('stripe') === 'complete') {
       setSuccess('Η σύνδεση με Stripe ολοκληρώθηκε. Ελέγχουμε την κατάστασή σας...');
-      apiClient.stripeConnectStatus().then(setStripeStatus).catch(() => {});
+      apiClient.stripeConnectStatus().then(setStripeStatus).catch((e) => {
+        // Post-onboarding status check — failure means the success banner
+        // shows but status stays stale; surface it for debugging.
+        console.error('[producer/settings] post-Stripe status check failed:', e);
+      });
     }
   }, [searchParams]);
 

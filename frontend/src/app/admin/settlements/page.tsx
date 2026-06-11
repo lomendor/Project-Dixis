@@ -51,7 +51,14 @@ export default function AdminSettlementsPage() {
   useEffect(() => { load(); loadSummary() }, [filter])
 
   async function loadSummary() {
-    try { const d = await api(`${API}/summary`); setSummary(d.summary) } catch {}
+    try {
+      const d = await api(`${API}/summary`)
+      setSummary(d.summary)
+    } catch (e: unknown) {
+      // Non-blocking (summary is a header widget) but must not vanish silently.
+      console.error('[settlements] summary load failed:', e)
+      showError(e instanceof Error ? e.message : 'Αποτυχία φόρτωσης συνόψεων')
+    }
   }
 
   async function load() {

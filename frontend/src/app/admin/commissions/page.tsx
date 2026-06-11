@@ -27,7 +27,7 @@ export default function AdminCommissionsPage() {
   const [pr, setPr] = useState<Record<string, unknown> | null>(null); const [pv, setPv] = useState(false)
 
   useEffect(() => { load() }, [])
-  async function load() { setLoading(true); try { setRules((await api(API)).rules || []) } catch {} finally { setLoading(false) } }
+  async function load() { setLoading(true); try { setRules((await api(API)).rules || []) } catch (e: unknown) { console.error('[commissions] load failed:', e); showError(e instanceof Error ? e.message : 'Αποτυχία φόρτωσης κανόνων προμήθειας') } finally { setLoading(false) } }
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF(p => ({ ...p, [k]: e.target.value }))
   const fc = (c: number) => (c / 100).toFixed(2)
 
