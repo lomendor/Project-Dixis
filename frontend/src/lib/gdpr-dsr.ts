@@ -244,8 +244,12 @@ export class GDPRDataSubjectService {
     await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 700));
 
     const requestId = `dsr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const now = new Date().toISOString();
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
+    // Derive both timestamps from ONE clock read: reading the time twice made
+    // expires_at land a few ms after submitted_at, so Math.ceil(diff/day)
+    // intermittently yielded 31 instead of 30 days (flaky GDPR-timeline test).
+    const nowMs = Date.now();
+    const now = new Date(nowMs).toISOString();
+    const expiresAt = new Date(nowMs + 30 * 24 * 60 * 60 * 1000).toISOString(); // exactly 30 days
 
     switch (endpoint) {
       case '/gdpr/dsr-requests':
