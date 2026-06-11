@@ -21,9 +21,6 @@ use Tests\TestCase;
  * than deleted if the user also has customer orders — otherwise the cascade
  * on orders.user_id would wipe a customer's history.
  */
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class AdminProducerDestroyTest extends TestCase
 {
     use RefreshDatabase;
@@ -36,6 +33,11 @@ class AdminProducerDestroyTest extends TestCase
         parent::setUp();
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->consumer = User::factory()->create(['role' => 'consumer']);
+
+        // Destroy flow disconnects Stripe Connect best-effort (post-DB, in
+        // try/catch) — but StripeClient's constructor throws on a null key
+        // before that. Any non-empty dummy key suffices in tests.
+        config(['payments.stripe.secret_key' => 'sk_test_dummy']);
     }
 
     /** @test */
@@ -45,13 +47,13 @@ class AdminProducerDestroyTest extends TestCase
 
         $this->actingAs($this->consumer)
             ->deleteJson("/api/v1/admin/producers/{$producer->id}")
-            ->assertStatus(403);
+            ->assertStatus(401);
     }
 
     /** @test */
     public function delete_returns_404_for_unknown_producer(): void
     {
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->deleteJson('/api/v1/admin/producers/999999')
             ->assertStatus(404);
     }
@@ -61,7 +63,7 @@ class AdminProducerDestroyTest extends TestCase
     {
         $producer = $this->makeProducer();
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->getJson("/api/v1/admin/producers/{$producer->id}/deletion-preview")
             ->assertStatus(200)
             ->assertJsonPath('mode', 'hard')
@@ -78,7 +80,7 @@ class AdminProducerDestroyTest extends TestCase
         // Producer has a product — verifies cascade
         Product::factory()->create(['producer_id' => $producer->id]);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->deleteJson("/api/v1/admin/producers/{$producer->id}", ['reason' => 'founder request'])
             ->assertStatus(200)
             ->assertJsonPath('mode', 'hard')
@@ -102,7 +104,7 @@ class AdminProducerDestroyTest extends TestCase
         // Customer order placed by the same user
         Order::factory()->create(['user_id' => $userId]);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->deleteJson("/api/v1/admin/producers/{$producer->id}")
             ->assertStatus(200)
             ->assertJsonPath('mode', 'hard')
@@ -130,7 +132,7 @@ class AdminProducerDestroyTest extends TestCase
             'producer_id' => $producer->id,
         ]);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->deleteJson("/api/v1/admin/producers/{$producer->id}", ['reason' => 'GDPR DSR'])
             ->assertStatus(200)
             ->assertJsonPath('mode', 'soft')
@@ -161,11 +163,11 @@ class AdminProducerDestroyTest extends TestCase
         $producer = $this->makeProducer();
         $producer->update(['anonymized_at' => now()]);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->deleteJson("/api/v1/admin/producers/{$producer->id}")
             ->assertStatus(409);
 
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->getJson("/api/v1/admin/producers/{$producer->id}/deletion-preview")
             ->assertStatus(409);
     }

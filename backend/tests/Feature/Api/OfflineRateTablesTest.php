@@ -6,9 +6,6 @@ use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class OfflineRateTablesTest extends TestCase
 {
     use RefreshDatabase;
@@ -250,7 +247,7 @@ class OfflineRateTablesTest extends TestCase
         // Create an admin user for authentication (admin middleware required)
         $user = \App\Models\User::factory()->admin()->create();
 
-        $response = $this->actingAs($user, 'sanctum')
+        $response = $this->actingAs($user)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/shipping/rates');
 
         $response->assertStatus(200)
@@ -280,7 +277,7 @@ class OfflineRateTablesTest extends TestCase
     {
         $user = \App\Models\User::factory()->admin()->create();
 
-        $response = $this->actingAs($user, 'sanctum')
+        $response = $this->actingAs($user)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/shipping/simulate');
 
         $response->assertStatus(200)

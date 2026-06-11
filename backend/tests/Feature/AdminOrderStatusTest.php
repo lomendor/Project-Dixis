@@ -7,9 +7,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class AdminOrderStatusTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,7 +35,7 @@ class AdminOrderStatusTest extends TestCase
     /** @test */
     public function admin_can_update_order_status()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'confirmed',
             ]);
@@ -64,7 +61,7 @@ class AdminOrderStatusTest extends TestCase
     {
         $note = 'Customer requested expedited shipping';
 
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'processing',
                 'note' => $note,
@@ -88,7 +85,7 @@ class AdminOrderStatusTest extends TestCase
                 'status' => 'confirmed',
             ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(401);
 
         // Verify status not changed
         $this->assertDatabaseHas('orders', [
@@ -101,7 +98,7 @@ class AdminOrderStatusTest extends TestCase
     public function invalid_status_transition_is_rejected()
     {
         // Cannot jump from pending directly to delivered
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'delivered',
             ]);
@@ -121,7 +118,7 @@ class AdminOrderStatusTest extends TestCase
     /** @test */
     public function invalid_status_value_is_rejected()
     {
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'invalid_status',
             ]);
@@ -144,28 +141,28 @@ class AdminOrderStatusTest extends TestCase
     public function status_can_transition_through_full_lifecycle()
     {
         // pending → confirmed
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", ['status' => 'confirmed'])
             ->assertStatus(200);
 
         $this->assertEquals('confirmed', $this->order->fresh()->status);
 
         // confirmed → processing
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", ['status' => 'processing'])
             ->assertStatus(200);
 
         $this->assertEquals('processing', $this->order->fresh()->status);
 
         // processing → shipped
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", ['status' => 'shipped'])
             ->assertStatus(200);
 
         $this->assertEquals('shipped', $this->order->fresh()->status);
 
         // shipped → delivered
-        $this->actingAs($this->admin)
+        $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", ['status' => 'delivered'])
             ->assertStatus(200);
 
@@ -176,7 +173,7 @@ class AdminOrderStatusTest extends TestCase
     public function status_can_be_cancelled_from_early_states()
     {
         // pending → cancelled
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'cancelled',
             ]);
@@ -196,7 +193,7 @@ class AdminOrderStatusTest extends TestCase
         $this->order->update(['status' => 'delivered']);
 
         // Try to change to any other status
-        $response = $this->actingAs($this->admin)
+        $response = $this->actingAs($this->admin)->withHeaders($this->adminJwtHeaders())
             ->patchJson("/api/v1/admin/orders/{$this->order->id}/status", [
                 'status' => 'shipped',
             ]);

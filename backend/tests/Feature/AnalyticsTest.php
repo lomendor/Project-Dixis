@@ -10,9 +10,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group('admin-jwt-rework')]
 class AnalyticsTest extends TestCase
 {
     use RefreshDatabase;
@@ -45,7 +42,7 @@ class AnalyticsTest extends TestCase
             'created_at' => now()->subDay(),
         ]);
 
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/sales?period=daily&limit=7');
 
         $response->assertStatus(200)
@@ -78,7 +75,7 @@ class AnalyticsTest extends TestCase
         Order::factory()->count(2)->create(['status' => 'delivered']);
         Order::factory()->count(1)->create(['status' => 'cancelled']);
 
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/orders');
 
         $response->assertStatus(200)
@@ -135,7 +132,7 @@ class AnalyticsTest extends TestCase
             'total_price' => 40.00,
         ]);
 
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/products?limit=5');
 
         $response->assertStatus(200)
@@ -189,7 +186,7 @@ class AnalyticsTest extends TestCase
             'total_price' => 100.00,
         ]);
 
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/producers');
 
         $response->assertStatus(200)
@@ -236,7 +233,7 @@ class AnalyticsTest extends TestCase
         Producer::factory()->count(3)->create();
         Product::factory()->count(10)->create(['is_active' => true]);
 
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/dashboard');
 
         $response->assertStatus(200)
@@ -289,7 +286,7 @@ class AnalyticsTest extends TestCase
 
     public function test_sales_analytics_period_validation()
     {
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/sales?period=invalid');
 
         $response->assertStatus(422)
@@ -298,7 +295,7 @@ class AnalyticsTest extends TestCase
 
     public function test_products_analytics_limit_validation()
     {
-        $response = $this->actingAs($this->adminUser)
+        $response = $this->actingAs($this->adminUser)->withHeaders($this->adminJwtHeaders())
             ->getJson('/api/v1/admin/analytics/products?limit=100');
 
         $response->assertStatus(422)

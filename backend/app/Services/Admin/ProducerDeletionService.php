@@ -183,13 +183,16 @@ class ProducerDeletionService
             return;
         }
         $user->tokens()->delete();
-        $user->update([
+        // forceFill: email_verified_at and anonymized_at are not in
+        // User::$fillable, so update() drops them silently — leaving the
+        // anonymized user without the GDPR flag and still email-verified.
+        $user->forceFill([
             'name' => 'Διαγραφημένος Χρήστης',
             'email' => 'deleted-' . Str::uuid()->toString() . '@dixis.local',
             'password' => Hash::make(Str::random(64)),
             'email_verified_at' => null,
             'anonymized_at' => now(),
-        ]);
+        ])->save();
     }
 
     private function deleteUser(int $userId): void
