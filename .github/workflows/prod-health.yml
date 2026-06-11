@@ -1,0 +1,50 @@
+# Production health smoke — read-only full-stack check against the live site.
+#
+# Runs tests/smoke/prod-health.spec.ts (homepage renders real products,
+# products API, PDP, nav, healthz) against https://dixis.gr every morning.
+# Unlike the mock-auth CI e2e suite, this hits the REAL Laravel backend, so a
+# green run means the whole chain (Next.js + Laravel + Postgres) is up.
+#
+# Read-only: no auth, no order creation, safe to run on a schedule.
+# This is a MONITOR, not a PR gate — it tests prod, not a PR's code.
+
+name: Prod Health (nightly & manual)
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # 06:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target base URL (defaults to https://dixis.gr)'
+        required: false
+        default: 'https://dixis.gr'
+
+permissions:
+  contents: read
+
+jobs:
+  prod-health:
+    name: Production health smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      BASE_URL: ${{ github.event.inputs.base_url || 'https://dixis.gr' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable corepack
+        run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
+      - name: Install deps
+        run: pnpm i --no-frozen-lockfile
+      - name: Install Playwright chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Run production health smoke
+        run: pnpm exec playwright test --config=playwright.config.prod-health.ts --reporter=line

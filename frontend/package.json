@@ -104,6 +104,7 @@
     "agent:docs": "npm run agent:routes && npm run agent:schema",
     "test:e2e:smoke": "npx -y dotenv-cli -e .env.ci -- playwright test --grep @smoke --reporter=line,html --global-timeout=300000 --max-failures=1",
     "test:smoke": "playwright test -g @smoke --reporter=line",
+    "test:prod-health": "playwright test --config=playwright.config.prod-health.ts --reporter=line",
     "test:ship": "playwright test tests/shipping --reporter=line",
     "typecheck": "tsc --noEmit",
     "db:push:ci": "prisma db push --schema=prisma/schema.ci.prisma",
