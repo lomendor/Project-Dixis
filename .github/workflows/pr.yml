@@ -101,7 +101,9 @@ jobs:
       #   invisible until now because CI only ran the mvp group. Fix pass pending.
       # - external-provider: ACS courier integration tests, need provider creds.
       - name: Run backend test suite
-        run: php artisan test --env=testing --exclude-group=admin-jwt-rework,external-provider
+        # (separate --exclude-group flags: comma form is a PHPUnit runner
+        # warning, which artisan test converts to exit 1 even with 0 failures)
+        run: php artisan test --env=testing --exclude-group=admin-jwt-rework --exclude-group=external-provider
         working-directory: backend
         env:
           DB_CONNECTION: pgsql
