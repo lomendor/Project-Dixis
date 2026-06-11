@@ -17,7 +17,7 @@ interface FilterStripProps {
 
 export function FilterStrip({ label, options, selected, paramName, basePath }: FilterStripProps) {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams() ?? new URLSearchParams()
 
   if (options.length === 0) return null
 

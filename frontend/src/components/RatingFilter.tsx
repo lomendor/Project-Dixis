@@ -19,7 +19,7 @@ interface RatingFilterProps {
 
 export function RatingFilter({ selectedRating }: RatingFilterProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const current = selectedRating ?? searchParams.get('min_rating');
 
   const handleClick = (value: string | null) => {

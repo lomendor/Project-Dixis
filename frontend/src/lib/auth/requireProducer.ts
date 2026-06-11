@@ -38,7 +38,9 @@ export async function requireProducer(): Promise<ProducerSession> {
     });
 
     if (producer) {
-      return producer;
+      // phone is the lookup key (guarded non-null above), so coalesce to
+      // satisfy ProducerSession — Prisma types the column as nullable.
+      return { ...producer, phone: producer.phone ?? phone };
     }
   } catch {
     // Prisma may fail if table is removed in future — fall through to Laravel

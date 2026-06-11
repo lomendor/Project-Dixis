@@ -98,7 +98,7 @@ export function CategoryStrip({
   dynamicCategories,
 }: CategoryStripProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const currentCat = selectedCategory ?? searchParams.get('cat');
 
   const handleCategoryClick = (slug: string | null) => {

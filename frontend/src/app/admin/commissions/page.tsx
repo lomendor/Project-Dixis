@@ -100,7 +100,7 @@ export default function AdminCommissionsPage() {
         {pr && <div className="mt-3 p-3 bg-gray-50 rounded text-sm">
           <p><strong>Προμήθεια:</strong> {typeof pr.commission_cents === 'number' ? fc(pr.commission_cents as number) : '-'}</p>
           <p><strong>Κανόνας ID:</strong> {pr.rule_id != null ? String(pr.rule_id) : 'Κανένας'}</p>
-          {pr.breakdown && <p className="text-gray-500 text-xs mt-1">{typeof pr.breakdown === 'string' ? pr.breakdown : JSON.stringify(pr.breakdown)}</p>}
+          {!!pr.breakdown && <p className="text-gray-500 text-xs mt-1">{typeof pr.breakdown === 'string' ? pr.breakdown : JSON.stringify(pr.breakdown)}</p>}
         </div>}
       </section>
 

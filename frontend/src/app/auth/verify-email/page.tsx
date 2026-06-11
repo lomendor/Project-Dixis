@@ -14,7 +14,7 @@ type VerificationState = 'loading' | 'success' | 'error' | 'expired' | 'missing'
  * Reads token and email from URL query params, calls verify endpoint.
  */
 function VerifyEmailForm() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const t = useTranslations();
 
   const [state, setState] = useState<VerificationState>('loading');

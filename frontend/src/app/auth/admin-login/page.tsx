@@ -35,7 +35,7 @@ function AdminLoginContent() {
   const [devCode, setDevCode] = useState<string | null>(null);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const from = safeAdminRedirect(searchParams.get('from'));
 
   async function handleRequestOtp(e: React.FormEvent) {

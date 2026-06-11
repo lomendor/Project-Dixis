@@ -15,8 +15,10 @@ export interface ProducerShipping {
   subtotal: number;
   shipping_cost: number;
   is_free: boolean;
-  free_reason: string | null;
-  zone: string;
+  // Aligned with CartShippingQuoteSchema (the validated API shape):
+  free_reason: 'threshold' | 'pickup' | null;
+  threshold?: number;
+  zone: string | null;
   weight_grams: number;
 }
 

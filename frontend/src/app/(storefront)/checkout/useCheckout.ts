@@ -83,9 +83,9 @@ export function useCheckout() {
         .then((data) => {
           if (data.address) {
             setSavedAddress(data.address)
-            const hasValidPostal = data.address.postal_code && /^\d{5}$/.test(data.address.postal_code)
-            if (hasValidPostal) {
-              setPostalCode(data.address.postal_code)
+            const postal = data.address.postal_code
+            if (postal && /^\d{5}$/.test(postal)) {
+              setPostalCode(postal)
             } else {
               setSavedAddressPartial(true)
             }

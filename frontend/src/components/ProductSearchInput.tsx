@@ -10,7 +10,7 @@ import { useTranslations } from '@/contexts/LocaleContext';
  */
 export function ProductSearchInput() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations();
 

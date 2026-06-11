@@ -22,7 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function ProducerSidebar({ onClose }: { onClose: () => void }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const { user, logout } = useAuth();
 
   function isActive(href: string): boolean {

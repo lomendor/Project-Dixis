@@ -31,7 +31,7 @@ export function logWithId(rid: string, msg: string, details?: unknown): void {
     timestamp,
     requestId: rid,
     message: msg,
-    ...(details && { details }),
+    ...(details ? { details } : {}),
   };
   console.log(JSON.stringify(logEntry));
 }

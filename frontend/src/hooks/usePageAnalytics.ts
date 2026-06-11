@@ -4,7 +4,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function usePageAnalytics(pageTitle?: string) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const { trackPageView } = useAnalytics();
   const { user } = useAuth();
 

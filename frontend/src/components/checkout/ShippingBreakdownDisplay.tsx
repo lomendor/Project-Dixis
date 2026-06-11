@@ -139,7 +139,7 @@ export default function ShippingBreakdownDisplay({
           className={totalShipping === 0 ? 'text-emerald-600' : ''}
           data-testid="shipping-total"
         >
-          {totalShipping === 0 ? t('checkoutPage.shippingFree') : fmt.format(totalShipping)}
+          {totalShipping === 0 ? t('checkoutPage.shippingFree') : fmt.format(totalShipping ?? 0)}
         </span>
       </div>
     </div>
