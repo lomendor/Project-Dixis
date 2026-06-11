@@ -54,7 +54,7 @@ const nextStatusLabels: Record<OrderStatus, string> = {
 type EmailStatus = 'idle' | 'sending' | 'sent' | 'failed' | 'skipped';
 
 export default function ProducerOrderDetailsPage() {
-  const params = useParams();
+  const params = useParams() ?? {};
   const orderId = Number(params.id);
 
   const [order, setOrder] = useState<ProducerOrder | null>(null);

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 const statuses = ['ALL','PAID','PACKING','SHIPPED','DELIVERED','CANCELLED']
 
 export default function OrdersClient(){
-  const sp = useSearchParams()
+  const sp = useSearchParams() ?? new URLSearchParams()
   const router = useRouter()
   const [q,setQ] = useState(sp.get('q')||'')
   const [status,setStatus] = useState((sp.get('status')||'ALL').toUpperCase())

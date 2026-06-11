@@ -17,7 +17,7 @@ export default function ProducerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   // Onboarding page gets no sidebar — producer hasn't completed setup yet
   const isOnboarding = pathname.startsWith('/producer/onboarding');

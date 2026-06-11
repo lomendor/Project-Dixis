@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
  * - Close button visible on mobile only
  */
 export function AdminSidebar({ onClose }: { onClose: () => void }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   function isActive(href: string): boolean {
     if (href === '/admin') return pathname === '/admin';

@@ -65,7 +65,7 @@ export default function ProducerSettingsPage() {
 
 function ProducerSettingsContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>('');

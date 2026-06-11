@@ -20,7 +20,7 @@ function parseIntOr(x: string | null, d: number): number | undefined {
 
 export function useOrdersFilters() {
   const router = useRouter();
-  const sp = useSearchParams();
+  const sp = useSearchParams() ?? new URLSearchParams();
 
   const filters = React.useMemo<OrdersFilters>(() => ({
     status: sp.get('status') || undefined,

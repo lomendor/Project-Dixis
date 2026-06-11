@@ -26,7 +26,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const t = useTranslations();
 
   // Strategic Fix 2B: Read redirect param set by middleware

@@ -215,7 +215,7 @@ export default function ProducerDashboard() {
                           {product.images.length > 0 ? (
                             <Image
                               className="rounded-lg object-cover"
-                              src={product.images[0].url || product.images[0].image_path}
+                              src={product.images[0].url || product.images[0].image_path || ""}
                               alt={product.images[0].alt_text || product.name}
                               width={48}
                               height={48}
@@ -229,7 +229,7 @@ export default function ProducerDashboard() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-neutral-900 truncate">{product.name}</p>
                           <p className="text-sm text-neutral-600">
-                            {formatCurrency(parseFloat(product.price || product.current_price))}
+                            {formatCurrency(parseFloat(product.price || product.current_price || "0"))}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-neutral-500">
@@ -272,7 +272,7 @@ export default function ProducerDashboard() {
                                   {product.images.length > 0 ? (
                                     <Image
                                       className="rounded-lg object-cover"
-                                      src={product.images[0].url || product.images[0].image_path}
+                                      src={product.images[0].url || product.images[0].image_path || ""}
                                       alt={product.images[0].alt_text || product.name}
                                       width={40}
                                       height={40}
@@ -297,7 +297,7 @@ export default function ProducerDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-neutral-900">
-                                {formatCurrency(parseFloat(product.price || product.current_price))}
+                                {formatCurrency(parseFloat(product.price || product.current_price || "0"))}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">

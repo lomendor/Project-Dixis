@@ -220,7 +220,7 @@ export default function LockerSearch({
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center mb-1">
-                  <span className="text-lg mr-2">{getLockerIcon(locker.provider)}</span>
+                  <span className="text-lg mr-2">{getLockerIcon(locker.provider ?? '')}</span>
                   <div className="font-medium text-gray-900 truncate">
                     {locker.name}
                   </div>

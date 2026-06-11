@@ -17,7 +17,7 @@ const SORT_OPTIONS = [
  */
 export function ProductSort() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   // Reconstruct compound value from URL params
   const currentSort = searchParams.get('sort') || 'created_at';

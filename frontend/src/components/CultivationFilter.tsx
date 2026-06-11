@@ -69,7 +69,7 @@ export function CultivationFilter({
   availableCounts,
 }: CultivationFilterProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const current = selectedCultivation ?? searchParams.get('cult');
 
   // Only show options that have at least 1 product

@@ -180,7 +180,7 @@ function InlineEditField({ value, onSave, type, disabled }: { value: number; onS
 
 function AdminProductsContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams() ?? new URLSearchParams()
   const { showSuccess, showError } = useToast()
 
   const [products, setProducts] = useState<Product[]>([])

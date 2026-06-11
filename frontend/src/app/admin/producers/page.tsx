@@ -103,7 +103,7 @@ export default function AdminProducersPage() {
 
 function AdminProducersContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const { showSuccess, showError } = useToast();
 
   const [producers, setProducers] = useState<Producer[]>([]);

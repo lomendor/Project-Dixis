@@ -54,8 +54,11 @@ export async function logAdminAction(input: AuditLogInput) {
       action,
       entityType,
       entityId,
-      oldValue: oldValue ?? null,
-      newValue: newValue ?? null,
+      // oldValue/newValue are nullable Json columns: store SQL NULL via
+      // Prisma.DbNull (a literal `null` is rejected by the Json input type).
+      oldValue: oldValue ?? Prisma.DbNull,
+      newValue: newValue ?? Prisma.DbNull,
+      // details is a nullable String column — plain null is correct here.
       details: details ?? null,
       ipAddress: admin.ipAddress,
       userAgent: admin.userAgent,

@@ -20,7 +20,7 @@ export default function AuthGuard({
 }: AuthGuardProps) {
   const { user, loading, isAuthenticated, setIntendedDestination } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   useEffect(() => {
     if (loading) return;
