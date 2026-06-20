@@ -4,7 +4,7 @@
 > This file contains everything that takes 20+ minutes to rediscover each time.
 > It makes me effective from line 1 instead of after warmup.
 
-**Last Updated**: 2026-02-25
+**Last Updated**: 2026-06-20
 
 ---
 
@@ -115,7 +115,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 | "DB offline" | Fix .env symlink: `ln -sfn /var/www/dixis/shared/frontend.env frontend/.env` |
 | OOM during build | `NODE_OPTIONS='--max-old-space-size=2048' pnpm build` |
 | PM2 crash loop | `fuser -k 3000/tcp && pm2 restart dixis-frontend` |
-| Auto-deploy broken | SSH key issue in GitHub Actions. Use manual deploy. |
+| Auto-deploy broken | GitHub Actions runner can't reach the VPS over SSH (port 22 connection-timeout, all retries; last seen 2026-06-20). Use manual deploy. |
 
 ---
 
@@ -186,7 +186,7 @@ curl -sI https://dixis.gr/api/healthz       # 200 = OK
 3. **The `/my/*` routes are now redirect stubs** to `/producer/*`. All implementations live at `/producer/*`. `/my/*` only exists for backwards compatibility.
 4. **Worktree builds may fail** with Prisma errors — always run `npx prisma generate` first.
 5. **Admin cookie is `dixis_jwt`** (renamed from `dixis_session` to avoid collision).
-6. **Auto-deploy is broken** (SSH key issue). Always deploy manually after merge.
+6. **Auto-deploy is broken** — GitHub Actions runner can't SSH to the VPS (port 22 connection-timeout, all retries; last seen 2026-06-20, run 27869013464). Deploy manually after merge: PM2 restart for code-only, or `bash scripts/prod-deploy-clean.sh` from local for a full rebuild.
 7. **CI uses SQLite**, production uses PostgreSQL. No `mode: 'insensitive'` or other PG-only features.
 8. **Greek locale everywhere**: `el-GR` for dates/currency, Greek UI strings, 5-digit postal codes.
 9. **LARAVEL_INTERNAL_URL already includes `/api/v1`**. Use `laravelUrl('path')` from `@/lib/laravel/url` instead of manual concatenation to avoid double-prefix bugs (PR #3192).

@@ -1,6 +1,6 @@
 # AGENT-STATE — Dixis Canonical Entry Point
 
-**Updated**: 2026-03-10 (Action plan locked)
+**Updated**: 2026-06-20 (analytics client-build fix + manual prod deploy of b907d4ca; last major technical update 2026-06-11: TEST-FIX-ADMIN-JWT + E2E prod-health)
 
 > **This is THE entry point.** Read this first on every agent session. Single source of truth.
 > **Then read**: `docs/AGENT/CONTEXT-BOOT.md` — full operational context, deploy procedures, architecture, permissions.
@@ -164,7 +164,7 @@ _(Older entries archived — see `docs/OPS/STATE.md`)_
 - **PR size ≤300 LOC** — May need multiple PRs for large features
 - **Workflow changes only if broken** — `.github/workflows/**` locked unless deploy/CI is failing
 - **Docs inside PR** — No separate docs-only PRs (update AGENT-STATE in same PR)
-- **Deploy**: Auto-deploy via GitHub Actions WORKING (verified 2026-02-28). Manual fallback: `ssh dixis-prod` → PM2 restart only (do NOT git pull + build, rsync --delete will overwrite)
+- **Deploy**: Auto-deploy via GitHub Actions is currently **RED** — `deploy-frontend.yml` fails because the runner cannot SSH to the VPS (`port 22: Connection timed out`, all retries; last seen 2026-06-20, run 27869013464). Manual deploy is the live path: code-only change → `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend` (PM2 restart ONLY — do NOT git pull + build, rsync `--delete` overwrites); full rebuild → `bash scripts/prod-deploy-clean.sh` from local. (verified 2026-06-20 via `gh run list`)
 
 ---
 
@@ -173,6 +173,7 @@ _(Older entries archived — see `docs/OPS/STATE.md`)_
 1. Update this file (WIP → Recently Done, update audit status if relevant)
 2. Add entry to `docs/OPS/STATE.md` (top)
 3. Verify prod: `curl -sI https://dixis.gr/api/healthz`
+4. If you changed deploy/ports/health/version/architecture: update `docs/INDEX.md` links AND re-verify the claim against reality (`gh run list`, `curl .../api/healthz`, `grep '"next"' frontend/package.json`) before writing WORKING/BROKEN or a version pin.
 
 ---
 
@@ -185,7 +186,7 @@ _(Older entries archived — see `docs/OPS/STATE.md`)_
 - **Producer routes**: `/producer/*` (dashboard, orders, products, settings, analytics, settlements) — all wrapped in sidebar layout. `/my/*` routes are redirect stubs only.
 - **Categories**: 10 unified slugs in both backend + frontend. `toStorefrontSlug()` bridge in `category-map.ts`.
 - **i18n**: Single `i18n.ts` config file + `messages/` directory (el.json, en.json). NOT an `i18n/` directory.
-- **Deploy (auto)**: `deploy-frontend.yml` builds standalone bundle, rsync to VPS, restores .env, PM2 restart, 20x health proof. **WORKING** (verified 2026-02-28).
+- **Deploy (auto)**: `deploy-frontend.yml` is designed to build the standalone bundle, rsync to VPS, restore .env, PM2 restart, with a 20x health proof — but it is currently **BROKEN**: the runner times out on SSH port 22 at the 'Precheck VPS env files' step (last seen 2026-06-20). Use the manual deploy above. (verified 2026-06-20 via `gh run list`)
 - **Analytics**: Umami v3.0.3 self-hosted at `/var/www/dixis/umami/`, PM2 on port 3001. Cookieless (no GDPR consent needed). Proxied via Next.js rewrite `/u/*` → `localhost:3001/*`. Public dashboard: `https://umami.dixis.gr` (nginx reverse proxy, SSL via Let's Encrypt). Admin password: rotated 2026-05-05 — credentials in `~/.dixis-secrets/umami-admin.txt` (founder's local machine, NOT in repo). **Self-heal**: cron `*/2` runs `/var/www/dixis/ensure-umami.sh` (source: `scripts/ops/ensure-umami.sh`) to recover Umami after frontend deploys, which `pm2 delete all` + `pm2 kill` the entire daemon. Workflow file is locked per project rules, so we patch around it.
 - **Deploy (manual fallback)**: `ssh dixis-prod` → `cd /var/www/dixis/current/frontend && pm2 restart dixis-frontend`. Do NOT `git pull` + `npm run build` — the VPS directory is managed by rsync `--delete`.
 
