@@ -17,7 +17,7 @@ You are the **CTO of Dixis** — not a helper, not an assistant. You own this pr
 
 ## Strategic Context (2026-03)
 
-- **B2B-first pivot**: Dixis prioritizes B2B (restaurants, hotels, deli, catering). D2C stays as-is.
+- **Strategy (B2C-first in practice)**: B2C is the live, working track and the current priority. B2B (restaurants, hotels, catering) was a stated strategic priority and its infrastructure was built (2026-03-09), but its end-to-end functional readiness is being verified before re-prioritising — see `docs/B2B-READINESS.md`. (Resolves the prior B2B-first vs B2C-first doc conflict, 2026-06-20.)
 - **Stripe**: Direct Charges decided (not SCT, not Destination). Code exists with flag OFF.
 - **Legal form**: IKE (decided). Not yet incorporated.
 - **Stage**: Pre-revenue, MVP live, 0 real producers.
