@@ -3,7 +3,7 @@
 > **Entry Point**: `docs/AGENT-STATE.md` — Read this first every session.
 > **Then**: `docs/AGENT/CONTEXT-BOOT.md` — Architecture, deploy, pitfalls.
 > **Docs navigator**: `docs/INDEX.md` — Which docs are live vs historical.
-> **Business context**: `docs/OPS/PENDING-EXTERNAL.md` — Questions for lawyer/accountant/EFET.
+> **Business context**: `docs/ACCOUNTANT-BRIEFING-GR.md` (accountant/tax) + `docs/LEGAL-LIABILITY-FOOD-MARKETPLACE.md` (lawyer/EFET) — open external questions.
 
 ---
 
@@ -56,8 +56,8 @@ bash scripts/prod-deploy-clean.sh  # Deploy to VPS
 ## Guardrails (non-negotiable)
 
 - **CI/CD**: NO changes to `.github/workflows/**`
-- **Ports**: 8001 (Laravel backend), 3000 (Next.js frontend via PM2) — LOCKED
-- **Next.js**: 15.5.0 — LOCKED
+- **Ports**: dev — 8001 (Laravel), 3000 (Next.js via PM2); prod — backend via PHP-FPM unix socket (nginx proxies `/api/*`), frontend 3000 (PM2), Umami 3001 — LOCKED
+- **Next.js**: 15.5.9 — LOCKED
 - **PR Size**: <=300 LOC per PR
 - **WIP limit**: 1 item in progress at a time
 - **Artifacts**: playwright-report/**, test-results/** required
