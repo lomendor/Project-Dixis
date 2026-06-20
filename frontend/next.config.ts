@@ -2,7 +2,33 @@ import type { NextConfig } from "next";
 import path from "path";
 import { withSentryConfig } from '@sentry/nextjs';
 
+// Analytics (ANALYTICS-UMAMI-01): NEXT_PUBLIC_* values are inlined into the CLIENT
+// bundle at BUILD time, not read at runtime. The CI build runner (deploy-frontend.yml)
+// never exported the Umami vars, so the shipped client bundle had provider/website-id
+// = undefined and the tracker never loaded — Umami recorded 0 visitors even though the
+// server-side env (PM2) was correct. Default them for production builds so the values
+// are always baked into the bundle. Any explicit env still wins (e.g. staging), and
+// dev builds stay disabled so local traffic never pollutes prod analytics.
+const analyticsEnv: Record<string, string> =
+  process.env.NODE_ENV === 'production'
+    ? {
+        NEXT_PUBLIC_ANALYTICS_PROVIDER:
+          process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER || 'umami',
+        NEXT_PUBLIC_ANALYTICS_DOMAIN:
+          process.env.NEXT_PUBLIC_ANALYTICS_DOMAIN || 'dixis.gr',
+        NEXT_PUBLIC_ANALYTICS_SRC:
+          process.env.NEXT_PUBLIC_ANALYTICS_SRC || '/u/script.js',
+        NEXT_PUBLIC_ANALYTICS_WEBSITE_ID:
+          process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID ||
+          'a35acaaa-3571-4e02-b211-d104a9e42698',
+      }
+    : {};
+
 const nextConfig: NextConfig = {
+  // Build-time analytics env so NEXT_PUBLIC_ANALYTICS_* are inlined into the
+  // client bundle (see analyticsEnv above for why).
+  env: analyticsEnv,
+
   // Fix "inferred workspace root" warning
   outputFileTracingRoot: __dirname,
 
