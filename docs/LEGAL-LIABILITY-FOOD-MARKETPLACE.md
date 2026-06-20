@@ -4,6 +4,8 @@
 **Purpose:** Comprehensive legal liability research for Dixis as an online food marketplace
 **Status:** Research document -- NOT legal advice. Consult a Greek lawyer before acting.
 
+> **2026-06 reality sync:** Payments are now **Direct Charges** (decided; code ready, flag OFF) — re-read §10 PSD2 with that in mind, not the older "Separate Charges & Transfers". The B2B subscription built in code is a single €120/yr tier (tiered model is future intent). The §2.1/§4.2 action item "identify the producer on every listing" is the #1 legal defense — producer *name* is shown on the site; full identification (address/registration) still needs verification. Open legal/accounting follow-through is tracked in `~/MY-STATE.md` (Admin project) — see also `docs/ACCOUNTANT-BRIEFING-GR.md`.
+
 ---
 
 ## Table of Contents
