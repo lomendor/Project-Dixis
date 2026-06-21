@@ -19,6 +19,8 @@ function OrderDetailsPage(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const { showToast } = useToast();
   const addToCart = useCart(s => s.add);
 
@@ -163,6 +165,23 @@ function OrderDetailsPage(): React.JSX.Element {
       router.push('/checkout');
     } else {
       showToast('error', 'Δεν υπάρχουν διαθέσιμα προϊόντα για επαναπαραγγελία');
+    }
+  };
+
+  const handleCancel = async () => {
+    if (cancelling) return;
+    setCancelling(true);
+    try {
+      apiClient.refreshToken();
+      const result = await apiClient.cancelOrder(orderId);
+      setOrder(result.order);
+      setShowCancelConfirm(false);
+      showToast('success', 'Η παραγγελία ακυρώθηκε επιτυχώς');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Αποτυχία ακύρωσης';
+      showToast('error', msg);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -402,6 +421,49 @@ function OrderDetailsPage(): React.JSX.Element {
                 )}
               </div>
             </div>
+
+            {/* Order Cancellation — only for pending orders */}
+            {order.status === 'pending' && (
+              <div data-testid="cancel-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
+                <div className="p-6">
+                  {!showCancelConfirm ? (
+                    <button
+                      onClick={() => setShowCancelConfirm(true)}
+                      data-testid="cancel-order-button"
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Ακύρωση Παραγγελίας
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-neutral-700 text-center">
+                        Είστε σίγουροι ότι θέλετε να ακυρώσετε αυτή την παραγγελία;
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setShowCancelConfirm(false)}
+                          disabled={cancelling}
+                          className="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-neutral-300 text-neutral-700 bg-white hover:bg-neutral-50 transition-colors"
+                        >
+                          Όχι
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          disabled={cancelling}
+                          data-testid="confirm-cancel-button"
+                          className="flex-1 px-3 py-2 text-sm font-medium rounded-lg border border-transparent text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        >
+                          {cancelling ? 'Ακύρωση...' : 'Ναι, ακύρωση'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Pass REORDER-01: Reorder Button */}
             <div data-testid="reorder-section" className="bg-white rounded-lg shadow-sm border border-neutral-200">
