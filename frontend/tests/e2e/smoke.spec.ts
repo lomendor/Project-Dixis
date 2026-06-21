@@ -216,3 +216,17 @@ test('@smoke privacy page loads', async ({ page }) => {
 
   await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
 });
+
+// @smoke — Returns policy page loads without crash
+// CI-safe: Static legal page (PR K)
+test('@smoke returns policy page loads', async ({ page }) => {
+  const response = await page.goto('/legal/returns', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+
+  // Verify page heading renders
+  await expect(page.getByRole('heading', { name: 'Πολιτική Επιστροφών' })).toBeVisible({ timeout: 10000 });
+});
