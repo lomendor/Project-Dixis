@@ -216,3 +216,27 @@ test('@smoke privacy page loads', async ({ page }) => {
 
   await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
 });
+
+// @smoke — Unsubscribe page loads without crash
+// CI-safe: Static page (PR M)
+test('@smoke unsubscribe page loads', async ({ page }) => {
+  const response = await page.goto('/unsubscribe', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const status = response?.status() || 0;
+  expect([200, 304].includes(status)).toBe(true);
+
+  await expect(page.locator('body')).toBeVisible({ timeout: 10000 });
+});
+
+// @smoke — Unsubscribe API validates input
+// CI-safe: POST with empty body should return 422 (PR M)
+test('@smoke unsubscribe API validates input', async ({ request }) => {
+  const res = await request.post('/api/unsubscribe', {
+    data: {},
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 10000,
+  });
+  expect(res.status()).toBe(422);
+  const json = await res.json();
+  expect(json.ok).toBe(false);
+});
